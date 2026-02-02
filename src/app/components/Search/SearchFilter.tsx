@@ -1,15 +1,12 @@
 "use client";
 
-import type React from "react";
-
-/* 개별 구현체 */
-import { CheckboxSrchFilter } from "@/app/components/search/filters/CheckboxSrchFilter";
-import { ComboFilter } from "@/app/components/search/filters/ComboSrchFilter";
-import { DateRangeFilter } from "@/app/components/search/filters/DateRangeSrchFilter";
-import { PopupSrchFilter } from "@/app/components/search/filters/PopupSrchFilter";
-import { TextSrchFilter } from "@/app/components/search/filters/TextSrchFilter";
+import { CheckboxFilter } from "@/app/components/search/filters/CheckboxFilter";
+import { ComboFilter } from "@/app/components/search/filters/ComboFilter";
+import { DateRangeFilter } from "@/app/components/search/filters/DateRangeFilter";
+import { PopupFilter } from "@/app/components/search/filters/PopupFilter";
+import { TextFilter } from "@/app/components/search/filters/TextFilter";
 import { SearchFilterLabel } from "@/app/components/search/SearchFilterLabel";
-
+import { ConditionBox } from "@/app/components/search/ConditionBox";
 import { cn } from "../ui/utils";
 
 /* =======================
@@ -17,7 +14,9 @@ import { cn } from "../ui/utils";
  * ======================= */
 type BaseFilterProps = {
   className?: string;
-  span?: number; // ⭐ 추가
+  span?: number;
+  condition?: string;
+  onConditionChange?: (c: string) => void;
 };
 
 /* =======================
@@ -36,19 +35,25 @@ type CheckboxFilterProps = BaseFilterProps & {
 /* =======================
  * Combo
  * ======================= */
-type ComboOption = {
-  value: string;
-  label: string;
-};
-
 type ComboFilterProps = BaseFilterProps & {
   type: "combo";
-  label?: string;
+  label: string;
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+};
+
+/* =======================
+ * Text
+ * ======================= */
+type TextFilterProps = BaseFilterProps & {
+  type: "text";
+  label: string;
   value: string;
   onChange: (value: string) => void;
-  options: ComboOption[];
   placeholder?: string;
-  selectId?: string;
   required?: boolean;
 };
 
@@ -57,7 +62,7 @@ type ComboFilterProps = BaseFilterProps & {
  * ======================= */
 type DateRangeFilterProps = BaseFilterProps & {
   type: "dateRange";
-  label?: string;
+  label: string;
   fromValue: string;
   toValue: string;
   onChangeFrom: (value: string) => void;
@@ -70,7 +75,7 @@ type DateRangeFilterProps = BaseFilterProps & {
  * ======================= */
 type PopupFilterProps = BaseFilterProps & {
   type: "popup";
-  label?: string;
+  label: string;
   code: string;
   name: string;
   onChangeCode: (v: string) => void;
@@ -80,27 +85,18 @@ type PopupFilterProps = BaseFilterProps & {
 };
 
 /* =======================
- * Text
- * ======================= */
-type TextFilterProps = BaseFilterProps & {
-  type: "text";
-  label?: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  required?: boolean;
-};
-
-/* =======================
  * Union
  * ======================= */
 export type SearchFilterProps =
   | CheckboxFilterProps
   | ComboFilterProps
+  | TextFilterProps
   | DateRangeFilterProps
-  | PopupFilterProps
-  | TextFilterProps;
+  | PopupFilterProps;
 
+/* =======================
+ * Span Map
+ * ======================= */
 const SPAN_CLASS: Record<number, string> = {
   1: "col-span-1",
   2: "col-span-2",
@@ -115,52 +111,43 @@ const SPAN_CLASS: Record<number, string> = {
   11: "col-span-11",
   12: "col-span-12",
 };
+
 /* =======================
  * Main Component
  * ======================= */
 export function SearchFilter(props: SearchFilterProps) {
-  const { label, required, className, span = 3 } = props;
+  const { label, span = 3, className, condition, onConditionChange } = props;
 
   return (
     <div
       className={cn(
-        SPAN_CLASS[span] ?? "col-span-3", // ✅ 핵심
+        SPAN_CLASS[span] ?? "col-span-3",
         "flex items-center gap-3 min-w-0",
         className,
       )}
     >
-      {/* Label – 고정 폭 */}
+      {/* Label */}
       <div className="w-[96px] shrink-0">
         <SearchFilterLabel
           label={label}
-          required={required}
-          className="justify-start text-left"
+          condition={
+            onConditionChange ? (
+              <ConditionBox
+                value={condition ?? "equal"}
+                onChange={onConditionChange}
+              />
+            ) : null
+          }
         />
       </div>
 
-      {/* Input – 나머지 전부 */}
+      {/* Input */}
       <div className="flex-1 min-w-0">
-        {(() => {
-          switch (props.type) {
-            case "checkbox":
-              return <CheckboxSrchFilter {...props} />;
-
-            case "combo":
-              return <ComboFilter {...props} />;
-
-            case "dateRange":
-              return <DateRangeFilter {...props} />;
-
-            case "popup":
-              return <PopupSrchFilter {...props} />;
-
-            case "text":
-              return <TextSrchFilter {...props} />;
-
-            default:
-              return null;
-          }
-        })()}
+        {props.type === "checkbox" && <CheckboxFilter {...props} />}
+        {props.type === "combo" && <ComboFilter {...props} />}
+        {props.type === "text" && <TextFilter {...props} />}
+        {props.type === "dateRange" && <DateRangeFilter {...props} />}
+        {props.type === "popup" && <PopupFilter {...props} />}
       </div>
     </div>
   );

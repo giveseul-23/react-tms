@@ -4,10 +4,9 @@ import * as React from "react";
 import { Search } from "lucide-react";
 import { cn } from "../../ui/utils";
 import { Input } from "../../ui/input";
-import { Label } from "../../ui/label";
 import { Button } from "../../ui/button";
 
-type PopupSrchFilterProps = React.ComponentPropsWithoutRef<"div"> & {
+export type PopupFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   label?: string;
   code: string;
   name: string;
@@ -19,7 +18,7 @@ type PopupSrchFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   required?: boolean;
 };
 
-function PopupSrchFilter({
+export function PopupFilter({
   className,
   label = "팝업",
   code,
@@ -31,7 +30,7 @@ function PopupSrchFilter({
   nameId = "lgstGroupName",
   required,
   ...props
-}: PopupSrchFilterProps) {
+}: PopupFilterProps) {
   return (
     <div
       className={cn("w-full min-w-0 flex flex-col gap-2", className)}
@@ -73,6 +72,3 @@ function PopupSrchFilter({
     </div>
   );
 }
-
-export { PopupSrchFilter };
-export type { PopupSrchFilterProps };

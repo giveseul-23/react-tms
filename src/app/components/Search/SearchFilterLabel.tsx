@@ -1,32 +1,29 @@
 "use client";
 
 import { Label } from "@/app/components/ui/label";
-import ConditionBox from "./conditionBox";
 import { cn } from "../ui/utils";
-
-type SearchFilterLabelProps = {
-  label?: string;
-  required?: boolean;
-  htmlFor?: string;
-};
 
 export function SearchFilterLabel({
   label,
-  required,
-  htmlFor,
+  condition,
   className,
-}: SearchFilterLabelProps & { className?: string }) {
-  if (!label) return null;
-
+  required,
+}: {
+  label: string;
+  condition?: React.ReactNode;
+  className?: string;
+  required?: string;
+}) {
   return (
     <Label
-      htmlFor={htmlFor}
       className={cn(
-        "flex items-center gap-1 text-sm font-medium text-[rgb(var(--fg))] whitespace-nowrap",
+        "flex items-center gap-1 text-sm font-medium whitespace-nowrap",
         className,
       )}
     >
-      <ConditionBox />
+      {condition && (
+        <span className="inline-flex items-center">{condition}</span>
+      )}
       <span>{label}</span>
       {required && <span className="text-red-400">*</span>}
     </Label>

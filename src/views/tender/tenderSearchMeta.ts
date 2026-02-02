@@ -1,0 +1,111 @@
+// src/views/tender/tenderSearchMeta.ts
+export const TENDER_SEARCH_META = [
+  {
+    key: "logiGroup",
+    type: "popup",
+    label: "물류운영그룹",
+    span: 3,
+    condition: "equal",
+    // SQL_ID 필요하면 여기서 추가 가능
+  },
+  {
+    key: "deliveryDate",
+    type: "dateRange",
+    label: "납품일",
+    span: 4,
+    required: true,
+    condition: "equal",
+  },
+  {
+    key: "fromLocName",
+    type: "text",
+    label: "출발지명",
+    span: 3,
+    condition: "percent",
+  },
+  {
+    key: "route",
+    type: "text",
+    label: "경로",
+    span: 3,
+    condition: "percent",
+  },
+  {
+    key: "dispatchStatus",
+    type: "combo",
+    label: "배차진행상태",
+    span: 3,
+    condition: "chevronLast",
+    // options는 실제 코드값 정해지면 채우면 됨
+    options: [
+      { value: "ALL", label: "전체" },
+      { value: "WAIT", label: "대기" },
+      { value: "ING", label: "진행중" },
+      { value: "DONE", label: "완료" },
+    ],
+  },
+  {
+    key: "dispatchNo",
+    type: "text",
+    label: "배차번호",
+    span: 3,
+    condition: "percent",
+  },
+  {
+    key: "carrier",
+    type: "popup",
+    label: "운송협력사",
+    span: 3,
+    condition: "equal",
+  },
+  {
+    key: "driverName",
+    type: "text",
+    label: "운전자명",
+    span: 3,
+    condition: "percent",
+  },
+  {
+    key: "vehicleNo",
+    type: "text",
+    label: "차량번호",
+    span: 3,
+    condition: "percent",
+  },
+  {
+    key: "freightReservable",
+    type: "combo",
+    label: "운임예약가능여부",
+    span: 3,
+    condition: "equal",
+    options: [
+      { value: "Y", label: "가능" },
+      { value: "N", label: "불가" },
+    ],
+  },
+  //   {
+  //     key: "arrivalRequestDateTime",
+  //     type: "dateRange",
+  //     label: "입차요청일시",
+  //     span: 3,
+  //     condition: "equal",
+  //   },
+  {
+    key: "vehicleType",
+    type: "popup",
+    label: "차량유형",
+    span: 3,
+    condition: "equal",
+  },
+  {
+    key: "operationType",
+    type: "combo",
+    label: "운영형태",
+    span: 3,
+    condition: "equal",
+    options: [
+      { value: "OWN", label: "지입" },
+      { value: "RENT", label: "용차" },
+    ],
+  },
+] as const;

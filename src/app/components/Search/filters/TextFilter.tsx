@@ -5,21 +5,21 @@ import { Input } from "../../ui/input";
 import { Search } from "lucide-react";
 import { cn } from "../../ui/utils";
 
-type TextSrchFilterProps = React.ComponentPropsWithoutRef<"div"> & {
+export type TextFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
   inputClassName?: string;
 };
 
-function TextSrchFilter({
+export function TextFilter({
   placeholder = "입력하세요",
   value,
   onChange,
   className,
   inputClassName,
   ...props
-}: TextSrchFilterProps) {
+}: TextFilterProps) {
   return (
     // ⭐ 부모가 준 폭을 무조건 100% 사용
     <div
@@ -48,6 +48,3 @@ function TextSrchFilter({
     </div>
   );
 }
-
-export { TextSrchFilter };
-export type { TextSrchFilterProps };

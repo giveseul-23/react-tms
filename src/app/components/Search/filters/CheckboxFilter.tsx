@@ -3,7 +3,7 @@
 import * as React from "react";
 import { cn } from "../../ui/utils";
 
-type CheckboxSrchFilterProps = React.ComponentPropsWithoutRef<"div"> & {
+export type CheckboxFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   id: string;
   label: string;
   checked: boolean;
@@ -12,7 +12,7 @@ type CheckboxSrchFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   required?: boolean;
 };
 
-export function CheckboxSrchFilter({
+export function CheckboxFilter({
   className,
   id,
   label,
@@ -21,7 +21,7 @@ export function CheckboxSrchFilter({
   description,
   required,
   ...props
-}: CheckboxSrchFilterProps) {
+}: CheckboxFilterProps) {
   return (
     <div
       className={cn("w-full min-w-0 flex flex-col gap-2", className)}
