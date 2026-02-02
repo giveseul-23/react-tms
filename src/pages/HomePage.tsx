@@ -2,8 +2,8 @@
 
 import { useState, useMemo, Children } from "react";
 import { ThemeProvider } from "@/app/context/ThemeContext";
-import { PopupProvider } from "@/app/components/ui/popup/PopupContext";
-import { Sidebar } from "@/app/components/Sidebar";
+import { PopupProvider } from "@/app/components/popup/PopupContext";
+import { Sidebar } from "@/app/components/layout/Sidebar";
 import { MENU_SECTIONS } from "@/app/menu/menuConfig";
 import TenderReceiveDispatch from "@/views/tender/TenderReceiveDispatch";
 

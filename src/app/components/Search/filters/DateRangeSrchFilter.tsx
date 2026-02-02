@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { Calendar, Clock } from "lucide-react";
-import { cn } from "../utils";
+import { cn } from "../../ui/utils";
 import { Input } from "@/app/components/ui/input";
 
 type DateGranularity = "date" | "datetime";

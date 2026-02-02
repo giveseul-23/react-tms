@@ -6,7 +6,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useState } from "react";
-import { usePopup } from "@/app/components/ui/popup/PopupContext";
+import { usePopup } from "@/app/components/popup/PopupContext";
 import { MENU_SECTIONS, MenuSection } from "@/app/menu/menuConfig";
 
 import { SettingsPopup } from "@/views/settings/SettingsPopup";

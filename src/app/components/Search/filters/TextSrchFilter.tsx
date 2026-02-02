@@ -1,9 +1,9 @@
 "use client";
 
 import type React from "react";
-import { Input } from "../input";
+import { Input } from "../../ui/input";
 import { Search } from "lucide-react";
-import { cn } from "../utils";
+import { cn } from "../../ui/utils";
 
 type TextSrchFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   placeholder?: string;

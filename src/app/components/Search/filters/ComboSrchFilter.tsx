@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
-import { cn } from "../utils";
+import { cn } from "../../ui/utils";
 
 type ComboOption = {
   value: string;

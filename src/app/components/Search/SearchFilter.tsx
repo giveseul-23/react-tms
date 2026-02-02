@@ -3,14 +3,14 @@
 import type React from "react";
 
 /* 개별 구현체 */
-import { CheckboxSrchFilter } from "./CheckboxSrchFilter";
-import { ComboFilter } from "./ComboSrchFilter";
-import { DateRangeFilter } from "./DateRangeSrchFilter";
-import { PopupSrchFilter } from "./PopupSrchFilter";
-import { TextSrchFilter } from "./TextSrchFilter";
-import { SearchFilterLabel } from "./SearchFilterLabel";
+import { CheckboxSrchFilter } from "@/app/components/search/filters/CheckboxSrchFilter";
+import { ComboFilter } from "@/app/components/search/filters/ComboSrchFilter";
+import { DateRangeFilter } from "@/app/components/search/filters/DateRangeSrchFilter";
+import { PopupSrchFilter } from "@/app/components/search/filters/PopupSrchFilter";
+import { TextSrchFilter } from "@/app/components/search/filters/TextSrchFilter";
+import { SearchFilterLabel } from "@/app/components/search/SearchFilterLabel";
 
-import { cn } from "../utils";
+import { cn } from "../ui/utils";
 
 /* =======================
  * Base Props

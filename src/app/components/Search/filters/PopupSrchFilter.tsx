@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { Search } from "lucide-react";
-import { cn } from "../utils";
-import { Input } from "../input";
-import { Label } from "../label";
-import { Button } from "../button";
+import { cn } from "../../ui/utils";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
+import { Button } from "../../ui/button";
 
 type PopupSrchFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   label?: string;

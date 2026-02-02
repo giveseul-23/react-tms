@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
-import { SearchFilters } from "@/app/components/SearchFilters";
+import { SearchFilters } from "@/app/components/search/SearchFilters";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 type LayoutType = "side" | "vertical";

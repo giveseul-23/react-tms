@@ -2,7 +2,7 @@
 
 import { Label } from "@/app/components/ui/label";
 import ConditionBox from "./conditionBox";
-import { cn } from "../utils";
+import { cn } from "../ui/utils";
 
 type SearchFilterLabelProps = {
   label?: string;

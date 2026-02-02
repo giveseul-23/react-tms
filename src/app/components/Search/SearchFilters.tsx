@@ -11,7 +11,7 @@ import {
   CollapsibleTrigger,
 } from "@/app/components/ui/collapsible";
 
-import { SearchFilter } from "@/app/components/ui/searchFilterComponents/SearchFilter";
+import { SearchFilter } from "@/app/components/search/SearchFilter";
 
 /* ======================
  * Options
