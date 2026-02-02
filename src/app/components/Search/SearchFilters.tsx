@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, Filter, RefreshCw, ChevronDown } from "lucide-react";
-
+import { usePopup } from "@/app/components/popup/PopupContext";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/app/components/ui/collapsible";
 
 import { SearchFilter } from "@/app/components/search/SearchFilter";
+import { CommonPopup } from "@/views/common/CommonPopup";
 
 type SearchMeta = {
   key: string;
@@ -41,6 +42,8 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
     });
     return s;
   }, [meta]);
+
+  const { openPopup } = usePopup();
 
   const [filters, setFilters] = useState(initialState);
   const [open, setOpen] = useState(true);
@@ -129,7 +132,13 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                         onChangeName={(v: string) =>
                           setFilters((p) => ({ ...p, [`${m.key}Name`]: v }))
                         }
-                        onClickSearch={() => console.log("popup open:", m.key)}
+                        onClickSearch={() =>
+                          openPopup({
+                            title: m.label,
+                            content: <CommonPopup />,
+                            width: "xl",
+                          })
+                        }
                       />
                     );
 

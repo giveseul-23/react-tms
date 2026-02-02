@@ -34,6 +34,8 @@ type DataGridProps<TRow> = {
   layoutType?: "tab" | "plain";
   gridHeightPx?: number;
   actions: ActionItem[];
+
+  onRowSelected?: (row: TRow) => void;
 };
 
 export default function DataGrid<TRow>({
@@ -44,6 +46,7 @@ export default function DataGrid<TRow>({
   layoutType = "tab",
   gridHeightPx,
   actions,
+  onRowSelected,
 }: DataGridProps<TRow>) {
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
@@ -106,6 +109,11 @@ export default function DataGrid<TRow>({
             rowSelection={rowSelection as any}
             onGridReady={(e: GridReadyEvent) => {
               requestAnimationFrame(() => e.api.sizeColumnsToFit());
+            }}
+            onRowSelected={(e) => {
+              if (e.type === "rowSelected" && e.data) {
+                onRowSelected?.(e.data);
+              }
             }}
           />
         </div>
