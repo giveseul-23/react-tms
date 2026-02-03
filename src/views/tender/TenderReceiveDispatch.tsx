@@ -168,10 +168,10 @@ export default function TenderReceiveDispatch() {
       </div>
 
       {/* grid area */}
-      <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
+      <div className="flex-1 min-h-0 min-w-0 overflow-x-visible">
         <PanelGroup
           direction={layout === "side" ? "horizontal" : "vertical"}
-          className="h-full w-full min-h-0 min-w-0 overflow-hidden"
+          className="h-full w-full min-h-0 min-w-0"
         >
           <Panel defaultSize={50} minSize={20} className="min-h-0 min-w-0">
             <div className="h-full flex flex-col overflow-hidden">

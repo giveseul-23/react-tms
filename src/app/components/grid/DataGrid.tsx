@@ -97,7 +97,7 @@ export default function DataGrid<TRow>({
   }, []);
 
   return (
-    <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
+    <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full">
       {/* tabs */}
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-4">
@@ -105,13 +105,14 @@ export default function DataGrid<TRow>({
         </div>
       )}
 
-      {/* actions */}
-      <GridActionsBar actions={actions} />
+      {/* ⭐ ActionBar는 overflow-visible 레이어 */}
+      <div className="relative z-50 overflow-visible shrink-0 min-w-0">
+        <GridActionsBar actions={actions} />
+      </div>
 
-      {/* grid */}
+      {/* ⭐ Grid는 overflow-hidden 레이어 */}
       <div
-        className={`grid-wrapper ${gridHeightPx ? "" : "flex-1 min-h-0"}`}
-        style={gridHeightPx ? { height: gridHeightPx } : undefined}
+        className={`grid-wrapper ${gridHeightPx ? "" : "flex-1 min-h-0 overflow-hidden"}`}
       >
         <div className="ag-theme-quartz ag-theme-bridge w-full h-full">
           <AgGridReact<TRow>

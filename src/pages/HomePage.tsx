@@ -41,7 +41,7 @@ export default function HomePage() {
           {currentMenuLabel ?? "메뉴 선택"}
         </header>
 
-        <main className="flex-1 overflow-hidden p-6">
+        <main className="flex-1 min-w-0 p-6">
           {ActiveComponent ? (
             <ActiveComponent />
           ) : (
