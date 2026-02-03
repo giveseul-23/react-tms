@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import React, { useEffect, useRef, useState } from "react";
 import { SquareMinus, SquarePlus } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
@@ -41,6 +42,9 @@ export function GridActionsBar({
 }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const [dropdownStyle, setDropdownStyle] =
+    useState<React.CSSProperties | null>(null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -92,7 +96,17 @@ export function GridActionsBar({
                 variant="outline"
                 className="h-8 px-2 py-1 text-xs gap-1"
                 onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+
                   setAnchorEl(e.currentTarget);
+                  setDropdownStyle({
+                    position: "fixed",
+                    top: rect.bottom + 4,
+                    left: rect.right - 180,
+                    width: 180,
+                    zIndex: 9999,
+                  });
+
                   setOpenKey((prev) => (prev === a.key ? null : a.key));
                 }}
               >
@@ -119,32 +133,31 @@ export function GridActionsBar({
       </div>
 
       {/* ✅ 드롭다운 */}
-      {openGroup && anchorEl && (
-        <div
-          data-dropdown
-          className="absolute z-[9999] mt-1 rounded-md border border-gray-200 bg-[rgb(var(--bg))] shadow-lg p-1"
-          style={{
-            top: anchorEl.offsetTop + anchorEl.offsetHeight + 4,
-            left: anchorEl.offsetLeft + anchorEl.offsetWidth - 180,
-            width: 180,
-          }}
-        >
-          {openGroup.items.map((it) => (
-            <button
-              key={it.key}
-              type="button"
-              disabled={it.disabled}
-              onClick={() => {
-                it.onClick?.();
-                setOpenKey(null);
-              }}
-              className="w-full rounded-md px-2 py-2 text-left text-xs hover:bg-gray-100 disabled:opacity-50"
-            >
-              {it.label}
-            </button>
-          ))}
-        </div>
-      )}
+      {openGroup &&
+        dropdownStyle &&
+        createPortal(
+          <div
+            data-dropdown
+            className="rounded-md border border-gray-200 bg-[rgb(var(--bg))] shadow-lg p-1"
+            style={dropdownStyle}
+          >
+            {openGroup.items.map((it) => (
+              <button
+                key={it.key}
+                type="button"
+                disabled={it.disabled}
+                onClick={() => {
+                  it.onClick?.();
+                  setOpenKey(null);
+                }}
+                className="w-full rounded-md px-2 py-2 text-left text-xs hover:bg-gray-100 disabled:opacity-50"
+              >
+                {it.label}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
