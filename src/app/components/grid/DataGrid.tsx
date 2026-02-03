@@ -2,10 +2,9 @@
 // app/lib/agGrid.ts
 import { ModuleRegistry } from "ag-grid-community";
 import { AllCommunityModule } from "ag-grid-community";
-
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import type {
   ColDef,
@@ -20,21 +19,17 @@ import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-// import "ag-grid-community/styles/ag-theme-quartz-dark.css";
 
 type DataGridProps<TRow> = {
-  /** tab 모드 */
   tabs?: GridTab[];
   presets?: Record<string, GridPreset<TRow>>;
 
-  /** plain 모드 */
   rowData?: TRow[];
   columnDefs?: (ColDef<TRow> | ColGroupDef<TRow>)[];
 
   layoutType?: "tab" | "plain";
   gridHeightPx?: number;
   actions: ActionItem[];
-
   onRowSelected?: (row: TRow) => void;
 };
 
@@ -59,11 +54,13 @@ export default function DataGrid<TRow>({
     return { rowData, columnDefs };
   }, [layoutType, activeTab, presets, rowData, columnDefs]);
 
+  /** No 컬럼 처리 */
   const finalColumnDefs = useMemo(() => {
     return activePreset.columnDefs.map((col) => {
-      if (col.headerName === "No") {
+      if ("headerName" in col && col.headerName === "No") {
         return {
           ...col,
+          width: 60,
           valueGetter: (params: ValueGetterParams<TRow>) =>
             (params.node?.rowIndex ?? 0) + 1,
         };
@@ -80,6 +77,24 @@ export default function DataGrid<TRow>({
     }),
     [],
   );
+
+  /** ⭐ width 없는 컬럼만 autoSize */
+  const handleGridReady = useCallback((e: GridReadyEvent) => {
+    requestAnimationFrame(() => {
+      const autoSizeColIds: string[] = [];
+
+      e.columnApi.getAllColumns()?.forEach((col) => {
+        const def = col.getColDef();
+        if (def.width == null && def.flex == null) {
+          autoSizeColIds.push(col.getId());
+        }
+      });
+
+      if (autoSizeColIds.length > 0) {
+        e.columnApi.autoSizeColumns(autoSizeColIds, false);
+      }
+    });
+  }, []);
 
   return (
     <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
@@ -103,13 +118,16 @@ export default function DataGrid<TRow>({
             theme="legacy"
             rowData={activePreset.rowData}
             columnDefs={finalColumnDefs}
-            defaultColDef={{ resizable: true, sortable: true }}
+            defaultColDef={{
+              resizable: true,
+              sortable: true,
+              minWidth: 100,
+              maxWidth: 300,
+            }}
             headerHeight={36}
             rowHeight={40}
             rowSelection={rowSelection as any}
-            onGridReady={(e: GridReadyEvent) => {
-              requestAnimationFrame(() => e.api.sizeColumnsToFit());
-            }}
+            onGridReady={handleGridReady}
             onRowSelected={(e) => {
               if (e.type === "rowSelected" && e.data) {
                 onRowSelected?.(e.data);

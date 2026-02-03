@@ -5,7 +5,7 @@ import {
   ChevronRight,
   Truck,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { MENU_SECTIONS, MenuSection } from "@/app/menu/menuConfig";
 
@@ -18,15 +18,33 @@ interface SidebarProps {
   onSelectMenu: (menuCode: string) => void;
 }
 
+function findSectionByMenuCode(menuCode: string | null) {
+  if (!menuCode) return null;
+
+  for (const section of MENU_SECTIONS) {
+    if (section.items.some((item) => item.menuCode === menuCode)) {
+      return section.sectionCode;
+    }
+  }
+  return null;
+}
+
 export function Sidebar({
   isOpen,
   activeMenuCode,
   onToggle,
   onSelectMenu,
 }: SidebarProps) {
-  const [expandedSection, setExpandedSection] = useState<string | null>(
-    MENU_SECTIONS[0]?.sectionCode ?? null,
+  const [expandedSection, setExpandedSection] = useState<string | null>(() =>
+    findSectionByMenuCode(activeMenuCode),
   );
+
+  useEffect(() => {
+    const sectionCode = findSectionByMenuCode(activeMenuCode);
+    if (sectionCode) {
+      setExpandedSection(sectionCode);
+    }
+  }, [activeMenuCode]);
 
   const { openPopup } = usePopup();
 
@@ -108,8 +126,8 @@ export function Sidebar({
                           w-full text-left px-3 py-2 text-sm rounded-lg
                           ${
                             activeMenuCode === item.menuCode
-                              ? "bg-blue-50 text-[rgb(var(--primary))] font-medium"
-                              : "bg-[rgb(var(--bg))] text-[rgb(var(--fg))] hover:bg-gray-100 hover:text-[rgb(var(--hover))]"
+                              ? "bg-[var(--grid-header-bg)] text-[rgb(var(--primary))] font-medium"
+                              : "text-[rgb(var(--fg))] hover:bg-gray-100 hover:text-[rgb(var(--hover))]"
                           }
                         `}
                       >

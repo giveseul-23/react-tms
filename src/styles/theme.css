@@ -30,6 +30,14 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+
+  /* 🔹 헤더 / 배경용 (투명) */
+  --chart-1-soft: oklch(0.488 0.243 264.376 / 0.12);
+  --chart-2-soft: oklch(0.696 0.17 162.48 / 0.12);
+  --chart-3-soft: oklch(0.769 0.188 70.08 / 0.12);
+  --chart-4-soft: oklch(80.275% 0.14988 66.085 / 0.12);
+  --chart-5-soft: oklch(0.645 0.246 16.439 / 0.12);
+
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -45,6 +53,8 @@
 
   --primary: 37 99 235; /* BLUE 기본 */
   --hover: 0.145 0 0;
+
+  --grid-header-bg: var(--chart-1-soft);
 }
 
 .dark {
@@ -74,6 +84,14 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+
+  /* 🔹 헤더 / 배경용 (투명) */
+  --chart-1-soft: oklch(0.488 0.243 264.376 / 0.12);
+  --chart-2-soft: oklch(0.696 0.17 162.48 / 0.12);
+  --chart-3-soft: oklch(0.769 0.188 70.08 / 0.12);
+  --chart-4-soft: oklch(80.275% 0.14988 66.085 / 0.12);
+  --chart-5-soft: oklch(0.645 0.246 16.439 / 0.12);
+
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -89,6 +107,8 @@
   --fg: 243 244 246;
 
   --hover: 0.145 0 0;
+
+  --grid-header-bg: var(--chart-1-soft);
 }
 
 @theme inline {
@@ -196,22 +216,27 @@
 /* 테마 컬러 */
 [data-theme="BLUE"] {
   --primary: 37 99 235;
+  --grid-header-bg: var(--chart-1-soft);
 }
 
 [data-theme="GREEN"] {
   --primary: 22 163 74;
+  --grid-header-bg: var(--chart-2-soft);
 }
 
 [data-theme="RED"] {
   --primary: 220 38 38;
+  --grid-header-bg: var(--chart-5-soft);
 }
 
 [data-theme="ORANGE"] {
   --primary: 234 88 12;
+  --grid-header-bg: var(--chart-4-soft);
 }
 
 [data-theme="YELLOW"] {
   --primary: 202 138 4;
+  --grid-header-bg: var(--chart-3-soft);
 }
 /* ===============================
    ag-Grid ← App Theme Bridge
@@ -223,11 +248,11 @@
 }
 
 /* 헤더 */
-.ag-theme-bridge .ag-header {
+/* .ag-theme-bridge .ag-header {
   background-color: var(--background);
   color: var(--foreground);
   border-bottom: 1px solid var(--border);
-}
+} */
 
 .ag-theme-bridge .ag-header-cell-text {
   color: var(--foreground);
@@ -279,11 +304,11 @@
 }
 
 /* 헤더 */
-.ag-theme-bridge .ag-header {
+/* .ag-theme-bridge .ag-header {
   background-color: rgb(var(--bg));
   color: rgb(var(--fg));
   border-bottom: 1px solid var(--border);
-}
+} */
 
 .ag-theme-bridge .ag-header-cell-text {
   color: rgb(var(--fg));
@@ -329,4 +354,10 @@
 .dark .btn-outline {
   border-color: rgb(var(--fg));
   color: rgb(var(--fg));
+}
+
+.ag-theme-quartz.ag-theme-bridge {
+  --ag-header-background-color: var(--grid-header-bg);
+  --ag-header-foreground-color: rgb(var(--fg));
+  --ag-border-color: var(--border);
 }

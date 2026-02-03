@@ -62,7 +62,7 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
+            <Filter className="w-4 h-4 text-[rgb(var(--primary))]" />
             <h2 className="text-base font-semibold">조회 조건</h2>
           </div>
 
@@ -169,7 +169,11 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                 초기화
               </Button>
 
-              <Button onClick={handleSearch}>
+              <Button
+                variant="outline"
+                onClick={handleSearch}
+                className="btn-primary btn-primary:hover"
+              >
                 <Search className="w-4 h-4 mr-1" />
                 조회
               </Button>

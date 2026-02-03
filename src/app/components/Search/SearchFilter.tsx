@@ -116,7 +116,14 @@ const SPAN_CLASS: Record<number, string> = {
  * Main Component
  * ======================= */
 export function SearchFilter(props: SearchFilterProps) {
-  const { label, span = 3, className, condition, onConditionChange } = props;
+  const {
+    label,
+    span = 3,
+    className,
+    condition,
+    onConditionChange,
+    required,
+  } = props;
 
   return (
     <div
@@ -138,6 +145,7 @@ export function SearchFilter(props: SearchFilterProps) {
               />
             ) : null
           }
+          required={required}
         />
       </div>
 

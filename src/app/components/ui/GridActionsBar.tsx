@@ -80,7 +80,7 @@ function GroupButton({
           type="button"
           variant="outline"
           disabled={group.disabled}
-          className="h-8 px-2 py-1 text-sm gap-1"
+          className="h-8 px-2 py-1 text-xs gap-1"
           onClick={onToggle}
         >
           {open ? (
@@ -110,7 +110,7 @@ function GroupButton({
                 onClose();
               }}
               className={cls(
-                "w-full rounded-md px-2 py-2 text-left text-sm",
+                "w-full rounded-md px-2 py-2 text-left text-xs",
                 "hover:bg-gray-100",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
               )}
@@ -132,50 +132,73 @@ export function GridActionsBar({
   className?: string;
 }) {
   const [openGroupKey, setOpenGroupKey] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   if (!actions || actions.length === 0) return null;
 
-  // ✅ 핵심: open -> !open 토글 (prev 기반)
   const toggleGroup = (key: string) => {
     setOpenGroupKey((prev) => (prev === key ? null : key));
   };
 
+  /** ⭐ 마우스 휠 → 가로 스크롤 */
+  const handleWheel = (e: React.WheelEvent) => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    }
+  };
+
   return (
-    <div
-      className={cls(
-        "shrink-0 flex items-center justify-end px-4 py-3",
-        className,
-      )}
-    >
-      <div className="flex items-center gap-1">
-        {actions.map((a) => {
-          if (a.type === "group") {
-            const open = openGroupKey === a.key;
+    <div className={cls("shrink-0 px-4 py-3", className)}>
+      {/* 🔹 스크롤 컨테이너 */}
+      <div
+        ref={scrollRef}
+        onWheel={handleWheel}
+        className={cls(
+          "flex",
+          "overflow-x-auto overflow-y-hidden",
+          "scrollbar-none",
+        )}
+      >
+        {/* 🔹 오른쪽 정렬 핵심 */}
+        <div
+          className={cls(
+            "ml-auto inline-flex items-center gap-1",
+            "whitespace-nowrap",
+          )}
+        >
+          {actions.map((a) => {
+            if (a.type === "group") {
+              const open = openGroupKey === a.key;
+
+              return (
+                <GroupButton
+                  key={a.key}
+                  group={a}
+                  open={open}
+                  onToggle={() => toggleGroup(a.key)}
+                  onClose={() => setOpenGroupKey(null)}
+                />
+              );
+            }
 
             return (
-              <GroupButton
+              <Button
                 key={a.key}
-                group={a}
-                open={open}
-                onToggle={() => toggleGroup(a.key)} // ✅ 여기
-                onClose={() => setOpenGroupKey(null)}
-              />
+                type="button"
+                variant="outline"
+                disabled={a.disabled}
+                className="h-8 px-2 py-1 text-xs shrink-0"
+                onClick={a.onClick}
+              >
+                {a.label}
+              </Button>
             );
-          }
-
-          return (
-            <Button
-              key={a.key}
-              type="button"
-              variant="outline"
-              disabled={a.disabled}
-              className="h-8 px-2 py-1 text-sm"
-              onClick={a.onClick}
-            >
-              {a.label}
-            </Button>
-          );
-        })}
+          })}
+        </div>
       </div>
     </div>
   );
