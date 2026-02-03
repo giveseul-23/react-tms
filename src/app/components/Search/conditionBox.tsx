@@ -36,7 +36,7 @@ export function ConditionBox({
       </button>
 
       {open && (
-        <div className="absolute z-10 mt-1">
+        <div className="absolute z-9999 mt-1">
           <IconCombo
             currentValue={value} // ⭐ userCondition 그대로
             onSelect={(v) => {
