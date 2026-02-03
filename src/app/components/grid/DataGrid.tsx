@@ -106,7 +106,7 @@ export default function DataGrid<TRow>({
       )}
 
       {/* ⭐ ActionBar는 overflow-visible 레이어 */}
-      <div className="relative z-50 overflow-visible shrink-0 min-w-0">
+      <div className="relative z-50 overflow-visible shrink-0 min-w-0 w-full">
         <GridActionsBar actions={actions} />
       </div>
 

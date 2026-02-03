@@ -76,7 +76,13 @@ export function GridActionsBar({
     <div className={cls("relative px-4 py-2 min-w-0", className)}>
       <div
         ref={scrollRef}
-        className="w-full min-w-0 overflow-x-auto overflow-y-hidden scrollbar-none"
+        className="
+          min-w-0
+          overflow-x-auto
+          overflow-y-hidden
+          scrollbar-none
+          flex
+        "
         onWheel={(e) => {
           if (!scrollRef.current) return;
 
