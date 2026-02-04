@@ -46,7 +46,7 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
   const { openPopup } = usePopup();
 
   const [filters, setFilters] = useState(initialState);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const handleSearch = () => {
     console.log("검색 payload:", filters);
@@ -67,7 +67,7 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
           </div>
 
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="xs">
               {open ? "접기" : "펼치기"}
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${

@@ -17,7 +17,7 @@ export function SearchFilterLabel({
   return (
     <Label
       className={cn(
-        "flex items-center gap-1 text-sm font-medium whitespace-nowrap",
+        "flex items-center gap-1 text-[13px] font-medium",
         className,
       )}
     >

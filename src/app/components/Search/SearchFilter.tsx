@@ -129,12 +129,12 @@ export function SearchFilter(props: SearchFilterProps) {
     <div
       className={cn(
         SPAN_CLASS[span] ?? "col-span-3",
-        "flex items-center gap-3 min-w-0",
+        "flex items-center gap-2 min-w-0",
         className,
       )}
     >
       {/* Label */}
-      <div className="w-[96px] shrink-0">
+      <div className="w-[94px] shrink-0">
         <SearchFilterLabel
           label={label}
           condition={

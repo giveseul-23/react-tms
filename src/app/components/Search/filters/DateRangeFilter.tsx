@@ -32,6 +32,18 @@ type DateFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   required?: boolean;
 };
 
+function getToday(granularity: "date" | "datetime") {
+  const now = new Date();
+
+  if (granularity === "datetime") {
+    // yyyy-MM-ddTHH:mm
+    return now.toISOString().slice(0, 16);
+  }
+
+  // yyyy-MM-dd
+  return now.toISOString().slice(0, 10);
+}
+
 export function DateRangeFilter({
   label = "날짜",
   mode = "range",
@@ -53,6 +65,14 @@ export function DateRangeFilter({
   const inputType = granularity === "datetime" ? "datetime-local" : "date";
   const Icon = granularity === "datetime" ? Clock : Calendar;
 
+  const today = getToday(granularity);
+
+  const from = fromValue || today;
+  const to = toValue || today;
+
+  const inputClass =
+    granularity === "date" ? "h-8 pl-9 pr-2 text-sm" : "h-9 pl-10 pr-3 text-sm";
+
   return (
     <div className={cn("flex flex-col gap-2", className)} {...props}>
       {/* input area */}
@@ -63,9 +83,9 @@ export function DateRangeFilter({
           <Input
             id={fromId}
             type={inputType}
-            value={fromValue}
+            value={from}
             onChange={(e) => onChangeFrom(e.target.value)}
-            className="pl-10"
+            className={inputClass}
           />
         </div>
 
@@ -79,9 +99,9 @@ export function DateRangeFilter({
               <Input
                 id={toId}
                 type={inputType}
-                value={toValue}
+                value={to}
                 onChange={(e) => onChangeTo?.(e.target.value)}
-                className="pl-10"
+                className={inputClass}
               />
             </div>
           </>

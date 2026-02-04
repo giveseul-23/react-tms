@@ -13,6 +13,8 @@ import type {
   ValueGetterParams,
 } from "ag-grid-community";
 
+import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
+
 import { GridTabs } from "./GridTabs";
 import type { GridPreset, GridTab } from "./types";
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -31,6 +33,8 @@ type DataGridProps<TRow> = {
   gridHeightPx?: number;
   actions: ActionItem[];
   onRowSelected?: (row: TRow) => void;
+
+  renderRightGrid?: (activeTabKey: string) => React.ReactNode;
 };
 
 export default function DataGrid<TRow>({
@@ -42,6 +46,7 @@ export default function DataGrid<TRow>({
   gridHeightPx,
   actions,
   onRowSelected,
+  renderRightGrid,
 }: DataGridProps<TRow>) {
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
@@ -54,7 +59,6 @@ export default function DataGrid<TRow>({
     return { rowData, columnDefs };
   }, [layoutType, activeTab, presets, rowData, columnDefs]);
 
-  /** No 컬럼 처리 */
   const finalColumnDefs = useMemo(() => {
     return activePreset.columnDefs.map((col) => {
       if ("headerName" in col && col.headerName === "No") {
@@ -78,64 +82,99 @@ export default function DataGrid<TRow>({
     [],
   );
 
-  /** ⭐ width 없는 컬럼만 autoSize */
   const handleGridReady = useCallback((e: GridReadyEvent) => {
     requestAnimationFrame(() => {
       const autoSizeColIds: string[] = [];
-
       e.columnApi.getAllColumns()?.forEach((col) => {
         const def = col.getColDef();
         if (def.width == null && def.flex == null) {
           autoSizeColIds.push(col.getId());
         }
       });
-
       if (autoSizeColIds.length > 0) {
         e.columnApi.autoSizeColumns(autoSizeColIds, false);
       }
     });
   }, []);
 
+  const rightGrid =
+    layoutType === "tab" && activeTab && renderRightGrid
+      ? renderRightGrid(activeTab)
+      : null;
+
   return (
-    <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full">
-      {/* tabs */}
+    <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
       {layoutType === "tab" && tabs && activeTab && (
-        <div className="px-4">
+        <div className="px-4 shrink-0">
           <GridTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         </div>
       )}
 
-      {/* ⭐ ActionBar는 overflow-visible 레이어 */}
       <div className="relative z-50 overflow-visible shrink-0 min-w-0 w-full">
         <GridActionsBar actions={actions} />
       </div>
 
-      {/* ⭐ Grid는 overflow-hidden 레이어 */}
-      <div
-        className={`grid-wrapper ${gridHeightPx ? "" : "flex-1 min-h-0 overflow-hidden"}`}
-      >
-        <div className="ag-theme-quartz ag-theme-bridge w-full h-full">
-          <AgGridReact<TRow>
-            theme="legacy"
-            rowData={activePreset.rowData}
-            columnDefs={finalColumnDefs}
-            defaultColDef={{
-              resizable: true,
-              sortable: true,
-              minWidth: 100,
-              maxWidth: 300,
-            }}
-            headerHeight={36}
-            rowHeight={40}
-            rowSelection={rowSelection as any}
-            onGridReady={handleGridReady}
-            onRowSelected={(e) => {
-              if (e.type === "rowSelected" && e.data) {
-                onRowSelected?.(e.data);
-              }
-            }}
-          />
-        </div>
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {rightGrid ? (
+          <PanelGroup direction="horizontal" className="h-full w-full">
+            {/* LEFT */}
+            <Panel defaultSize={70} minSize={30}>
+              <div className="flex flex-col h-full min-h-0 min-w-0">
+                <div className="flex-1 min-h-0">
+                  <div className="ag-theme-quartz ag-theme-bridge w-full h-full">
+                    <AgGridReact<TRow>
+                      theme="legacy"
+                      rowData={activePreset.rowData}
+                      columnDefs={finalColumnDefs}
+                      defaultColDef={{
+                        resizable: true,
+                        sortable: true,
+                        minWidth: 100,
+                        maxWidth: 300,
+                      }}
+                      headerHeight={36}
+                      rowHeight={40}
+                      rowSelection={rowSelection as any}
+                      onGridReady={handleGridReady}
+                      onRowSelected={(e) => {
+                        if (e.type === "rowSelected" && e.data) {
+                          onRowSelected?.(e.data);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Panel>
+
+            <PanelResizeHandle className="w-2 cursor-col-resize bg-transparent hover:bg-slate-200/70" />
+
+            {/* RIGHT */}
+            <Panel defaultSize={30} minSize={20}>
+              <div className="flex flex-col h-full min-h-0 min-w-0 border-l border-gray-200 bg-white">
+                <div className="flex-1 min-h-0">{rightGrid}</div>
+              </div>
+            </Panel>
+          </PanelGroup>
+        ) : (
+          <div className="ag-theme-quartz ag-theme-bridge w-full h-full">
+            <AgGridReact<TRow>
+              theme="legacy"
+              rowData={activePreset.rowData}
+              columnDefs={finalColumnDefs}
+              defaultColDef={{
+                resizable: true,
+                sortable: true,
+                minWidth: 100,
+                maxWidth: 300,
+              }}
+              headerHeight={36}
+              rowHeight={40}
+              rowSelection={rowSelection as any}
+              onGridReady={handleGridReady}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
