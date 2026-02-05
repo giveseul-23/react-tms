@@ -60,17 +60,17 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
     <Card className="shadow-sm">
       <Collapsible open={open} onOpenChange={setOpen}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-3 py-2 border-b">
+          <div className="flex items-center gap-1.5">
             <Filter className="w-4 h-4 text-[rgb(var(--primary))]" />
-            <h2 className="text-base font-semibold">조회 조건</h2>
+            <h2 className="text-sm font-semibold">조회 조건</h2>
           </div>
 
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="xs">
+            <Button variant="ghost" size="sm" className="h-7 px-2">
               {open ? "접기" : "펼치기"}
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${
+                className={`w-4 h-4 ml-1 transition-transform ${
                   open ? "rotate-180" : ""
                 }`}
               />
@@ -79,8 +79,18 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
         </div>
 
         <CollapsibleContent>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-12 gap-x-6 gap-y-3">
+          <CardContent
+            className="
+              p-3
+              [&_input]:h-8
+              [&_input]:text-sm
+              [&_select]:h-8
+              [&_select]:text-sm
+              [&_button]:h-8
+            "
+          >
+            {/* Filters */}
+            <div className="grid grid-cols-12 gap-x-4 gap-y-2">
               {meta.map((m) => {
                 const common = {
                   key: m.key,
@@ -163,14 +173,16 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
               })}
             </div>
 
-            <div className="flex justify-between mt-4 pt-4 border-t">
-              <Button variant="outline" onClick={handleReset}>
+            {/* Footer */}
+            <div className="flex justify-between mt-2 pt-2 border-t">
+              <Button variant="outline" size="sm" onClick={handleReset}>
                 <RefreshCw className="w-4 h-4 mr-1" />
                 초기화
               </Button>
 
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleSearch}
                 className="btn-primary btn-primary:hover"
               >

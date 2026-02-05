@@ -88,6 +88,8 @@ export function CommonPopup({
             },
           ]}
           rowData={filteredRows}
+          pagination
+          pageSize={20}
           rowSelection="single"
           onRowSelected={(row: any) => setSelectedRow(row)}
         />

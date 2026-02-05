@@ -32,6 +32,10 @@ type DataGridProps<TRow> = {
   layoutType?: "tab" | "plain";
   gridHeightPx?: number;
   actions: ActionItem[];
+
+  pagination?: boolean;
+  pageSize?: number;
+
   onRowSelected?: (row: TRow) => void;
 
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
@@ -45,6 +49,8 @@ export default function DataGrid<TRow>({
   layoutType = "tab",
   gridHeightPx,
   actions,
+  pagination = false,
+  pageSize = 20,
   onRowSelected,
   renderRightGrid,
 }: DataGridProps<TRow>) {
@@ -170,6 +176,10 @@ export default function DataGrid<TRow>({
               }}
               headerHeight={36}
               rowHeight={40}
+              /* ⭐ 페이징 */
+              pagination={pagination}
+              paginationPageSize={pageSize}
+              paginationPageSizeSelector={[10, 20, 50, 100]}
               rowSelection={rowSelection as any}
               onGridReady={handleGridReady}
             />
