@@ -420,6 +420,8 @@ export default function TenderReceiveDispatch() {
                 ]}
                 rowData={[{ LGST_GRP_CD: "d" }]}
                 actions={actions1}
+                pagination
+                pageSize={20}
               />
             </div>
           </Panel>
@@ -515,6 +517,8 @@ export default function TenderReceiveDispatch() {
                   if (tabKey !== "CNTR") return null;
                   return <CntrSubGrid />;
                 }}
+                pagination
+                pageSize={20}
               />
             </div>
           </Panel>

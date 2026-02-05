@@ -146,7 +146,7 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                           openPopup({
                             title: m.label,
                             content: <CommonPopup />,
-                            width: "xl",
+                            width: "2xl",
                           })
                         }
                       />
