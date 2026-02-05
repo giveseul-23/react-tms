@@ -25,7 +25,6 @@ type SearchMeta = {
 };
 
 export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
-  /** 🔹 초기 state 생성 */
   const initialState = useMemo(() => {
     const s: Record<string, any> = {};
     meta.forEach((m) => {
@@ -79,9 +78,10 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
         </div>
 
         <CollapsibleContent>
+          {/* 조회조건 영역 */}
           <CardContent
             className="
-              p-3
+              p-2
               [&_input]:h-8
               [&_input]:text-sm
               [&_select]:h-8
@@ -89,7 +89,6 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
               [&_button]:h-8
             "
           >
-            {/* Filters */}
             <div className="grid grid-cols-12 gap-x-4 gap-y-2">
               {meta.map((m) => {
                 const common = {
@@ -137,10 +136,16 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                         code={filters[`${m.key}Code`]}
                         name={filters[`${m.key}Name`]}
                         onChangeCode={(v: string) =>
-                          setFilters((p) => ({ ...p, [`${m.key}Code`]: v }))
+                          setFilters((p) => ({
+                            ...p,
+                            [`${m.key}Code`]: v,
+                          }))
                         }
                         onChangeName={(v: string) =>
-                          setFilters((p) => ({ ...p, [`${m.key}Name`]: v }))
+                          setFilters((p) => ({
+                            ...p,
+                            [`${m.key}Name`]: v,
+                          }))
                         }
                         onClickSearch={() =>
                           openPopup({
@@ -159,10 +164,16 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                         fromValue={filters[`${m.key}From`]}
                         toValue={filters[`${m.key}To`]}
                         onChangeFrom={(v: string) =>
-                          setFilters((p) => ({ ...p, [`${m.key}From`]: v }))
+                          setFilters((p) => ({
+                            ...p,
+                            [`${m.key}From`]: v,
+                          }))
                         }
                         onChangeTo={(v: string) =>
-                          setFilters((p) => ({ ...p, [`${m.key}To`]: v }))
+                          setFilters((p) => ({
+                            ...p,
+                            [`${m.key}To`]: v,
+                          }))
                         }
                       />
                     );
@@ -172,25 +183,25 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                 }
               })}
             </div>
-
-            {/* Footer */}
-            <div className="flex justify-between mt-2 pt-2 border-t">
-              <Button variant="outline" size="sm" onClick={handleReset}>
-                <RefreshCw className="w-4 h-4 mr-1" />
-                초기화
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSearch}
-                className="btn-primary btn-primary:hover"
-              >
-                <Search className="w-4 h-4 mr-1" />
-                조회
-              </Button>
-            </div>
           </CardContent>
+
+          {/* Footer (⬅ 여기 분리됨) */}
+          <div className="flex justify-between px-2 py-2 border-t">
+            <Button variant="outline" size="sm" onClick={handleReset}>
+              <RefreshCw className="w-4 h-4 mr-1" />
+              초기화
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSearch}
+              className="btn-primary btn-primary:hover"
+            >
+              <Search className="w-4 h-4 mr-1" />
+              조회
+            </Button>
+          </div>
         </CollapsibleContent>
       </Collapsible>
     </Card>
