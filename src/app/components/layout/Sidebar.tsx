@@ -4,12 +4,16 @@ import {
   ChevronLeft,
   ChevronRight,
   Truck,
+  LogOut,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { MENU_SECTIONS, MenuSection } from "@/app/menu/menuConfig";
 
 import { SettingsPopup } from "@/views/settings/SettingsPopup";
+
+import { getUserName, clearTokens } from "@/app/services/auth/auth";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,7 +21,6 @@ interface SidebarProps {
   onToggle: () => void;
   onSelectMenu: (menuCode: string) => void;
 }
-
 function findSectionByMenuCode(menuCode: string | null) {
   if (!menuCode) return null;
 
@@ -47,6 +50,13 @@ export function Sidebar({
   }, [activeMenuCode]);
 
   const { openPopup } = usePopup();
+  const navigate = useNavigate();
+
+  function logOut() {
+    clearTokens();
+
+    navigate("/login", { replace: true });
+  }
 
   return (
     <>
@@ -148,7 +158,7 @@ export function Sidebar({
               <Users className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">주다슬</p>
+              <p className="text-sm font-medium truncate">{getUserName()}</p>
               <p className="text-xs text-gray-500 truncate">010-9523-5068</p>
             </div>
             <button
@@ -162,6 +172,13 @@ export function Sidebar({
               }
             >
               <Settings className="w-4 h-4" />
+            </button>
+
+            <button
+              className="p-1 bg-[rgb(var(--bg))] hover:bg-gray-300 hover:text-black rounded"
+              onClick={() => logOut()}
+            >
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>

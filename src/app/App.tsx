@@ -5,7 +5,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "@/pages/HomePage";
 import LoginRoutePage from "@/pages/LoginPage";
-import { RequireAuth, OnlyGuest } from "@/auth/RouteGuards";
+import { RequireAuth, OnlyGuest } from "@/app/services/auth/RouteGuards";
 
 export default function App() {
   return (

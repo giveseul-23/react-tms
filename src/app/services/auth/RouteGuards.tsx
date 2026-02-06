@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { isAuthed } from "./auth";
+import { isAuthed } from "@/app/services/auth/auth";
 
 // 로그인 필요 페이지 가드 (ex: /)
 export function RequireAuth() {

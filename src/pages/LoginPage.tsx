@@ -4,7 +4,8 @@
 import React, { useState } from "react";
 import loginBgImg from "@/assets/logistics_img.jpg";
 import { useNavigate } from "react-router-dom";
-import { setToken } from "@/auth/auth"; // ✅ 여기 setToken 사용
+import { authApi } from "@/app/services/auth/authApi";
+import { setTokens } from "@/app/services/auth/auth"; // ✅ 여기 setToken 사용
 
 type FormState = { userId: string; password: string };
 
@@ -15,7 +16,7 @@ function cn(...xs: Array<string | false | null | undefined>) {
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<FormState>({
-    userId: "01095235068",
+    userId: "",
     password: "",
   });
 
@@ -27,16 +28,21 @@ export default function AuthPage() {
 
     setLoading(true);
     try {
-      // ✅ TODO: 여기서 실제 로그인 API 호출 후 성공 시 token 받아서 setToken(token) 하면 됨
-      await new Promise((r) => setTimeout(r, 500));
+      const res = await authApi.loginMobile({
+        userId: form.userId,
+        password: form.password,
+      });
 
-      // ✅ 데모 토큰 저장 (라우팅 가드가 isAuthed()로 잡아줌)
-      setToken("demo-token");
+      const { ACCESS_TOKEN, REFRESH_TOKEN, userNm } = res.data.data;
+
+      if (ACCESS_TOKEN == null || ACCESS_TOKEN === undefined) {
+        alert("NOT VALID");
+        return;
+      }
+
+      setTokens(ACCESS_TOKEN, REFRESH_TOKEN, userNm);
+
       navigate("/", { replace: true });
-
-      console.log("login submit", form);
-      // ✅ 라우팅 이동은 바깥(Login route page)에서 처리하거나
-      // 여기서 직접 하려면 react-router의 useNavigate()로 "/" 이동해도 됨.
     } finally {
       setLoading(false);
     }
