@@ -1,5 +1,6 @@
 "use client";
-// app/lib/agGrid.ts
+// app/components/grid/DataGrid.tsx
+
 import { ModuleRegistry } from "ag-grid-community";
 import { AllCommunityModule } from "ag-grid-community";
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -30,14 +31,12 @@ type DataGridProps<TRow> = {
   columnDefs?: (ColDef<TRow> | ColGroupDef<TRow>)[];
 
   layoutType?: "tab" | "plain";
-  gridHeightPx?: number;
   actions: ActionItem[];
 
   pagination?: boolean;
   pageSize?: number;
 
   onRowSelected?: (row: TRow) => void;
-
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
 };
 
@@ -47,7 +46,6 @@ export default function DataGrid<TRow>({
   rowData = [],
   columnDefs = [],
   layoutType = "tab",
-  gridHeightPx,
   actions,
   pagination = false,
   pageSize = 20,
@@ -65,12 +63,13 @@ export default function DataGrid<TRow>({
     return { rowData, columnDefs };
   }, [layoutType, activeTab, presets, rowData, columnDefs]);
 
+  /** No 컬럼 처리 */
   const finalColumnDefs = useMemo(() => {
     return activePreset.columnDefs.map((col) => {
       if ("headerName" in col && col.headerName === "No") {
         return {
           ...col,
-          width: 60,
+          width: 56,
           valueGetter: (params: ValueGetterParams<TRow>) =>
             (params.node?.rowIndex ?? 0) + 1,
         };
@@ -88,6 +87,7 @@ export default function DataGrid<TRow>({
     [],
   );
 
+  /** 컬럼 autosize */
   const handleGridReady = useCallback((e: GridReadyEvent) => {
     requestAnimationFrame(() => {
       const autoSizeColIds: string[] = [];
@@ -97,7 +97,7 @@ export default function DataGrid<TRow>({
           autoSizeColIds.push(col.getId());
         }
       });
-      if (autoSizeColIds.length > 0) {
+      if (autoSizeColIds.length) {
         e.columnApi.autoSizeColumns(autoSizeColIds, false);
       }
     });
@@ -110,60 +110,70 @@ export default function DataGrid<TRow>({
 
   return (
     <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
+      {/* Tabs */}
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-4 shrink-0">
           <GridTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         </div>
       )}
 
-      <div className="relative z-50 overflow-visible shrink-0 min-w-0 w-full">
+      {/* Actions */}
+      <div className="relative z-50 shrink-0 min-w-0 w-full">
         <GridActionsBar actions={actions} />
       </div>
 
+      {/* Grid */}
       <div className="flex-1 min-h-0 overflow-hidden">
         {rightGrid ? (
           <PanelGroup direction="horizontal" className="h-full w-full">
-            {/* LEFT */}
             <Panel defaultSize={70} minSize={30}>
-              <div className="flex flex-col h-full min-h-0 min-w-0">
-                <div className="flex-1 min-h-0">
-                  <div className="ag-theme-quartz ag-theme-bridge w-full h-full">
-                    <AgGridReact<TRow>
-                      theme="legacy"
-                      rowData={activePreset.rowData}
-                      columnDefs={finalColumnDefs}
-                      defaultColDef={{
-                        resizable: true,
-                        sortable: true,
-                        minWidth: 100,
-                        maxWidth: 300,
-                      }}
-                      headerHeight={36}
-                      rowHeight={40}
-                      rowSelection={rowSelection as any}
-                      onGridReady={handleGridReady}
-                      onRowSelected={(e) => {
-                        if (e.type === "rowSelected" && e.data) {
-                          onRowSelected?.(e.data);
-                        }
-                      }}
-                    />
-                  </div>
+              <div className="h-full">
+                <div
+                  className="ag-theme-quartz ag-theme-bridge w-full h-full"
+                  style={{
+                    // ⭐ 밀도만 줄이기 (기존 CSS 유지)
+                    ["--ag-font-size" as any]: "12px",
+                    ["--ag-cell-horizontal-padding" as any]: "6px",
+                  }}
+                >
+                  <AgGridReact<TRow>
+                    theme="legacy"
+                    rowData={activePreset.rowData}
+                    columnDefs={finalColumnDefs}
+                    defaultColDef={{
+                      resizable: true,
+                      sortable: true,
+                      minWidth: 80, // ⭐ 핵심
+                      maxWidth: 120,
+                    }}
+                    headerHeight={30} // ⭐
+                    rowHeight={34} // ⭐
+                    rowSelection={rowSelection as any}
+                    onGridReady={handleGridReady}
+                    onRowSelected={(e) => {
+                      if (e.type === "rowSelected" && e.data) {
+                        onRowSelected?.(e.data);
+                      }
+                    }}
+                  />
                 </div>
               </div>
             </Panel>
 
-            <PanelResizeHandle className="w-2 cursor-col-resize bg-transparent hover:bg-slate-200/70" />
+            <PanelResizeHandle className="w-2 cursor-col-resize hover:bg-slate-200/70" />
 
-            {/* RIGHT */}
             <Panel defaultSize={30} minSize={20}>
-              <div className="flex flex-col h-full min-h-0 min-w-0 border-l border-gray-200 bg-white">
-                <div className="flex-1 min-h-0">{rightGrid}</div>
-              </div>
+              <div className="h-full border-l border-gray-200">{rightGrid}</div>
             </Panel>
           </PanelGroup>
         ) : (
-          <div className="ag-theme-quartz ag-theme-bridge w-full h-full">
+          <div
+            className="ag-theme-quartz ag-theme-bridge w-full h-full"
+            style={{
+              ["--ag-font-size" as any]: "12px",
+              ["--ag-cell-horizontal-padding" as any]: "6px",
+            }}
+          >
             <AgGridReact<TRow>
               theme="legacy"
               rowData={activePreset.rowData}
@@ -171,12 +181,11 @@ export default function DataGrid<TRow>({
               defaultColDef={{
                 resizable: true,
                 sortable: true,
-                minWidth: 100,
-                maxWidth: 300,
+                minWidth: 80,
+                maxWidth: 120,
               }}
-              headerHeight={36}
-              rowHeight={40}
-              /* ⭐ 페이징 */
+              headerHeight={30}
+              rowHeight={34}
               pagination={pagination}
               paginationPageSize={pageSize}
               paginationPageSizeSelector={[10, 20, 50, 100]}
