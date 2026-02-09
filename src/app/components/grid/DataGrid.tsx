@@ -118,7 +118,7 @@ export default function DataGrid<TRow>({
       )}
 
       {/* Actions */}
-      <div className="relative z-50 shrink-0 min-w-0 w-full">
+      <div className="relative z-1 shrink-0 min-w-0 w-full">
         <GridActionsBar actions={actions} />
       </div>
 
