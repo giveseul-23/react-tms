@@ -129,16 +129,12 @@ export function SearchFilter(props: SearchFilterProps) {
     <div
       className={cn(
         SPAN_CLASS[span] ?? "col-span-3",
-        // 🔽 gap-2 → gap-1.5 : label ↔ input 간격 축소
         "flex items-center gap-1.5 min-w-0",
         className,
       )}
     >
       {/* Label */}
-      <div
-        // 🔽 94px → 84px : 전체 밀도 상승
-        className="w-[96px] shrink-0"
-      >
+      <div className="min-w-[96px] shrink-0 whitespace-nowrap">
         <SearchFilterLabel
           label={label}
           condition={

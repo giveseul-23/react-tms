@@ -59,14 +59,14 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
     <Card className="shadow-sm">
       <Collapsible open={open} onOpenChange={setOpen}>
         {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b">
+        <div className="flex items-center justify-between px-3 py-1.5 border-b">
           <div className="flex items-center gap-1.5">
             <Filter className="w-4 h-4 text-[rgb(var(--primary))]" />
             <h2 className="text-sm font-semibold">조회 조건</h2>
           </div>
 
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 px-2">
+            <Button variant="ghost" size="sm" className="h-6 px-2">
               {open ? "접기" : "펼치기"}
               <ChevronDown
                 className={`w-4 h-4 ml-1 transition-transform ${
@@ -81,21 +81,32 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
           {/* 조회조건 영역 */}
           <CardContent
             className="
-              p-2
-              [&_input]:h-8
-              [&_input]:text-sm
-              [&_select]:h-8
-              [&_select]:text-sm
-              [&_button]:h-8
+               p-2
+                [&_input]:h-7
+                [&_input]:text-xs
+                [&_input]:leading-none
+
+                [&_select]:h-7
+                [&_select]:text-xs
+                [&_select]:leading-none
+                [&_select]:py-0
+
+                [&_[role=combobox]]:h-7
+                [&_[role=combobox]]:text-xs
+                [&_[role=combobox]]:leading-none
+                [&_[role=combobox]]:py-0
+
+                [&_button]:h-7
             "
           >
-            <div className="grid grid-cols-12 gap-x-4 gap-y-2">
+            <div className="grid grid-cols-17 gap-x-1 gap-y-1">
               {meta.map((m) => {
                 const common = {
                   key: m.key,
                   type: m.type,
                   label: m.label,
-                  span: m.span,
+                  // ✅ 핵심 변경: 기본 span 2
+                  span: m.span ?? 2,
                   required: m.required,
                   condition: filters[`${m.key}Condition`],
                   onConditionChange: (c: string) =>
@@ -185,8 +196,8 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
             </div>
           </CardContent>
 
-          {/* Footer (⬅ 여기 분리됨) */}
-          <div className="flex justify-between px-2 py-2 border-t">
+          {/* Footer */}
+          <div className="flex justify-between px-2 py-1.5 border-t">
             <Button variant="outline" size="sm" onClick={handleReset}>
               <RefreshCw className="w-4 h-4 mr-1" />
               초기화
