@@ -150,7 +150,7 @@ export default function DataGrid<TRow>({
                       maxWidth: 120,
                       // quickFilter
                       filter: true,
-                      floatingFilter: true,
+                      floatingFilter: true, //header에서 바로보이게
                     }}
                     headerHeight={30} // ⭐
                     rowHeight={34} // ⭐
@@ -191,7 +191,7 @@ export default function DataGrid<TRow>({
                 maxWidth: 120,
                 // quickFilter
                 filter: true,
-                floatingFilter: true,
+                floatingFilter: true, //header에서 바로보이게
               }}
               headerHeight={30}
               rowHeight={34}
