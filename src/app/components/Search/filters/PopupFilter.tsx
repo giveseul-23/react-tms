@@ -6,13 +6,16 @@ import { cn } from "../../ui/utils";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 
-export type PopupFilterProps = React.ComponentPropsWithoutRef<"div"> & {
-  label?: string;
+export type PopupFilterProps = {
+  className?: string;
+
   code: string;
   name: string;
+
   onChangeCode: (v: string) => void;
   onChangeName: (v: string) => void;
   onClickSearch: () => void;
+
   codeId?: string;
   nameId?: string;
   required?: boolean;
@@ -20,7 +23,6 @@ export type PopupFilterProps = React.ComponentPropsWithoutRef<"div"> & {
 
 export function PopupFilter({
   className,
-  label = "팝업",
   code,
   name,
   onChangeCode,
@@ -28,15 +30,9 @@ export function PopupFilter({
   onClickSearch,
   codeId = "lgstGroupCode",
   nameId = "lgstGroupName",
-  required,
-  ...props
 }: PopupFilterProps) {
   return (
-    <div
-      className={cn("w-full min-w-0 flex flex-col gap-2", className)}
-      {...props}
-    >
-      {/* ✅ 인풋 2개 + 돋보기 (색/라운드 = Input 기본값 사용) */}
+    <div className={cn("w-full min-w-0 flex flex-col gap-2", className)}>
       <div className="flex items-center gap-3">
         {/* 코드 */}
         <Input
@@ -44,17 +40,17 @@ export function PopupFilter({
           value={code}
           onChange={(e) => onChangeCode(e.target.value)}
           placeholder="코드"
-          className="w-[110px]" // ✅ 폭만 지정 (색/라운드는 건드리지 않음)
+          className="w-[110px]"
         />
 
-        {/* 센터명 + 돋보기(인풋 안) */}
+        {/* 센터명 + 돋보기 */}
         <div className="relative flex-1">
           <Input
             id={nameId}
             value={name}
             onChange={(e) => onChangeName(e.target.value)}
             placeholder="코드명"
-            className="pr-10" // ✅ 아이콘 공간만 확보
+            className="pr-10"
           />
 
           <Button

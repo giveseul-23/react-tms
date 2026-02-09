@@ -6,7 +6,7 @@ export const TENDER_SEARCH_META = [
     label: "물류운영그룹",
     span: 3,
     condition: "equal",
-    // SQL_ID 필요하면 여기서 추가 가능
+    sqlId: "selectLogisticsgroupCodeName",
   },
   {
     key: "deliveryDate",

@@ -33,14 +33,14 @@ export default function AuthPage() {
         password: form.password,
       });
 
-      const { ACCESS_TOKEN, REFRESH_TOKEN, userNm } = res.data.data;
+      const { ACCESS_TOKEN, REFRESH_TOKEN, userId, userNm } = res.data.data;
 
       if (ACCESS_TOKEN == null || ACCESS_TOKEN === undefined) {
         alert("NOT VALID");
         return;
       }
 
-      setTokens(ACCESS_TOKEN, REFRESH_TOKEN, userNm);
+      setTokens(ACCESS_TOKEN, REFRESH_TOKEN, userId, userNm);
 
       navigate("/", { replace: true });
     } finally {

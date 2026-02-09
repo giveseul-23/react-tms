@@ -78,6 +78,7 @@ type PopupFilterProps = BaseFilterProps & {
   label: string;
   code: string;
   name: string;
+  sqlId: string;
   onChangeCode: (v: string) => void;
   onChangeName: (v: string) => void;
   onClickSearch: () => void;

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
+import { commonApi } from "@/app/services/common/commonApi";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 /* =======================
@@ -25,26 +26,37 @@ const mockRows = [
  * Component
  * ======================= */
 export function CommonPopup({
+  sqlId,
   onApply,
   onClose,
 }: {
+  sqlId: string;
   onApply: (row: any) => void;
   onClose: () => void;
 }) {
+  const [rows, setRows] = useState<any[]>([]);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
-  /* ======================= filtering ======================= */
-  const filteredRows = useMemo(() => {
-    return mockRows.filter((row) => {
-      const codeMatch = !code || row.CODE.includes(code);
+  useEffect(() => {
+    const userId = sessionStorage.getItem("userId");
+    const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
 
-      const nameMatch = !name || row.NAME.includes(name);
-
-      return codeMatch && nameMatch;
-    });
-  }, [code, name]);
+    commonApi
+      .getCodesAndNames({
+        sesUserId: userId,
+        userId, // 필요한 값만 payload로
+        sqlProp: sqlId,
+        ACCESS_TOKEN,
+      })
+      .then((res: any) => {
+        setRows(res.data.result ?? []);
+      })
+      .catch((err: any) => {
+        console.error(err);
+      });
+  }, []);
 
   return (
     <div className="flex flex-col gap-3 w-full h-full">
@@ -87,7 +99,7 @@ export function CommonPopup({
               flex: 1,
             },
           ]}
-          rowData={filteredRows}
+          rowData={rows}
           pagination
           pageSize={20}
           rowSelection="single"

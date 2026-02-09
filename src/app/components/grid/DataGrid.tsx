@@ -87,7 +87,10 @@ export default function DataGrid<TRow>({
     [],
   );
 
-  /** 컬럼 autosize */
+  /** 컬럼 autosize
+   * todo : columAPi - getAllColumns, autoSizeColumns 정의필요
+   *
+   */
   const handleGridReady = useCallback((e: GridReadyEvent) => {
     requestAnimationFrame(() => {
       const autoSizeColIds: string[] = [];

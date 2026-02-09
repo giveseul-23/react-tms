@@ -19,6 +19,7 @@ type SearchMeta = {
   type: "text" | "combo" | "popup" | "dateRange";
   label: string;
   span?: number;
+  sqlId?: string;
   condition?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
@@ -100,6 +101,7 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                     type: m.type,
                     label: m.label,
                     span: m.span ?? 1,
+                    sqlId: m.sqlId,
                     required: m.required,
                     condition: filters[`${m.key}Condition`],
                     onConditionChange: (c: string) =>
@@ -115,6 +117,7 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                       return (
                         <SearchFilter
                           {...common}
+                          key={m.key}
                           value={filters[m.key]}
                           options={m.options}
                           onChange={(v: string) =>
@@ -127,8 +130,10 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                       return (
                         <SearchFilter
                           {...common}
+                          key={m.key}
                           code={filters[`${m.key}Code`]}
                           name={filters[`${m.key}Name`]}
+                          sqlId={m.sqlId}
                           onChangeCode={(v: string) =>
                             setFilters((p) => ({
                               ...p,
@@ -144,7 +149,7 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                           onClickSearch={() =>
                             openPopup({
                               title: m.label,
-                              content: <CommonPopup />,
+                              content: <CommonPopup sqlId={m.sqlId} />,
                               width: "2xl",
                             })
                           }
@@ -155,6 +160,7 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                       return (
                         <SearchFilter
                           {...common}
+                          key={m.key}
                           fromValue={filters[`${m.key}From`]}
                           toValue={filters[`${m.key}To`]}
                           onChangeFrom={(v: string) =>
