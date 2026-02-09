@@ -88,7 +88,7 @@ export default function DataGrid<TRow>({
   );
 
   /** 컬럼 autosize
-   * todo : columAPi - getAllColumns, autoSizeColumns 정의필요
+   * todo : columAPi - getAllColumns, autoSizeColumns
    *
    */
   const handleGridReady = useCallback((e: GridReadyEvent) => {
@@ -148,6 +148,9 @@ export default function DataGrid<TRow>({
                       sortable: true,
                       minWidth: 80, // ⭐ 핵심
                       maxWidth: 120,
+                      // quickFilter
+                      filter: true,
+                      floatingFilter: true,
                     }}
                     headerHeight={30} // ⭐
                     rowHeight={34} // ⭐
@@ -186,6 +189,9 @@ export default function DataGrid<TRow>({
                 sortable: true,
                 minWidth: 80,
                 maxWidth: 120,
+                // quickFilter
+                filter: true,
+                floatingFilter: true,
               }}
               headerHeight={30}
               rowHeight={34}

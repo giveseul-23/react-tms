@@ -1,26 +1,14 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { Search } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { commonApi } from "@/app/services/common/commonApi";
 import DataGrid from "@/app/components/grid/DataGrid";
 
-/* =======================
- * Mock Data
- * ======================= */
-const mockRows = [
-  { CODE: "GD3011", NAME: "PC 군포센터" },
-  { CODE: "SD1001", NAME: "시화센터" },
-  { CODE: "SD1002", NAME: "성남센터" },
-  { CODE: "SS1000", NAME: "성남/서울합송" },
-  { CODE: "ST1003", NAME: "대구센터" },
-  { CODE: "ST1004", NAME: "호남센터" },
-  { CODE: "ST1005", NAME: "충주센터" },
-  { CODE: "ST1006", NAME: "청주센터" },
-  { CODE: "ST1007", NAME: "서천센터" },
-  { CODE: "ST1008", NAME: "세종센터" },
-];
+const userId = sessionStorage.getItem("userId");
+const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
 
 /* =======================
  * Component
@@ -40,9 +28,6 @@ export function CommonPopup({
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
   useEffect(() => {
-    const userId = sessionStorage.getItem("userId");
-    const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
-
     commonApi
       .getCodesAndNames({
         sesUserId: userId,
@@ -58,6 +43,26 @@ export function CommonPopup({
       });
   }, []);
 
+  const onSearch = () => {
+    const payload = {
+      sesUserId: userId,
+      userId,
+      sqlProp: sqlId,
+      ACCESS_TOKEN,
+      ...(code && { code }),
+      ...(name && { name }),
+    };
+
+    commonApi
+      .getCodesAndNames(payload)
+      .then((res: any) => {
+        setRows(res.data.result ?? []);
+      })
+      .catch((err: any) => {
+        console.error(err);
+      });
+  };
+
   return (
     <div className="flex flex-col gap-3 w-full h-full">
       {/* ================= Search Area ================= */}
@@ -66,15 +71,24 @@ export function CommonPopup({
         <Input
           value={code}
           placeholder="CODE"
-          onChange={(e) => setCode(e.target.value)}
+          onChange={(e: any) => setCode(e.target.value)}
         />
 
         <span className="text-sm font-medium">코드명</span>
         <Input
           value={name}
           placeholder="NAME"
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e: any) => setName(e.target.value)}
         />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={(e: any) => onSearch()}
+          className="btn-primary btn-primary:hover"
+        >
+          <Search className="w-4 h-4 mr-1" />
+          조회
+        </Button>
       </div>
 
       {/* ================= Grid ================= */}
