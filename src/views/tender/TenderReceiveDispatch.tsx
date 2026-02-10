@@ -3,10 +3,13 @@
 
 import { useState } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 import { SearchFilters } from "@/app/components/search/SearchFilters";
 import { TENDER_SEARCH_META } from "./tenderSearchMeta";
 import DataGrid from "@/app/components/grid/DataGrid";
+
+import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 type LayoutType = "side" | "vertical";
 
@@ -168,12 +171,17 @@ const actions1 = [
 ];
 
 export default function TenderReceiveDispatch() {
+  const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
   const [layout, setLayout] = useState<LayoutType>("side");
+
+  if (loading) {
+    return <Skeleton className="h-24" />;
+  }
 
   return (
     <div className="flex flex-col gap-3 h-full min-h-0 min-w-0">
       {/* 조회 조건 */}
-      <SearchFilters meta={TENDER_SEARCH_META} />
+      <SearchFilters meta={meta} />
 
       {/* layout toggle */}
       <div className="shrink-0 flex items-center justify-between text-[13px] text-[rgb(var(--fg))]">

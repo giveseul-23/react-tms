@@ -36,13 +36,8 @@ export const TENDER_SEARCH_META = [
     label: "배차진행상태",
     span: 5,
     condition: "chevronLast",
-    // options는 실제 코드값 정해지면 채우면 됨
-    options: [
-      { value: "ALL", label: "전체" },
-      { value: "WAIT", label: "대기" },
-      { value: "ING", label: "진행중" },
-      { value: "DONE", label: "완료" },
-    ],
+    sqlProp: "CODE",
+    keyParam: "DSPCH_OP_STS",
   },
   {
     key: "dispatchNo",
@@ -78,10 +73,8 @@ export const TENDER_SEARCH_META = [
     label: "운임예약가능여부",
     span: 5,
     condition: "equal",
-    options: [
-      { value: "Y", label: "가능" },
-      { value: "N", label: "불가" },
-    ],
+    sqlProp: "CODE",
+    keyParam: "YN",
   },
   //   {
   //     key: "arrivalRequestDateTime",
@@ -103,9 +96,7 @@ export const TENDER_SEARCH_META = [
     label: "운영형태",
     span: 5,
     condition: "equal",
-    options: [
-      { value: "OWN", label: "지입" },
-      { value: "RENT", label: "용차" },
-    ],
+    sqlProp: "CODE",
+    keyParam: "VEH_OP_TP",
   },
 ] as const;

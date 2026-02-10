@@ -11,11 +11,6 @@ import {
 } from "@/app/components/ui/select";
 import { cn } from "../../ui/utils";
 
-type ComboOption = {
-  value: string;
-  label: string;
-};
-
 type ComboFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   value: string;
   onChange: (value: string) => void;
@@ -24,7 +19,7 @@ type ComboFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   selectId?: string;
   placeholder?: string;
   inputClassName?: string;
-  options: ComboOption[];
+  options?: { value: string; label: string }[];
   required?: boolean;
 };
 
@@ -40,6 +35,8 @@ export function ComboFilter({
   required,
   ...props
 }: ComboFilterProps) {
+  const safeOptions = options ?? [];
+
   return (
     <div
       className={cn(
@@ -60,7 +57,7 @@ export function ComboFilter({
         </SelectTrigger>
 
         <SelectContent>
-          {options.map((opt) => (
+          {safeOptions.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
             </SelectItem>

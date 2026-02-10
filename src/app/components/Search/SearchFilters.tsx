@@ -19,6 +19,7 @@ type SearchMeta = {
   type: "text" | "combo" | "popup" | "dateRange";
   label: string;
   span?: number;
+  mode?: string;
   sqlId?: string;
   condition?: string;
   required?: boolean;
@@ -103,7 +104,6 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                   type: m.type,
                   label: m.label,
                   span: m.span ?? 1,
-                  sqlId: m.sqlId,
                   mode: m.mode,
                   granularity: m.granularity,
                   required: m.required,
