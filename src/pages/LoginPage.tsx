@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
-import loginBgImg from "@/assets/logistics_img.jpg";
+import loginBgImg from "@/assets/logistics_img4.png";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "@/app/services/auth/authApi";
 import { setTokens } from "@/app/services/auth/auth"; // ✅ 여기 setToken 사용
