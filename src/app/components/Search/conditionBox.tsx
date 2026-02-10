@@ -29,7 +29,7 @@ export function ConditionBox({
     <div className="relative" ref={ref}>
       <button
         type="button"
-        className="inline-flex items-center justify-center w-5 h-5"
+        className="w-5 h-5 shrink-0 inline-flex items-center justify-center"
         onClick={() => setOpen((v) => !v)}
       >
         <Icon className="w-4 h-4" />

@@ -85,6 +85,8 @@ type PopupFilterProps = BaseFilterProps & {
   required?: boolean;
 };
 
+const LABEL_WIDTH = "w-[100px]";
+
 /* =======================
  * Union
  * ======================= */
@@ -129,25 +131,20 @@ export function SearchFilter(props: SearchFilterProps) {
   return (
     <div
       className={cn(
-        SPAN_CLASS[span] ?? "col-span-3",
-        "flex items-center gap-1.5 min-w-0",
+        SPAN_CLASS[span],
+        "flex items-center gap-2 min-w-0",
         className,
       )}
     >
       {/* Label */}
-      <div className="min-w-[96px] shrink-0 whitespace-nowrap">
-        <SearchFilterLabel
-          label={label}
-          condition={
-            onConditionChange ? (
-              <ConditionBox
-                value={condition ?? "equal"}
-                onChange={onConditionChange}
-              />
-            ) : null
-          }
-          required={required}
-        />
+      <div className={cn(LABEL_WIDTH, "shrink-0 flex items-center gap-1")}>
+        {onConditionChange && (
+          <ConditionBox
+            value={condition ?? "equal"}
+            onChange={onConditionChange}
+          />
+        )}
+        <SearchFilterLabel label={label} required={required} />
       </div>
 
       {/* Input */}

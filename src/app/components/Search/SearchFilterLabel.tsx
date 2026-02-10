@@ -5,27 +5,22 @@ import { cn } from "../ui/utils";
 
 export function SearchFilterLabel({
   label,
-  condition,
   className,
   required,
 }: {
   label: string;
-  condition?: React.ReactNode;
   className?: string;
-  required?: string;
+  required?: boolean;
 }) {
   return (
     <Label
       className={cn(
-        "flex items-center gap-1 text-[13px] font-medium",
+        "flex items-center text-[11px] font-medium leading-6 whitespace-nowrap",
         className,
       )}
     >
-      {condition && (
-        <span className="inline-flex items-center">{condition}</span>
-      )}
       <span>{label}</span>
-      {required && <span className="text-red-400">*</span>}
+      {required && <span className="ml-0.5 text-red-400">*</span>}
     </Label>
   );
 }

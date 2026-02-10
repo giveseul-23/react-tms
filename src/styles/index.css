@@ -10,3 +10,13 @@
   -ms-overflow-style: none; /* IE */
   scrollbar-width: none; /* Firefox */
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 4px; /* ← 여기 조절 */
+  margin: 0;
+  padding: 0;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}

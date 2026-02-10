@@ -22,6 +22,7 @@ type SearchMeta = {
   sqlId?: string;
   condition?: string;
   required?: boolean;
+  granularity?: string;
   options?: { value: string; label: string }[];
 };
 
@@ -80,111 +81,113 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
 
         <CollapsibleContent>
           {/* 조회조건 영역 */}
-          <div
-            className="origin-top-left scale-[0.85] -mb-6"
-            style={{ width: "117%" }}
+          <CardContent
+            className="
+            p-2
+            text-[12px]
+
+            [&_input]:h-6
+            [&_input]:px-2
+            [&_input]:py-0
+            [&_input]:text-[11px]
+
+            [&_select]:h-6
+            [&_[role=combobox]]:h-6
+            [&_button]:h-6
+            "
           >
-            <CardContent
-              className="
-        p-2
-        [&_input]:h-7
-        [&_input]:text-xs
-        [&_select]:h-7
-        [&_[role=combobox]]:h-7
-        [&_button]:h-7
-      "
-            >
-              <div className="grid grid-cols-17 gap-x-1 gap-y-1">
-                {meta.map((m) => {
-                  const common = {
-                    key: m.key,
-                    type: m.type,
-                    label: m.label,
-                    span: m.span ?? 1,
-                    sqlId: m.sqlId,
-                    required: m.required,
-                    condition: filters[`${m.key}Condition`],
-                    onConditionChange: (c: string) =>
-                      setFilters((p) => ({
-                        ...p,
-                        [`${m.key}Condition`]: c,
-                      })),
-                  };
+            <div className="grid grid-cols-20 gap-x-2 gap-y-1">
+              {meta.map((m) => {
+                const common = {
+                  key: m.key,
+                  type: m.type,
+                  label: m.label,
+                  span: m.span ?? 1,
+                  sqlId: m.sqlId,
+                  mode: m.mode,
+                  granularity: m.granularity,
+                  required: m.required,
+                  condition: filters[`${m.key}Condition`],
+                  onConditionChange: (c: string) =>
+                    setFilters((p) => ({
+                      ...p,
+                      [`${m.key}Condition`]: c,
+                    })),
+                };
 
-                  switch (m.type) {
-                    case "text":
-                    case "combo":
-                      return (
-                        <SearchFilter
-                          {...common}
-                          key={m.key}
-                          value={filters[m.key]}
-                          options={m.options}
-                          onChange={(v: string) =>
-                            setFilters((p) => ({ ...p, [m.key]: v }))
-                          }
-                        />
-                      );
+                switch (m.type) {
+                  case "text":
+                  case "combo":
+                    return (
+                      <SearchFilter
+                        {...common}
+                        key={m.key}
+                        value={filters[m.key]}
+                        options={m.options}
+                        onChange={(v: string) =>
+                          setFilters((p) => ({ ...p, [m.key]: v }))
+                        }
+                      />
+                    );
 
-                    case "popup":
-                      return (
-                        <SearchFilter
-                          {...common}
-                          key={m.key}
-                          code={filters[`${m.key}Code`]}
-                          name={filters[`${m.key}Name`]}
-                          sqlId={m.sqlId}
-                          onChangeCode={(v: string) =>
-                            setFilters((p) => ({
-                              ...p,
-                              [`${m.key}Code`]: v,
-                            }))
-                          }
-                          onChangeName={(v: string) =>
-                            setFilters((p) => ({
-                              ...p,
-                              [`${m.key}Name`]: v,
-                            }))
-                          }
-                          onClickSearch={() =>
-                            openPopup({
-                              title: m.label,
-                              content: <CommonPopup sqlId={m.sqlId} />,
-                              width: "2xl",
-                            })
-                          }
-                        />
-                      );
+                  case "popup":
+                    return (
+                      <SearchFilter
+                        {...common}
+                        key={m.key}
+                        code={filters[`${m.key}Code`]}
+                        name={filters[`${m.key}Name`]}
+                        sqlId={m.sqlId}
+                        onChangeCode={(v: string) =>
+                          setFilters((p) => ({
+                            ...p,
+                            [`${m.key}Code`]: v,
+                          }))
+                        }
+                        onChangeName={(v: string) =>
+                          setFilters((p) => ({
+                            ...p,
+                            [`${m.key}Name`]: v,
+                          }))
+                        }
+                        onClickSearch={() =>
+                          openPopup({
+                            title: m.label,
+                            content: <CommonPopup sqlId={m.sqlId} />,
+                            width: "2xl",
+                          })
+                        }
+                      />
+                    );
 
-                    case "dateRange":
-                      return (
-                        <SearchFilter
-                          {...common}
-                          key={m.key}
-                          fromValue={filters[`${m.key}From`]}
-                          toValue={filters[`${m.key}To`]}
-                          onChangeFrom={(v: string) =>
-                            setFilters((p) => ({
-                              ...p,
-                              [`${m.key}From`]: v,
-                            }))
-                          }
-                          onChangeTo={(v: string) =>
-                            setFilters((p) => ({
-                              ...p,
-                              [`${m.key}To`]: v,
-                            }))
-                          }
-                        />
-                      );
+                  case "dateRange":
+                    return (
+                      <SearchFilter
+                        {...common}
+                        key={m.key}
+                        fromValue={filters[`${m.key}From`]}
+                        toValue={filters[`${m.key}To`]}
+                        onChangeFrom={(v: string) =>
+                          setFilters((p) => ({
+                            ...p,
+                            [`${m.key}From`]: v,
+                          }))
+                        }
+                        onChangeTo={(v: string) =>
+                          setFilters((p) => ({
+                            ...p,
+                            [`${m.key}To`]: v,
+                          }))
+                        }
+                      />
+                    );
 
-                    default:
-                      return null;
-                  }
-                })}
-              </div>
-            </CardContent>
-          </div>
+                  default:
+                    return null;
+                }
+              })}
+            </div>
+          </CardContent>
 
           {/* Footer */}
           <div className="flex justify-between px-2 py-1.5 border-t">

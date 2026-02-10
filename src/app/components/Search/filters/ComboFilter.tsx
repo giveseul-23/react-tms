@@ -49,7 +49,13 @@ export function ComboFilter({
       {...props}
     >
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger id={selectId}>
+        <SelectTrigger
+          id={selectId}
+          className={cn(
+            "h-6 px-2 text-[11px]", // ⭐ 여기서 직접 제어
+            inputClassName,
+          )}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
 

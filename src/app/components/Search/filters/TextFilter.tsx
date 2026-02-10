@@ -22,16 +22,10 @@ export function TextFilter({
 }: TextFilterProps) {
   return (
     // ⭐ 부모가 준 폭을 무조건 100% 사용
-    <div
-      className={cn(
-        "w-full min-w-0", // ⭐ 핵심
-        className,
-      )}
-      {...props}
-    >
+    <div className={cn("w-full min-w-0", className)} {...props}>
       <div className="relative w-full">
-        {/* icon */}
-        <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        {/* 🔍 icon → 오른쪽 */}
+        <Search className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
 
         {/* input */}
         <Input
@@ -40,7 +34,7 @@ export function TextFilter({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            "w-full pl-10", // ⭐ input도 100%
+            "w-full pr-7 pl-2 text-[11px] h-7", // ⭐ 오른쪽 padding
             inputClassName,
           )}
         />
