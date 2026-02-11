@@ -70,12 +70,10 @@ export const TENDER_SEARCH_META = [
   },
   {
     key: "freightReservable",
-    type: "combo",
+    type: "checkbox",
     label: "운임예약가능여부",
     span: 5,
     condition: "equal",
-    sqlProp: "CODE",
-    keyParam: "YN",
   },
   {
     key: "arrivalRequestDateTime",

@@ -15,22 +15,19 @@ export type CheckboxFilterProps = React.ComponentPropsWithoutRef<"div"> & {
 export function CheckboxFilter({
   className,
   id,
-  label,
   checked,
   onCheckedChange,
   description,
-  required,
   ...props
 }: CheckboxFilterProps) {
   return (
-    <div
-      className={cn("w-full min-w-0 flex flex-col gap-2", className)}
-      {...props}
-    >
+    <div className={cn("w-full min-w-0", className)} {...props}>
       <label
         htmlFor={id}
         className={cn(
-          "flex items-center gap-2 rounded-xl border bg-[rgb(var(--bg))] px-3 py-2",
+          "flex items-center gap-2",
+          "h-6 px-2 py-0",
+          "rounded-md border bg-[rgb(var(--bg))]",
           "transition-colors",
           checked
             ? "border-emerald-300 ring-1 ring-emerald-200"
@@ -42,18 +39,20 @@ export function CheckboxFilter({
           type="checkbox"
           checked={checked}
           onChange={(e) => onCheckedChange(e.target.checked)}
-          className={cn(
-            "h-4 w-4 rounded border-gray-300",
-            "accent-emerald-600",
-          )}
+          className="
+          h-3 w-3
+          translate-y-[0.2px]   // 🔥 핵심
+          rounded border-gray-300
+          accent-emerald-600
+        "
         />
 
-        <span className="text-sm text-[rgb(var(--fg))] select-none">
+        <span className="text-[11px] leading-none text-[rgb(var(--fg))] select-none">
           {checked ? "Checked" : "UnChecked"}
         </span>
 
         {description && (
-          <span className="ml-auto text-xs text-[rgb(var(--fg))]">
+          <span className="ml-auto text-[11px] text-[rgb(var(--fg))]">
             {description}
           </span>
         )}

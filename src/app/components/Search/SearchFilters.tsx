@@ -16,7 +16,7 @@ import { CommonPopup } from "@/views/common/CommonPopup";
 
 type SearchMeta = {
   key: string;
-  type: "text" | "combo" | "popup" | "dateRange";
+  type: "text" | "combo" | "popup" | "dateRange" | "checkbox";
   label: string;
   span?: number;
   mode?: string;
@@ -37,6 +37,8 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
       } else if (m.type === "popup") {
         s[`${m.key}Code`] = "";
         s[`${m.key}Name`] = "";
+      } else if (m.type === "checkbox") {
+        s[m.key] = false;
       } else {
         s[m.key] = "";
       }
@@ -181,6 +183,22 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                         }
                       />
                     );
+                  case "checkbox":
+                    return (
+                      <SearchFilter
+                        {...common}
+                        key={m.key}
+                        type="checkbox"
+                        id={m.key}
+                        checked={Boolean(filters[m.key])}
+                        onCheckedChange={(checked: boolean) =>
+                          setFilters((p) => ({
+                            ...p,
+                            [m.key]: checked,
+                          }))
+                        }
+                      />
+                    );
 
                   default:
                     return null;
@@ -190,19 +208,19 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
           </CardContent>
 
           {/* Footer */}
-          <div className="flex justify-between px-2 py-1.5 border-t">
-            <Button variant="outline" size="sm" onClick={handleReset}>
-              <RefreshCw className="w-4 h-4 mr-1" />
+          <div className="flex justify-between px-2 py-1 border-t">
+            <Button variant="outline" size="xs" onClick={handleReset}>
+              <RefreshCw className="w-3 h-3" />
               초기화
             </Button>
 
             <Button
               variant="outline"
-              size="sm"
+              size="xs"
               onClick={handleSearch}
               className="btn-primary btn-primary:hover"
             >
-              <Search className="w-4 h-4 mr-1" />
+              <Search className="w-3 h-3" />
               조회
             </Button>
           </div>
