@@ -219,6 +219,11 @@ export default function DataGrid<TRow>({
               paginationPageSizeSelector={[10, 20, 50, 100]}
               rowSelection={rowSelection as any}
               onGridReady={handleGridReady}
+              onRowSelected={(e) => {
+                if (e.type === "rowSelected" && e.data) {
+                  onRowSelected?.(e.data);
+                }
+              }}
             />
           </div>
         )}

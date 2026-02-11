@@ -27,7 +27,15 @@ type SearchMeta = {
   options?: { value: string; label: string }[];
 };
 
-export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
+export function SearchFilters({
+  meta,
+  value,
+  onChange,
+}: {
+  meta: readonly SearchMeta[];
+  value: Record<string, any>;
+  onChange: (v: Record<string, any>) => void;
+}) {
   const initialState = useMemo(() => {
     const s: Record<string, any> = {};
     meta.forEach((m) => {
@@ -47,17 +55,16 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
     return s;
   }, [meta]);
 
-  const { openPopup } = usePopup();
+  const { openPopup, closePopup } = usePopup();
 
-  const [filters, setFilters] = useState(initialState);
   const [open, setOpen] = useState(false);
 
   const handleSearch = () => {
-    console.log("검색 payload:", filters);
+    console.log("검색 payload:", value);
   };
 
   const handleReset = () => {
-    setFilters(initialState);
+    onChange(initialState);
   };
 
   return (
@@ -109,12 +116,12 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                   mode: m.mode,
                   granularity: m.granularity,
                   required: m.required,
-                  condition: filters[`${m.key}Condition`],
-                  onConditionChange: (c: string) =>
-                    setFilters((p) => ({
-                      ...p,
-                      [`${m.key}Condition`]: c,
-                    })),
+                  condition: value[`${m.key}Condition`],
+                  onConditionChange: (v: string) =>
+                    onChange({
+                      ...value,
+                      [m.key]: v,
+                    }),
                 };
 
                 switch (m.type) {
@@ -124,10 +131,13 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                       <SearchFilter
                         {...common}
                         key={m.key}
-                        value={filters[m.key]}
+                        value={value[m.key]}
                         options={m.options}
                         onChange={(v: string) =>
-                          setFilters((p) => ({ ...p, [m.key]: v }))
+                          onChange({
+                            ...value,
+                            [m.key]: v,
+                          })
                         }
                       />
                     );
@@ -137,25 +147,37 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                       <SearchFilter
                         {...common}
                         key={m.key}
-                        code={filters[`${m.key}Code`]}
-                        name={filters[`${m.key}Name`]}
+                        code={value[`${m.key}Code`]}
+                        name={value[`${m.key}Name`]}
                         sqlId={m.sqlId}
                         onChangeCode={(v: string) =>
-                          setFilters((p) => ({
-                            ...p,
-                            [`${m.key}Code`]: v,
-                          }))
+                          onChange({
+                            ...value,
+                            [`${m.key}NCodee`]: v,
+                          })
                         }
                         onChangeName={(v: string) =>
-                          setFilters((p) => ({
-                            ...p,
+                          onChange({
+                            ...value,
                             [`${m.key}Name`]: v,
-                          }))
+                          })
                         }
                         onClickSearch={() =>
                           openPopup({
                             title: m.label,
-                            content: <CommonPopup sqlId={m.sqlId} />,
+                            content: (
+                              <CommonPopup
+                                sqlId={m.sqlId}
+                                onApply={(row: any) => {
+                                  onChange({
+                                    ...value,
+                                    [`${m.key}Code`]: row.CODE,
+                                    [`${m.key}Name`]: row.NAME,
+                                  });
+                                  closePopup();
+                                }}
+                              />
+                            ),
                             width: "2xl",
                           })
                         }
@@ -167,19 +189,19 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                       <SearchFilter
                         {...common}
                         key={m.key}
-                        fromValue={filters[`${m.key}From`]}
-                        toValue={filters[`${m.key}To`]}
+                        fromValue={value[`${m.key}From`]}
+                        toValue={value[`${m.key}To`]}
                         onChangeFrom={(v: string) =>
-                          setFilters((p) => ({
-                            ...p,
+                          onChange({
+                            ...value,
                             [`${m.key}From`]: v,
-                          }))
+                          })
                         }
                         onChangeTo={(v: string) =>
-                          setFilters((p) => ({
-                            ...p,
+                          onChange({
+                            ...value,
                             [`${m.key}To`]: v,
-                          }))
+                          })
                         }
                       />
                     );
@@ -190,12 +212,12 @@ export function SearchFilters({ meta }: { meta: readonly SearchMeta[] }) {
                         key={m.key}
                         type="checkbox"
                         id={m.key}
-                        checked={Boolean(filters[m.key])}
-                        onCheckedChange={(checked: boolean) =>
-                          setFilters((p) => ({
-                            ...p,
+                        checked={Boolean(value[m.key])}
+                        onCheckedChange={(checked: any) =>
+                          onChange({
+                            ...value,
                             [m.key]: checked,
-                          }))
+                          })
                         }
                       />
                     );

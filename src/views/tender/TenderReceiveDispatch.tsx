@@ -172,6 +172,7 @@ const actions1 = [
 
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const [layout, setLayout] = useState<LayoutType>("side");
 
   if (loading) {
@@ -181,7 +182,7 @@ export default function TenderReceiveDispatch() {
   return (
     <div className="flex flex-col gap-3 h-full min-h-0 min-w-0">
       {/* 조회 조건 */}
-      <SearchFilters meta={meta} />
+      <SearchFilters meta={meta} value={filters} onChange={setFilters} />
 
       {/* layout toggle */}
       <div className="shrink-0 flex items-center justify-between text-[13px] text-[rgb(var(--fg))]">
