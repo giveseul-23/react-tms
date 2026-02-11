@@ -15,6 +15,7 @@ export function useSearchMeta(baseMeta: readonly SearchMeta[]) {
       const userId = sessionStorage.getItem("userId") ?? "";
       const sesUserId = sessionStorage.getItem("sesUserId") ?? "";
       const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN") ?? "";
+      const sesLang = sessionStorage.getItem("sesLang") ?? "";
 
       const comboMetas = baseMeta.filter(
         (m) => m.type === "combo" && m.sqlProp && m.keyParam,
@@ -39,6 +40,7 @@ export function useSearchMeta(baseMeta: readonly SearchMeta[]) {
           sqlProp: m.sqlProp!,
           keyParam: m.keyParam!,
           ACCESS_TOKEN,
+          sesLang,
         }));
 
         const res = await commonApi.fetchComboOptions(payload);

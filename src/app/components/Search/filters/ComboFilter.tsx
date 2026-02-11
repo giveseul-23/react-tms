@@ -19,7 +19,7 @@ type ComboFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   selectId?: string;
   placeholder?: string;
   inputClassName?: string;
-  options?: { value: string; label: string }[];
+  options?: { CODE: string; NAME: string }[];
   required?: boolean;
 };
 
@@ -58,8 +58,8 @@ export function ComboFilter({
 
         <SelectContent>
           {safeOptions.map((opt) => (
-            <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
+            <SelectItem key={opt.CODE} value={opt.NAME}>
+              {opt.NAME}
             </SelectItem>
           ))}
         </SelectContent>

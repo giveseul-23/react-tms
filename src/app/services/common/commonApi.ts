@@ -13,6 +13,7 @@ export type comboOptRequest = {
   sqlProp: string;
   keyParam: string;
   ACCESS_TOKEN: string;
+  LANG_TP: string;
 };
 
 export type commonResponse = {
