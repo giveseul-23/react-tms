@@ -38,6 +38,8 @@ type DataGridProps<TRow> = {
 
   onRowSelected?: (row: TRow) => void;
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
+
+  disableAutoSize?: boolean;
 };
 
 export default function DataGrid<TRow>({
@@ -51,6 +53,7 @@ export default function DataGrid<TRow>({
   pageSize = 20,
   onRowSelected,
   renderRightGrid,
+  disableAutoSize,
 }: DataGridProps<TRow>) {
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
@@ -70,10 +73,24 @@ export default function DataGrid<TRow>({
         return {
           ...col,
           width: 56,
+          suppressMenu: true,
+          sortable: false,
+          filter: false,
+          floatingFilter: false,
+          getQuickFilterText: () => null,
           valueGetter: (params: ValueGetterParams<TRow>) =>
             (params.node?.rowIndex ?? 0) + 1,
         };
       }
+
+      // 공통코드에서 maxWidth 설정안되게 수정
+      if ((col as any).disableMaxWidth === true) {
+        return {
+          ...col,
+          maxWidth: null, // ⭐ 반드시 명시
+        };
+      }
+
       return col;
     });
   }, [activePreset]);
@@ -93,6 +110,8 @@ export default function DataGrid<TRow>({
    */
   const handleGridReady = useCallback((e: GridReadyEvent) => {
     requestAnimationFrame(() => {
+      if (disableAutoSize) return;
+
       const autoSizeColIds: string[] = [];
       e.columnApi.getAllColumns()?.forEach((col) => {
         const def = col.getColDef();

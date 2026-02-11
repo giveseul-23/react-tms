@@ -100,7 +100,6 @@ export function CommonPopup({
             {
               headerName: "No",
               width: 60,
-              valueGetter: (p: any) => p.node.rowIndex + 1,
             },
             {
               headerName: "코드",
@@ -111,6 +110,8 @@ export function CommonPopup({
               headerName: "코드명",
               field: "NAME",
               flex: 1,
+              minWidth: 300,
+              disableMaxWidth: true,
             },
           ]}
           rowData={rows}
@@ -118,6 +119,7 @@ export function CommonPopup({
           pageSize={20}
           rowSelection="single"
           onRowSelected={(row: any) => setSelectedRow(row)}
+          disableAutoSize={true}
         />
       </div>
 
