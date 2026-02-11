@@ -42,7 +42,6 @@ export function GridActionsBar({
 }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-
   const [dropdownStyle, setDropdownStyle] =
     useState<React.CSSProperties | null>(null);
 
@@ -73,7 +72,7 @@ export function GridActionsBar({
   );
 
   return (
-    <div className={cls("relative px-4 py-2 min-w-0", className)}>
+    <div className={cls("relative px-2 py-1 min-w-0", className)}>
       <div
         ref={scrollRef}
         className="
@@ -85,8 +84,6 @@ export function GridActionsBar({
         "
         onWheel={(e) => {
           if (!scrollRef.current) return;
-
-          // 세로 휠 → 가로 스크롤 변환
           if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
             scrollRef.current.scrollLeft += e.deltaY;
             e.preventDefault();
@@ -100,7 +97,13 @@ export function GridActionsBar({
                 key={a.key}
                 type="button"
                 variant="outline"
-                className="h-8 px-2 py-1 text-xs gap-1"
+                className="
+                  h-6
+                  px-2
+                  text-[11px]
+                  gap-1
+                  rounded-md
+                "
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
 
@@ -108,8 +111,8 @@ export function GridActionsBar({
                   setDropdownStyle({
                     position: "fixed",
                     top: rect.bottom + 4,
-                    left: rect.right - 180,
-                    width: 180,
+                    left: rect.right - 160,
+                    width: 160,
                     zIndex: 9999,
                   });
 
@@ -117,9 +120,9 @@ export function GridActionsBar({
                 }}
               >
                 {openKey === a.key ? (
-                  <SquareMinus className="w-4 h-4" />
+                  <SquareMinus className="w-3 h-3" />
                 ) : (
-                  <SquarePlus className="w-4 h-4" />
+                  <SquarePlus className="w-3 h-3" />
                 )}
                 {a.label}
               </Button>
@@ -128,7 +131,12 @@ export function GridActionsBar({
                 key={a.key}
                 type="button"
                 variant="outline"
-                className="h-8 px-2 py-1 text-xs"
+                className="
+                  h-6
+                  px-2
+                  text-[11px]
+                  rounded-md
+                "
                 onClick={a.onClick}
               >
                 {a.label}
@@ -144,7 +152,13 @@ export function GridActionsBar({
         createPortal(
           <div
             data-dropdown
-            className="rounded-md border border-gray-200 bg-[rgb(var(--bg))] shadow-lg p-1"
+            className="
+              rounded-md
+              border border-gray-200
+              bg-[rgb(var(--bg))]
+              shadow-md
+              p-1
+            "
             style={dropdownStyle}
           >
             {openGroup.items.map((it) => (
@@ -156,7 +170,16 @@ export function GridActionsBar({
                   it.onClick?.();
                   setOpenKey(null);
                 }}
-                className="w-full rounded-md px-2 py-2 text-left text-xs hover:bg-gray-100 disabled:opacity-50"
+                className="
+                  w-full
+                  rounded-md
+                  px-2
+                  py-1.5
+                  text-[11px]
+                  text-left
+                  hover:bg-gray-100
+                  disabled:opacity-50
+                "
               >
                 {it.label}
               </button>

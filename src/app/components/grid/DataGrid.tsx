@@ -153,9 +153,16 @@ export default function DataGrid<TRow>({
                 <div
                   className="ag-theme-quartz ag-theme-bridge w-full h-full"
                   style={{
-                    // ⭐ 밀도만 줄이기 (기존 CSS 유지)
-                    ["--ag-font-size" as any]: "12px",
-                    ["--ag-cell-horizontal-padding" as any]: "6px",
+                    ["--ag-font-size" as any]: "11px",
+                    ["--ag-header-font-size" as any]: "11px",
+
+                    ["--ag-row-height" as any]: "22px",
+                    ["--ag-header-height" as any]: "22px",
+
+                    ["--ag-cell-horizontal-padding" as any]: "3px",
+                    ["--ag-cell-vertical-padding" as any]: "1px",
+
+                    ["--ag-grid-size" as any]: "3px",
                   }}
                 >
                   <AgGridReact<TRow>
@@ -171,8 +178,8 @@ export default function DataGrid<TRow>({
                       filter: true,
                       floatingFilter: true, //header에서 바로보이게
                     }}
-                    headerHeight={30} // ⭐
-                    rowHeight={34} // ⭐
+                    headerHeight={22}
+                    rowHeight={22}
                     rowSelection={rowSelection as any}
                     onGridReady={handleGridReady}
                     onRowSelected={(e) => {
@@ -195,8 +202,16 @@ export default function DataGrid<TRow>({
           <div
             className="ag-theme-quartz ag-theme-bridge w-full h-full"
             style={{
-              ["--ag-font-size" as any]: "12px",
-              ["--ag-cell-horizontal-padding" as any]: "6px",
+              ["--ag-font-size" as any]: "11px",
+              ["--ag-header-font-size" as any]: "11px",
+
+              ["--ag-row-height" as any]: "22px",
+              ["--ag-header-height" as any]: "22px",
+
+              ["--ag-cell-horizontal-padding" as any]: "3px",
+              ["--ag-cell-vertical-padding" as any]: "1px",
+
+              ["--ag-grid-size" as any]: "3px",
             }}
           >
             <AgGridReact<TRow>
@@ -212,8 +227,8 @@ export default function DataGrid<TRow>({
                 filter: true,
                 floatingFilter: true, //header에서 바로보이게
               }}
-              headerHeight={30}
-              rowHeight={34}
+              headerHeight={22}
+              rowHeight={22}
               pagination={pagination}
               paginationPageSize={pageSize}
               paginationPageSizeSelector={[10, 20, 50, 100]}
