@@ -52,6 +52,7 @@ export const TENDER_SEARCH_META = [
     label: "운송협력사",
     span: 5,
     condition: "equal",
+    sqlId: "selectCarrList",
   },
   {
     key: "driverName",
@@ -76,19 +77,21 @@ export const TENDER_SEARCH_META = [
     sqlProp: "CODE",
     keyParam: "YN",
   },
-  //   {
-  //     key: "arrivalRequestDateTime",
-  //     type: "dateRange",
-  //     label: "입차요청일시",
-  //     span: 5,
-  //     condition: "equal",
-  //   },
+  {
+    key: "arrivalRequestDateTime",
+    type: "dateRange",
+    label: "입차요청일시",
+    span: 5,
+    mode: "single",
+    condition: "equal",
+  },
   {
     key: "vehicleType",
     type: "popup",
     label: "차량유형",
     span: 5,
     condition: "equal",
+    sqlId: "selectVehTpList",
   },
   {
     key: "operationType",
