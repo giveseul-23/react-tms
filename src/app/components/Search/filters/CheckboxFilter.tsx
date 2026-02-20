@@ -21,7 +21,7 @@ export function CheckboxFilter({
   ...props
 }: CheckboxFilterProps) {
   return (
-    <div className={cn("w-full min-w-0", className)} {...props}>
+    <div className={cn("w-full min-w-0", className)}>
       <label
         htmlFor={id}
         className={cn(

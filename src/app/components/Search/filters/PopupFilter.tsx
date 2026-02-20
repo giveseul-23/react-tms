@@ -23,13 +23,13 @@ export type PopupFilterProps = {
 
 export function PopupFilter({
   className,
-  code,
-  name,
+  code = "",
+  name = "",
   onChangeCode,
   onChangeName,
   onClickSearch,
-  codeId = "lgstGroupCode",
-  nameId = "lgstGroupName",
+  codeId,
+  nameId,
 }: PopupFilterProps) {
   return (
     <div className={cn("w-full min-w-0 flex flex-col gap-2", className)}>

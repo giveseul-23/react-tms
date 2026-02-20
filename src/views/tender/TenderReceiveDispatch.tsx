@@ -1,7 +1,7 @@
 // src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 
@@ -10,6 +10,8 @@ import { TENDER_SEARCH_META } from "./tenderSearchMeta";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useSearchMeta } from "@/hooks/useSearchMeta";
+
+import { tenderApi } from "@/app/services/tender/tenderApi";
 
 type LayoutType = "side" | "vertical";
 
@@ -174,6 +176,24 @@ export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [layout, setLayout] = useState<LayoutType>("side");
+  const [headerRowData, setHeaderRowData] = useState([]);
+  const [subRowData, setSubRowData] = useState([]);
+
+  const onSearch = async () => {
+    try {
+      const param = {
+        ...filters,
+        userId: sessionStorage.getItem("userId"),
+        ACCESS_TOKEN: sessionStorage.getItem("ACCESS_TOKEN"),
+        REFRESH_TOKEN: sessionStorage.getItem("REFRESH_TOKEN"),
+      };
+      const res = await tenderApi.getDispatchList(param);
+
+      setHeaderRowData(res.data.data);
+    } catch (e) {
+      alert("error");
+    }
+  };
 
   if (loading) {
     return <Skeleton className="h-24" />;
@@ -427,7 +447,7 @@ export default function TenderReceiveDispatch() {
                     field: "UPD_DTTM",
                   },
                 ]}
-                rowData={[{ LGST_GRP_CD: "d" }]}
+                rowData={headerRowData}
                 actions={actions1}
                 pagination
                 pageSize={20}
@@ -520,9 +540,9 @@ export default function TenderReceiveDispatch() {
                     rowData: [{ DSPCH_NO: 3, DONE_DT: "2026-01-28" }],
                   },
                 }}
-                rowData={[{ DSPCH_NO: 1 }, { DSPCH_NO: 2 }]}
+                rowData={subRowData}
                 /** ⭐ 여기 추가 */
-                renderRightGrid={(tabKey) => {
+                renderRightGrid={(tabKey: any) => {
                   if (tabKey !== "CNTR") return null;
                   return <CntrSubGrid />;
                 }}

@@ -34,7 +34,7 @@ export function DateRangeFilter({
   fromId = "dateFrom",
   toId = "dateTo",
 
-  fromValue,
+  fromValue = "",
   toValue = "",
 
   onChangeFrom,

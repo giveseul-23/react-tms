@@ -21,7 +21,7 @@ export function GridTabs({
               type="button"
               onClick={() => onChange(t.key)}
               className={[
-                "relative py-3 text-sm",
+                "relative py-3 text-xs",
                 active
                   ? "text-[rgb(var(--fg))] font-medium"
                   : "text-[rgb(var(--fg))] hover:text-gray-700",

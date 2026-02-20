@@ -181,7 +181,7 @@ export default function DataGrid<TRow>({
                     headerHeight={22}
                     rowHeight={22}
                     rowSelection={rowSelection as any}
-                    onGridReady={handleGridReady}
+                    // onGridReady={handleGridReady}
                     onRowSelected={(e) => {
                       if (e.type === "rowSelected" && e.data) {
                         onRowSelected?.(e.data);
@@ -233,7 +233,7 @@ export default function DataGrid<TRow>({
               paginationPageSize={pageSize}
               paginationPageSizeSelector={[10, 20, 50, 100]}
               rowSelection={rowSelection as any}
-              onGridReady={handleGridReady}
+              // onGridReady={handleGridReady}
               onRowSelected={(e) => {
                 if (e.type === "rowSelected" && e.data) {
                   onRowSelected?.(e.data);

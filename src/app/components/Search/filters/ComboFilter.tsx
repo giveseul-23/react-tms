@@ -43,7 +43,6 @@ export function ComboFilter({
         "w-full min-w-0", // ⭐ 핵심
         className,
       )}
-      {...props}
     >
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger
@@ -58,7 +57,7 @@ export function ComboFilter({
 
         <SelectContent>
           {safeOptions.map((opt) => (
-            <SelectItem key={opt.CODE} value={opt.NAME}>
+            <SelectItem key={opt.CODE} value={opt.CODE} className="text-xs">
               {opt.NAME}
             </SelectItem>
           ))}

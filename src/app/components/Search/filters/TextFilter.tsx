@@ -10,6 +10,7 @@ export type TextFilterProps = React.ComponentPropsWithoutRef<"div"> & {
   value: string;
   onChange: (value: string) => void;
   inputClassName?: string;
+  className?: string;
 };
 
 export function TextFilter({
@@ -22,7 +23,7 @@ export function TextFilter({
 }: TextFilterProps) {
   return (
     // ⭐ 부모가 준 폭을 무조건 100% 사용
-    <div className={cn("w-full min-w-0", className)} {...props}>
+    <div className={cn("w-full min-w-0", className)}>
       <div className="relative w-full">
         {/* 🔍 icon → 오른쪽 */}
         <Search className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />

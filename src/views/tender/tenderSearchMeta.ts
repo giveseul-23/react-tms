@@ -1,7 +1,7 @@
 // src/views/tender/tenderSearchMeta.ts
 export const TENDER_SEARCH_META = [
   {
-    key: "logiGroup",
+    key: "LGST_GRP_CD",
     type: "popup",
     label: "물류운영그룹",
     span: 5,
@@ -9,7 +9,7 @@ export const TENDER_SEARCH_META = [
     sqlId: "selectLogisticsgroupCodeName",
   },
   {
-    key: "deliveryDate",
+    key: "DLVRY_DT",
     type: "dateRange",
     label: "납품일",
     span: 5,
@@ -17,21 +17,21 @@ export const TENDER_SEARCH_META = [
     condition: "equal",
   },
   {
-    key: "fromLocName",
+    key: "FRM_LOC_NM",
     type: "text",
     label: "출발지명",
     span: 5,
     condition: "percent",
   },
   {
-    key: "route",
+    key: "ROUTH",
     type: "text",
     label: "경로",
     span: 5,
     condition: "percent",
   },
   {
-    key: "dispatchStatus",
+    key: "DSPCH_OP_STS",
     type: "combo",
     label: "배차진행상태",
     span: 5,
@@ -40,14 +40,14 @@ export const TENDER_SEARCH_META = [
     keyParam: "DSPCH_OP_STS",
   },
   {
-    key: "dispatchNo",
+    key: "DSPCH_NO",
     type: "text",
     label: "배차번호",
     span: 5,
     condition: "percent",
   },
   {
-    key: "carrier",
+    key: "CARR_CD",
     type: "popup",
     label: "운송협력사",
     span: 5,
@@ -55,28 +55,28 @@ export const TENDER_SEARCH_META = [
     sqlId: "selectCarrList",
   },
   {
-    key: "driverName",
+    key: "DRVR_NM",
     type: "text",
     label: "운전자명",
     span: 5,
     condition: "percent",
   },
   {
-    key: "vehicleNo",
+    key: "VEH_NO",
     type: "text",
     label: "차량번호",
     span: 5,
     condition: "percent",
   },
   {
-    key: "freightReservable",
+    key: "FREIGHT_YN",
     type: "checkbox",
     label: "운임예약가능여부",
     span: 5,
     condition: "equal",
   },
   {
-    key: "arrivalRequestDateTime",
+    key: "ARR_REQ_DTTM",
     type: "dateRange",
     label: "입차요청일시",
     span: 5,
@@ -84,7 +84,7 @@ export const TENDER_SEARCH_META = [
     condition: "equal",
   },
   {
-    key: "vehicleType",
+    key: "VEH_TP_CD",
     type: "popup",
     label: "차량유형",
     span: 5,
@@ -92,7 +92,7 @@ export const TENDER_SEARCH_META = [
     sqlId: "selectVehTpList",
   },
   {
-    key: "operationType",
+    key: "VEH_OP_TP",
     type: "combo",
     label: "운영형태",
     span: 5,

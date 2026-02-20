@@ -143,23 +143,26 @@ export function SearchFilters({
                     );
 
                   case "popup":
+                    const key = m.key.replace("_CD", "");
                     return (
                       <SearchFilter
                         {...common}
                         key={m.key}
-                        code={value[`${m.key}Code`]}
-                        name={value[`${m.key}Name`]}
+                        code={value[`${key}_CD`]}
+                        name={value[`${key}_NM`]}
+                        codeId={value[`${key}_CD`]}
+                        nameId={value[`${key}_NM`]}
                         sqlId={m.sqlId}
                         onChangeCode={(v: string) =>
                           onChange({
                             ...value,
-                            [`${m.key}NCodee`]: v,
+                            [`${key}_CD`]: v,
                           })
                         }
                         onChangeName={(v: string) =>
                           onChange({
                             ...value,
-                            [`${m.key}Name`]: v,
+                            [`${key}_NM`]: v,
                           })
                         }
                         onClickSearch={() =>
@@ -171,11 +174,12 @@ export function SearchFilters({
                                 onApply={(row: any) => {
                                   onChange({
                                     ...value,
-                                    [`${m.key}Code`]: row.CODE,
-                                    [`${m.key}Name`]: row.NAME,
+                                    [`${key}_CD`]: row.CODE,
+                                    [`${key}_NM`]: row.NAME,
                                   });
                                   closePopup();
                                 }}
+                                onClose={closePopup}
                               />
                             ),
                             width: "2xl",
