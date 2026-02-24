@@ -14,16 +14,29 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
 
   let returnStr = " AND ";
 
+  // 🔥 숫자 타입이면 콤마 제거
+  const normalizedValue =
+    dataType === "NUMBER" ? (value ?? "").replace(/,/g, "") : (value ?? "");
+
+  // 문자열일 때만 escape
   const safeValue =
-    typeof value === "string" ? value.replace(/'/g, "''") : (value ?? "");
+    dataType === "NUMBER"
+      ? normalizedValue
+      : normalizedValue.replace(/'/g, "''");
 
   switch (operator) {
     case "equal":
-      returnStr += `${key} = '${safeValue}'`;
+      returnStr +=
+        dataType === "NUMBER"
+          ? `${key} = ${safeValue}`
+          : `${key} = '${safeValue}'`;
       break;
 
     case "notEqual":
-      returnStr += `(${key} <> '${safeValue}' OR ${key} IS NULL)`;
+      returnStr +=
+        dataType === "NUMBER"
+          ? `(${key} <> ${safeValue} OR ${key} IS NULL)`
+          : `(${key} <> '${safeValue}' OR ${key} IS NULL)`;
       break;
 
     case "percent":
@@ -31,23 +44,35 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
       break;
 
     case "parentheses":
-      returnStr += `${key} IN ${buildInQuery(safeValue)}`;
+      returnStr += `${key} IN ${buildInQuery(safeValue, dataType)}`;
       break;
 
     case "chevronRight":
-      returnStr += `${key} > '${safeValue}'`;
+      returnStr +=
+        dataType === "NUMBER"
+          ? `${key} > ${safeValue}`
+          : `${key} > '${safeValue}'`;
       break;
 
     case "chevronLeft":
-      returnStr += `${key} < '${safeValue}'`;
+      returnStr +=
+        dataType === "NUMBER"
+          ? `${key} < ${safeValue}`
+          : `${key} < '${safeValue}'`;
       break;
 
     case "chevronLast":
-      returnStr += `${key} >= '${safeValue}'`;
+      returnStr +=
+        dataType === "NUMBER"
+          ? `${key} >= ${safeValue}`
+          : `${key} >= '${safeValue}'`;
       break;
 
     case "chevronFirst":
-      returnStr += `${key} <= '${safeValue}'`;
+      returnStr +=
+        dataType === "NUMBER"
+          ? `${key} <= ${safeValue}`
+          : `${key} <= '${safeValue}'`;
       break;
 
     case "notUsed":
@@ -61,13 +86,21 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
   return returnStr;
 }
 
-function buildInQuery(val: string): string {
+function buildInQuery(val: string, dataType?: string): string {
   if (!val) return "()";
 
   const tokens = val.split(",");
 
   const values = tokens
-    .map((t) => `'${t.trim().replace(/'/g, "''")}'`)
+    .map((t) => {
+      const trimmed = t.trim().replace(/'/g, "''");
+
+      if (dataType === "NUMBER") {
+        return trimmed.replace(/,/g, ""); // 🔥 숫자 콤마 제거 + 따옴표 없음
+      }
+
+      return `'${trimmed}'`;
+    })
     .join(",");
 
   return `(${values})`;

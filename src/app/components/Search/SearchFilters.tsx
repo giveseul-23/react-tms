@@ -162,13 +162,10 @@ export function SearchFilters({
                   requaluired: m.requaluired,
                   condition: m.condition ?? "equal",
                   dataType: m.dataType,
-                  onConditionChange: (op: string) =>
-                    updateCondition(
-                      m.key,
-                      condition?.value ?? "",
-                      op,
-                      m.dataType,
-                    ),
+                  onConditionChange: (op: string) => {
+                    const currentValue = getCondition(m.key)?.value ?? "";
+                    updateCondition(m.key, currentValue, op, m.dataType);
+                  },
                 };
 
                 switch (m.type) {
