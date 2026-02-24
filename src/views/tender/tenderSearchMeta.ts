@@ -7,6 +7,7 @@ export const TENDER_SEARCH_META = [
     span: 5,
     condition: "equal",
     sqlId: "selectLogisticsgroupCodeName",
+    dataType: "STRING",
   },
   {
     key: "DLVRY_DT",
@@ -15,6 +16,7 @@ export const TENDER_SEARCH_META = [
     span: 5,
     required: true,
     condition: "equal",
+    dataType: "DATE",
   },
   {
     key: "FRM_LOC_NM",
@@ -22,6 +24,7 @@ export const TENDER_SEARCH_META = [
     label: "출발지명",
     span: 5,
     condition: "percent",
+    dataType: "STRING",
   },
   {
     key: "ROUTH",
@@ -29,6 +32,7 @@ export const TENDER_SEARCH_META = [
     label: "경로",
     span: 5,
     condition: "percent",
+    dataType: "STRING",
   },
   {
     key: "DSPCH_OP_STS",
@@ -38,6 +42,7 @@ export const TENDER_SEARCH_META = [
     condition: "chevronLast",
     sqlProp: "CODE",
     keyParam: "DSPCH_OP_STS",
+    dataType: "STRING",
   },
   {
     key: "DSPCH_NO",
@@ -45,6 +50,7 @@ export const TENDER_SEARCH_META = [
     label: "배차번호",
     span: 5,
     condition: "percent",
+    dataType: "NUMBER",
   },
   {
     key: "CARR_CD",
@@ -53,6 +59,7 @@ export const TENDER_SEARCH_META = [
     span: 5,
     condition: "equal",
     sqlId: "selectCarrList",
+    dataType: "STRING",
   },
   {
     key: "DRVR_NM",
@@ -60,6 +67,7 @@ export const TENDER_SEARCH_META = [
     label: "운전자명",
     span: 5,
     condition: "percent",
+    dataType: "STRING",
   },
   {
     key: "VEH_NO",
@@ -67,6 +75,7 @@ export const TENDER_SEARCH_META = [
     label: "차량번호",
     span: 5,
     condition: "percent",
+    dataType: "STRING",
   },
   {
     key: "FREIGHT_YN",
@@ -74,6 +83,7 @@ export const TENDER_SEARCH_META = [
     label: "운임예약가능여부",
     span: 5,
     condition: "equal",
+    dataType: "STRING",
   },
   {
     key: "ARR_REQ_DTTM",
@@ -82,6 +92,7 @@ export const TENDER_SEARCH_META = [
     span: 5,
     mode: "single",
     condition: "equal",
+    dataType: "DATE",
   },
   {
     key: "VEH_TP_CD",
@@ -90,6 +101,7 @@ export const TENDER_SEARCH_META = [
     span: 5,
     condition: "equal",
     sqlId: "selectVehTpList",
+    dataType: "STRING",
   },
   {
     key: "VEH_OP_TP",
@@ -99,5 +111,6 @@ export const TENDER_SEARCH_META = [
     condition: "equal",
     sqlProp: "CODE",
     keyParam: "VEH_OP_TP",
+    dataType: "STRING",
   },
 ] as const;

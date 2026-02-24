@@ -31,6 +31,7 @@ type SearchMeta = {
   requaluired?: boolean;
   granularity?: string;
   options?: { value: string; label: string }[];
+  dataType: string;
 };
 
 export function SearchFilters({
@@ -59,7 +60,7 @@ export function SearchFilters({
       key: string,
       newValue: string,
       operator: keyof typeof CONDITION_ICON_MAP,
-      dataType: "DATE" | "STRING" | "NUMBER" = "STRING",
+      dataType: string,
     ) => {
       onChange((prev) => {
         const existingIndex = prev.findIndex((c) => c.key === key);
@@ -160,12 +161,13 @@ export function SearchFilters({
                   granularity: m.granularity,
                   requaluired: m.requaluired,
                   condition: m.condition ?? "equal",
+                  dataType: m.dataType,
                   onConditionChange: (op: string) =>
                     updateCondition(
                       m.key,
                       condition?.value ?? "",
                       op,
-                      m.type === "dateRange" ? "DATE" : "STRING",
+                      m.dataType,
                     ),
                 };
 
@@ -184,7 +186,7 @@ export function SearchFilters({
                             m.key,
                             v,
                             m.condition ?? "equal",
-                            "STRING",
+                            m.dataType ?? "STRING",
                           )
                         }
                       />
@@ -203,7 +205,7 @@ export function SearchFilters({
                             `${m.key}From`,
                             v,
                             m.condition ?? "equal",
-                            "DATE",
+                            m.dataType ?? "STRING",
                           )
                         }
                         onChangeTo={(v: string) =>
@@ -211,7 +213,7 @@ export function SearchFilters({
                             `${m.key}To`,
                             v,
                             m.condition ?? "equal",
-                            "DATE",
+                            m.dataType ?? "STRING",
                           )
                         }
                       />
@@ -231,7 +233,7 @@ export function SearchFilters({
                             m.key,
                             checked ? "Y" : "",
                             "equal",
-                            "STRING",
+                            m.dataType ?? "STRING",
                           )
                         }
                       />
@@ -259,13 +261,13 @@ export function SearchFilters({
                                     `${baseKey}_CD`,
                                     row.CODE,
                                     "equal",
-                                    "STRING",
+                                    m.dataType ?? "STRING",
                                   );
                                   updateCondition(
                                     `${baseKey}_NM`,
                                     row.NAME,
                                     "equal",
-                                    "STRING",
+                                    m.dataType ?? "STRING",
                                   );
                                   closePopup();
                                 }}
