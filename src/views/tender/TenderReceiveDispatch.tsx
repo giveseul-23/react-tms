@@ -13,6 +13,8 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { tenderApi } from "@/app/services/tender/tenderApi";
 
+import { SearchCondition } from "@/features/search/search.builder";
+
 type LayoutType = "side" | "vertical";
 
 function CntrSubGrid() {
@@ -174,7 +176,7 @@ const actions1 = [
 
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
-  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [filters, setFilters] = useState<SearchCondition[]>([]);
   const [layout, setLayout] = useState<LayoutType>("side");
   const [headerRowData, setHeaderRowData] = useState([]);
   const [subRowData, setSubRowData] = useState([]);

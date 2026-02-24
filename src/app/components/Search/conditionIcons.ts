@@ -13,7 +13,7 @@ import {
 /**
  * condition 문자열 → 아이콘 컴포넌트 매핑
  */
-const CONDITION_ICON_MAP: Record<string, React.ElementType> = {
+export const CONDITION_ICON_MAP: Record<string, React.ElementType> = {
   equal: Equal,
   notEqual: EqualNot,
   percent: Percent,

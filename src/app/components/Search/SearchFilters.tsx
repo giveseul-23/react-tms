@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Search, Filter, RefreshCw, ChevronDown } from "lucide-react";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { Button } from "@/app/components/ui/button";
@@ -13,6 +13,12 @@ import {
 
 import { SearchFilter } from "@/app/components/search/SearchFilter";
 import { CommonPopup } from "@/views/common/CommonPopup";
+import {
+  buildSearchCondition,
+  SearchCondition,
+} from "@/features/search/search.builder";
+
+import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
 
 type SearchMeta = {
   key: string;
@@ -22,7 +28,7 @@ type SearchMeta = {
   mode?: string;
   sqlId?: string;
   condition?: string;
-  required?: boolean;
+  requaluired?: boolean;
   granularity?: string;
   options?: { value: string; label: string }[];
 };
@@ -33,44 +39,80 @@ export function SearchFilters({
   onChange,
 }: {
   meta: readonly SearchMeta[];
-  value: Record<string, any>;
-  onChange: (v: Record<string, any>) => void;
+  value: SearchCondition[];
+  onChange: React.Dispatch<React.SetStateAction<SearchCondition[]>>;
 }) {
-  const initialState = useMemo(() => {
-    const s: Record<string, any> = {};
-    meta.forEach((m) => {
-      if (m.type === "dateRange") {
-        s[`${m.key}From`] = "";
-        s[`${m.key}To`] = "";
-      } else if (m.type === "popup") {
-        s[`${m.key}Code`] = "";
-        s[`${m.key}Name`] = "";
-      } else if (m.type === "checkbox") {
-        s[m.key] = false;
-      } else {
-        s[m.key] = "";
-      }
-      s[`${m.key}Condition`] = m.condition ?? "equal";
-    });
-    return s;
-  }, [meta]);
-
   const { openPopup, closePopup } = usePopup();
-
   const [open, setOpen] = useState(false);
 
-  const handleSearch = () => {
-    console.log("검색 payload:", value);
-  };
+  /* ----------------------------- */
+  /* Helpers */
+  /* ----------------------------- */
+
+  const getCondition = useCallback(
+    (key: string) => value.find((c) => c.key === key),
+    [value],
+  );
+
+  const updateCondition = useCallback(
+    (
+      key: string,
+      newValue: string,
+      operator: keyof typeof CONDITION_ICON_MAP,
+      dataType: "DATE" | "STRING" | "NUMBER" = "STRING",
+    ) => {
+      onChange((prev) => {
+        const existingIndex = prev.findIndex((c) => c.key === key);
+
+        if (!newValue?.toString().trim()) {
+          return prev.filter((c) => c.key !== key);
+        }
+
+        if (existingIndex !== -1) {
+          const copy = [...prev];
+          copy[existingIndex] = {
+            ...copy[existingIndex],
+            operator,
+            value: newValue,
+          };
+          return copy;
+        }
+
+        return [
+          ...prev,
+          {
+            key,
+            operator,
+            dataType,
+            value: newValue,
+          },
+        ];
+      });
+    },
+    [onChange],
+  );
+
+  /* ----------------------------- */
+  /* Actions */
+  /* ----------------------------- */
 
   const handleReset = () => {
-    onChange(initialState);
+    onChange([]);
   };
+
+  const handleSearch = () => {
+    const whereClause = value.map((v) => buildSearchCondition(v)).join("");
+
+    console.log("검색 SQL WHERE:", whereClause);
+  };
+
+  /* ----------------------------- */
+  /* Render */
+  /* ----------------------------- */
 
   return (
     <Card className="shadow-sm">
       <Collapsible open={open} onOpenChange={setOpen}>
-        {/* Header */}
         <div className="flex items-center justify-between px-3 py-1.5 border-b">
           <div className="flex items-center gap-1.5">
             <Filter className="w-4 h-4 text-[rgb(var(--primary))]" />
@@ -90,7 +132,6 @@ export function SearchFilters({
         </div>
 
         <CollapsibleContent>
-          {/* 조회조건 영역 */}
           <CardContent
             className="
             p-2
@@ -108,6 +149,8 @@ export function SearchFilters({
           >
             <div className="grid grid-cols-20 gap-x-2 gap-y-1">
               {meta.map((m) => {
+                const condition = getCondition(m.key);
+
                 const common = {
                   key: m.key,
                   type: m.type,
@@ -115,100 +158,66 @@ export function SearchFilters({
                   span: m.span ?? 1,
                   mode: m.mode,
                   granularity: m.granularity,
-                  required: m.required,
-                  condition: value[`${m.key}Condition`],
-                  onConditionChange: (v: string) =>
-                    onChange({
-                      ...value,
-                      [m.key]: v,
-                    }),
+                  requaluired: m.requaluired,
+                  condition: m.condition ?? "equal",
+                  onConditionChange: (op: string) =>
+                    updateCondition(
+                      m.key,
+                      condition?.value ?? "",
+                      op,
+                      m.type === "dateRange" ? "DATE" : "STRING",
+                    ),
                 };
 
                 switch (m.type) {
+                  /* ---------- TEXT / COMBO ---------- */
                   case "text":
                   case "combo":
                     return (
                       <SearchFilter
                         {...common}
                         key={m.key}
-                        value={value[m.key]}
+                        value={condition?.value ?? ""}
                         options={m.options}
                         onChange={(v: string) =>
-                          onChange({
-                            ...value,
-                            [m.key]: v,
-                          })
+                          updateCondition(
+                            m.key,
+                            v,
+                            m.condition ?? "equal",
+                            "STRING",
+                          )
                         }
                       />
                     );
 
-                  case "popup":
-                    const key = m.key.replace("_CD", "");
-                    return (
-                      <SearchFilter
-                        {...common}
-                        key={m.key}
-                        code={value[`${key}_CD`]}
-                        name={value[`${key}_NM`]}
-                        codeId={value[`${key}_CD`]}
-                        nameId={value[`${key}_NM`]}
-                        sqlId={m.sqlId}
-                        onChangeCode={(v: string) =>
-                          onChange({
-                            ...value,
-                            [`${key}_CD`]: v,
-                          })
-                        }
-                        onChangeName={(v: string) =>
-                          onChange({
-                            ...value,
-                            [`${key}_NM`]: v,
-                          })
-                        }
-                        onClickSearch={() =>
-                          openPopup({
-                            title: m.label,
-                            content: (
-                              <CommonPopup
-                                sqlId={m.sqlId}
-                                onApply={(row: any) => {
-                                  onChange({
-                                    ...value,
-                                    [`${key}_CD`]: row.CODE,
-                                    [`${key}_NM`]: row.NAME,
-                                  });
-                                  closePopup();
-                                }}
-                                onClose={closePopup}
-                              />
-                            ),
-                            width: "2xl",
-                          })
-                        }
-                      />
-                    );
-
+                  /* ---------- DATE RANGE ---------- */
                   case "dateRange":
                     return (
                       <SearchFilter
                         {...common}
                         key={m.key}
-                        fromValue={value[`${m.key}From`]}
-                        toValue={value[`${m.key}To`]}
+                        fromValue={getCondition(`${m.key}From`)?.value ?? ""}
+                        toValue={getCondition(`${m.key}To`)?.value ?? ""}
                         onChangeFrom={(v: string) =>
-                          onChange({
-                            ...value,
-                            [`${m.key}From`]: v,
-                          })
+                          updateCondition(
+                            `${m.key}From`,
+                            v,
+                            m.condition ?? "equal",
+                            "DATE",
+                          )
                         }
                         onChangeTo={(v: string) =>
-                          onChange({
-                            ...value,
-                            [`${m.key}To`]: v,
-                          })
+                          updateCondition(
+                            `${m.key}To`,
+                            v,
+                            m.condition ?? "equal",
+                            "DATE",
+                          )
                         }
                       />
                     );
+
+                  /* ---------- CHECKBOX ---------- */
                   case "checkbox":
                     return (
                       <SearchFilter
@@ -216,11 +225,54 @@ export function SearchFilters({
                         key={m.key}
                         type="checkbox"
                         id={m.key}
-                        checked={Boolean(value[m.key])}
-                        onCheckedChange={(checked: any) =>
-                          onChange({
-                            ...value,
-                            [m.key]: checked,
+                        checked={Boolean(condition?.value)}
+                        onCheckedChange={(checked: boolean) =>
+                          updateCondition(
+                            m.key,
+                            checked ? "Y" : "",
+                            "equal",
+                            "STRING",
+                          )
+                        }
+                      />
+                    );
+
+                  /* ---------- POPUP ---------- */
+                  case "popup":
+                    const baseKey = m.key.replace("_CD", "");
+
+                    return (
+                      <SearchFilter
+                        {...common}
+                        key={m.key}
+                        code={getCondition(`${baseKey}_CD`)?.value ?? ""}
+                        name={getCondition(`${baseKey}_NM`)?.value ?? ""}
+                        sqlId={m.sqlId}
+                        onClickSearch={() =>
+                          openPopup({
+                            title: m.label,
+                            content: (
+                              <CommonPopup
+                                sqlId={m.sqlId}
+                                onApply={(row: any) => {
+                                  updateCondition(
+                                    `${baseKey}_CD`,
+                                    row.CODE,
+                                    "equal",
+                                    "STRING",
+                                  );
+                                  updateCondition(
+                                    `${baseKey}_NM`,
+                                    row.NAME,
+                                    "equal",
+                                    "STRING",
+                                  );
+                                  closePopup();
+                                }}
+                                onClose={closePopup}
+                              />
+                            ),
+                            width: "2xl",
                           })
                         }
                       />
@@ -233,7 +285,6 @@ export function SearchFilters({
             </div>
           </CardContent>
 
-          {/* Footer */}
           <div className="flex justify-between px-2 py-1 border-t">
             <Button variant="outline" size="xs" onClick={handleReset}>
               <RefreshCw className="w-3 h-3" />
