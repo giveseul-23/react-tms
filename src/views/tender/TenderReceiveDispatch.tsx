@@ -443,7 +443,7 @@ export default function TenderReceiveDispatch() {
                 actions={actions1}
                 pagination
                 pageSize={20}
-                onRowSelected={(row: any) => {
+                onRowClicked={(row: any) => {
                   tenderApi
                     .getDispatchStopList({
                       DSPCH_NO: row.DSPCH_NO,

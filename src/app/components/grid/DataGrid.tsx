@@ -37,6 +37,7 @@ type DataGridProps<TRow> = {
   pageSize?: number;
 
   onRowSelected?: (row: TRow) => void;
+  onRowClicked?: (row: TRow) => void;
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
 
   disableAutoSize?: boolean;
@@ -54,6 +55,7 @@ export default function DataGrid<TRow>({
   onRowSelected,
   renderRightGrid,
   disableAutoSize,
+  onRowClicked,
 }: DataGridProps<TRow>) {
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
@@ -110,7 +112,7 @@ export default function DataGrid<TRow>({
   const rowSelection = useMemo(
     () => ({
       mode: "multiRow" as const,
-      enableClickSelection: true,
+      enableClickSelection: false, //row 선택시 체크 못하게끔 막음(api 호출때문)
       enableSelectionWithoutKeys: true,
     }),
     [],
@@ -199,6 +201,26 @@ export default function DataGrid<TRow>({
                         onRowSelected?.(e.data);
                       }
                     }}
+                    onRowClicked={(e) => {
+                      const target = e.event?.target as HTMLElement;
+
+                      // checkbox 클릭 차단
+                      if (
+                        target?.closest(".ag-selection-checkbox") ||
+                        target?.closest(".ag-checkbox") ||
+                        target?.tagName === "INPUT"
+                      ) {
+                        return;
+                      }
+
+                      if (e.event?.shiftKey) {
+                        return;
+                      }
+
+                      if (!e.data) return;
+
+                      onRowClicked?.(e.data);
+                    }}
                   />
                 </div>
               </div>
@@ -243,13 +265,32 @@ export default function DataGrid<TRow>({
               rowHeight={22}
               pagination={pagination}
               paginationPageSize={pageSize}
-              paginationPageSizeSelector={[10, 20, 50, 100]}
               rowSelection={rowSelection as any}
               // onGridReady={handleGridReady}
               onRowSelected={(e) => {
                 if (e.type === "rowSelected" && e.data) {
                   onRowSelected?.(e.data);
                 }
+              }}
+              onRowClicked={(e) => {
+                const target = e.event?.target as HTMLElement;
+
+                // checkbox 클릭 차단
+                if (
+                  target?.closest(".ag-selection-checkbox") ||
+                  target?.closest(".ag-checkbox") ||
+                  target?.tagName === "INPUT"
+                ) {
+                  return;
+                }
+
+                if (e.event?.shiftKey) {
+                  return;
+                }
+
+                if (!e.data) return;
+
+                onRowClicked?.(e.data);
               }}
             />
           </div>
