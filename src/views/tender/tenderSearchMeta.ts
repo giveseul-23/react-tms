@@ -77,14 +77,14 @@ export const TENDER_SEARCH_META = [
     condition: "percent",
     dataType: "STRING",
   },
-  {
-    key: "FREIGHT_YN",
-    type: "checkbox",
-    label: "운임예약가능여부",
-    span: 5,
-    condition: "equal",
-    dataType: "STRING",
-  },
+  // {
+  //   key: "FREIGHT_YN",
+  //   type: "checkbox",
+  //   label: "운임예약가능여부",
+  //   span: 5,
+  //   condition: "equal",
+  //   dataType: "STRING",
+  // },
   // {
   //   key: "ARR_REQ_DTTM",
   //   type: "dateRange",

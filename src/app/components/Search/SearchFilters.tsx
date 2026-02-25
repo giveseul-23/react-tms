@@ -37,17 +37,17 @@ type SearchMeta = {
 
 export function SearchFilters({
   meta,
-  value,
-  onChange,
   onSearch,
 }: {
   meta: readonly SearchMeta[];
-  value: SearchCondition[];
-  onChange: React.Dispatch<React.SetStateAction<SearchCondition[]>>;
   onSearch: React.Dispatch<React.SetStateAction<[]>>;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
+
+  const [searchState, setSearchState] = useState<
+    Record<string, SearchCondition>
+  >({});
 
   const getToday = () => {
     const d = new Date();
@@ -57,122 +57,82 @@ export function SearchFilters({
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  const buildInitialSearchState = () => {
+    const today = getToday();
+    const initial: Record<string, SearchCondition> = {};
+
+    meta.forEach((m) => {
+      if (m.type !== "dateRange") return;
+
+      if (m.mode === "single") {
+        initial[m.key] = {
+          key: m.key,
+          operator: m.condition ?? "equal",
+          dataType: m.dataType,
+          value: today,
+        };
+      } else {
+        const fromKey = `${m.key}_FRM`;
+        const toKey = `${m.key}_TO`;
+
+        initial[fromKey] = {
+          key: fromKey,
+          operator: m.condition ?? "equal",
+          dataType: m.dataType,
+          value: today,
+        };
+
+        initial[toKey] = {
+          key: toKey,
+          operator: m.condition ?? "equal",
+          dataType: m.dataType,
+          value: today,
+        };
+      }
+    });
+
+    return initial;
+  };
+
   useEffect(() => {
     if (!meta?.length) return;
+    setSearchState(buildInitialSearchState());
+  }, [meta]);
 
-    const today = getToday();
+  const getCondition = (key: string) => searchState[key];
 
-    onChange((prev) => {
-      const next = [...prev];
-      let changed = false;
-
-      meta.forEach((m) => {
-        if (m.type !== "dateRange") return;
-
-        // 🔹 single 모드
-        if (m.mode === "single") {
-          const key = m.key;
-
-          if (!next.some((c) => c.key === key)) {
-            next.push({
-              key,
-              operator: m.condition ?? "equal",
-              dataType: m.dataType,
-              value: today,
-            });
-            changed = true;
-          }
-        }
-
-        // 🔹 range 모드
-        else {
-          const fromKey = `${m.key}_FRM`;
-          const toKey = `${m.key}_TO`;
-
-          if (!next.some((c) => c.key === fromKey)) {
-            next.push({
-              key: fromKey,
-              operator: m.condition ?? "equal",
-              dataType: m.dataType,
-              value: today,
-            });
-            changed = true;
-          }
-
-          if (!next.some((c) => c.key === toKey)) {
-            next.push({
-              key: toKey,
-              operator: m.condition ?? "equal",
-              dataType: m.dataType,
-              value: today,
-            });
-            changed = true;
-          }
-        }
-      });
-
-      // 🔥 아무 변경 없으면 기존 상태 유지 (불필요한 렌더 방지)
-      return changed ? next : prev;
-    });
-  }, [meta, onChange]);
-
-  const getCondition = useCallback(
-    (key: string) => value.find((c) => c.key === key),
-    [value],
-  );
-
-  const updateCondition = useCallback(
-    (
-      key: string,
-      newValue: string,
-      operator: keyof typeof CONDITION_ICON_MAP,
-      dataType: string,
-    ) => {
-      onChange((prev) => {
-        const existingIndex = prev.findIndex((c) => c.key === key);
-
-        // 기존 항목이 있다면 수정
-        if (existingIndex !== -1) {
-          const copy = [...prev];
-          copy[existingIndex] = {
-            ...copy[existingIndex],
-            operator,
-            value: newValue,
-          };
-          return copy;
-        }
-
-        // 값이 없고 operator만 바뀐 경우라도 생성
-        return [
-          ...prev,
-          {
-            key,
-            operator,
-            dataType,
-            value: newValue ?? "",
-          },
-        ];
-      });
-    },
-    [onChange],
-  );
-
-  /* ----------------------------- */
-  /* Actions */
-  /* ----------------------------- */
+  const updateCondition = (
+    key: string,
+    newValue: string,
+    operator: keyof typeof CONDITION_ICON_MAP,
+    dataType: string,
+  ) => {
+    setSearchState((prev) => ({
+      ...prev,
+      [key]: {
+        key,
+        operator,
+        dataType,
+        value: newValue ?? "",
+      },
+    }));
+  };
 
   const handleReset = () => {
-    onChange([]);
+    setSearchState(buildInitialSearchState());
   };
 
   const handleSearch = () => {
-    const whereClause = value.map((v) => buildSearchCondition(v)).join("");
+    const whereClause = Object.values(searchState)
+      .map((v) => buildSearchCondition(v))
+      .join("");
+
     const userId = sessionStorage.getItem("userId");
 
     tenderApi
       .getDispatchList({
         sesUserId: userId,
-        userId, // 필요한 값만 payload로
+        userId,
         ACCESS_TOKEN: sessionStorage.getItem("ACCESS_TOKEN"),
         DYNAMIC_QUERY: whereClause,
         MENU_CD: "test",
@@ -184,10 +144,6 @@ export function SearchFilters({
         console.error(err);
       });
   };
-
-  /* ----------------------------- */
-  /* Render */
-  /* ----------------------------- */
 
   return (
     <Card className="shadow-sm">
