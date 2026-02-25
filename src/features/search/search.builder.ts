@@ -8,21 +8,38 @@ export type SearchCondition = {
 };
 
 export function buildSearchCondition(searchCon: SearchCondition): string {
-  const { key, operator, dataType, value } = searchCon;
+  let { key, operator, dataType, value } = searchCon;
 
   if (!value && operator !== "notUsed") return "";
 
   let returnStr = " AND ";
 
-  // 🔥 숫자 타입이면 콤마 제거
   const normalizedValue =
     dataType === "NUMBER" ? (value ?? "").replace(/,/g, "") : (value ?? "");
 
-  // 문자열일 때만 escape
   const safeValue =
     dataType === "NUMBER"
       ? normalizedValue
       : normalizedValue.replace(/'/g, "''");
+
+  // 🔥 dateRange 처리 (_FRM / _TO)
+  if (key.endsWith("_FRM")) {
+    const baseKey = key.replace("_FRM", "");
+    returnStr +=
+      dataType === "NUMBER"
+        ? `${baseKey} >= TO_DATE(${safeValue}, 'YYYY-MM-DD')`
+        : `${baseKey} >= TO_DATE('${safeValue}', 'YYYY-MM-DD')`;
+    return returnStr;
+  }
+
+  if (key.endsWith("_TO")) {
+    const baseKey = key.replace("_TO", "");
+    returnStr +=
+      dataType === "NUMBER"
+        ? `${baseKey} <= TO_DATE(${safeValue}, 'YYYY-MM-DD')`
+        : `${baseKey} <= TO_DATE('${safeValue}', 'YYYY-MM-DD')`;
+    return returnStr;
+  }
 
   switch (operator) {
     case "equal":

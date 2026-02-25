@@ -180,23 +180,6 @@ export default function TenderReceiveDispatch() {
   const [layout, setLayout] = useState<LayoutType>("side");
   const [headerRowData, setHeaderRowData] = useState([]);
   const [subRowData, setSubRowData] = useState([]);
-
-  const onSearch = async () => {
-    try {
-      const param = {
-        ...filters,
-        userId: sessionStorage.getItem("userId"),
-        ACCESS_TOKEN: sessionStorage.getItem("ACCESS_TOKEN"),
-        REFRESH_TOKEN: sessionStorage.getItem("REFRESH_TOKEN"),
-      };
-      const res = await tenderApi.getDispatchList(param);
-
-      setHeaderRowData(res.data.data);
-    } catch (e) {
-      alert("error");
-    }
-  };
-
   if (loading) {
     return <Skeleton className="h-24" />;
   }
@@ -204,7 +187,12 @@ export default function TenderReceiveDispatch() {
   return (
     <div className="flex flex-col gap-3 h-full min-h-0 min-w-0">
       {/* 조회 조건 */}
-      <SearchFilters meta={meta} value={filters} onChange={setFilters} />
+      <SearchFilters
+        meta={meta}
+        value={filters}
+        onChange={setFilters}
+        onSearch={setHeaderRowData}
+      />
 
       {/* layout toggle */}
       <div className="shrink-0 flex items-center justify-between text-[13px] text-[rgb(var(--fg))]">

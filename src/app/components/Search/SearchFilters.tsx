@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Search, Filter, RefreshCw, ChevronDown } from "lucide-react";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { Button } from "@/app/components/ui/button";
@@ -19,6 +19,7 @@ import {
 } from "@/features/search/search.builder";
 
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
+import { tenderApi } from "@/app/services/tender/tenderApi";
 
 type SearchMeta = {
   key: string;
@@ -38,17 +39,82 @@ export function SearchFilters({
   meta,
   value,
   onChange,
+  onSearch,
 }: {
   meta: readonly SearchMeta[];
   value: SearchCondition[];
   onChange: React.Dispatch<React.SetStateAction<SearchCondition[]>>;
+  onSearch: React.Dispatch<React.SetStateAction<[]>>;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
 
-  /* ----------------------------- */
-  /* Helpers */
-  /* ----------------------------- */
+  const getToday = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  useEffect(() => {
+    if (!meta?.length) return;
+
+    const today = getToday();
+
+    onChange((prev) => {
+      const next = [...prev];
+      let changed = false;
+
+      meta.forEach((m) => {
+        if (m.type !== "dateRange") return;
+
+        // 🔹 single 모드
+        if (m.mode === "single") {
+          const key = m.key;
+
+          if (!next.some((c) => c.key === key)) {
+            next.push({
+              key,
+              operator: m.condition ?? "equal",
+              dataType: m.dataType,
+              value: today,
+            });
+            changed = true;
+          }
+        }
+
+        // 🔹 range 모드
+        else {
+          const fromKey = `${m.key}_FRM`;
+          const toKey = `${m.key}_TO`;
+
+          if (!next.some((c) => c.key === fromKey)) {
+            next.push({
+              key: fromKey,
+              operator: m.condition ?? "equal",
+              dataType: m.dataType,
+              value: today,
+            });
+            changed = true;
+          }
+
+          if (!next.some((c) => c.key === toKey)) {
+            next.push({
+              key: toKey,
+              operator: m.condition ?? "equal",
+              dataType: m.dataType,
+              value: today,
+            });
+            changed = true;
+          }
+        }
+      });
+
+      // 🔥 아무 변경 없으면 기존 상태 유지 (불필요한 렌더 방지)
+      return changed ? next : prev;
+    });
+  }, [meta, onChange]);
 
   const getCondition = useCallback(
     (key: string) => value.find((c) => c.key === key),
@@ -65,10 +131,7 @@ export function SearchFilters({
       onChange((prev) => {
         const existingIndex = prev.findIndex((c) => c.key === key);
 
-        if (!newValue?.toString().trim()) {
-          return prev.filter((c) => c.key !== key);
-        }
-
+        // 기존 항목이 있다면 수정
         if (existingIndex !== -1) {
           const copy = [...prev];
           copy[existingIndex] = {
@@ -79,13 +142,14 @@ export function SearchFilters({
           return copy;
         }
 
+        // 값이 없고 operator만 바뀐 경우라도 생성
         return [
           ...prev,
           {
             key,
             operator,
             dataType,
-            value: newValue,
+            value: newValue ?? "",
           },
         ];
       });
@@ -103,8 +167,22 @@ export function SearchFilters({
 
   const handleSearch = () => {
     const whereClause = value.map((v) => buildSearchCondition(v)).join("");
+    const userId = sessionStorage.getItem("userId");
 
-    console.log("검색 SQL WHERE:", whereClause);
+    tenderApi
+      .getDispatchList({
+        sesUserId: userId,
+        userId, // 필요한 값만 payload로
+        ACCESS_TOKEN: sessionStorage.getItem("ACCESS_TOKEN"),
+        DYNAMIC_QUERY: whereClause,
+        MENU_CD: "test",
+      })
+      .then((res: any) => {
+        onSearch(res.data.result);
+      })
+      .catch((err: any) => {
+        console.error(err);
+      });
   };
 
   /* ----------------------------- */
@@ -160,7 +238,8 @@ export function SearchFilters({
                   mode: m.mode,
                   granularity: m.granularity,
                   requaluired: m.requaluired,
-                  condition: m.condition ?? "equal",
+                  condition:
+                    getCondition(m.key)?.operator ?? m.condition ?? "equal",
                   dataType: m.dataType,
                   onConditionChange: (op: string) => {
                     const currentValue = getCondition(m.key)?.value ?? "";
@@ -191,15 +270,33 @@ export function SearchFilters({
 
                   /* ---------- DATE RANGE ---------- */
                   case "dateRange":
+                    if (m.mode === "single") {
+                      return (
+                        <SearchFilter
+                          {...common}
+                          key={m.key}
+                          value={getCondition(m.key)?.value ?? ""}
+                          onChange={(v: string) =>
+                            updateCondition(
+                              m.key,
+                              v,
+                              m.condition ?? "equal",
+                              m.dataType ?? "STRING",
+                            )
+                          }
+                        />
+                      );
+                    }
+
                     return (
                       <SearchFilter
                         {...common}
                         key={m.key}
-                        fromValue={getCondition(`${m.key}From`)?.value ?? ""}
-                        toValue={getCondition(`${m.key}To`)?.value ?? ""}
+                        fromValue={getCondition(`${m.key}_FRM`)?.value ?? ""}
+                        toValue={getCondition(`${m.key}_TO`)?.value ?? ""}
                         onChangeFrom={(v: string) =>
                           updateCondition(
-                            `${m.key}From`,
+                            `${m.key}_FRM`,
                             v,
                             m.condition ?? "equal",
                             m.dataType ?? "STRING",
@@ -207,7 +304,7 @@ export function SearchFilters({
                         }
                         onChangeTo={(v: string) =>
                           updateCondition(
-                            `${m.key}To`,
+                            `${m.key}_TO`,
                             v,
                             m.condition ?? "equal",
                             m.dataType ?? "STRING",
