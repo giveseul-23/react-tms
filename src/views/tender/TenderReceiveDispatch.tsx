@@ -179,7 +179,9 @@ export default function TenderReceiveDispatch() {
   const [filters, setFilters] = useState<SearchCondition[]>([]);
   const [layout, setLayout] = useState<LayoutType>("side");
   const [headerRowData, setHeaderRowData] = useState([]);
-  const [subRowData, setSubRowData] = useState([]);
+  const [subStopRowData, setSubStopRowData] = useState([]);
+  const [subSmsHisRowData, setSubSmsHisRowData] = useState([]);
+  const [subApSetlRowData, setSubApSetlRowData] = useState([]);
   if (loading) {
     return <Skeleton className="h-24" />;
   }
@@ -441,6 +443,40 @@ export default function TenderReceiveDispatch() {
                 actions={actions1}
                 pagination
                 pageSize={20}
+                onRowSelected={(row: any) => {
+                  tenderApi
+                    .getDispatchStopList({
+                      DSPCH_NO: row.DSPCH_NO,
+                    })
+                    .then((res: any) => {
+                      setSubStopRowData(res.data.result);
+                    })
+                    .catch((err: any) => {
+                      console.error(err);
+                    });
+
+                  tenderApi
+                    .getDispatchSmsHisList({
+                      DSPCH_NO: row.DSPCH_NO,
+                    })
+                    .then((res: any) => {
+                      setSubSmsHisRowData(res.data.result);
+                    })
+                    .catch((err: any) => {
+                      console.error(err);
+                    });
+
+                  tenderApi
+                    .getDispatchApSetlList({
+                      DSPCH_NO: row.DSPCH_NO,
+                    })
+                    .then((res: any) => {
+                      setSubApSetlRowData(res.data.result);
+                    })
+                    .catch((err: any) => {
+                      console.error(err);
+                    });
+                }}
               />
             </div>
           </Panel>
@@ -461,78 +497,86 @@ export default function TenderReceiveDispatch() {
                   { key: "STOP", label: "경유처" },
                   { key: "SMS_HIS", label: "SMS전송이력" },
                   { key: "AP_SETL", label: "운송비내역" },
-                  { key: "CNTR", label: "적재정보" },
-                  { key: "RETURN", label: "회수수량" },
                 ]}
                 presets={{
                   STOP: {
                     columnDefs: [
                       { headerName: "No" },
                       { headerName: "배차번호", field: "DSPCH_NO" },
-                      { headerName: "순번", field: "DSPCH_NO" },
-                      { headerName: "착지코드", field: "DSPCH_NO" },
-                      { headerName: "착지명", field: "DSPCH_NO" },
-                      { headerName: "착지구분", field: "DSPCH_NO" },
-                      { headerName: "실제도착시각", field: "DSPCH_NO" },
-                      { headerName: "실제출발일시", field: "DSPCH_NO" },
-                      { headerName: "광역시/도", field: "DSPCH_NO" },
-                      { headerName: "시군구", field: "DSPCH_NO" },
-                      { headerName: "상세주소", field: "DSPCH_NO" },
+                      { headerName: "순번", field: "STOP_SEQ" },
+                      { headerName: "착지코드", field: "LOC_CD" },
+                      { headerName: "착지명", field: "LOC_NM" },
+                      { headerName: "착지구분", field: "STOP_TP" },
+                      { headerName: "주", field: "STT_NM" },
+                      { headerName: "도시", field: "CTY_NM" },
+                      { headerName: "상세주소1", field: "DTL_ADDR1" },
+                      { headerName: "상세주소2", field: "DTL_ADDR2" },
+                      { headerName: "위도", field: "LAT" },
+                      { headerName: "경도", field: "LON" },
+                      { headerName: "상차CBM", field: "LDNG_VOL" },
+                      { headerName: "상차중량", field: "LDNG_WGT" },
+                      { headerName: "상차FQ1", field: "LDNG_FLEX_QTY1" },
+                      { headerName: "상차FQ2", field: "LDNG_FLEX_QTY2" },
+                      { headerName: "상차FQ3", field: "LDNG_FLEX_QTY3" },
+                      { headerName: "상차FQ4", field: "LDNG_FLEX_QTY4" },
+                      { headerName: "상차FQ5", field: "LDNG_FLEX_QTY5" },
+                      { headerName: "하차CBM", field: "UNLDNG_VOL" },
+                      { headerName: "하차CBM", field: "UNLDNG_WGT" },
+                      { headerName: "하차FQ1", field: "UNLDNG_FLEX_QTY1" },
+                      { headerName: "하차FQ2", field: "UNLDNG_FLEX_QTY2" },
+                      { headerName: "하차FQ3", field: "UNLDNG_FLEX_QTY3" },
+                      { headerName: "하차FQ4", field: "UNLDNG_FLEX_QTY4" },
+                      { headerName: "하차FQ5", field: "UNLDNG_FLEX_QTY5" },
                     ],
-                    rowData: [{ DSPCH_NO: 1 }],
                   },
                   SMS_HIS: {
                     columnDefs: [
                       { headerName: "No" },
-                      { headerName: "전송이력ID", field: "DSPCH_NO" },
-                      { headerName: "배차번호", field: "STATUS" },
-                      { headerName: "전송번호", field: "STATUS" },
-                      { headerName: "작성자/등록자", field: "STATUS" },
-                      { headerName: "등록일자", field: "STATUS" },
+                      { headerName: "운송지시번호", field: "ORD_NO" },
+                      { headerName: "고객주문번호", field: "CUST_ORD_NO" },
+                      { headerName: "도착지코드", field: "TO_LOC_CD" },
+                      { headerName: "도착지명", field: "TO_LOC_NM" },
+                      { headerName: "도착지우편번호", field: "TO_ZIP_CD" },
+                      { headerName: "도착지위도", field: "TO_LAT" },
+                      { headerName: "도착지경도", field: "TO_LON" },
+                      { headerName: "주문타입", field: "ORD_TP" },
+                      { headerName: "주문번호", field: "SHPM_NO" },
+                      { headerName: "콘솔", field: "MIT_CLSS_CD" },
+                      { headerName: "고객사코드", field: "CUST_CD" },
+                      { headerName: "고객사명", field: "CUST_NM" },
+                      { headerName: "출발지ID", field: "FRM_LOC_ID" },
+                      { headerName: "출발지코드", field: "FRM_LOC_CD" },
+                      { headerName: "출발지명", field: "FRM_LOC_NM" },
+                      { headerName: "출발지국가", field: "FRM_LOC_NM" },
+                      { headerName: "출발지도시", field: "FRM_CTY_NM" },
+                      { headerName: "출발지주", field: "FRM_STT_NM" },
+                      { headerName: "출발지우편번호", field: "FRM_ZIP_CD" },
+                      { headerName: "출발지위도", field: "FRM_LAT" },
+                      { headerName: "출발지경도", field: "FRM_LON" },
                     ],
-                    rowData: [{ DSPCH_NO: 2, STATUS: "대기" }],
                   },
                   AP_SETL: {
                     columnDefs: [
                       { headerName: "No" },
-                      { headerName: "항목", field: "DSPCH_NO" },
-                      { headerName: "등록금액", field: "STATUS" },
-                      { headerName: "등록사유", field: "DONE_DT" },
-                      { headerName: "확정금액", field: "DONE_DT" },
-                      { headerName: "확정사유내용", field: "DONE_DT" },
-                      { headerName: "등록일자", field: "DONE_DT" },
-                      { headerName: "작성자/등록자", field: "DONE_DT" },
-                      { headerName: "수정일시", field: "DONE_DT" },
-                      { headerName: "수정자", field: "DONE_DT" },
+                      { headerName: "품목코드", field: "CUST_ITEM_CD" },
+                      { headerName: "품목명", field: "CUST_ITEM_NM" },
+                      { headerName: "계획CBM", field: "PLN_VOL" },
+                      { headerName: "계획중량", field: "PLN_WGT" },
+                      { headerName: "계획FQ1", field: "PLN_FLEX_QTY1" },
+                      { headerName: "계획FQ2", field: "PLN_FLEX_QTY2" },
+                      { headerName: "계획FQ3", field: "PLN_FLEX_QTY3" },
+                      { headerName: "계획FQ4", field: "PLN_FLEX_QTY4" },
+                      { headerName: "계획FQ5", field: "PLN_FLEX_QTY5" },
+                      { headerName: "계획수량", field: "PLN_QTY" },
                     ],
-                    rowData: [{ DSPCH_NO: 3, DONE_DT: "2026-01-28" }],
-                  },
-                  CNTR: {
-                    columnDefs: [
-                      { headerName: "No" },
-                      { headerName: "부피", field: "DSPCH_NO" },
-                      { headerName: "중량", field: "DONE_DT" },
-                      { headerName: "PVC수량", field: "DONE_DT" },
-                      { headerName: "팔레트수량", field: "DONE_DT" },
-                      { headerName: "전용용기", field: "DONE_DT" },
-                      { headerName: "종이박스/지대수량", field: "DONE_DT" },
-                      { headerName: "채반수량", field: "DONE_DT" },
-                    ],
-                    rowData: [{ DSPCH_NO: 3, DONE_DT: "2026-01-28" }],
-                  },
-                  RETURN: {
-                    columnDefs: [
-                      { headerName: "No", width: 60 },
-                      { headerName: "PVC특대", field: "DSPCH_NO" },
-                      { headerName: "PVC대", field: "DSPCH_NO" },
-                      { headerName: "PVC중", field: "DONE_DT" },
-                    ],
-                    rowData: [{ DSPCH_NO: 3, DONE_DT: "2026-01-28" }],
                   },
                 }}
-                rowData={subRowData}
-                /** ⭐ 여기 추가 */
-                renderRightGrid={(tabKey: any) => {
+                rowData={{
+                  STOP: subStopRowData,
+                  SMS_HIS: subSmsHisRowData,
+                  AP_SETL: subApSetlRowData,
+                }}
+                renderRightGrid={(tabKey: string) => {
                   if (tabKey !== "CNTR") return null;
                   return <CntrSubGrid />;
                 }}

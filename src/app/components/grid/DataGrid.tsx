@@ -27,7 +27,7 @@ type DataGridProps<TRow> = {
   tabs?: GridTab[];
   presets?: Record<string, GridPreset<TRow>>;
 
-  rowData?: TRow[];
+  rowData?: TRow[] | Record<string, TRow[]>;
   columnDefs?: (ColDef<TRow> | ColGroupDef<TRow>)[];
 
   layoutType?: "tab" | "plain";
@@ -59,16 +59,28 @@ export default function DataGrid<TRow>({
     tabs?.[0]?.key ?? null,
   );
 
-  const activePreset = useMemo(() => {
+  const activeColumnDefs = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
-      return presets[activeTab];
+      return presets[activeTab].columnDefs;
     }
-    return { rowData, columnDefs };
-  }, [layoutType, activeTab, presets, rowData, columnDefs]);
+    return columnDefs;
+  }, [layoutType, activeTab, presets, columnDefs]);
+
+  const activeRowData = useMemo(() => {
+    if (
+      layoutType === "tab" &&
+      activeTab &&
+      rowData &&
+      !Array.isArray(rowData)
+    ) {
+      return rowData[activeTab] ?? [];
+    }
+    return Array.isArray(rowData) ? rowData : [];
+  }, [layoutType, activeTab, rowData]);
 
   /** No 컬럼 처리 */
   const finalColumnDefs = useMemo(() => {
-    return activePreset.columnDefs.map((col) => {
+    return activeColumnDefs.map((col) => {
       if ("headerName" in col && col.headerName === "No") {
         return {
           ...col,
@@ -93,7 +105,7 @@ export default function DataGrid<TRow>({
 
       return col;
     });
-  }, [activePreset]);
+  }, [activeColumnDefs]);
 
   const rowSelection = useMemo(
     () => ({
@@ -167,7 +179,7 @@ export default function DataGrid<TRow>({
                 >
                   <AgGridReact<TRow>
                     theme="legacy"
-                    rowData={activePreset.rowData}
+                    rowData={activeRowData}
                     columnDefs={finalColumnDefs}
                     defaultColDef={{
                       resizable: true,
@@ -216,7 +228,7 @@ export default function DataGrid<TRow>({
           >
             <AgGridReact<TRow>
               theme="legacy"
-              rowData={activePreset.rowData}
+              rowData={activeRowData}
               columnDefs={finalColumnDefs}
               defaultColDef={{
                 resizable: true,

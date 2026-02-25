@@ -12,11 +12,24 @@ export const tenderApi = {
     );
   },
 
-  getDispatchDetail(dispatchNo: string) {
-    return apiClient.get(`/tender/dispatch/${dispatchNo}`);
+  getDispatchStopList(payload: any) {
+    return apiClient.post<commonResponse>(
+      "/openapina/carrier/getDspchStopList",
+      payload,
+    );
   },
 
-  saveDispatch(payload: any) {
-    return apiClient.post("/tender/dispatch/save", payload);
+  getDispatchSmsHisList(payload: any) {
+    return apiClient.post<commonResponse>(
+      "/openapina/carrier/getDispatchSmsHisList",
+      payload,
+    );
+  },
+
+  getDispatchApSetlList(payload: any) {
+    return apiClient.post<commonResponse>(
+      "/openapina/carrier/getDispatchApSetlList",
+      payload,
+    );
   },
 };
