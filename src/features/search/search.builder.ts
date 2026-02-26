@@ -5,11 +5,13 @@ export type SearchCondition = {
   operator: keyof typeof CONDITION_ICON_MAP;
   dataType?: "DATE" | "STRING" | "NUMBER";
   value?: string;
+  sourceType?: "POPUP" | "NORMAL";
 };
 
 export function buildSearchCondition(searchCon: SearchCondition): string {
-  let { key, operator, dataType, value } = searchCon;
+  let { key, operator, dataType, value, sourceType } = searchCon;
 
+  if (sourceType === "POPUP" && key.endsWith("_NM")) return "";
   if (!value && operator !== "notUsed") return "";
 
   let returnStr = " AND ";

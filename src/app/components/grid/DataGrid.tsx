@@ -57,6 +57,7 @@ export default function DataGrid<TRow>({
   disableAutoSize,
   onRowClicked,
 }: DataGridProps<TRow>) {
+  const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
   );
@@ -144,6 +145,35 @@ export default function DataGrid<TRow>({
       ? renderRightGrid(activeTab)
       : null;
 
+  const wrappedActions = useMemo(() => {
+    return actions?.map((action) => {
+      if (action.type === "button") {
+        return {
+          ...action,
+          onClick: () =>
+            action.onClick?.({
+              data: selectedRows,
+            }),
+        };
+      }
+
+      if (action.type === "group") {
+        return {
+          ...action,
+          items: action.items.map((item) => ({
+            ...item,
+            onClick: () =>
+              item.onClick?.({
+                data: selectedRows,
+              }),
+          })),
+        };
+      }
+
+      return action;
+    });
+  }, [actions, selectedRows]);
+
   return (
     <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
       {/* Tabs */}
@@ -155,7 +185,7 @@ export default function DataGrid<TRow>({
 
       {/* Actions */}
       <div className="relative z-1 shrink-0 min-w-0 w-full">
-        <GridActionsBar actions={actions} />
+        <GridActionsBar actions={wrappedActions} />
       </div>
 
       {/* Grid */}
@@ -197,6 +227,11 @@ export default function DataGrid<TRow>({
                     rowSelection={rowSelection as any}
                     // onGridReady={handleGridReady}
                     onRowSelected={(e) => {
+                      if (!e.api) return;
+
+                      const rows = e.api.getSelectedRows();
+                      setSelectedRows(rows);
+
                       if (e.type === "rowSelected" && e.data) {
                         onRowSelected?.(e.data);
                       }
@@ -266,8 +301,12 @@ export default function DataGrid<TRow>({
               pagination={pagination}
               paginationPageSize={pageSize}
               rowSelection={rowSelection as any}
-              // onGridReady={handleGridReady}
               onRowSelected={(e) => {
+                if (!e.api) return;
+
+                const rows = e.api.getSelectedRows();
+                setSelectedRows(rows);
+
                 if (e.type === "rowSelected" && e.data) {
                   onRowSelected?.(e.data);
                 }

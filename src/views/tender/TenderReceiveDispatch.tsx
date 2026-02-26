@@ -14,6 +14,8 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 import { tenderApi } from "@/app/services/tender/tenderApi";
 
 import { SearchCondition } from "@/features/search/search.builder";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import ErrorConfirmModal from "@/views/common/ErrorPopup";
 
 type LayoutType = "side" | "vertical";
 
@@ -47,133 +49,6 @@ function CntrSubGrid() {
   );
 }
 
-const actions1 = [
-  {
-    type: "button",
-    key: "운송사메모등록",
-    label: "운송사메모등록",
-    onClick: () => console.log("refresh"),
-  },
-  {
-    type: "group",
-    key: "add",
-    label: "차량등록",
-    items: [
-      {
-        type: "button",
-        key: "b1",
-        label: "지입차",
-        onClick: () => console.log("BTN1"),
-      },
-      {
-        type: "button",
-        key: "b2",
-        label: "모바일가입용차",
-        onClick: () => console.log("BTN2"),
-      },
-      {
-        type: "button",
-        key: "b3",
-        label: "임시용차",
-        onClick: () => console.log("BTN3"),
-      },
-    ],
-  },
-  {
-    type: "button",
-    key: "입차예정일시등록",
-    label: "입차예정일시등록",
-    onClick: () => console.log("입차예정일시등록"),
-  },
-  {
-    type: "button",
-    key: "운송요청수락",
-    label: "운송요청수락",
-    onClick: () => console.log("운송요청수락"),
-  },
-  {
-    type: "group",
-    key: "운송요청취소",
-    label: "운송요청취소",
-    items: [
-      {
-        type: "button",
-        key: "운송요청거절",
-        label: "운송요청거절",
-        onClick: () => console.log("운송요청거절"),
-      },
-      {
-        type: "button",
-        key: "운송요청수락취소",
-        label: "운송요청수락취소",
-        onClick: () => console.log("운송요청수락취소"),
-      },
-    ],
-  },
-  {
-    type: "button",
-    key: "운반비정산조직변경",
-    label: "운반비정산조직변경",
-    onClick: () => console.log("운반비정산조직변경"),
-  },
-  {
-    type: "button",
-    key: "용차정산처리동기화",
-    label: "용차정산처리동기화",
-    onClick: () => console.log("용차정산처리동기화"),
-  },
-  {
-    type: "button",
-    key: "저장",
-    label: "저장",
-    onClick: () => console.log("저장"),
-  },
-  {
-    type: "group",
-    key: "운송비엑셀관리",
-    label: "운송비엑셀관리",
-    items: [
-      {
-        type: "button",
-        key: "운송비양식다운로드",
-        label: "운송비양식다운로드",
-        onClick: () => console.log("운송비양식다운로드"),
-      },
-      {
-        type: "button",
-        key: "운송비업로드",
-        label: "운송비업로드",
-        onClick: () => console.log("운송비업로드"),
-      },
-    ],
-  },
-  {
-    type: "group",
-    key: "엑셀",
-    label: "엑셀",
-    items: [
-      {
-        type: "button",
-        key: "조회된모든데이터다운로드",
-        label: "조회된모든데이터다운로드",
-        onClick: () => console.log("조회된모든데이터다운로드"),
-      },
-      {
-        type: "button",
-        key: "보이는데이터다운로드",
-        label: "보이는데이터다운로드",
-        onClick: () => console.log("보이는데이터다운로드"),
-      },
-    ],
-  },
-  {
-    type: "button",
-    key: "앱설치SMS",
-    label: "앱설치SMS",
-    onClick: () => console.log("앱설치SMS"),
-  },
-];
-
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
   const [filters, setFilters] = useState<SearchCondition[]>([]);
@@ -182,9 +57,124 @@ export default function TenderReceiveDispatch() {
   const [subStopRowData, setSubStopRowData] = useState([]);
   const [subSmsHisRowData, setSubSmsHisRowData] = useState([]);
   const [subApSetlRowData, setSubApSetlRowData] = useState([]);
+  const { openPopup, closePopup } = usePopup();
+
   if (loading) {
     return <Skeleton className="h-24" />;
   }
+
+  const actions1 = [
+    {
+      type: "button",
+      key: "운송요청수락",
+      label: "운송요청수락",
+      onClick: (e) => {
+        tenderApi.onTenderAccepted(e.data).catch((err: any) => {
+          openPopup({
+            content: (
+              <ErrorConfirmModal
+                open={true}
+                title={"에러"}
+                description={
+                  err.response.data.error?.message ??
+                  String(err.response.data.error)
+                }
+                onClose={closePopup}
+              />
+            ),
+            width: "lg",
+          });
+        });
+      },
+    },
+    {
+      type: "button",
+      key: "운송요청거절",
+      label: "운송요청거절",
+      onClick: (e) => tenderApi.onTenderRejected(e.data),
+    },
+    {
+      type: "group",
+      key: "add",
+      label: "차량변경",
+      items: [
+        {
+          type: "button",
+          key: "b1",
+          label: "지입차",
+          onClick: (e) => tenderApi.onChangeRegVeh(e.data),
+        },
+        {
+          type: "button",
+          key: "b2",
+          label: "모바일가입용차",
+          onClick: (e) => tenderApi.onChangeTempVeh(e.data),
+        },
+        {
+          type: "button",
+          key: "b3",
+          label: "임시용차",
+          onClick: (e) => tenderApi.onVehicleChange(e.data),
+        },
+      ],
+    },
+    {
+      type: "button",
+      key: "운송요청수락취소",
+      label: "운송요청수락취소",
+      onClick: (e) => tenderApi.onVehicleCancel(e.data),
+    },
+    {
+      type: "button",
+      key: "앱설치SMS",
+      label: "앱설치SMS",
+      onClick: (e) => tenderApi.sendSMSForAppInstall(e.data),
+    },
+    {
+      type: "button",
+      key: "저장",
+      label: "저장",
+      // onClick: (e) => tenderApi.sendSMSForAppInstall(e.data),
+    },
+    {
+      type: "group",
+      key: "운송비엑셀관리",
+      label: "운송비엑셀관리",
+      items: [
+        {
+          type: "button",
+          key: "운송비양식다운로드",
+          label: "운송비양식다운로드",
+          onClick: () => console.log("운송비양식다운로드"),
+        },
+        {
+          type: "button",
+          key: "운송비업로드",
+          label: "운송비업로드",
+          onClick: () => console.log("운송비업로드"),
+        },
+      ],
+    },
+    {
+      type: "group",
+      key: "엑셀",
+      label: "엑셀",
+      items: [
+        {
+          type: "button",
+          key: "조회된모든데이터다운로드",
+          label: "조회된모든데이터다운로드",
+          onClick: () => console.log("조회된모든데이터다운로드"),
+        },
+        {
+          type: "button",
+          key: "보이는데이터다운로드",
+          label: "보이는데이터다운로드",
+          onClick: () => console.log("보이는데이터다운로드"),
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-3 h-full min-h-0 min-w-0">

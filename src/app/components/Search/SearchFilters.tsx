@@ -106,6 +106,7 @@ export function SearchFilters({
     newValue: string,
     operator: keyof typeof CONDITION_ICON_MAP,
     dataType: string,
+    sourceType: "POPUP" | "NORMAL" = "NORMAL",
   ) => {
     setSearchState((prev) => ({
       ...prev,
@@ -114,6 +115,7 @@ export function SearchFilters({
         operator,
         dataType,
         value: newValue ?? "",
+        sourceType,
       },
     }));
   };
@@ -312,12 +314,14 @@ export function SearchFilters({
                                     row.CODE,
                                     "equal",
                                     m.dataType ?? "STRING",
+                                    "POPUP",
                                   );
                                   updateCondition(
                                     `${baseKey}_NM`,
                                     row.NAME,
                                     "equal",
                                     m.dataType ?? "STRING",
+                                    "POPUP",
                                   );
                                   closePopup();
                                 }}
