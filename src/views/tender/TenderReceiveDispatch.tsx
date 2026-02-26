@@ -15,6 +15,8 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import TenderRejectPopup from "@/views/tender/popup/TenderRejectPopup";
 import TemporaryVehicleChangePopup from "@/views/tender/popup/TemporaryVehicleChangePopup";
 import AppInstallSmsPopup from "@/views/tender/popup/AppInstallSmsPopup";
+import VehicleChangePopup from "@/views/tender/popup/VehicleChangePopup";
+import VehicleAssignPopup from "@/views/tender/popup/VehicleAssignPopup";
 
 type LayoutType = "side" | "vertical";
 
@@ -157,9 +159,9 @@ export default function TenderReceiveDispatch() {
             openPopup({
               title: "차량변경",
               content: (
-                <TenderRejectPopup
+                <VehicleChangePopup
                   reasons={[]}
-                  onConfirm={(ie: any) => {
+                  onApply={(ie: any) => {
                     closePopup();
 
                     handleApi(
@@ -173,7 +175,7 @@ export default function TenderReceiveDispatch() {
                   onClose={closePopup}
                 />
               ),
-              width: "lg",
+              width: "2xl",
             });
           },
         },
@@ -213,7 +215,7 @@ export default function TenderReceiveDispatch() {
             openPopup({
               title: "임시용차차량변경",
               content: (
-                <TenderRejectPopup
+                <VehicleAssignPopup
                   reasons={[]}
                   onConfirm={(ie: any) => {
                     closePopup();
@@ -229,7 +231,7 @@ export default function TenderReceiveDispatch() {
                   onClose={closePopup}
                 />
               ),
-              width: "lg",
+              width: "2xl",
             });
           },
         },
@@ -239,7 +241,7 @@ export default function TenderReceiveDispatch() {
       type: "button",
       key: "운송요청수락취소",
       label: "운송요청수락취소",
-      onClick: (e) =>
+      onClick: (e: any) =>
         handleApi(tenderApi.onVehicleCancel(e.data), "저장되었습니다."),
     },
     {
