@@ -1,5 +1,5 @@
 import { usePopup } from "@/app/components/popup/PopupContext";
-import ErrorConfirmModal from "@/views/common/ErrorPopup";
+import ConfirmModal from "@/views/common/ConfirmPopup";
 
 export function useApiHandler() {
   const { openPopup, closePopup } = usePopup();
@@ -13,11 +13,12 @@ export function useApiHandler() {
 
       openPopup({
         content: (
-          <ErrorConfirmModal
+          <ConfirmModal
             title="확인"
             description={successMessage}
             onClose={closePopup}
             onConfirm={closePopup}
+            type={"confirm"}
           />
         ),
         width: "lg",
@@ -31,11 +32,12 @@ export function useApiHandler() {
 
       openPopup({
         content: (
-          <ErrorConfirmModal
+          <ConfirmModal
             title="에러"
             description={message}
             onClose={closePopup}
             onConfirm={closePopup}
+            type={"error"}
           />
         ),
         width: "lg",

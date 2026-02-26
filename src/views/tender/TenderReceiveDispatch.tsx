@@ -171,7 +171,8 @@ export default function TenderReceiveDispatch() {
       type: "button",
       key: "운송요청수락취소",
       label: "운송요청수락취소",
-      onClick: (e) => tenderApi.onVehicleCancel(e.data),
+      onClick: (e) =>
+        handleApi(tenderApi.onVehicleCancel(e.data), "저장되었습니다."),
     },
     {
       type: "button",

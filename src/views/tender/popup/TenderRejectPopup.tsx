@@ -19,17 +19,6 @@ export default function RejectReasonContent({
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      {/* 상단 타이틀 */}
-      <div className="relative flex items-center justify-center mb-10">
-        {/* 중간 고정 링 */}
-        <div className="absolute h-20 w-20 rounded-full bg-blue-100 opacity-70" />
-
-        {/* 메인 원 */}
-        <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 shadow-lg">
-          <Check className="text-white" />
-        </div>
-      </div>
-
       {/* 폼 영역 */}
       <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100">
         {/* 사유 선택 */}
