@@ -13,6 +13,8 @@ import { SearchCondition } from "@/features/search/search.builder";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import TenderRejectPopup from "@/views/tender/popup/TenderRejectPopup";
+import TemporaryVehicleChangePopup from "@/views/tender/popup/TemporaryVehicleChangePopup";
+import AppInstallSmsPopup from "@/views/tender/popup/AppInstallSmsPopup";
 
 type LayoutType = "side" | "vertical";
 
@@ -151,19 +153,85 @@ export default function TenderReceiveDispatch() {
           type: "button",
           key: "b1",
           label: "지입차",
-          onClick: (e) => tenderApi.onChangeRegVeh(e.data),
+          onClick: (e: any) => {
+            openPopup({
+              title: "차량변경",
+              content: (
+                <TenderRejectPopup
+                  reasons={[]}
+                  onConfirm={(ie: any) => {
+                    closePopup();
+
+                    handleApi(
+                      tenderApi.onChangeRegVeh({
+                        ...e.data,
+                        ...ie.data,
+                      }),
+                      "저장되었습니다..",
+                    );
+                  }}
+                  onClose={closePopup}
+                />
+              ),
+              width: "lg",
+            });
+          },
         },
         {
           type: "button",
           key: "b2",
           label: "모바일가입용차",
-          onClick: (e) => tenderApi.onChangeTempVeh(e.data),
+          onClick: (e: any) => {
+            openPopup({
+              title: "임시차량변경",
+              content: (
+                <TemporaryVehicleChangePopup
+                  reasons={[]}
+                  onConfirm={(ie: any) => {
+                    closePopup();
+
+                    handleApi(
+                      tenderApi.onChangeTempVeh({
+                        ...e.data,
+                        ...ie.data,
+                      }),
+                      "저장되었습니다..",
+                    );
+                  }}
+                  onClose={closePopup}
+                />
+              ),
+              width: "lg",
+            });
+          },
         },
         {
           type: "button",
           key: "b3",
           label: "임시용차",
-          onClick: (e) => tenderApi.onVehicleChange(e.data),
+          onClick: (e: any) => {
+            openPopup({
+              title: "임시용차차량변경",
+              content: (
+                <TenderRejectPopup
+                  reasons={[]}
+                  onConfirm={(ie: any) => {
+                    closePopup();
+
+                    handleApi(
+                      tenderApi.onVehicleChange({
+                        ...e.data,
+                        ...ie.data,
+                      }),
+                      "저장되었습니다..",
+                    );
+                  }}
+                  onClose={closePopup}
+                />
+              ),
+              width: "lg",
+            });
+          },
         },
       ],
     },
@@ -178,7 +246,29 @@ export default function TenderReceiveDispatch() {
       type: "button",
       key: "앱설치SMS",
       label: "앱설치SMS",
-      onClick: (e) => tenderApi.sendSMSForAppInstall(e.data),
+      onClick: (e: any) => {
+        openPopup({
+          title: "전화번호입력",
+          content: (
+            <AppInstallSmsPopup
+              reasons={[]}
+              onConfirm={(ie: any) => {
+                closePopup();
+
+                handleApi(
+                  tenderApi.sendSMSForAppInstall({
+                    ...e.data,
+                    ...ie.data,
+                  }),
+                  "저장되었습니다..",
+                );
+              }}
+              onClose={closePopup}
+            />
+          ),
+          width: "lg",
+        });
+      },
     },
     {
       type: "group",
