@@ -4,18 +4,15 @@
 import React, { useState } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
-
 import { SearchFilters } from "@/app/components/search/SearchFilters";
 import { TENDER_SEARCH_META } from "./tenderSearchMeta";
 import DataGrid from "@/app/components/grid/DataGrid";
-
 import { useSearchMeta } from "@/hooks/useSearchMeta";
-
 import { tenderApi } from "@/app/services/tender/tenderApi";
-
 import { SearchCondition } from "@/features/search/search.builder";
+import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
-import ErrorConfirmModal from "@/views/common/ErrorPopup";
+import TenderRejectPopup from "@/views/tender/popup/TenderRejectPopup";
 
 type LayoutType = "side" | "vertical";
 
@@ -49,6 +46,51 @@ function CntrSubGrid() {
   );
 }
 
+// statusColorMap.ts
+const dispatchStatusColorMap: Record<string, string> = {
+  // 요청 / 취소 계열 (보라)
+  "2030": "bg-purple-100 text-purple-700",
+  "2040": "bg-purple-100 text-purple-700",
+  "2050": "bg-purple-100 text-purple-700",
+  "2060": "bg-purple-100 text-purple-700",
+
+  // 상차 계열 (하늘)
+  "2070": "bg-sky-100 text-sky-700",
+  "2073": "bg-sky-100 text-sky-700",
+  "2075": "bg-sky-100 text-sky-700",
+
+  // 운송 계열 (블루)
+  "2080": "bg-blue-100 text-blue-700",
+  "2090": "bg-blue-100 text-blue-700",
+
+  // 완료 / 종료 계열 (그린)
+  "2100": "bg-emerald-100 text-emerald-700",
+  "2103": "bg-emerald-100 text-emerald-700",
+  "2105": "bg-emerald-100 text-emerald-700",
+  "2110": "bg-emerald-100 text-emerald-700",
+};
+
+//todo : 추후 데이터 불러올 것
+const getDspchLabel = (value: string): string => {
+  const labelMap: Record<string, string> = {
+    "2030": "운송요청",
+    "2040": "운송요청거절",
+    "2050": "운송요청수락",
+    "2060": "운송요청취소",
+    "2070": "상차요청",
+    "2073": "상차중",
+    "2075": "상차완료",
+    "2080": "출발전",
+    "2090": "운송중",
+    "2100": "부분운송완료",
+    "2103": "배송완료",
+    "2105": "복귀중",
+    "2110": "운행종료",
+  };
+
+  return labelMap[value] ?? value;
+};
+
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
   const [filters, setFilters] = useState<SearchCondition[]>([]);
@@ -57,6 +99,7 @@ export default function TenderReceiveDispatch() {
   const [subStopRowData, setSubStopRowData] = useState([]);
   const [subSmsHisRowData, setSubSmsHisRowData] = useState([]);
   const [subApSetlRowData, setSubApSetlRowData] = useState([]);
+  const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
 
   if (loading) {
@@ -68,30 +111,36 @@ export default function TenderReceiveDispatch() {
       type: "button",
       key: "운송요청수락",
       label: "운송요청수락",
-      onClick: (e) => {
-        tenderApi.onTenderAccepted(e.data).catch((err: any) => {
-          openPopup({
-            content: (
-              <ErrorConfirmModal
-                open={true}
-                title={"에러"}
-                description={
-                  err.response.data.error?.message ??
-                  String(err.response.data.error)
-                }
-                onClose={closePopup}
-              />
-            ),
-            width: "lg",
-          });
-        });
-      },
+      onClick: (e: any) =>
+        handleApi(tenderApi.onTenderAccepted(e.data), "저장되었습니다."),
     },
     {
       type: "button",
       key: "운송요청거절",
       label: "운송요청거절",
-      onClick: (e) => tenderApi.onTenderRejected(e.data),
+      onClick: (e: any) => {
+        openPopup({
+          title: "운송요청 거절",
+          content: (
+            <TenderRejectPopup
+              reasons={[]}
+              onConfirm={(ie: any) => {
+                closePopup();
+
+                handleApi(
+                  tenderApi.onTenderRejected({
+                    ...e.data,
+                    ...ie.data,
+                  }),
+                  "저장되었습니다..",
+                );
+              }}
+              onClose={closePopup}
+            />
+          ),
+          width: "lg",
+        });
+      },
     },
     {
       type: "group",
@@ -129,12 +178,6 @@ export default function TenderReceiveDispatch() {
       key: "앱설치SMS",
       label: "앱설치SMS",
       onClick: (e) => tenderApi.sendSMSForAppInstall(e.data),
-    },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      // onClick: (e) => tenderApi.sendSMSForAppInstall(e.data),
     },
     {
       type: "group",
@@ -239,6 +282,22 @@ export default function TenderReceiveDispatch() {
                   {
                     headerName: "배차진행상태",
                     field: "DSPCH_OP_STS",
+                    cellRenderer: (params: any) => {
+                      const code = params.value;
+                      const label = getDspchLabel(code);
+
+                      const cls =
+                        dispatchStatusColorMap[String(code)] ??
+                        "bg-gray-100 text-gray-600";
+
+                      return (
+                        <span
+                          className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}
+                        >
+                          {label}
+                        </span>
+                      );
+                    },
                   },
                   {
                     headerName: "운송협력사명",
