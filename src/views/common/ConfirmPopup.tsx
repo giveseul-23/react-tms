@@ -1,5 +1,5 @@
 "use client";
-import { Check } from "lucide-react";
+import { Check, CircleAlert } from "lucide-react";
 
 type ConfirmModalProps = {
   title?: string;
@@ -18,19 +18,30 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   return (
     <div className="flex flex-col items-center text-center px-4 py-6">
-      {type === "error" ? (
+      {type === "error" && (
         <div className="relative flex items-center justify-center mb-4">
           <span className="absolute inline-flex h-16 w-16 rounded-full bg-red-100 opacity-75 animate-ping" />
           <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <span className="text-red-500 text-xl font-bold">!</span>
           </div>
         </div>
-      ) : (
+      )}
+      {type === "normal" && (
         <div className="relative flex items-center justify-center mb-10">
           <div className="absolute h-20 w-20 rounded-full bg-blue-100 opacity-70" />
 
           <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 shadow-lg">
             <Check className="text-white" />
+          </div>
+        </div>
+      )}
+
+      {type === "check" && (
+        <div className="relative flex items-center justify-center mb-10">
+          <div className="absolute h-20 w-20 rounded-full bg-gray-100 opacity-70" />
+
+          <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gray-300 shadow-lg">
+            <CircleAlert className="text-white" />
           </div>
         </div>
       )}
@@ -50,11 +61,10 @@ export default function ConfirmModal({
         <button
           type="button"
           onClick={onClose}
-          className={`flex-1 h-11 rounded-md text-white font-medium transition ${
-            type === "error"
-              ? "bg-red-500 hover:bg-red-600"
-              : "bg-blue-500 hover:bg-blue-600"
-          }`}
+          className={`flex-1 h-11 rounded-md text-white font-medium transition 
+            ${type === "error" && "bg-red-500 hover:bg-red-600"}
+            ${type === "confirm" && "bg-blue-500 hover:bg-blue-600"}
+            ${type === "check" && "bg-gray-500 hover:bg-gray-600"}`}
         >
           {confirmText}
         </button>

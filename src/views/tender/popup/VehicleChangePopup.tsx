@@ -65,43 +65,43 @@ export default function VehicleChangePopup({
   return (
     <div className="flex flex-col gap-4 w-full h-full">
       {/* ================= 검색 영역 ================= */}
-      <div className="bg-gray-50 rounded-xl p-2 border space-y-4">
+      <div className="bg-gray-20 rounded-xl p-2 border space-y-4">
         <div className="grid grid-cols-3 gap-4">
           <Input
             placeholder="물류운영그룹코드"
             value={logisticsGroupCode}
             onChange={(e: any) => setLogisticsGroupCode(e.target.value)}
-            className="w-full pr-7 pl-2 text-[11px] h-7"
+            className="w-full text-[11px] h-6"
           />
           <Input
             placeholder="운송협력사코드"
             value={carrierCode}
             onChange={(e: any) => setCarrierCode(e.target.value)}
-            className="w-full pr-7 pl-2 text-[11px] h-7"
+            className="w-full text-[11px] h-6"
           />
           <Input
             placeholder="운송협력사명"
             value={carrierName}
             onChange={(e: any) => setCarrierName(e.target.value)}
-            className="w-full pr-7 pl-2 text-[11px] h-7"
+            className="w-full text-[11px] h-6"
           />
           <Input
             placeholder="차량코드"
             value={vehicleCode}
             onChange={(e: any) => setVehicleCode(e.target.value)}
-            className="w-full pr-7 pl-2 text-[11px] h-7"
+            className="w-full text-[11px] h-6"
           />
           <Input
             placeholder="차량유형코드"
             value={vehicleType}
             onChange={(e: any) => setVehicleType(e.target.value)}
-            className="w-full pr-7 pl-2 text-[11px] h-7"
+            className="w-full text-[11px] h-6"
           />
           <Input
             placeholder="차량번호"
             value={vehicleNo}
             onChange={(e: any) => setVehicleNo(e.target.value)}
-            className="w-full pr-7 pl-2 text-[11px] h-7"
+            className="w-full text-[11px] h-6"
           />
         </div>
         <div className="flex justify-end">

@@ -17,6 +17,7 @@ import TemporaryVehicleChangePopup from "@/views/tender/popup/TemporaryVehicleCh
 import AppInstallSmsPopup from "@/views/tender/popup/AppInstallSmsPopup";
 import VehicleChangePopup from "@/views/tender/popup/VehicleChangePopup";
 import VehicleAssignPopup from "@/views/tender/popup/VehicleAssignPopup";
+import { useGuard } from "@/hooks/useGuard";
 
 type LayoutType = "side" | "vertical";
 
@@ -105,6 +106,7 @@ export default function TenderReceiveDispatch() {
   const [subApSetlRowData, setSubApSetlRowData] = useState([]);
   const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
+  const { guardHasData } = useGuard();
 
   if (loading) {
     return <Skeleton className="h-24" />;
@@ -115,8 +117,10 @@ export default function TenderReceiveDispatch() {
       type: "button",
       key: "운송요청수락",
       label: "운송요청수락",
-      onClick: (e: any) =>
-        handleApi(tenderApi.onTenderAccepted(e.data), "저장되었습니다."),
+      onClick: (e: any) => {
+        if (!guardHasData(e.data)) return;
+        handleApi(tenderApi.onTenderAccepted(e.data), "저장되었습니다.");
+      },
     },
     {
       type: "button",
@@ -130,6 +134,8 @@ export default function TenderReceiveDispatch() {
               reasons={[]}
               onConfirm={(ie: any) => {
                 closePopup();
+
+                if (!guardHasData(ie.data)) return;
 
                 handleApi(
                   tenderApi.onTenderRejected({

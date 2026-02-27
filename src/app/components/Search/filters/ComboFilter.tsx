@@ -38,17 +38,12 @@ export function ComboFilter({
   const safeOptions = options ?? [];
 
   return (
-    <div
-      className={cn(
-        "w-full min-w-0", // ⭐ 핵심
-        className,
-      )}
-    >
+    <div className={cn(className ? "w-full min-w-0" : className)}>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger
           id={selectId}
           className={cn(
-            "h-6 px-2 text-[11px]", // ⭐ 여기서 직접 제어
+            `!h-6 !min-h-0 px-2 text-[11px] [&>svg]:h-3 [&>svg]:w-3`,
             inputClassName,
           )}
         >

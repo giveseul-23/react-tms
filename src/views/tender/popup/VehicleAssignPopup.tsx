@@ -6,6 +6,7 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { commonApi } from "@/app/services/common/commonApi";
+import { ComboFilter } from "@/app/components/Search/filters/comboFilter";
 
 const userId = sessionStorage.getItem("userId");
 const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
@@ -64,50 +65,47 @@ export default function VehicleAssignPopup({
   return (
     <div className="flex flex-col gap-4 w-full h-full">
       {/* ================= 검색 영역 ================= */}
-      <div className="bg-gray-50 rounded-lg p-3 border">
+      <div className="bg-gray-20 rounded-lg p-3 border">
         <div className="grid grid-cols-4 gap-3 items-center text-[12px]">
           <Input
             placeholder="차량코드"
             value={vehicleCode}
             onChange={(e: any) => setVehicleCode(e.target.value)}
-            className="h-7 text-[11px]"
+            className="h-6"
           />
 
           <Input
             placeholder="차량유형명"
             value={vehicleType}
             onChange={(e: any) => setVehicleType(e.target.value)}
-            className="h-7 text-[11px]"
+            className="h-6"
           />
 
           <Input
             placeholder="차량번호"
             value={vehicleNo}
             onChange={(e: any) => setVehicleNo(e.target.value)}
-            className="h-7 text-[11px]"
+            className="h-6"
           />
 
           <Input
             placeholder="운전자명"
             value={driverName}
             onChange={(e: any) => setDriverName(e.target.value)}
-            className="h-7 text-[11px]"
+            className="h-6"
           />
-
-          <Input
+          <ComboFilter
             placeholder="선호권역1"
             value={region1}
-            onChange={(e: any) => setRegion1(e.target.value)}
-            className="h-7 text-[11px]"
+            onChange={(value) => setRegion1(value)}
+            inputClassName="h-6 text-[13px]"
           />
-
-          <Input
+          <ComboFilter
             placeholder="선호권역2"
             value={region2}
-            onChange={(e: any) => setRegion2(e.target.value)}
-            className="h-7 text-[11px]"
+            onChange={(value) => setRegion2(value)}
+            inputClassName="h-6 text-[13px]"
           />
-
           <div className="col-span-4 flex justify-end pt-1">
             <Button size="xs" variant="outline" onClick={onSearch}>
               <Search className="w-3 h-3 mr-1" />

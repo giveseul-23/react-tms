@@ -1,21 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { Check } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Skeleton } from "@/app/components/ui/skeleton";
+import { ComboFilter } from "@/app/components/Search/filters/comboFilter";
+import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 type RejectReasonContentProps = {
-  reasons: { label: string; value: string }[];
   onConfirm: (data: { reasonCode: string; detail: string }) => void;
   onClose: () => void;
 };
 
 export default function RejectReasonContent({
-  reasons,
   onConfirm,
   onClose,
 }: RejectReasonContentProps) {
   const [reasonCode, setReasonCode] = useState("");
   const [detail, setDetail] = useState("");
+
+  const searchConfig = useMemo(
+    () => [
+      {
+        key: "TNDR_RJT_RSN_CD",
+        type: "combo",
+        sqlProp: "CODE",
+        keyParam: "TNDR_RJT_RSN_CD",
+      },
+    ],
+    [],
+  );
+
+  const { meta, loading } = useSearchMeta(searchConfig);
+
+  if (loading) {
+    return <Skeleton className="h-24" />;
+  }
 
   return (
     <div className="w-full max-w-xl mx-auto">
@@ -27,18 +45,25 @@ export default function RejectReasonContent({
             운송요청 거절사유
           </label>
 
-          <select
+          <ComboFilter
             value={reasonCode}
-            onChange={(e) => setReasonCode(e.target.value)}
-            className="w-full h-11 rounded-lg border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="">선택하세요</option>
-            {reasons.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </select>
+            onChange={setReasonCode}
+            placeholder="선택하세요"
+            options={meta[0].options.map((r) => ({
+              CODE: r.CODE,
+              NAME: r.NAME,
+            }))}
+            className="w-full"
+            inputClassName="
+    !h-11
+    rounded-lg
+    border border-gray-300
+    px-3
+    text-sm
+    focus:ring-2
+    focus:ring-blue-400
+  "
+          />
         </div>
 
         {/* 상세 내용 */}
