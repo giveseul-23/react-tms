@@ -7,7 +7,7 @@ export function useSearchMeta(baseMeta: readonly SearchMeta[]) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false; // 👈 언마운트 안전장치
+    let cancelled = false;
 
     async function load() {
       setLoading(true);
@@ -21,14 +21,12 @@ export function useSearchMeta(baseMeta: readonly SearchMeta[]) {
         (m) => m.type === "combo" && m.sqlProp && m.keyParam,
       );
 
-      // combo가 없으면 그대로 반환
       if (comboMetas.length === 0) {
         if (!cancelled) setMeta([...baseMeta]);
         setLoading(false);
         return;
       }
 
-      // 기본값: 모든 combo 옵션은 빈 배열
       const emptyResolved = baseMeta.map((m) =>
         m.type === "combo" ? { ...m, options: [] } : m,
       );
@@ -44,20 +42,41 @@ export function useSearchMeta(baseMeta: readonly SearchMeta[]) {
         }));
 
         const res = await commonApi.fetchComboOptions(payload);
-
         const optionMap = res?.data ?? {};
 
-        const resolved = baseMeta.map((m) =>
-          m.type === "combo" && m.keyParam
-            ? { ...m, options: optionMap[m.keyParam] ?? [] }
-            : m,
-        );
+        const resolved = baseMeta.map((m) => {
+          if (m.type !== "combo" || !m.keyParam) return m;
+
+          let options = optionMap[m.keyParam] ?? [];
+
+          /* ---------------------------
+             1️⃣ 옵션 필터링
+          --------------------------- */
+
+          if (m.filterValues && Array.isArray(m.filterValues)) {
+            options = options.filter((opt: any) =>
+              m.filterValues.includes(opt.CODE),
+            );
+          }
+
+          /* ---------------------------
+             2️⃣ 전체 옵션 추가
+          --------------------------- */
+
+          if (m.includeAll) {
+            options = [{ CODE: "ALL", NAME: "모두" }, ...options];
+          }
+
+          return {
+            ...m,
+            options,
+          };
+        });
 
         if (!cancelled) setMeta(resolved);
       } catch (e) {
         console.error("[useSearchMeta] fetchComboOptions failed", e);
 
-        // ❗ 실패 시에도 UI는 정상 렌더
         if (!cancelled) setMeta(emptyResolved);
       } finally {
         if (!cancelled) setLoading(false);

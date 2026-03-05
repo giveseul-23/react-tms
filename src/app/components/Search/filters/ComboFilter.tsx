@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { Label } from "@/app/components/ui/label";
+import { useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -36,6 +35,12 @@ export function ComboFilter({
   ...props
 }: ComboFilterProps) {
   const safeOptions = options ?? [];
+
+  useEffect(() => {
+    if (!value && safeOptions.length > 0) {
+      onChange(safeOptions[0].CODE);
+    }
+  }, [safeOptions, value, onChange]);
 
   return (
     <div className={cn(className ? "w-full min-w-0" : className)}>

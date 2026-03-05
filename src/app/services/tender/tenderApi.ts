@@ -8,7 +8,7 @@ export const tenderApi = {
   ////// SEARCH
   getDispatchList(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/getDspchList",
+      `/openapina/carrier/getDspchList`,
       payload,
     );
   },

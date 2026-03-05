@@ -1,7 +1,7 @@
 // src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/search/SearchFilters";
@@ -18,6 +18,7 @@ import AppInstallSmsPopup from "@/views/tender/popup/AppInstallSmsPopup";
 import VehicleChangePopup from "@/views/tender/popup/VehicleChangePopup";
 import VehicleAssignPopup from "@/views/tender/popup/VehicleAssignPopup";
 import { useGuard } from "@/hooks/useGuard";
+import { useCommonStores } from "@/hooks/useCommonStores";
 
 type LayoutType = "side" | "vertical";
 
@@ -75,27 +76,6 @@ const dispatchStatusColorMap: Record<string, string> = {
   "2110": "bg-emerald-100 text-emerald-700",
 };
 
-//todo : 추후 데이터 불러올 것
-const getDspchLabel = (value: string): string => {
-  const labelMap: Record<string, string> = {
-    "2030": "운송요청",
-    "2040": "운송요청거절",
-    "2050": "운송요청수락",
-    "2060": "운송요청취소",
-    "2070": "상차요청",
-    "2073": "상차중",
-    "2075": "상차완료",
-    "2080": "출발전",
-    "2090": "운송중",
-    "2100": "부분운송완료",
-    "2103": "배송완료",
-    "2105": "복귀중",
-    "2110": "운행종료",
-  };
-
-  return labelMap[value] ?? value;
-};
-
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
   const [filters, setFilters] = useState<SearchCondition[]>([]);
@@ -107,6 +87,23 @@ export default function TenderReceiveDispatch() {
   const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
   const { guardHasData } = useGuard();
+
+  const { stores } = useCommonStores({
+    dspchOpSts: {
+      sqlProp: "CODE",
+      keyParam: "DSPCH_OP_STS",
+    },
+  });
+
+  const codeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+
+    (stores?.dspchOpSts ?? []).forEach((item: any) => {
+      map[item.CODE] = item.NAME;
+    });
+
+    return map;
+  }, [stores]);
 
   if (loading) {
     return <Skeleton className="h-24" />;
@@ -383,7 +380,7 @@ export default function TenderReceiveDispatch() {
                     field: "DSPCH_OP_STS",
                     cellRenderer: (params: any) => {
                       const code = params.value;
-                      const label = getDspchLabel(code);
+                      const label = codeMap[String(code)] ?? code;
 
                       const cls =
                         dispatchStatusColorMap[String(code)] ??

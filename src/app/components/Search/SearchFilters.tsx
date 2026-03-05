@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Filter, RefreshCw, ChevronDown } from "lucide-react";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { Button } from "@/app/components/ui/button";
@@ -125,9 +125,26 @@ export function SearchFilters({
   };
 
   const handleSearch = () => {
-    const whereClause = Object.values(searchState)
-      .map((v) => buildSearchCondition(v))
-      .join("");
+    const conditions: string[] = [];
+
+    Object.values(searchState).forEach((v) => {
+      if (v.value === "ALL") {
+        const metaItem = meta.find((m) => m.key === v.key);
+
+        if (metaItem?.options) {
+          const codes = metaItem.options
+            .filter((o) => o.CODE !== "ALL")
+            .map((o) => `'${o.CODE}'`)
+            .join(",");
+
+          conditions.push(` AND ${v.key} IN (${codes})`);
+        }
+      } else {
+        conditions.push(buildSearchCondition(v));
+      }
+    });
+
+    const whereClause = conditions.join("");
 
     const userId = sessionStorage.getItem("userId");
 
@@ -136,6 +153,7 @@ export function SearchFilters({
         sesUserId: userId,
         userId,
         ACCESS_TOKEN: sessionStorage.getItem("ACCESS_TOKEN"),
+        REFRESH_TOKEN: sessionStorage.getItem("REFRESH_TOKEN"),
         DYNAMIC_QUERY: whereClause,
         MENU_CD: "test",
       })
