@@ -184,7 +184,7 @@ export default function TenderReceiveDispatch() {
                       tenderApi.onChangeRegVeh(
                         e.data.map((row: any) => ({ ...row, ...ie })),
                       ),
-                      "저장되었습니다..",
+                      "저장되었습니다.",
                     ).then(() => {
                       searchRef.current?.();
                     });

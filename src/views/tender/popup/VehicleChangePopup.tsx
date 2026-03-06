@@ -81,6 +81,89 @@ export default function VehicleChangePopup({
     { label: "차량번호", value: vehicleNo, onChange: setVehicleNo },
   ];
 
+  const columnDefs = [
+    { headerName: "No", width: 30 },
+    {
+      field: "LGST_GRP_CD",
+      sendField: "RETURN_LGST_GRP_CD",
+      hide: true,
+    },
+    {
+      field: "DIV_CD",
+      sendField: "RETURN_DIV_CD",
+      hide: true,
+    },
+    {
+      headerName: "운송협력사코드",
+      field: "CARR_CD",
+      sendField: "RETURN_CARR_CD",
+      width: 130,
+    },
+    {
+      headerName: "운송협력사명",
+      field: "CARR_NM",
+      sendField: "RETURN_CARR_NM",
+      width: 160,
+    },
+    {
+      headerName: "차량코드",
+      field: "VEH_ID",
+      sendField: "RETURN_VEH_ID",
+      width: 110,
+    },
+    {
+      headerName: "차량번호",
+      field: "VEH_NO",
+      sendField: "RETURN_VEH_NO",
+      width: 130,
+    },
+    {
+      headerName: "차량유형",
+      field: "VEH_TP_CD",
+      sendField: "RETURN_VEH_TP_CD",
+      width: 130,
+    },
+    {
+      headerName: "차량유형명",
+      field: "VEH_TP_NM",
+      sendField: "RETURN_VEH_TP_NM",
+      width: 130,
+    },
+    {
+      headerName: "운전자아이디",
+      field: "DRVR_ID",
+      sendField: "RETURN_DRVR_ID",
+      width: 110,
+    },
+    {
+      headerName: "운전자명",
+      field: "DRVR_NM",
+      sendField: "RETURN_DRVR_NM",
+      width: 110,
+    },
+    {
+      headerName: "축종",
+      field: "AXLE_TYPE",
+      sendField: "RETURN_AXLE_TYPE",
+      width: 90,
+    },
+  ];
+
+  const buildPayload = (row: any) => {
+    return columnDefs.reduce(
+      (acc, col) => {
+        const sendKey = (col as any).sendField ?? col.field;
+        if (sendKey && col.field) {
+          acc[sendKey] = row[col.field];
+        }
+
+        acc.CHGVEH_MEMO = "운송사협력사 요청건";
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+  };
+
   return (
     <div className="flex flex-col gap-3 w-full h-full">
       {/* ── 조회 조건 ── */}
@@ -156,21 +239,7 @@ export default function VehicleChangePopup({
         <DataGrid
           layoutType="plain"
           actions={[]}
-          columnDefs={[
-            { headerName: "No", width: 30 },
-            {
-              headerName: "운송협력사코드",
-              field: "RETURN_CARR_CD",
-              width: 130,
-            },
-            { headerName: "운송협력사명", field: "RETURN_CARR_NM", width: 160 },
-            { headerName: "차량코드", field: "RETURN_VEH_ID", width: 110 },
-            { headerName: "차량번호", field: "RETURN_VEH_NO", width: 130 },
-            { headerName: "차량유형", field: "RETURN_VEH_TP_CD", width: 130 },
-            { headerName: "차량유형명", field: "RETURN_VEH_TP_NM", width: 130 },
-            { headerName: "운전자명", field: "RETURN_DRVR_NM", width: 110 },
-            { headerName: "축종", field: "RETURN_AXLE_TYPE", width: 90 },
-          ]}
+          columnDefs={columnDefs}
           rowData={rows}
           pagination
           pageSize={20}
@@ -194,7 +263,7 @@ export default function VehicleChangePopup({
         <Button
           size="sm"
           disabled={!selectedRow}
-          onClick={() => onApply(selectedRow)}
+          onClick={() => onApply(buildPayload(selectedRow))}
           className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 gap-1.5"
         >
           <Check className="w-3 h-3" />
