@@ -25,7 +25,7 @@ export function useCommonStores(params: Record<string, any>) {
 
         const res = await commonApi.fetchComboOptions(req);
 
-        const result = res?.data?.result || {};
+        const result = res?.data || {};
 
         const mapped: Record<string, any[]> = {};
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Search, Filter, RefreshCw, ChevronDown } from "lucide-react";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { Button } from "@/app/components/ui/button";
@@ -38,9 +38,11 @@ type SearchMeta = {
 export function SearchFilters({
   meta,
   onSearch,
+  searchRef,
 }: {
   meta: readonly SearchMeta[];
   onSearch: React.Dispatch<React.SetStateAction<[]>>;
+  searchRef?: React.MutableRefObject<(() => void) | null>;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
@@ -124,7 +126,7 @@ export function SearchFilters({
     setSearchState(buildInitialSearchState());
   };
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     const conditions: string[] = [];
 
     Object.values(searchState).forEach((v) => {
@@ -163,7 +165,14 @@ export function SearchFilters({
       .catch((err: any) => {
         console.error(err);
       });
-  };
+  }, [searchState, meta, onSearch]);
+
+  // ✅ useEffect는 컴포넌트 최상단 레벨에 위치
+  useEffect(() => {
+    if (searchRef) {
+      searchRef.current = handleSearch;
+    }
+  }, [searchRef, handleSearch]);
 
   return (
     <Card className="shadow-sm">

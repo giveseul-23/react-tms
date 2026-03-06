@@ -1,7 +1,7 @@
 // src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/search/SearchFilters";
@@ -93,13 +93,22 @@ export default function TenderReceiveDispatch() {
       sqlProp: "CODE",
       keyParam: "DSPCH_OP_STS",
     },
+    apFiSts: {
+      sqlProp: "CODE",
+      keyParam: "AP_FI_STS",
+    },
   });
 
-  const codeMap = useMemo(() => {
-    const map: Record<string, string> = {};
+  const searchRef = useRef<(() => void) | null>(null);
 
-    (stores?.dspchOpSts ?? []).forEach((item: any) => {
-      map[item.CODE] = item.NAME;
+  const codeMap = useMemo(() => {
+    const map: Record<string, Record<string, string>> = {};
+
+    Object.entries(stores).forEach(([storeKey, items]) => {
+      map[storeKey] = {};
+      (items ?? []).forEach((item: any) => {
+        map[storeKey][item.CODE] = item.NAME;
+      });
     });
 
     return map;
@@ -124,6 +133,8 @@ export default function TenderReceiveDispatch() {
       key: "운송요청거절",
       label: "운송요청거절",
       onClick: (e: any) => {
+        if (!guardHasData(e.data)) return;
+
         openPopup({
           title: "운송요청 거절",
           content: (
@@ -131,16 +142,14 @@ export default function TenderReceiveDispatch() {
               reasons={[]}
               onConfirm={(ie: any) => {
                 closePopup();
-
-                if (!guardHasData(ie.data)) return;
-
                 handleApi(
-                  tenderApi.onTenderRejected({
-                    ...e.data,
-                    ...ie.data,
-                  }),
-                  "저장되었습니다..",
-                );
+                  tenderApi.onTenderRejected(
+                    e.data.map((row: any) => ({ ...row, ...ie.data })),
+                  ),
+                  "저장되었습니다.",
+                ).then(() => {
+                  searchRef.current?.(); // ✅ 재조회
+                });
               }}
               onClose={closePopup}
             />
@@ -323,6 +332,7 @@ export default function TenderReceiveDispatch() {
         value={filters}
         onChange={setFilters}
         onSearch={setHeaderRowData}
+        searchRef={searchRef}
       />
 
       {/* layout toggle */}
@@ -362,6 +372,22 @@ export default function TenderReceiveDispatch() {
                   {
                     headerName: "정산진행상태",
                     field: "AP_FI_STS",
+                    cellRenderer: (params: any) => {
+                      const code = params.value;
+                      const label = codeMap.apFiSts?.[String(code)] ?? code;
+
+                      const cls =
+                        dispatchStatusColorMap[String(code)] ??
+                        "bg-gray-100 text-gray-600";
+
+                      return (
+                        <span
+                          className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}
+                        >
+                          {label}
+                        </span>
+                      );
+                    },
                   },
                   {
                     headerName: "물류운영그룹",
@@ -380,7 +406,7 @@ export default function TenderReceiveDispatch() {
                     field: "DSPCH_OP_STS",
                     cellRenderer: (params: any) => {
                       const code = params.value;
-                      const label = codeMap[String(code)] ?? code;
+                      const label = codeMap.dspchOpSts?.[String(code)] ?? code;
 
                       const cls =
                         dispatchStatusColorMap[String(code)] ??
