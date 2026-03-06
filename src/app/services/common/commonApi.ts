@@ -1,5 +1,4 @@
 import { apiClient } from "@/app/api/client";
-import { Hash } from "lucide-react";
 export type commonRequest = {
   sesUserId: string;
   userId: string;

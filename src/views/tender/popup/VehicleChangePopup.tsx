@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, X, Check, Truck, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { commonApi } from "@/app/services/common/commonApi";
+import { chgVehicleApi } from "@/app/services/chgVehicle/chgVehicleApi";
 
 const userId = sessionStorage.getItem("userId");
 const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
@@ -13,33 +12,39 @@ const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
 type VehicleChangePopupContentProps = {
   onApply: (row: any) => void;
   onClose: () => void;
+  initialValues?: Record<string, any>;
 };
 
 export default function VehicleChangePopup({
   onApply,
   onClose,
+  initialValues = {},
 }: VehicleChangePopupContentProps) {
   const [rows, setRows] = useState<any[]>([]);
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
-  const [logisticsGroupCode, setLogisticsGroupCode] = useState("");
-  const [carrierCode, setCarrierCode] = useState("");
-  const [carrierName, setCarrierName] = useState("");
-  const [vehicleCode, setVehicleCode] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
-  const [vehicleNo, setVehicleNo] = useState("");
+  const [logisticsGroupCode, setLogisticsGroupCode] = useState(
+    initialValues.LGST_GRP_CD ?? "",
+  );
+  const [carrierCode, setCarrierCode] = useState(initialValues.CARR_CD ?? "");
+  const [carrierName, setCarrierName] = useState(initialValues.CARR_NM ?? "");
+  const [vehicleCode, setVehicleCode] = useState(initialValues.VEH_ID ?? "");
+  const [vehicleType, setVehicleType] = useState(initialValues.VEH_TP_CD ?? "");
+  const [vehicleNo, setVehicleNo] = useState(initialValues.VEH_NO ?? "");
+  const [vehicleOperType, setVehicleOperType] = useState("100");
 
-  /* ================= 초기 조회 ================= */
   useEffect(() => {
-    fetchData({});
+    fetchData({
+      LGST_GRP_CD: logisticsGroupCode,
+      VEH_OP_TP: vehicleOperType,
+    });
   }, []);
 
   const fetchData = (extraParams: any) => {
-    commonApi
-      .getCodesAndNames({
+    chgVehicleApi
+      .getDedTruckList({
         sesUserId: userId,
         userId,
-        sqlProp: "VEHICLE_CHANGE_LIST",
         ACCESS_TOKEN,
         ...extraParams,
       })
@@ -53,79 +58,118 @@ export default function VehicleChangePopup({
 
   const onSearch = () => {
     fetchData({
-      logisticsGroupCode,
-      carrierCode,
-      carrierName,
-      vehicleCode,
-      vehicleType,
-      vehicleNo,
+      LGST_GRP_CD: logisticsGroupCode,
+      CARR_CD: carrierCode,
+      CARR_NM: carrierName,
+      VEH_ID: vehicleCode,
+      VEH_TP_CD: vehicleType,
+      VEH_NO: vehicleNo,
+      VEH_OP_TP: vehicleOperType,
     });
   };
 
+  const fields = [
+    {
+      label: "물류운영그룹코드",
+      value: logisticsGroupCode,
+      onChange: setLogisticsGroupCode,
+    },
+    { label: "운송협력사코드", value: carrierCode, onChange: setCarrierCode },
+    { label: "운송협력사명", value: carrierName, onChange: setCarrierName },
+    { label: "차량코드", value: vehicleCode, onChange: setVehicleCode },
+    { label: "차량유형코드", value: vehicleType, onChange: setVehicleType },
+    { label: "차량번호", value: vehicleNo, onChange: setVehicleNo },
+  ];
+
   return (
-    <div className="flex flex-col gap-4 w-full h-full">
-      {/* ================= 검색 영역 ================= */}
-      <div className="bg-gray-20 rounded-xl p-2 border space-y-4">
-        <div className="grid grid-cols-3 gap-4">
-          <Input
-            placeholder="물류운영그룹코드"
-            value={logisticsGroupCode}
-            onChange={(e: any) => setLogisticsGroupCode(e.target.value)}
-            className="w-full text-[11px] h-6"
-          />
-          <Input
-            placeholder="운송협력사코드"
-            value={carrierCode}
-            onChange={(e: any) => setCarrierCode(e.target.value)}
-            className="w-full text-[11px] h-6"
-          />
-          <Input
-            placeholder="운송협력사명"
-            value={carrierName}
-            onChange={(e: any) => setCarrierName(e.target.value)}
-            className="w-full text-[11px] h-6"
-          />
-          <Input
-            placeholder="차량코드"
-            value={vehicleCode}
-            onChange={(e: any) => setVehicleCode(e.target.value)}
-            className="w-full text-[11px] h-6"
-          />
-          <Input
-            placeholder="차량유형코드"
-            value={vehicleType}
-            onChange={(e: any) => setVehicleType(e.target.value)}
-            className="w-full text-[11px] h-6"
-          />
-          <Input
-            placeholder="차량번호"
-            value={vehicleNo}
-            onChange={(e: any) => setVehicleNo(e.target.value)}
-            className="w-full text-[11px] h-6"
-          />
-        </div>
-        <div className="flex justify-end">
-          <Button size="xs" variant="outline" onClick={onSearch}>
-            <Search className="w-4 h-4 mr-1" />
+    <div className="flex flex-col gap-3 w-full h-full">
+      {/* ── 조회 조건 ── */}
+      <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        {/* 헤더 바 */}
+        <div className="flex items-center justify-between px-3 py-2 bg-slate-800">
+          <div className="flex items-center gap-1.5">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-300 mt-px" />
+            <span className="text-[11px] font-semibold text-slate-200 tracking-widest uppercase leading-none">
+              조회 조건
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={onSearch}
+            style={{
+              backgroundColor: "rgb(var(--primary))",
+              color: "rgb(var(--primary-fg, 255 255 255))",
+              borderColor: "rgb(var(--primary))",
+            }}
+            className="hover:opacity-90 transition-opacity"
+          >
+            <Search className="w-3 h-3" />
             조회
           </Button>
         </div>
+
+        {/* 필드 — 테이블형 레이아웃 */}
+        <div className="grid grid-cols-3 divide-x divide-y divide-slate-100">
+          {fields.map((f) => (
+            <div
+              key={f.label}
+              className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group"
+            >
+              <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
+                {f.label}
+              </label>
+              <input
+                value={f.value}
+                onChange={(e) => f.onChange(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && onSearch()}
+                className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full"
+                placeholder="—"
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* ================= Grid ================= */}
-      <div className="flex-1 min-h-[350px]">
+      {/* ── 선택 상태 표시 ── */}
+      {selectedRow ? (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
+          <Truck className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
+          <span className="font-semibold">{selectedRow.VEH_NO}</span>
+          <span className="text-blue-300">|</span>
+          <span>{selectedRow.CARR_NM}</span>
+          <span className="text-blue-300">|</span>
+          <span>{selectedRow.DRVR_NM}</span>
+          <span className="ml-auto text-[10px] text-blue-400 font-medium">
+            선택됨 ✓
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-dashed border-slate-200 text-[11px] text-slate-400">
+          <Truck className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>그리드에서 차량을 선택하세요</span>
+        </div>
+      )}
+
+      {/* ── Grid ── */}
+      <div className="flex-1 min-h-[300px]">
         <DataGrid
           layoutType="plain"
           actions={[]}
           columnDefs={[
-            { headerName: "No", width: 60 },
-            { headerName: "운송협력사코드", field: "CARR_CD", width: 140 },
-            { headerName: "운송협력사명", field: "CARR_NM", width: 180 },
-            { headerName: "차량코드", field: "VEH_ID", width: 120 },
-            { headerName: "차량번호", field: "VEH_NO", width: 140 },
-            { headerName: "차량유형명", field: "VEH_TP_NM", width: 140 },
-            { headerName: "운전자명", field: "DRVR_NM", width: 120 },
-            { headerName: "축종", field: "AXLE_TYPE", width: 100 },
+            { headerName: "No", width: 30 },
+            {
+              headerName: "운송협력사코드",
+              field: "RETURN_CARR_CD",
+              width: 130,
+            },
+            { headerName: "운송협력사명", field: "RETURN_CARR_NM", width: 160 },
+            { headerName: "차량코드", field: "RETURN_VEH_ID", width: 110 },
+            { headerName: "차량번호", field: "RETURN_VEH_NO", width: 130 },
+            { headerName: "차량유형", field: "RETURN_VEH_TP_CD", width: 130 },
+            { headerName: "차량유형명", field: "RETURN_VEH_TP_NM", width: 130 },
+            { headerName: "운전자명", field: "RETURN_DRVR_NM", width: 110 },
+            { headerName: "축종", field: "RETURN_AXLE_TYPE", width: 90 },
           ]}
           rowData={rows}
           pagination
@@ -136,18 +180,25 @@ export default function VehicleChangePopup({
         />
       </div>
 
-      {/* ================= 버튼 영역 ================= */}
-      <div className="flex justify-end gap-2 pt-3 border-t">
+      {/* ── 버튼 영역 ── */}
+      <div className="flex justify-end gap-2 pt-2.5 border-t border-slate-100">
         <Button
           size="sm"
           variant="outline"
+          onClick={onClose}
+          className="h-7 px-4 text-xs border-slate-200 text-slate-500 hover:bg-slate-50 gap-1.5"
+        >
+          <X className="w-3 h-3" />
+          취소
+        </Button>
+        <Button
+          size="sm"
           disabled={!selectedRow}
           onClick={() => onApply(selectedRow)}
+          className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 gap-1.5"
         >
+          <Check className="w-3 h-3" />
           적용
-        </Button>
-        <Button size="sm" variant="outline" onClick={onClose}>
-          취소
         </Button>
       </div>
     </div>

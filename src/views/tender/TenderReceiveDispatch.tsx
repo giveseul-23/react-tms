@@ -148,7 +148,7 @@ export default function TenderReceiveDispatch() {
                   ),
                   "저장되었습니다.",
                 ).then(() => {
-                  searchRef.current?.(); // ✅ 재조회
+                  searchRef.current?.();
                 });
               }}
               onClose={closePopup}
@@ -168,21 +168,26 @@ export default function TenderReceiveDispatch() {
           key: "b1",
           label: "지입차",
           onClick: (e: any) => {
+            if (!guardHasData(e.data)) return;
+
             openPopup({
               title: "차량변경",
               content: (
                 <VehicleChangePopup
-                  reasons={[]}
+                  initialValues={{
+                    LGST_GRP_CD: e.data[0].LGST_GRP_CD,
+                  }}
                   onApply={(ie: any) => {
                     closePopup();
 
                     handleApi(
-                      tenderApi.onChangeRegVeh({
-                        ...e.data,
-                        ...ie.data,
-                      }),
+                      tenderApi.onChangeRegVeh(
+                        e.data.map((row: any) => ({ ...row, ...ie })),
+                      ),
                       "저장되었습니다..",
-                    );
+                    ).then(() => {
+                      searchRef.current?.();
+                    });
                   }}
                   onClose={closePopup}
                 />
