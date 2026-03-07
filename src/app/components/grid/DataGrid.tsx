@@ -147,34 +147,35 @@ export default function DataGrid<TRow>({
       ? renderRightGrid(activeTab)
       : null;
 
+  // DataGrid.tsx - activeActions 추가
+  const activeActions = useMemo(() => {
+    if (layoutType === "tab" && activeTab && presets) {
+      return presets[activeTab].actions ?? actions ?? [];
+    }
+    return actions ?? [];
+  }, [layoutType, activeTab, presets, actions]);
+
+  // wrappedActions에서 actions 대신 activeActions 사용
   const wrappedActions = useMemo(() => {
-    return actions?.map((action) => {
+    return activeActions?.map((action) => {
       if (action.type === "button") {
         return {
           ...action,
-          onClick: () =>
-            action.onClick?.({
-              data: selectedRows,
-            }),
+          onClick: () => action.onClick?.({ data: selectedRows }),
         };
       }
-
       if (action.type === "group") {
         return {
           ...action,
           items: action.items.map((item) => ({
             ...item,
-            onClick: () =>
-              item.onClick?.({
-                data: selectedRows,
-              }),
+            onClick: () => item.onClick?.({ data: selectedRows }),
           })),
         };
       }
-
       return action;
     });
-  }, [actions, selectedRows]);
+  }, [activeActions, selectedRows]);
 
   return (
     <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">

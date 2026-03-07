@@ -272,6 +272,8 @@ export default function TenderReceiveDispatch() {
       key: "앱설치SMS",
       label: "앱설치SMS",
       onClick: (e: any) => {
+        if (!guardHasData(e.data)) return;
+
         openPopup({
           title: "전화번호입력",
           content: (
@@ -286,7 +288,9 @@ export default function TenderReceiveDispatch() {
                     ...ie.data,
                   }),
                   "저장되었습니다..",
-                );
+                ).then(() => {
+                  searchRef.current?.();
+                });
               }}
               onClose={closePopup}
             />
@@ -750,6 +754,24 @@ export default function TenderReceiveDispatch() {
                       { headerName: "계획FQ4", field: "PLN_FLEX_QTY4" },
                       { headerName: "계획FQ5", field: "PLN_FLEX_QTY5" },
                       { headerName: "계획수량", field: "PLN_QTY" },
+                    ],
+                    actions: [
+                      {
+                        type: "button",
+                        key: "운송비추가",
+                        label: "추가",
+                        onClick: (e: any) => {
+                          console.log("운송비내역 추가", e);
+                        },
+                      },
+                      {
+                        type: "button",
+                        key: "운송비저장",
+                        label: "저장",
+                        onClick: (e: any) => {
+                          console.log("운송비내역 저장", e);
+                        },
+                      },
                     ],
                   },
                 }}

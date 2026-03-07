@@ -44,10 +44,7 @@ export function GridActionsBar({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [dropdownStyle, setDropdownStyle] =
     useState<React.CSSProperties | null>(null);
-
   const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  if (!actions?.length) return null;
 
   useEffect(() => {
     if (!openKey) return;
@@ -66,6 +63,8 @@ export function GridActionsBar({
     window.addEventListener("pointerdown", handler, true);
     return () => window.removeEventListener("pointerdown", handler, true);
   }, [openKey, anchorEl]);
+
+  if (!actions?.length) return null;
 
   const openGroup = actions.find(
     (a): a is ActionGroup => a.type === "group" && a.key === openKey,
