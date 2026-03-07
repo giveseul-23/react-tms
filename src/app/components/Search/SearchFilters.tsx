@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Search, Filter, RefreshCw, ChevronDown } from "lucide-react";
+import {
+  Search,
+  Filter,
+  RefreshCw,
+  ChevronDown,
+  SlidersHorizontal,
+} from "lucide-react";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
@@ -13,6 +19,7 @@ import {
 
 import { SearchFilter } from "@/app/components/search/SearchFilter";
 import { CommonPopup } from "@/views/common/CommonPopup";
+import ConfirmModal from "@/views/common/ConfirmPopup";
 import {
   buildSearchCondition,
   SearchCondition,
@@ -33,6 +40,7 @@ type SearchMeta = {
   granularity?: string;
   options?: { value: string; label: string }[];
   dataType: string;
+  required?: boolean;
 };
 
 export function SearchFilters({
@@ -127,6 +135,38 @@ export function SearchFilters({
   };
 
   const handleSearch = useCallback(() => {
+    const missingFields = meta
+      .filter((m) => m.required === true)
+      .filter((m) => {
+        if (m.type === "dateRange") {
+          if (m.mode === "single") {
+            return !searchState[m.key]?.value;
+          }
+          return (
+            !searchState[`${m.key}_FRM`]?.value ||
+            !searchState[`${m.key}_TO`]?.value
+          );
+        }
+        return !searchState[m.key]?.value;
+      });
+
+    if (missingFields.length > 0) {
+      const labels = missingFields.map((m) => m.label).join(", ");
+      openPopup({
+        title: "",
+        content: (
+          <ConfirmModal
+            type="error"
+            title="필수 항목 누락"
+            description={`다음 항목을 입력해주세요 : ${labels}`}
+            onClose={closePopup}
+          />
+        ),
+        width: "sm",
+      });
+      return;
+    }
+
     const conditions: string[] = [];
 
     Object.values(searchState).forEach((v) => {
@@ -177,14 +217,22 @@ export function SearchFilters({
   return (
     <Card className="shadow-sm">
       <Collapsible open={open} onOpenChange={setOpen}>
-        <div className="flex items-center justify-between px-3 py-1.5 border-b">
+        <div
+          className={`flex items-center justify-between px-3 py-1.5 bg-[rgb(var(--primary))] ${open ? "rounded-t-xl" : "rounded-xl"}`}
+        >
           <div className="flex items-center gap-1.5">
-            <Filter className="w-4 h-4 text-[rgb(var(--primary))]" />
-            <h2 className="text-sm font-semibold">조회 조건</h2>
+            <SlidersHorizontal className="w-4 h-4 text-white mt-px" />
+            <span className="text-sm font-semibold text-white uppercase leading-none">
+              조회조건
+            </span>
           </div>
 
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 px-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-slate-200 hover:bg-transparent hover:text-white hover:font-bold"
+            >
               {open ? "접기" : "펼치기"}
               <ChevronDown
                 className={`w-4 h-4 ml-1 transition-transform ${
@@ -230,6 +278,7 @@ export function SearchFilters({
                     const currentValue = getCondition(m.key)?.value ?? "";
                     updateCondition(m.key, currentValue, op, m.dataType);
                   },
+                  required: m.required ? m.required : false,
                 };
 
                 switch (m.type) {

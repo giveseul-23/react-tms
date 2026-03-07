@@ -36,11 +36,12 @@ type DataGridProps<TRow> = {
   pagination?: boolean;
   pageSize?: number;
 
-  onRowSelected?: (row: TRow) => void;
+  onRowSelected?: (row: TRow | null) => void;
   onRowClicked?: (row: TRow) => void;
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
 
   disableAutoSize?: boolean;
+  rowSelection?: string;
 };
 
 export default function DataGrid<TRow>({
@@ -56,6 +57,7 @@ export default function DataGrid<TRow>({
   renderRightGrid,
   disableAutoSize,
   onRowClicked,
+  rowSelection: rowSelectionProp,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -123,22 +125,22 @@ export default function DataGrid<TRow>({
    * todo : columAPi - getAllColumns, autoSizeColumns
    *
    */
-  const handleGridReady = useCallback((e: GridReadyEvent) => {
-    requestAnimationFrame(() => {
-      if (disableAutoSize) return;
+  // const handleGridReady = useCallback((e: GridReadyEvent) => {
+  //   requestAnimationFrame(() => {
+  //     if (disableAutoSize) return;
 
-      const autoSizeColIds: string[] = [];
-      e.columnApi.getAllColumns()?.forEach((col) => {
-        const def = col.getColDef();
-        if (def.width == null && def.flex == null) {
-          autoSizeColIds.push(col.getId());
-        }
-      });
-      if (autoSizeColIds.length) {
-        e.columnApi.autoSizeColumns(autoSizeColIds, false);
-      }
-    });
-  }, []);
+  //     const autoSizeColIds: string[] = [];
+  //     e.columnApi.getAllColumns()?.forEach((col) => {
+  //       const def = col.getColDef();
+  //       if (def.width == null && def.flex == null) {
+  //         autoSizeColIds.push(col.getId());
+  //       }
+  //     });
+  //     if (autoSizeColIds.length) {
+  //       e.columnApi.autoSizeColumns(autoSizeColIds, false);
+  //     }
+  //   });
+  // }, []);
 
   const rightGrid =
     layoutType === "tab" && activeTab && renderRightGrid
@@ -224,7 +226,14 @@ export default function DataGrid<TRow>({
                     }}
                     headerHeight={22}
                     rowHeight={22}
-                    rowSelection={rowSelection as any}
+                    rowSelection={
+                      rowSelectionProp === "single"
+                        ? {
+                            mode: "singleRow",
+                            enableClickSelection: true,
+                          }
+                        : { mode: "multiRow" }
+                    }
                     // onGridReady={handleGridReady}
                     onRowSelected={(e) => {
                       if (!e.api) return;
@@ -232,8 +241,15 @@ export default function DataGrid<TRow>({
                       const rows = e.api.getSelectedRows();
                       setSelectedRows(rows);
 
-                      if (e.type === "rowSelected" && e.data) {
-                        onRowSelected?.(e.data);
+                      if (e.node.isSelected() && e.data) {
+                        onRowSelected?.(e.data); // 선택 시 즉시 전달
+                      } else {
+                        // 해제 시 약간 지연 - 다른 row 선택으로 인한 해제면 무시됨
+                        setTimeout(() => {
+                          if (e.api.getSelectedRows().length === 0) {
+                            onRowSelected?.(null);
+                          }
+                        }, 0);
                       }
                     }}
                     onRowClicked={(e) => {
@@ -300,15 +316,29 @@ export default function DataGrid<TRow>({
               rowHeight={22}
               pagination={pagination}
               paginationPageSize={pageSize}
-              rowSelection={rowSelection as any}
+              rowSelection={
+                rowSelectionProp === "single"
+                  ? {
+                      mode: "singleRow",
+                      enableClickSelection: true,
+                    }
+                  : { mode: "multiRow" }
+              }
               onRowSelected={(e) => {
                 if (!e.api) return;
 
                 const rows = e.api.getSelectedRows();
                 setSelectedRows(rows);
 
-                if (e.type === "rowSelected" && e.data) {
-                  onRowSelected?.(e.data);
+                if (e.node.isSelected() && e.data) {
+                  onRowSelected?.(e.data); // 선택 시 즉시 전달
+                } else {
+                  // 해제 시 약간 지연 - 다른 row 선택으로 인한 해제면 무시됨
+                  setTimeout(() => {
+                    if (e.api.getSelectedRows().length === 0) {
+                      onRowSelected?.(null);
+                    }
+                  }, 0);
                 }
               }}
               onRowClicked={(e) => {

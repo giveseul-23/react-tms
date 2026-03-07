@@ -5,6 +5,7 @@ export const TENDER_SEARCH_META = [
     type: "popup",
     label: "물류운영그룹",
     span: 5,
+    required: true,
     condition: "equal",
     sqlId: "selectLogisticsgroupCodeName",
     dataType: "STRING",

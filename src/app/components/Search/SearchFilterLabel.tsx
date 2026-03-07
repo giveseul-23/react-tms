@@ -20,7 +20,7 @@ export function SearchFilterLabel({
       )}
     >
       <span>{label}</span>
-      {required && <span className="ml-0.5 text-red-400">*</span>}
+      {required && <span className="text-red-500 ml-0.5">*</span>}
     </Label>
   );
 }
