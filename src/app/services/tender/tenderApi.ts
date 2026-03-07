@@ -4,19 +4,23 @@ type commonResponse = {
   rows: [];
 };
 
-// ✅ 공통 payload 주입 헬퍼
 const withSession = (payload: any = {}) => {
   const userId = sessionStorage.getItem("userId");
   const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
   const REFRESH_TOKEN = sessionStorage.getItem("REFRESH_TOKEN");
 
-  return {
+  const sessionFields = {
     userId,
     sesUserId: userId,
     ACCESS_TOKEN,
     REFRESH_TOKEN,
-    ...payload,
   };
+
+  if (Array.isArray(payload)) {
+    return payload.map((item) => ({ ...sessionFields, ...item }));
+  }
+
+  return { ...sessionFields, ...payload };
 };
 
 export const tenderApi = {

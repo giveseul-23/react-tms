@@ -15,6 +15,8 @@ type VehicleChangePopupContentProps = {
   initialValues?: Record<string, any>;
 };
 
+const vehicleOperType = "100";
+
 export default function VehicleChangePopup({
   onApply,
   onClose,
@@ -31,7 +33,6 @@ export default function VehicleChangePopup({
   const [vehicleCode, setVehicleCode] = useState(initialValues.VEH_ID ?? "");
   const [vehicleType, setVehicleType] = useState(initialValues.VEH_TP_CD ?? "");
   const [vehicleNo, setVehicleNo] = useState(initialValues.VEH_NO ?? "");
-  const [vehicleOperType, setVehicleOperType] = useState("100");
 
   useEffect(() => {
     fetchData({

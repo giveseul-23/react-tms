@@ -233,21 +233,23 @@ export default function TenderReceiveDispatch() {
           key: "b3",
           label: "임시용차",
           onClick: (e: any) => {
+            if (!guardHasData(e.data)) return;
+
             openPopup({
               title: "임시용차차량변경",
               content: (
                 <VehicleAssignPopup
-                  reasons={[]}
-                  onConfirm={(ie: any) => {
+                  onApply={(ie: any) => {
                     closePopup();
 
                     handleApi(
-                      tenderApi.onVehicleChange({
-                        ...e.data,
-                        ...ie.data,
-                      }),
-                      "저장되었습니다..",
-                    );
+                      tenderApi.onVehicleChange(
+                        e.data.map((row: any) => ({ ...row, ...ie })),
+                      ),
+                      "저장되었습니다.",
+                    ).then(() => {
+                      searchRef.current?.();
+                    });
                   }}
                   onClose={closePopup}
                 />
