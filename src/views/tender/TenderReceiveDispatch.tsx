@@ -201,21 +201,25 @@ export default function TenderReceiveDispatch() {
           key: "b2",
           label: "모바일가입용차",
           onClick: (e: any) => {
+            if (!guardHasData(e.data)) return;
+
             openPopup({
               title: "임시차량변경",
               content: (
                 <TemporaryVehicleChangePopup
-                  reasons={[]}
+                  initialValues={{
+                    VEH_TP_CD: e.data[0].VEH_TP_CD,
+                    CARR_NM: e.data[0].CARR_NM,
+                  }}
                   onConfirm={(ie: any) => {
                     closePopup();
 
                     handleApi(
-                      tenderApi.onChangeTempVeh({
-                        ...e.data,
-                        ...ie.data,
-                      }),
-                      "저장되었습니다..",
-                    );
+                      tenderApi.onChangeTempVeh({ ...e.data[0], ...ie }),
+                      "저장되었습니다.",
+                    ).then(() => {
+                      searchRef.current?.();
+                    });
                   }}
                   onClose={closePopup}
                 />

@@ -4,33 +4,48 @@ type commonResponse = {
   rows: [];
 };
 
+// ✅ 공통 payload 주입 헬퍼
+const withSession = (payload: any = {}) => {
+  const userId = sessionStorage.getItem("userId");
+  const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
+  const REFRESH_TOKEN = sessionStorage.getItem("REFRESH_TOKEN");
+
+  return {
+    userId,
+    sesUserId: userId,
+    ACCESS_TOKEN,
+    REFRESH_TOKEN,
+    ...payload,
+  };
+};
+
 export const tenderApi = {
   ////// SEARCH
   getDispatchList(payload: any) {
     return apiClient.post<commonResponse>(
       `/openapina/carrier/getDspchList`,
-      payload,
+      withSession(payload),
     );
   },
 
   getDispatchStopList(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/getDspchStopList",
-      payload,
+      withSession(payload),
     );
   },
 
   getDispatchSmsHisList(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/getDispatchSmsHisList",
-      payload,
+      withSession(payload),
     );
   },
 
   getDispatchApSetlList(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/getDispatchApSetlList",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -40,7 +55,7 @@ export const tenderApi = {
   onTenderAccepted(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onTenderAccepted",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -48,7 +63,7 @@ export const tenderApi = {
   onTenderRejected(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onTenderRejected",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -56,7 +71,7 @@ export const tenderApi = {
   onChangeRegVeh(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onChangeRegVeh",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -64,7 +79,7 @@ export const tenderApi = {
   onChangeTempVeh(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onChangeTempVeh",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -72,7 +87,7 @@ export const tenderApi = {
   onVehicleChange(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onVehicleChange",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -80,7 +95,7 @@ export const tenderApi = {
   onVehicleCancel(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onVehicleCancel",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -88,7 +103,7 @@ export const tenderApi = {
   sendSMSForAppInstall(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/sendSMSForAppInstall",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -97,7 +112,7 @@ export const tenderApi = {
   onCarrierRateExcelAll(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onCarrierRateExcelAll",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -105,7 +120,7 @@ export const tenderApi = {
   gridExcelUpload(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/gridExcelUpload",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -113,7 +128,7 @@ export const tenderApi = {
   gridExcelAll(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/gridExcelAll",
-      payload,
+      withSession(payload),
     );
   },
 
@@ -121,7 +136,7 @@ export const tenderApi = {
   gridExcel(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/gridExcel",
-      payload,
+      withSession(payload),
     );
   },
 };

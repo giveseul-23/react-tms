@@ -5,7 +5,7 @@ export const TENDER_SEARCH_META = [
     type: "popup",
     label: "물류운영그룹",
     span: 5,
-    required: true,
+    // required: true,
     condition: "equal",
     sqlId: "selectLogisticsgroupCodeName",
     dataType: "STRING",
@@ -107,5 +107,6 @@ export const TENDER_SEARCH_META = [
     sqlProp: "CODE",
     keyParam: "VEH_OP_TP",
     dataType: "STRING",
+    includeAll: true,
   },
 ] as const;

@@ -6,19 +6,21 @@ type TemporaryVehicleChangeContentProps = {
   defaultVehicleType?: string;
   defaultCarrierName?: string;
   onConfirm: (data: {
-    vehicleNo: string;
-    driverName: string;
-    driverPhone: string;
+    VEH_NO: string;
+    DRVR_NM: string;
+    MBL_PHN_NO: string;
   }) => void;
   onClose: () => void;
+  initialValues?: Record<string, any>;
 };
 
 export default function TemporaryVehicleChangePopup({
-  defaultVehicleType = "1톤레미콘",
-  defaultCarrierName = "",
   onConfirm,
   onClose,
+  initialValues = {},
 }: TemporaryVehicleChangeContentProps) {
+  const [vehicleType, setVehicleType] = useState(initialValues.VEH_TP_CD ?? "");
+  const [carrierName, setCarrierName] = useState(initialValues.CARR_NM ?? "");
   const [vehicleNo, setVehicleNo] = useState("");
   const [driverName, setDriverName] = useState("");
   const [driverPhone, setDriverPhone] = useState("");
@@ -35,7 +37,7 @@ export default function TemporaryVehicleChangePopup({
             차량유형명
           </label>
           <input
-            value={defaultVehicleType}
+            value={vehicleType}
             disabled
             className="col-span-2 h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm"
           />
@@ -47,7 +49,7 @@ export default function TemporaryVehicleChangePopup({
             운송협력사명
           </label>
           <input
-            value={defaultCarrierName}
+            value={carrierName}
             disabled
             className="col-span-2 h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm"
           />
@@ -102,9 +104,9 @@ export default function TemporaryVehicleChangePopup({
           disabled={!isValid}
           onClick={() =>
             onConfirm({
-              vehicleNo,
-              driverName,
-              driverPhone,
+              VEH_NO: vehicleNo,
+              DRVR_NM: driverName,
+              MBL_PHN_NO: driverPhone,
             })
           }
           className="flex-1 h-11 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-40 transition"
