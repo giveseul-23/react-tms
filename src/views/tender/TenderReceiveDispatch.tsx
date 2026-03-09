@@ -20,6 +20,8 @@ import VehicleAssignPopup from "@/views/tender/popup/VehicleAssignPopup";
 import { useGuard } from "@/hooks/useGuard";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
+import { downExcelSearch } from "@/views/common/common";
+
 type LayoutType = "side" | "vertical";
 
 function CntrSubGrid() {
@@ -117,6 +119,254 @@ export default function TenderReceiveDispatch() {
   if (loading) {
     return <Skeleton className="h-24" />;
   }
+
+  const buildExcelPayload = () => {
+    return filters.reduce(
+      (acc, f: any) => {
+        acc[f.key] = f.value;
+        return acc;
+      },
+      {} as Record<string, unknown>,
+    );
+  };
+
+  const columnDefs1 = [
+    { headerName: "No" },
+    {
+      headerName: "정산진행상태",
+      field: "AP_FI_STS",
+      cellRenderer: (params: any) => {
+        const code = params.value;
+        const label = codeMap.apFiSts?.[String(code)] ?? code;
+
+        const cls =
+          dispatchStatusColorMap[String(code)] ?? "bg-gray-100 text-gray-600";
+
+        return (
+          <span className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}>
+            {label}
+          </span>
+        );
+      },
+    },
+    {
+      headerName: "물류운영그룹",
+      field: "LGST_GRP_CD",
+    },
+    {
+      headerName: "납품일",
+      field: "DLVRY_DT",
+    },
+    {
+      headerName: "배차번호",
+      field: "DSPCH_NO",
+    },
+    {
+      headerName: "배차진행상태",
+      field: "DSPCH_OP_STS",
+      cellRenderer: (params: any) => {
+        const code = params.value;
+        const label = codeMap.dspchOpSts?.[String(code)] ?? code;
+
+        const cls =
+          dispatchStatusColorMap[String(code)] ?? "bg-gray-100 text-gray-600";
+
+        return (
+          <span className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}>
+            {label}
+          </span>
+        );
+      },
+    },
+    {
+      headerName: "운송협력사명",
+      field: "CARR_NM",
+    },
+    {
+      headerName: "차량유형명",
+      field: "VEH_TP_NM",
+    },
+    {
+      headerName: "입차순서",
+      field: "ETRNC_SEQ",
+    },
+    {
+      headerName: "차량번호",
+      field: "VEH_NO",
+    },
+    {
+      headerName: "운전자명",
+      field: "DRVR_NM",
+    },
+    {
+      headerName: "핸드폰번호",
+      field: "MBL_PHN_NO",
+    },
+    {
+      headerName: "메모",
+      field: "MEMO_DESC",
+    },
+    {
+      headerName: "운송사메모",
+      field: "CARR_MEMO_DESC",
+    },
+    {
+      headerName: "경로",
+      field: "ROUTE_PATH",
+    },
+    {
+      headerName: "중량",
+      field: "TTL_LD_WGT",
+    },
+    {
+      headerName: "팔레트수량",
+      field: "TTL_LD_FLEX_QTY2",
+    },
+    {
+      headerName: "회수PVC수량",
+      field: "RETURN_PVC_QTY",
+    },
+    {
+      headerName: "PVC회수스캔일시",
+      field: "DLVRY_RETURN_DTTM",
+    },
+    {
+      headerName: "입차요청일시",
+      field: "REQ_ETRNC_DTTM",
+    },
+    {
+      headerName: "입차예정일시",
+      field: "EXPCT_ETRNC_DTTM",
+    },
+    {
+      headerName: "입차지연사유",
+      field: "DLYD_ETRNC_RSN_DESC",
+    },
+    {
+      headerName: "차량유형",
+      field: "CARR_CFM_VEH_TCD",
+    },
+    {
+      headerName: "수/배송구분",
+      field: "TRANS_TCD",
+    },
+    {
+      headerName: "추적번호",
+      field: "TRCK_NO",
+    },
+    {
+      headerName: "SMS전송일시",
+      field: "SMS_APP_INST_DTTM",
+    },
+    {
+      headerName: "전송번호",
+      field: "SEND_NO",
+    },
+    {
+      headerName: "메모(운송요청)",
+      field: "MEMO",
+    },
+    {
+      headerName: "경유처수",
+      field: "STOP_CNT",
+    },
+    {
+      headerName: "운임예약가능여부",
+      field: "CARR_BOOKING_YN",
+    },
+    {
+      headerName: "등록금액",
+      field: "RATE",
+    },
+    {
+      headerName: "확정금액",
+      field: "CFM_COST",
+    },
+    {
+      headerName: "등록사유",
+      field: "CARR_CHG_RMK",
+    },
+    {
+      headerName: "부피",
+      field: "TTL_LD_VOL",
+    },
+    {
+      headerName: "PVC수량",
+      field: "TTL_LD_FLEX_QTY1",
+    },
+    {
+      headerName: "전용용기",
+      field: "TTL_LD_FLEX_QTY3",
+    },
+    {
+      headerName: "종이박스/지대수량",
+      field: "TTL_LD_FLEX_QTY4",
+    },
+    {
+      headerName: "채반수량",
+      field: "TTL_LD_FLEX_QTY5",
+    },
+    {
+      headerName: "출발지명",
+      field: "FRM_LOC_NM",
+    },
+    {
+      headerName: "디비전",
+      field: "DIV_CD",
+    },
+    {
+      headerName: "물류운영그룹코드",
+      field: "LGST_GRP_CD",
+    },
+    {
+      headerName: "출발지코드",
+      field: "FRM_LOC_CD",
+    },
+    {
+      headerName: "연계배차번호",
+      field: "TRIP_ID",
+    },
+    {
+      headerName: "연계배차순서",
+      field: "TRIP_SEQ",
+    },
+    {
+      headerName: "출발시군구",
+      field: "FRM_FULL_ADDR",
+    },
+    {
+      headerName: "도착시군구",
+      field: "TO_FULL_ADDR",
+    },
+    {
+      headerName: "차량코드",
+      field: "VEH_ID",
+    },
+    {
+      headerName: "운전자코드",
+      field: "DRVR_ID",
+    },
+    {
+      headerName: "배송차수",
+      field: "BATCH_NO",
+    },
+    {
+      headerName: "작성자/등록자",
+      field: "CRE_USR_ID",
+    },
+    {
+      headerName: "등록일자",
+      field: "CRE_DTTM",
+    },
+    {
+      headerName: "수정자",
+      field: "UPD_USR_ID",
+    },
+    {
+      headerName: "수정일시",
+      field: "UPD_DTTM",
+    },
+  ];
 
   const actions1 = [
     {
@@ -308,13 +558,26 @@ export default function TenderReceiveDispatch() {
           type: "button",
           key: "운송비양식다운로드",
           label: "운송비양식다운로드",
-          onClick: () => console.log("운송비양식다운로드"),
+          onClick: () => {
+            downExcelSearch({
+              columns: columnDefs1,
+              searchParams: buildExcelPayload(),
+              searchUrl: "/tenderReceiveDispatchService/searchCarrierRateExcel",
+              menuCd: "MENU_PLAN_TENDER_RECEIVE",
+              menuName: "운송수배현황",
+            });
+          },
         },
         {
           type: "button",
           key: "운송비업로드",
           label: "운송비업로드",
-          onClick: () => console.log("운송비업로드"),
+          onClick: () => {
+            handleApi(
+              tenderApi.gridExcelUpload(buildExcelPayload()),
+              "업로드가 완료되었습니다.",
+            );
+          },
         },
       ],
     },
@@ -382,249 +645,7 @@ export default function TenderReceiveDispatch() {
             <div className="h-full flex flex-col overflow-hidden">
               <DataGrid
                 layoutType="plain"
-                columnDefs={[
-                  { headerName: "No" },
-                  {
-                    headerName: "정산진행상태",
-                    field: "AP_FI_STS",
-                    cellRenderer: (params: any) => {
-                      const code = params.value;
-                      const label = codeMap.apFiSts?.[String(code)] ?? code;
-
-                      const cls =
-                        dispatchStatusColorMap[String(code)] ??
-                        "bg-gray-100 text-gray-600";
-
-                      return (
-                        <span
-                          className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}
-                        >
-                          {label}
-                        </span>
-                      );
-                    },
-                  },
-                  {
-                    headerName: "물류운영그룹",
-                    field: "LGST_GRP_CD",
-                  },
-                  {
-                    headerName: "납품일",
-                    field: "DLVRY_DT",
-                  },
-                  {
-                    headerName: "배차번호",
-                    field: "DSPCH_NO",
-                  },
-                  {
-                    headerName: "배차진행상태",
-                    field: "DSPCH_OP_STS",
-                    cellRenderer: (params: any) => {
-                      const code = params.value;
-                      const label = codeMap.dspchOpSts?.[String(code)] ?? code;
-
-                      const cls =
-                        dispatchStatusColorMap[String(code)] ??
-                        "bg-gray-100 text-gray-600";
-
-                      return (
-                        <span
-                          className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}
-                        >
-                          {label}
-                        </span>
-                      );
-                    },
-                  },
-                  {
-                    headerName: "운송협력사명",
-                    field: "CARR_NM",
-                  },
-                  {
-                    headerName: "차량유형명",
-                    field: "VEH_TP_NM",
-                  },
-                  {
-                    headerName: "입차순서",
-                    field: "ETRNC_SEQ",
-                  },
-                  {
-                    headerName: "차량번호",
-                    field: "VEH_NO",
-                  },
-                  {
-                    headerName: "운전자명",
-                    field: "DRVR_NM",
-                  },
-                  {
-                    headerName: "핸드폰번호",
-                    field: "MBL_PHN_NO",
-                  },
-                  {
-                    headerName: "메모",
-                    field: "MEMO_DESC",
-                  },
-                  {
-                    headerName: "운송사메모",
-                    field: "CARR_MEMO_DESC",
-                  },
-                  {
-                    headerName: "경로",
-                    field: "ROUTE_PATH",
-                  },
-                  {
-                    headerName: "중량",
-                    field: "TTL_LD_WGT",
-                  },
-                  {
-                    headerName: "팔레트수량",
-                    field: "TTL_LD_FLEX_QTY2",
-                  },
-                  {
-                    headerName: "회수PVC수량",
-                    field: "RETURN_PVC_QTY",
-                  },
-                  {
-                    headerName: "PVC회수스캔일시",
-                    field: "DLVRY_RETURN_DTTM",
-                  },
-                  {
-                    headerName: "입차요청일시",
-                    field: "REQ_ETRNC_DTTM",
-                  },
-                  {
-                    headerName: "입차예정일시",
-                    field: "EXPCT_ETRNC_DTTM",
-                  },
-                  {
-                    headerName: "입차지연사유",
-                    field: "DLYD_ETRNC_RSN_DESC",
-                  },
-                  {
-                    headerName: "차량유형",
-                    field: "CARR_CFM_VEH_TCD",
-                  },
-                  {
-                    headerName: "수/배송구분",
-                    field: "TRANS_TCD",
-                  },
-                  {
-                    headerName: "추적번호",
-                    field: "TRCK_NO",
-                  },
-                  {
-                    headerName: "SMS전송일시",
-                    field: "SMS_APP_INST_DTTM",
-                  },
-                  {
-                    headerName: "전송번호",
-                    field: "SEND_NO",
-                  },
-                  {
-                    headerName: "메모(운송요청)",
-                    field: "MEMO",
-                  },
-                  {
-                    headerName: "경유처수",
-                    field: "STOP_CNT",
-                  },
-                  {
-                    headerName: "운임예약가능여부",
-                    field: "CARR_BOOKING_YN",
-                  },
-                  {
-                    headerName: "등록금액",
-                    field: "RATE",
-                  },
-                  {
-                    headerName: "확정금액",
-                    field: "CFM_COST",
-                  },
-                  {
-                    headerName: "등록사유",
-                    field: "CARR_CHG_RMK",
-                  },
-                  {
-                    headerName: "부피",
-                    field: "TTL_LD_VOL",
-                  },
-                  {
-                    headerName: "PVC수량",
-                    field: "TTL_LD_FLEX_QTY1",
-                  },
-                  {
-                    headerName: "전용용기",
-                    field: "TTL_LD_FLEX_QTY3",
-                  },
-                  {
-                    headerName: "종이박스/지대수량",
-                    field: "TTL_LD_FLEX_QTY4",
-                  },
-                  {
-                    headerName: "채반수량",
-                    field: "TTL_LD_FLEX_QTY5",
-                  },
-                  {
-                    headerName: "출발지명",
-                    field: "FRM_LOC_NM",
-                  },
-                  {
-                    headerName: "디비전",
-                    field: "DIV_CD",
-                  },
-                  {
-                    headerName: "물류운영그룹코드",
-                    field: "LGST_GRP_CD",
-                  },
-                  {
-                    headerName: "출발지코드",
-                    field: "FRM_LOC_CD",
-                  },
-                  {
-                    headerName: "연계배차번호",
-                    field: "TRIP_ID",
-                  },
-                  {
-                    headerName: "연계배차순서",
-                    field: "TRIP_SEQ",
-                  },
-                  {
-                    headerName: "출발시군구",
-                    field: "FRM_FULL_ADDR",
-                  },
-                  {
-                    headerName: "도착시군구",
-                    field: "TO_FULL_ADDR",
-                  },
-                  {
-                    headerName: "차량코드",
-                    field: "VEH_ID",
-                  },
-                  {
-                    headerName: "운전자코드",
-                    field: "DRVR_ID",
-                  },
-                  {
-                    headerName: "배송차수",
-                    field: "BATCH_NO",
-                  },
-                  {
-                    headerName: "작성자/등록자",
-                    field: "CRE_USR_ID",
-                  },
-                  {
-                    headerName: "등록일자",
-                    field: "CRE_DTTM",
-                  },
-                  {
-                    headerName: "수정자",
-                    field: "UPD_USR_ID",
-                  },
-                  {
-                    headerName: "수정일시",
-                    field: "UPD_DTTM",
-                  },
-                ]}
+                columnDefs={columnDefs1}
                 rowData={headerRowData}
                 actions={actions1}
                 pagination

@@ -15,6 +15,7 @@ function cn(...xs: Array<string | false | null | undefined>) {
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>({
     userId: "",
     password: "",
@@ -26,6 +27,7 @@ export default function AuthPage() {
     e.preventDefault();
     if (loading) return;
 
+    setError(null); // ✅ 제출 시 에러 초기화
     setLoading(true);
     try {
       const res = await authApi.loginMobile({
@@ -37,13 +39,14 @@ export default function AuthPage() {
         res.data.data;
 
       if (ACCESS_TOKEN == null || ACCESS_TOKEN === undefined) {
-        alert("NOT VALID");
+        setError("아이디 또는 비밀번호가 올바르지 않습니다.");
         return;
       }
 
       setTokens(ACCESS_TOKEN, REFRESH_TOKEN, userId, userNm, userLang);
-
       navigate("/", { replace: true });
+    } catch (err) {
+      setError("로그인에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setLoading(false);
     }
@@ -51,9 +54,7 @@ export default function AuthPage() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-white">
-      {/* ✅ 2컬럼 레이아웃: 왼쪽(이미지) / 오른쪽(폼) */}
       <div className="h-full w-full flex">
-        {/* ✅ 이미지 칸 */}
         <div className="relative flex-1 min-w-0">
           <img
             src={loginBgImg}
@@ -74,7 +75,11 @@ export default function AuthPage() {
                   Welcome back.
                   {"\n"}Sign in to continue.
                 </p>
-
+                {error && (
+                  <div className="mt-3 rounded-md border border-red-300 bg-red-50 px-4 py-3">
+                    <p className="text-sm font-medium text-red-600">{error}</p>
+                  </div>
+                )}
                 <form onSubmit={onSubmit} className="mt-10 space-y-6">
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-slate-500">

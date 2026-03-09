@@ -220,7 +220,6 @@ export default function DataGrid<TRow>({
                       resizable: true,
                       sortable: true,
                       minWidth: 80, // ⭐ 핵심
-                      maxWidth: 120,
                       // quickFilter
                       filter: true,
                       floatingFilter: true, //header에서 바로보이게
@@ -273,6 +272,15 @@ export default function DataGrid<TRow>({
 
                       onRowClicked?.(e.data);
                     }}
+                    onFirstDataRendered={(e) => {
+                      const updatedDefs = e.api.getColumnDefs()?.map((col) => ({
+                        ...col,
+                        maxWidth: 120,
+                      }));
+                      if (updatedDefs) {
+                        e.api.setGridOption("columnDefs", updatedDefs);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -308,7 +316,6 @@ export default function DataGrid<TRow>({
                 resizable: true,
                 sortable: true,
                 minWidth: 80,
-                maxWidth: 120,
                 // quickFilter
                 filter: true,
                 floatingFilter: true, //header에서 바로보이게
@@ -361,6 +368,15 @@ export default function DataGrid<TRow>({
                 if (!e.data) return;
 
                 onRowClicked?.(e.data);
+              }}
+              onFirstDataRendered={(e) => {
+                const updatedDefs = e.api.getColumnDefs()?.map((col) => ({
+                  ...col,
+                  maxWidth: 120,
+                }));
+                if (updatedDefs) {
+                  e.api.setGridOption("columnDefs", updatedDefs);
+                }
               }}
             />
           </div>
