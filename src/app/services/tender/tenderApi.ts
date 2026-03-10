@@ -53,7 +53,21 @@ export const tenderApi = {
     );
   },
 
+  getBookingChgCodeName(payload: any) {
+    return apiClient.post<commonResponse>(
+      "/openapina/carrier/getBookingChgCodeName",
+      withSession(payload),
+    );
+  },
+
   /////// ACTION
+  //운송비 저장
+  updateCarrierRate(payload: any) {
+    return apiClient.post<commonResponse>(
+      "/openapina/carrier/updateCarrierRate",
+      withSession(payload),
+    );
+  },
 
   //운송요청수락
   onTenderAccepted(payload: any) {

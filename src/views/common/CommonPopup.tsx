@@ -15,10 +15,12 @@ const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
  * ======================= */
 export function CommonPopup({
   sqlId,
+  fetchFn,
   onApply,
   onClose,
 }: {
   sqlId: string;
+  fetchFn?: (params?: any) => Promise<any>;
   onApply: (row: any) => void;
   onClose: () => void;
 }) {
@@ -28,39 +30,43 @@ export function CommonPopup({
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
   useEffect(() => {
-    commonApi
-      .getCodesAndNames({
-        sesUserId: userId,
-        userId, // 필요한 값만 payload로
-        sqlProp: sqlId,
-        ACCESS_TOKEN,
-      })
-      .then((res: any) => {
-        setRows(res.data.result ?? []);
-      })
-      .catch((err: any) => {
-        console.error(err);
-      });
+    handleSearch({});
   }, []);
 
+  const handleSearch = (extra: Record<string, any> = {}) => {
+    // sqlId가 있으면 기존 commonApi 사용
+    if (sqlId) {
+      commonApi
+        .getCodesAndNames({
+          sesUserId: userId,
+          userId,
+          sqlProp: sqlId,
+          ACCESS_TOKEN,
+          ...extra,
+        })
+        .then((res: any) => setRows(res.data.result ?? []))
+        .catch(console.error);
+      return;
+    }
+
+    // fetchFn이 있으면 주입된 API 사용
+    if (fetchFn) {
+      fetchFn(extra)
+        .then((res: any) => {
+          // 응답 데이터를 { CODE, NAME } 형식으로 변환
+          const result = res.data.result ?? res.data.rows ?? [];
+          setRows(result);
+        })
+        .catch(console.error);
+      return;
+    }
+  };
+
   const onSearch = () => {
-    const payload = {
-      sesUserId: userId,
-      userId,
-      sqlProp: sqlId,
-      ACCESS_TOKEN,
+    handleSearch({
       ...(code && { code }),
       ...(name && { name }),
-    };
-
-    commonApi
-      .getCodesAndNames(payload)
-      .then((res: any) => {
-        setRows(res.data.result ?? []);
-      })
-      .catch((err: any) => {
-        console.error(err);
-      });
+    });
   };
 
   return (

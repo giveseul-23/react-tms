@@ -19,6 +19,7 @@ import VehicleChangePopup from "@/views/tender/popup/VehicleChangePopup";
 import VehicleAssignPopup from "@/views/tender/popup/VehicleAssignPopup";
 import { useGuard } from "@/hooks/useGuard";
 import { useCommonStores } from "@/hooks/useCommonStores";
+import { CommonPopup } from "@/views/common/CommonPopup";
 
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 
@@ -82,13 +83,15 @@ export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
   const [filters, setFilters] = useState<SearchCondition[]>([]);
   const [layout, setLayout] = useState<LayoutType>("side");
-  const [headerRowData, setHeaderRowData] = useState([]);
-  const [subStopRowData, setSubStopRowData] = useState([]);
-  const [subSmsHisRowData, setSubSmsHisRowData] = useState([]);
-  const [subApSetlRowData, setSubApSetlRowData] = useState([]);
+  const [subStopRowData, setSubStopRowData] = useState<any[]>([]);
+  const [subSmsHisRowData, setSubSmsHisRowData] = useState<any[]>([]);
+  const [subApSetlRowData, setSubApSetlRowData] = useState<any[]>([]);
+  const [headerRowData, setHeaderRowData] = useState<any[]>([]);
   const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
   const { guardHasData } = useGuard();
+
+  const [selectedHeaderRow, setSelectedHeaderRow] = useState<any>(null);
 
   const { stores } = useCommonStores({
     dspchOpSts: {
@@ -661,6 +664,8 @@ export default function TenderReceiveDispatch() {
                 pagination
                 pageSize={20}
                 onRowClicked={(row: any) => {
+                  setSelectedHeaderRow(row);
+
                   tenderApi
                     .getDispatchStopList({
                       DSPCH_NO: row.DSPCH_NO,
@@ -775,24 +780,114 @@ export default function TenderReceiveDispatch() {
                   AP_SETL: {
                     columnDefs: [
                       { headerName: "No" },
-                      { headerName: "품목코드", field: "CUST_ITEM_CD" },
-                      { headerName: "품목명", field: "CUST_ITEM_NM" },
-                      { headerName: "계획CBM", field: "PLN_VOL" },
-                      { headerName: "계획중량", field: "PLN_WGT" },
-                      { headerName: "계획FQ1", field: "PLN_FLEX_QTY1" },
-                      { headerName: "계획FQ2", field: "PLN_FLEX_QTY2" },
-                      { headerName: "계획FQ3", field: "PLN_FLEX_QTY3" },
-                      { headerName: "계획FQ4", field: "PLN_FLEX_QTY4" },
-                      { headerName: "계획FQ5", field: "PLN_FLEX_QTY5" },
-                      { headerName: "계획수량", field: "PLN_QTY" },
+                      {
+                        headerName: "삭제",
+                        field: "_delete",
+                        width: 60,
+                        filter: false,
+                        floatingFilter: false,
+                        cellRenderer: (params: any) => {
+                          // 새로 추가된 행만 체크박스 표시
+                          if (!params.data._isNew) return null;
+
+                          return (
+                            <div className="flex items-center justify-start h-full">
+                              <input
+                                type="checkbox"
+                                className="ag-input-field-input ag-checkbox-input"
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSubApSetlRowData((prev: any) =>
+                                      prev.filter(
+                                        (row: any) => row !== params.data,
+                                      ),
+                                    );
+                                  }
+                                }}
+                              />
+                            </div>
+                          );
+                        },
+                      },
+                      {
+                        field: "DSPCH_NO",
+                        hide: true,
+                      },
+                      {
+                        headerName: "항목코드",
+                        field: "CHG_CD",
+                      },
+                      {
+                        headerName: "항목명",
+                        field: "CHG_NM",
+                      },
+                      {
+                        headerName: "등록금액",
+                        field: "RATE",
+                        editable: true,
+                      },
+                      {
+                        headerName: "확정금액",
+                        field: "CFM_COST",
+                        // editable: true,
+                      },
+                      {
+                        headerName: "확정사유내용",
+                        field: "RMK",
+                        // editable: true,
+                      },
+                      {
+                        headerName: "등록일자",
+                        field: "CRE_DTTM",
+                      },
+                      {
+                        headerName: "작성자/등록자",
+                        field: "CRE_USR_ID",
+                      },
+                      {
+                        headerName: "수정일시",
+                        field: "UPD_DTTM",
+                      },
+                      {
+                        headerName: "수정자",
+                        field: "UPD_USR_ID",
+                      },
                     ],
                     actions: [
                       {
                         type: "button",
                         key: "운송비추가",
                         label: "추가",
-                        onClick: (e: any) => {
-                          console.log("운송비내역 추가", e);
+                        onClick: () => {
+                          if (!guardHasData(selectedHeaderRow)) {
+                            return;
+                          }
+
+                          openPopup({
+                            title: "항목코드",
+                            content: (
+                              <CommonPopup
+                                fetchFn={(params: any) =>
+                                  tenderApi.getBookingChgCodeName(params)
+                                }
+                                onApply={(row: any) => {
+                                  closePopup();
+
+                                  setSubApSetlRowData((prev: any) => [
+                                    ...prev,
+                                    {
+                                      _isNew: true,
+                                      DSPCH_NO: selectedHeaderRow.DSPCH_NO,
+                                      CHG_CD: row.CODE,
+                                      CHG_NM: row.NAME,
+                                    },
+                                  ]);
+                                }}
+                                onClose={closePopup}
+                              />
+                            ),
+                            width: "2xl",
+                          });
                         },
                       },
                       {
@@ -800,7 +895,12 @@ export default function TenderReceiveDispatch() {
                         key: "운송비저장",
                         label: "저장",
                         onClick: (e: any) => {
-                          console.log("운송비내역 저장", e);
+                          handleApi(
+                            tenderApi.updateCarrierRate(
+                              subApSetlRowData.filter((sub) => sub._isNew),
+                            ),
+                            "저장되었습니다.",
+                          ).then(searchRef.current?.());
                         },
                       },
                     ],
