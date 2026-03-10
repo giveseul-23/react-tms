@@ -47,10 +47,12 @@ export function SearchFilters({
   meta,
   onSearch,
   searchRef,
+  filtersRef,
 }: {
   meta: readonly SearchMeta[];
   onSearch: React.Dispatch<React.SetStateAction<[]>>;
   searchRef?: React.MutableRefObject<(() => void) | null>;
+  filtersRef?: React.MutableRefObject<Record<string, unknown>>;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
@@ -189,6 +191,13 @@ export function SearchFilters({
     const whereClause = conditions.join("");
 
     const userId = sessionStorage.getItem("userId");
+
+    if (filtersRef) {
+      filtersRef.current = {
+        DYNAMIC_QUERY: whereClause,
+        MENU_CD: "test",
+      };
+    }
 
     tenderApi
       .getDispatchList({

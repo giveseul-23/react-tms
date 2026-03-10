@@ -215,52 +215,77 @@ export function getColumnsCodeData(
 interface DownExcelOptions {
   columns: ColumnDefine[];
   searchParams?: Record<string, unknown>;
-  searchUrl: string;
-  menuCd: string;
   menuName?: string;
   comboStores?: Record<string, ComboOption[]>;
-  filteredRowsOnly?: boolean;
-  withSession?: (payload: any) => any;
+  fetchFn: (params: any) => Promise<any>; // ← 추가, searchUrl 제거
 }
 
+// excelUtils.ts
 export async function downExcelSearch({
   columns,
   searchParams = {},
-  searchUrl,
-  menuCd,
-  menuName,
+  menuName = "download",
   comboStores = {},
-  filteredRowsOnly = false,
-  withSession = (p) => p,
+  fetchFn, // ← API 함수를 주입받음
 }: DownExcelOptions): Promise<void> {
   const { comboColumns } = setColumnsForExcel(columns);
-
-  // 컬럼 정보 조립
   const excelInfo = getColumnInfoForExcelDown(columns, { menuName });
 
-  // 콤보 코드 데이터
-  const codeDataArray = getColumnsCodeData(comboColumns, comboStores);
-  const codeData: Record<string, unknown> = {};
-  for (const { key, data } of codeDataArray) {
-    codeData[key] = data;
-  }
+  // 1단계: 전달받은 fetchFn으로 전체 데이터 조회
+  const searchResponse = await fetchFn(searchParams);
+  const rows = searchResponse.data?.result ?? searchResponse.data?.rows ?? [];
 
-  const payload = withSession({
-    MENU_CD: menuCd,
-    SEARCH_URL: searchUrl,
-    DOWN_EXCEL_FILTERED_ROWS: filteredRowsOnly ? "Y" : "N",
+  // 2단계: 엑셀 다운로드
+  const payload = {
+    fileName: menuName,
+    rows,
     EXCEL_INFO: excelInfo,
-    DS_JSONDATA: {
-      dsSearchCondition: changeParamsToSearchCondition(searchParams),
-      ...codeData,
-    },
+  };
+
+  const response = await tenderApi.gridExcelAll(payload);
+
+  const blob = new Blob([response.data], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${menuName}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
-  // 1단계: 엑셀 준비 (세션 저장)
-  const res = await tenderApi.onCarrierRateExcelAll(payload);
+// 현재 그리드에 보이는 데이터로 엑셀 다운 (센차 downExcelSearched 대체)
+export async function downExcelSearched({
+  columns,
+  rows,
+  menuName = "download",
+}: {
+  columns: ColumnDefine[];
+  rows: Record<string, unknown>[];
+  menuName?: string;
+}): Promise<void> {
+  const excelInfo = getColumnInfoForExcelDown(columns, { menuName });
 
-  if (res?.data?.success) {
-    // 2단계: 실제 파일 다운로드
-    window.location.href = `/downloaderService/commonExcelDown?MENU_CD=${menuCd}`;
-  }
+  const payload = {
+    fileName: menuName,
+    rows,
+    EXCEL_INFO: excelInfo,
+  };
+
+  const response = await tenderApi.gridExcelAll(payload);
+
+  const blob = new Blob([response.data], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${menuName}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

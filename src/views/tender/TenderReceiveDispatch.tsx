@@ -20,7 +20,7 @@ import VehicleAssignPopup from "@/views/tender/popup/VehicleAssignPopup";
 import { useGuard } from "@/hooks/useGuard";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
-import { downExcelSearch } from "@/views/common/common";
+import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 
 type LayoutType = "side" | "vertical";
 
@@ -102,6 +102,7 @@ export default function TenderReceiveDispatch() {
   });
 
   const searchRef = useRef<(() => void) | null>(null);
+  const filtersRef = useRef<Record<string, unknown>>({});
 
   const codeMap = useMemo(() => {
     const map: Record<string, Record<string, string>> = {};
@@ -120,15 +121,7 @@ export default function TenderReceiveDispatch() {
     return <Skeleton className="h-24" />;
   }
 
-  const buildExcelPayload = () => {
-    return filters.reduce(
-      (acc, f: any) => {
-        acc[f.key] = f.value;
-        return acc;
-      },
-      {} as Record<string, unknown>,
-    );
-  };
+  const buildExcelPayload = () => filtersRef.current;
 
   const columnDefs1 = [
     { headerName: "No" },
@@ -586,17 +579,33 @@ export default function TenderReceiveDispatch() {
       key: "엑셀",
       label: "엑셀",
       items: [
+        // 조회된모든데이터다운로드 → 서버 DB 재조회
         {
           type: "button",
           key: "조회된모든데이터다운로드",
           label: "조회된모든데이터다운로드",
-          onClick: () => console.log("조회된모든데이터다운로드"),
+          onClick: () => {
+            downExcelSearch({
+              columns: columnDefs1,
+              searchParams: buildExcelPayload(), // filtersRef.current 반환
+              menuName: "운송사요청목록",
+              fetchFn: tenderApi.getDispatchList,
+            });
+          },
         },
+        // 보이는데이터다운로드 → 프론트 rowData 그대로
         {
           type: "button",
           key: "보이는데이터다운로드",
           label: "보이는데이터다운로드",
-          onClick: () => console.log("보이는데이터다운로드"),
+          onClick: () => {
+            downExcelSearched({
+              // 프론트 rowData
+              columns: columnDefs1,
+              rows: headerRowData,
+              menuName: "운송사요청목록",
+            });
+          },
         },
       ],
     },
@@ -611,6 +620,7 @@ export default function TenderReceiveDispatch() {
         onChange={setFilters}
         onSearch={setHeaderRowData}
         searchRef={searchRef}
+        filtersRef={filtersRef}
       />
 
       {/* layout toggle */}

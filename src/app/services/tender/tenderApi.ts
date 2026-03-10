@@ -131,8 +131,9 @@ export const tenderApi = {
   //엑셀 - 조회된 모든 데이터 다운로드
   gridExcelAll(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/gridExcelAll",
+      "/openapina/carrier/downloadExcel",
       withSession(payload),
+      { responseType: "blob" },
     );
   },
 
@@ -141,6 +142,17 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/gridExcel",
       withSession(payload),
+    );
+  },
+
+  async gridExcelAllBySearch(payload: any) {
+    // 1단계 + 2단계를 한번에: onCarrierRateExcelAll이 아닌 downloadExcel로 직접 호출
+    // 단, 서버가 searchUrl로 DB 재조회해서 rows를 채워줘야 하므로
+    // 백엔드 downloadExcel이 searchUrl 조회를 지원해야 함
+    return apiClient.post(
+      "/openapina/carrier/downloadExcel",
+      withSession(payload),
+      { responseType: "blob" },
     );
   },
 };
