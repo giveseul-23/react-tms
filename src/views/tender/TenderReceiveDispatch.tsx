@@ -273,6 +273,11 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "등록금액",
       field: "RATE",
+      editable: (params: any) => params.data._isNew,
+      valueSetter: (params: any) => {
+        params.data.RATE = params.newValue; // ← data 객체 직접 수정
+        return true;
+      },
     },
     {
       headerName: "확정금액",
@@ -894,13 +899,23 @@ export default function TenderReceiveDispatch() {
                         type: "button",
                         key: "운송비저장",
                         label: "저장",
-                        onClick: (e: any) => {
+                        onClick: () => {
+                          const newRows = subApSetlRowData.filter(
+                            (sub: any) => sub._isNew,
+                          );
+
                           handleApi(
-                            tenderApi.updateCarrierRate(
-                              subApSetlRowData.filter((sub) => sub._isNew),
-                            ),
+                            tenderApi.updateCarrierRate(newRows),
                             "저장되었습니다.",
-                          ).then(searchRef.current?.());
+                          ).then(() => {
+                            tenderApi
+                              .getDispatchApSetlList({
+                                DSPCH_NO: selectedHeaderRow.DSPCH_NO,
+                              })
+                              .then((res: any) =>
+                                setSubApSetlRowData(res.data.result),
+                              );
+                          });
                         },
                       },
                     ],

@@ -42,6 +42,8 @@ type DataGridProps<TRow> = {
 
   disableAutoSize?: boolean;
   rowSelection?: string;
+
+  onCellValueChanged?: (params: any) => void; // ← 추가
 };
 
 export default function DataGrid<TRow>({
@@ -58,6 +60,7 @@ export default function DataGrid<TRow>({
   disableAutoSize,
   onRowClicked,
   rowSelection: rowSelectionProp,
+  onCellValueChanged,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -281,6 +284,7 @@ export default function DataGrid<TRow>({
                         e.api.setGridOption("columnDefs", updatedDefs);
                       }
                     }}
+                    onCellValueChanged={onCellValueChanged}
                   />
                 </div>
               </div>
@@ -378,6 +382,7 @@ export default function DataGrid<TRow>({
                   e.api.setGridOption("columnDefs", updatedDefs);
                 }
               }}
+              onCellValueChanged={onCellValueChanged}
             />
           </div>
         )}
