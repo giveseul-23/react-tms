@@ -102,10 +102,26 @@ export default function TenderReceiveDispatch() {
   });
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
-
-  // filtersRef 에는 DYNAMIC_QUERY, MENU_CD 만 저장 (page/limit 없음)
-  // → 전체 다운로드 시 page/limit 없이 그대로 서버 호출 → 서버에서 전체 조회
   const filtersRef = useRef<Record<string, unknown>>({});
+  const apSetlGridRef = useRef<any>(null);
+
+  // setTimeout 클로저 문제 방지: 항상 최신 subApSetlRowData를 ref로 유지
+  const subApSetlRowDataRef = useRef<any[]>([]);
+  const selectedHeaderRowRef = useRef<any>(null);
+
+  // state setter를 래핑해서 ref도 같이 업데이트
+  const setSubApSetlRowDataWithRef = (updater: any) => {
+    setSubApSetlRowData((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      subApSetlRowDataRef.current = next;
+      return next;
+    });
+  };
+
+  const setSelectedHeaderRowWithRef = (row: any) => {
+    setSelectedHeaderRow(row);
+    selectedHeaderRowRef.current = row;
+  };
 
   const codeMap = useMemo(() => {
     const map: Record<string, Record<string, string>> = {};
@@ -414,7 +430,6 @@ export default function TenderReceiveDispatch() {
       label: "엑셀",
       items: [
         {
-          // 전체 데이터: filtersRef(page/limit 없음)로 서버 전체 재조회
           type: "button",
           key: "조회된모든데이터다운로드",
           label: "조회된모든데이터다운로드",
@@ -427,7 +442,6 @@ export default function TenderReceiveDispatch() {
           },
         },
         {
-          // 현재 페이지 데이터: gridData.rows 그대로 사용 (추가 API 호출 없음)
           type: "button",
           key: "보이는데이터다운로드",
           label: "보이는데이터다운로드",
@@ -493,7 +507,7 @@ export default function TenderReceiveDispatch() {
                 onPageChange={(page) => searchRef.current?.(page)}
                 actions={actions1}
                 onRowClicked={(row: any) => {
-                  setSelectedHeaderRow(row);
+                  setSelectedHeaderRowWithRef(row);
 
                   tenderApi
                     .getDispatchStopList({ DSPCH_NO: row.DSPCH_NO })
@@ -507,7 +521,9 @@ export default function TenderReceiveDispatch() {
 
                   tenderApi
                     .getDispatchApSetlList({ DSPCH_NO: row.DSPCH_NO })
-                    .then((res: any) => setSubApSetlRowData(res.data.result))
+                    .then((res: any) =>
+                      setSubApSetlRowDataWithRef(res.data.result),
+                    )
                     .catch(console.error);
                 }}
               />
@@ -589,6 +605,7 @@ export default function TenderReceiveDispatch() {
                     ],
                   },
                   AP_SETL: {
+                    gridRef: apSetlGridRef,
                     columnDefs: [
                       { headerName: "No" },
                       {
@@ -598,6 +615,7 @@ export default function TenderReceiveDispatch() {
                         filter: false,
                         floatingFilter: false,
                         cellRenderer: (params: any) => {
+                          // _isNew 행만 삭제 체크박스 표시
                           if (!params.data._isNew) return null;
                           return (
                             <div className="flex items-center justify-start h-full">
@@ -606,7 +624,7 @@ export default function TenderReceiveDispatch() {
                                 className="ag-input-field-input ag-checkbox-input"
                                 onChange={(e) => {
                                   if (e.target.checked) {
-                                    setSubApSetlRowData((prev: any) =>
+                                    setSubApSetlRowDataWithRef((prev: any) =>
                                       prev.filter(
                                         (row: any) => row !== params.data,
                                       ),
@@ -621,7 +639,12 @@ export default function TenderReceiveDispatch() {
                       { field: "DSPCH_NO", hide: true },
                       { headerName: "항목코드", field: "CHG_CD" },
                       { headerName: "항목명", field: "CHG_NM" },
-                      { headerName: "등록금액", field: "RATE", editable: true },
+                      {
+                        headerName: "등록금액",
+                        field: "RATE",
+                        // _isNew(신규), _isDirty(기존 수정) 모두 편집 가능
+                        editable: true,
+                      },
                       { headerName: "확정금액", field: "CFM_COST" },
                       { headerName: "확정사유내용", field: "RMK" },
                       { headerName: "등록일자", field: "CRE_DTTM" },
@@ -629,13 +652,29 @@ export default function TenderReceiveDispatch() {
                       { headerName: "수정일시", field: "UPD_DTTM" },
                       { headerName: "수정자", field: "UPD_USR_ID" },
                     ],
+                    // 셀 수정 시 React state 즉시 반영 + _isDirty 마킹
+                    onCellValueChanged: (params: any) => {
+                      setSubApSetlRowDataWithRef((prev: any) =>
+                        prev.map((row: any) =>
+                          row === params.data
+                            ? {
+                                ...row,
+                                [params.colDef.field]: params.newValue,
+                                // 기존 row(_isNew 아닌 것)면 _isDirty 마킹
+                                ...(!row._isNew && { _isDirty: true }),
+                              }
+                            : row,
+                        ),
+                      );
+                    },
                     actions: [
                       {
                         type: "button",
                         key: "운송비추가",
                         label: "추가",
                         onClick: () => {
-                          if (!guardHasData(selectedHeaderRow)) return;
+                          if (!guardHasData(selectedHeaderRowRef.current))
+                            return;
                           openPopup({
                             title: "항목코드",
                             content: (
@@ -645,11 +684,12 @@ export default function TenderReceiveDispatch() {
                                 }
                                 onApply={(row: any) => {
                                   closePopup();
-                                  setSubApSetlRowData((prev: any) => [
+                                  setSubApSetlRowDataWithRef((prev: any) => [
                                     ...prev,
                                     {
                                       _isNew: true,
-                                      DSPCH_NO: selectedHeaderRow.DSPCH_NO,
+                                      DSPCH_NO:
+                                        selectedHeaderRowRef.current.DSPCH_NO,
                                       CHG_CD: row.CODE,
                                       CHG_NM: row.NAME,
                                     },
@@ -667,21 +707,31 @@ export default function TenderReceiveDispatch() {
                         key: "운송비저장",
                         label: "저장",
                         onClick: () => {
-                          const newRows = subApSetlRowData.filter(
-                            (sub: any) => sub._isNew,
-                          );
-                          handleApi(
-                            tenderApi.updateCarrierRate(newRows),
-                            "저장되었습니다.",
-                          ).then(() => {
-                            tenderApi
-                              .getDispatchApSetlList({
-                                DSPCH_NO: selectedHeaderRow.DSPCH_NO,
-                              })
-                              .then((res: any) =>
-                                setSubApSetlRowData(res.data.result),
-                              );
-                          });
+                          // 1. 편집 중인 셀 종료 → onCellValueChanged 트리거
+                          apSetlGridRef.current?.api?.stopEditing();
+
+                          // 2. ref에서 최신값 읽어 저장 (_isNew 신규 + _isDirty 변경분)
+                          setTimeout(() => {
+                            const saveRows = subApSetlRowDataRef.current.filter(
+                              (sub: any) => sub._isNew || sub._isDirty,
+                            );
+
+                            if (saveRows.length === 0) return;
+
+                            handleApi(
+                              tenderApi.updateCarrierRate(saveRows),
+                              "저장되었습니다.",
+                            ).then(() => {
+                              tenderApi
+                                .getDispatchApSetlList({
+                                  DSPCH_NO:
+                                    selectedHeaderRowRef.current.DSPCH_NO,
+                                })
+                                .then((res: any) =>
+                                  setSubApSetlRowDataWithRef(res.data.result),
+                                );
+                            });
+                          }, 50);
                         },
                       },
                     ],

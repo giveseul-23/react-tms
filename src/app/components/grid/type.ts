@@ -1,11 +1,14 @@
 import type { ColDef, ColGroupDef } from "ag-grid-community";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 export type GridTab = {
-  key: string; // 완전 자유 (DB/화면 정의)
-  label: string; // 탭 타이틀
+  key: string;
+  label: string;
 };
 
 export type GridPreset<TRow> = {
   columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[];
-  rowData: TRow[];
+  actions?: ActionItem[];
+  onCellValueChanged?: (params: any) => void;
+  gridRef?: React.RefObject<any>; // ← stopEditing 용
 };

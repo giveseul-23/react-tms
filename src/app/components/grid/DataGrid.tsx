@@ -5,14 +5,9 @@ import { ModuleRegistry } from "ag-grid-community";
 import { AllCommunityModule } from "ag-grid-community";
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
-import type {
-  ColDef,
-  ColGroupDef,
-  GridReadyEvent,
-  ValueGetterParams,
-} from "ag-grid-community";
+import type { ColDef, ColGroupDef, ValueGetterParams } from "ag-grid-community";
 
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
@@ -74,6 +69,9 @@ export default function DataGrid<TRow>({
     tabs?.[0]?.key ?? null,
   );
 
+  // preset에 gridRef가 없을 때 사용할 내부 ref
+  const internalGridRef = useRef<any>(null);
+
   const totalPages = Math.ceil((totalCount ?? 0) / (pageSize ?? 20));
 
   const activeColumnDefs = useMemo(() => {
@@ -95,6 +93,29 @@ export default function DataGrid<TRow>({
     return Array.isArray(rowData) ? rowData : [];
   }, [layoutType, activeTab, rowData]);
 
+  const activeActions = useMemo(() => {
+    if (layoutType === "tab" && activeTab && presets) {
+      return presets[activeTab].actions ?? actions ?? [];
+    }
+    return actions ?? [];
+  }, [layoutType, activeTab, presets, actions]);
+
+  // preset의 onCellValueChanged 우선, 없으면 prop 사용
+  const activeOnCellValueChanged = useMemo(() => {
+    if (layoutType === "tab" && activeTab && presets) {
+      return presets[activeTab].onCellValueChanged ?? onCellValueChanged;
+    }
+    return onCellValueChanged;
+  }, [layoutType, activeTab, presets, onCellValueChanged]);
+
+  // preset의 gridRef 우선, 없으면 내부 ref 사용
+  const activeGridRef = useMemo(() => {
+    if (layoutType === "tab" && activeTab && presets) {
+      return presets[activeTab].gridRef ?? internalGridRef;
+    }
+    return internalGridRef;
+  }, [layoutType, activeTab, presets]);
+
   /** No 컬럼 처리 */
   const finalColumnDefs = useMemo(() => {
     return activeColumnDefs.map((col) => {
@@ -112,7 +133,6 @@ export default function DataGrid<TRow>({
         };
       }
 
-      // 공통코드에서 maxWidth 설정안되게 수정
       if ((col as any).disableMaxWidth === true) {
         return {
           ...col,
@@ -123,27 +143,6 @@ export default function DataGrid<TRow>({
       return col;
     });
   }, [activeColumnDefs]);
-
-  const rowSelection = useMemo(
-    () => ({
-      mode: "multiRow" as const,
-      enableClickSelection: false,
-      enableSelectionWithoutKeys: true,
-    }),
-    [],
-  );
-
-  const rightGrid =
-    layoutType === "tab" && activeTab && renderRightGrid
-      ? renderRightGrid(activeTab)
-      : null;
-
-  const activeActions = useMemo(() => {
-    if (layoutType === "tab" && activeTab && presets) {
-      return presets[activeTab].actions ?? actions ?? [];
-    }
-    return actions ?? [];
-  }, [layoutType, activeTab, presets, actions]);
 
   const wrappedActions = useMemo(() => {
     return activeActions?.map((action) => {
@@ -165,6 +164,11 @@ export default function DataGrid<TRow>({
       return action;
     });
   }, [activeActions, selectedRows]);
+
+  const rightGrid =
+    layoutType === "tab" && activeTab && renderRightGrid
+      ? renderRightGrid(activeTab)
+      : null;
 
   // 공통 AgGridReact props
   const commonGridProps = {
@@ -215,7 +219,7 @@ export default function DataGrid<TRow>({
         e.api.setGridOption("columnDefs", updatedDefs);
       }
     },
-    onCellValueChanged,
+    onCellValueChanged: activeOnCellValueChanged,
     rowSelection:
       rowSelectionProp === "single"
         ? { mode: "singleRow" as const, enableClickSelection: true }
@@ -301,6 +305,7 @@ export default function DataGrid<TRow>({
                   style={gridStyle}
                 >
                   <AgGridReact<TRow>
+                    ref={activeGridRef}
                     {...commonGridProps}
                     rowData={activeRowData}
                   />
@@ -319,7 +324,11 @@ export default function DataGrid<TRow>({
             className="ag-theme-quartz ag-theme-bridge w-full h-full"
             style={gridStyle}
           >
-            <AgGridReact<TRow> {...commonGridProps} rowData={activeRowData} />
+            <AgGridReact<TRow>
+              ref={activeGridRef}
+              {...commonGridProps}
+              rowData={activeRowData}
+            />
           </div>
         )}
       </div>
