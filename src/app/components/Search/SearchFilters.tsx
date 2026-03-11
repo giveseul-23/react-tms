@@ -43,19 +43,28 @@ type SearchMeta = {
   required?: boolean;
 };
 
+// ← onSearch 타입 변경: rows/totalCount/page/limit 를 담은 객체를 전달
 export function SearchFilters({
   meta,
   onSearch,
   searchRef,
   filtersRef,
+  pageSize = 20,
 }: {
   meta: readonly SearchMeta[];
-  onSearch: React.Dispatch<React.SetStateAction<[]>>;
-  searchRef?: React.MutableRefObject<(() => void) | null>;
+  onSearch: (data: {
+    rows: any[];
+    totalCount: number;
+    page: number;
+    limit: number;
+  }) => void;
+  searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
+  pageSize?: number;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
+  const [limit] = useState(pageSize);
 
   const [searchState, setSearchState] = useState<
     Record<string, SearchCondition>
@@ -136,87 +145,99 @@ export function SearchFilters({
     setSearchState(buildInitialSearchState());
   };
 
-  const handleSearch = useCallback(() => {
-    const missingFields = meta
-      .filter((m) => m.required === true)
-      .filter((m) => {
-        if (m.type === "dateRange") {
-          if (m.mode === "single") {
-            return !searchState[m.key]?.value;
+  // ← targetPage 파라미터 추가 (페이지 변경 시 재조회에 사용)
+  const handleSearch = useCallback(
+    (targetPage = 1) => {
+      const missingFields = meta
+        .filter((m) => m.required === true)
+        .filter((m) => {
+          if (m.type === "dateRange") {
+            if (m.mode === "single") {
+              return !searchState[m.key]?.value;
+            }
+            return (
+              !searchState[`${m.key}_FRM`]?.value ||
+              !searchState[`${m.key}_TO`]?.value
+            );
           }
-          return (
-            !searchState[`${m.key}_FRM`]?.value ||
-            !searchState[`${m.key}_TO`]?.value
-          );
-        }
-        return !searchState[m.key]?.value;
-      });
+          return !searchState[m.key]?.value;
+        });
 
-    if (missingFields.length > 0) {
-      const labels = missingFields.map((m) => m.label).join(", ");
-      openPopup({
-        title: "",
-        content: (
-          <ConfirmModal
-            type="error"
-            title="필수 항목 누락"
-            description={`다음 항목을 입력해주세요 : ${labels}`}
-            onClose={closePopup}
-          />
-        ),
-        width: "sm",
-      });
-      return;
-    }
-
-    const conditions: string[] = [];
-
-    Object.values(searchState).forEach((v) => {
-      if (v.value === "ALL") {
-        const metaItem = meta.find((m) => m.key === v.key);
-
-        if (metaItem?.options) {
-          const codes = metaItem.options
-            .filter((o) => o.CODE !== "ALL")
-            .map((o) => `'${o.CODE}'`)
-            .join(",");
-
-          conditions.push(` AND ${v.key} IN (${codes})`);
-        }
-      } else {
-        conditions.push(buildSearchCondition(v));
+      if (missingFields.length > 0) {
+        const labels = missingFields.map((m) => m.label).join(", ");
+        openPopup({
+          title: "",
+          content: (
+            <ConfirmModal
+              type="error"
+              title="필수 항목 누락"
+              description={`다음 항목을 입력해주세요 : ${labels}`}
+              onClose={closePopup}
+            />
+          ),
+          width: "sm",
+        });
+        return;
       }
-    });
 
-    const whereClause = conditions.join("");
+      const conditions: string[] = [];
 
-    const userId = sessionStorage.getItem("userId");
+      Object.values(searchState).forEach((v) => {
+        if (v.value === "ALL") {
+          const metaItem = meta.find((m) => m.key === v.key);
 
-    if (filtersRef) {
-      filtersRef.current = {
-        DYNAMIC_QUERY: whereClause,
-        MENU_CD: "test",
-      };
-    }
+          if (metaItem?.options) {
+            const codes = metaItem.options
+              .filter((o) => o.CODE !== "ALL")
+              .map((o) => `'${o.CODE}'`)
+              .join(",");
 
-    tenderApi
-      .getDispatchList({
-        sesUserId: userId,
-        userId,
-        ACCESS_TOKEN: sessionStorage.getItem("ACCESS_TOKEN"),
-        REFRESH_TOKEN: sessionStorage.getItem("REFRESH_TOKEN"),
-        DYNAMIC_QUERY: whereClause,
-        MENU_CD: "test",
-      })
-      .then((res: any) => {
-        onSearch(res.data.result);
-      })
-      .catch((err: any) => {
-        console.error(err);
+            conditions.push(` AND ${v.key} IN (${codes})`);
+          }
+        } else {
+          conditions.push(buildSearchCondition(v));
+        }
       });
-  }, [searchState, meta, onSearch]);
 
-  // ✅ useEffect는 컴포넌트 최상단 레벨에 위치
+      const whereClause = conditions.join("");
+      const userId = sessionStorage.getItem("userId");
+
+      if (filtersRef) {
+        filtersRef.current = {
+          DYNAMIC_QUERY: whereClause,
+          MENU_CD: "test",
+        };
+      }
+
+      tenderApi
+        .getDispatchList({
+          sesUserId: userId,
+          userId,
+          ACCESS_TOKEN: sessionStorage.getItem("ACCESS_TOKEN"),
+          REFRESH_TOKEN: sessionStorage.getItem("REFRESH_TOKEN"),
+          DYNAMIC_QUERY: whereClause,
+          MENU_CD: "test",
+          page: targetPage, // ← 추가
+          limit, // ← 추가
+        })
+        .then((res: any) => {
+          const rows = res.data.result ?? [];
+          const totalCount = rows[0]?.TOTALCOUNT ?? 0; // ← 첫 번째 row에서 추출
+
+          onSearch({
+            rows,
+            totalCount,
+            page: targetPage,
+            limit,
+          });
+        })
+        .catch((err: any) => {
+          console.error(err);
+        });
+    },
+    [searchState, meta, limit, onSearch],
+  );
+
   useEffect(() => {
     if (searchRef) {
       searchRef.current = handleSearch;
@@ -291,7 +312,6 @@ export function SearchFilters({
                 };
 
                 switch (m.type) {
-                  /* ---------- TEXT / COMBO ---------- */
                   case "text":
                   case "combo":
                     return (
@@ -311,7 +331,6 @@ export function SearchFilters({
                       />
                     );
 
-                  /* ---------- DATE RANGE ---------- */
                   case "dateRange":
                     if (m.mode === "single") {
                       return (
@@ -356,7 +375,6 @@ export function SearchFilters({
                       />
                     );
 
-                  /* ---------- CHECKBOX ---------- */
                   case "checkbox":
                     return (
                       <SearchFilter
@@ -376,7 +394,6 @@ export function SearchFilters({
                       />
                     );
 
-                  /* ---------- POPUP ---------- */
                   case "popup":
                     const baseKey = m.key.replace("_CD", "");
 
@@ -435,7 +452,7 @@ export function SearchFilters({
             <Button
               variant="outline"
               size="xs"
-              onClick={handleSearch}
+              onClick={() => handleSearch(1)} // ← 조회 버튼은 항상 1페이지부터
               className="btn-primary btn-primary:hover"
             >
               <Search className="w-3 h-3" />

@@ -55,24 +55,16 @@ function CntrSubGrid() {
   );
 }
 
-// statusColorMap.ts
 const dispatchStatusColorMap: Record<string, string> = {
-  // 요청 / 취소 계열 (보라)
   "2030": "bg-purple-100 text-purple-700",
   "2040": "bg-purple-100 text-purple-700",
   "2050": "bg-purple-100 text-purple-700",
   "2060": "bg-purple-100 text-purple-700",
-
-  // 상차 계열 (하늘)
   "2070": "bg-sky-100 text-sky-700",
   "2073": "bg-sky-100 text-sky-700",
   "2075": "bg-sky-100 text-sky-700",
-
-  // 운송 계열 (블루)
   "2080": "bg-blue-100 text-blue-700",
   "2090": "bg-blue-100 text-blue-700",
-
-  // 완료 / 종료 계열 (그린)
   "2100": "bg-emerald-100 text-emerald-700",
   "2103": "bg-emerald-100 text-emerald-700",
   "2105": "bg-emerald-100 text-emerald-700",
@@ -86,7 +78,6 @@ export default function TenderReceiveDispatch() {
   const [subStopRowData, setSubStopRowData] = useState<any[]>([]);
   const [subSmsHisRowData, setSubSmsHisRowData] = useState<any[]>([]);
   const [subApSetlRowData, setSubApSetlRowData] = useState<any[]>([]);
-  const [headerRowData, setHeaderRowData] = useState<any[]>([]);
   const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
   const { guardHasData } = useGuard();
@@ -94,29 +85,35 @@ export default function TenderReceiveDispatch() {
   const [selectedHeaderRow, setSelectedHeaderRow] = useState<any>(null);
 
   const { stores } = useCommonStores({
-    dspchOpSts: {
-      sqlProp: "CODE",
-      keyParam: "DSPCH_OP_STS",
-    },
-    apFiSts: {
-      sqlProp: "CODE",
-      keyParam: "AP_FI_STS",
-    },
+    dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
+    apFiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
   });
 
-  const searchRef = useRef<(() => void) | null>(null);
+  // ← 서버 페이징 상태 (rows + 페이징 메타)
+  const [gridData, setGridData] = useState<{
+    rows: any[];
+    totalCount: number;
+    page: number;
+    limit: number;
+  }>({
+    rows: [],
+    totalCount: 0,
+    page: 1,
+    limit: 20,
+  });
+
+  // ← searchRef 타입: page 인자를 받을 수 있도록 변경
+  const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
 
   const codeMap = useMemo(() => {
     const map: Record<string, Record<string, string>> = {};
-
     Object.entries(stores).forEach(([storeKey, items]) => {
       map[storeKey] = {};
       (items ?? []).forEach((item: any) => {
         map[storeKey][item.CODE] = item.NAME;
       });
     });
-
     return map;
   }, [stores]);
 
@@ -134,10 +131,8 @@ export default function TenderReceiveDispatch() {
       cellRenderer: (params: any) => {
         const code = params.value;
         const label = codeMap.apFiSts?.[String(code)] ?? code;
-
         const cls =
           dispatchStatusColorMap[String(code)] ?? "bg-gray-100 text-gray-600";
-
         return (
           <span className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}>
             {label}
@@ -145,28 +140,17 @@ export default function TenderReceiveDispatch() {
         );
       },
     },
-    {
-      headerName: "물류운영그룹",
-      field: "LGST_GRP_CD",
-    },
-    {
-      headerName: "납품일",
-      field: "DLVRY_DT",
-    },
-    {
-      headerName: "배차번호",
-      field: "DSPCH_NO",
-    },
+    { headerName: "물류운영그룹", field: "LGST_GRP_CD" },
+    { headerName: "납품일", field: "DLVRY_DT" },
+    { headerName: "배차번호", field: "DSPCH_NO" },
     {
       headerName: "배차진행상태",
       field: "DSPCH_OP_STS",
       cellRenderer: (params: any) => {
         const code = params.value;
         const label = codeMap.dspchOpSts?.[String(code)] ?? code;
-
         const cls =
           dispatchStatusColorMap[String(code)] ?? "bg-gray-100 text-gray-600";
-
         return (
           <span className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}>
             {label}
@@ -174,214 +158,66 @@ export default function TenderReceiveDispatch() {
         );
       },
     },
-    {
-      headerName: "운송협력사명",
-      field: "CARR_NM",
-    },
-    {
-      headerName: "차량유형명",
-      field: "VEH_TP_NM",
-    },
-    {
-      headerName: "입차순서",
-      field: "ETRNC_SEQ",
-    },
-    {
-      headerName: "차량번호",
-      field: "VEH_NO",
-    },
-    {
-      headerName: "운전자명",
-      field: "DRVR_NM",
-    },
-    {
-      headerName: "핸드폰번호",
-      field: "MBL_PHN_NO",
-    },
-    {
-      headerName: "메모",
-      field: "MEMO_DESC",
-    },
-    {
-      headerName: "운송사메모",
-      field: "CARR_MEMO_DESC",
-    },
-    {
-      headerName: "경로",
-      field: "ROUTE_PATH",
-    },
-    {
-      headerName: "중량",
-      field: "TTL_LD_WGT",
-      type: "numeric",
-    },
-    {
-      headerName: "팔레트수량",
-      field: "TTL_LD_FLEX_QTY2",
-      type: "numeric",
-    },
-    {
-      headerName: "회수PVC수량",
-      field: "RETURN_PVC_QTY",
-      type: "numeric",
-    },
-    {
-      headerName: "PVC회수스캔일시",
-      field: "DLVRY_RETURN_DTTM",
-    },
-    {
-      headerName: "입차요청일시",
-      field: "REQ_ETRNC_DTTM",
-    },
-    {
-      headerName: "입차예정일시",
-      field: "EXPCT_ETRNC_DTTM",
-    },
-    {
-      headerName: "입차지연사유",
-      field: "DLYD_ETRNC_RSN_DESC",
-    },
-    {
-      headerName: "차량유형",
-      field: "CARR_CFM_VEH_TCD",
-    },
-    {
-      headerName: "수/배송구분",
-      field: "TRANS_TCD",
-    },
-    {
-      headerName: "추적번호",
-      field: "TRCK_NO",
-      type: "numeric",
-    },
-    {
-      headerName: "SMS전송일시",
-      field: "SMS_APP_INST_DTTM",
-    },
-    {
-      headerName: "전송번호",
-      field: "SEND_NO",
-    },
-    {
-      headerName: "메모(운송요청)",
-      field: "MEMO",
-    },
-    {
-      headerName: "경유처수",
-      field: "STOP_CNT",
-      type: "numeric",
-    },
-    {
-      headerName: "운임예약가능여부",
-      field: "CARR_BOOKING_YN",
-    },
+    { headerName: "운송협력사명", field: "CARR_NM" },
+    { headerName: "차량유형명", field: "VEH_TP_NM" },
+    { headerName: "입차순서", field: "ETRNC_SEQ" },
+    { headerName: "차량번호", field: "VEH_NO" },
+    { headerName: "운전자명", field: "DRVR_NM" },
+    { headerName: "핸드폰번호", field: "MBL_PHN_NO" },
+    { headerName: "메모", field: "MEMO_DESC" },
+    { headerName: "운송사메모", field: "CARR_MEMO_DESC" },
+    { headerName: "경로", field: "ROUTE_PATH" },
+    { headerName: "중량", field: "TTL_LD_WGT", type: "numeric" },
+    { headerName: "팔레트수량", field: "TTL_LD_FLEX_QTY2", type: "numeric" },
+    { headerName: "회수PVC수량", field: "RETURN_PVC_QTY", type: "numeric" },
+    { headerName: "PVC회수스캔일시", field: "DLVRY_RETURN_DTTM" },
+    { headerName: "입차요청일시", field: "REQ_ETRNC_DTTM" },
+    { headerName: "입차예정일시", field: "EXPCT_ETRNC_DTTM" },
+    { headerName: "입차지연사유", field: "DLYD_ETRNC_RSN_DESC" },
+    { headerName: "차량유형", field: "CARR_CFM_VEH_TCD" },
+    { headerName: "수/배송구분", field: "TRANS_TCD" },
+    { headerName: "추적번호", field: "TRCK_NO", type: "numeric" },
+    { headerName: "SMS전송일시", field: "SMS_APP_INST_DTTM" },
+    { headerName: "전송번호", field: "SEND_NO" },
+    { headerName: "메모(운송요청)", field: "MEMO" },
+    { headerName: "경유처수", field: "STOP_CNT", type: "numeric" },
+    { headerName: "운임예약가능여부", field: "CARR_BOOKING_YN" },
     {
       headerName: "등록금액",
       field: "RATE",
       type: "numeric",
       editable: (params: any) => params.data._isNew,
       valueSetter: (params: any) => {
-        params.data.RATE = params.newValue; // ← data 객체 직접 수정
+        params.data.RATE = params.newValue;
         return true;
       },
     },
-    {
-      headerName: "확정금액",
-      field: "CFM_COST",
-      type: "numeric",
-    },
-    {
-      headerName: "등록사유",
-      field: "CARR_CHG_RMK",
-    },
-    {
-      headerName: "부피",
-      field: "TTL_LD_VOL",
-      type: "numeric",
-    },
-    {
-      headerName: "PVC수량",
-      field: "TTL_LD_FLEX_QTY1",
-      type: "numeric",
-    },
-    {
-      headerName: "전용용기",
-      field: "TTL_LD_FLEX_QTY3",
-      type: "numeric",
-    },
+    { headerName: "확정금액", field: "CFM_COST", type: "numeric" },
+    { headerName: "등록사유", field: "CARR_CHG_RMK" },
+    { headerName: "부피", field: "TTL_LD_VOL", type: "numeric" },
+    { headerName: "PVC수량", field: "TTL_LD_FLEX_QTY1", type: "numeric" },
+    { headerName: "전용용기", field: "TTL_LD_FLEX_QTY3", type: "numeric" },
     {
       headerName: "종이박스/지대수량",
       field: "TTL_LD_FLEX_QTY4",
       type: "numeric",
     },
-    {
-      headerName: "채반수량",
-      field: "TTL_LD_FLEX_QTY5",
-      type: "numeric",
-    },
-    {
-      headerName: "출발지명",
-      field: "FRM_LOC_NM",
-    },
-    {
-      headerName: "디비전",
-      field: "DIV_CD",
-    },
-    {
-      headerName: "물류운영그룹코드",
-      field: "LGST_GRP_CD",
-    },
-    {
-      headerName: "출발지코드",
-      field: "FRM_LOC_CD",
-    },
-    {
-      headerName: "연계배차번호",
-      field: "TRIP_ID",
-      editType: "numeric",
-    },
-    {
-      headerName: "연계배차순서",
-      field: "TRIP_SEQ",
-      type: "numeric",
-    },
-    {
-      headerName: "출발시군구",
-      field: "FRM_FULL_ADDR",
-    },
-    {
-      headerName: "도착시군구",
-      field: "TO_FULL_ADDR",
-    },
-    {
-      headerName: "차량코드",
-      field: "VEH_ID",
-    },
-    {
-      headerName: "운전자코드",
-      field: "DRVR_ID",
-    },
-    {
-      headerName: "배송차수",
-      field: "BATCH_NO",
-      type: "numeric",
-    },
-    {
-      headerName: "작성자/등록자",
-      field: "CRE_USR_ID",
-    },
-    {
-      headerName: "등록일자",
-      field: "CRE_DTTM",
-    },
-    {
-      headerName: "수정자",
-      field: "UPD_USR_ID",
-    },
-    {
-      headerName: "수정일시",
-      field: "UPD_DTTM",
-    },
+    { headerName: "채반수량", field: "TTL_LD_FLEX_QTY5", type: "numeric" },
+    { headerName: "출발지명", field: "FRM_LOC_NM" },
+    { headerName: "디비전", field: "DIV_CD" },
+    { headerName: "물류운영그룹코드", field: "LGST_GRP_CD" },
+    { headerName: "출발지코드", field: "FRM_LOC_CD" },
+    { headerName: "연계배차번호", field: "TRIP_ID" },
+    { headerName: "연계배차순서", field: "TRIP_SEQ", type: "numeric" },
+    { headerName: "출발시군구", field: "FRM_FULL_ADDR" },
+    { headerName: "도착시군구", field: "TO_FULL_ADDR" },
+    { headerName: "차량코드", field: "VEH_ID" },
+    { headerName: "운전자코드", field: "DRVR_ID" },
+    { headerName: "배송차수", field: "BATCH_NO", type: "numeric" },
+    { headerName: "작성자/등록자", field: "CRE_USR_ID" },
+    { headerName: "등록일자", field: "CRE_DTTM" },
+    { headerName: "수정자", field: "UPD_USR_ID" },
+    { headerName: "수정일시", field: "UPD_DTTM" },
   ];
 
   const actions1 = [
@@ -400,7 +236,6 @@ export default function TenderReceiveDispatch() {
       label: "운송요청거절",
       onClick: (e: any) => {
         if (!guardHasData(e.data)) return;
-
         openPopup({
           title: "운송요청 거절",
           content: (
@@ -413,9 +248,7 @@ export default function TenderReceiveDispatch() {
                     e.data.map((row: any) => ({ ...row, ...ie.data })),
                   ),
                   "저장되었습니다.",
-                ).then(() => {
-                  searchRef.current?.();
-                });
+                ).then(() => searchRef.current?.());
               }}
               onClose={closePopup}
             />
@@ -435,25 +268,19 @@ export default function TenderReceiveDispatch() {
           label: "지입차",
           onClick: (e: any) => {
             if (!guardHasData(e.data)) return;
-
             openPopup({
               title: "차량변경",
               content: (
                 <VehicleChangePopup
-                  initialValues={{
-                    LGST_GRP_CD: e.data[0].LGST_GRP_CD,
-                  }}
+                  initialValues={{ LGST_GRP_CD: e.data[0].LGST_GRP_CD }}
                   onApply={(ie: any) => {
                     closePopup();
-
                     handleApi(
                       tenderApi.onChangeRegVeh(
                         e.data.map((row: any) => ({ ...row, ...ie })),
                       ),
                       "저장되었습니다.",
-                    ).then(() => {
-                      searchRef.current?.();
-                    });
+                    ).then(() => searchRef.current?.());
                   }}
                   onClose={closePopup}
                 />
@@ -468,7 +295,6 @@ export default function TenderReceiveDispatch() {
           label: "모바일가입용차",
           onClick: (e: any) => {
             if (!guardHasData(e.data)) return;
-
             openPopup({
               title: "임시차량변경",
               content: (
@@ -479,13 +305,10 @@ export default function TenderReceiveDispatch() {
                   }}
                   onConfirm={(ie: any) => {
                     closePopup();
-
                     handleApi(
                       tenderApi.onChangeTempVeh({ ...e.data[0], ...ie }),
                       "저장되었습니다.",
-                    ).then(() => {
-                      searchRef.current?.();
-                    });
+                    ).then(() => searchRef.current?.());
                   }}
                   onClose={closePopup}
                 />
@@ -500,22 +323,18 @@ export default function TenderReceiveDispatch() {
           label: "임시용차",
           onClick: (e: any) => {
             if (!guardHasData(e.data)) return;
-
             openPopup({
               title: "임시용차차량변경",
               content: (
                 <VehicleAssignPopup
                   onApply={(ie: any) => {
                     closePopup();
-
                     handleApi(
                       tenderApi.onVehicleChange(
                         e.data.map((row: any) => ({ ...row, ...ie })),
                       ),
                       "저장되었습니다.",
-                    ).then(() => {
-                      searchRef.current?.();
-                    });
+                    ).then(() => searchRef.current?.());
                   }}
                   onClose={closePopup}
                 />
@@ -539,7 +358,6 @@ export default function TenderReceiveDispatch() {
       label: "앱설치SMS",
       onClick: (e: any) => {
         if (!guardHasData(e.data)) return;
-
         openPopup({
           title: "전화번호입력",
           content: (
@@ -547,16 +365,10 @@ export default function TenderReceiveDispatch() {
               reasons={[]}
               onConfirm={(ie: any) => {
                 closePopup();
-
                 handleApi(
-                  tenderApi.sendSMSForAppInstall({
-                    ...e.data,
-                    ...ie.data,
-                  }),
+                  tenderApi.sendSMSForAppInstall({ ...e.data, ...ie.data }),
                   "저장되었습니다..",
-                ).then(() => {
-                  searchRef.current?.();
-                });
+                ).then(() => searchRef.current?.());
               }}
               onClose={closePopup}
             />
@@ -602,7 +414,6 @@ export default function TenderReceiveDispatch() {
       key: "엑셀",
       label: "엑셀",
       items: [
-        // 조회된모든데이터다운로드 → 서버 DB 재조회
         {
           type: "button",
           key: "조회된모든데이터다운로드",
@@ -610,22 +421,20 @@ export default function TenderReceiveDispatch() {
           onClick: () => {
             downExcelSearch({
               columns: columnDefs1,
-              searchParams: buildExcelPayload(), // filtersRef.current 반환
+              searchParams: buildExcelPayload(),
               menuName: "운송사요청목록",
               fetchFn: tenderApi.getDispatchList,
             });
           },
         },
-        // 보이는데이터다운로드 → 프론트 rowData 그대로
         {
           type: "button",
           key: "보이는데이터다운로드",
           label: "보이는데이터다운로드",
           onClick: () => {
             downExcelSearched({
-              // 프론트 rowData
               columns: columnDefs1,
-              rows: headerRowData,
+              rows: gridData.rows, // ← headerRowData → gridData.rows 로 변경
               menuName: "운송사요청목록",
             });
           },
@@ -639,17 +448,15 @@ export default function TenderReceiveDispatch() {
       {/* 조회 조건 */}
       <SearchFilters
         meta={meta}
-        value={filters}
-        onChange={setFilters}
-        onSearch={setHeaderRowData}
+        onSearch={setGridData} // ← { rows, totalCount, page, limit } 객체를 받아 gridData에 저장
         searchRef={searchRef}
         filtersRef={filtersRef}
+        pageSize={20}
       />
 
       {/* layout toggle */}
       <div className="shrink-0 flex items-center justify-between text-[13px] text-[rgb(var(--fg))]">
         <span>Showing</span>
-
         <div className="flex items-center gap-1.5">
           <button
             type="button"
@@ -679,45 +486,29 @@ export default function TenderReceiveDispatch() {
               <DataGrid
                 layoutType="plain"
                 columnDefs={columnDefs1}
-                rowData={headerRowData}
+                rowData={gridData.rows} // ← headerRowData → gridData.rows
+                totalCount={gridData.totalCount} // ← 추가
+                currentPage={gridData.page} // ← 추가
+                pageSize={gridData.limit} // ← 추가
+                onPageChange={(page) => searchRef.current?.(page)} // ← 추가
                 actions={actions1}
-                pagination
-                pageSize={20}
                 onRowClicked={(row: any) => {
                   setSelectedHeaderRow(row);
 
                   tenderApi
-                    .getDispatchStopList({
-                      DSPCH_NO: row.DSPCH_NO,
-                    })
-                    .then((res: any) => {
-                      setSubStopRowData(res.data.result);
-                    })
-                    .catch((err: any) => {
-                      console.error(err);
-                    });
+                    .getDispatchStopList({ DSPCH_NO: row.DSPCH_NO })
+                    .then((res: any) => setSubStopRowData(res.data.result))
+                    .catch(console.error);
 
                   tenderApi
-                    .getDispatchSmsHisList({
-                      DSPCH_NO: row.DSPCH_NO,
-                    })
-                    .then((res: any) => {
-                      setSubSmsHisRowData(res.data.result);
-                    })
-                    .catch((err: any) => {
-                      console.error(err);
-                    });
+                    .getDispatchSmsHisList({ DSPCH_NO: row.DSPCH_NO })
+                    .then((res: any) => setSubSmsHisRowData(res.data.result))
+                    .catch(console.error);
 
                   tenderApi
-                    .getDispatchApSetlList({
-                      DSPCH_NO: row.DSPCH_NO,
-                    })
-                    .then((res: any) => {
-                      setSubApSetlRowData(res.data.result);
-                    })
-                    .catch((err: any) => {
-                      console.error(err);
-                    });
+                    .getDispatchApSetlList({ DSPCH_NO: row.DSPCH_NO })
+                    .then((res: any) => setSubApSetlRowData(res.data.result))
+                    .catch(console.error);
                 }}
               />
             </div>
@@ -807,9 +598,7 @@ export default function TenderReceiveDispatch() {
                         filter: false,
                         floatingFilter: false,
                         cellRenderer: (params: any) => {
-                          // 새로 추가된 행만 체크박스 표시
                           if (!params.data._isNew) return null;
-
                           return (
                             <div className="flex items-center justify-start h-full">
                               <input
@@ -829,49 +618,16 @@ export default function TenderReceiveDispatch() {
                           );
                         },
                       },
-                      {
-                        field: "DSPCH_NO",
-                        hide: true,
-                      },
-                      {
-                        headerName: "항목코드",
-                        field: "CHG_CD",
-                      },
-                      {
-                        headerName: "항목명",
-                        field: "CHG_NM",
-                      },
-                      {
-                        headerName: "등록금액",
-                        field: "RATE",
-                        editable: true,
-                      },
-                      {
-                        headerName: "확정금액",
-                        field: "CFM_COST",
-                        // editable: true,
-                      },
-                      {
-                        headerName: "확정사유내용",
-                        field: "RMK",
-                        // editable: true,
-                      },
-                      {
-                        headerName: "등록일자",
-                        field: "CRE_DTTM",
-                      },
-                      {
-                        headerName: "작성자/등록자",
-                        field: "CRE_USR_ID",
-                      },
-                      {
-                        headerName: "수정일시",
-                        field: "UPD_DTTM",
-                      },
-                      {
-                        headerName: "수정자",
-                        field: "UPD_USR_ID",
-                      },
+                      { field: "DSPCH_NO", hide: true },
+                      { headerName: "항목코드", field: "CHG_CD" },
+                      { headerName: "항목명", field: "CHG_NM" },
+                      { headerName: "등록금액", field: "RATE", editable: true },
+                      { headerName: "확정금액", field: "CFM_COST" },
+                      { headerName: "확정사유내용", field: "RMK" },
+                      { headerName: "등록일자", field: "CRE_DTTM" },
+                      { headerName: "작성자/등록자", field: "CRE_USR_ID" },
+                      { headerName: "수정일시", field: "UPD_DTTM" },
+                      { headerName: "수정자", field: "UPD_USR_ID" },
                     ],
                     actions: [
                       {
@@ -879,10 +635,7 @@ export default function TenderReceiveDispatch() {
                         key: "운송비추가",
                         label: "추가",
                         onClick: () => {
-                          if (!guardHasData(selectedHeaderRow)) {
-                            return;
-                          }
-
+                          if (!guardHasData(selectedHeaderRow)) return;
                           openPopup({
                             title: "항목코드",
                             content: (
@@ -892,7 +645,6 @@ export default function TenderReceiveDispatch() {
                                 }
                                 onApply={(row: any) => {
                                   closePopup();
-
                                   setSubApSetlRowData((prev: any) => [
                                     ...prev,
                                     {
@@ -918,7 +670,6 @@ export default function TenderReceiveDispatch() {
                           const newRows = subApSetlRowData.filter(
                             (sub: any) => sub._isNew,
                           );
-
                           handleApi(
                             tenderApi.updateCarrierRate(newRows),
                             "저장되었습니다.",
@@ -945,8 +696,7 @@ export default function TenderReceiveDispatch() {
                   if (tabKey !== "CNTR") return null;
                   return <CntrSubGrid />;
                 }}
-                pagination
-                pageSize={20}
+                actions={[]}
               />
             </div>
           </Panel>

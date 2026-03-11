@@ -34,7 +34,6 @@ type DataGridProps<TRow> = {
   actions: ActionItem[];
 
   pagination?: boolean;
-  pageSize?: number;
 
   onRowSelected?: (row: TRow | null) => void;
   onRowClicked?: (row: TRow) => void;
@@ -43,7 +42,12 @@ type DataGridProps<TRow> = {
   disableAutoSize?: boolean;
   rowSelection?: string;
 
-  onCellValueChanged?: (params: any) => void; // ← 추가
+  onCellValueChanged?: (params: any) => void;
+
+  totalCount?: number;
+  currentPage?: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
 };
 
 export default function DataGrid<TRow>({
@@ -61,11 +65,16 @@ export default function DataGrid<TRow>({
   onRowClicked,
   rowSelection: rowSelectionProp,
   onCellValueChanged,
+  totalCount,
+  currentPage,
+  onPageChange,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
   );
+
+  const totalPages = Math.ceil((totalCount ?? 0) / (pageSize ?? 20));
 
   const activeColumnDefs = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
@@ -107,7 +116,7 @@ export default function DataGrid<TRow>({
       if ((col as any).disableMaxWidth === true) {
         return {
           ...col,
-          maxWidth: null, // ⭐ 반드시 명시
+          maxWidth: null,
         };
       }
 
@@ -118,39 +127,17 @@ export default function DataGrid<TRow>({
   const rowSelection = useMemo(
     () => ({
       mode: "multiRow" as const,
-      enableClickSelection: false, //row 선택시 체크 못하게끔 막음(api 호출때문)
+      enableClickSelection: false,
       enableSelectionWithoutKeys: true,
     }),
     [],
   );
-
-  /** 컬럼 autosize
-   * todo : columAPi - getAllColumns, autoSizeColumns
-   *
-   */
-  // const handleGridReady = useCallback((e: GridReadyEvent) => {
-  //   requestAnimationFrame(() => {
-  //     if (disableAutoSize) return;
-
-  //     const autoSizeColIds: string[] = [];
-  //     e.columnApi.getAllColumns()?.forEach((col) => {
-  //       const def = col.getColDef();
-  //       if (def.width == null && def.flex == null) {
-  //         autoSizeColIds.push(col.getId());
-  //       }
-  //     });
-  //     if (autoSizeColIds.length) {
-  //       e.columnApi.autoSizeColumns(autoSizeColIds, false);
-  //     }
-  //   });
-  // }, []);
 
   const rightGrid =
     layoutType === "tab" && activeTab && renderRightGrid
       ? renderRightGrid(activeTab)
       : null;
 
-  // DataGrid.tsx - activeActions 추가
   const activeActions = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
       return presets[activeTab].actions ?? actions ?? [];
@@ -158,7 +145,6 @@ export default function DataGrid<TRow>({
     return actions ?? [];
   }, [layoutType, activeTab, presets, actions]);
 
-  // wrappedActions에서 actions 대신 activeActions 사용
   const wrappedActions = useMemo(() => {
     return activeActions?.map((action) => {
       if (action.type === "button") {
@@ -179,6 +165,116 @@ export default function DataGrid<TRow>({
       return action;
     });
   }, [activeActions, selectedRows]);
+
+  // 공통 AgGridReact props
+  const commonGridProps = {
+    theme: "legacy" as const,
+    columnDefs: finalColumnDefs,
+    defaultColDef: {
+      resizable: true,
+      sortable: true,
+      minWidth: 80,
+      filter: true,
+      floatingFilter: true,
+    },
+    headerHeight: 22,
+    rowHeight: 22,
+    onRowSelected: (e: any) => {
+      if (!e.api) return;
+      const rows = e.api.getSelectedRows();
+      setSelectedRows(rows);
+      if (e.node.isSelected() && e.data) {
+        onRowSelected?.(e.data);
+      } else {
+        setTimeout(() => {
+          if (e.api.getSelectedRows().length === 0) {
+            onRowSelected?.(null);
+          }
+        }, 0);
+      }
+    },
+    onRowClicked: (e: any) => {
+      const target = e.event?.target as HTMLElement;
+      if (
+        target?.closest(".ag-selection-checkbox") ||
+        target?.closest(".ag-checkbox") ||
+        target?.tagName === "INPUT"
+      ) {
+        return;
+      }
+      if (e.event?.shiftKey) return;
+      if (!e.data) return;
+      onRowClicked?.(e.data);
+    },
+    onFirstDataRendered: (e: any) => {
+      const updatedDefs = e.api.getColumnDefs()?.map((col: any) => ({
+        ...col,
+        maxWidth: 120,
+      }));
+      if (updatedDefs) {
+        e.api.setGridOption("columnDefs", updatedDefs);
+      }
+    },
+    onCellValueChanged,
+    rowSelection:
+      rowSelectionProp === "single"
+        ? { mode: "singleRow" as const, enableClickSelection: true }
+        : { mode: "multiRow" as const },
+  };
+
+  // 공통 그리드 스타일
+  const gridStyle = {
+    ["--ag-font-size" as any]: "11px",
+    ["--ag-header-font-size" as any]: "11px",
+    ["--ag-row-height" as any]: "22px",
+    ["--ag-header-height" as any]: "22px",
+    ["--ag-cell-horizontal-padding" as any]: "3px",
+    ["--ag-cell-vertical-padding" as any]: "1px",
+    ["--ag-grid-size" as any]: "3px",
+  };
+
+  // 페이지네이션 UI
+  const PaginationBar = () => {
+    if (totalCount == null) return null;
+    return (
+      <div className="flex items-center justify-center gap-2 py-1 border-t shrink-0 text-xs">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => onPageChange?.(1)}
+          className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
+        >
+          «
+        </button>
+        <button
+          disabled={currentPage === 1}
+          onClick={() => onPageChange?.((currentPage ?? 1) - 1)}
+          className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
+        >
+          ‹
+        </button>
+        <span className="text-gray-600">
+          {currentPage} / {totalPages}
+        </span>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => onPageChange?.((currentPage ?? 1) + 1)}
+          className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
+        >
+          ›
+        </button>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => onPageChange?.(totalPages)}
+          className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
+        >
+          »
+        </button>
+        <span className="text-gray-400">
+          (총 {totalCount.toLocaleString()}건)
+        </span>
+      </div>
+    );
+  };
 
   return (
     <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
@@ -202,89 +298,11 @@ export default function DataGrid<TRow>({
               <div className="h-full">
                 <div
                   className="ag-theme-quartz ag-theme-bridge w-full h-full"
-                  style={{
-                    ["--ag-font-size" as any]: "11px",
-                    ["--ag-header-font-size" as any]: "11px",
-
-                    ["--ag-row-height" as any]: "22px",
-                    ["--ag-header-height" as any]: "22px",
-
-                    ["--ag-cell-horizontal-padding" as any]: "3px",
-                    ["--ag-cell-vertical-padding" as any]: "1px",
-
-                    ["--ag-grid-size" as any]: "3px",
-                  }}
+                  style={gridStyle}
                 >
                   <AgGridReact<TRow>
-                    theme="legacy"
+                    {...commonGridProps}
                     rowData={activeRowData}
-                    columnDefs={finalColumnDefs}
-                    defaultColDef={{
-                      resizable: true,
-                      sortable: true,
-                      minWidth: 80, // ⭐ 핵심
-                      // quickFilter
-                      filter: true,
-                      floatingFilter: true, //header에서 바로보이게
-                    }}
-                    headerHeight={22}
-                    rowHeight={22}
-                    rowSelection={
-                      rowSelectionProp === "single"
-                        ? {
-                            mode: "singleRow",
-                            enableClickSelection: true,
-                          }
-                        : { mode: "multiRow" }
-                    }
-                    // onGridReady={handleGridReady}
-                    onRowSelected={(e) => {
-                      if (!e.api) return;
-
-                      const rows = e.api.getSelectedRows();
-                      setSelectedRows(rows);
-
-                      if (e.node.isSelected() && e.data) {
-                        onRowSelected?.(e.data); // 선택 시 즉시 전달
-                      } else {
-                        // 해제 시 약간 지연 - 다른 row 선택으로 인한 해제면 무시됨
-                        setTimeout(() => {
-                          if (e.api.getSelectedRows().length === 0) {
-                            onRowSelected?.(null);
-                          }
-                        }, 0);
-                      }
-                    }}
-                    onRowClicked={(e) => {
-                      const target = e.event?.target as HTMLElement;
-
-                      // checkbox 클릭 차단
-                      if (
-                        target?.closest(".ag-selection-checkbox") ||
-                        target?.closest(".ag-checkbox") ||
-                        target?.tagName === "INPUT"
-                      ) {
-                        return;
-                      }
-
-                      if (e.event?.shiftKey) {
-                        return;
-                      }
-
-                      if (!e.data) return;
-
-                      onRowClicked?.(e.data);
-                    }}
-                    onFirstDataRendered={(e) => {
-                      const updatedDefs = e.api.getColumnDefs()?.map((col) => ({
-                        ...col,
-                        maxWidth: 120,
-                      }));
-                      if (updatedDefs) {
-                        e.api.setGridOption("columnDefs", updatedDefs);
-                      }
-                    }}
-                    onCellValueChanged={onCellValueChanged}
                   />
                 </div>
               </div>
@@ -299,94 +317,15 @@ export default function DataGrid<TRow>({
         ) : (
           <div
             className="ag-theme-quartz ag-theme-bridge w-full h-full"
-            style={{
-              ["--ag-font-size" as any]: "11px",
-              ["--ag-header-font-size" as any]: "11px",
-
-              ["--ag-row-height" as any]: "22px",
-              ["--ag-header-height" as any]: "22px",
-
-              ["--ag-cell-horizontal-padding" as any]: "3px",
-              ["--ag-cell-vertical-padding" as any]: "1px",
-
-              ["--ag-grid-size" as any]: "3px",
-            }}
+            style={gridStyle}
           >
-            <AgGridReact<TRow>
-              theme="legacy"
-              rowData={activeRowData}
-              columnDefs={finalColumnDefs}
-              defaultColDef={{
-                resizable: true,
-                sortable: true,
-                minWidth: 80,
-                // quickFilter
-                filter: true,
-                floatingFilter: true, //header에서 바로보이게
-              }}
-              headerHeight={22}
-              rowHeight={22}
-              pagination={pagination}
-              paginationPageSize={pageSize}
-              rowSelection={
-                rowSelectionProp === "single"
-                  ? {
-                      mode: "singleRow",
-                      enableClickSelection: true,
-                    }
-                  : { mode: "multiRow" }
-              }
-              onRowSelected={(e) => {
-                if (!e.api) return;
-
-                const rows = e.api.getSelectedRows();
-                setSelectedRows(rows);
-
-                if (e.node.isSelected() && e.data) {
-                  onRowSelected?.(e.data); // 선택 시 즉시 전달
-                } else {
-                  // 해제 시 약간 지연 - 다른 row 선택으로 인한 해제면 무시됨
-                  setTimeout(() => {
-                    if (e.api.getSelectedRows().length === 0) {
-                      onRowSelected?.(null);
-                    }
-                  }, 0);
-                }
-              }}
-              onRowClicked={(e) => {
-                const target = e.event?.target as HTMLElement;
-
-                // checkbox 클릭 차단
-                if (
-                  target?.closest(".ag-selection-checkbox") ||
-                  target?.closest(".ag-checkbox") ||
-                  target?.tagName === "INPUT"
-                ) {
-                  return;
-                }
-
-                if (e.event?.shiftKey) {
-                  return;
-                }
-
-                if (!e.data) return;
-
-                onRowClicked?.(e.data);
-              }}
-              onFirstDataRendered={(e) => {
-                const updatedDefs = e.api.getColumnDefs()?.map((col) => ({
-                  ...col,
-                  maxWidth: 120,
-                }));
-                if (updatedDefs) {
-                  e.api.setGridOption("columnDefs", updatedDefs);
-                }
-              }}
-              onCellValueChanged={onCellValueChanged}
-            />
+            <AgGridReact<TRow> {...commonGridProps} rowData={activeRowData} />
           </div>
         )}
       </div>
+
+      {/* 서버 페이지네이션 */}
+      <PaginationBar />
     </div>
   );
 }
