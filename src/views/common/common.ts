@@ -16,6 +16,7 @@ export interface ColumnDefine {
   dataIndex?: string;
   width?: number;
   align?: string;
+  type?: string;
   [key: string]: unknown;
 }
 
@@ -152,7 +153,8 @@ export function getColumnInfoForExcelDown(
     headerCols.push(col.headerName ?? col.field);
     colNames.push(col.field);
     colWidths.push(col.width ?? defaultColWidth);
-    colAligns.push((col.align as string) ?? "left");
+    const colAlign = (col.align as string) ?? resolveDefaultAlign(col);
+    colAligns.push(colAlign);
   }
 
   const comboCols = comboColumns
@@ -204,6 +206,18 @@ export function getColumnsCodeData(
       return { key, data: comboStores[key] ?? [] };
     })
     .filter((item) => item.key !== "");
+}
+
+// 컬럼 타입 기반으로 기본 align 결정
+function resolveDefaultAlign(col: ColumnDefine): string {
+  // const NUMBER_EDIT_TYPES = ["number", "integer", "float", "currency"];
+  const DATE_TYPES = ["date", "month", "datetime", "time"];
+
+  // if (col.editType && NUMBER_EDIT_TYPES.includes(col.editType)) return "right";
+  if (col.editType && DATE_TYPES.includes(col.editType)) return "center";
+  if (col.type === "numeric") return "right";
+  if (col.type === "string") return "left";
+  return "left";
 }
 
 // ────────────────────────────────────────────

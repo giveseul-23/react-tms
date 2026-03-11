@@ -213,14 +213,17 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "중량",
       field: "TTL_LD_WGT",
+      type: "numeric",
     },
     {
       headerName: "팔레트수량",
       field: "TTL_LD_FLEX_QTY2",
+      type: "numeric",
     },
     {
       headerName: "회수PVC수량",
       field: "RETURN_PVC_QTY",
+      type: "numeric",
     },
     {
       headerName: "PVC회수스캔일시",
@@ -249,6 +252,7 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "추적번호",
       field: "TRCK_NO",
+      type: "numeric",
     },
     {
       headerName: "SMS전송일시",
@@ -265,6 +269,7 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "경유처수",
       field: "STOP_CNT",
+      type: "numeric",
     },
     {
       headerName: "운임예약가능여부",
@@ -273,6 +278,7 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "등록금액",
       field: "RATE",
+      type: "numeric",
       editable: (params: any) => params.data._isNew,
       valueSetter: (params: any) => {
         params.data.RATE = params.newValue; // ← data 객체 직접 수정
@@ -282,6 +288,7 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "확정금액",
       field: "CFM_COST",
+      type: "numeric",
     },
     {
       headerName: "등록사유",
@@ -290,22 +297,27 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "부피",
       field: "TTL_LD_VOL",
+      type: "numeric",
     },
     {
       headerName: "PVC수량",
       field: "TTL_LD_FLEX_QTY1",
+      type: "numeric",
     },
     {
       headerName: "전용용기",
       field: "TTL_LD_FLEX_QTY3",
+      type: "numeric",
     },
     {
       headerName: "종이박스/지대수량",
       field: "TTL_LD_FLEX_QTY4",
+      type: "numeric",
     },
     {
       headerName: "채반수량",
       field: "TTL_LD_FLEX_QTY5",
+      type: "numeric",
     },
     {
       headerName: "출발지명",
@@ -326,10 +338,12 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "연계배차번호",
       field: "TRIP_ID",
+      editType: "numeric",
     },
     {
       headerName: "연계배차순서",
       field: "TRIP_SEQ",
+      type: "numeric",
     },
     {
       headerName: "출발시군구",
@@ -350,6 +364,7 @@ export default function TenderReceiveDispatch() {
     {
       headerName: "배송차수",
       field: "BATCH_NO",
+      type: "numeric",
     },
     {
       headerName: "작성자/등록자",
