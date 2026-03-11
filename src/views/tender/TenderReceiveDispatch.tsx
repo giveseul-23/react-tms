@@ -89,7 +89,6 @@ export default function TenderReceiveDispatch() {
     apFiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
   });
 
-  // ← 서버 페이징 상태 (rows + 페이징 메타)
   const [gridData, setGridData] = useState<{
     rows: any[];
     totalCount: number;
@@ -102,8 +101,10 @@ export default function TenderReceiveDispatch() {
     limit: 20,
   });
 
-  // ← searchRef 타입: page 인자를 받을 수 있도록 변경
   const searchRef = useRef<((page?: number) => void) | null>(null);
+
+  // filtersRef 에는 DYNAMIC_QUERY, MENU_CD 만 저장 (page/limit 없음)
+  // → 전체 다운로드 시 page/limit 없이 그대로 서버 호출 → 서버에서 전체 조회
   const filtersRef = useRef<Record<string, unknown>>({});
 
   const codeMap = useMemo(() => {
@@ -120,8 +121,6 @@ export default function TenderReceiveDispatch() {
   if (loading) {
     return <Skeleton className="h-24" />;
   }
-
-  const buildExcelPayload = () => filtersRef.current;
 
   const columnDefs1 = [
     { headerName: "No" },
@@ -389,7 +388,7 @@ export default function TenderReceiveDispatch() {
           onClick: () => {
             downExcelSearch({
               columns: columnDefs1,
-              searchParams: buildExcelPayload(),
+              searchParams: filtersRef.current,
               searchUrl: "/tenderReceiveDispatchService/searchCarrierRateExcel",
               menuCd: "MENU_PLAN_TENDER_RECEIVE",
               menuName: "운송수배현황",
@@ -402,7 +401,7 @@ export default function TenderReceiveDispatch() {
           label: "운송비업로드",
           onClick: () => {
             handleApi(
-              tenderApi.gridExcelUpload(buildExcelPayload()),
+              tenderApi.gridExcelUpload(filtersRef.current),
               "업로드가 완료되었습니다.",
             );
           },
@@ -415,26 +414,27 @@ export default function TenderReceiveDispatch() {
       label: "엑셀",
       items: [
         {
+          // 전체 데이터: filtersRef(page/limit 없음)로 서버 전체 재조회
           type: "button",
           key: "조회된모든데이터다운로드",
           label: "조회된모든데이터다운로드",
           onClick: () => {
             downExcelSearch({
               columns: columnDefs1,
-              searchParams: buildExcelPayload(),
               menuName: "운송사요청목록",
-              fetchFn: tenderApi.getDispatchList,
+              fetchFn: () => tenderApi.getDispatchList(filtersRef.current),
             });
           },
         },
         {
+          // 현재 페이지 데이터: gridData.rows 그대로 사용 (추가 API 호출 없음)
           type: "button",
           key: "보이는데이터다운로드",
           label: "보이는데이터다운로드",
           onClick: () => {
             downExcelSearched({
               columns: columnDefs1,
-              rows: gridData.rows, // ← headerRowData → gridData.rows 로 변경
+              rows: gridData.rows,
               menuName: "운송사요청목록",
             });
           },
@@ -448,7 +448,7 @@ export default function TenderReceiveDispatch() {
       {/* 조회 조건 */}
       <SearchFilters
         meta={meta}
-        onSearch={setGridData} // ← { rows, totalCount, page, limit } 객체를 받아 gridData에 저장
+        onSearch={setGridData}
         searchRef={searchRef}
         filtersRef={filtersRef}
         pageSize={20}
@@ -486,11 +486,11 @@ export default function TenderReceiveDispatch() {
               <DataGrid
                 layoutType="plain"
                 columnDefs={columnDefs1}
-                rowData={gridData.rows} // ← headerRowData → gridData.rows
-                totalCount={gridData.totalCount} // ← 추가
-                currentPage={gridData.page} // ← 추가
-                pageSize={gridData.limit} // ← 추가
-                onPageChange={(page) => searchRef.current?.(page)} // ← 추가
+                rowData={gridData.rows}
+                totalCount={gridData.totalCount}
+                currentPage={gridData.page}
+                pageSize={gridData.limit}
+                onPageChange={(page) => searchRef.current?.(page)}
                 actions={actions1}
                 onRowClicked={(row: any) => {
                   setSelectedHeaderRow(row);
