@@ -47,7 +47,9 @@ export function DateRangeFilter({
   const to = toValue || today;
 
   const inputClass =
-    "relative h-7 pl-2 pr-6 text-[11px] leading-none tracking-tight";
+    "relative h-7 pl-2 pr-6 text-[11px] leading-none tracking-tight " +
+    "dark:[color-scheme:dark] dark:text-white";
+
   /* ---------- single ---------- */
   if (mode === "single") {
     return (

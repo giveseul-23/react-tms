@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "@/app/context/ThemeContext";
-import { User, Lock, Settings, Palette, Globe } from "lucide-react";
+import { User, Lock, Palette, Save, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,17 +11,14 @@ import {
 import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
 
+type ThemeColor = "BLUE" | "GREEN" | "RED" | "ORANGE" | "YELLOW";
+
 const categoryCntryOptions = [
   { value: "전체", label: "전체" },
   { value: "대한민국", label: "대한민국" },
 ];
 
-const categoryTabCntOptions = [
-  { value: "전체", label: "전체" },
-  { value: "20", label: "20" },
-];
-
-const themeOptions = [
+const themeOptions: { value: ThemeColor; color: string; label: string }[] = [
   { value: "BLUE", color: "bg-blue-500", label: "파랑" },
   { value: "GREEN", color: "bg-green-500", label: "초록" },
   { value: "RED", color: "bg-red-500", label: "빨강" },
@@ -30,40 +27,36 @@ const themeOptions = [
 ];
 
 type ThemePickerProps = {
-  value: string;
-  onChange: (value: string) => void;
+  value: ThemeColor;
+  onChange: (value: ThemeColor) => void;
 };
 
-const ThemePicker = ({ value, onChange }: ThemePickerProps) => {
-  return (
-    <div role="radiogroup" className="flex items-center gap-3">
-      {themeOptions.map((opt) => {
-        const isSelected = opt.value === value;
-
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            role="radio"
-            aria-checked={isSelected}
-            title={opt.label}
-            onClick={() => onChange(opt.value)}
-            className={`
-              h-6 w-6 rounded-full
-              ${opt.color}
-              transition-all
-              ${
-                isSelected
-                  ? "ring-2 ring-blue-500 ring-offset-2 scale-110"
-                  : "hover:scale-105"
-              }
-            `}
-          />
-        );
-      })}
-    </div>
-  );
-};
+const ThemePicker = ({ value, onChange }: ThemePickerProps) => (
+  <div role="radiogroup" className="flex items-center gap-2.5">
+    {themeOptions.map((opt) => {
+      const isSelected = opt.value === value;
+      return (
+        <button
+          key={opt.value}
+          type="button"
+          role="radio"
+          aria-checked={isSelected}
+          title={opt.label}
+          onClick={() => onChange(opt.value)}
+          className={`
+            h-5 w-5 rounded-full transition-all
+            ${opt.color}
+            ${
+              isSelected
+                ? "ring-2 ring-offset-1 ring-blue-500 scale-110"
+                : "hover:scale-105 opacity-70 hover:opacity-100"
+            }
+          `}
+        />
+      );
+    })}
+  </div>
+);
 
 type ToggleSwitchProps = {
   value: boolean;
@@ -75,239 +68,250 @@ const ToggleSwitch = ({
   value,
   onChange,
   disabled = false,
-}: ToggleSwitchProps) => {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={value}
-      disabled={disabled}
-      onClick={() => !disabled && onChange(!value)}
+}: ToggleSwitchProps) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={value}
+    disabled={disabled}
+    onClick={() => !disabled && onChange(!value)}
+    className={`
+      relative inline-flex h-5 w-9 items-center rounded-full transition-colors
+      ${value ? "bg-blue-600" : "bg-gray-200"}
+      ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+    `}
+  >
+    <span
       className={`
-        relative inline-flex h-6 w-11 items-center rounded-full
-        transition-colors
-        ${value ? "bg-blue-600" : "bg-gray-300"}
-        ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+        inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform
+        ${value ? "translate-x-4" : "translate-x-0.5"}
       `}
-    >
-      <span
-        className={`
-          inline-block h-5 w-5 transform rounded-full bg-white shadow
-          transition-transform
-          ${value ? "translate-x-5" : "translate-x-1"}
-        `}
-      />
-    </button>
-  );
-};
+    />
+  </button>
+);
 
 /* =======================
  * SettingsPopup
  * ======================= */
 export const SettingsPopup: React.FC = () => {
-  const { darkMode, setDarkMode, themeColor, setThemeColor } = useTheme();
+  const { darkMode, themeColor, applySettings } = useTheme();
 
-  const [userId, setUserId] = useState("daseul.ju");
+  const [draft, setDraft] = useState<{
+    userId: string;
+    locale: string;
+    themeColor: ThemeColor;
+    darkMode: boolean;
+  }>({
+    userId: "daseul.ju",
+    locale: "대한민국",
+    themeColor,
+    darkMode,
+  });
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [locale, setLocale] = useState("대한민국");
 
-  const [autoLogin, setAutoLogin] = useState(true);
+  const setDraftField = <K extends keyof typeof draft>(
+    key: K,
+    value: (typeof draft)[K],
+  ) => setDraft((prev) => ({ ...prev, [key]: value }));
+
+  const handleApply = () => {
+    applySettings({ themeColor: draft.themeColor, darkMode: draft.darkMode });
+  };
+
+  const handleCancel = () => {
+    setDraft({ userId: "daseul.ju", locale: "대한민국", themeColor, darkMode });
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
 
   return (
-    <div className="w-full">
-      <form className="space-y-8">
-        {/* 사용자 정보 */}
-        <Section
-          icon={<User />}
-          title="사용자 정보"
-          fields={[
-            {
-              label: "사용자명",
-              render: () => (
-                <Input value="주다슬" readOnly className="bg-gray-50" />
-              ),
-            },
-            {
-              label: "사용자 아이디",
-              render: () => (
-                <Input
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                />
-              ),
-            },
-            {
-              label: "로컬",
-              render: () => (
-                <div className="flex items-center gap-2">
-                  <Select onValueChange={(e) => setLocale(e.target.value)}>
-                    <SelectTrigger id={""}>
-                      <SelectValue placeholder={""} />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      {categoryCntryOptions.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ),
-            },
-          ]}
-        />
-
-        {/* 비밀번호 */}
-        <Section
-          icon={<Lock />}
-          title="비밀번호"
-          fields={[
-            {
-              label: "현재 비밀번호",
-              render: () => (
-                <Input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                />
-              ),
-            },
-            {
-              label: "새 비밀번호",
-              render: () => (
-                <Input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-              ),
-            },
-            {
-              label: "새 비밀번호 확인",
-              render: () => (
-                <Input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              ),
-            },
-          ]}
-        />
-
-        {/* 최대 탭 개수
-        <Section
-          icon={<Settings />}
-          title="최대 탭 개수 설정"
-          fields={[
-            {
-              label: "사용자설정값",
-              render: () => (
-                <select
-                  value={userSetting}
-                  onChange={(e) => setUserSetting(e.target.value)}
-                  className="input"
-                >
-                  {[10, 20, 30, 40, 50].map((v) => (
-                    <option key={v}>{v}</option>
-                  ))}
-                </select>
-              ),
-            },
-            {
-              label: "시스템설정값",
-              render: () => (
-                <Input
-                  value={systemSetting}
-                  onChange={(e) => setSystemSetting(e.target.value)}
-                />
-              ),
-            },
-          ]}
-        /> */}
-
-        {/* 기타 */}
-        <Section
-          icon={<Palette />}
-          title="기타"
-          fields={[
-            {
-              label: "테마",
-              render: () => (
-                <ThemePicker value={themeColor} onChange={setThemeColor} />
-              ),
-            },
-            {
-              label: "다크모드",
-              render: () => (
-                <ToggleSwitch value={darkMode} onChange={setDarkMode} />
-              ),
-            },
-          ]}
-        />
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button size="sm" variant="outline">
-            취소
-          </Button>
-          <Button
-            size="sm"
-            className="gap-2 bg-[rgb(var(--primary))] hover:bg-blue-700"
+    <div className="flex flex-col gap-4 w-full">
+      {/* ── 사용자 정보 ── */}
+      <SectionBlock icon={<User className="w-3.5 h-3.5" />} title="사용자 정보">
+        <FieldRow label="사용자명">
+          <Input
+            value="주다슬"
+            readOnly
+            className="h-7 text-xs
+              bg-slate-50 dark:bg-slate-700
+              border-slate-200 dark:border-slate-600
+              text-slate-500 dark:text-slate-400
+              cursor-default"
+          />
+        </FieldRow>
+        <FieldRow label="아이디">
+          <Input
+            value={draft.userId}
+            onChange={(e) => setDraftField("userId", e.target.value)}
+            className="h-7 text-xs
+              bg-white dark:bg-slate-800
+              border-slate-200 dark:border-slate-600
+              text-slate-700 dark:text-slate-100"
+          />
+        </FieldRow>
+        <FieldRow label="로컬">
+          <Select
+            value={draft.locale}
+            onValueChange={(v) => setDraftField("locale", v)}
           >
-            적용
-          </Button>
-        </div>
-      </form>
+            <SelectTrigger
+              className="h-7 text-xs
+                bg-white dark:bg-slate-800
+                border-slate-200 dark:border-slate-600
+                text-slate-700 dark:text-slate-100"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {categoryCntryOptions.map((opt) => (
+                <SelectItem
+                  key={opt.value}
+                  value={opt.value}
+                  className="text-xs"
+                >
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldRow>
+      </SectionBlock>
+
+      {/* ── 비밀번호 ── */}
+      <SectionBlock icon={<Lock className="w-3.5 h-3.5" />} title="비밀번호">
+        <FieldRow label="현재 비밀번호">
+          <Input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="현재 비밀번호 입력"
+            className="h-7 text-xs
+              bg-white dark:bg-slate-800
+              border-slate-200 dark:border-slate-600
+              text-slate-700 dark:text-slate-100
+              placeholder:text-slate-300 dark:placeholder:text-slate-500"
+          />
+        </FieldRow>
+        <FieldRow label="새 비밀번호">
+          <Input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="새 비밀번호 입력"
+            className="h-7 text-xs
+              bg-white dark:bg-slate-800
+              border-slate-200 dark:border-slate-600
+              text-slate-700 dark:text-slate-100
+              placeholder:text-slate-300 dark:placeholder:text-slate-500"
+          />
+        </FieldRow>
+        <FieldRow label="비밀번호 확인">
+          <Input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="새 비밀번호 재입력"
+            className="h-7 text-xs
+              bg-white dark:bg-slate-800
+              border-slate-200 dark:border-slate-600
+              text-slate-700 dark:text-slate-100
+              placeholder:text-slate-300 dark:placeholder:text-slate-500"
+          />
+        </FieldRow>
+      </SectionBlock>
+
+      {/* ── 테마 / 기타 ── */}
+      <SectionBlock
+        icon={<Palette className="w-3.5 h-3.5" />}
+        title="화면 설정"
+      >
+        <FieldRow label="테마 색상">
+          <ThemePicker
+            value={draft.themeColor}
+            onChange={(v) => setDraftField("themeColor", v)}
+          />
+        </FieldRow>
+        <FieldRow label="다크모드">
+          <ToggleSwitch
+            value={draft.darkMode}
+            onChange={(v) => setDraftField("darkMode", v)}
+          />
+        </FieldRow>
+      </SectionBlock>
+
+      {/* ── 버튼 ── */}
+      <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleCancel}
+          className="h-7 px-4 text-xs
+            border-slate-200 dark:border-slate-600
+            text-slate-500 dark:text-slate-300
+            hover:bg-slate-50 dark:hover:bg-slate-700
+            gap-1.5"
+        >
+          <X className="w-3 h-3" />
+          취소
+        </Button>
+        <Button
+          size="sm"
+          onClick={handleApply}
+          className="h-7 px-4 text-xs font-semibold bg-[rgb(var(--primary))] hover:bg-blue-700 text-white gap-1.5"
+        >
+          <Save className="w-3 h-3" />
+          적용
+        </Button>
+      </div>
     </div>
   );
 };
 
 /* =======================
- * Section
+ * SectionBlock
  * ======================= */
-type SectionProps = {
+type SectionBlockProps = {
   icon: React.ReactNode;
   title: string;
-  fields: {
-    label: string;
-    render: () => React.ReactNode;
-  }[];
+  children: React.ReactNode;
 };
 
-const Section = ({ icon, title, fields }: SectionProps) => (
-  <section>
-    <div className="flex items-center gap-2 mb-4">
-      <span className="text-[rgb(var(--fg))]">{icon}</span>
-      <h3 className="text-lg font-semibold text-[rgb(var(--fg))]">{title}</h3>
+const SectionBlock = ({ icon, title, children }: SectionBlockProps) => (
+  <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+    {/* 헤더 - primary 색상 유지 */}
+    <div className="flex items-center gap-1.5 px-3 py-2 bg-[rgb(var(--primary))]">
+      <span className="text-white/80">{icon}</span>
+      <span className="text-[12px] font-semibold text-white tracking-widest uppercase leading-none">
+        {title}
+      </span>
     </div>
-
-    <div className="space-y-4">
-      {fields.map((f) => (
-        <FormRow key={f.label} label={f.label}>
-          {f.render()}
-        </FormRow>
-      ))}
+    <div className="divide-y divide-slate-100 dark:divide-slate-700">
+      {children}
     </div>
-  </section>
+  </div>
 );
 
 /* =======================
- * FormRow
+ * FieldRow
  * ======================= */
-const FormRow = ({
+const FieldRow = ({
   label,
   children,
 }: {
   label: string;
   children: React.ReactNode;
 }) => (
-  <div className="grid grid-cols-[120px_1fr] items-center gap-4">
-    <span className="text-sm font-medium text-[rgb(var(--fg))] whitespace-nowrap">
+  <div
+    className="grid grid-cols-[110px_1fr] items-center gap-3 px-3 py-2
+    bg-white dark:bg-slate-800
+    hover:bg-blue-50/40 dark:hover:bg-slate-700/60
+    transition-colors group"
+  >
+    <span className="text-[11px] font-medium text-slate-400 dark:text-slate-400 whitespace-nowrap">
       {label}
     </span>
     <div className="w-full">{children}</div>

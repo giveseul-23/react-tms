@@ -7,11 +7,9 @@ import App from "./app/App.tsx";
 import "./styles/index.css";
 
 createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <ThemeProvider>
-      <PopupProvider>
-        <App />
-      </PopupProvider>
-    </ThemeProvider>
-  </React.StrictMode>,
+  <ThemeProvider>
+    <PopupProvider>
+      <App />
+    </PopupProvider>
+  </ThemeProvider>,
 );
