@@ -5,7 +5,7 @@ import { ComboFilter } from "@/app/components/search/filters/ComboFilter";
 import { DateRangeFilter } from "@/app/components/search/filters/DateRangeFilter";
 import { PopupFilter } from "@/app/components/search/filters/PopupFilter";
 import { TextFilter } from "@/app/components/search/filters/TextFilter";
-import { SearchFilterLabel } from "@/app/components/search/SearchFilterLabel";
+import { SearchFilterLabel } from "@/app/components/Search/SearchFilterLabel";
 import { ConditionBox } from "@/app/components/search/ConditionBox";
 import { cn } from "../ui/utils";
 

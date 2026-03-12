@@ -17,7 +17,7 @@ import {
   CollapsibleTrigger,
 } from "@/app/components/ui/collapsible";
 
-import { SearchFilter } from "@/app/components/search/SearchFilter";
+import { SearchFilter } from "@/app/components/Search/SearchFilter";
 import { CommonPopup } from "@/views/common/CommonPopup";
 import ConfirmModal from "@/views/common/ConfirmPopup";
 import {
