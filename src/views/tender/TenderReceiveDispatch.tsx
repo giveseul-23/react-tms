@@ -4,7 +4,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import { SearchFilters } from "@/app/components/search/SearchFilters.tsx";
+import { SearchFilters } from "@/app/components/Search/SearchFilters.tsx";
 import { TENDER_SEARCH_META } from "./tenderSearchMeta";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
