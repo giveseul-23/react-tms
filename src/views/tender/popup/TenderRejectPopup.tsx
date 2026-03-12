@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import { ComboFilter } from "@/app/components/Search/filters/comboFilter";
+import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 type RejectReasonContentProps = {
@@ -37,18 +37,18 @@ export default function RejectReasonContent({
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      {/* 폼 영역 */}
+      {/* ???�역 */}
       <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100">
-        {/* 사유 선택 */}
+        {/* ?�유 ?�택 */}
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            운송요청 거절사유
+            ?�송?�청 거절?�유
           </label>
 
           <ComboFilter
             value={reasonCode}
             onChange={setReasonCode}
-            placeholder="선택하세요"
+            placeholder="?�택?�세??
             options={meta[0].options.map((r) => ({
               CODE: r.CODE,
               NAME: r.NAME,
@@ -66,10 +66,10 @@ export default function RejectReasonContent({
           />
         </div>
 
-        {/* 상세 내용 */}
+        {/* ?�세 ?�용 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            운송요청 거절사유 세부내용
+            ?�송?�청 거절?�유 ?��??�용
           </label>
 
           <textarea
@@ -77,12 +77,12 @@ export default function RejectReasonContent({
             onChange={(e) => setDetail(e.target.value)}
             rows={5}
             className="w-full rounded-lg border border-gray-300 p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="세부 내용을 입력하세요"
+            placeholder="?��? ?�용???�력?�세??
           />
         </div>
       </div>
 
-      {/* 버튼 영역 */}
+      {/* 버튼 ?�역 */}
       <div className="flex gap-3 mt-6">
         <button
           type="button"
@@ -98,7 +98,7 @@ export default function RejectReasonContent({
           onClick={() => onConfirm({ reasonCode, detail })}
           className="flex-1 h-11 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-40 transition"
         >
-          저장
+          ?�??
         </button>
       </div>
     </div>

@@ -1,12 +1,12 @@
 "use client";
 
-import { CheckboxFilter } from "@/app/components/search/filters/CheckboxFilter";
-import { ComboFilter } from "@/app/components/search/filters/ComboFilter";
-import { DateRangeFilter } from "@/app/components/search/filters/DateRangeFilter";
-import { PopupFilter } from "@/app/components/search/filters/PopupFilter";
-import { TextFilter } from "@/app/components/search/filters/TextFilter";
+import { CheckboxFilter } from "@/app/components/Search/filters/CheckboxFilter";
+import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
+import { DateRangeFilter } from "@/app/components/Search/filters/DateRangeFilter";
+import { PopupFilter } from "@/app/components/Search/filters/PopupFilter";
+import { TextFilter } from "@/app/components/Search/filters/TextFilter";
 import { SearchFilterLabel } from "@/app/components/Search/SearchFilterLabel";
-import { ConditionBox } from "@/app/components/search/ConditionBox";
+import { ConditionBox } from "@/app/components/Search/ConditionBox";
 import { cn } from "../ui/utils";
 
 /* =======================
