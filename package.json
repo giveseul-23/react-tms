@@ -4,14 +4,12 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "build": "node --max-old-space-size=4096 node_modules/.bin/vite build",
+    "build": "vite build",
     "dev": "vite"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@mui/icons-material": "7.3.5",
-    "@mui/material": "7.3.5",
     "@popperjs/core": "2.11.8",
     "@radix-ui/react-accordion": "1.2.3",
     "@radix-ui/react-alert-dialog": "1.1.6",
@@ -41,8 +39,10 @@
     "@radix-ui/react-tooltip": "1.1.8",
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-react": "4.7.0",
-    "ag-grid-community": "^35.0.1",
-    "ag-grid-react": "^35.0.1",
+    "ag-grid-community": "^32.3.3",
+    "ag-grid-react": "^32.3.3",
+    "@mui/material": "6.4.8",
+    "@mui/icons-material": "6.4.8",
     "axios": "^1.13.4",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",

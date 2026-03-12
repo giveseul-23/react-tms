@@ -43,7 +43,7 @@ export default function VehicleAssignPopup({
   });
 
   const fetchData = (extraParams: any) => {
-    //todo : ?�정
+    //todo : 수정
     chgVehicleApi
       .getConTruckList({
         VEH_OP_TP: vehicleOperType,
@@ -70,9 +70,9 @@ export default function VehicleAssignPopup({
 
   const textFields = [
     { label: "차량코드", value: vehicleCode, onChange: setVehicleCode },
-    { label: "차량?�형�?, value: vehicleType, onChange: setVehicleType },
+    { label: "차량유형", value: vehicleType, onChange: setVehicleType },
     { label: "차량번호", value: vehicleNo, onChange: setVehicleNo },
-    { label: "?�전?�명", value: driverName, onChange: setDriverName },
+    { label: "운전자명", value: driverName, onChange: setDriverName },
   ];
 
   const columnDefs = [
@@ -104,7 +104,7 @@ export default function VehicleAssignPopup({
       hide: true,
     },
     {
-      headerName: "?�전?�명",
+      headerName: "운전자명",
       sendField: "RETURN_DRVR_NM",
       field: "DRVR_NM",
       width: 120,
@@ -115,7 +115,7 @@ export default function VehicleAssignPopup({
       hide: true,
     },
     {
-      headerName: "차량?�형�?,
+      headerName: "차량유형명",
       sendField: "RETURN_VEH_TP_NM",
       field: "VEH_TP_NM",
       width: 120,
@@ -131,12 +131,12 @@ export default function VehicleAssignPopup({
       hide: true,
     },
     {
-      headerName: "?�호권역1",
+      headerName: "선호권역1",
       field: "PRFRD_ZN_NM1",
       width: 120,
     },
     {
-      headerName: "?�호권역2",
+      headerName: "선호권역2",
       field: "PRFRD_ZN_NM2",
       width: 120,
     },
@@ -150,7 +150,7 @@ export default function VehicleAssignPopup({
           acc[sendKey] = row[col.field];
         }
 
-        acc.CHGVEH_MEMO = "?�송?�협?�사 ?�청�?;
+        acc.CHGVEH_MEMO = "운송협력사 요청";
         return acc;
       },
       {} as Record<string, any>,
@@ -159,9 +159,9 @@ export default function VehicleAssignPopup({
 
   return (
     <div className="flex flex-col gap-3 w-full h-full">
-      {/* ?�?� 조회 조건 ?�?� */}
+      {/* 상단 조회 조건 영역 */}
       <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        {/* ?�더 �?*/}
+        {/* 헤더 바 */}
         <div className="flex items-center justify-between px-3 py-2 bg-[rgb(var(--primary))]">
           <div className="flex items-center gap-1.5 leading-none">
             <SlidersHorizontal className="w-3.5 h-3.5 text-white/80 flex-shrink-0" />
@@ -181,9 +181,9 @@ export default function VehicleAssignPopup({
           </Button>
         </div>
 
-        {/* ?�드 ???�이블형 ?�이?�웃 */}
+        {/* 필드 및 테이블형 레이아웃 */}
         <div className="grid grid-cols-3 divide-x divide-y divide-slate-100">
-          {/* ?�스???�드 */}
+          {/* 텍스트 필드 */}
           {textFields.map((f) => (
             <div
               key={f.label}
@@ -197,18 +197,18 @@ export default function VehicleAssignPopup({
                 onChange={(e) => f.onChange(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && onSearch()}
                 className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full"
-                placeholder="??
+                placeholder="입력"
               />
             </div>
           ))}
 
-          {/* ?�호권역1 */}
+          {/* 선호권역1 */}
           <div className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group">
             <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
-              ?�호권역1
+              선호권역1
             </label>
             <ComboFilter
-              placeholder="??
+              placeholder="선택"
               options={stores.preferredZone}
               value={region1}
               onChange={setRegion1}
@@ -216,13 +216,13 @@ export default function VehicleAssignPopup({
             />
           </div>
 
-          {/* ?�호권역2 */}
+          {/* 선호권역2 */}
           <div className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group">
             <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
-              ?�호권역2
+              선호권역2
             </label>
             <ComboFilter
-              placeholder="??
+              placeholder="선택"
               options={stores.preferredZone}
               value={region2}
               onChange={setRegion2}
@@ -232,7 +232,7 @@ export default function VehicleAssignPopup({
         </div>
       </div>
 
-      {/* ?�?� ?�택 ?�태 ?�시 ?�?� */}
+      {/* 차량 선택 상태 표시 영역 */}
       {selectedRow ? (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
           <Truck className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
@@ -242,17 +242,17 @@ export default function VehicleAssignPopup({
           <span className="text-blue-300">|</span>
           <span>{selectedRow.VEH_TP_NM}</span>
           <span className="ml-auto text-[10px] text-blue-400 font-medium">
-            ?�택????
+            선택됨
           </span>
         </div>
       ) : (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-dashed border-slate-200 text-[11px] text-slate-400">
           <Truck className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>그리?�에??차량???�택?�세??/span>
+          <span>그리드에서 차량을 선택하세요</span>
         </div>
       )}
 
-      {/* ?�?� Grid ?�?� */}
+      {/* 데이터 Grid 영역 */}
       <div className="flex-1 min-h-[280px]">
         <DataGrid
           layoutType="plain"
@@ -267,7 +267,7 @@ export default function VehicleAssignPopup({
         />
       </div>
 
-      {/* ?�?� 버튼 ?�역 ?�?� */}
+      {/* 하단 버튼 영역 */}
       <div className="flex justify-end gap-2 pt-2.5 border-t border-slate-100">
         <Button
           size="sm"
@@ -285,7 +285,7 @@ export default function VehicleAssignPopup({
           className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 gap-1.5"
         >
           <Check className="w-3 h-3" />
-          ?�용
+          적용
         </Button>
       </div>
     </div>

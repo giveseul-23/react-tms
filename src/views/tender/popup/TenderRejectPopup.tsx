@@ -37,18 +37,18 @@ export default function RejectReasonContent({
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      {/* ???�역 */}
+      {/* 입력 영역 */}
       <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100">
-        {/* ?�유 ?�택 */}
+        {/* 이유 선택 */}
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            ?�송?�청 거절?�유
+            운송요청 거절이유
           </label>
 
           <ComboFilter
             value={reasonCode}
             onChange={setReasonCode}
-            placeholder="?�택?�세??
+            placeholder="선택하세요"
             options={meta[0].options.map((r) => ({
               CODE: r.CODE,
               NAME: r.NAME,
@@ -66,10 +66,10 @@ export default function RejectReasonContent({
           />
         </div>
 
-        {/* ?�세 ?�용 */}
+        {/* 상세 내용 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            ?�송?�청 거절?�유 ?��??�용
+            운송요청 거절이유 상세내용
           </label>
 
           <textarea
@@ -77,12 +77,12 @@ export default function RejectReasonContent({
             onChange={(e) => setDetail(e.target.value)}
             rows={5}
             className="w-full rounded-lg border border-gray-300 p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="?��? ?�용???�력?�세??
+            placeholder="상세 내용을 입력하세요"
           />
         </div>
       </div>
 
-      {/* 버튼 ?�역 */}
+      {/* 버튼 영역 */}
       <div className="flex gap-3 mt-6">
         <button
           type="button"
@@ -98,7 +98,7 @@ export default function RejectReasonContent({
           onClick={() => onConfirm({ reasonCode, detail })}
           className="flex-1 h-11 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-40 transition"
         >
-          ?�??
+          확인
         </button>
       </div>
     </div>

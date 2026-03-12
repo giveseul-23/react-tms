@@ -1,10 +1,6 @@
 "use client";
 // app/components/grid/DataGrid.tsx
 
-import { ModuleRegistry } from "ag-grid-community";
-import { AllCommunityModule } from "ag-grid-community";
-ModuleRegistry.registerModules([AllCommunityModule]);
-
 import React, { useMemo, useState, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef, ColGroupDef, ValueGetterParams } from "ag-grid-community";
