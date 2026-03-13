@@ -38,10 +38,10 @@ export default function RejectReasonContent({
   return (
     <div className="w-full max-w-xl mx-auto">
       {/* 입력 영역 */}
-      <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100 dark:bg-slate-800">
         {/* 이유 선택 */}
         <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2 dark:[color-scheme:dark] dark:text-white">
             운송요청 거절이유
           </label>
 
@@ -68,7 +68,7 @@ export default function RejectReasonContent({
 
         {/* 상세 내용 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2 dark:[color-scheme:dark] dark:text-white">
             운송요청 거절이유 상세내용
           </label>
 
@@ -96,7 +96,7 @@ export default function RejectReasonContent({
           type="button"
           disabled={!reasonCode}
           onClick={() => onConfirm({ reasonCode, detail })}
-          className="flex-1 h-11 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-40 transition"
+          className="flex-1 h-11 rounded-lg bg-[rgb(var(--primary))] text-white font-medium hover:bg-blue-700 disabled:opacity-40 transition"
         >
           확인
         </button>

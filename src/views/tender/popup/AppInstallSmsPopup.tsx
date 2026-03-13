@@ -24,9 +24,9 @@ export default function AppInstallSmsPopup({
   return (
     <div className="w-full max-w-lg mx-auto">
       {/* 카드 */}
-      <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100 dark:bg-slate-800">
         <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
             전화번호 <span className="text-red-500">*</span>
           </label>
 

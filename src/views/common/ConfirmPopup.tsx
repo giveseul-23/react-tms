@@ -48,7 +48,9 @@ export default function ConfirmModal({
 
       {/* Title */}
       {title && (
-        <h2 className="text-lg font-semibold text-gray-800 mb-2">{title}</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-2 dark:[color-scheme:dark] dark:text-white">
+          {title}
+        </h2>
       )}
       {/* Description */}
       {description && (
@@ -63,7 +65,7 @@ export default function ConfirmModal({
           onClick={onClose}
           className={`flex-1 h-11 rounded-md text-white font-medium transition 
             ${type === "error" && "bg-red-500 hover:bg-red-600"}
-            ${type === "confirm" && "bg-blue-500 hover:bg-blue-600"}
+            ${type === "confirm" && "bg-blue-500 hover:bg-blue-600 "}
             ${type === "check" && "bg-gray-500 hover:bg-gray-600"}`}
         >
           {confirmText}

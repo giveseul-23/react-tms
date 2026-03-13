@@ -177,6 +177,7 @@ export function GridActionsBar({
                   text-[11px]
                   text-left
                   hover:bg-gray-100
+                  dark:hover:text-slate-900
                   disabled:opacity-50
                 "
               >

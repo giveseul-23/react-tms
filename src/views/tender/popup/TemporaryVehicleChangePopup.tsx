@@ -30,34 +30,36 @@ export default function TemporaryVehicleChangePopup({
   return (
     <div className="w-full max-w-xl mx-auto">
       {/* 카드 */}
-      <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+      <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4 dark:bg-slate-800">
         {/* 차량유형명 */}
         <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
             차량유형명
           </label>
           <input
             value={vehicleType}
             disabled
-            className="col-span-2 h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm"
+            className="col-span-2 h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm dark:text-slate-900"
           />
         </div>
 
         {/* 운송협력사명 */}
         <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
             운송협력사명
           </label>
           <input
             value={carrierName}
             disabled
-            className="col-span-2 h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm"
+            className="col-span-2 h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm dark:text-slate-900"
           />
         </div>
 
         {/* 차량번호 */}
         <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">차량번호</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
+            차량번호
+          </label>
           <input
             value={vehicleNo}
             onChange={(e) => setVehicleNo(e.target.value)}
@@ -67,7 +69,9 @@ export default function TemporaryVehicleChangePopup({
 
         {/* 운전자명 */}
         <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">운전자명</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
+            운전자명
+          </label>
           <input
             value={driverName}
             onChange={(e) => setDriverName(e.target.value)}
@@ -77,7 +81,7 @@ export default function TemporaryVehicleChangePopup({
 
         {/* 운전자전화번호 */}
         <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
             운전자전화번호
           </label>
           <input
