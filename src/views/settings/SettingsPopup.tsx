@@ -11,7 +11,7 @@ import {
 import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
 
-type ThemeColor = "BLUE" | "GREEN" | "RED" | "ORANGE" | "YELLOW";
+type ThemeColor = "BLUE" | "GREEN" | "RED" | "ORANGE" | "YELLOW" | "WINE";
 
 const categoryCntryOptions = [
   { value: "전체", label: "전체" },
@@ -24,6 +24,7 @@ const themeOptions: { value: ThemeColor; color: string; label: string }[] = [
   { value: "RED", color: "bg-red-500", label: "빨강" },
   { value: "ORANGE", color: "bg-orange-500", label: "주황" },
   { value: "YELLOW", color: "bg-yellow-400", label: "노랑" },
+  { value: "WINE", color: "bg-[#800020]", label: "와인" },
 ];
 
 type ThemePickerProps = {

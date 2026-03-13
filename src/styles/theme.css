@@ -238,6 +238,12 @@
   --primary: 202 138 4;
   --grid-header-bg: var(--chart-3-soft);
 }
+
+[data-theme="WINE"] {
+  --primary: 114 47 55;
+  --grid-header-bg: var(--chart-5-soft);
+}
+
 /* ===============================
    ag-Grid ← App Theme Bridge
    =============================== */
