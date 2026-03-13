@@ -53,7 +53,7 @@ export default function AppInstallSmsPopup({
           type="button"
           disabled={!isValid}
           onClick={() => onConfirm({ phone })}
-          className="flex-1 h-11 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-40 transition"
+          className="flex-1 h-11 rounded-lg text-white font-medium disabled:opacity-40 transition hover:bg-[rgb(var(--primary-hover))] bg-[rgb(var(--primary))]"
         >
           전송
         </button>

@@ -216,31 +216,37 @@
 /* 테마 컬러 */
 [data-theme="BLUE"] {
   --primary: 37 99 235;
+  --primary-hover: 29 78 216;
   --grid-header-bg: var(--chart-1-soft);
 }
 
 [data-theme="GREEN"] {
   --primary: 22 163 74;
+  --primary-hover: 21 128 61;
   --grid-header-bg: var(--chart-2-soft);
 }
 
 [data-theme="RED"] {
   --primary: 220 38 38;
+  --primary-hover: 185 28 28;
   --grid-header-bg: var(--chart-5-soft);
 }
 
 [data-theme="ORANGE"] {
   --primary: 234 88 12;
+  --primary-hover: 194 65 12;
   --grid-header-bg: var(--chart-4-soft);
 }
 
 [data-theme="YELLOW"] {
   --primary: 202 138 4;
+  --primary-hover: 161 98 7;
   --grid-header-bg: var(--chart-3-soft);
 }
 
 [data-theme="WINE"] {
   --primary: 114 47 55;
+  --primary-hover: 88 35 42;
   --grid-header-bg: var(--chart-5-soft);
 }
 

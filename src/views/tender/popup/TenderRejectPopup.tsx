@@ -96,7 +96,7 @@ export default function RejectReasonContent({
           type="button"
           disabled={!reasonCode}
           onClick={() => onConfirm({ reasonCode, detail })}
-          className="flex-1 h-11 rounded-lg bg-[rgb(var(--primary))] text-white font-medium hover:bg-blue-700 disabled:opacity-40 transition"
+          className="flex-1 h-11 rounded-lg bg-[rgb(var(--primary))] text-white font-medium hover:bg-[rgb(var(--primary-hover))] disabled:opacity-40 transition"
         >
           확인
         </button>

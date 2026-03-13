@@ -262,7 +262,7 @@ export const SettingsPopup: React.FC = () => {
         <Button
           size="sm"
           onClick={handleApply}
-          className="h-7 px-4 text-xs font-semibold bg-[rgb(var(--primary))] hover:bg-blue-700 text-white gap-1.5"
+          className="h-7 px-4 text-xs font-semibold text-white gap-1.5 hover:bg-[rgb(var(--primary-hover))] bg-[rgb(var(--primary))]"
         >
           <Save className="w-3 h-3" />
           적용
