@@ -1,12 +1,18 @@
 "use client";
 // app/components/grid/DataGrid.tsx
 
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
-import type { ColDef, ColGroupDef, ValueGetterParams } from "ag-grid-community";
+import type {
+  ColDef,
+  ColGroupDef,
+  ValueGetterParams,
+  GridReadyEvent,
+  FirstDataRenderedEvent,
+} from "ag-grid-community";
 
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
@@ -16,6 +22,104 @@ import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+
+// ─── 오토사이징 유틸 ────────────────────────────────────────────────────────────
+
+/**
+ * Canvas를 이용해 문자열의 픽셀 너비를 측정합니다.
+ * 그리드 폰트(11px)에 맞게 고정합니다.
+ */
+const GRID_FONT = "11px -apple-system, BlinkMacSystemFont, sans-serif";
+let _canvas: HTMLCanvasElement | null = null;
+
+function measureTextWidth(text: string): number {
+  if (typeof document === "undefined") return text.length * 7;
+  if (!_canvas) _canvas = document.createElement("canvas");
+  const ctx = _canvas.getContext("2d");
+  if (!ctx) return text.length * 7;
+  ctx.font = GRID_FONT;
+  return ctx.measureText(text).width;
+}
+
+const CELL_PADDING = 10; // 셀 양쪽 패딩 (3px × 2 + 여유)
+const HEADER_PADDING = 20; // 헤더 패딩 + 정렬 아이콘 여유
+const MIN_COL_WIDTH = 80;
+
+/**
+ * rowData와 columnDefs를 받아 각 컬럼의 최적 너비를 계산합니다.
+ * - 헤더 텍스트 너비와 데이터 최대 너비 중 큰 값을 사용
+ * - 최소 MIN_COL_WIDTH 보장
+ */
+function calcOptimalWidths<TRow>(
+  columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[],
+  rowData: TRow[],
+): Record<string, number> {
+  const widthMap: Record<string, number> = {};
+
+  for (const col of columnDefs) {
+    // ColGroupDef는 field가 없으므로 스킵
+    if (!("field" in col) && !("colId" in col)) continue;
+
+    const colDef = col as ColDef<TRow>;
+    const key = (colDef.colId ?? colDef.field ?? "") as string;
+    if (!key) continue;
+
+    // 헤더 최소 너비
+    const headerText = colDef.headerName ?? key;
+    const headerWidth = measureTextWidth(headerText) + HEADER_PADDING;
+
+    // 데이터 최대 너비
+    let maxDataWidth = 0;
+    for (const row of rowData) {
+      const raw = (row as any)[colDef.field as string];
+      const str =
+        raw == null
+          ? ""
+          : typeof raw === "object"
+            ? JSON.stringify(raw)
+            : String(raw);
+      const w = measureTextWidth(str) + CELL_PADDING;
+      if (w > maxDataWidth) maxDataWidth = w;
+    }
+
+    // 헤더 vs 데이터 중 큰 값, 최소 MIN_COL_WIDTH
+    widthMap[key] = Math.max(headerWidth, maxDataWidth, MIN_COL_WIDTH);
+  }
+
+  return widthMap;
+}
+
+/**
+ * ag-Grid API를 통해 각 컬럼에 계산된 너비를 적용합니다.
+ * disableMaxWidth 플래그가 있는 컬럼은 maxWidth 제한 없이 처리합니다.
+ */
+function applyColumnWidths<TRow>(
+  api: any,
+  columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[],
+  widthMap: Record<string, number>,
+) {
+  const updatedDefs = columnDefs.map((col) => {
+    if (!("field" in col) && !("colId" in col)) return col;
+    const colDef = col as ColDef<TRow>;
+    const key = (colDef.colId ?? colDef.field ?? "") as string;
+    const width = widthMap[key];
+    if (!width) return col;
+
+    const base = { ...colDef, width };
+
+    // disableMaxWidth 플래그가 있으면 maxWidth 제한 제거
+    if ((colDef as any).disableMaxWidth === true) {
+      return { ...base, maxWidth: undefined };
+    }
+
+    return base;
+  });
+
+  api.setGridOption("columnDefs", updatedDefs);
+}
+
+// ─── 컴포넌트 ───────────────────────────────────────────────────────────────────
+
 type DataGridProps<TRow> = {
   tabs?: GridTab[];
   presets?: Record<string, GridPreset<TRow>>;
@@ -67,7 +171,6 @@ export default function DataGrid<TRow>({
     tabs?.[0]?.key ?? null,
   );
 
-  // preset에 gridRef가 없을 때 사용할 내부 ref
   const internalGridRef = useRef<any>(null);
 
   const totalPages = Math.ceil((totalCount ?? 0) / (pageSize ?? 20));
@@ -98,7 +201,6 @@ export default function DataGrid<TRow>({
     return actions ?? [];
   }, [layoutType, activeTab, presets, actions]);
 
-  // preset의 onCellValueChanged 우선, 없으면 prop 사용
   const activeOnCellValueChanged = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
       return presets[activeTab].onCellValueChanged ?? onCellValueChanged;
@@ -106,7 +208,6 @@ export default function DataGrid<TRow>({
     return onCellValueChanged;
   }, [layoutType, activeTab, presets, onCellValueChanged]);
 
-  // preset의 gridRef 우선, 없으면 내부 ref 사용
   const activeGridRef = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
       return presets[activeTab].gridRef ?? internalGridRef;
@@ -142,6 +243,50 @@ export default function DataGrid<TRow>({
     });
   }, [activeColumnDefs]);
 
+  // ─── 오토사이징 핸들러 ────────────────────────────────────────────────────────
+
+  /**
+   * 데이터 기준 최적 너비를 계산해 컬럼에 적용합니다.
+   * disableAutoSize prop이 true면 아무것도 하지 않습니다.
+   */
+  const runAutoSize = useCallback(
+    (api: any, cols: (ColDef<TRow> | ColGroupDef<TRow>)[], rows: TRow[]) => {
+      if (disableAutoSize) return;
+
+      // "No" 컬럼은 너비 고정(56px)이므로 오토사이징 대상에서 제외
+      const sizableCols = cols.filter(
+        (col) => !("headerName" in col && col.headerName === "No"),
+      );
+
+      const widthMap = calcOptimalWidths(sizableCols, rows);
+      applyColumnWidths(api, cols, widthMap);
+    },
+    [disableAutoSize],
+  );
+
+  const handleFirstDataRendered = useCallback(
+    (e: FirstDataRenderedEvent<TRow>) => {
+      runAutoSize(e.api, finalColumnDefs, activeRowData);
+    },
+    [runAutoSize, finalColumnDefs, activeRowData],
+  );
+
+  // rowData가 변경될 때(탭 전환, 새 조회 등)도 오토사이징 재실행
+  const handleGridReady = useCallback(
+    (e: GridReadyEvent<TRow>) => {
+      // 초기 데이터가 이미 있는 경우(presets 등)에도 적용
+      if (activeRowData.length > 0) {
+        // 다음 프레임에 실행하여 렌더링 완료 후 적용
+        requestAnimationFrame(() => {
+          runAutoSize(e.api, finalColumnDefs, activeRowData);
+        });
+      }
+    },
+    [runAutoSize, finalColumnDefs, activeRowData],
+  );
+
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const wrappedActions = useMemo(() => {
     return activeActions?.map((action) => {
       if (action.type === "button") {
@@ -168,19 +313,20 @@ export default function DataGrid<TRow>({
       ? renderRightGrid(activeTab)
       : null;
 
-  // 공통 AgGridReact props
   const commonGridProps = {
     theme: "legacy" as const,
     columnDefs: finalColumnDefs,
     defaultColDef: {
       resizable: true,
       sortable: true,
-      minWidth: 80,
+      minWidth: MIN_COL_WIDTH,
       filter: true,
       floatingFilter: true,
     },
     headerHeight: 22,
     rowHeight: 22,
+    onGridReady: handleGridReady,
+    onFirstDataRendered: handleFirstDataRendered,
     onRowSelected: (e: any) => {
       if (!e.api) return;
       const rows = e.api.getSelectedRows();
@@ -208,15 +354,6 @@ export default function DataGrid<TRow>({
       if (!e.data) return;
       onRowClicked?.(e.data);
     },
-    onFirstDataRendered: (e: any) => {
-      const updatedDefs = e.api.getColumnDefs()?.map((col: any) => ({
-        ...col,
-        maxWidth: 120,
-      }));
-      if (updatedDefs) {
-        e.api.setGridOption("columnDefs", updatedDefs);
-      }
-    },
     onCellValueChanged: activeOnCellValueChanged,
     rowSelection:
       rowSelectionProp === "single"
@@ -224,7 +361,6 @@ export default function DataGrid<TRow>({
         : { mode: "multiRow" as const },
   };
 
-  // 공통 그리드 스타일
   const gridStyle = {
     ["--ag-font-size" as any]: "11px",
     ["--ag-header-font-size" as any]: "11px",
@@ -235,7 +371,6 @@ export default function DataGrid<TRow>({
     ["--ag-grid-size" as any]: "3px",
   };
 
-  // 페이지네이션 UI
   const PaginationBar = () => {
     if (totalCount == null) return null;
     return (
@@ -280,19 +415,16 @@ export default function DataGrid<TRow>({
 
   return (
     <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
-      {/* Tabs */}
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-4 shrink-0">
           <GridTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         </div>
       )}
 
-      {/* Actions */}
       <div className="relative z-1 shrink-0 min-w-0 w-full">
         <GridActionsBar actions={wrappedActions} />
       </div>
 
-      {/* Grid */}
       <div className="flex-1 min-h-0 overflow-hidden">
         {rightGrid ? (
           <PanelGroup direction="horizontal" className="h-full w-full">
@@ -331,7 +463,6 @@ export default function DataGrid<TRow>({
         )}
       </div>
 
-      {/* 서버 페이지네이션 */}
       <PaginationBar />
     </div>
   );
