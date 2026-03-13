@@ -33,21 +33,16 @@ export function PopupShell({
 
       {/* Dialog */}
       <DialogContent
-        className={`
-    p-0
-    w-full
-    ${POPUP_WIDTH_CLASS[width]}
-  `}
+        className={`p-0 w-full ${POPUP_WIDTH_CLASS[width]} shadow-xl rounded-xl bg-white`}
       >
-        <Card className="shadow-xl">
-          {title && (
-            <DialogHeader className="px-6 pt-6">
-              <DialogTitle>{title}</DialogTitle>
-            </DialogHeader>
-          )}
-
-          <div className="p-6">{children}</div>
-        </Card>
+        {title && (
+          <DialogHeader className="px-6 pt-6">
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+        )}
+        <div className="p-6 break-all overflow-y-auto max-h-[80vh]">
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );
