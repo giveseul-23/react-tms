@@ -1,7 +1,13 @@
 "use client";
 // app/components/grid/DataGrid.tsx
 
-import React, { useMemo, useState, useRef, useCallback } from "react";
+import React, {
+  useMemo,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+} from "react";
 import { AgGridReact } from "ag-grid-react";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 
@@ -271,12 +277,13 @@ export default function DataGrid<TRow>({
     [runAutoSize, finalColumnDefs, activeRowData],
   );
 
-  // rowData가 변경될 때(탭 전환, 새 조회 등)도 오토사이징 재실행
+  // 그리드 API를 ref에 저장해두고 탭 전환 시 재사용
+  const gridApiRef = useRef<any>(null);
+
   const handleGridReady = useCallback(
     (e: GridReadyEvent<TRow>) => {
-      // 초기 데이터가 이미 있는 경우(presets 등)에도 적용
+      gridApiRef.current = e.api;
       if (activeRowData.length > 0) {
-        // 다음 프레임에 실행하여 렌더링 완료 후 적용
         requestAnimationFrame(() => {
           runAutoSize(e.api, finalColumnDefs, activeRowData);
         });
@@ -284,6 +291,19 @@ export default function DataGrid<TRow>({
     },
     [runAutoSize, finalColumnDefs, activeRowData],
   );
+
+  // 탭 전환 또는 rowData 교체 시 저장된 API로 오토사이징 재실행
+  useEffect(() => {
+    if (disableAutoSize) return;
+    const api = gridApiRef.current;
+    if (!api || api.isDestroyed?.()) return;
+    if (activeRowData.length === 0) return;
+
+    requestAnimationFrame(() => {
+      if (api.isDestroyed?.()) return;
+      runAutoSize(api, finalColumnDefs, activeRowData);
+    });
+  }, [activeTab, activeRowData, finalColumnDefs, runAutoSize, disableAutoSize]);
 
   // ─────────────────────────────────────────────────────────────────────────────
 
