@@ -3,6 +3,9 @@
 
 import React, { useMemo, useState, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
+import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 import type { ColDef, ColGroupDef, ValueGetterParams } from "ag-grid-community";
 
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
@@ -12,8 +15,7 @@ import type { GridPreset, GridTab } from "./types";
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 
 import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
-
+import "ag-grid-community/styles/ag-theme-quartz.css";
 type DataGridProps<TRow> = {
   tabs?: GridTab[];
   presets?: Record<string, GridPreset<TRow>>;
@@ -168,6 +170,7 @@ export default function DataGrid<TRow>({
 
   // 공통 AgGridReact props
   const commonGridProps = {
+    theme: "legacy" as const,
     columnDefs: finalColumnDefs,
     defaultColDef: {
       resizable: true,
