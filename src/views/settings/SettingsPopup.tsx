@@ -10,6 +10,7 @@ import {
 } from "@/app/components/ui/select";
 import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
+import { usePopup } from "@/app/components/popup/PopupContext";
 
 type ThemeColor = "BLUE" | "GREEN" | "RED" | "ORANGE" | "YELLOW" | "WINE";
 
@@ -112,6 +113,8 @@ export const SettingsPopup: React.FC = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const { closePopup } = usePopup();
 
   const setDraftField = <K extends keyof typeof draft>(
     key: K,
@@ -249,7 +252,7 @@ export const SettingsPopup: React.FC = () => {
         <Button
           size="sm"
           variant="outline"
-          onClick={handleCancel}
+          onClick={closePopup}
           className="h-7 px-4 text-xs
             border-slate-200 dark:border-slate-600
             text-slate-500 dark:text-slate-300
