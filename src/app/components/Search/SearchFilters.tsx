@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Search,
-  Filter,
   RefreshCw,
   ChevronDown,
   SlidersHorizontal,
@@ -26,7 +25,6 @@ import {
 } from "@/features/search/search.builder";
 
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
-import { tenderApi } from "@/app/services/tender/tenderApi";
 
 type SearchMeta = {
   key: string;
@@ -43,24 +41,28 @@ type SearchMeta = {
   required?: boolean;
 };
 
-// ← onSearch 타입 변경: rows/totalCount/page/limit 를 담은 객체를 전달
+export type SearchResult = {
+  rows: any[];
+  totalCount: number;
+  page: number;
+  limit: number;
+};
+
 export function SearchFilters({
   meta,
   onSearch,
   searchRef,
   filtersRef,
   pageSize = 20,
+  // fetchFn을 prop으로 주입받아 tenderApi 직접 의존 제거
+  fetchFn,
 }: {
   meta: readonly SearchMeta[];
-  onSearch: (data: {
-    rows: any[];
-    totalCount: number;
-    page: number;
-    limit: number;
-  }) => void;
+  onSearch: (data: SearchResult) => void;
   searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
   pageSize?: number;
+  fetchFn: (params: Record<string, unknown>) => Promise<any>;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
@@ -78,7 +80,7 @@ export function SearchFilters({
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  const buildInitialSearchState = () => {
+  const buildInitialSearchState = useCallback(() => {
     const today = getToday();
     const initial: Record<string, SearchCondition> = {};
 
@@ -113,12 +115,12 @@ export function SearchFilters({
     });
 
     return initial;
-  };
+  }, [meta]);
 
   useEffect(() => {
     if (!meta?.length) return;
     setSearchState(buildInitialSearchState());
-  }, [meta]);
+  }, [meta, buildInitialSearchState]);
 
   const getCondition = (key: string) => searchState[key];
 
@@ -145,7 +147,6 @@ export function SearchFilters({
     setSearchState(buildInitialSearchState());
   };
 
-  // ← targetPage 파라미터 추가 (페이지 변경 시 재조회에 사용)
   const handleSearch = useCallback(
     (targetPage = 1) => {
       const missingFields = meta
@@ -188,8 +189,8 @@ export function SearchFilters({
 
           if (metaItem?.options) {
             const codes = metaItem.options
-              .filter((o) => o.CODE !== "ALL")
-              .map((o) => `'${o.CODE}'`)
+              .filter((o: any) => o.CODE !== "ALL")
+              .map((o: any) => `'${o.CODE}'`)
               .join(",");
 
             conditions.push(` AND ${v.key} IN (${codes})`);
@@ -200,7 +201,13 @@ export function SearchFilters({
       });
 
       const whereClause = conditions.join("");
-      const userId = sessionStorage.getItem("userId");
+
+      const params: Record<string, unknown> = {
+        DYNAMIC_QUERY: whereClause,
+        MENU_CD: "test",
+        page: targetPage,
+        limit,
+      };
 
       if (filtersRef) {
         filtersRef.current = {
@@ -209,20 +216,10 @@ export function SearchFilters({
         };
       }
 
-      tenderApi
-        .getDispatchList({
-          sesUserId: userId,
-          userId,
-          ACCESS_TOKEN: sessionStorage.getItem("ACCESS_TOKEN"),
-          REFRESH_TOKEN: sessionStorage.getItem("REFRESH_TOKEN"),
-          DYNAMIC_QUERY: whereClause,
-          MENU_CD: "test",
-          page: targetPage, // ← 추가
-          limit, // ← 추가
-        })
+      fetchFn(params)
         .then((res: any) => {
           const rows = res.data.result ?? [];
-          const totalCount = rows[0]?.TOTALCOUNT ?? 0; // ← 첫 번째 row에서 추출
+          const totalCount = rows[0]?.TOTALCOUNT ?? 0;
 
           onSearch({
             rows,
@@ -235,7 +232,7 @@ export function SearchFilters({
           console.error(err);
         });
     },
-    [searchState, meta, limit, onSearch],
+    [searchState, meta, limit, onSearch, fetchFn, filtersRef, openPopup, closePopup],
   );
 
   useEffect(() => {
@@ -394,7 +391,7 @@ export function SearchFilters({
                       />
                     );
 
-                  case "popup":
+                  case "popup": {
                     const baseKey = m.key.replace("_CD", "");
 
                     return (
@@ -435,6 +432,7 @@ export function SearchFilters({
                         }
                       />
                     );
+                  }
 
                   default:
                     return null;
@@ -452,7 +450,7 @@ export function SearchFilters({
             <Button
               variant="outline"
               size="xs"
-              onClick={() => handleSearch(1)} // ← 조회 버튼은 항상 1페이지부터
+              onClick={() => handleSearch(1)}
               className="btn-primary btn-primary:hover"
             >
               <Search className="w-3 h-3" />

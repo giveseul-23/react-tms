@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 import { PopupShell } from "./PopupShell";
 import type { PopupWidth } from "./popup.types";
 
@@ -21,41 +21,31 @@ type PopupContextType = {
 const PopupContext = createContext<PopupContextType | null>(null);
 
 export function PopupProvider({ children }: { children: React.ReactNode }) {
-  const [popup, setPopup] = useState<PopupState>({
-    open: false,
-    content: null,
-    width: "xl", // 기본값 명시 (중요)
-  });
+  // 팝업 스택으로 변경 → 중첩 팝업 지원
+  const [stack, setStack] = useState<PopupState[]>([]);
 
-  const openPopup = ({ title, content, width }: OpenPopupPayload) => {
-    setPopup({
-      open: true,
-      title,
-      content,
-      width, // ✅ 이제 정상 전달
-    });
-  };
+  const openPopup = useCallback(({ title, content, width }: OpenPopupPayload) => {
+    setStack((prev) => [...prev, { open: true, title, content, width }]);
+  }, []);
 
-  const closePopup = () => {
-    setPopup((prev) => ({
-      ...prev,
-      open: false,
-      content: null,
-    }));
-  };
+  const closePopup = useCallback(() => {
+    setStack((prev) => prev.slice(0, -1));
+  }, []);
+
+  const top = stack[stack.length - 1];
 
   return (
     <PopupContext.Provider value={{ openPopup, closePopup }}>
       {children}
 
-      {/* ===== Global Popup Shell ===== */}
+      {/* 스택의 최상단 팝업만 렌더링 */}
       <PopupShell
-        open={popup.open}
+        open={!!top?.open}
         onOpenChange={(v) => !v && closePopup()}
-        title={popup.title}
-        width={popup.width}
+        title={top?.title}
+        width={top?.width}
       >
-        {popup.content}
+        {top?.content ?? null}
       </PopupShell>
     </PopupContext.Provider>
   );

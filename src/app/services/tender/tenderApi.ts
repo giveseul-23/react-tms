@@ -1,20 +1,12 @@
 import { apiClient } from "@/app/api/client";
+import { getSessionFields } from "@/app/services/auth/auth";
 
 type commonResponse = {
   rows: [];
 };
 
 const withSession = (payload: any = {}) => {
-  const userId = sessionStorage.getItem("userId");
-  const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
-  const REFRESH_TOKEN = sessionStorage.getItem("REFRESH_TOKEN");
-
-  const sessionFields = {
-    userId,
-    sesUserId: userId,
-    ACCESS_TOKEN,
-    REFRESH_TOKEN,
-  };
+  const sessionFields = getSessionFields();
 
   if (Array.isArray(payload)) {
     return payload.map((item) => ({ ...sessionFields, ...item }));
@@ -61,7 +53,6 @@ export const tenderApi = {
   },
 
   /////// ACTION
-  //운송비 저장
   updateCarrierRate(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/updateCarrierRate",
@@ -69,7 +60,6 @@ export const tenderApi = {
     );
   },
 
-  //운송요청수락
   onTenderAccepted(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onTenderAccepted",
@@ -77,7 +67,6 @@ export const tenderApi = {
     );
   },
 
-  //운송요청거절
   onTenderRejected(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onTenderRejected",
@@ -85,7 +74,6 @@ export const tenderApi = {
     );
   },
 
-  //지입차 변경
   onChangeRegVeh(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onChangeRegVeh",
@@ -93,7 +81,6 @@ export const tenderApi = {
     );
   },
 
-  //임시용차 변경
   onChangeTempVeh(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onChangeTempVeh",
@@ -101,7 +88,6 @@ export const tenderApi = {
     );
   },
 
-  //모바일가입용차 변경
   onVehicleChange(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onVehicleChange",
@@ -109,7 +95,6 @@ export const tenderApi = {
     );
   },
 
-  //차량취소
   onVehicleCancel(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onVehicleCancel",
@@ -117,7 +102,6 @@ export const tenderApi = {
     );
   },
 
-  //SMS 전송
   sendSMSForAppInstall(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/sendSMSForAppInstall",
@@ -125,16 +109,7 @@ export const tenderApi = {
     );
   },
 
-  // 엑셀 관련
-  //운송비양식다운로드
-  onCarrierRateExcelAll(payload: any) {
-    return apiClient.post(
-      "/openapina/carrier/onCarrierRateExcelAll",
-      withSession(payload),
-    );
-  },
-
-  //운송비양식업로드
+  // 엑셀
   gridExcelUpload(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/gridExcelUpload",
@@ -142,7 +117,6 @@ export const tenderApi = {
     );
   },
 
-  //엑셀 - 조회된 모든 데이터 다운로드
   gridExcelAll(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/downloadExcel",
@@ -150,23 +124,5 @@ export const tenderApi = {
       { responseType: "blob" },
     );
   },
-
-  //엑셀 - 보이는 데이터 다운로드
-  gridExcel(payload: any) {
-    return apiClient.post<commonResponse>(
-      "/openapina/carrier/gridExcel",
-      withSession(payload),
-    );
-  },
-
-  async gridExcelAllBySearch(payload: any) {
-    // 1단계 + 2단계를 한번에: onCarrierRateExcelAll이 아닌 downloadExcel로 직접 호출
-    // 단, 서버가 searchUrl로 DB 재조회해서 rows를 채워줘야 하므로
-    // 백엔드 downloadExcel이 searchUrl 조회를 지원해야 함
-    return apiClient.post(
-      "/openapina/carrier/downloadExcel",
-      withSession(payload),
-      { responseType: "blob" },
-    );
-  },
+  // gridExcel, onCarrierRateExcelAll, gridExcelAllBySearch 제거 (미사용)
 };

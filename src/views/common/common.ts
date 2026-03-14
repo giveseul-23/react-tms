@@ -1,18 +1,18 @@
-// excelUtils.ts 상단
-import { tenderApi } from "@/app/services/tender/tenderApi";
 // excelUtils.ts
+import { tenderApi } from "@/app/services/tender/tenderApi";
 
 // ────────────────────────────────────────────
 // Types
 // ────────────────────────────────────────────
 
 export interface ColumnDefine {
-  headerName?: string; // AG Grid
-  field?: string; // AG Grid
+  headerName?: string;
+  field?: string;
   excelPrint?: boolean;
   xtype?: string;
   editType?: string;
-  edityType?: string;
+  // 오타 수정: edityType → editorType (기존 코드 호환을 위해 둘 다 허용)
+  editorType?: string;
   dataIndex?: string;
   width?: number;
   align?: string;
@@ -85,7 +85,10 @@ export function setColumnsForExcel(columns: ColumnDefine[]): {
     if (col.excelPrint === false) continue;
     if (col.headerName === "No") continue;
 
-    if (col.xtype === "excheckcolumn" || col.edityType === "check") {
+    // 오타 수정: edityType → editorType (기존 데이터 호환)
+    const editorType = col.editorType ?? (col as any).edityType;
+
+    if (col.xtype === "excheckcolumn" || editorType === "check") {
       checkboxColumns.push(col);
     } else if (col.editType === "combo") {
       comboColumns.push(col);
@@ -100,27 +103,7 @@ export function setColumnsForExcel(columns: ColumnDefine[]): {
 }
 
 // ────────────────────────────────────────────
-// 검색 파라미터 → dsSearchCondition 변환
-// ────────────────────────────────────────────
-
-export function changeParamsToSearchCondition(
-  params: Record<string, unknown>,
-): SearchConditionItem[] {
-  return Object.entries(params).map(([key, value]) => ({
-    dataType: "STRING",
-    rowStatus: "normal",
-    type: "TEXT",
-    val0: key,
-    val1: "라벨",
-    val2: "=",
-    val3: value,
-    val4: "",
-  }));
-}
-
-// ────────────────────────────────────────────
 // AG Grid 컬럼 → 엑셀 파라미터 조립
-// (ExtJS getColumnInfoForExcelDown 대체)
 // ────────────────────────────────────────────
 
 export function getColumnInfoForExcelDown(
@@ -146,9 +129,8 @@ export function getColumnInfoForExcelDown(
   const colAligns: string[] = [];
 
   for (const col of columns) {
-    // No 컬럼, excelPrint=false, cellRenderer만 있고 field 없는 컬럼 제외
     if (col.headerName === "No" || col.excelPrint === false) continue;
-    if (!col.field) continue; // ← field 없으면 엑셀에 못 씀
+    if (!col.field) continue;
 
     headerCols.push(col.headerName ?? col.field);
     colNames.push(col.field);
@@ -191,11 +173,6 @@ export function getColumnInfoForExcelDown(
   };
 }
 
-// ────────────────────────────────────────────
-// 콤보 컬럼 코드 데이터 추출
-// (ExtJS getColumnsCodeData 대체)
-// ────────────────────────────────────────────
-
 export function getColumnsCodeData(
   comboColumns: ColumnDefine[],
   comboStores: Record<string, ComboOption[]>,
@@ -208,12 +185,8 @@ export function getColumnsCodeData(
     .filter((item) => item.key !== "");
 }
 
-// 컬럼 타입 기반으로 기본 align 결정
 function resolveDefaultAlign(col: ColumnDefine): string {
-  // const NUMBER_EDIT_TYPES = ["number", "integer", "float", "currency"];
   const DATE_TYPES = ["date", "month", "datetime", "time"];
-
-  // if (col.editType && NUMBER_EDIT_TYPES.includes(col.editType)) return "right";
   if (col.editType && DATE_TYPES.includes(col.editType)) return "center";
   if (col.type === "numeric") return "right";
   if (col.type === "string") return "left";
@@ -221,9 +194,7 @@ function resolveDefaultAlign(col: ColumnDefine): string {
 }
 
 // ────────────────────────────────────────────
-// 엑셀 다운로드 메인 함수
-// 1단계: prepare API 호출 (세션 저장)
-// 2단계: commonExcelDown 으로 파일 다운로드
+// 엑셀 다운로드
 // ────────────────────────────────────────────
 
 interface DownExcelOptions {
@@ -231,47 +202,44 @@ interface DownExcelOptions {
   searchParams?: Record<string, unknown>;
   menuName?: string;
   comboStores?: Record<string, ComboOption[]>;
-  fetchFn: (params: any) => Promise<any>; // ← 추가, searchUrl 제거
+  fetchFn: (params: any) => Promise<any>;
 }
 
-// excelUtils.ts
-export async function downExcelSearch({
-  columns,
-  searchParams = {},
-  menuName = "download",
-  comboStores = {},
-  fetchFn, // ← API 함수를 주입받음
-}: DownExcelOptions): Promise<void> {
-  const { comboColumns } = setColumnsForExcel(columns);
-  const excelInfo = getColumnInfoForExcelDown(columns, { menuName });
-
-  // 1단계: 전달받은 fetchFn으로 전체 데이터 조회
-  const searchResponse = await fetchFn(searchParams);
-  const rows = searchResponse.data?.result ?? searchResponse.data?.rows ?? [];
-
-  // 2단계: 엑셀 다운로드
-  const payload = {
-    fileName: menuName,
-    rows,
-    EXCEL_INFO: excelInfo,
-  };
-
-  const response = await tenderApi.gridExcelAll(payload);
-
-  const blob = new Blob([response.data], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
+async function triggerDownload(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${menuName}.xlsx`;
+  a.download = `${fileName}.xlsx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
-// 현재 그리드에 보이는 데이터로 엑셀 다운 (센차 downExcelSearched 대체)
+export async function downExcelSearch({
+  columns,
+  searchParams = {},
+  menuName = "download",
+  fetchFn,
+}: DownExcelOptions): Promise<void> {
+  const excelInfo = getColumnInfoForExcelDown(columns, { menuName });
+  const searchResponse = await fetchFn(searchParams);
+  const rows = searchResponse.data?.result ?? searchResponse.data?.rows ?? [];
+
+  const response = await tenderApi.gridExcelAll({
+    fileName: menuName,
+    rows,
+    EXCEL_INFO: excelInfo,
+  });
+
+  await triggerDownload(
+    new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
+    menuName,
+  );
+}
+
 export async function downExcelSearched({
   columns,
   rows,
@@ -283,23 +251,16 @@ export async function downExcelSearched({
 }): Promise<void> {
   const excelInfo = getColumnInfoForExcelDown(columns, { menuName });
 
-  const payload = {
+  const response = await tenderApi.gridExcelAll({
     fileName: menuName,
     rows,
     EXCEL_INFO: excelInfo,
-  };
-
-  const response = await tenderApi.gridExcelAll(payload);
-
-  const blob = new Blob([response.data], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${menuName}.xlsx`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+
+  await triggerDownload(
+    new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
+    menuName,
+  );
 }

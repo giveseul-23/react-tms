@@ -22,10 +22,6 @@ export function getAccessToken() {
   return sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
-export function getRefreshToken() {
-  return sessionStorage.getItem(REFRESH_TOKEN_KEY);
-}
-
 export function getUserName() {
   return sessionStorage.getItem(USERNM);
 }
@@ -40,4 +36,16 @@ export function clearTokens() {
 
 export function isAuthed() {
   return !!getAccessToken();
+}
+
+/** API 레이어에서 공통으로 쓰는 세션 필드 */
+export function getSessionFields() {
+  const userId = sessionStorage.getItem(USERID) ?? "";
+  return {
+    userId,
+    sesUserId: userId,
+    ACCESS_TOKEN: sessionStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
+    REFRESH_TOKEN: sessionStorage.getItem(REFRESH_TOKEN_KEY) ?? "",
+    sesLang: sessionStorage.getItem(SESLANG) ?? "",
+  };
 }

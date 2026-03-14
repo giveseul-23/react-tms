@@ -1,7 +1,7 @@
 // src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/Search/SearchFilters.tsx";
@@ -9,7 +9,6 @@ import { TENDER_SEARCH_META } from "./tenderSearchMeta";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 import { tenderApi } from "@/app/services/tender/tenderApi";
-import { SearchCondition } from "@/features/search/search.builder";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import TenderRejectPopup from "@/views/tender/popup/TenderRejectPopup";
@@ -20,40 +19,9 @@ import VehicleAssignPopup from "@/views/tender/popup/VehicleAssignPopup";
 import { useGuard } from "@/hooks/useGuard";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import { CommonPopup } from "@/views/common/CommonPopup";
-
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 
 type LayoutType = "side" | "vertical";
-
-function CntrSubGrid() {
-  return (
-    <div className="flex flex-col h-full min-h-0">
-      <DataGrid
-        layoutType="plain"
-        columnDefs={[
-          { headerName: "No" },
-          { headerName: "품목코드", field: "CNTR_TP" },
-          { headerName: "품목명", field: "QTY" },
-          { headerName: "주문수량", field: "QTY" },
-          { headerName: "주문수량단위", field: "QTY" },
-          { headerName: "부피", field: "RMK" },
-          { headerName: "중량", field: "RMK" },
-          { headerName: "판매적재단위", field: "RMK" },
-          { headerName: "PVC수량", field: "RMK" },
-          { headerName: "팔레트수량", field: "RMK" },
-          { headerName: "전용용기", field: "RMK" },
-          { headerName: "종이박스/지대", field: "RMK" },
-          { headerName: "채반", field: "RMK" },
-        ]}
-        rowData={[
-          { CNTR_TP: "PVC특대", QTY: 10 },
-          { CNTR_TP: "PVC대", QTY: 5 },
-        ]}
-        actions={[]}
-      />
-    </div>
-  );
-}
 
 const dispatchStatusColorMap: Record<string, string> = {
   "2030": "bg-purple-100 text-purple-700",
@@ -73,7 +41,6 @@ const dispatchStatusColorMap: Record<string, string> = {
 
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
-  const [filters, setFilters] = useState<SearchCondition[]>([]);
   const [layout, setLayout] = useState<LayoutType>("side");
   const [subStopRowData, setSubStopRowData] = useState<any[]>([]);
   const [subSmsHisRowData, setSubSmsHisRowData] = useState<any[]>([]);
@@ -105,23 +72,22 @@ export default function TenderReceiveDispatch() {
   const filtersRef = useRef<Record<string, unknown>>({});
   const apSetlGridRef = useRef<any>(null);
 
-  // setTimeout 클로저 문제 방지: 항상 최신 subApSetlRowData를 ref로 유지
+  // ref로 최신 state 유지 (setTimeout 클로저 / 이벤트 핸들러에서 사용)
   const subApSetlRowDataRef = useRef<any[]>([]);
   const selectedHeaderRowRef = useRef<any>(null);
 
-  // state setter를 래핑해서 ref도 같이 업데이트
-  const setSubApSetlRowDataWithRef = (updater: any) => {
+  const setSubApSetlRowDataWithRef = useCallback((updater: any) => {
     setSubApSetlRowData((prev) => {
       const next = typeof updater === "function" ? updater(prev) : updater;
       subApSetlRowDataRef.current = next;
       return next;
     });
-  };
+  }, []);
 
-  const setSelectedHeaderRowWithRef = (row: any) => {
+  const setSelectedHeaderRowWithRef = useCallback((row: any) => {
     setSelectedHeaderRow(row);
     selectedHeaderRowRef.current = row;
-  };
+  }, []);
 
   const codeMap = useMemo(() => {
     const map: Record<string, Record<string, string>> = {};
@@ -133,6 +99,34 @@ export default function TenderReceiveDispatch() {
     });
     return map;
   }, [stores]);
+
+  // SearchFilters에 주입할 fetch 함수
+  const fetchDispatchList = useCallback(
+    (params: Record<string, unknown>) => tenderApi.getDispatchList(params),
+    [],
+  );
+
+  // 행 클릭 시 3개 서브 API를 Promise.all로 병렬 처리
+  const handleRowClicked = useCallback(
+    (row: any) => {
+      setSelectedHeaderRowWithRef(row);
+
+      Promise.all([
+        tenderApi.getDispatchStopList({ DSPCH_NO: row.DSPCH_NO }),
+        tenderApi.getDispatchSmsHisList({ DSPCH_NO: row.DSPCH_NO }),
+        tenderApi.getDispatchApSetlList({ DSPCH_NO: row.DSPCH_NO }),
+      ])
+        .then(([stopRes, smsRes, apSetlRes]: any[]) => {
+          setSubStopRowData(stopRes.data.result ?? []);
+          setSubSmsHisRowData(smsRes.data.result ?? []);
+          setSubApSetlRowDataWithRef(apSetlRes.data.result ?? []);
+        })
+        .catch((err) => {
+          console.error("[TenderReceiveDispatch] row click sub-fetch failed", err);
+        });
+    },
+    [setSelectedHeaderRowWithRef, setSubApSetlRowDataWithRef],
+  );
 
   if (loading) {
     return <Skeleton className="h-24" />;
@@ -212,11 +206,7 @@ export default function TenderReceiveDispatch() {
     { headerName: "부피", field: "TTL_LD_VOL", type: "numeric" },
     { headerName: "PVC수량", field: "TTL_LD_FLEX_QTY1", type: "numeric" },
     { headerName: "전용용기", field: "TTL_LD_FLEX_QTY3", type: "numeric" },
-    {
-      headerName: "종이박스/지대수량",
-      field: "TTL_LD_FLEX_QTY4",
-      type: "numeric",
-    },
+    { headerName: "종이박스/지대수량", field: "TTL_LD_FLEX_QTY4", type: "numeric" },
     { headerName: "채반수량", field: "TTL_LD_FLEX_QTY5", type: "numeric" },
     { headerName: "출발지명", field: "FRM_LOC_NM" },
     { headerName: "디비전", field: "DIV_CD" },
@@ -405,9 +395,9 @@ export default function TenderReceiveDispatch() {
             downExcelSearch({
               columns: columnDefs1,
               searchParams: filtersRef.current,
-              searchUrl: "/tenderReceiveDispatchService/searchCarrierRateExcel",
-              menuCd: "MENU_PLAN_TENDER_RECEIVE",
               menuName: "운송수배현황",
+              fetchFn: (params) =>
+                tenderApi.getDispatchList(params),
             });
           },
         },
@@ -466,6 +456,7 @@ export default function TenderReceiveDispatch() {
         searchRef={searchRef}
         filtersRef={filtersRef}
         pageSize={20}
+        fetchFn={fetchDispatchList}
       />
 
       {/* layout toggle */}
@@ -506,26 +497,7 @@ export default function TenderReceiveDispatch() {
                 pageSize={gridData.limit}
                 onPageChange={(page) => searchRef.current?.(page)}
                 actions={actions1}
-                onRowClicked={(row: any) => {
-                  setSelectedHeaderRowWithRef(row);
-
-                  tenderApi
-                    .getDispatchStopList({ DSPCH_NO: row.DSPCH_NO })
-                    .then((res: any) => setSubStopRowData(res.data.result))
-                    .catch(console.error);
-
-                  tenderApi
-                    .getDispatchSmsHisList({ DSPCH_NO: row.DSPCH_NO })
-                    .then((res: any) => setSubSmsHisRowData(res.data.result))
-                    .catch(console.error);
-
-                  tenderApi
-                    .getDispatchApSetlList({ DSPCH_NO: row.DSPCH_NO })
-                    .then((res: any) =>
-                      setSubApSetlRowDataWithRef(res.data.result),
-                    )
-                    .catch(console.error);
-                }}
+                onRowClicked={handleRowClicked}
               />
             </div>
           </Panel>
@@ -570,7 +542,7 @@ export default function TenderReceiveDispatch() {
                       { headerName: "상차FQ4", field: "LDNG_FLEX_QTY4" },
                       { headerName: "상차FQ5", field: "LDNG_FLEX_QTY5" },
                       { headerName: "하차CBM", field: "UNLDNG_VOL" },
-                      { headerName: "하차CBM", field: "UNLDNG_WGT" },
+                      { headerName: "하차중량", field: "UNLDNG_WGT" },
                       { headerName: "하차FQ1", field: "UNLDNG_FLEX_QTY1" },
                       { headerName: "하차FQ2", field: "UNLDNG_FLEX_QTY2" },
                       { headerName: "하차FQ3", field: "UNLDNG_FLEX_QTY3" },
@@ -596,7 +568,7 @@ export default function TenderReceiveDispatch() {
                       { headerName: "출발지ID", field: "FRM_LOC_ID" },
                       { headerName: "출발지코드", field: "FRM_LOC_CD" },
                       { headerName: "출발지명", field: "FRM_LOC_NM" },
-                      { headerName: "출발지국가", field: "FRM_LOC_NM" },
+                      { headerName: "출발지국가", field: "FRM_CNTY_NM" },
                       { headerName: "출발지도시", field: "FRM_CTY_NM" },
                       { headerName: "출발지주", field: "FRM_STT_NM" },
                       { headerName: "출발지우편번호", field: "FRM_ZIP_CD" },
@@ -615,7 +587,6 @@ export default function TenderReceiveDispatch() {
                         filter: false,
                         floatingFilter: false,
                         cellRenderer: (params: any) => {
-                          // _isNew 행만 삭제 체크박스 표시
                           if (!params.data._isNew) return null;
                           return (
                             <div className="flex items-center justify-start h-full">
@@ -639,12 +610,7 @@ export default function TenderReceiveDispatch() {
                       { field: "DSPCH_NO", hide: true },
                       { headerName: "항목코드", field: "CHG_CD" },
                       { headerName: "항목명", field: "CHG_NM" },
-                      {
-                        headerName: "등록금액",
-                        field: "RATE",
-                        // _isNew(신규), _isDirty(기존 수정) 모두 편집 가능
-                        editable: true,
-                      },
+                      { headerName: "등록금액", field: "RATE", editable: true },
                       { headerName: "확정금액", field: "CFM_COST" },
                       { headerName: "확정사유내용", field: "RMK" },
                       { headerName: "등록일자", field: "CRE_DTTM" },
@@ -652,7 +618,6 @@ export default function TenderReceiveDispatch() {
                       { headerName: "수정일시", field: "UPD_DTTM" },
                       { headerName: "수정자", field: "UPD_USR_ID" },
                     ],
-                    // 셀 수정 시 React state 즉시 반영 + _isDirty 마킹
                     onCellValueChanged: (params: any) => {
                       setSubApSetlRowDataWithRef((prev: any) =>
                         prev.map((row: any) =>
@@ -660,7 +625,6 @@ export default function TenderReceiveDispatch() {
                             ? {
                                 ...row,
                                 [params.colDef.field]: params.newValue,
-                                // 기존 row(_isNew 아닌 것)면 _isDirty 마킹
                                 ...(!row._isNew && { _isDirty: true }),
                               }
                             : row,
@@ -707,31 +671,29 @@ export default function TenderReceiveDispatch() {
                         key: "운송비저장",
                         label: "저장",
                         onClick: () => {
-                          // 1. 편집 중인 셀 종료 → onCellValueChanged 트리거
+                          // stopEditing 후 onCellEditingStopped로 안전하게 처리
+                          // ag-Grid는 stopEditing 호출 즉시 onCellValueChanged를 동기로 실행하므로
+                          // ref에서 최신값을 바로 읽어 저장 가능
                           apSetlGridRef.current?.api?.stopEditing();
 
-                          // 2. ref에서 최신값 읽어 저장 (_isNew 신규 + _isDirty 변경분)
-                          setTimeout(() => {
-                            const saveRows = subApSetlRowDataRef.current.filter(
-                              (sub: any) => sub._isNew || sub._isDirty,
-                            );
+                          const saveRows = subApSetlRowDataRef.current.filter(
+                            (sub: any) => sub._isNew || sub._isDirty,
+                          );
 
-                            if (saveRows.length === 0) return;
+                          if (saveRows.length === 0) return;
 
-                            handleApi(
-                              tenderApi.updateCarrierRate(saveRows),
-                              "저장되었습니다.",
-                            ).then(() => {
-                              tenderApi
-                                .getDispatchApSetlList({
-                                  DSPCH_NO:
-                                    selectedHeaderRowRef.current.DSPCH_NO,
-                                })
-                                .then((res: any) =>
-                                  setSubApSetlRowDataWithRef(res.data.result),
-                                );
-                            });
-                          }, 50);
+                          handleApi(
+                            tenderApi.updateCarrierRate(saveRows),
+                            "저장되었습니다.",
+                          ).then(() => {
+                            tenderApi
+                              .getDispatchApSetlList({
+                                DSPCH_NO: selectedHeaderRowRef.current.DSPCH_NO,
+                              })
+                              .then((res: any) =>
+                                setSubApSetlRowDataWithRef(res.data.result ?? []),
+                              );
+                          });
                         },
                       },
                     ],
@@ -741,10 +703,6 @@ export default function TenderReceiveDispatch() {
                   STOP: subStopRowData,
                   SMS_HIS: subSmsHisRowData,
                   AP_SETL: subApSetlRowData,
-                }}
-                renderRightGrid={(tabKey: string) => {
-                  if (tabKey !== "CNTR") return null;
-                  return <CntrSubGrid />;
                 }}
                 actions={[]}
               />
