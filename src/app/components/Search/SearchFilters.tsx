@@ -25,6 +25,7 @@ import {
 } from "@/features/search/search.builder";
 
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
+import { showSearchToast } from "@/app/components/ui/SearchToast";
 
 type SearchMeta = {
   key: string;
@@ -221,15 +222,28 @@ export function SearchFilters({
           const rows = res.data.result ?? [];
           const totalCount = rows[0]?.TOTALCOUNT ?? 0;
 
-          onSearch({
-            rows,
-            totalCount,
-            page: targetPage,
-            limit,
-          });
+          onSearch({ rows, totalCount, page: targetPage, limit });
+
+          // 조회 완료 토스트
+          showSearchToast(totalCount);
         })
         .catch((err: any) => {
-          console.error(err);
+          const message =
+            err?.response?.data?.error?.message ??
+            String(err?.response?.data?.error ?? err?.message ?? err);
+
+          openPopup({
+            title: "",
+            content: (
+              <ConfirmModal
+                type="error"
+                title="조회 오류"
+                description={message}
+                onClose={closePopup}
+              />
+            ),
+            width: "sm",
+          });
         });
     },
     [searchState, meta, limit, onSearch, fetchFn, filtersRef, openPopup, closePopup],
