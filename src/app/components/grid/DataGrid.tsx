@@ -393,34 +393,39 @@ export default function DataGrid<TRow>({
 
   const PaginationBar = () => {
     if (totalCount == null) return null;
+
+    const isEmpty = totalCount === 0;
+    const isFirst = isEmpty || currentPage === 1;
+    const isLast = isEmpty || currentPage === totalPages;
+
     return (
       <div className="flex items-center justify-center gap-2 py-1 border-t shrink-0 text-xs">
         <button
-          disabled={currentPage === 1}
+          disabled={isFirst}
           onClick={() => onPageChange?.(1)}
           className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
         >
           «
         </button>
         <button
-          disabled={currentPage === 1}
+          disabled={isFirst}
           onClick={() => onPageChange?.((currentPage ?? 1) - 1)}
           className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
         >
           ‹
         </button>
         <span className="text-gray-600">
-          {currentPage} / {totalPages}
+          {isEmpty ? "0 / 0" : `${currentPage} / ${totalPages}`}
         </span>
         <button
-          disabled={currentPage === totalPages}
+          disabled={isLast}
           onClick={() => onPageChange?.((currentPage ?? 1) + 1)}
           className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
         >
           ›
         </button>
         <button
-          disabled={currentPage === totalPages}
+          disabled={isLast}
           onClick={() => onPageChange?.(totalPages)}
           className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
         >
