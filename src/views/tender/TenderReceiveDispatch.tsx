@@ -106,6 +106,19 @@ export default function TenderReceiveDispatch() {
     [],
   );
 
+  // 메인 조회 시 서브그리드 초기화
+  const handleSearch = useCallback(
+    (data: any) => {
+      setGridData(data);
+      // 재조회 시 서브그리드 및 선택행 초기화
+      setSubStopRowData([]);
+      setSubSmsHisRowData([]);
+      setSubApSetlRowDataWithRef([]);
+      setSelectedHeaderRowWithRef(null);
+    },
+    [setSubApSetlRowDataWithRef, setSelectedHeaderRowWithRef],
+  );
+
   // 행 클릭 시 3개 서브 API를 Promise.all로 병렬 처리
   const handleRowClicked = useCallback(
     (row: any) => {
@@ -460,7 +473,7 @@ export default function TenderReceiveDispatch() {
       {/* 조회 조건 */}
       <SearchFilters
         meta={meta}
-        onSearch={setGridData}
+        onSearch={handleSearch}
         searchRef={searchRef}
         filtersRef={filtersRef}
         pageSize={20}
@@ -503,7 +516,13 @@ export default function TenderReceiveDispatch() {
                 totalCount={gridData.totalCount}
                 currentPage={gridData.page}
                 pageSize={gridData.limit}
-                onPageChange={(page) => searchRef.current?.(page)}
+                onPageChange={(page) => {
+                  setSubStopRowData([]);
+                  setSubSmsHisRowData([]);
+                  setSubApSetlRowDataWithRef([]);
+                  setSelectedHeaderRowWithRef(null);
+                  searchRef.current?.(page);
+                }}
                 actions={actions1}
                 onRowClicked={handleRowClicked}
               />
