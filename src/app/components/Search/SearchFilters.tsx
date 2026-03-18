@@ -35,6 +35,7 @@ type SearchMeta = {
   mode?: string;
   sqlId?: string;
   condition?: string;
+  conditionLocked?: boolean;
   requaluired?: boolean;
   granularity?: string;
   options?: { value: string; label: string }[];
@@ -315,7 +316,8 @@ export function SearchFilters({
                   condition:
                     getCondition(m.key)?.operator ?? m.condition ?? "equal",
                   dataType: m.dataType,
-                  onConditionChange: (op: string) => {
+                  conditionLocked: m.conditionLocked,
+                  onConditionChange: m.conditionLocked ? undefined : (op: string) => {
                     const currentValue = getCondition(m.key)?.value ?? "";
                     updateCondition(m.key, currentValue, op, m.dataType);
                   },

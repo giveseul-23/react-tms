@@ -3,13 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import { IconCombo } from "./IconCombo";
 import { getConditionIcon } from "./conditionIcons";
+import { cn } from "../ui/utils";
 
 export function ConditionBox({
   value,
   onChange,
+  disabled,
 }: {
   value: string;
   onChange: (v: string) => void;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -29,16 +32,19 @@ export function ConditionBox({
     <div className="relative" ref={ref}>
       <button
         type="button"
-        className="w-5 h-5 shrink-0 inline-flex items-center justify-center"
-        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "w-5 h-5 shrink-0 inline-flex items-center justify-center",
+          disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
+        )}
+        onClick={() => !disabled && setOpen((v) => !v)}
       >
         <Icon className="w-4 h-4" />
       </button>
 
-      {open && (
+      {open && !disabled && (
         <div className="absolute z-9999 mt-1">
           <IconCombo
-            currentValue={value} // ⭐ userCondition 그대로
+            currentValue={value}
             onSelect={(v) => {
               onChange?.(v);
               setOpen(false);

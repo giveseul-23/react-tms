@@ -60,7 +60,7 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
       break;
 
     case "percent":
-      returnStr += `UPPER(${key}) LIKE '%' || UPPER('${safeValue}') || '%'`;
+      returnStr += `CAST(${key} AS TEXT) LIKE '%' || '${safeValue}' || '%'`;
       break;
 
     case "parentheses":

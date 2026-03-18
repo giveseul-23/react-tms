@@ -17,6 +17,7 @@ type BaseFilterProps = {
   span?: number;
   condition?: string;
   onConditionChange?: (c: string) => void;
+  conditionLocked?: boolean;
 };
 
 /* =======================
@@ -125,6 +126,7 @@ export function SearchFilter(props: SearchFilterProps) {
     className,
     condition,
     onConditionChange,
+    conditionLocked,
     required,
   } = props;
 
@@ -138,10 +140,11 @@ export function SearchFilter(props: SearchFilterProps) {
     >
       {/* Label */}
       <div className={cn(LABEL_WIDTH, "shrink-0 flex items-center gap-1")}>
-        {onConditionChange && (
+        {condition !== undefined && (
           <ConditionBox
             value={condition ?? "equal"}
-            onChange={onConditionChange}
+            onChange={onConditionChange ?? (() => {})}
+            disabled={conditionLocked}
           />
         )}
         <SearchFilterLabel label={label} required={required} />
