@@ -481,8 +481,7 @@ export default function TenderReceiveDispatch() {
       />
 
       {/* layout toggle */}
-      <div className="shrink-0 flex items-center justify-between text-[13px] text-[rgb(var(--fg))]">
-        <span>Showing</span>
+      <div className="shrink-0 flex items-center justify-end text-[13px] text-[rgb(var(--fg))]">
         <div className="flex items-center gap-1.5">
           <button
             type="button"
