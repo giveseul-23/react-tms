@@ -335,7 +335,7 @@ export function SearchFilters({
                           updateCondition(
                             m.key,
                             v,
-                            m.condition ?? "equal",
+                            (getCondition(m.key)?.operator ?? m.condition ?? "equal") as any,
                             m.dataType ?? "STRING",
                           )
                         }
@@ -353,7 +353,7 @@ export function SearchFilters({
                             updateCondition(
                               m.key,
                               v,
-                              m.condition ?? "equal",
+                              (getCondition(m.key)?.operator ?? m.condition ?? "equal") as any,
                               m.dataType ?? "STRING",
                             )
                           }

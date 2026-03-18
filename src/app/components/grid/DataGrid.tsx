@@ -47,8 +47,8 @@ function measureTextWidth(text: string): number {
   return ctx.measureText(text).width;
 }
 
-const CELL_PADDING = 10; // 셀 양쪽 패딩 (3px × 2 + 여유)
-const HEADER_PADDING = 20; // 헤더 패딩 + 정렬 아이콘 여유
+const CELL_PADDING = 24; // 양쪽 3px + 보더 + 여유
+const HEADER_PADDING = 32; // 헤더 아이콘(정렬/필터) 여유 추가
 const MIN_COL_WIDTH = 80;
 
 /**
@@ -347,6 +347,7 @@ export default function DataGrid<TRow>({
     rowHeight: 22,
     onGridReady: handleGridReady,
     onFirstDataRendered: handleFirstDataRendered,
+
     onRowSelected: (e: any) => {
       if (!e.api) return;
       const rows = e.api.getSelectedRows();
@@ -359,6 +360,15 @@ export default function DataGrid<TRow>({
             onRowSelected?.(null);
           }
         }, 0);
+      }
+    },
+    onCellClicked: (e: any) => {
+      const editable =
+        typeof e.colDef.editable === "function"
+          ? e.colDef.editable(e)
+          : !!e.colDef.editable;
+      if (!editable && e.value != null && e.value !== "") {
+        navigator.clipboard.writeText(String(e.value)).catch(() => {});
       }
     },
     onRowClicked: (e: any) => {

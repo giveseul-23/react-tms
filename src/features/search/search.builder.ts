@@ -13,6 +13,7 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
 
   if (sourceType === "POPUP" && key.endsWith("_NM")) return "";
   if (!value && operator !== "notUsed") return "";
+  if (operator === "notUsed") return "";
 
   let returnStr = " AND ";
 
@@ -95,8 +96,7 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
       break;
 
     case "notUsed":
-      returnStr += `${key} IS NULL`;
-      break;
+      return "";
 
     default:
       return "";
