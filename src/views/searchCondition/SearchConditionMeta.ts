@@ -1,0 +1,48 @@
+// src/views/tender/tenderSearchMeta.ts
+export const SEARCH_CONDITION_SEARCH_META = [
+  {
+    key: "MENU_DESC",
+    type: "text",
+    label: "메뉴명",
+    span: 5,
+    condition: "percent",
+    dataType: "STRING",
+  },
+  {
+    key: "MENU_CD",
+    type: "text",
+    label: "메뉴코드",
+    span: 5,
+    condition: "percent",
+    dataType: "STRING",
+  },
+  {
+    key: "DB_CLMN_NM",
+    type: "text",
+    label: "데이터베이스컬럼명",
+    span: 5,
+    condition: "percent",
+    dataType: "STRING",
+  },
+  {
+    key: "DSPLY_TP",
+    type: "combo",
+    label: "표시유형",
+    span: 5,
+    condition: "equal",
+    dataType: "STRING",
+    sqlProp: "CODE",
+    keyParam: "DSPL_TP",
+  },
+  {
+    key: "USE_YN",
+    type: "combo",
+    label: "사용여부",
+    span: 5,
+    condition: "equal",
+    dataType: "STRING",
+    sqlProp: "CODE",
+    keyParam: "YN",
+    includeAll: true,
+  },
+] as const;

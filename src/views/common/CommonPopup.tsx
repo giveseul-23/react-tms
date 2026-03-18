@@ -6,9 +6,7 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { commonApi } from "@/app/services/common/commonApi";
 import DataGrid from "@/app/components/grid/DataGrid";
-
-const userId = sessionStorage.getItem("userId");
-const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
+import { getSessionFields } from "@/app/services/auth/auth";
 
 /* =======================
  * Component
@@ -34,6 +32,7 @@ export function CommonPopup({
   }, []);
 
   const handleSearch = (extra: Record<string, any> = {}) => {
+    const { userId, ACCESS_TOKEN } = getSessionFields();
     // sqlId가 있으면 기존 commonApi 사용
     if (sqlId) {
       commonApi

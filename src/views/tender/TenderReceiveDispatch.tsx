@@ -1,7 +1,7 @@
 // src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
-import React, { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/Search/SearchFilters.tsx";
@@ -122,7 +122,10 @@ export default function TenderReceiveDispatch() {
           setSubApSetlRowDataWithRef(apSetlRes.data.result ?? []);
         })
         .catch((err) => {
-          console.error("[TenderReceiveDispatch] row click sub-fetch failed", err);
+          console.error(
+            "[TenderReceiveDispatch] row click sub-fetch failed",
+            err,
+          );
         });
     },
     [setSelectedHeaderRowWithRef, setSubApSetlRowDataWithRef],
@@ -206,7 +209,11 @@ export default function TenderReceiveDispatch() {
     { headerName: "부피", field: "TTL_LD_VOL", type: "numeric" },
     { headerName: "PVC수량", field: "TTL_LD_FLEX_QTY1", type: "numeric" },
     { headerName: "전용용기", field: "TTL_LD_FLEX_QTY3", type: "numeric" },
-    { headerName: "종이박스/지대수량", field: "TTL_LD_FLEX_QTY4", type: "numeric" },
+    {
+      headerName: "종이박스/지대수량",
+      field: "TTL_LD_FLEX_QTY4",
+      type: "numeric",
+    },
     { headerName: "채반수량", field: "TTL_LD_FLEX_QTY5", type: "numeric" },
     { headerName: "출발지명", field: "FRM_LOC_NM" },
     { headerName: "디비전", field: "DIV_CD" },
@@ -396,8 +403,7 @@ export default function TenderReceiveDispatch() {
               columns: columnDefs1,
               searchParams: filtersRef.current,
               menuName: "운송수배현황",
-              fetchFn: (params) =>
-                tenderApi.getDispatchList(params),
+              fetchFn: (params) => tenderApi.getDispatchList(params),
             });
           },
         },
@@ -691,7 +697,9 @@ export default function TenderReceiveDispatch() {
                                 DSPCH_NO: selectedHeaderRowRef.current.DSPCH_NO,
                               })
                               .then((res: any) =>
-                                setSubApSetlRowDataWithRef(res.data.result ?? []),
+                                setSubApSetlRowDataWithRef(
+                                  res.data.result ?? [],
+                                ),
                               );
                           });
                         },

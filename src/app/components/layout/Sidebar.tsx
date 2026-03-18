@@ -159,7 +159,7 @@ export function Sidebar({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{getUserName()}</p>
-              <p className="text-xs text-gray-500 truncate">010-9523-5068</p>
+              <p className="text-xs text-gray-500 truncate">010-0000-0000</p>
             </div>
             <button
               className="p-1 bg-[rgb(var(--bg))] hover:bg-gray-300 hover:text-black rounded"

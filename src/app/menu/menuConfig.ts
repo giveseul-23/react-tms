@@ -19,8 +19,8 @@ export const MENU_SECTIONS: MenuSection[] = [
     icon: Home,
     items: [
       { menuCode: "SYS_CONFIG", label: "시스템설정" },
-      { menuCode: "VEHICLE_MANAGE", label: "차량관리" },
-      { menuCode: "DRIVER_MANAGE", label: "운전자관리" },
+      { menuCode: "SEARCH_CONDITION", label: "조회조건" },
+      { menuCode: "MENU_CONFIG", label: "메뉴구성" },
     ],
   },
   {
