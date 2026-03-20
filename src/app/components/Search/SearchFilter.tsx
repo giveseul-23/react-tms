@@ -147,7 +147,27 @@ export function SearchFilter(props: SearchFilterProps) {
             disabled={conditionLocked}
           />
         )}
-        <SearchFilterLabel label={label} required={required} />
+        <SearchFilterLabel
+          label={label}
+          required={required}
+          onDoubleClick={() => {
+            if (props.type === "text") {
+              props.onChange("");
+            } else if (props.type === "combo") {
+              props.onChange("");
+            } else if (props.type === "dateRange") {
+              if (props.mode === "single") {
+                props.onChange?.("");
+              } else {
+                props.onChangeFrom?.("");
+                props.onChangeTo?.("");
+              }
+            } else if (props.type === "popup") {
+              props.onChangeCode?.("");
+              props.onChangeName?.("");
+            }
+          }}
+        />
       </div>
 
       {/* Input */}

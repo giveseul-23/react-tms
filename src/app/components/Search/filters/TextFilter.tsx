@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { Input } from "../../ui/input";
-import { Search } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "../../ui/utils";
 
 export type TextFilterProps = React.ComponentPropsWithoutRef<"div"> & {
@@ -22,20 +22,27 @@ export function TextFilter({
   ...props
 }: TextFilterProps) {
   return (
-    // ⭐ 부모가 준 폭을 무조건 100% 사용
     <div className={cn("w-full min-w-0", className)}>
       <div className="relative w-full">
-        {/* 🔍 icon → 오른쪽 */}
-        <Search className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+        {/* X 아이콘 — 값 있을 때만 표시, 클릭 시 초기화 */}
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
 
-        {/* input */}
         <Input
           type="text"
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            "w-full pr-7 pl-2 text-[11px] h-7", // ⭐ 오른쪽 padding
+            "w-full text-[11px] h-7",
+            value ? "pr-6 pl-2" : "px-2",
             inputClassName,
           )}
         />
