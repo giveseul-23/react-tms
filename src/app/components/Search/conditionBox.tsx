@@ -42,7 +42,7 @@ export function ConditionBox({
       </button>
 
       {open && !disabled && (
-        <div className="absolute z-9999 mt-1">
+        <div className="absolute z-[10000] mt-1">
           <IconCombo
             currentValue={value}
             onSelect={(v) => {

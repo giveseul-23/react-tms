@@ -134,6 +134,8 @@ type DataGridProps<TRow> = {
   pageSize?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
+  /** 선택 row 기반 추적 그리드 — 버튼 클릭 시 슬라이드로 표시 */
+  onTrack?: (rows: any[]) => React.ReactNode;
 };
 
 export default function DataGrid<TRow>({
@@ -155,6 +157,7 @@ export default function DataGrid<TRow>({
   currentPage,
   onPageChange,
   onPageSizeChange,
+  onTrack,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -162,6 +165,8 @@ export default function DataGrid<TRow>({
   );
   const [pageSizeInput, setPageSizeInput] = useState<string>(String(pageSize));
   const [pageInput, setPageInput] = useState<string>(String(currentPage ?? 1));
+  const [trackContent, setTrackContent] = useState<React.ReactNode>(null);
+  const [trackOpen, setTrackOpen] = useState(false);
 
   // currentPage가 외부에서 바뀌면 input 동기화
   useEffect(() => {
@@ -173,6 +178,8 @@ export default function DataGrid<TRow>({
   }, [pageSize]);
 
   const internalGridRef = useRef<any>(null);
+  // Shift+셀클릭 범위 복사용 앵커 rowIndex
+  const shiftAnchorRef = useRef<number | null>(null);
 
   const totalPages = Math.ceil((totalCount ?? 0) / (pageSize ?? 20));
 
@@ -316,6 +323,23 @@ export default function DataGrid<TRow>({
     });
   }, [activeActions, selectedRows]);
 
+  // onTrack 버튼을 actions 맨 앞에 주입
+  const wrappedActionsWithTrack = useMemo(() => {
+    if (!onTrack) return wrappedActions;
+    const trackAction: ActionItem = {
+      type: "button",
+      key: "__track__",
+      label: "+ 추적",
+      onClick: () => {
+        const content = onTrack(selectedRows);
+        setTrackContent(content);
+        setTrackOpen(true);
+      },
+      disabled: selectedRows.length === 0,
+    };
+    return [trackAction, ...wrappedActions];
+  }, [onTrack, wrappedActions, selectedRows]);
+
   const rightGrid =
     layoutType === "tab" && activeTab && renderRightGrid
       ? renderRightGrid(activeTab)
@@ -355,12 +379,38 @@ export default function DataGrid<TRow>({
         typeof e.colDef.editable === "function"
           ? e.colDef.editable(e)
           : !!e.colDef.editable;
-      if (!editable && e.value != null && e.value !== "") {
-        navigator.clipboard.writeText(String(e.value)).catch(() => {});
+      if (editable) return;
+
+      const field = e.colDef.field;
+      const isShift = e.event?.shiftKey;
+
+      if (isShift && field) {
+        // Shift+셀 클릭 → shiftAnchorRef ~ 현재 rowIndex 범위의 해당 컬럼 값 복사
+        const api = e.api;
+        const currentIdx = e.node.rowIndex ?? 0;
+        const anchorIdx = shiftAnchorRef.current ?? currentIdx;
+        const minIdx = Math.min(anchorIdx, currentIdx);
+        const maxIdx = Math.max(anchorIdx, currentIdx);
+
+        const rows: string[] = [];
+        for (let i = minIdx; i <= maxIdx; i++) {
+          const node = api.getDisplayedRowAtIndex(i);
+          if (node?.data) {
+            rows.push(String(node.data[field] ?? ""));
+          }
+        }
+        navigator.clipboard.writeText(rows.join("\n")).catch(() => {});
+      } else {
+        // 일반 클릭 → 앵커 저장 + 단일 셀 값 복사
+        shiftAnchorRef.current = e.node.rowIndex ?? 0;
+        if (e.value != null && e.value !== "") {
+          navigator.clipboard.writeText(String(e.value)).catch(() => {});
+        }
       }
     },
     onRowClicked: (e: any) => {
       const target = e.event?.target as HTMLElement;
+      // 체크박스 클릭은 체크박스 전용 — 행 클릭 이벤트 스킵
       if (
         target?.closest(".ag-selection-checkbox") ||
         target?.closest(".ag-checkbox") ||
@@ -368,6 +418,7 @@ export default function DataGrid<TRow>({
       ) {
         return;
       }
+      // Shift 클릭은 셀 복사 용도 — onRowClicked 스킵
       if (e.event?.shiftKey) return;
       if (!e.data) return;
       onRowClicked?.(e.data);
@@ -376,7 +427,11 @@ export default function DataGrid<TRow>({
     rowSelection:
       rowSelectionProp === "single"
         ? { mode: "singleRow" as const, enableClickSelection: true }
-        : { mode: "multiRow" as const },
+        : {
+            mode: "multiRow" as const,
+            // 체크박스로만 선택 — 행 클릭으로 체크 안 됨
+            enableClickSelection: false,
+          },
   };
 
   const gridStyle = {
@@ -498,7 +553,7 @@ export default function DataGrid<TRow>({
       )}
 
       <div className="relative z-1 shrink-0 min-w-0 w-full">
-        <GridActionsBar actions={wrappedActions} />
+        <GridActionsBar actions={wrappedActionsWithTrack} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">
@@ -540,6 +595,34 @@ export default function DataGrid<TRow>({
       </div>
 
       <PaginationBar />
+
+      {/* 추적 그리드 — 슬라이드 다운 */}
+      {onTrack && (
+        <div
+          className={`overflow-hidden transition-all duration-400 ease-in-out ${
+            trackOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+          style={{ transitionProperty: "max-height, opacity" }}
+        >
+          <div className="border-t border-gray-200 mt-1">
+            {/* 추적 헤더 */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 dark:bg-gray-800">
+              <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                추적 결과
+              </span>
+              <button
+                onClick={() => setTrackOpen(false)}
+                className="text-[11px] text-gray-400 hover:text-gray-600 px-2 py-0.5 rounded hover:bg-gray-200 transition-colors"
+              >
+                닫기
+              </button>
+            </div>
+            <div className="p-2">
+              {trackContent}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

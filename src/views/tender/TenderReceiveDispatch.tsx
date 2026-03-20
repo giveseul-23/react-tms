@@ -45,6 +45,8 @@ export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
   const [layout, setLayout] = useState<LayoutType>("side");
   const [subStopRowData, setSubStopRowData] = useState<any[]>([]);
+  const [trackOpen, setTrackOpen] = useState(false);
+  const [trackRows, setTrackRows] = useState<any[]>([]);
   const [subSmsHisRowData, setSubSmsHisRowData] = useState<any[]>([]);
   const [subApSetlRowData, setSubApSetlRowData] = useState<any[]>([]);
   const { handleApi } = useApiHandler();
@@ -251,6 +253,16 @@ export default function TenderReceiveDispatch() {
   ];
 
   const actions1 = [
+    {
+      type: "button",
+      key: "+ 추적",
+      label: "+ 추적",
+      onClick: (e: any) => {
+        if (!e.data?.length) return;
+        setTrackRows(e.data);
+        setTrackOpen(true);
+      },
+    },
     {
       type: "button",
       key: "운송요청수락",
@@ -731,6 +743,54 @@ export default function TenderReceiveDispatch() {
             </div>
           </Panel>
         </PanelGroup>
+      </div>
+      {/* 추적 그리드 슬라이드 패널 */}
+      <div
+        className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${
+          trackOpen ? "h-[280px] opacity-100" : "h-0 opacity-0"
+        }`}
+      >
+        <div className="h-full border border-gray-200 rounded-lg overflow-hidden flex flex-col">
+          {/* 추적 헤더 */}
+          <div className="flex items-center justify-between px-3 py-1.5 bg-[rgb(var(--primary))] shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-semibold text-white uppercase tracking-wider">
+                추적 결과
+              </span>
+              {trackRows.length > 0 && (
+                <span className="text-[11px] text-white/70">
+                  {trackRows.map((r: any) => r.DSPCH_NO).filter(Boolean).join(", ")}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setTrackOpen(false)}
+              className="text-[11px] text-white/70 hover:text-white px-2 py-0.5 rounded hover:bg-white/10 transition-colors"
+            >
+              닫기
+            </button>
+          </div>
+          {/* 추적 서브그리드 */}
+          <div className="flex-1 min-h-0">
+            <DataGrid
+              layoutType="plain"
+              actions={[]}
+              columnDefs={[
+                { headerName: "No" },
+                { headerName: "배차번호", field: "DSPCH_NO" },
+                { headerName: "순번", field: "STOP_SEQ" },
+                { headerName: "착지코드", field: "LOC_CD" },
+                { headerName: "착지명", field: "LOC_NM" },
+                { headerName: "착지구분", field: "STOP_TP" },
+                { headerName: "주", field: "STT_NM" },
+                { headerName: "도시", field: "CTY_NM" },
+                { headerName: "상세주소1", field: "DTL_ADDR1" },
+                { headerName: "상세주소2", field: "DTL_ADDR2" },
+              ]}
+              rowData={subStopRowData}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
