@@ -52,6 +52,7 @@ export default function TenderReceiveDispatch() {
   const { guardHasData } = useGuard();
 
   const [selectedHeaderRow, setSelectedHeaderRow] = useState<any>(null);
+  const [pageSize, setPageSize] = useState(20);
 
   const { stores } = useCommonStores({
     dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
@@ -478,7 +479,7 @@ export default function TenderReceiveDispatch() {
         onSearch={handleSearch}
         searchRef={searchRef}
         filtersRef={filtersRef}
-        pageSize={20}
+        pageSize={pageSize}
         fetchFn={fetchDispatchList}
         layoutToggle={
           <LayoutToggleButton
@@ -504,13 +505,16 @@ export default function TenderReceiveDispatch() {
                 rowData={gridData.rows}
                 totalCount={gridData.totalCount}
                 currentPage={gridData.page}
-                pageSize={gridData.limit}
+                pageSize={pageSize}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                }}
                 onPageChange={(page) => {
                   setSubStopRowData([]);
                   setSubSmsHisRowData([]);
                   setSubApSetlRowDataWithRef([]);
                   setSelectedHeaderRowWithRef(null);
-                  searchRef.current?.(page);
+                  searchRef.current?.(page, false);
                 }}
                 actions={actions1}
                 onRowClicked={handleRowClicked}

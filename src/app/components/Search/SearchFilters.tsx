@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, ReactNode } from "react";
+import React, { useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import {
   Search,
   RefreshCw,
@@ -71,11 +71,29 @@ export function SearchFilters({
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
-  const [limit] = useState(pageSize);
+  const [limit, setLimit] = useState(pageSize);
+  const limitRef = useRef(pageSize);
 
   const [searchState, setSearchState] = useState<
     Record<string, SearchCondition>
   >({});
+
+  useEffect(() => {
+    // limit을 ref에 즉시 반영 (state 비동기 업데이트 우회)
+    limitRef.current = pageSize;
+    setLimit(pageSize);
+  }, [pageSize]);
+
+  // pageSize가 바뀌면 자동 재조회 (초기 마운트는 제외)
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    handleSearch(1, false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageSize]);
 
   const getToday = () => {
     const d = new Date();
@@ -153,7 +171,7 @@ export function SearchFilters({
   };
 
   const handleSearch = useCallback(
-    (targetPage = 1) => {
+    (targetPage = 1, showToast = true) => {
       const missingFields = meta
         .filter((m) => m.required === true)
         .filter((m) => {
@@ -211,7 +229,7 @@ export function SearchFilters({
         DYNAMIC_QUERY: whereClause,
         MENU_CD: "test",
         page: targetPage,
-        limit,
+        limit: limitRef.current,
       };
 
       if (filtersRef) {
@@ -226,10 +244,10 @@ export function SearchFilters({
           const rows = res.data.result ?? [];
           const totalCount = rows[0]?.TOTALCOUNT ?? 0;
 
-          onSearch({ rows, totalCount, page: targetPage, limit });
+          onSearch({ rows, totalCount, page: targetPage, limit: limitRef.current });
 
-          // 조회 완료 토스트
-          showSearchToast(totalCount);
+          // 조회 완료 토스트 (페이지 이동 시에는 표시 안 함)
+          if (showToast) showSearchToast(totalCount);
         })
         .catch((err: any) => {
           const message =
@@ -250,7 +268,16 @@ export function SearchFilters({
           });
         });
     },
-    [searchState, meta, limit, onSearch, fetchFn, filtersRef, openPopup, closePopup],
+    [
+      searchState,
+      meta,
+      limit,
+      onSearch,
+      fetchFn,
+      filtersRef,
+      openPopup,
+      closePopup,
+    ],
   );
 
   useEffect(() => {
@@ -320,10 +347,12 @@ export function SearchFilters({
                     getCondition(m.key)?.operator ?? m.condition ?? "equal",
                   dataType: m.dataType,
                   conditionLocked: m.conditionLocked,
-                  onConditionChange: m.conditionLocked ? undefined : (op: string) => {
-                    const currentValue = getCondition(m.key)?.value ?? "";
-                    updateCondition(m.key, currentValue, op, m.dataType);
-                  },
+                  onConditionChange: m.conditionLocked
+                    ? undefined
+                    : (op: string) => {
+                        const currentValue = getCondition(m.key)?.value ?? "";
+                        updateCondition(m.key, currentValue, op, m.dataType);
+                      },
                   required: m.required ? m.required : false,
                 };
 
@@ -340,7 +369,9 @@ export function SearchFilters({
                           updateCondition(
                             m.key,
                             v,
-                            (getCondition(m.key)?.operator ?? m.condition ?? "equal") as any,
+                            (getCondition(m.key)?.operator ??
+                              m.condition ??
+                              "equal") as any,
                             m.dataType ?? "STRING",
                           )
                         }
@@ -358,7 +389,9 @@ export function SearchFilters({
                             updateCondition(
                               m.key,
                               v,
-                              (getCondition(m.key)?.operator ?? m.condition ?? "equal") as any,
+                              (getCondition(m.key)?.operator ??
+                                m.condition ??
+                                "equal") as any,
                               m.dataType ?? "STRING",
                             )
                           }

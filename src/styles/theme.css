@@ -8,7 +8,6 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* --primary: #030213; */
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.95 0.0058 264.53);
   --secondary-foreground: #030213;
@@ -31,13 +30,6 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
 
-  /* 🔹 헤더 / 배경용 (투명) */
-  --chart-1-soft: oklch(0.488 0.243 264.376 / 0.12);
-  --chart-2-soft: oklch(0.696 0.17 162.48 / 0.12);
-  --chart-3-soft: oklch(0.769 0.188 70.08 / 0.12);
-  --chart-4-soft: oklch(80.275% 0.14988 66.085 / 0.12);
-  --chart-5-soft: oklch(0.645 0.246 16.439 / 0.12);
-
   --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -50,11 +42,13 @@
 
   --bg: 255 255 255;
   --fg: 17 24 39;
-
-  --primary: 37 99 235; /* BLUE 기본 */
   --hover: 0.145 0 0;
 
-  --grid-header-bg: var(--chart-1-soft);
+  /* ─── 기본 테마: BLUE #00BAED ─── */
+  --primary: 0 186 237; /* #00BAED            */
+  --primary-hover: 0 158 201; /* #00BAED × 85%      */
+  --primary-soft: rgba(0, 186, 237, 0.12); /* 헤더 배경 */
+  --grid-header-bg: var(--primary-soft);
 }
 
 .dark {
@@ -64,7 +58,6 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  /* --primary: oklch(0.985 0 0); */
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -85,13 +78,6 @@
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
 
-  /* 🔹 헤더 / 배경용 (투명) */
-  --chart-1-soft: oklch(0.488 0.243 264.376 / 0.12);
-  --chart-2-soft: oklch(0.696 0.17 162.48 / 0.12);
-  --chart-3-soft: oklch(0.769 0.188 70.08 / 0.12);
-  --chart-4-soft: oklch(80.275% 0.14988 66.085 / 0.12);
-  --chart-5-soft: oklch(0.645 0.246 16.439 / 0.12);
-
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -101,14 +87,15 @@
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
 
-  --primary: 37 99 235;
-
   --bg: 17 24 39;
   --fg: 243 244 246;
-
   --hover: 0.145 0 0;
 
-  --grid-header-bg: var(--chart-1-soft);
+  /* 다크모드도 기본 테마 유지 */
+  --primary: 0 186 237;
+  --primary-hover: 0 158 201;
+  --primary-soft: rgba(0, 186, 237, 0.12);
+  --grid-header-bg: var(--primary-soft);
 }
 
 @theme inline {
@@ -161,11 +148,6 @@
     @apply bg-background text-foreground;
   }
 
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
-
   html {
     font-size: var(--font-size);
   }
@@ -213,41 +195,57 @@
   }
 }
 
-/* 테마 컬러 */
+/* ===============================
+   테마 컬러
+   구조: hex 하나 바꾸면 primary / hover(×85%) / soft(12% alpha) 자동 정렬
+   =============================== */
+
+/* ── BLUE #00BAED ── */
 [data-theme="BLUE"] {
-  --primary: 37 99 235;
-  --primary-hover: 29 78 216;
-  --grid-header-bg: var(--chart-1-soft);
+  --primary: 0 186 237; /* #00BAED         */
+  --primary-hover: 0 158 201; /* #00BAED × 85%   */
+  --primary-soft: rgba(0, 186, 237, 0.12);
+  --grid-header-bg: var(--primary-soft);
 }
 
+/* ── GREEN #16A34A ── */
 [data-theme="GREEN"] {
-  --primary: 22 163 74;
-  --primary-hover: 21 128 61;
-  --grid-header-bg: var(--chart-2-soft);
+  --primary: 22 163 74; /* #16A34A         */
+  --primary-hover: 18 138 62; /* #16A34A × 85%   */
+  --primary-soft: rgba(22, 163, 74, 0.12);
+  --grid-header-bg: var(--primary-soft);
 }
 
+/* ── RED #DC2626 ── */
 [data-theme="RED"] {
-  --primary: 220 38 38;
-  --primary-hover: 185 28 28;
-  --grid-header-bg: var(--chart-5-soft);
+  --primary: 220 38 38; /* #DC2626         */
+  --primary-hover: 187 32 32; /* #DC2626 × 85%   */
+  --primary-soft: rgba(220, 38, 38, 0.12);
+  --grid-header-bg: var(--primary-soft);
 }
 
+/* ── ORANGE #EA580C ── */
 [data-theme="ORANGE"] {
-  --primary: 234 88 12;
-  --primary-hover: 194 65 12;
-  --grid-header-bg: var(--chart-4-soft);
+  --primary: 234 88 12; /* #EA580C         */
+  --primary-hover: 198 74 10; /* #EA580C × 85%   */
+  --primary-soft: rgba(234, 88, 12, 0.12);
+  --grid-header-bg: var(--primary-soft);
 }
 
+/* ── YELLOW #FFD11A ── */
 [data-theme="YELLOW"] {
-  --primary: 202 138 4;
-  --primary-hover: 161 98 7;
-  --grid-header-bg: var(--chart-3-soft);
+  --primary: 255 209 26; /* #FFD11A         */
+  --primary-hover: 216 177 22; /* #FFD11A × 85%   */
+  --primary-soft: rgba(255, 209, 26, 0.12);
+  --grid-header-bg: var(--primary-soft);
 }
 
+/* ── WINE #72312F ── */
 [data-theme="WINE"] {
-  --primary: 114 47 55;
-  --primary-hover: 88 35 42;
-  --grid-header-bg: var(--chart-5-soft);
+  --primary: 114 49 47; /* #72312F         */
+  --primary-hover: 96 41 39; /* #72312F × 85%   */
+  --primary-soft: rgba(114, 49, 47, 0.12);
+  --grid-header-bg: var(--primary-soft);
 }
 
 /* ===============================
@@ -259,45 +257,29 @@
   color: rgb(var(--fg));
 }
 
-/* 헤더 */
-/* .ag-theme-bridge .ag-header {
-  background-color: var(--background);
-  color: var(--foreground);
-  border-bottom: 1px solid var(--border);
-} */
-
 .ag-theme-bridge .ag-header-cell-text {
-  color: var(--foreground);
+  color: rgb(var(--fg));
 }
 
-/* 셀 */
 .ag-theme-bridge .ag-cell {
   background-color: rgb(var(--bg));
   color: rgb(var(--fg));
 }
 
-/* 행 hover */
 .ag-theme-bridge .ag-row-hover {
   background-color: var(--muted) !important;
 }
 
-/* 행 선택 */
-.ag-theme-bridge .ag-row-selected {
-  background-color: var(--accent) !important;
-}
-
-/* 테두리 */
 .ag-theme-bridge .ag-root-wrapper {
   border-color: var(--border);
 }
 
-/* 체크박스 */
 .ag-theme-bridge input[type="checkbox"] {
   accent-color: rgb(var(--primary));
 }
 
 /* ===============================
-   Grid wrapper (바깥 흰 여백 제거)
+   Grid wrapper
    =============================== */
 
 .grid-wrapper {
@@ -306,7 +288,7 @@
 }
 
 /* ===============================
-   ag-Grid 내부 빈 영역까지 다크
+   ag-Grid 내부 빈 영역 다크 대응
    =============================== */
 
 .ag-theme-bridge .ag-root-wrapper,
@@ -315,34 +297,50 @@
   background-color: rgb(var(--bg));
 }
 
-/* 헤더 */
-/* .ag-theme-bridge .ag-header {
-  background-color: rgb(var(--bg));
-  color: rgb(var(--fg));
-  border-bottom: 1px solid var(--border);
-} */
+/* ===============================
+   ag-Grid Quartz 테마 변수 오버라이드
+   =============================== */
 
-.ag-theme-bridge .ag-header-cell-text {
-  color: rgb(var(--fg));
+.ag-theme-quartz.ag-theme-bridge {
+  --ag-header-background-color: var(--grid-header-bg);
+  --ag-header-foreground-color: rgb(var(--fg));
+  --ag-border-color: var(--border);
+  --ag-wrapper-border-radius: 0.5rem;
+  --ag-card-radius: 0.5rem;
+  --ag-selected-row-background-color: #f0f0f0;
 }
 
-/* 셀 */
-.ag-theme-bridge .ag-cell {
-  background-color: rgb(var(--bg));
-  color: rgb(var(--fg));
+.dark .ag-theme-quartz.ag-theme-bridge {
+  --ag-selected-row-background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* hover */
-.ag-theme-bridge .ag-row-hover {
-  background-color: var(--muted) !important;
+/* 선택 행 강제 적용
+   (ag-row-even / ag-row-odd / ag-row-no-focus 조합이
+   단순 .ag-row-selected 보다 specificity가 높아서 모두 명시) */
+.ag-theme-quartz.ag-theme-bridge .ag-row-selected,
+.ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-even,
+.ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-odd,
+.ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-no-focus,
+.ag-theme-quartz.ag-theme-bridge .ag-row-selected .ag-cell,
+.ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-even .ag-cell,
+.ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-odd .ag-cell {
+  background-color: #f0f0f0 !important;
 }
 
-/* 선택 */
-.ag-theme-bridge .ag-row-selected {
-  background-color: var(--accent) !important;
+.dark .ag-theme-quartz.ag-theme-bridge .ag-row-selected,
+.dark .ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-even,
+.dark .ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-odd,
+.dark .ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-no-focus,
+.dark .ag-theme-quartz.ag-theme-bridge .ag-row-selected .ag-cell,
+.dark .ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-even .ag-cell,
+.dark .ag-theme-quartz.ag-theme-bridge .ag-row-selected.ag-row-odd .ag-cell {
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* 버튼 */
+/* ===============================
+   버튼
+   =============================== */
+
 .btn-primary {
   background-color: rgb(var(--primary));
   color: #fff;
@@ -366,12 +364,4 @@
 .dark .btn-outline {
   border-color: rgb(var(--fg));
   color: rgb(var(--fg));
-}
-
-.ag-theme-quartz.ag-theme-bridge {
-  --ag-header-background-color: var(--grid-header-bg);
-  --ag-header-foreground-color: rgb(var(--fg));
-  --ag-border-color: var(--border);
-  --ag-wrapper-border-radius: 0.5rem;
-  --ag-card-radius: 0.5rem;
 }

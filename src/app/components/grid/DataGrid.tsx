@@ -31,10 +31,6 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 
 // ─── 오토사이징 유틸 ────────────────────────────────────────────────────────────
 
-/**
- * Canvas를 이용해 문자열의 픽셀 너비를 측정합니다.
- * 그리드 폰트(11px)에 맞게 고정합니다.
- */
 const GRID_FONT = "11px -apple-system, BlinkMacSystemFont, sans-serif";
 let _canvas: HTMLCanvasElement | null = null;
 
@@ -47,15 +43,10 @@ function measureTextWidth(text: string): number {
   return ctx.measureText(text).width;
 }
 
-const CELL_PADDING = 24; // 양쪽 3px + 보더 + 여유
-const HEADER_PADDING = 32; // 헤더 아이콘(정렬/필터) 여유 추가
+const CELL_PADDING = 24;
+const HEADER_PADDING = 32;
 const MIN_COL_WIDTH = 80;
 
-/**
- * rowData와 columnDefs를 받아 각 컬럼의 최적 너비를 계산합니다.
- * - 헤더 텍스트 너비와 데이터 최대 너비 중 큰 값을 사용
- * - 최소 MIN_COL_WIDTH 보장
- */
 function calcOptimalWidths<TRow>(
   columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[],
   rowData: TRow[],
@@ -63,18 +54,15 @@ function calcOptimalWidths<TRow>(
   const widthMap: Record<string, number> = {};
 
   for (const col of columnDefs) {
-    // ColGroupDef는 field가 없으므로 스킵
     if (!("field" in col) && !("colId" in col)) continue;
 
     const colDef = col as ColDef<TRow>;
     const key = (colDef.colId ?? colDef.field ?? "") as string;
     if (!key) continue;
 
-    // 헤더 최소 너비
     const headerText = colDef.headerName ?? key;
     const headerWidth = measureTextWidth(headerText) + HEADER_PADDING;
 
-    // 데이터 최대 너비
     let maxDataWidth = 0;
     for (const row of rowData) {
       const raw = (row as any)[colDef.field as string];
@@ -88,17 +76,12 @@ function calcOptimalWidths<TRow>(
       if (w > maxDataWidth) maxDataWidth = w;
     }
 
-    // 헤더 vs 데이터 중 큰 값, 최소 MIN_COL_WIDTH
     widthMap[key] = Math.max(headerWidth, maxDataWidth, MIN_COL_WIDTH);
   }
 
   return widthMap;
 }
 
-/**
- * ag-Grid API를 통해 각 컬럼에 계산된 너비를 적용합니다.
- * disableMaxWidth 플래그가 있는 컬럼은 maxWidth 제한 없이 처리합니다.
- */
 function applyColumnWidths<TRow>(
   api: any,
   columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[],
@@ -113,7 +96,6 @@ function applyColumnWidths<TRow>(
 
     const base = { ...colDef, width };
 
-    // disableMaxWidth 플래그가 있으면 maxWidth 제한 제거
     if ((colDef as any).disableMaxWidth === true) {
       return { ...base, maxWidth: undefined };
     }
@@ -151,6 +133,7 @@ type DataGridProps<TRow> = {
   currentPage?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
 };
 
 export default function DataGrid<TRow>({
@@ -171,11 +154,23 @@ export default function DataGrid<TRow>({
   totalCount,
   currentPage,
   onPageChange,
+  onPageSizeChange,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
   );
+  const [pageSizeInput, setPageSizeInput] = useState<string>(String(pageSize));
+  const [pageInput, setPageInput] = useState<string>(String(currentPage ?? 1));
+
+  // currentPage가 외부에서 바뀌면 input 동기화
+  useEffect(() => {
+    setPageInput(String(currentPage ?? 1));
+  }, [currentPage]);
+
+  useEffect(() => {
+    setPageSizeInput(String(pageSize));
+  }, [pageSize]);
 
   const internalGridRef = useRef<any>(null);
 
@@ -251,15 +246,10 @@ export default function DataGrid<TRow>({
 
   // ─── 오토사이징 핸들러 ────────────────────────────────────────────────────────
 
-  /**
-   * 데이터 기준 최적 너비를 계산해 컬럼에 적용합니다.
-   * disableAutoSize prop이 true면 아무것도 하지 않습니다.
-   */
   const runAutoSize = useCallback(
     (api: any, cols: (ColDef<TRow> | ColGroupDef<TRow>)[], rows: TRow[]) => {
       if (disableAutoSize) return;
 
-      // "No" 컬럼은 너비 고정(56px)이므로 오토사이징 대상에서 제외
       const sizableCols = cols.filter(
         (col) => !("headerName" in col && col.headerName === "No"),
       );
@@ -277,7 +267,6 @@ export default function DataGrid<TRow>({
     [runAutoSize, finalColumnDefs, activeRowData],
   );
 
-  // 그리드 API를 ref에 저장해두고 탭 전환 시 재사용
   const gridApiRef = useRef<any>(null);
 
   const handleGridReady = useCallback(
@@ -292,7 +281,6 @@ export default function DataGrid<TRow>({
     [runAutoSize, finalColumnDefs, activeRowData],
   );
 
-  // 탭 전환 또는 rowData 교체 시 저장된 API로 오토사이징 재실행
   useEffect(() => {
     if (disableAutoSize) return;
     const api = gridApiRef.current;
@@ -401,6 +389,8 @@ export default function DataGrid<TRow>({
     ["--ag-grid-size" as any]: "3px",
   };
 
+  // ─── 페이지네이션 바 ──────────────────────────────────────────────────────────
+
   const PaginationBar = () => {
     if (totalCount == null) return null;
 
@@ -408,42 +398,93 @@ export default function DataGrid<TRow>({
     const isFirst = isEmpty || currentPage === 1;
     const isLast = isEmpty || currentPage === totalPages;
 
+    const commitPageSize = () => {
+      const v = parseInt(pageSizeInput);
+      if (!isNaN(v) && v > 0) {
+        onPageSizeChange?.(v);
+      } else {
+        setPageSizeInput(String(pageSize));
+      }
+    };
+
+    const commitPage = () => {
+      const v = parseInt(pageInput);
+      if (!isNaN(v) && v >= 1 && v <= (totalPages || 1)) {
+        onPageChange?.(v);
+      } else {
+        setPageInput(String(currentPage ?? 1));
+      }
+    };
+
+    const btnCls =
+      "px-1.5 py-0.5 border border-gray-300 rounded text-[11px] disabled:opacity-40 hover:bg-gray-100 leading-none";
+
     return (
-      <div className="flex items-center justify-center gap-2 py-1 border-t shrink-0 text-xs">
-        <button
-          disabled={isFirst}
-          onClick={() => onPageChange?.(1)}
-          className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
-        >
-          «
-        </button>
-        <button
-          disabled={isFirst}
-          onClick={() => onPageChange?.((currentPage ?? 1) - 1)}
-          className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
-        >
-          ‹
-        </button>
-        <span className="text-gray-600">
-          {isEmpty ? "0 / 0" : `${currentPage} / ${totalPages}`}
+      <div className="flex items-center gap-2 px-2 py-1 border-t shrink-0 text-[11px] text-gray-600">
+        {/* 총 건수 뱃지 */}
+        <span className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded border border-gray-300 bg-gray-100 font-medium text-gray-700">
+          {totalCount.toLocaleString()}
         </span>
-        <button
-          disabled={isLast}
-          onClick={() => onPageChange?.((currentPage ?? 1) + 1)}
-          className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
-        >
-          ›
-        </button>
-        <button
-          disabled={isLast}
-          onClick={() => onPageChange?.(totalPages)}
-          className="px-2 py-0.5 border rounded disabled:opacity-40 hover:bg-gray-100"
-        >
-          »
-        </button>
-        <span className="text-gray-400">
-          (총 {totalCount.toLocaleString()}건)
+
+        {/* 페이지당 행 개수 */}
+        <span className="shrink-0 text-gray-500">페이지당 행 개수:</span>
+        <input
+          type="number"
+          min={1}
+          value={pageSizeInput}
+          onChange={(e) => setPageSizeInput(e.target.value)}
+          onBlur={commitPageSize}
+          onKeyDown={(e) => e.key === "Enter" && commitPageSize()}
+          className="w-14 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
+        />
+
+        {/* 현재 페이지 */}
+        <span className="shrink-0 text-gray-500">현재 페이지:</span>
+        <input
+          type="number"
+          min={1}
+          max={totalPages || 1}
+          value={pageInput}
+          onChange={(e) => setPageInput(e.target.value)}
+          onBlur={commitPage}
+          onKeyDown={(e) => e.key === "Enter" && commitPage()}
+          className="w-10 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
+        />
+        <span className="shrink-0 text-gray-500">
+          / {isEmpty ? 0 : totalPages} 페이지
         </span>
+
+        {/* 페이지 이동 버튼 — 오른쪽 끝 */}
+        <div className="ml-auto flex items-center gap-0.5">
+          <button
+            disabled={isFirst}
+            onClick={() => onPageChange?.(1)}
+            className={btnCls}
+          >
+            {"<<"}
+          </button>
+          <button
+            disabled={isFirst}
+            onClick={() => onPageChange?.((currentPage ?? 1) - 1)}
+            className={btnCls}
+          >
+            {"<"}
+          </button>
+          <button
+            disabled={isLast}
+            onClick={() => onPageChange?.((currentPage ?? 1) + 1)}
+            className={btnCls}
+          >
+            {">"}
+          </button>
+          <button
+            disabled={isLast}
+            onClick={() => onPageChange?.(totalPages)}
+            className={btnCls}
+          >
+            {">>"}
+          </button>
+        </div>
       </div>
     );
   };

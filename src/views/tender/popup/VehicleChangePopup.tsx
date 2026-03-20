@@ -232,7 +232,7 @@ export default function VehicleChangePopup({
       )}
 
       {/* ── Grid ── */}
-      <div className="flex-1 min-h-[300px]">
+      <div className="h-[400px] shrink-0">
         <DataGrid
           layoutType="plain"
           actions={[]}

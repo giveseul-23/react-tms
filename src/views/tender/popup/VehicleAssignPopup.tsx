@@ -253,7 +253,7 @@ export default function VehicleAssignPopup({
       )}
 
       {/* 데이터 Grid 영역 */}
-      <div className="flex-1 min-h-[280px]">
+      <div className="h-[350px] shrink-0">
         <DataGrid
           layoutType="plain"
           actions={[]}
