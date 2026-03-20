@@ -178,8 +178,14 @@ export default function DataGrid<TRow>({
   }, [pageSize]);
 
   const internalGridRef = useRef<any>(null);
-  // Shift+셀클릭 범위 복사용 앵커 rowIndex
-  const shiftAnchorRef = useRef<number | null>(null);
+  // 드래그/Shift 범위 선택 복사
+  const gridContainerRef = useRef<HTMLDivElement>(null);
+  const selectedCellsRef = useRef<Set<string>>(new Set());
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef<{ rowIndex: number; colIndex: number } | null>(
+    null,
+  );
+  const columnOrderRef = useRef<string[]>([]);
 
   const totalPages = Math.ceil((totalCount ?? 0) / (pageSize ?? 20));
 
@@ -279,6 +285,12 @@ export default function DataGrid<TRow>({
   const handleGridReady = useCallback(
     (e: GridReadyEvent<TRow>) => {
       gridApiRef.current = e.api;
+      // 컬럼 순서 저장 — DOM의 col-id 속성값과 동일한 getColId() 사용
+      columnOrderRef.current =
+        e.api
+          .getColumns()
+          ?.map((col: any) => col.getColId())
+          .filter(Boolean) ?? [];
       if (activeRowData.length > 0) {
         requestAnimationFrame(() => {
           runAutoSize(e.api, finalColumnDefs, activeRowData);
@@ -300,6 +312,165 @@ export default function DataGrid<TRow>({
     });
   }, [activeTab, activeRowData, finalColumnDefs, runAutoSize, disableAutoSize]);
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 드래그 범위 선택 + Ctrl+C 복사 (HTML 샘플 방식)
+  useEffect(() => {
+    const container = gridContainerRef.current;
+    if (!container) return;
+
+    function getCellCoords(el: HTMLElement) {
+      const cell = el.classList.contains("ag-cell") ? el : el.closest<HTMLElement>(".ag-cell");
+      const row = el.closest<HTMLElement>("[row-index]");
+      if (!cell || !row) return null;
+
+      // ag-Grid는 .ag-cell에 col-id 속성을 붙임
+      const colId = cell.getAttribute("col-id");
+      if (!colId) return null;
+
+      const rowIndex = parseInt(row.getAttribute("row-index") ?? "-1", 10);
+      // col-id가 field명 또는 colId명일 수 있으므로 둘 다 indexOf 시도
+      let colIndex = columnOrderRef.current.indexOf(colId);
+      if (rowIndex < 0 || colIndex < 0) return null;
+      return { rowIndex, colIndex };
+    }
+
+    function getRangeKeys(
+      a: { rowIndex: number; colIndex: number },
+      b: { rowIndex: number; colIndex: number },
+    ) {
+      const keys = new Set<string>();
+      for (
+        let r = Math.min(a.rowIndex, b.rowIndex);
+        r <= Math.max(a.rowIndex, b.rowIndex);
+        r++
+      ) {
+        for (
+          let cl = Math.min(a.colIndex, b.colIndex);
+          cl <= Math.max(a.colIndex, b.colIndex);
+          cl++
+        ) {
+          keys.add(`${r}:${cl}`);
+        }
+      }
+      return keys;
+    }
+
+    function applyHighlight() {
+      container.querySelectorAll<HTMLElement>(".ag-cell").forEach((cell) => {
+        const coords = getCellCoords(cell);
+        if (!coords) return;
+        const selected = selectedCellsRef.current.has(
+          `${coords.rowIndex}:${coords.colIndex}`,
+        );
+        cell.style.backgroundColor = selected ? "rgba(59,130,246,0.15)" : "";
+        cell.style.outline = selected ? "1px solid rgba(59,130,246,0.5)" : "";
+      });
+    }
+
+    function tsvFromSelection() {
+      const keys = selectedCellsRef.current;
+      if (keys.size === 0) return null;
+      let minR = Infinity,
+        maxR = -Infinity,
+        minC = Infinity,
+        maxC = -Infinity;
+      keys.forEach((k) => {
+        const [r, cl] = k.split(":").map(Number);
+        if (r < minR) minR = r;
+        if (r > maxR) maxR = r;
+        if (cl < minC) minC = cl;
+        if (cl > maxC) maxC = cl;
+      });
+      const api = gridApiRef.current;
+      if (!api) return null;
+      // colId → field 매핑 (colId가 field와 다를 수 있음)
+      const colIdToField: Record<string, string> = {};
+      api.getColumns()?.forEach((col: any) => {
+        colIdToField[col.getColId()] = col.getColDef().field ?? col.getColId();
+      });
+
+      const lines: string[] = [];
+      for (let r = minR; r <= maxR; r++) {
+        const node = api.getDisplayedRowAtIndex(r);
+        const cells: string[] = [];
+        for (let cl = minC; cl <= maxC; cl++) {
+          const colId = columnOrderRef.current[cl];
+          const field = colIdToField[colId] ?? colId;
+          const val = node?.data?.[field];
+          cells.push(val != null ? String(val) : "");
+        }
+        lines.push(cells.join("\t"));
+      }
+      return lines.join("\n");
+    }
+
+    const onMouseDown = (e: MouseEvent) => {
+      // 매번 최신 컬럼 순서 갱신 (컬럼 이동/추가 대응)
+      const api = gridApiRef.current;
+      if (api && !api.isDestroyed?.()) {
+        const cols = api.getColumns()?.map((col: any) => col.getColId()).filter(Boolean) ?? [];
+        if (cols.length > 0) columnOrderRef.current = cols;
+      }
+
+      const cell = (e.target as HTMLElement).closest<HTMLElement>(".ag-cell");
+      if (!cell) return;
+      const coords = getCellCoords(cell);
+      if (!coords) return;
+
+      if (e.shiftKey && dragStartRef.current) {
+        selectedCellsRef.current = getRangeKeys(dragStartRef.current, coords);
+      } else {
+        dragStartRef.current = coords;
+        selectedCellsRef.current = new Set([
+          `${coords.rowIndex}:${coords.colIndex}`,
+        ]);
+        isDraggingRef.current = true;
+      }
+      applyHighlight();
+      // e.preventDefault() 제거 — ag-Grid 자체 이벤트(행선택 등) 차단하지 않음
+    };
+
+    const onMouseOver = (e: MouseEvent) => {
+      if (!isDraggingRef.current || !dragStartRef.current) return;
+      const cell = (e.target as HTMLElement).closest<HTMLElement>(".ag-cell");
+      if (!cell) return;
+      const coords = getCellCoords(cell);
+      if (!coords) return;
+      selectedCellsRef.current = getRangeKeys(dragStartRef.current, coords);
+      applyHighlight();
+    };
+
+    const onMouseUp = () => {
+      isDraggingRef.current = false;
+    };
+
+    const onScroll = () => requestAnimationFrame(applyHighlight);
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key !== "c") return;
+      const tag = (document.activeElement as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (selectedCellsRef.current.size === 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const tsv = tsvFromSelection();
+      if (tsv) navigator.clipboard.writeText(tsv).catch(() => {});
+    };
+
+    container.addEventListener("mousedown", onMouseDown);
+    container.addEventListener("mouseover", onMouseOver);
+    document.addEventListener("mouseup", onMouseUp);
+    container.addEventListener("scroll", onScroll, true);
+    document.addEventListener("keydown", onKeyDown, true);
+
+    return () => {
+      container.removeEventListener("mousedown", onMouseDown);
+      container.removeEventListener("mouseover", onMouseOver);
+      document.removeEventListener("mouseup", onMouseUp);
+      container.removeEventListener("scroll", onScroll, true);
+      document.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, []);
   // ─────────────────────────────────────────────────────────────────────────────
 
   const wrappedActions = useMemo(() => {
@@ -374,39 +545,8 @@ export default function DataGrid<TRow>({
         }, 0);
       }
     },
-    onCellClicked: (e: any) => {
-      const editable =
-        typeof e.colDef.editable === "function"
-          ? e.colDef.editable(e)
-          : !!e.colDef.editable;
-      if (editable) return;
-
-      const field = e.colDef.field;
-      const isShift = e.event?.shiftKey;
-
-      if (isShift && field) {
-        // Shift+셀 클릭 → shiftAnchorRef ~ 현재 rowIndex 범위의 해당 컬럼 값 복사
-        const api = e.api;
-        const currentIdx = e.node.rowIndex ?? 0;
-        const anchorIdx = shiftAnchorRef.current ?? currentIdx;
-        const minIdx = Math.min(anchorIdx, currentIdx);
-        const maxIdx = Math.max(anchorIdx, currentIdx);
-
-        const rows: string[] = [];
-        for (let i = minIdx; i <= maxIdx; i++) {
-          const node = api.getDisplayedRowAtIndex(i);
-          if (node?.data) {
-            rows.push(String(node.data[field] ?? ""));
-          }
-        }
-        navigator.clipboard.writeText(rows.join("\n")).catch(() => {});
-      } else {
-        // 일반 클릭 → 앵커 저장 + 단일 셀 값 복사
-        shiftAnchorRef.current = e.node.rowIndex ?? 0;
-        if (e.value != null && e.value !== "") {
-          navigator.clipboard.writeText(String(e.value)).catch(() => {});
-        }
-      }
+    onCellClicked: (_e: any) => {
+      // 범위 복사는 마우스 이벤트 + Ctrl+C 로 처리 (아래 useEffect 참조)
     },
     onRowClicked: (e: any) => {
       const target = e.event?.target as HTMLElement;
@@ -545,7 +685,10 @@ export default function DataGrid<TRow>({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
+    <div
+      ref={gridContainerRef}
+      className="border border-gray-200 rounded-lg bg-[rgb(var(--bg))] flex flex-col h-full min-h-0"
+    >
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-4 shrink-0">
           <GridTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
@@ -617,9 +760,7 @@ export default function DataGrid<TRow>({
                 닫기
               </button>
             </div>
-            <div className="p-2">
-              {trackContent}
-            </div>
+            <div className="p-2">{trackContent}</div>
           </div>
         </div>
       )}
