@@ -31,7 +31,10 @@ export function PageTabBar({
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+  const handleDragOver = (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number,
+  ) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
 
@@ -63,7 +66,7 @@ export function PageTabBar({
 
   return (
     <div
-      className="flex items-center bg-[rgb(var(--bg))] border-b border-gray-200 shrink-0 h-9"
+      className="flex items-center bg-[rgb(var(--bg))] border-b border-gray-200 shrink-0 h-10"
       // 탭 바 맨 끝에 드롭할 수 있도록 바 자체도 처리
       onDragOver={(e) => {
         e.preventDefault();
@@ -87,9 +90,15 @@ export function PageTabBar({
         const isActive = tab.menuCode === activeMenuCode;
 
         // 이 탭의 왼쪽에 인디케이터 표시 여부
-        const showIndicatorBefore = dropIndex === index && dragIndexRef.current !== index && dragIndexRef.current !== index - 1;
+        const showIndicatorBefore =
+          dropIndex === index &&
+          dragIndexRef.current !== index &&
+          dragIndexRef.current !== index - 1;
         // 이 탭의 오른쪽(= 다음 탭 왼쪽)에 인디케이터 표시 여부
-        const showIndicatorAfter = dropIndex === index + 1 && dragIndexRef.current !== index && dragIndexRef.current !== index + 1;
+        const showIndicatorAfter =
+          dropIndex === index + 1 &&
+          dragIndexRef.current !== index &&
+          dragIndexRef.current !== index + 1;
 
         return (
           <div
@@ -101,18 +110,23 @@ export function PageTabBar({
             onDrop={(e) => handleDrop(e, index)}
             onDragEnd={handleDragEnd}
             className={`
-              group relative flex items-center gap-1.5 px-3 h-full shrink-0
-              text-xs cursor-grab active:cursor-grabbing select-none
+              group relative flex items-center gap-1.5 px-4 h-full shrink-0
+              text-[13px] cursor-grab active:cursor-grabbing select-none
               border-r border-gray-200 transition-colors
-              ${isActive
-                ? "bg-white text-[rgb(var(--primary))] font-semibold border-b-2 border-b-[rgb(var(--primary))] -mb-px"
-                : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+              ${
+                isActive
+                  ? "bg-white text-[rgb(var(--primary))] font-semibold border-b-2 border-b-[rgb(var(--primary))] -mb-px"
+                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
               }
             `}
             style={{
               // 인디케이터: 왼쪽 또는 오른쪽에 파란 선
-              borderLeft: showIndicatorBefore ? "2px solid rgb(var(--primary))" : undefined,
-              borderRight: showIndicatorAfter ? "2px solid rgb(var(--primary))" : undefined,
+              borderLeft: showIndicatorBefore
+                ? "2px solid rgb(var(--primary))"
+                : undefined,
+              borderRight: showIndicatorAfter
+                ? "2px solid rgb(var(--primary))"
+                : undefined,
             }}
             onClick={() => onSelect(tab.menuCode)}
           >

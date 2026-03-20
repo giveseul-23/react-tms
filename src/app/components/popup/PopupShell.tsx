@@ -33,7 +33,7 @@ export function PopupShell({
 
       {/* Dialog */}
       <DialogContent
-        className={`p-0 w-full ${POPUP_WIDTH_CLASS[width]} shadow-xl rounded-xl bg-white dark:bg-slate-800`}
+        className={`p-0 w-full ${POPUP_WIDTH_CLASS[width]} shadow-xl rounded-lg bg-white dark:bg-slate-800`}
       >
         {title && (
           <DialogHeader className="px-6 pt-6">

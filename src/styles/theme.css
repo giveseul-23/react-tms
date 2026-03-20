@@ -38,7 +38,7 @@
   --chart-4-soft: oklch(80.275% 0.14988 66.085 / 0.12);
   --chart-5-soft: oklch(0.645 0.246 16.439 / 0.12);
 
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: #030213;
@@ -372,4 +372,6 @@
   --ag-header-background-color: var(--grid-header-bg);
   --ag-header-foreground-color: rgb(var(--fg));
   --ag-border-color: var(--border);
+  --ag-wrapper-border-radius: 0.5rem;
+  --ag-card-radius: 0.5rem;
 }

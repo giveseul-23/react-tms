@@ -3,6 +3,7 @@ const REFRESH_TOKEN_KEY = "REFRESH_TOKEN";
 const USERID = "userId";
 const USERNM = "userNm";
 const SESLANG = "sesLang";
+const USRGRP = "userGroupName";
 
 export function setTokens(
   accessToken: string,
@@ -10,12 +11,14 @@ export function setTokens(
   userId: string,
   userNm: string,
   sesLang: string,
+  userGroupName: string,
 ) {
   sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   sessionStorage.setItem(USERID, userId);
   sessionStorage.setItem(USERNM, userNm);
   sessionStorage.setItem(SESLANG, sesLang);
+  sessionStorage.setItem(USRGRP, userGroupName);
 }
 
 export function getAccessToken() {
@@ -26,12 +29,17 @@ export function getUserName() {
   return sessionStorage.getItem(USERNM);
 }
 
+export function getUserGroup() {
+  return sessionStorage.getItem(USRGRP);
+}
+
 export function clearTokens() {
   sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
   sessionStorage.removeItem(USERID);
   sessionStorage.removeItem(USERNM);
   sessionStorage.removeItem(SESLANG);
+  sessionStorage.removeItem(USRGRP);
 }
 
 export function isAuthed() {

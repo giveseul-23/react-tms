@@ -23,3 +23,12 @@ body,
   --ag-row-border-color: #f1f5f9;
   --ag-header-background-color: #f8fafc;
 }
+
+.ag-header-cell-label {
+  justify-content: center; /* 가로 중앙 */
+}
+
+.ag-header-cell-label .ag-header-cell-text {
+  text-align: center; /* 텍스트 중앙 */
+  width: 100%;
+}

@@ -1,5 +1,4 @@
 import {
-  Users,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -10,10 +9,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { MENU_SECTIONS, MenuSection } from "@/app/menu/menuConfig";
-
 import { SettingsPopup } from "@/views/settings/SettingsPopup";
-
-import { getUserName, clearTokens } from "@/app/services/auth/auth";
+import {
+  getUserName,
+  getUserGroup,
+  clearTokens,
+} from "@/app/services/auth/auth";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -21,9 +22,9 @@ interface SidebarProps {
   onToggle: () => void;
   onSelectMenu: (menuCode: string) => void;
 }
+
 function findSectionByMenuCode(menuCode: string | null) {
   if (!menuCode) return null;
-
   for (const section of MENU_SECTIONS) {
     if (section.items.some((item) => item.menuCode === menuCode)) {
       return section.sectionCode;
@@ -44,9 +45,7 @@ export function Sidebar({
 
   useEffect(() => {
     const sectionCode = findSectionByMenuCode(activeMenuCode);
-    if (sectionCode) {
-      setExpandedSection(sectionCode);
-    }
+    if (sectionCode) setExpandedSection(sectionCode);
   }, [activeMenuCode]);
 
   const { openPopup } = usePopup();
@@ -54,7 +53,6 @@ export function Sidebar({
 
   function logOut() {
     clearTokens();
-
     navigate("/login", { replace: true });
   }
 
@@ -72,33 +70,46 @@ export function Sidebar({
       <aside
         className={`
           fixed lg:relative inset-y-0 left-0 z-30
-          w-72 bg-[rgb(var(--bg))] border-r border-gray-200
-          transform transition-transform duration-300
+          bg-[rgb(var(--bg))] border-r border-gray-200
+          transform transition-all duration-300 flex flex-col
           ${
             isOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden lg:border-r-0"
+              ? "w-60 translate-x-0"
+              : "-translate-x-full lg:translate-x-0 lg:w-14 lg:overflow-hidden"
           }
-          flex flex-col
         `}
       >
         {/* Logo */}
-        <div className="h-16 px-6 flex items-center justify-between border-b">
-          {/* left: logo + title */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[rgb(var(--primary))] rounded-lg flex items-center justify-center">
-              <Truck className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-lg">Mobyus TMS</span>
-          </div>
-
-          {/* right: toggle button */}
-          <button
-            onClick={onToggle}
-            className="hidden lg:block p-1 hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+        <div
+          className={`h-16 flex items-center justify-between border-b ${isOpen ? "px-6" : "px-0"}`}
+        >
+          {isOpen ? (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-[rgb(var(--primary))] rounded-lg flex items-center justify-center shrink-0">
+                  <Truck className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-semibold text-lg whitespace-nowrap">
+                  Mobyus TMS
+                </span>
+              </div>
+              <button
+                onClick={onToggle}
+                className="hidden lg:block p-1 hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onToggle}
+              className="hidden lg:flex w-full h-full items-center justify-center hover:bg-gray-100 hover:text-[rgb(var(--hover))]"
+            >
+              <div className="w-8 h-8 bg-[rgb(var(--primary))] rounded-lg flex items-center justify-center">
+                <Truck className="w-5 h-5 text-white" />
+              </div>
+            </button>
+          )}
         </div>
 
         {/* Menu */}
@@ -106,34 +117,46 @@ export function Sidebar({
           {MENU_SECTIONS.map((section: MenuSection) => {
             const Icon = section.icon;
             const isExpanded = expandedSection === section.sectionCode;
+            const isActive = section.items.some(
+              (item) => item.menuCode === activeMenuCode,
+            );
 
             return (
               <div key={section.sectionCode} className="mb-2">
                 <button
-                  onClick={() =>
-                    setExpandedSection(isExpanded ? null : section.sectionCode)
-                  }
-                  className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg"
+                  onClick={() => {
+                    if (!isOpen) onToggle();
+                    setExpandedSection(isExpanded ? null : section.sectionCode);
+                  }}
+                  title={!isOpen ? section.title : undefined}
+                  className={`
+                    w-full flex items-center px-3 py-1 text-sm font-medium
+                    hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg
+                    ${isOpen ? "justify-between" : "justify-center"}
+                    ${isActive && !isOpen ? "text-[rgb(var(--primary))]" : ""}
+                  `}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5" />
-                    <span>{section.title}</span>
+                  <div className={`flex items-center ${isOpen ? "gap-3" : ""}`}>
+                    <Icon className="w-5 h-5 shrink-0" />
+                    {isOpen && <span>{section.title}</span>}
                   </div>
-                  <ChevronRight
-                    className={`w-4 h-4 transition-transform ${
-                      isExpanded ? "rotate-90" : ""
-                    }`}
-                  />
+                  {isOpen && (
+                    <ChevronRight
+                      className={`w-4 h-4 transition-transform ${
+                        isExpanded ? "rotate-90" : ""
+                      }`}
+                    />
+                  )}
                 </button>
 
-                {isExpanded && (
+                {isOpen && isExpanded && (
                   <div className="ml-8 mt-1 space-y-1">
                     {section.items.map((item) => (
                       <button
                         key={item.menuCode}
                         onClick={() => onSelectMenu(item.menuCode)}
                         className={`
-                          w-full text-left px-3 py-2 text-sm rounded-lg
+                          w-full text-left px-3 py-1 text-sm rounded-lg
                           ${
                             activeMenuCode === item.menuCode
                               ? "bg-[var(--grid-header-bg)] text-[rgb(var(--primary))] font-medium"
@@ -153,46 +176,59 @@ export function Sidebar({
 
         {/* Footer */}
         <div className="p-4 border-t">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <Users className="w-4 h-4" />
+          {isOpen ? (
+            <div className="flex items-center gap-3 px-3 py-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{getUserName()}</p>
+                <p className="text-xs text-gray-500 truncate">
+                  {getUserGroup()}
+                </p>
+              </div>
+              <button
+                className="p-1 bg-[rgb(var(--bg))] hover:bg-gray-300 hover:text-black rounded"
+                onClick={() =>
+                  openPopup({
+                    title: "사용자 환경설정",
+                    content: <SettingsPopup />,
+                    width: "xl",
+                  })
+                }
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              <button
+                className="p-1 bg-[rgb(var(--bg))] hover:bg-gray-300 hover:text-black rounded"
+                onClick={logOut}
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{getUserName()}</p>
-              <p className="text-xs text-gray-500 truncate">010-0000-0000</p>
+          ) : (
+            <div className="flex flex-col items-center gap-2 py-2">
+              <button
+                title="환경설정"
+                className="p-1 bg-[rgb(var(--bg))] hover:bg-gray-300 hover:text-black rounded"
+                onClick={() =>
+                  openPopup({
+                    title: "사용자 환경설정",
+                    content: <SettingsPopup />,
+                    width: "xl",
+                  })
+                }
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              <button
+                title="로그아웃"
+                className="p-1 bg-[rgb(var(--bg))] hover:bg-gray-300 hover:text-black rounded"
+                onClick={logOut}
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              className="p-1 bg-[rgb(var(--bg))] hover:bg-gray-300 hover:text-black rounded"
-              onClick={() =>
-                openPopup({
-                  title: "사용자 환경설정",
-                  content: <SettingsPopup />,
-                  width: "xl",
-                })
-              }
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-
-            <button
-              className="p-1 bg-[rgb(var(--bg))] hover:bg-gray-300 hover:text-black rounded"
-              onClick={() => logOut()}
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+          )}
         </div>
       </aside>
-
-      {/* Collapsed Button */}
-      {!isOpen && (
-        <button
-          onClick={onToggle}
-          className="hidden lg:block fixed left-0 top-20 z-10 p-2 bg-[rgb(var(--bg))] btn-outline rounded-r-lg"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      )}
     </>
   );
 }

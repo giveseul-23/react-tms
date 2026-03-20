@@ -27,7 +27,7 @@ export function CheckboxFilter({
         className={cn(
           "flex items-center gap-2",
           "h-6 px-2 py-0",
-          "rounded-md border bg-[rgb(var(--bg))]",
+          "rounded-lg border bg-[rgb(var(--bg))]",
           "transition-colors",
           checked
             ? "border-emerald-300 ring-1 ring-emerald-200"
@@ -42,7 +42,7 @@ export function CheckboxFilter({
           className="
           h-3 w-3
           translate-y-[0.2px]   // 🔥 핵심
-          rounded border-gray-300
+          rounded-lg border-gray-300
           accent-emerald-600
         "
         />

@@ -35,15 +35,28 @@ export default function AuthPage() {
         password: form.password,
       });
 
-      const { ACCESS_TOKEN, REFRESH_TOKEN, userId, userNm, userLang } =
-        res.data.data;
+      const {
+        ACCESS_TOKEN,
+        REFRESH_TOKEN,
+        userId,
+        userNm,
+        userLang,
+        userGroupName,
+      } = res.data.data;
 
       if (ACCESS_TOKEN == null || ACCESS_TOKEN === undefined) {
         setError("아이디 또는 비밀번호가 올바르지 않습니다.");
         return;
       }
 
-      setTokens(ACCESS_TOKEN, REFRESH_TOKEN, userId, userNm, userLang);
+      setTokens(
+        ACCESS_TOKEN,
+        REFRESH_TOKEN,
+        userId,
+        userNm,
+        userLang,
+        userGroupName,
+      );
       navigate("/", { replace: true });
     } catch (err) {
       setError("로그인에 실패했습니다. 다시 시도해주세요.");

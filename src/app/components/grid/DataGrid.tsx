@@ -449,7 +449,7 @@ export default function DataGrid<TRow>({
   };
 
   return (
-    <div className="border border-gray-200 rounded-xl bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
+    <div className="border border-gray-200 rounded-lg bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-4 shrink-0">
           <GridTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />

@@ -32,7 +32,7 @@ type IconComboProps = {
 
 export function IconCombo({ currentValue, onSelect }: IconComboProps) {
   return (
-    <ul className="min-w-max rounded-md border bg-white shadow-lg py-1">
+    <ul className="min-w-max rounded-lg border bg-white shadow-lg py-1">
       {ICON_OPTIONS.map((opt) => {
         const selected = opt.value === currentValue;
 

@@ -96,16 +96,9 @@ export function GridActionsBar({
                 key={a.key}
                 type="button"
                 variant="outline"
-                className="
-                  h-6
-                  px-2
-                  text-[11px]
-                  gap-1
-                  rounded-md
-                "
+                className="h-6 px-2 text-[11px] gap-1 rounded-lg items-center [&_svg]:size-3 [&_svg]:shrink-0"
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
-
                   setAnchorEl(e.currentTarget);
                   setDropdownStyle({
                     position: "fixed",
@@ -114,15 +107,10 @@ export function GridActionsBar({
                     width: 160,
                     zIndex: 9999,
                   });
-
                   setOpenKey((prev) => (prev === a.key ? null : a.key));
                 }}
               >
-                {openKey === a.key ? (
-                  <SquareMinus className="w-3 h-3" />
-                ) : (
-                  <SquarePlus className="w-3 h-3" />
-                )}
+                {openKey === a.key ? <SquareMinus /> : <SquarePlus />}
                 {a.label}
               </Button>
             ) : (
@@ -130,12 +118,7 @@ export function GridActionsBar({
                 key={a.key}
                 type="button"
                 variant="outline"
-                className="
-                  h-6
-                  px-2
-                  text-[11px]
-                  rounded-md
-                "
+                className="h-6 px-2 text-[11px] rounded-lg items-center [&_svg]:size-3 [&_svg]:shrink-0"
                 onClick={a.onClick}
               >
                 {a.label}
@@ -145,19 +128,13 @@ export function GridActionsBar({
         </div>
       </div>
 
-      {/* ✅ 드롭다운 */}
+      {/* 드롭다운 */}
       {openGroup &&
         dropdownStyle &&
         createPortal(
           <div
             data-dropdown
-            className="
-              rounded-md
-              border border-gray-200
-              bg-[rgb(var(--bg))]
-              shadow-md
-              p-1
-            "
+            className="rounded-lg border border-gray-200 bg-[rgb(var(--bg))] shadow-md p-1"
             style={dropdownStyle}
           >
             {openGroup.items.map((it) => (
@@ -169,17 +146,7 @@ export function GridActionsBar({
                   it.onClick?.();
                   setOpenKey(null);
                 }}
-                className="
-                  w-full
-                  rounded-md
-                  px-2
-                  py-1.5
-                  text-[11px]
-                  text-left
-                  hover:bg-gray-100
-                  dark:hover:text-slate-900
-                  disabled:opacity-50
-                "
+                className="w-full rounded-lg px-2 py-1.5 text-[11px] text-left hover:bg-gray-100 dark:hover:text-slate-900 disabled:opacity-50"
               >
                 {it.label}
               </button>

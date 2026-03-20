@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, ReactNode } from "react";
 import {
   Search,
   RefreshCw,
@@ -58,6 +58,7 @@ export function SearchFilters({
   pageSize = 20,
   // fetchFn을 prop으로 주입받아 tenderApi 직접 의존 제거
   fetchFn,
+  layoutToggle,
 }: {
   meta: readonly SearchMeta[];
   onSearch: (data: SearchResult) => void;
@@ -65,6 +66,8 @@ export function SearchFilters({
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
   pageSize?: number;
   fetchFn: (params: Record<string, unknown>) => Promise<any>;
+  /** DataGrid 두 개인 화면에서만 전달 — 초기화 버튼 옆에 렌더링 */
+  layoutToggle?: ReactNode;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
@@ -257,10 +260,10 @@ export function SearchFilters({
   }, [searchRef, handleSearch]);
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm rounded-lg">
       <Collapsible open={open} onOpenChange={setOpen}>
         <div
-          className={`flex items-center justify-between px-3 py-1.5 bg-[rgb(var(--primary))] ${open ? "rounded-t-xl" : "rounded-xl"}`}
+          className={`flex items-center justify-between px-3 py-1.5 bg-[rgb(var(--primary))] ${open ? "rounded-t-lg" : "rounded-lg"}`}
         >
           <div className="flex items-center gap-1.5">
             <SlidersHorizontal className="w-4 h-4 text-white mt-px" />
@@ -458,10 +461,13 @@ export function SearchFilters({
           </CardContent>
 
           <div className="flex justify-between px-2 py-1 border-t">
-            <Button variant="outline" size="xs" onClick={handleReset}>
-              <RefreshCw className="w-3 h-3" />
-              초기화
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button variant="outline" size="xs" onClick={handleReset}>
+                <RefreshCw className="w-3 h-3" />
+                초기화
+              </Button>
+              {layoutToggle}
+            </div>
 
             <Button
               variant="outline"

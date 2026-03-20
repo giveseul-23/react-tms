@@ -20,8 +20,10 @@ import { useGuard } from "@/hooks/useGuard";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import { CommonPopup } from "@/views/common/CommonPopup";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
-
-type LayoutType = "side" | "vertical";
+import {
+  LayoutToggleButton,
+  LayoutType,
+} from "@/app/components/layout/LayoutToggleButton";
 
 const dispatchStatusColorMap: Record<string, string> = {
   "2030": "bg-purple-100 text-purple-700",
@@ -159,7 +161,7 @@ export default function TenderReceiveDispatch() {
         const cls =
           dispatchStatusColorMap[String(code)] ?? "bg-gray-100 text-gray-600";
         return (
-          <span className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}>
+          <span className={`px-2 py-0.5 rounded-lg text-xs ${cls}`}>
             {label}
           </span>
         );
@@ -177,7 +179,7 @@ export default function TenderReceiveDispatch() {
         const cls =
           dispatchStatusColorMap[String(code)] ?? "bg-gray-100 text-gray-600";
         return (
-          <span className={`px-0.5 py-0.5 rounded-md text-xs ${cls}`}>
+          <span className={`px-2 py-0.5 rounded-lg text-xs ${cls}`}>
             {label}
           </span>
         );
@@ -478,27 +480,15 @@ export default function TenderReceiveDispatch() {
         filtersRef={filtersRef}
         pageSize={20}
         fetchFn={fetchDispatchList}
+        layoutToggle={
+          <LayoutToggleButton
+            layout={layout}
+            onToggle={() =>
+              setLayout((prev) => (prev === "side" ? "vertical" : "side"))
+            }
+          />
+        }
       />
-
-      {/* layout toggle */}
-      <div className="shrink-0 flex items-center justify-end text-[13px] text-[rgb(var(--fg))]">
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setLayout("vertical")}
-            className="h-[30px] w-[34px] rounded-md border border-slate-200 bg-[rgb(var(--bg))] text-[rgb(var(--fg))]"
-          >
-            ⬇
-          </button>
-          <button
-            type="button"
-            onClick={() => setLayout("side")}
-            className="h-[30px] w-[34px] rounded-md border border-slate-200 bg-[rgb(var(--bg))] text-[rgb(var(--fg))]"
-          >
-            ➡
-          </button>
-        </div>
-      </div>
 
       {/* grid area */}
       <div className="flex-1 min-h-0 min-w-0 overflow-x-visible">
