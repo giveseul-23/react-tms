@@ -15,14 +15,14 @@ interface PopupShellProps {
 }
 
 const WIDTH_PX: Record<PopupWidth, number> = {
-  sm:    384,
-  md:    448,
-  lg:    512,
-  xl:    576,
+  sm: 384,
+  md: 448,
+  lg: 512,
+  xl: 576,
   "2xl": 672,
   "3xl": 768,
   "4xl": 896,
-  full:  1200,
+  full: 1200,
 };
 
 export function PopupShell({
@@ -58,11 +58,19 @@ export function PopupShell({
       const w = dialogRef.current?.offsetWidth ?? 400;
       const h = dialogRef.current?.offsetHeight ?? 300;
       setPos({
-        x: Math.max(0, Math.min(e.clientX - offset.current.x, window.innerWidth - w)),
-        y: Math.max(0, Math.min(e.clientY - offset.current.y, window.innerHeight - h)),
+        x: Math.max(
+          0,
+          Math.min(e.clientX - offset.current.x, window.innerWidth - w),
+        ),
+        y: Math.max(
+          0,
+          Math.min(e.clientY - offset.current.y, window.innerHeight - h),
+        ),
       });
     };
-    const onMouseUp = () => { dragging.current = false; };
+    const onMouseUp = () => {
+      dragging.current = false;
+    };
 
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
@@ -74,26 +82,27 @@ export function PopupShell({
 
   if (!open) return null;
 
-  const dialogStyle: React.CSSProperties = pos === null
-    ? {
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        maxWidth: WIDTH_PX[width],
-        maxHeight: "90vh",
-        width: "100%",
-        zIndex: 9999,
-      }
-    : {
-        position: "fixed",
-        top: pos.y,
-        left: pos.x,
-        maxWidth: WIDTH_PX[width],
-        maxHeight: "90vh",
-        width: "100%",
-        zIndex: 9999,
-      };
+  const dialogStyle: React.CSSProperties =
+    pos === null
+      ? {
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          maxWidth: WIDTH_PX[width],
+          maxHeight: "90vh",
+          width: "100%",
+          zIndex: 9999,
+        }
+      : {
+          position: "fixed",
+          top: pos.y,
+          left: pos.x,
+          maxWidth: WIDTH_PX[width],
+          maxHeight: "90vh",
+          width: "100%",
+          zIndex: 9999,
+        };
 
   return createPortal(
     <>
@@ -126,9 +135,7 @@ export function PopupShell({
         </div>
 
         {/* Content — flex-1로 남은 높이 채우고, 자식이 h-full 쓸 수 있도록 min-h-0 */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-6">
-          {children}
-        </div>
+        <div className="flex-1 min-h-0 overflow-hidden p-6">{children}</div>
       </div>
     </>,
     document.body,

@@ -69,7 +69,7 @@ export function CommonPopup({
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full h-full">
+    <div className="flex flex-col gap-3 w-full h-full overflow-hidden">
       {/* ================= Search Area ================= */}
       <div className="shrink-0 grid grid-cols-[60px_1fr_60px_1fr_auto] gap-2 items-center">
         <span className="text-sm font-medium">코드</span>
@@ -97,7 +97,7 @@ export function CommonPopup({
       </div>
 
       {/* ================= Grid ================= */}
-      <div className="flex-1 min-h-[300px]">
+      <div style={{ height: "400px" }}>
         <DataGrid
           layoutType="plain"
           actions={[]}
