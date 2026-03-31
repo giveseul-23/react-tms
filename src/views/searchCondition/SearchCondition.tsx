@@ -7,7 +7,7 @@ import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 /** 센차 menuCode — 서버에서 dsSearchCondition을 가져오는 키 */
-const MENU_CODE = "SEARCH_CONDITION";
+const MENU_CODE = "MENU_CFG_SRCH_COND";
 
 export default function SearchCondition() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
