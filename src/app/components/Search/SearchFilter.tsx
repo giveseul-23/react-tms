@@ -24,7 +24,7 @@ type BaseFilterProps = {
  * Checkbox
  * ======================= */
 type CheckboxFilterProps = BaseFilterProps & {
-  type: "checkbox";
+  type: "CHECKBOX";
   id: string;
   label: string;
   checked: boolean;
@@ -37,10 +37,10 @@ type CheckboxFilterProps = BaseFilterProps & {
  * Combo
  * ======================= */
 type ComboFilterProps = BaseFilterProps & {
-  type: "combo";
+  type: "COMBO";
   label: string;
   value: string;
-  options: { value: string; label: string }[];
+  options?: { CODE: string; NAME: string }[];
   onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
@@ -50,7 +50,7 @@ type ComboFilterProps = BaseFilterProps & {
  * Text
  * ======================= */
 type TextFilterProps = BaseFilterProps & {
-  type: "text";
+  type: "TEXT";
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -61,27 +61,31 @@ type TextFilterProps = BaseFilterProps & {
 /* =======================
  * Date Range
  * ======================= */
+type DateMode = "Y" | "N";
+
 type DateRangeFilterProps = BaseFilterProps & {
-  type: "dateRange";
+  type: "YMD";
   label: string;
   fromValue: string;
   toValue: string;
-  onChangeFrom: (value: string) => void;
-  onChangeTo: (value: string) => void;
+  onChange?: (value: string) => void;
+  onChangeFrom?: (value: string) => void;
+  onChangeTo?: (value: string) => void;
   required?: boolean;
+  mode?: DateMode;
 };
 
 /* =======================
  * Popup
  * ======================= */
 type PopupFilterProps = BaseFilterProps & {
-  type: "popup";
+  type: "POPUP";
   label: string;
   code: string;
   name: string;
   sqlId: string;
-  onChangeCode: (v: string) => void;
-  onChangeName: (v: string) => void;
+  onChangeCode?: (v: string) => void;
+  onChangeName?: (v: string) => void;
   onClickSearch: () => void;
   required?: boolean;
 };
@@ -151,18 +155,18 @@ export function SearchFilter(props: SearchFilterProps) {
           label={label}
           required={required}
           onDoubleClick={() => {
-            if (props.type === "text") {
+            if (props.type === "TEXT") {
               props.onChange("");
-            } else if (props.type === "combo") {
+            } else if (props.type === "COMBO") {
               props.onChange("");
-            } else if (props.type === "dateRange") {
-              if (props.mode === "single") {
+            } else if (props.type === "YMD") {
+              if (props.mode === "N") {
                 props.onChange?.("");
               } else {
                 props.onChangeFrom?.("");
                 props.onChangeTo?.("");
               }
-            } else if (props.type === "popup") {
+            } else if (props.type === "POPUP") {
               props.onChangeCode?.("");
               props.onChangeName?.("");
             }
@@ -172,11 +176,11 @@ export function SearchFilter(props: SearchFilterProps) {
 
       {/* Input */}
       <div className="flex-1 min-w-0">
-        {props.type === "checkbox" && <CheckboxFilter {...props} />}
-        {props.type === "combo" && <ComboFilter {...props} />}
-        {props.type === "text" && <TextFilter {...props} />}
-        {props.type === "dateRange" && <DateRangeFilter {...props} />}
-        {props.type === "popup" && <PopupFilter {...props} />}
+        {props.type === "CHECKBOX" && <CheckboxFilter {...props} />}
+        {props.type === "COMBO" && <ComboFilter {...props} />}
+        {props.type === "TEXT" && <TextFilter {...props} />}
+        {props.type === "YMD" && <DateRangeFilter {...props} />}
+        {props.type === "POPUP" && <PopupFilter {...props} />}
       </div>
     </div>
   );

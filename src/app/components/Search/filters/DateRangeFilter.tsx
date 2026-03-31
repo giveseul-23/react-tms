@@ -4,9 +4,9 @@ import type React from "react";
 import { Input } from "@/app/components/ui/input";
 
 type DateGranularity = "date" | "datetime";
-type DateMode = "single" | "range";
+type DateMode = "Y" | "N";
 
-type DateFilterProps = React.ComponentPropsWithoutRef<"div"> & {
+type DateFilterProps = {
   mode?: DateMode;
   granularity?: DateGranularity;
 
@@ -28,7 +28,7 @@ function getToday(granularity: DateGranularity) {
 }
 
 export function DateRangeFilter({
-  mode = "range",
+  mode = "Y",
   granularity = "date",
 
   fromId = "dateFrom",
@@ -51,7 +51,7 @@ export function DateRangeFilter({
     "dark:[color-scheme:dark] dark:text-white";
 
   /* ---------- single ---------- */
-  if (mode === "single") {
+  if (mode === "N") {
     return (
       <Input
         id={fromId}

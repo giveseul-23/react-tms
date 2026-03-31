@@ -12,8 +12,8 @@ export type PopupFilterProps = {
   code: string;
   name: string;
 
-  onChangeCode: (v: string) => void;
-  onChangeName: (v: string) => void;
+  onChangeCode?: (v: string) => void;
+  onChangeName?: (v: string) => void;
   onClickSearch: () => void;
 
   codeId?: string;

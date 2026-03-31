@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef, ReactNode } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  ReactNode,
+} from "react";
 import {
   Search,
   RefreshCw,
@@ -26,22 +32,7 @@ import {
 
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
 import { showSearchToast } from "@/app/components/ui/SearchToast";
-
-type SearchMeta = {
-  key: string;
-  type: "text" | "combo" | "popup" | "dateRange" | "checkbox";
-  label: string;
-  span?: number;
-  mode?: string;
-  sqlId?: string;
-  condition?: string;
-  conditionLocked?: boolean;
-  requaluired?: boolean;
-  granularity?: string;
-  options?: { value: string; label: string }[];
-  dataType: string;
-  required?: boolean;
-};
+import type { SearchMeta } from "@/features/search/search.meta.types";
 
 export type SearchResult = {
   rows: any[];
@@ -92,7 +83,7 @@ export function SearchFilters({
       return;
     }
     handleSearch(1, false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageSize]);
 
   const getToday = () => {
@@ -108,9 +99,9 @@ export function SearchFilters({
     const initial: Record<string, SearchCondition> = {};
 
     meta.forEach((m) => {
-      if (m.type !== "dateRange") return;
+      if (m.type !== "YMD") return;
 
-      if (m.mode === "single") {
+      if (m.mode === "N") {
         initial[m.key] = {
           key: m.key,
           operator: m.condition ?? "equal",
@@ -147,11 +138,13 @@ export function SearchFilters({
 
   const getCondition = (key: string) => searchState[key];
 
+  type SearchDataType = "STRING" | "NUMBER" | "DATE";
+
   const updateCondition = (
     key: string,
     newValue: string,
     operator: keyof typeof CONDITION_ICON_MAP,
-    dataType: string,
+    dataType: SearchDataType,
     sourceType: "POPUP" | "NORMAL" = "NORMAL",
   ) => {
     setSearchState((prev) => ({
@@ -175,8 +168,8 @@ export function SearchFilters({
       const missingFields = meta
         .filter((m) => m.required === true)
         .filter((m) => {
-          if (m.type === "dateRange") {
-            if (m.mode === "single") {
+          if (m.type === "YMD") {
+            if (m.mode === "N") {
               return !searchState[m.key]?.value;
             }
             return (
@@ -209,11 +202,13 @@ export function SearchFilters({
       Object.values(searchState).forEach((v) => {
         if (v.value === "ALL") {
           const metaItem = meta.find((m) => m.key === v.key);
+          const options =
+            metaItem?.type === "COMBO" ? metaItem.options : undefined;
 
-          if (metaItem?.options) {
-            const codes = metaItem.options
-              .filter((o: any) => o.CODE !== "ALL")
-              .map((o: any) => `'${o.CODE}'`)
+          if (options) {
+            const codes = options
+              .filter((o) => o.CODE !== "ALL")
+              .map((o) => `'${o.CODE}'`)
               .join(",");
 
             conditions.push(` AND ${v.key} IN (${codes})`);
@@ -244,7 +239,12 @@ export function SearchFilters({
           const rows = res.data.result ?? [];
           const totalCount = rows[0]?.TOTALCOUNT ?? 0;
 
-          onSearch({ rows, totalCount, page: targetPage, limit: limitRef.current });
+          onSearch({
+            rows,
+            totalCount,
+            page: targetPage,
+            limit: limitRef.current,
+          });
 
           // 조회 완료 토스트 (페이지 이동 시에는 표시 안 함)
           if (showToast) showSearchToast(totalCount);
@@ -340,9 +340,7 @@ export function SearchFilters({
                   type: m.type,
                   label: m.label,
                   span: m.span ?? 1,
-                  mode: m.mode,
-                  granularity: m.granularity,
-                  requaluired: m.requaluired,
+                  requaluired: m.required,
                   condition:
                     getCondition(m.key)?.operator ?? m.condition ?? "equal",
                   dataType: m.dataType,
@@ -357,14 +355,13 @@ export function SearchFilters({
                 };
 
                 switch (m.type) {
-                  case "text":
-                  case "combo":
+                  case "TEXT":
                     return (
                       <SearchFilter
                         {...common}
                         key={m.key}
+                        type="TEXT"
                         value={condition?.value ?? ""}
-                        options={m.options}
                         onChange={(v: string) =>
                           updateCondition(
                             m.key,
@@ -378,12 +375,34 @@ export function SearchFilters({
                       />
                     );
 
-                  case "dateRange":
-                    if (m.mode === "single") {
+                  case "COMBO":
+                    return (
+                      <SearchFilter
+                        {...common}
+                        key={m.key}
+                        type="COMBO"
+                        value={condition?.value ?? ""}
+                        options={m.options ?? []}
+                        onChange={(v: string) =>
+                          updateCondition(
+                            m.key,
+                            v,
+                            (getCondition(m.key)?.operator ??
+                              m.condition ??
+                              "equal") as any,
+                            m.dataType ?? "STRING",
+                          )
+                        }
+                      />
+                    );
+
+                  case "YMD":
+                    if (m.mode === "N") {
                       return (
                         <SearchFilter
                           {...common}
                           key={m.key}
+                          type="YMD"
                           value={getCondition(m.key)?.value ?? ""}
                           onChange={(v: string) =>
                             updateCondition(
@@ -403,6 +422,7 @@ export function SearchFilters({
                       <SearchFilter
                         {...common}
                         key={m.key}
+                        type="YMD"
                         fromValue={getCondition(`${m.key}_FRM`)?.value ?? ""}
                         toValue={getCondition(`${m.key}_TO`)?.value ?? ""}
                         onChangeFrom={(v: string) =>
@@ -424,12 +444,12 @@ export function SearchFilters({
                       />
                     );
 
-                  case "checkbox":
+                  case "CHECKBOX":
                     return (
                       <SearchFilter
                         {...common}
                         key={m.key}
-                        type="checkbox"
+                        type="CHECKBOX"
                         id={m.key}
                         checked={Boolean(condition?.value)}
                         onCheckedChange={(checked: boolean) =>
@@ -443,13 +463,14 @@ export function SearchFilters({
                       />
                     );
 
-                  case "popup": {
+                  case "POPUP": {
                     const baseKey = m.key.replace("_CD", "");
 
                     return (
                       <SearchFilter
                         {...common}
                         key={m.key}
+                        type="POPUP"
                         code={getCondition(`${baseKey}_CD`)?.value ?? ""}
                         name={getCondition(`${baseKey}_NM`)?.value ?? ""}
                         sqlId={m.sqlId}

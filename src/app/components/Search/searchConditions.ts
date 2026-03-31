@@ -1,6 +1,6 @@
 export type SearchConditionConfig = {
   key: string;
-  type: "popup" | "dateRange" | "text" | "combo" | "checkbox" | "date";
+  type: "POPUP" | "YMDDT" | "TEXT" | "COMBO" | "CHECKBOX" | "YMD";
   title: string;
   span?: number;
   required?: boolean;

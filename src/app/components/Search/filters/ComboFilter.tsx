@@ -10,7 +10,8 @@ import {
 } from "@/app/components/ui/select";
 import { cn } from "../../ui/utils";
 
-type ComboFilterProps = React.ComponentPropsWithoutRef<"div"> & {
+type ComboFilterProps = {
+  className?: string;
   value: string;
   onChange: (value: string) => void;
 

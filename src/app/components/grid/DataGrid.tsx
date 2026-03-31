@@ -26,6 +26,8 @@ import { GridTabs } from "./GridTabs";
 import type { GridPreset, GridTab } from "./types";
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 
+import { Lang } from "@/app/services/common/Lang";
+
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
@@ -235,6 +237,7 @@ export default function DataGrid<TRow>({
       if ("headerName" in col && col.headerName === "No") {
         return {
           ...col,
+          headerName: Lang.get(col.headerName),
           width: 56,
           suppressMenu: true,
           sortable: false,
@@ -253,7 +256,10 @@ export default function DataGrid<TRow>({
         };
       }
 
-      return col;
+      return {
+        ...col,
+        headerName: Lang.get(col.headerName),
+      };
     });
   }, [activeColumnDefs]);
 
@@ -319,7 +325,9 @@ export default function DataGrid<TRow>({
     if (!container) return;
 
     function getCellCoords(el: HTMLElement) {
-      const cell = el.classList.contains("ag-cell") ? el : el.closest<HTMLElement>(".ag-cell");
+      const cell = el.classList.contains("ag-cell")
+        ? el
+        : el.closest<HTMLElement>(".ag-cell");
       const row = el.closest<HTMLElement>("[row-index]");
       if (!cell || !row) return null;
 
@@ -408,7 +416,11 @@ export default function DataGrid<TRow>({
       // 매번 최신 컬럼 순서 갱신 (컬럼 이동/추가 대응)
       const api = gridApiRef.current;
       if (api && !api.isDestroyed?.()) {
-        const cols = api.getColumns()?.map((col: any) => col.getColId()).filter(Boolean) ?? [];
+        const cols =
+          api
+            .getColumns()
+            ?.map((col: any) => col.getColId())
+            .filter(Boolean) ?? [];
         if (cols.length > 0) columnOrderRef.current = cols;
       }
 

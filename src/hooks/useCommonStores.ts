@@ -36,9 +36,11 @@ export function useCommonStores(params: Record<string, any>) {
     }
 
     load();
-    return () => { cancelled = true; };
-  // params는 오브젝트라 JSON.stringify로 비교
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
+    // params는 오브젝트라 JSON.stringify로 비교
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(params)]);
 
   return { stores };

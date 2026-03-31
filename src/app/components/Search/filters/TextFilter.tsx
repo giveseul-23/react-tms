@@ -5,7 +5,7 @@ import { Input } from "../../ui/input";
 import { X } from "lucide-react";
 import { cn } from "../../ui/utils";
 
-export type TextFilterProps = React.ComponentPropsWithoutRef<"div"> & {
+export type TextFilterProps = {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;

@@ -4,8 +4,9 @@
 import React, { useState } from "react";
 import loginBgImg from "@/assets/logistics_img3.png";
 import { useNavigate } from "react-router-dom";
-import { authApi } from "@/app/services/auth/authApi";
-import { setTokens } from "@/app/services/auth/auth"; // ✅ 여기 setToken 사용
+import { authApi, getConfigInfo } from "@/app/services/auth/authApi";
+import { setTokens } from "@/app/services/auth/auth";
+import { Util } from "@/app/services/common/Util.ts";
 
 type FormState = { userId: string; password: string };
 
@@ -25,44 +26,44 @@ export default function AuthPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
 
-    setError(null); // ✅ 제출 시 에러 초기화
-    setLoading(true);
-    try {
-      const res = await authApi.loginMobile({
-        userId: form.userId,
-        password: form.password,
-      });
+    const res = await authApi.loginMobile({
+      userId: form.userId,
+      password: form.password,
+    });
 
-      const {
-        ACCESS_TOKEN,
-        REFRESH_TOKEN,
-        userId,
-        userNm,
-        userLang,
-        userGroupName,
-      } = res.data.data;
+    const {
+      ACCESS_TOKEN,
+      REFRESH_TOKEN,
+      userId,
+      userNm,
+      userLang,
+      userGroupName,
+      userGroupCode, // 추가 필요
+    } = res.data.data;
 
-      if (ACCESS_TOKEN == null || ACCESS_TOKEN === undefined) {
-        setError("아이디 또는 비밀번호가 올바르지 않습니다.");
-        return;
-      }
+    setTokens(
+      ACCESS_TOKEN,
+      REFRESH_TOKEN,
+      userId,
+      userNm,
+      userLang,
+      userGroupName,
+    );
 
-      setTokens(
-        ACCESS_TOKEN,
-        REFRESH_TOKEN,
-        userId,
-        userNm,
-        userLang,
-        userGroupName,
-      );
-      navigate("/", { replace: true });
-    } catch (err) {
-      setError("로그인에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setLoading(false);
-    }
+    // ✅ 1. Util 세팅
+    Util.setUtilUserInfo({
+      userNm,
+      userLang,
+      userGroupName,
+      userGroupCode,
+    });
+
+    // ✅ 2. 언어팩 + config 가져오기
+    await getConfigInfo();
+
+    // ✅ 3. 이동
+    navigate("/", { replace: true });
   };
 
   return (

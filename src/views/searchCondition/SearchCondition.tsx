@@ -5,10 +5,12 @@ import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/Search/SearchFilters.tsx";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
-import { SEARCH_CONDITION_SEARCH_META } from "./SearchConditionMeta";
+
+/** 센차 menuCode — 서버에서 dsSearchCondition을 가져오는 키 */
+const MENU_CODE = "SEARCH_CONDITION";
 
 export default function SearchCondition() {
-  const { meta, loading } = useSearchMeta(SEARCH_CONDITION_SEARCH_META);
+  const { meta, loading } = useSearchMeta(MENU_CODE);
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
   const subApSetlRowDataRef = useRef<any[]>([]);
@@ -94,7 +96,6 @@ export default function SearchCondition() {
     { headerName: "콤보표시유형", field: "DATA_TP" },
     { headerName: "표시순서", field: "DATA_TP" },
     { headerName: "데이터베이스컬럼명", field: "DATA_TP" },
-
     { headerName: "등록일자", field: "CRE_DTTM" },
     { headerName: "작성자/등록자", field: "CRE_USR_ID" },
     { headerName: "수정일시", field: "UPD_DTTM" },

@@ -17,7 +17,6 @@ import { useRef } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/Search/SearchFilters.tsx";
-import { TENDER_SEARCH_META } from "./tenderSearchMeta";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 import {
@@ -36,9 +35,12 @@ import {
 } from "./TenderReceiveDispatchColumns.tsx";
 // ─────────────────────────────────────────────────────────────────
 
+/** 센차 menuCode — 서버에서 dsSearchCondition을 가져오는 키 */
+const MENU_CODE = "MENU_PLAN_TENDER_RECEIVE";
+
 export default function TenderReceiveDispatch() {
-  // 센차 expanelsrch 메타 로드 (콤보/팝업 옵션 포함)
-  const { meta, loading } = useSearchMeta(TENDER_SEARCH_META);
+  // 서버에서 조회조건 메타 로드 (콤보 옵션까지 자동 처리)
+  const { meta, loading } = useSearchMeta(MENU_CODE);
 
   // 센차 ViewModel → React state/ref 묶음
   const model = useTenderReceiveDispatchModel();
@@ -73,7 +75,7 @@ export default function TenderReceiveDispatch() {
             layout={model.layout}
             onToggle={() =>
               model.setLayout((prev: LayoutType) =>
-                prev === "side" ? "vertical" : "side"
+                prev === "side" ? "vertical" : "side",
               )
             }
           />
@@ -124,7 +126,7 @@ export default function TenderReceiveDispatch() {
               <DataGrid
                 layoutType="tab"
                 tabs={[
-                  { key: "STOP",    label: "경유처" },
+                  { key: "STOP", label: "경유처" },
                   { key: "SMS_HIS", label: "SMS전송이력" },
                   { key: "AP_SETL", label: "운송비내역" },
                 ]}
@@ -143,7 +145,7 @@ export default function TenderReceiveDispatch() {
                   },
                 }}
                 rowData={{
-                  STOP:    model.subStopRowData,
+                  STOP: model.subStopRowData,
                   SMS_HIS: model.subSmsHisRowData,
                   AP_SETL: model.subApSetlRowData,
                 }}
