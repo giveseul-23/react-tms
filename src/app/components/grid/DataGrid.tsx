@@ -136,8 +136,28 @@ type DataGridProps<TRow> = {
   pageSize?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
-  /** 선택 row 기반 추적 그리드 — 버튼 클릭 시 슬라이드로 표시 */
+
   onTrack?: (rows: any[]) => React.ReactNode;
+
+  // ─── Tree Data 지원 ───────────────────────────────────────────────────────
+  treeData?: boolean;
+  getDataPath?: (data: TRow) => string[];
+  autoGroupColumnDef?: ColDef<TRow>;
+  groupDefaultExpanded?: number; // -1: 전체 펼침, 0: 전체 접힘, N: N 레벨까지
+
+  // ─── Escape Hatch ─────────────────────────────────────────────────────────
+  /**
+   * 외부에서 직접 rowData를 주입합니다.
+   * 이 값이 있으면 내부의 activeRowData 계산(탭/프리셋)을 완전히 무시합니다.
+   * flat-tree처럼 visibleRows를 외부에서 관리할 때 사용하세요.
+   */
+  overrideRowData?: TRow[];
+  /**
+   * AgGridReact에 추가로 전달할 옵션을 오버라이드합니다.
+   * commonGridProps보다 나중에 스프레드되어 최종 우선순위를 가집니다.
+   * (예: getRowId, suppressMovableColumns, rowClassRules 등)
+   */
+  gridOptions?: Record<string, any>;
 };
 
 export default function DataGrid<TRow>({
@@ -160,6 +180,12 @@ export default function DataGrid<TRow>({
   onPageChange,
   onPageSizeChange,
   onTrack,
+  treeData,
+  getDataPath,
+  autoGroupColumnDef,
+  groupDefaultExpanded = -1,
+  overrideRowData,
+  gridOptions,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -170,7 +196,6 @@ export default function DataGrid<TRow>({
   const [trackContent, setTrackContent] = useState<React.ReactNode>(null);
   const [trackOpen, setTrackOpen] = useState(false);
 
-  // currentPage가 외부에서 바뀌면 input 동기화
   useEffect(() => {
     setPageInput(String(currentPage ?? 1));
   }, [currentPage]);
@@ -180,7 +205,6 @@ export default function DataGrid<TRow>({
   }, [pageSize]);
 
   const internalGridRef = useRef<any>(null);
-  // 드래그/Shift 범위 선택 복사
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const selectedCellsRef = useRef<Set<string>>(new Set());
   const isDraggingRef = useRef(false);
@@ -199,6 +223,8 @@ export default function DataGrid<TRow>({
   }, [layoutType, activeTab, presets, columnDefs]);
 
   const activeRowData = useMemo(() => {
+    // escape hatch: 외부 rowData 직접 주입
+    if (overrideRowData !== undefined) return overrideRowData;
     if (
       layoutType === "tab" &&
       activeTab &&
@@ -208,7 +234,7 @@ export default function DataGrid<TRow>({
       return rowData[activeTab] ?? [];
     }
     return Array.isArray(rowData) ? rowData : [];
-  }, [layoutType, activeTab, rowData]);
+  }, [layoutType, activeTab, rowData, overrideRowData]);
 
   const activeActions = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
@@ -291,7 +317,6 @@ export default function DataGrid<TRow>({
   const handleGridReady = useCallback(
     (e: GridReadyEvent<TRow>) => {
       gridApiRef.current = e.api;
-      // 컬럼 순서 저장 — DOM의 col-id 속성값과 동일한 getColId() 사용
       columnOrderRef.current =
         e.api
           .getColumns()
@@ -318,8 +343,7 @@ export default function DataGrid<TRow>({
     });
   }, [activeTab, activeRowData, finalColumnDefs, runAutoSize, disableAutoSize]);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 드래그 범위 선택 + Ctrl+C 복사 (HTML 샘플 방식)
+  // ─── 드래그 범위 선택 + Ctrl+C 복사 ──────────────────────────────────────────
   useEffect(() => {
     const container = gridContainerRef.current;
     if (!container) return;
@@ -331,12 +355,10 @@ export default function DataGrid<TRow>({
       const row = el.closest<HTMLElement>("[row-index]");
       if (!cell || !row) return null;
 
-      // ag-Grid는 .ag-cell에 col-id 속성을 붙임
       const colId = cell.getAttribute("col-id");
       if (!colId) return null;
 
       const rowIndex = parseInt(row.getAttribute("row-index") ?? "-1", 10);
-      // col-id가 field명 또는 colId명일 수 있으므로 둘 다 indexOf 시도
       let colIndex = columnOrderRef.current.indexOf(colId);
       if (rowIndex < 0 || colIndex < 0) return null;
       return { rowIndex, colIndex };
@@ -391,7 +413,6 @@ export default function DataGrid<TRow>({
       });
       const api = gridApiRef.current;
       if (!api) return null;
-      // colId → field 매핑 (colId가 field와 다를 수 있음)
       const colIdToField: Record<string, string> = {};
       api.getColumns()?.forEach((col: any) => {
         colIdToField[col.getColId()] = col.getColDef().field ?? col.getColId();
@@ -413,7 +434,6 @@ export default function DataGrid<TRow>({
     }
 
     const onMouseDown = (e: MouseEvent) => {
-      // 매번 최신 컬럼 순서 갱신 (컬럼 이동/추가 대응)
       const api = gridApiRef.current;
       if (api && !api.isDestroyed?.()) {
         const cols =
@@ -439,7 +459,6 @@ export default function DataGrid<TRow>({
         isDraggingRef.current = true;
       }
       applyHighlight();
-      // e.preventDefault() 제거 — ag-Grid 자체 이벤트(행선택 등) 차단하지 않음
     };
 
     const onMouseOver = (e: MouseEvent) => {
@@ -483,6 +502,7 @@ export default function DataGrid<TRow>({
       document.removeEventListener("keydown", onKeyDown, true);
     };
   }, []);
+
   // ─────────────────────────────────────────────────────────────────────────────
 
   const wrappedActions = useMemo(() => {
@@ -506,7 +526,6 @@ export default function DataGrid<TRow>({
     });
   }, [activeActions, selectedRows]);
 
-  // onTrack 버튼을 actions 맨 앞에 주입
   const wrappedActionsWithTrack = useMemo(() => {
     if (!onTrack) return wrappedActions;
     const trackAction: ActionItem = {
@@ -543,6 +562,14 @@ export default function DataGrid<TRow>({
     onGridReady: handleGridReady,
     onFirstDataRendered: handleFirstDataRendered,
 
+    // ─── Tree Data props ───────────────────────────────────────────────────
+    ...(treeData && {
+      treeData: true,
+      getDataPath,
+      autoGroupColumnDef,
+      groupDefaultExpanded,
+    }),
+
     onRowSelected: (e: any) => {
       if (!e.api) return;
       const rows = e.api.getSelectedRows();
@@ -557,12 +584,9 @@ export default function DataGrid<TRow>({
         }, 0);
       }
     },
-    onCellClicked: (_e: any) => {
-      // 범위 복사는 마우스 이벤트 + Ctrl+C 로 처리 (아래 useEffect 참조)
-    },
+    onCellClicked: (_e: any) => {},
     onRowClicked: (e: any) => {
       const target = e.event?.target as HTMLElement;
-      // 체크박스 클릭은 체크박스 전용 — 행 클릭 이벤트 스킵
       if (
         target?.closest(".ag-selection-checkbox") ||
         target?.closest(".ag-checkbox") ||
@@ -570,7 +594,6 @@ export default function DataGrid<TRow>({
       ) {
         return;
       }
-      // Shift 클릭은 셀 복사 용도 — onRowClicked 스킵
       if (e.event?.shiftKey) return;
       if (!e.data) return;
       onRowClicked?.(e.data);
@@ -581,9 +604,11 @@ export default function DataGrid<TRow>({
         ? { mode: "singleRow" as const, enableClickSelection: true }
         : {
             mode: "multiRow" as const,
-            // 체크박스로만 선택 — 행 클릭으로 체크 안 됨
             enableClickSelection: false,
           },
+
+    // ─── Escape Hatch: 외부 gridOptions 오버라이드 (최종 우선순위) ──────────
+    ...gridOptions,
   };
 
   const gridStyle = {
@@ -628,12 +653,10 @@ export default function DataGrid<TRow>({
 
     return (
       <div className="flex items-center gap-2 px-2 py-1 border-t shrink-0 text-[11px] text-gray-600">
-        {/* 총 건수 뱃지 */}
         <span className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded border border-gray-300 bg-gray-100 font-medium text-gray-700">
           {totalCount.toLocaleString()}
         </span>
 
-        {/* 페이지당 행 개수 */}
         <span className="shrink-0 text-gray-500">페이지당 행 개수:</span>
         <input
           type="number"
@@ -645,7 +668,6 @@ export default function DataGrid<TRow>({
           className="w-14 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
         />
 
-        {/* 현재 페이지 */}
         <span className="shrink-0 text-gray-500">현재 페이지:</span>
         <input
           type="number"
@@ -661,7 +683,6 @@ export default function DataGrid<TRow>({
           / {isEmpty ? 0 : totalPages} 페이지
         </span>
 
-        {/* 페이지 이동 버튼 — 오른쪽 끝 */}
         <div className="ml-auto flex items-center gap-0.5">
           <button
             disabled={isFirst}
@@ -728,9 +749,7 @@ export default function DataGrid<TRow>({
                 </div>
               </div>
             </Panel>
-
             <PanelResizeHandle className="w-2 cursor-col-resize hover:bg-slate-200/70" />
-
             <Panel defaultSize={30} minSize={20}>
               <div className="h-full border-l border-gray-200">{rightGrid}</div>
             </Panel>
@@ -751,7 +770,6 @@ export default function DataGrid<TRow>({
 
       <PaginationBar />
 
-      {/* 추적 그리드 — 슬라이드 다운 */}
       {onTrack && (
         <div
           className={`overflow-hidden transition-all duration-400 ease-in-out ${
@@ -760,7 +778,6 @@ export default function DataGrid<TRow>({
           style={{ transitionProperty: "max-height, opacity" }}
         >
           <div className="border-t border-gray-200 mt-1">
-            {/* 추적 헤더 */}
             <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 dark:bg-gray-800">
               <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                 추적 결과
