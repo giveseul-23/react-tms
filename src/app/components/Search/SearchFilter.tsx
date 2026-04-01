@@ -138,7 +138,7 @@ export function SearchFilter(props: SearchFilterProps) {
     <div
       className={cn(
         SPAN_CLASS[span],
-        "flex items-center gap-2 min-w-0",
+        "flex items-center gap-8 min-w-0",
         className,
       )}
     >

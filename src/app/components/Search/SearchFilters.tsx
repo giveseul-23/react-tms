@@ -50,6 +50,7 @@ export function SearchFilters({
   // fetchFn을 prop으로 주입받아 tenderApi 직접 의존 제거
   fetchFn,
   layoutToggle,
+  excludeKeysRef,
 }: {
   meta: readonly SearchMeta[];
   onSearch: (data: SearchResult) => void;
@@ -59,6 +60,7 @@ export function SearchFilters({
   fetchFn: (params: Record<string, unknown>) => Promise<any>;
   /** DataGrid 두 개인 화면에서만 전달 — 초기화 버튼 옆에 렌더링 */
   layoutToggle?: ReactNode;
+  excludeKeysRef?: React.MutableRefObject<Set<string>>;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
@@ -198,8 +200,14 @@ export function SearchFilters({
       }
 
       const conditions: string[] = [];
+      const extraParams: Record<string, any> = {};
 
       Object.values(searchState).forEach((v) => {
+        if (excludeKeysRef?.current.has(v.key)) {
+          extraParams[v.key] = v.value;
+          return;
+        }
+
         if (v.value === "ALL") {
           const metaItem = meta.find((m) => m.key === v.key);
           const options =
@@ -225,12 +233,14 @@ export function SearchFilters({
         MENU_CD: "test",
         page: targetPage,
         limit: limitRef.current,
+        ...extraParams,
       };
 
       if (filtersRef) {
         filtersRef.current = {
           DYNAMIC_QUERY: whereClause,
           MENU_CD: "test",
+          ...extraParams,
         };
       }
 

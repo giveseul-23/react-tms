@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
+import { useSearchMetaCode } from "@/hooks/useSearchMeta";
 
 type RejectReasonContentProps = {
   onConfirm: (data: { reasonCode: string; detail: string }) => void;
@@ -21,7 +21,7 @@ export default function RejectReasonContent({
     () => [
       {
         key: "TNDR_RJT_RSN_CD",
-        type: "combo",
+        type: "COMBO",
         sqlProp: "CODE",
         keyParam: "TNDR_RJT_RSN_CD",
       },
@@ -29,7 +29,7 @@ export default function RejectReasonContent({
     [],
   );
 
-  const { meta, loading } = useSearchMeta(searchConfig);
+  const { meta, loading } = useSearchMetaCode(searchConfig);
 
   if (loading) {
     return <Skeleton className="h-24" />;

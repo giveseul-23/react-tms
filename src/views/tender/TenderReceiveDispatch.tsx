@@ -13,7 +13,7 @@
 // ──────────────────────────────────────────────────────────────────
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/Search/SearchFilters.tsx";
@@ -48,6 +48,16 @@ export default function TenderReceiveDispatch() {
   // SearchFilters ↔ DataGrid 연결용 ref
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
+  // SearchFilters 에 exclude Search condiiton
+  const excludeKeysRef = useRef<Set<string>>(new Set());
+
+  const setExclude = (...keys: string[]) => {
+    keys.forEach((k) => excludeKeysRef.current.add(k));
+  };
+
+  useEffect(() => {
+    setExclude("BOOKING");
+  }, []);
 
   // 센차 Controller → 버튼/이벤트 핸들러 묶음
   const ctrl = useTenderReceiveDispatchController({
@@ -80,6 +90,7 @@ export default function TenderReceiveDispatch() {
             }
           />
         }
+        excludeKeysRef={excludeKeysRef}
       />
 
       {/* ── 그리드 영역 (센차: border layout, height:'60%' north + center) ── */}
