@@ -24,7 +24,7 @@ export default function HomePage() {
     closeTab,
     setActiveMenuCode,
     reorderTabs,
-  } = usePageTabs("TENDER_RECEIVE", MENU_LABEL_MAP["TENDER_RECEIVE"] ?? "홈");
+  } = usePageTabs("MENU_CONFIG", MENU_LABEL_MAP["MENU_CONFIG"] ?? "홈");
 
   function handleSelectMenu(menuCode: string) {
     const label = MENU_LABEL_MAP[menuCode] ?? menuCode;

@@ -102,6 +102,23 @@ function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
   });
 }
 
+// ─── optionMap에서 콤보 옵션을 찾는 헬퍼 ────────────────────────────────────
+//
+//  서버 응답의 optionMap 키 우선순위:
+//  1) keyParam  (e.g. "DSPCH_OP_STS")   → 대부분의 경우
+//  2) sqlProp   (e.g. "selectApplicationCode") → keyParam이 null인 경우
+//  3) ""        (빈 문자열)              → 단일 콤보 응답인 경우
+function resolveOptions(
+  optionMap: Record<string, any[]>,
+  keyParam: string | null | undefined,
+  sqlProp: string | null | undefined,
+): { CODE: string; NAME: string }[] {
+  if (keyParam && optionMap[keyParam] != null) return optionMap[keyParam];
+  if (sqlProp && optionMap[sqlProp] != null) return optionMap[sqlProp];
+  if (optionMap[""] != null) return optionMap[""];
+  return [];
+}
+
 export function useSearchMeta(menuCode: string) {
   const [meta, setMeta] = useState<SearchMeta[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,9 +144,10 @@ export function useSearchMeta(menuCode: string) {
 
         const baseMeta = toSearchMeta(rawRows);
 
+        // keyParam 이 없어도 sqlProp 이 있으면 콤보 요청 대상으로 포함
         const comboItems = baseMeta.filter(
           (m): m is Extract<SearchMeta, { type: "COMBO" }> =>
-            m.type === "COMBO" && !!m.sqlProp && !!m.keyParam,
+            m.type === "COMBO" && !!m.sqlProp,
         );
 
         if (comboItems.length === 0) {
@@ -145,7 +163,8 @@ export function useSearchMeta(menuCode: string) {
             sesUserId,
             userId,
             sqlProp: m.sqlProp,
-            keyParam: m.keyParam,
+            // keyParam 이 null 이면 빈 문자열로 전송 (서버 스펙에 따라 조정)
+            keyParam: m.keyParam ?? "",
             ACCESS_TOKEN,
             sesLang,
           })),
@@ -154,15 +173,15 @@ export function useSearchMeta(menuCode: string) {
         const optionMap = (comboRes?.data as any) ?? {};
 
         const resolved = baseMeta.map((m) => {
-          if (m.type !== "COMBO" || !m.keyParam) return m;
+          if (m.type !== "COMBO") return m;
 
-          let options: { CODE: string; NAME: string }[] =
-            optionMap[m.keyParam] ?? [];
+          // keyParam → sqlProp → "" 순으로 fallback
+          let options = resolveOptions(optionMap, m.keyParam, m.sqlProp);
 
           if (m.filterValues && m.filterValues.length > 0) {
             options = options.filter((opt) =>
               (
-                m as Extract<SearchMeta, { type: "combo" }>
+                m as Extract<SearchMeta, { type: "COMBO" }>
               ).filterValues!.includes(opt.CODE),
             );
           }
@@ -196,8 +215,6 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
   const [meta, setMeta] = useState<SearchMeta[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // baseMeta는 보통 모듈 레벨 const지만, props로 내려올 경우를 위해
-  // JSON.stringify로 안정적인 비교
   const baseMetaKey = JSON.stringify(baseMeta.map((m) => m.key));
   const baseMetaRef = useRef(baseMeta);
   baseMetaRef.current = baseMeta;
@@ -210,8 +227,9 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
       const { userId, sesUserId, ACCESS_TOKEN, sesLang } = getSessionFields();
       const currentMeta = baseMetaRef.current;
 
+      // keyParam がない場合も sqlProp があれば対象に含める
       const comboMetas = currentMeta.filter(
-        (m) => m.type === "COMBO" && m.sqlProp && m.keyParam,
+        (m) => m.type === "COMBO" && m.sqlProp,
       );
 
       if (comboMetas.length === 0) {
@@ -231,7 +249,7 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
           sesUserId,
           userId,
           sqlProp: m.sqlProp!,
-          keyParam: m.keyParam!,
+          keyParam: m.keyParam ?? "",
           ACCESS_TOKEN,
           sesLang,
         }));
@@ -240,9 +258,10 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
         const optionMap = res?.data ?? {};
 
         const resolved = currentMeta.map((m) => {
-          if (m.type !== "COMBO" || !m.keyParam) return m;
+          if (m.type !== "COMBO") return m;
 
-          let options = optionMap[m.keyParam] ?? [];
+          // keyParam → sqlProp → "" 순으로 fallback
+          let options = resolveOptions(optionMap, m.keyParam, m.sqlProp);
 
           if (m.filterValues && Array.isArray(m.filterValues)) {
             options = options.filter((opt: any) =>
@@ -270,7 +289,6 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
     return () => {
       cancelled = true;
     };
-    // baseMetaKey로 안정적 deps 관리 (무한루프 방지)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseMetaKey]);
 

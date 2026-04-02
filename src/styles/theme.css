@@ -337,6 +337,11 @@
   background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
+.ag-theme-bridge .ag-floating-filter-input input,
+.ag-theme-bridge .ag-text-field-input {
+  background-color: #ffffff !important;
+}
+
 /* ===============================
    버튼
    =============================== */

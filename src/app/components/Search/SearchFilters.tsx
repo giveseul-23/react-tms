@@ -34,6 +34,8 @@ import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
 import { showSearchToast } from "@/app/components/ui/SearchToast";
 import type { SearchMeta } from "@/features/search/search.meta.types";
 
+import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
+
 export type SearchResult = {
   rows: any[];
   totalCount: number;
@@ -44,6 +46,7 @@ export type SearchResult = {
 export function SearchFilters({
   meta,
   onSearch,
+  treeGridRef,
   searchRef,
   filtersRef,
   pageSize = 20,
@@ -54,6 +57,7 @@ export function SearchFilters({
 }: {
   meta: readonly SearchMeta[];
   onSearch: (data: SearchResult) => void;
+  treeGridRef?: React.MutableRefObject<TreeGridHandle>;
   searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
   pageSize?: number;
@@ -209,18 +213,7 @@ export function SearchFilters({
         }
 
         if (v.value === "ALL") {
-          const metaItem = meta.find((m) => m.key === v.key);
-          const options =
-            metaItem?.type === "COMBO" ? metaItem.options : undefined;
-
-          if (options) {
-            const codes = options
-              .filter((o) => o.CODE !== "ALL")
-              .map((o) => `'${o.CODE}'`)
-              .join(",");
-
-            conditions.push(` AND ${v.key} IN (${codes})`);
-          }
+          return;
         } else {
           conditions.push(buildSearchCondition(v));
         }
@@ -246,7 +239,7 @@ export function SearchFilters({
 
       fetchFn(params)
         .then((res: any) => {
-          const rows = res.data.result ?? [];
+          const rows = res.data.result ?? res.data.data.allData.data ?? [];
           const totalCount = rows[0]?.TOTALCOUNT ?? 0;
 
           onSearch({
