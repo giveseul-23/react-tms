@@ -257,7 +257,7 @@ export default function DataGrid<TRow>({
     return internalGridRef;
   }, [layoutType, activeTab, presets]);
 
-  /** No 컬럼 처리 */
+  /** No 컬럼 처리 + 자동 정렬 (숫자=우측, _STS=중앙, 기본=좌측) */
   const finalColumnDefs = useMemo(() => {
     return activeColumnDefs.map((col) => {
       if ("headerName" in col && col.headerName === "No") {
@@ -270,6 +270,8 @@ export default function DataGrid<TRow>({
           filter: false,
           floatingFilter: false,
           getQuickFilterText: () => null,
+          cellStyle: { textAlign: "center" },
+          headerClass: "ag-header-center",
           valueGetter: (params: ValueGetterParams<TRow>) =>
             (params.node?.rowIndex ?? 0) + 1,
         };
@@ -279,7 +281,37 @@ export default function DataGrid<TRow>({
         return {
           ...col,
           maxWidth: null,
+          headerName: Lang.get(col.headerName),
         };
+      }
+
+      const colDef = col as ColDef<TRow>;
+      const field = (colDef.field ?? colDef.colId ?? "") as string;
+
+      // 이미 cellStyle / type 이 지정된 경우 그대로 존중
+      if (!(colDef as any).cellStyle && !(colDef as any).type) {
+        // _STS 로 끝나는 상태값 컬럼 → 중앙 정렬
+        if (field.endsWith("_STS")) {
+          return {
+            ...col,
+            headerName: Lang.get(col.headerName),
+            cellStyle: { textAlign: "center" },
+            headerClass: "ag-header-center",
+          };
+        }
+
+        // 숫자 타입 컬럼 → 우측 정렬
+        if (
+          (colDef as any).dataType === "number" ||
+          (colDef as any).cellDataType === "number"
+        ) {
+          return {
+            ...col,
+            headerName: Lang.get(col.headerName),
+            cellStyle: { textAlign: "right" },
+            headerClass: "ag-header-right",
+          };
+        }
       }
 
       return {

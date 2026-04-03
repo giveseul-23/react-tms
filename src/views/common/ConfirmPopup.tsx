@@ -54,7 +54,7 @@ export default function ConfirmModal({
 
       {/* Description — 긴 오류 메시지가 들어와도 잘리지 않도록 break-words 적용 */}
       {description && (
-        <p className="text-sm text-gray-500 whitespace-pre-line mb-4 break-words w-full text-left">
+        <p className="text-sm text-gray-500 whitespace-pre-line mb-4 break-words w-full text-center">
           {description}
         </p>
       )}

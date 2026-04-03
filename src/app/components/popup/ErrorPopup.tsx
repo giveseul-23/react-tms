@@ -13,16 +13,18 @@ interface ErrorPopupProps {
   onClose: () => void;
 }
 
-export function ErrorPopup({ open, title = "오류", message, onClose }: ErrorPopupProps) {
+export function ErrorPopup({
+  open,
+  title = "오류",
+  message,
+  onClose,
+}: ErrorPopupProps) {
   if (!open) return null;
 
   return createPortal(
     <>
       {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-black/30 z-[9998]"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/30 z-[9998]" onClick={onClose} />
 
       {/* Dialog */}
       <div
@@ -44,8 +46,8 @@ export function ErrorPopup({ open, title = "오류", message, onClose }: ErrorPo
         </div>
 
         {/* Body */}
-        <div className="px-5 py-5">
-          <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+        <div className="px-5 py-5 flex flex-col items-center">
+          <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed text-center w-full">
             {message}
           </p>
         </div>

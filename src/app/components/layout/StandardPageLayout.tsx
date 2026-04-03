@@ -191,13 +191,14 @@ export function StandardPageLayout({
       </div>
 
       {/* ── 하단 슬라이드 패널 (선택) ─────────────────────────── */}
+      {/* Tailwind 동적 클래스(h-[Npx])는 JIT 빌드 없이 생성 안됨 → inline style 사용 */}
       {bottomPanel && (
         <div
-          className={`shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${
-            bottomPanel.open
-              ? `h-[${bottomPanel.height ?? 280}px] opacity-100`
-              : "h-0 opacity-0"
-          }`}
+          className="shrink-0 overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            height: bottomPanel.open ? `${bottomPanel.height ?? 280}px` : 0,
+            opacity: bottomPanel.open ? 1 : 0,
+          }}
         >
           {bottomPanel.render}
         </div>

@@ -153,10 +153,15 @@ export function PopupShell({
             minHeight: 0,
             overflowY: "auto",
             overflowX: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
           }}
           className="p-6"
         >
-          {children}
+          {/* 내용물은 최대 width 를 채우면서 중앙 배치 */}
+          <div style={{ width: "100%" }}>{children}</div>
         </div>
       </div>
     </>,

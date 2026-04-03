@@ -370,3 +370,11 @@
   border-color: rgb(var(--fg));
   color: rgb(var(--fg));
 }
+
+/* ── DataGrid 헤더 정렬 헬퍼 ── */
+.ag-header-center .ag-header-cell-label {
+  justify-content: center;
+}
+.ag-header-right .ag-header-cell-label {
+  justify-content: flex-end;
+}
