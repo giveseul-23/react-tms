@@ -54,6 +54,7 @@ export function SearchFilters({
   fetchFn,
   layoutToggle,
   excludeKeysRef,
+  computeTotalCount,
 }: {
   meta: readonly SearchMeta[];
   onSearch: (data: SearchResult) => void;
@@ -244,7 +245,12 @@ export function SearchFilters({
       fetchFn(params)
         .then((res: any) => {
           const rows = res.data.result ?? res.data.data.allData.data ?? [];
-          const totalCount = rows[0]?.TOTALCOUNT ?? 0;
+
+          const totalCount = computeTotalCount
+            ? computeTotalCount(rows) // 외부 함수로 직접 계산
+            : rows[0]?.TOTALCOUNT != null
+              ? Number(rows[0].TOTALCOUNT) // TOTALCOUNT 필드 있으면 사용
+              : rows.length; // 없으면 배열 길이 fallback
 
           onSearch({
             rows,
@@ -252,8 +258,6 @@ export function SearchFilters({
             page: targetPage,
             limit: limitRef.current,
           });
-
-          // 조회 완료 토스트 (페이지 이동 시에는 표시 안 함)
           if (showToast) showSearchToast(totalCount);
         })
         .catch((err: any) => {

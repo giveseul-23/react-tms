@@ -126,6 +126,16 @@ export default function MenuConfig() {
           />
         ),
       }}
+      computeTotalCount={(rows) => {
+        // data 배열이 있는 실제 leaf 노드 수 합산
+        function countLeafs(nodes: any[]): number {
+          return nodes.reduce((acc, node) => {
+            const children = node.data ?? [];
+            return children.length > 0 ? acc + countLeafs(children) : acc + 1;
+          }, 0);
+        }
+        return countLeafs(rows);
+      }}
     />
   );
 }

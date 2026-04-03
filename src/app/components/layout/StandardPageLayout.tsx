@@ -80,6 +80,7 @@ export interface StandardPageLayoutProps {
   treeGridRef?: React.MutableRefObject<TreeGridHandle>;
   pageSize?: number;
   excludeKeysRef?: React.MutableRefObject<Set<string>>;
+  computeTotalCount?: (rows: any[]) => number;
 
   // 그리드: singleGrid XOR dualGrid 중 하나만 전달
   singleGrid?: SingleGridConfig;
@@ -107,6 +108,7 @@ export function StandardPageLayout({
   layout = "side",
   onLayoutToggle,
   bottomPanel,
+  computeTotalCount, // ← 추가
 }: StandardPageLayoutProps) {
   // 그리드 개수 판별: dualGrid 가 있으면 2개, 없으면 1개
   const hasDualGrid = !!dualGrid;
@@ -141,6 +143,7 @@ export function StandardPageLayout({
         fetchFn={fetchFn}
         layoutToggle={layoutToggleNode}
         excludeKeysRef={excludeKeysRef}
+        computeTotalCount={computeTotalCount}
       />
 
       {/* ── 그리드 영역 ─────────────────────────────────────────── */}
