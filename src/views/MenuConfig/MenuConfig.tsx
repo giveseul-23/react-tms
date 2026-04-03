@@ -1,9 +1,9 @@
-// src/views/menu/MenuConfig.tsx
+// src/views/MenuConfig/MenuConfig.tsx
 "use client";
 
 import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import { SearchFilters } from "@/app/components/Search/SearchFilters.tsx";
+import { StandardPageLayout } from "@/app/components/layout/StandardPageLayout";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 import TreeGrid, {
   type TreeRow,
@@ -11,17 +11,12 @@ import TreeGrid, {
   type TreeCellContext,
 } from "@/app/components/grid/TreeGrid";
 import TreeNameCell from "@/app/components/grid/TreeNameCell";
-import {
-  LayoutToggleButton,
-  LayoutType,
-} from "@/app/components/layout/LayoutToggleButton";
 
 import { useMenuConfigModel } from "./MenuConfigModel";
 import { useMenuConfigController } from "./MenuConfigController";
 import { MAIN_COLUMN_DEFS } from "./MenuConfigColumns";
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
-
 export type MenuRow = TreeRow & {
   MENUCODE: string;
   MSG_CD: string;
@@ -79,10 +74,7 @@ export function buildSource(serverData: any[]): MenuRow[] {
   return result;
 }
 
-/** 센차 menuCode */
 const MENU_CODE = "MENU_CFG_CNFG";
-
-// ─── 페이지 ───────────────────────────────────────────────────────────────────
 
 export default function MenuConfig() {
   const filtersRef = useRef<Record<string, unknown>>({});
@@ -92,7 +84,6 @@ export default function MenuConfig() {
   const model = useMenuConfigModel();
   const ctrl = useMenuConfigController({ model, treeGridRef, filtersRef });
 
-  // renderNameCell: TreeNameCell 조립
   const renderNameCell = (params: any, ctx: TreeCellContext) => {
     const row: MenuRow = params.data;
     return (
@@ -110,41 +101,31 @@ export default function MenuConfig() {
   if (loading) return <Skeleton className="h-24" />;
 
   return (
-    <div className="flex flex-col gap-3 h-full min-h-0 min-w-0">
-      {/* 조회조건 */}
-      <SearchFilters
-        meta={meta}
-        onSearch={ctrl.handleSearch}
-        filtersRef={filtersRef}
-        fetchFn={ctrl.fetchMenuConfigList}
-        layoutToggle={
-          <LayoutToggleButton
-            layout={model.layout}
-            onToggle={() =>
-              model.setLayout((prev: LayoutType) =>
-                prev === "side" ? "vertical" : "side",
-              )
-            }
+    <StandardPageLayout
+      // 조회조건
+      meta={meta}
+      fetchFn={ctrl.fetchMenuConfigList}
+      onSearch={ctrl.handleSearch}
+      filtersRef={filtersRef}
+      treeGridRef={treeGridRef}
+      // 그리드가 1개 → layout 토글 없음 (StandardPageLayout 내부에서 visible=false 자동 처리)
+      singleGrid={{
+        render: (
+          <TreeGrid<MenuRow>
+            ref={treeGridRef}
+            source={ctrl.source}
+            renderNameCell={renderNameCell}
+            columnDefs={MAIN_COLUMN_DEFS()}
+            nameColumnHeader=""
+            nameColumnWidth={160}
+            sortField="DSPLY_SEQ"
+            defaultExpandLevel={1}
+            getRowId={(p) => p.data.id}
+            actions={ctrl.mainActions}
+            onRowClicked={ctrl.handleRowClicked}
           />
-        }
-      />
-
-      {/* 트리 그리드 */}
-      <div className="flex-1 min-h-0">
-        <TreeGrid<MenuRow>
-          ref={treeGridRef}
-          source={ctrl.source}
-          renderNameCell={renderNameCell}
-          columnDefs={MAIN_COLUMN_DEFS()}
-          nameColumnHeader=""
-          nameColumnWidth={160}
-          sortField="DSPLY_SEQ"
-          defaultExpandLevel={1}
-          getRowId={(p) => p.data.id}
-          actions={ctrl.mainActions}
-          onRowClicked={ctrl.handleRowClicked}
-        />
-      </div>
-    </div>
+        ),
+      }}
+    />
   );
 }

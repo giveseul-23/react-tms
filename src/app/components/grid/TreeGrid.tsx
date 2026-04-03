@@ -196,6 +196,18 @@ function TreeGridInner<TRow extends TreeRow>(
     buildInitialExpanded(source, defaultExpandLevel),
   );
 
+  // 재조회(source 교체) 시 expandedIds 를 새 source 기준으로 리셋
+  // 이전 source 의 id 가 남아 있으면 그리드가 갱신되지 않은 것처럼 보임
+  const prevSourceLengthRef = useRef<number>(source.length);
+  useEffect(() => {
+    // source 가 실제로 바뀐 경우에만 리셋 (길이 0→0 초기화는 제외)
+    if (source.length === 0 && prevSourceLengthRef.current === 0) return;
+    prevSourceLengthRef.current = source.length;
+    setExpandedIds(buildInitialExpanded(source, defaultExpandLevel));
+  // defaultExpandLevel 은 보통 고정값이므로 source 만 dependency
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source]);
+
   // ── 선택 행 상태 (액션바 onClick({ data }) 에 주입) ───────────────────────
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
 

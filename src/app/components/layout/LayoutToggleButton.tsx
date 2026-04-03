@@ -6,12 +6,18 @@ export type LayoutType = "side" | "vertical";
 interface LayoutToggleButtonProps {
   layout: LayoutType;
   onToggle: () => void;
+  /** 그리드가 1개뿐이면 false 전달 → 버튼 숨김. 기본값 true (표시) */
+  visible?: boolean;
 }
 
 export function LayoutToggleButton({
   layout,
   onToggle,
+  visible = true,
 }: LayoutToggleButtonProps) {
+  // 요구사항 4: 그리드가 1개인 경우 레이아웃 버튼 미표시
+  if (!visible) return null;
+
   return (
     <Button
       type="button"

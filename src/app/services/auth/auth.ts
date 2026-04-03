@@ -1,3 +1,6 @@
+// app/services/auth/auth.ts
+import { Lang } from "@/app/services/common/Lang";
+
 const ACCESS_TOKEN_KEY = "ACCESS_TOKEN";
 const REFRESH_TOKEN_KEY = "REFRESH_TOKEN";
 const USERID = "userId";
@@ -33,6 +36,10 @@ export function getUserGroup() {
   return sessionStorage.getItem(USRGRP);
 }
 
+/**
+ * 로그아웃 처리 — 세션 토큰 + Lang 캐시 모두 정리
+ * 요구사항 6: 자동 로그아웃 시에도 호출됨 (client.ts 인터셉터)
+ */
 export function clearTokens() {
   sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
@@ -40,6 +47,9 @@ export function clearTokens() {
   sessionStorage.removeItem(USERNM);
   sessionStorage.removeItem(SESLANG);
   sessionStorage.removeItem(USRGRP);
+
+  // 요구사항 6: Lang 캐시도 함께 정리 (보안 상 로그아웃 시 삭제)
+  Lang.clearCache();
 }
 
 export function isAuthed() {

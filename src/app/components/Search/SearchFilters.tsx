@@ -219,7 +219,11 @@ export function SearchFilters({
         }
       });
 
-      const whereClause = conditions.join("");
+      // ── 요구사항 3: DYNAMIC_QUERY 는 항상 "1=1" 로 시작
+      //    buildSearchCondition 이 " AND ..." 를 반환하므로
+      //    앞에 "1=1" 을 붙이면 최종적으로 "1=1 AND ..." 가 된다.
+      const filteredConditions = conditions.filter(Boolean);
+      const whereClause = "1=1" + filteredConditions.join("");
 
       const params: Record<string, unknown> = {
         DYNAMIC_QUERY: whereClause,

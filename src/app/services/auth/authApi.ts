@@ -1,3 +1,4 @@
+// app/services/auth/authApi.ts
 import { apiClient } from "@/app/api/client";
 import { Util } from "@/app/services/common/Util.ts";
 import { Lang } from "@/app/services/common/Lang.ts";
@@ -36,7 +37,6 @@ export async function getConfigInfo() {
   const userLang = Util.getUserInfo("userLang");
 
   const res = await configApi.getConfig();
-
   const resObj = res.data.data;
 
   if (!resObj.success) {
@@ -48,10 +48,9 @@ export async function getConfigInfo() {
 
 // 기존 me.setUtilConfig 대체
 function setUtilConfig(resObj: any, userLang: string) {
-  // 👉 여기서 언어팩 넣어야 핵심
-  const langPack = resObj.dsLangPack[0][userLang]; // 서버 구조에 맞게 수정
+  const langPack = resObj.dsLangPack[0][userLang];
 
-  Lang.setData(langPack);
-
-  // 필요하면 추가 config도 여기서 세팅
+  // 요구사항 6: setData 호출 시 버전 정보(타임스탬프)와 함께 localStorage 캐시 저장
+  const version = resObj.langPackVersion ?? new Date().toISOString();
+  Lang.setData(langPack, version);
 }

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { authApi, getConfigInfo } from "@/app/services/auth/authApi";
 import { setTokens } from "@/app/services/auth/auth";
 import { Util } from "@/app/services/common/Util.ts";
+import { ErrorPopup } from "@/app/components/popup/ErrorPopup";
 
 type FormState = { userId: string; password: string };
 
@@ -16,7 +17,11 @@ function cn(...xs: Array<string | false | null | undefined>) {
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorPopup, setErrorPopup] = useState<{ open: boolean; title: string; message: string }>({
+    open: false,
+    title: "",
+    message: "",
+  });
   const [form, setForm] = useState<FormState>({
     userId: "",
     password: "",
@@ -24,50 +29,79 @@ export default function AuthPage() {
 
   const navigate = useNavigate();
 
+  const showError = (title: string, message: string) => {
+    setErrorPopup({ open: true, title, message });
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    const res = await authApi.loginMobile({
-      userId: form.userId,
-      password: form.password,
-    });
+    try {
+      const res = await authApi.loginMobile({
+        userId: form.userId,
+        password: form.password,
+      });
 
-    const {
-      ACCESS_TOKEN,
-      REFRESH_TOKEN,
-      userId,
-      userNm,
-      userLang,
-      userGroupName,
-      userGroupCode, // 추가 필요
-    } = res.data.data;
+      const {
+        ACCESS_TOKEN,
+        REFRESH_TOKEN,
+        userId,
+        userNm,
+        userLang,
+        userGroupName,
+        userGroupCode,
+      } = res.data.data;
 
-    setTokens(
-      ACCESS_TOKEN,
-      REFRESH_TOKEN,
-      userId,
-      userNm,
-      userLang,
-      userGroupName,
-    );
+      setTokens(
+        ACCESS_TOKEN,
+        REFRESH_TOKEN,
+        userId,
+        userNm,
+        userLang,
+        userGroupName,
+      );
 
-    // ✅ 1. Util 세팅
-    Util.setUtilUserInfo({
-      userNm,
-      userLang,
-      userGroupName,
-      userGroupCode,
-    });
+      Util.setUtilUserInfo({
+        userNm,
+        userLang,
+        userGroupName,
+        userGroupCode,
+      });
 
-    // ✅ 2. 언어팩 + config 가져오기
-    await getConfigInfo();
+      await getConfigInfo();
 
-    // ✅ 3. 이동
-    navigate("/", { replace: true });
+      navigate("/", { replace: true });
+    } catch (err: any) {
+      // 네트워크 단절 / 서버 미응답
+      if (!err.response) {
+        showError(
+          "서버 연결 오류",
+          "서버에 연결할 수 없습니다.\n네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요.",
+        );
+      } else {
+        // 서버 응답이 있지만 오류인 경우
+        const serverMsg =
+          err?.response?.data?.message ??
+          err?.response?.data?.error?.message ??
+          `서버 오류가 발생했습니다. (HTTP ${err?.response?.status})`;
+        showError("로그인 오류", serverMsg);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-white">
+      {/* 오류 팝업 */}
+      <ErrorPopup
+        open={errorPopup.open}
+        title={errorPopup.title}
+        message={errorPopup.message}
+        onClose={() => setErrorPopup((p) => ({ ...p, open: false }))}
+      />
+
       <div className="h-full w-full flex">
         <div className="relative flex-1 min-w-0">
           <img
@@ -77,7 +111,6 @@ export default function AuthPage() {
           />
         </div>
 
-        {/* ✅ 로그인 칸: 흰색 고정 */}
         <div className="w-full md:w-[42%] lg:w-[38%] bg-white border-l border-slate-200">
           <div className="h-full flex items-center">
             <div className="w-full px-10 py-12 md:px-12 lg:px-14">
@@ -89,11 +122,7 @@ export default function AuthPage() {
                   Welcome back.
                   {"\n"}Sign in to continue.
                 </p>
-                {error && (
-                  <div className="mt-3 rounded-md border border-red-300 bg-red-50 px-4 py-3">
-                    <p className="text-sm font-medium text-red-600">{error}</p>
-                  </div>
-                )}
+
                 <form onSubmit={onSubmit} className="mt-10 space-y-6">
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-slate-500">
@@ -135,7 +164,6 @@ export default function AuthPage() {
                     />
                   </div>
 
-                  {/* ✅ Sign In 버튼 */}
                   <button
                     type="submit"
                     disabled={loading}
@@ -152,7 +180,6 @@ export default function AuthPage() {
             </div>
           </div>
         </div>
-        {/* ✅ 오른쪽 */}
       </div>
     </div>
   );

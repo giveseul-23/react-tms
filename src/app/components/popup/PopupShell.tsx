@@ -37,7 +37,6 @@ export function PopupShell({
   const offset = useRef({ x: 0, y: 0 });
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  // 팝업 열릴 때마다 중앙으로 초기화
   useEffect(() => {
     if (open) setPos(null);
   }, [open]);
@@ -71,7 +70,6 @@ export function PopupShell({
     const onMouseUp = () => {
       dragging.current = false;
     };
-
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     return () => {
@@ -82,26 +80,34 @@ export function PopupShell({
 
   if (!open) return null;
 
+  // ── 핵심: 뷰포트의 90% 를 넘지 않도록 높이 제한 ─────────────────────────
+  // inline style 에서 height 관련 속성은 style 로만 처리 (Tailwind calc 는 JIT 빌드 필요)
+  const baseStyle: React.CSSProperties = {
+    maxWidth: WIDTH_PX[width],
+    // 뷰포트 높이의 90% 로 제한 — 내용이 넘치면 Content 내부에서 스크롤
+    maxHeight: "90vh",
+    width: "100%",
+    zIndex: 9999,
+    // display:flex + flexDirection:column 을 inline으로 명시
+    // (Tailwind flex flex-col 과 동일하지만 overflow 계산을 위해 명시)
+    display: "flex",
+    flexDirection: "column",
+  };
+
   const dialogStyle: React.CSSProperties =
     pos === null
       ? {
+          ...baseStyle,
           position: "fixed",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          maxWidth: WIDTH_PX[width],
-          maxHeight: "90vh",
-          width: "100%",
-          zIndex: 9999,
         }
       : {
+          ...baseStyle,
           position: "fixed",
           top: pos.y,
           left: pos.x,
-          maxWidth: WIDTH_PX[width],
-          maxHeight: "90vh",
-          width: "100%",
-          zIndex: 9999,
         };
 
   return createPortal(
@@ -112,16 +118,17 @@ export function PopupShell({
         onClick={() => onOpenChange(false)}
       />
 
-      {/* Dialog — flex-col으로 자식이 높이를 채울 수 있게 */}
+      {/* Dialog */}
       <div
         ref={dialogRef}
         style={dialogStyle}
-        className="rounded-lg shadow-xl bg-white dark:bg-slate-800 flex flex-col overflow-hidden"
+        className="rounded-lg shadow-xl bg-white dark:bg-slate-800 overflow-hidden"
       >
-        {/* Header / 드래그 핸들 */}
+        {/* Header — 항상 고정 표시, shrink 되지 않음 */}
         <div
           onMouseDown={onMouseDown}
-          className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-slate-700 cursor-grab active:cursor-grabbing select-none shrink-0"
+          style={{ flexShrink: 0 }}
+          className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-slate-700 cursor-grab active:cursor-grabbing select-none"
         >
           <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
             {title ?? ""}
@@ -134,8 +141,23 @@ export function PopupShell({
           </button>
         </div>
 
-        {/* Content — flex-1로 남은 높이 채우고, 자식이 h-full 쓸 수 있도록 min-h-0 */}
-        <div className="flex-1 min-h-0 overflow-hidden p-6">{children}</div>
+        {/*
+          Content 영역:
+          - flex: 1 → 남은 높이를 모두 차지
+          - overflow-y: auto → 내용이 넘칠 때 스크롤 발생
+          - minHeight: 0 → flex 자식이 부모 높이를 초과하지 않도록
+        */}
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            overflowX: "hidden",
+          }}
+          className="p-6"
+        >
+          {children}
+        </div>
       </div>
     </>,
     document.body,
