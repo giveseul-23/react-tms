@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Truck,
   LogOut,
+  BookOpen,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -227,6 +228,15 @@ export function Sidebar({
               </button>
             </div>
           )}
+        </div>
+        <div className="p-2 border-t">
+          <button
+            onClick={() => window.open("/guide.html", "_blank")}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors w-full"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>화면 제작 가이드</span>
+          </button>
         </div>
       </aside>
     </>

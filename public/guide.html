@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>화면 제작 가이드</title>
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-light: #eff6ff;
+        --green: #059669;
+        --green-light: #ecfdf5;
+        --amber: #d97706;
+        --amber-light: #fffbeb;
+        --rose: #e11d48;
+        --rose-light: #fff1f2;
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-200: #e2e8f0;
+        --slate-300: #cbd5e1;
+        --slate-500: #64748b;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+        --slate-900: #0f172a;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          "Pretendard",
+          "Noto Sans KR",
+          -apple-system,
+          sans-serif;
+        background: var(--slate-50);
+        color: var(--slate-700);
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* ── 사이드 네비 ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 220px;
+        height: 100vh;
+        background: white;
+        border-right: 1px solid var(--slate-200);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        z-index: 100;
+      }
+
+      nav .nav-header {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--slate-200);
+      }
+
+      nav .nav-header h1 {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--slate-800);
+        letter-spacing: -0.01em;
+      }
+
+      nav .nav-header p {
+        font-size: 11px;
+        color: var(--slate-500);
+        margin-top: 3px;
+      }
+
+      nav ul {
+        list-style: none;
+        padding: 12px 10px;
+        flex: 1;
+      }
+
+      nav ul li a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        color: var(--slate-600);
+        text-decoration: none;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+
+      nav ul li a:hover {
+        background: var(--slate-100);
+        color: var(--slate-800);
+      }
+      nav ul li a.active {
+        background: var(--primary-light);
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      nav ul li a .nav-icon {
+        font-size: 14px;
+        width: 20px;
+        text-align: center;
+      }
+
+      /* ── 메인 콘텐츠 ── */
+      main {
+        margin-left: 220px;
+        flex: 1;
+        padding: 48px 56px;
+        max-width: calc(960px + 220px);
+      }
+
+      .page-header {
+        margin-bottom: 40px;
+        padding-bottom: 28px;
+        border-bottom: 2px solid var(--slate-200);
+      }
+
+      .page-header .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--primary-light);
+        color: var(--primary);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        margin-bottom: 12px;
+        letter-spacing: 0.03em;
+      }
+
+      .page-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--slate-800);
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+      }
+
+      .page-header p {
+        font-size: 14px;
+        color: var(--slate-500);
+        margin-top: 10px;
+        line-height: 1.7;
+      }
+
+      /* ── 섹션 ── */
+      section {
+        margin-bottom: 60px;
+        scroll-margin-top: 32px;
+      }
+
+      section h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--slate-800);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--slate-200);
+      }
+
+      section h2 .section-icon {
+        font-size: 20px;
+      }
+
+      section h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--slate-700);
+        margin: 24px 0 10px;
+        padding-left: 12px;
+        border-left: 3px solid var(--primary);
+      }
+
+      p,
+      li {
+        font-size: 13.5px;
+        line-height: 1.75;
+        color: var(--slate-600);
+      }
+
+      /* ── 태그 ── */
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid;
+        letter-spacing: 0.02em;
+      }
+      .tag-blue {
+        background: var(--primary-light);
+        color: var(--primary);
+        border-color: #bfdbfe;
+      }
+      .tag-green {
+        background: var(--green-light);
+        color: var(--green);
+        border-color: #a7f3d0;
+      }
+      .tag-amber {
+        background: var(--amber-light);
+        color: var(--amber);
+        border-color: #fde68a;
+      }
+      .tag-rose {
+        background: var(--rose-light);
+        color: var(--rose);
+        border-color: #fecdd3;
+      }
+      .tag-slate {
+        background: var(--slate-100);
+        color: var(--slate-600);
+        border-color: var(--slate-300);
+      }
+      .tag-required {
+        background: #fff1f2;
+        color: #e11d48;
+        border-color: #fecdd3;
+      }
+      .tag-optional {
+        background: var(--slate-100);
+        color: var(--slate-500);
+        border-color: var(--slate-300);
+      }
+
+      /* ── 카드 그리드 ── */
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin: 16px 0;
+      }
+
+      .card {
+        background: white;
+        border: 1px solid var(--slate-200);
+        border-radius: 12px;
+        padding: 18px;
+      }
+
+      .card .card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .card code.file-name {
+        display: block;
+        font-size: 11.5px;
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        color: var(--slate-500);
+        margin-bottom: 5px;
+      }
+
+      .card p {
+        font-size: 12px;
+        color: var(--slate-500);
+      }
+
+      /* ── 코드 블록 ── */
+      .code-block {
+        border: 1px solid var(--slate-200);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 14px 0;
+        position: relative;
+      }
+
+      .code-block .code-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 16px;
+        background: #1e293b;
+        color: #94a3b8;
+        font-size: 11px;
+        font-family: monospace;
+      }
+
+      .code-block .copy-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        font-size: 11px;
+        cursor: pointer;
+        padding: 2px 8px;
+        border-radius: 4px;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+
+      .code-block .copy-btn:hover {
+        background: #334155;
+        color: #e2e8f0;
+      }
+      .code-block .copy-btn.copied {
+        color: #4ade80;
+      }
+
+      .code-block pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        font-size: 12.5px;
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        line-height: 1.7;
+        padding: 20px;
+        overflow-x: auto;
+        margin: 0;
+        white-space: pre;
+      }
+
+      /* 코드 내 인라인 하이라이트 */
+      .code-block pre .c {
+        color: #64748b;
+        font-style: italic;
+      } /* comment */
+      .code-block pre .k {
+        color: #818cf8;
+      } /* keyword */
+      .code-block pre .s {
+        color: #4ade80;
+      } /* string */
+      .code-block pre .t {
+        color: #38bdf8;
+      } /* type */
+      .code-block pre .fn {
+        color: #fbbf24;
+      } /* function */
+
+      /* ── 인라인 코드 ── */
+      code {
+        background: var(--slate-100);
+        color: #e11d48;
+        font-size: 12px;
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+
+      /* ── 노트/팁 ── */
+      .note,
+      .tip {
+        display: flex;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin: 14px 0;
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .note {
+        background: var(--amber-light);
+        border: 1px solid #fde68a;
+        color: #92400e;
+      }
+      .tip {
+        background: var(--primary-light);
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+      }
+
+      .note .note-icon,
+      .tip .tip-icon {
+        font-size: 15px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      /* ── 레이아웃 패턴 카드 ── */
+      .pattern-card {
+        border: 1px solid var(--slate-200);
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 18px;
+      }
+
+      .pattern-card .pattern-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--slate-100);
+      }
+
+      .pattern-card .pattern-header .pattern-example {
+        margin-left: auto;
+        font-size: 11px;
+        color: var(--slate-400);
+      }
+
+      .pattern-card .pattern-body {
+        padding: 18px;
+        background: white;
+      }
+
+      .pattern-diagram {
+        background: var(--slate-50);
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        padding: 14px;
+        font-family: monospace;
+        font-size: 12px;
+        color: var(--slate-500);
+      }
+
+      .diagram-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .diagram-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .diagram-block {
+        border-radius: 6px;
+        padding: 10px 12px;
+        text-align: center;
+        font-size: 12px;
+        font-family: sans-serif;
+        flex: 1;
+      }
+
+      .db-header {
+        background: #e2e8f0;
+        color: var(--slate-600);
+      }
+      .db-blue {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .db-green {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .db-green2 {
+        background: #a7f3d0;
+        color: #065f46;
+      }
+      .db-amber {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .pattern-card .pattern-note {
+        font-size: 12px;
+        color: var(--slate-500);
+        margin-top: 10px;
+      }
+
+      /* ── 체크리스트 ── */
+      .checklist {
+        list-style: none;
+        counter-reset: checklist;
+      }
+
+      .checklist li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--slate-100);
+        font-size: 13.5px;
+        color: var(--slate-700);
+      }
+
+      .checklist li:last-child {
+        border-bottom: none;
+      }
+
+      .checklist li .step-num {
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        margin-top: 1px;
+      }
+
+      .checklist li .step-file {
+        margin-top: 2px;
+        font-size: 12px;
+        font-family: monospace;
+        color: var(--slate-400);
+      }
+
+      /* ── 테이블 ── */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin: 16px 0;
+      }
+
+      thead tr {
+        background: var(--slate-800);
+        color: white;
+      }
+
+      thead th {
+        padding: 10px 14px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid var(--slate-100);
+      }
+      tbody tr:hover {
+        background: var(--slate-50);
+      }
+
+      tbody td {
+        padding: 10px 14px;
+        vertical-align: top;
+      }
+
+      tbody td:first-child {
+        font-family: monospace;
+        font-size: 12px;
+        color: #e11d48;
+        white-space: nowrap;
+      }
+
+      tbody td .td-desc {
+        color: var(--slate-500);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+      /* ── 변경 포인트 테이블 ── */
+      .change-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin: 16px 0;
+      }
+      .change-table th {
+        background: var(--slate-800);
+        color: white;
+        padding: 10px 14px;
+        text-align: left;
+        font-size: 12px;
+      }
+      .change-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--slate-100);
+        vertical-align: top;
+        font-size: 13px;
+      }
+      .change-table tr:hover td {
+        background: var(--slate-50);
+      }
+      .change-table td:first-child {
+        color: var(--slate-700);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .change-table td:last-child {
+        color: var(--slate-500);
+        font-size: 12.5px;
+      }
+
+      /* ── 스크롤바 ── */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--slate-300);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── 사이드 네비 ── -->
+    <nav>
+      <div class="nav-header">
+        <h1>📘 화면 제작 가이드</h1>
+        <p>StandardPageLayout 기반</p>
+      </div>
+      <ul>
+        <li>
+          <a href="#overview" class="active"
+            ><span class="nav-icon">🗂</span> 전체 구조</a
+          >
+        </li>
+        <li>
+          <a href="#layout"><span class="nav-icon">⬜</span> 레이아웃 패턴</a>
+        </li>
+        <li>
+          <a href="#files"><span class="nav-icon">📝</span> 파일별 작성 방법</a>
+        </li>
+        <li>
+          <a href="#treegrid"><span class="nav-icon">🌲</span> 트리 그리드</a>
+        </li>
+        <li>
+          <a href="#checklist"
+            ><span class="nav-icon">✅</span> 신규 화면 체크리스트</a
+          >
+        </li>
+        <li>
+          <a href="#change"
+            ><span class="nav-icon">🔧</span> 레이아웃 변경 포인트</a
+          >
+        </li>
+        <li>
+          <a href="#props"><span class="nav-icon">📋</span> Props 레퍼런스</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- ── 메인 ── -->
+    <main>
+      <div class="page-header">
+        <div class="badge">📘 DEVELOPER GUIDE</div>
+        <h1>화면 제작 가이드</h1>
+        <p>
+          이 프로젝트의 모든 업무 화면은 <strong>MVC 4-파일 패턴</strong> +
+          <strong>StandardPageLayout</strong>을 기반으로 제작합니다.<br />
+          새 화면을 추가하거나 레이아웃을 변경할 때 이 문서를 참고하세요.
+        </p>
+      </div>
+
+      <!-- ── 1. 전체 구조 ── -->
+      <section id="overview">
+        <h2><span class="section-icon">🗂</span> 전체 구조</h2>
+        <p>
+          모든 업무 화면은 아래 4개 파일로 구성됩니다. 각 파일은 단일 책임
+          원칙에 따라 역할이 분리됩니다.
+        </p>
+
+        <div class="card-grid" style="margin-top: 16px">
+          <div class="card">
+            <div class="card-title"><span class="tag tag-blue">View</span></div>
+            <code class="file-name">{화면명}.tsx</code>
+            <p>
+              UI 렌더링만 담당. StandardPageLayout 으로 조립. 비즈니스 로직
+              없음.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="tag tag-green">Model</span>
+            </div>
+            <code class="file-name">{화면명}Model.ts</code>
+            <p>상태(state / ref) 관리. 비즈니스 로직 없음.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="tag tag-amber">Controller</span>
+            </div>
+            <code class="file-name">{화면명}Controller.tsx</code>
+            <p>이벤트 핸들러 · API 호출 로직.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="tag tag-rose">Columns</span>
+            </div>
+            <code class="file-name">{화면명}Columns.tsx</code>
+            <p>그리드 컬럼 정의. Lang.get() 으로 헤더 다국어 처리.</p>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+src/views/{모듈명}/{화면명}/
+├── {화면명}.tsx              ← View   : UI 렌더링만 담당
+├── {화면명}Model.ts          ← Model  : 상태(state/ref) 관리
+├── {화면명}Controller.tsx    ← Controller : 이벤트·API 호출 로직
+└── {화면명}Columns.tsx       ← Columns : 그리드 컬럼 정의</pre
+          >
+        </div>
+      </section>
+
+      <!-- ── 2. 레이아웃 패턴 ── -->
+      <section id="layout">
+        <h2><span class="section-icon">⬜</span> 레이아웃 패턴 3가지</h2>
+        <p>새 화면을 만들기 전에 아래 3가지 중 하나를 선택합니다.</p>
+
+        <!-- 패턴 A -->
+        <div class="pattern-card" style="margin-top: 20px">
+          <div class="pattern-header" style="background: #eff6ff">
+            <span class="tag tag-blue">패턴 A</span>
+            <strong style="font-size: 14px; color: #1e293b">단일 그리드</strong>
+            <span class="pattern-example">예시: 메뉴구성(MenuConfig)</span>
+          </div>
+          <div class="pattern-body">
+            <div class="pattern-diagram">
+              <div class="diagram-row">
+                <div class="diagram-block db-header">
+                  조회조건 (SearchFilters)
+                </div>
+              </div>
+              <div class="diagram-row">
+                <div class="diagram-block db-blue">
+                  그리드 1개 (DataGrid / TreeGrid)
+                </div>
+              </div>
+            </div>
+            <p class="pattern-note">
+              → <code>singleGrid</code> prop 전달. 레이아웃 토글 버튼 자동 숨김.
+            </p>
+          </div>
+        </div>
+
+        <!-- 패턴 B -->
+        <div class="pattern-card">
+          <div class="pattern-header" style="background: #ecfdf5">
+            <span class="tag tag-green">패턴 B</span>
+            <strong style="font-size: 14px; color: #1e293b">분할 그리드</strong>
+            <span class="pattern-example"
+              >예시: 운송사요청목록(TenderReceiveDispatch)</span
+            >
+          </div>
+          <div class="pattern-body">
+            <div class="pattern-diagram">
+              <div class="diagram-row">
+                <div class="diagram-block db-header">
+                  조회조건 (SearchFilters) + 레이아웃 토글 버튼 🔀
+                </div>
+              </div>
+              <div class="diagram-row">
+                <div class="diagram-block db-green">메인 그리드</div>
+                <div class="diagram-block db-green2">서브 그리드 (탭 가능)</div>
+              </div>
+            </div>
+            <p class="pattern-note">
+              → <code>dualGrid</code> prop 전달. <code>layout</code> 상태로 좌우
+              ↔ 상하 전환. 레이아웃 토글 버튼 자동 표시.
+            </p>
+          </div>
+        </div>
+
+        <!-- 패턴 C -->
+        <div class="pattern-card">
+          <div class="pattern-header" style="background: #fffbeb">
+            <span class="tag tag-amber">패턴 C</span>
+            <strong style="font-size: 14px; color: #1e293b"
+              >분할 그리드 + 하단 슬라이드 패널</strong
+            >
+            <span class="pattern-example">예시: 운송사요청목록 추적 패널</span>
+          </div>
+          <div class="pattern-body">
+            <div class="pattern-diagram">
+              <div class="diagram-row">
+                <div class="diagram-block db-header">
+                  조회조건 (SearchFilters) + 레이아웃 토글 버튼 🔀
+                </div>
+              </div>
+              <div class="diagram-row">
+                <div class="diagram-block db-green">메인 그리드</div>
+                <div class="diagram-block db-green2">서브 그리드</div>
+              </div>
+              <div class="diagram-row">
+                <div class="diagram-block db-amber">
+                  하단 슬라이드 패널 (open 상태로 토글)
+                </div>
+              </div>
+            </div>
+            <p class="pattern-note">
+              → <code>dualGrid</code> + <code>bottomPanel</code> prop 전달.
+              <code>bottomPanel.open</code> 으로 접기/펼치기 제어.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 3. 파일별 작성 방법 ── -->
+      <section id="files">
+        <h2><span class="section-icon">📝</span> 파일별 작성 방법</h2>
+
+        <!-- Columns -->
+        <h3>Columns 파일</h3>
+        <p>
+          컬럼 정의만 모아두는 파일입니다. View / Controller 에서 import 해
+          사용합니다.
+        </p>
+        <div class="note">
+          <span class="note-icon">⚠️</span> <code>headerName</code>은 반드시
+          <code>Lang.get('코드값')</code> 형태로 작성합니다. 하드코딩 문자열
+          금지.
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span>tsx — {화면명}Columns.tsx</span
+            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+import { Lang } from "@/app/services/common/Lang";
+import type { ColDef } from "ag-grid-community";
+
+export const MAIN_COLUMN_DEFS = (): ColDef[] => [
+  {
+    headerName: Lang.get("COLUMN_CODE"),   // 언어팩 사용
+    field: "CODE",
+    width: 120,
+  },
+  {
+    headerName: Lang.get("COLUMN_NAME"),
+    field: "NAME",
+    flex: 1,
+  },
+];</pre
+          >
+        </div>
+
+        <!-- Model -->
+        <h3>Model 파일</h3>
+        <p>
+          화면에서 사용하는 state 와 ref 만 정의합니다. 비즈니스 로직은 넣지
+          않습니다.
+        </p>
+        <div class="code-block">
+          <div class="code-header">
+            <span>ts — {화면명}Model.ts</span
+            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+import { useState, useRef, useCallback } from "react";
+import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
+
+export function use{화면명}Model() {
+  // ── 레이아웃 (분할 그리드가 있는 경우만)
+  const [layout, setLayout] = useState&lt;LayoutType&gt;("side");
+
+  // ── 페이징
+  const [pageSize, setPageSize] = useState(20);
+
+  // ── 메인 그리드 데이터
+  const [gridData, setGridData] = useState({
+    rows: [] as any[],
+    totalCount: 0,
+    page: 1,
+    limit: 20,
+  });
+
+  // ── 선택 행 (ref 와 state 동시 관리)
+  const [selectedRow, setSelectedRow] = useState&lt;any&gt;(null);
+  const selectedRowRef = useRef&lt;any&gt;(null);
+  const setSelectedRowWithRef = useCallback((row: any) => {
+    setSelectedRow(row);
+    selectedRowRef.current = row;
+  }, []);
+
+  return {
+    layout, setLayout,
+    pageSize, setPageSize,
+    gridData, setGridData,
+    selectedRow,
+    setSelectedRow: setSelectedRowWithRef,
+    selectedRowRef,
+  };
+}
+
+export type {화면명}Model = ReturnType&lt;typeof use{화면명}Model&gt;;</pre
+          >
+        </div>
+        <div class="tip">
+          <span class="tip-icon">💡</span> 서브 그리드가 필요하면
+          <code>subRowData, setSubRowData</code> 상태를 추가합니다.<br />
+          트리 그리드이면 <code>rows</code> 대신
+          <code>source, setSource</code> 상태를 사용합니다.
+        </div>
+
+        <!-- Controller -->
+        <h3>Controller 파일</h3>
+        <p>API 호출과 이벤트 핸들러를 정의합니다.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span>tsx — {화면명}Controller.tsx</span
+            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+import { useCallback, MutableRefObject } from "react";
+import { useApiHandler } from "@/hooks/useApiHandler";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import { {화면명}Model } from "./{화면명}Model";
+import { {화면명}Api } from "@/app/services/{모듈}/{화면명}Api";
+
+type ControllerProps = {
+  model: {화면명}Model;
+  searchRef: MutableRefObject&lt;((page?: number) =&gt; void) | null&gt;;
+  filtersRef: MutableRefObject&lt;Record&lt;string, unknown&gt;&gt;;
+};
+
+export function use{화면명}Controller({ model, searchRef, filtersRef }: ControllerProps) {
+  const { handleApi } = useApiHandler();
+  const { openPopup, closePopup } = usePopup();
+
+  // ── 조회 API — SearchFilters 의 fetchFn 으로 주입
+  const fetchList = useCallback(
+    (params: Record&lt;string, unknown&gt;) => {화면명}Api.getList(params),
+    []
+  );
+
+  // ── 조회 결과 콜백 — SearchFilters 의 onSearch 으로 주입
+  const handleSearch = useCallback(
+    (result: any) => { model.setGridData(result); },
+    [model]
+  );
+
+  // ── 행 클릭
+  const handleRowClicked = useCallback(
+    (row: any) => { model.setSelectedRow(row); },
+    [model]
+  );
+
+  // ── 툴바 액션 목록
+  const mainActions = [
+    {
+      type: "button" as const,
+      key: "저장",
+      label: "저장",
+      onClick: (e: any) => {
+        handleApi({화면명}Api.save(e.data), "저장되었습니다.")
+          .then(() => searchRef.current?.());
+      },
+    },
+  ];
+
+  return { fetchList, handleSearch, handleRowClicked, mainActions };
+}</pre
+          >
+        </div>
+
+        <!-- View - 패턴 A -->
+        <h3>View 파일 — 패턴 A (단일 그리드)</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span>tsx — {화면명}.tsx</span
+            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+"use client";
+
+import { useRef } from "react";
+import { Skeleton } from "@/app/components/ui/skeleton";
+import { StandardPageLayout } from "@/app/components/layout/StandardPageLayout";
+import DataGrid from "@/app/components/grid/DataGrid";
+import { useSearchMeta } from "@/hooks/useSearchMeta";
+import { use{화면명}Model } from "./{화면명}Model";
+import { use{화면명}Controller } from "./{화면명}Controller";
+import { MAIN_COLUMN_DEFS } from "./{화면명}Columns";
+
+const MENU_CODE = "MENU_XXX_YYY";   // 서버 조회조건 메타 키
+
+export default function {화면명}() {
+  const searchRef = useRef&lt;((page?: number) =&gt; void) | null&gt;(null);
+  const filtersRef = useRef&lt;Record&lt;string, unknown&gt;&gt;({});
+
+  const { meta, loading } = useSearchMeta(MENU_CODE);
+  const model = use{화면명}Model();
+  const ctrl = use{화면명}Controller({ model, searchRef, filtersRef });
+
+  if (loading) return &lt;Skeleton className="h-24" /&gt;;
+
+  return (
+    &lt;StandardPageLayout
+      meta={meta}
+      fetchFn={ctrl.fetchList}
+      onSearch={ctrl.handleSearch}
+      searchRef={searchRef}
+      filtersRef={filtersRef}
+      pageSize={model.pageSize}
+
+      // singleGrid — 레이아웃 토글 버튼 자동 숨김
+      singleGrid={{
+        render: (
+          &lt;DataGrid
+            layoutType="plain"
+            columnDefs={MAIN_COLUMN_DEFS()}
+            rowData={model.gridData.rows}
+            totalCount={model.gridData.totalCount}
+            currentPage={model.gridData.page}
+            pageSize={model.pageSize}
+            onPageSizeChange={model.setPageSize}
+            onPageChange={(page) =&gt; searchRef.current?.(page, false)}
+            actions={ctrl.mainActions}
+            onRowClicked={ctrl.handleRowClicked}
+          /&gt;
+        ),
+      }}
+    /&gt;
+  );
+}</pre
+          >
+        </div>
+
+        <!-- View - 패턴 B -->
+        <h3>View 파일 — 패턴 B (분할 그리드)</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span>tsx — {화면명}.tsx</span
+            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+return (
+  &lt;StandardPageLayout
+    meta={meta}
+    fetchFn={ctrl.fetchList}
+    onSearch={ctrl.handleSearch}
+    searchRef={searchRef}
+    filtersRef={filtersRef}
+    pageSize={model.pageSize}
+
+    // 레이아웃 토글 — dualGrid 가 있으면 버튼 자동 표시
+    layout={model.layout}
+    onLayoutToggle={() =&gt;
+      model.setLayout((prev) =&gt; prev === "side" ? "vertical" : "side")
+    }
+
+    dualGrid={{
+      direction: model.layout === "side" ? "horizontal" : "vertical",
+      defaultTopSize: 60,     // 상단 60% (기본 50)
+      defaultBottomSize: 40,  // 하단 40% (기본 50)
+      top: (
+        &lt;DataGrid
+          layoutType="plain"
+          columnDefs={MAIN_COLUMN_DEFS()}
+          rowData={model.gridData.rows}
+          totalCount={model.gridData.totalCount}
+          currentPage={model.gridData.page}
+          pageSize={model.pageSize}
+          onPageSizeChange={model.setPageSize}
+          onPageChange={(page) =&gt; searchRef.current?.(page, false)}
+          actions={ctrl.mainActions}
+          onRowClicked={ctrl.handleRowClicked}
+        /&gt;
+      ),
+      bottom: (
+        &lt;DataGrid
+          layoutType="plain"
+          columnDefs={SUB_COLUMN_DEFS()}
+          rowData={model.subGridData}
+          actions={[]}
+        /&gt;
+      ),
+    }}
+  /&gt;
+);</pre
+          >
+        </div>
+
+        <!-- View - 패턴 C -->
+        <h3>View 파일 — 패턴 C (분할 그리드 + 하단 슬라이드 패널)</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span>tsx — {화면명}.tsx</span
+            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+return (
+  &lt;StandardPageLayout
+    {/* ... 패턴 B 와 동일 */}
+    dualGrid={{ ... }}
+
+    // 하단 슬라이드 패널
+    bottomPanel={{
+      open: model.panelOpen,   // true/false 로 열기/닫기
+      height: 280,             // 패널 높이 px (기본 280)
+      render: (
+        &lt;div className="h-full border rounded-lg flex flex-col overflow-hidden"&gt;
+          &lt;div className="flex items-center justify-between px-3 py-1.5 bg-[rgb(var(--primary))] shrink-0"&gt;
+            &lt;span className="text-xs font-semibold text-white"&gt;패널 제목&lt;/span&gt;
+            &lt;button onClick={() =&gt; model.setPanelOpen(false)} className="text-xs text-white/70"&gt;
+              닫기
+            &lt;/button&gt;
+          &lt;/div&gt;
+          &lt;div className="flex-1 min-h-0"&gt;
+            &lt;DataGrid layoutType="plain" actions={[]} columnDefs={PANEL_COLUMN_DEFS()} rowData={model.panelData} /&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      ),
+    }}
+  /&gt;
+);</pre
+          >
+        </div>
+      </section>
+
+      <!-- ── 4. 트리 그리드 ── -->
+      <section id="treegrid">
+        <h2><span class="section-icon">🌲</span> 트리 그리드 화면인 경우</h2>
+        <p>
+          <code>DataGrid</code> 대신 <code>TreeGrid</code>를 사용하는 경우 추가
+          작업이 필요합니다.
+        </p>
+
+        <h3>View 추가 작업</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span>tsx</span
+            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+// 1. treeGridRef 선언
+const treeGridRef = useRef&lt;TreeGridHandle&gt;(null);
+
+// 2. NameCell 렌더러 정의
+const renderNameCell = (params: any, ctx: TreeCellContext) =&gt; {
+  const row: {화면명}Row = params.data;
+  return (
+    &lt;TreeNameCell
+      id={row.id}
+      level={row.level}
+      label={row.NAME}
+      hasChild={row.LEAFYN === "N"}
+      ctx={ctx}
+    /&gt;
+  );
+};
+
+// 3. StandardPageLayout 에 treeGridRef + computeTotalCount 전달
+&lt;StandardPageLayout
+  treeGridRef={treeGridRef}
+  computeTotalCount={(rows) =&gt; rows.length}  // TOTALCOUNT 없는 트리 데이터용
+  singleGrid={{
+    render: (
+      &lt;TreeGrid
+        ref={treeGridRef}
+        source={ctrl.source}
+        renderNameCell={renderNameCell}
+        columnDefs={MAIN_COLUMN_DEFS()}
+        defaultExpandLevel={1}
+        getRowId={(p) =&gt; p.data.id}
+        actions={ctrl.mainActions}
+        onRowClicked={ctrl.handleRowClicked}
+      /&gt;
+    ),
+  }}
+/&gt;</pre
+          >
+        </div>
+
+        <h3>Controller handleSearch</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span>ts</span
+            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre>
+const handleSearch = useCallback((result: any) => {
+  const list = result?.rows ?? [];
+
+  // DYNAMIC_QUERY 가 "1=1" 이면 전체조회, 그 외엔 필터링 조회
+  const dynamicQuery = String(
+    result?.DYNAMIC_QUERY ?? filtersRef.current?.DYNAMIC_QUERY ?? "1=1"
+  ).trim();
+  const isFiltered = dynamicQuery !== "1=1";
+
+  // buildSource: isFiltered=true 이면 자식 없는 루트 노드 제거
+  model.setSource(buildSource(list, isFiltered));
+}, [model, filtersRef]);</pre
+          >
+        </div>
+
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <code>buildSource(list, isFiltered)</code> — 두 번째 인자가
+          <code>true</code>이면 <code>data[]</code>가 비어 있는 가상 루트(-1)
+          노드를 트리에서 자동 제외합니다. 전체 조회(<code>false</code>)일 때는
+          빈 루트도 표시합니다.
+        </div>
+      </section>
+
+      <!-- ── 5. 체크리스트 ── -->
+      <section id="checklist">
+        <h2><span class="section-icon">✅</span> 신규 화면 추가 체크리스트</h2>
+        <p>새 화면을 만들 때 아래 순서대로 진행합니다.</p>
+        <ul class="checklist" style="margin-top: 16px">
+          <li>
+            <div class="step-num">1</div>
+            <div>
+              <strong>폴더 생성</strong>
+              <div class="step-file">src/views/{모듈}/{화면명}/</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div>
+              <strong>Columns 파일 작성</strong> — 컬럼 정의, Lang.get() 사용
+              <div class="step-file">{화면명}Columns.tsx</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div>
+              <strong>Model 파일 작성</strong> — 상태 정의
+              <div class="step-file">{화면명}Model.ts</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">4</div>
+            <div>
+              <strong>Controller 파일 작성</strong> — API / 핸들러
+              <div class="step-file">{화면명}Controller.tsx</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">5</div>
+            <div>
+              <strong>View 파일 작성</strong> — StandardPageLayout 으로 조립
+              <div class="step-file">{화면명}.tsx</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">6</div>
+            <div>
+              <strong>API 파일 추가</strong>
+              <div class="step-file">
+                src/app/services/{모듈}/{화면명}Api.ts
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">7</div>
+            <div>
+              <strong>메뉴 컴포넌트 맵 등록</strong>
+              <div class="step-file">src/app/menu/menuComponentMap.ts</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">8</div>
+            <div>
+              <strong>MENU_CODE 상수 확인</strong> — 서버 담당자에게 메뉴코드
+              확인
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ── 6. 레이아웃 변경 포인트 ── -->
+      <section id="change">
+        <h2>
+          <span class="section-icon">🔧</span> 레이아웃 변경 시 수정 포인트
+        </h2>
+        <table class="change-table">
+          <thead>
+            <tr>
+              <th>변경 내용</th>
+              <th>수정 위치</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>단일 → 분할 그리드</td>
+              <td>
+                View: <code>singleGrid</code> →
+                <code>dualGrid</code> 교체<br />Model: <code>layout</code> 상태
+                추가<br />View: <code>onLayoutToggle</code> 추가
+              </td>
+            </tr>
+            <tr>
+              <td>분할 그리드 비율 조정</td>
+              <td>
+                <code>dualGrid.defaultTopSize</code> /
+                <code>defaultBottomSize</code> 수정
+              </td>
+            </tr>
+            <tr>
+              <td>하단 슬라이드 패널 추가</td>
+              <td>
+                Model: <code>panelOpen</code> 상태 추가<br />View:
+                <code>bottomPanel</code> prop 추가
+              </td>
+            </tr>
+            <tr>
+              <td>트리 → 일반 그리드 변경</td>
+              <td>
+                Columns: TreeRow 타입 제거<br />View: TreeGrid → DataGrid
+                교체<br />Model: <code>source</code> →
+                <code>gridData</code> 변경
+              </td>
+            </tr>
+            <tr>
+              <td>조회조건 특정 키 제외</td>
+              <td>View: <code>excludeKeysRef.current.add('키')</code></td>
+            </tr>
+            <tr>
+              <td>페이지당 행 수 기본값 변경</td>
+              <td>Model: <code>useState(20)</code> 의 초기값 수정</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ── 7. Props 레퍼런스 ── -->
+      <section id="props">
+        <h2>
+          <span class="section-icon">📋</span> StandardPageLayout Props 레퍼런스
+        </h2>
+
+        <div class="note">
+          <span class="note-icon">⚠️</span>
+          <code>singleGrid</code> 와 <code>dualGrid</code> 는 둘 중 하나만
+          전달합니다. <code>dualGrid</code> 가 있으면 레이아웃 토글 버튼이
+          자동으로 표시되고, <code>singleGrid</code> 만 있으면 자동으로
+          숨겨집니다.
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 200px">Prop</th>
+              <th style="width: 80px">필수</th>
+              <th>설명</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>meta</td>
+              <td><span class="tag tag-required">필수</span></td>
+              <td>
+                조회조건 메타 — <code>useSearchMeta()</code> 결과
+                <div class="td-desc">SearchMeta[]</div>
+              </td>
+            </tr>
+            <tr>
+              <td>fetchFn</td>
+              <td><span class="tag tag-required">필수</span></td>
+              <td>
+                조회 API 함수 — Controller 의 fetchList 주입
+                <div class="td-desc">(params) =&gt; Promise</div>
+              </td>
+            </tr>
+            <tr>
+              <td>onSearch</td>
+              <td><span class="tag tag-required">필수</span></td>
+              <td>
+                조회 결과 콜백 — Controller 의 handleSearch 주입
+                <div class="td-desc">(result) =&gt; void</div>
+              </td>
+            </tr>
+            <tr>
+              <td>searchRef</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                외부에서 조회를 트리거할 때 사용 (저장 후 재조회 등)
+                <div class="td-desc">MutableRefObject</div>
+              </td>
+            </tr>
+            <tr>
+              <td>filtersRef</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                현재 필터 파라미터 참조 — 엑셀 다운로드 등에서 사용
+                <div class="td-desc">MutableRefObject</div>
+              </td>
+            </tr>
+            <tr>
+              <td>treeGridRef</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                TreeGrid 전용 ref — 모두펼치기/접기 액션 등에서 사용
+                <div class="td-desc">
+                  MutableRefObject&lt;TreeGridHandle&gt;
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>pageSize</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                페이지 크기, 기본값 20
+                <div class="td-desc">number</div>
+              </td>
+            </tr>
+            <tr>
+              <td>excludeKeysRef</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                DYNAMIC_QUERY 에서 제외할 조회조건 키 목록
+                <div class="td-desc">
+                  MutableRefObject&lt;Set&lt;string&gt;&gt;
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>computeTotalCount</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                트리 데이터처럼 TOTALCOUNT 필드가 없는 경우 건수를 직접 계산
+                <div class="td-desc">(rows: any[]) =&gt; number</div>
+              </td>
+            </tr>
+            <tr>
+              <td>singleGrid</td>
+              <td><span class="tag tag-optional">※ 둘 중 하나</span></td>
+              <td>
+                단일 그리드 렌더링 설정
+                <div class="td-desc">{ render: ReactNode }</div>
+              </td>
+            </tr>
+            <tr>
+              <td>dualGrid</td>
+              <td><span class="tag tag-optional">※ 둘 중 하나</span></td>
+              <td>
+                분할 그리드 설정 (top, bottom, direction, defaultTopSize,
+                defaultBottomSize)
+                <div class="td-desc">DualGridConfig</div>
+              </td>
+            </tr>
+            <tr>
+              <td>layout</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                분할 방향 상태 — dualGrid 사용 시 전달
+                <div class="td-desc">"side" | "vertical"</div>
+              </td>
+            </tr>
+            <tr>
+              <td>onLayoutToggle</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                레이아웃 전환 핸들러 — dualGrid 사용 시 전달
+                <div class="td-desc">() =&gt; void</div>
+              </td>
+            </tr>
+            <tr>
+              <td>bottomPanel</td>
+              <td><span class="tag tag-optional">선택</span></td>
+              <td>
+                하단 슬라이드 패널 설정 (open, height, render)
+                <div class="td-desc">BottomSlidePanel</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+      // ── 복사 버튼 ──
+      function copyCode(btn) {
+        const pre = btn.closest(".code-block").querySelector("pre");
+        navigator.clipboard.writeText(pre.innerText).then(() => {
+          btn.textContent = "✓ 복사됨";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = "복사";
+            btn.classList.remove("copied");
+          }, 1500);
+        });
+      }
+
+      // ── 스크롤 시 네비 active 업데이트 ──
+      const sections = document.querySelectorAll("section[id]");
+      const navLinks = document.querySelectorAll("nav ul li a");
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                link.classList.toggle(
+                  "active",
+                  link.getAttribute("href") === "#" + entry.target.id,
+                );
+              });
+            }
+          });
+        },
+        { rootMargin: "-30% 0px -60% 0px" },
+      );
+
+      sections.forEach((s) => observer.observe(s));
+    </script>
+  </body>
+</html>
