@@ -415,7 +415,7 @@ export function Sidebar({
                     <>
                       <button
                         onClick={() => toggleSection(section.sectionCode)}
-                        className="flex items-center gap-2 flex-1 py-1.5 pl-2 text-sm font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors min-w-0"
+                        className="flex items-center gap-2 flex-1 py-1.7 pl-2 text-sm font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors min-w-0"
                       >
                         <Icon className="w-5 h-5 shrink-0" />
                         <span className="truncate">{section.title}</span>
