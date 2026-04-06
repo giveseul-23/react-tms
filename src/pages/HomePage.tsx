@@ -8,6 +8,8 @@ import { MENU_COMPONENT_MAP } from "@/app/menu/menuComponentMap";
 import { usePageTabs } from "@/hooks/usePageTabs";
 import { SearchToast } from "@/app/components/ui/SearchToast";
 import { useDynamicMenu } from "@/hooks/useDynamicMenu";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import ConfirmModal from "@/views/common/ConfirmPopup";
 
 const STATIC_LABEL_MAP: Record<string, string> = {
   __WELCOME__: "Home",
@@ -17,6 +19,7 @@ const STATIC_LABEL_MAP: Record<string, string> = {
 };
 
 export default function HomePage() {
+  const { openPopup, closePopup } = usePopup();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const { sections, menuLabelMap, loading: menuLoading } = useDynamicMenu();
@@ -36,11 +39,27 @@ export default function HomePage() {
   } = usePageTabs(
     "__WELCOME__", // 기본 탭: 홈(Welcome)
     mergedLabelMap["__WELCOME__"] ?? "Home",
+    20,
   );
 
   function handleSelectMenu(menuCode: string) {
     const label = mergedLabelMap[menuCode] ?? menuCode;
-    openTab(menuCode, label);
+    const success = openTab(menuCode, label);
+
+    if (!success) {
+      openPopup({
+        title: "",
+        width: "sm",
+        content: (
+          <ConfirmModal
+            type="check"
+            title="탭 제한 초과"
+            description={`탭은 최대 ${20}개까지 열 수 있습니다.`}
+            onClose={closePopup}
+          />
+        ),
+      });
+    }
   }
 
   const mountedMenuCodes = useMemo(() => tabs.map((t) => t.menuCode), [tabs]);

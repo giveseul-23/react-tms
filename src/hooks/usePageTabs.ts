@@ -6,21 +6,32 @@ export type PageTab = {
   label: string;
 };
 
-export function usePageTabs(initialMenuCode: string, initialLabel: string) {
+export function usePageTabs(
+  initialMenuCode: string,
+  initialLabel: string,
+  maxTabs: number = 20,
+) {
   const [tabs, setTabs] = useState<PageTab[]>([
     { menuCode: initialMenuCode, label: initialLabel },
   ]);
   const [activeMenuCode, setActiveMenuCode] = useState<string>(initialMenuCode);
 
-  const openTab = useCallback((menuCode: string, label: string) => {
-    setTabs((prev) => {
-      const exists = prev.find((t) => t.menuCode === menuCode);
-      if (exists) return prev;
-      if (prev.length >= 20) return prev; //탭메뉴 제한 수
-      return [...prev, { menuCode, label }];
-    });
-    setActiveMenuCode(menuCode);
-  }, []);
+  const openTab = useCallback(
+    (menuCode: string, label: string): boolean => {
+      const exists = tabs.find((t) => t.menuCode === menuCode);
+      if (exists) {
+        setActiveMenuCode(menuCode);
+        return true;
+      }
+      if (tabs.length >= maxTabs) return false; // ← maxTabs 사용
+
+      setTabs((prev) => [...prev, { menuCode, label }]);
+      setActiveMenuCode(menuCode);
+      return true;
+    },
+    [tabs, maxTabs],
+  );
+
   const closeTab = useCallback(
     (menuCode: string) => {
       if (menuCode === "__WELCOME__") return; //WELCOME 페이지 못닫음
