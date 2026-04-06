@@ -70,7 +70,8 @@ export function PageTabBar({
 
   return (
     <div
-      className="flex items-center bg-[rgb(var(--bg))] border-b border-gray-200 shrink-0 h-10"
+      className="flex items-center bg-[rgb(var(--bg))] border-b border-gray-200 shrink-0 h-10 overflow-x-auto overflow-y-hidden"
+      style={{ scrollbarWidth: "none" }}
       // 탭 바 맨 끝에 드롭할 수 있도록 바 자체도 처리
       onDragOver={(e) => {
         e.preventDefault();
@@ -88,6 +89,10 @@ export function PageTabBar({
         }
         dragIndexRef.current = null;
         setDropIndex(null);
+      }}
+      onWheel={(e) => {
+        e.preventDefault();
+        e.currentTarget.scrollLeft += e.deltaY;
       }}
     >
       {tabs.map((tab, index) => {
@@ -142,7 +147,7 @@ export function PageTabBar({
               });
             }}
           >
-            <span className="max-w-[120px] truncate">{tab.label}</span>
+            <span>{tab.label}</span>
 
             {tabs.length > 1 && tab.menuCode !== "__WELCOME__" && (
               <button

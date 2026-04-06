@@ -16,11 +16,11 @@ export function usePageTabs(initialMenuCode: string, initialLabel: string) {
     setTabs((prev) => {
       const exists = prev.find((t) => t.menuCode === menuCode);
       if (exists) return prev;
+      if (prev.length >= 20) return prev; //탭메뉴 제한 수
       return [...prev, { menuCode, label }];
     });
     setActiveMenuCode(menuCode);
   }, []);
-
   const closeTab = useCallback(
     (menuCode: string) => {
       if (menuCode === "__WELCOME__") return; //WELCOME 페이지 못닫음
