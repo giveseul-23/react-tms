@@ -27,10 +27,7 @@ export function ErrorPopup({
       <div className="fixed inset-0 bg-black/30 z-[9998]" onClick={onClose} />
 
       {/* Dialog */}
-      <div
-        className="fixed z-[9999] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                   w-full max-w-sm bg-white rounded-lg shadow-2xl overflow-hidden"
-      >
+      <div className="fixed z-[9999] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-lg shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 bg-red-500">
           <div className="flex items-center gap-2">
@@ -46,7 +43,7 @@ export function ErrorPopup({
         </div>
 
         {/* Body */}
-        <div className="px-5 py-5 flex flex-col items-center">
+        <div className="px-5 py-5 flex flex-col items-center overflow-y-auto flex-1 min-h-0">
           <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed text-center w-full">
             {message}
           </p>

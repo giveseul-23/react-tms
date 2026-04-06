@@ -156,7 +156,7 @@ export function PopupShell({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
+            // justifyContent: "center",
           }}
           className="p-6"
         >

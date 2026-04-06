@@ -11,7 +11,7 @@ import {
   Plus,
   Minus,
 } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import type { MenuSection, MenuNode } from "@/app/menu/menuConfig";
@@ -98,8 +98,9 @@ function MenuNodeRenderer({
     const isActive = node.menuCode === activeMenuCode;
     return (
       <button
+        data-menu-code={node.menuCode}
         onClick={() => onSelectMenu(node.menuCode)}
-        style={{ paddingLeft: `${12 + depth * 12}px` }}
+        style={{ paddingLeft: `${16 + depth * 16}px` }}
         className={`
           w-full text-left py-1 pr-3 text-sm rounded-lg transition-colors
           ${
@@ -109,7 +110,10 @@ function MenuNodeRenderer({
           }
         `}
       >
-        {node.label}
+        <div className="flex items-center gap-1.5">
+          <div className="w-0.5 h-3 bg-slate-200 rounded-full shrink-0" />
+          <span>{node.label}</span>
+        </div>
       </button>
     );
   }
@@ -119,10 +123,13 @@ function MenuNodeRenderer({
     <div>
       <button
         onClick={() => onToggleGroup(node.code)}
-        style={{ paddingLeft: `${12 + depth * 12}px` }}
+        style={{ paddingLeft: `${16 + depth * 16}px` }}
         className="w-full flex items-center justify-between py-1 pr-3 text-sm text-slate-500 font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors"
       >
-        <span>{node.label}</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-0.5 h-3 bg-slate-300 rounded-full shrink-0" />
+          <span>{node.label}</span>
+        </div>
         <ChevronRight
           className={`w-3.5 h-3.5 shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`}
         />
@@ -157,17 +164,19 @@ export function Sidebar({
 }: SidebarProps) {
   const sections: MenuSection[] = sectionsProp ?? [];
 
-  // ── Set 으로 관리 → 여러 섹션 동시 오픈 가능, UI shift 없음
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     () => new Set([...findActiveSectionCodes(activeMenuCode, sections), "TMS"]),
   );
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
 
+  // nav 스크롤용 ref
+  const navRef = useRef<HTMLDivElement>(null);
+
   const { openPopup } = usePopup();
   const navigate = useNavigate();
 
-  // activeMenuCode 변경 시 해당 섹션/그룹 자동 펼침
+  // activeMenuCode 변경 시 해당 섹션/그룹 자동 펼침 + 스크롤
   useEffect(() => {
     const codes = findActiveSectionCodes(activeMenuCode, sections);
     if (codes.length > 0) {
@@ -190,6 +199,17 @@ export function Sidebar({
       });
       if (toOpen.length > 0)
         setExpandedGroups((prev) => new Set([...prev, ...toOpen]));
+
+      // 활성 메뉴 버튼으로 스크롤 — 펼침 state 반영 후 실행
+      setTimeout(() => {
+        if (!navRef.current) return;
+        const activeEl = navRef.current.querySelector<HTMLElement>(
+          `[data-menu-code="${activeMenuCode}"]`,
+        );
+        if (activeEl) {
+          activeEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+      }, 100);
     }
   }, [activeMenuCode, sections]);
 
@@ -219,7 +239,7 @@ export function Sidebar({
     });
   };
 
-  // ── 전체 펼치기/닫기 — 모든 섹션 + 모든 그룹
+  // ── 전체 펼치기/닫기
   const expandAll = () => {
     setExpandedSections(new Set(sections.map((s) => s.sectionCode)));
     setExpandedGroups(
@@ -321,7 +341,6 @@ export function Sidebar({
         {/* ── 검색 + 전체 펼치기/닫기 ── */}
         {isOpen && (
           <div className="shrink-0 px-3 py-2 border-b">
-            {/* 검색창 */}
             <div className="relative mb-2">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
               <input
@@ -340,7 +359,6 @@ export function Sidebar({
               )}
             </div>
 
-            {/* 전체 펼치기 / 닫기 */}
             <div className="flex items-center justify-between px-1">
               <span className="text-[11px] text-slate-400">전체</span>
               <div className="flex items-center gap-1">
@@ -349,7 +367,7 @@ export function Sidebar({
                   title="전체 펼치기"
                   className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
                 >
-                  <Plus className="w-3.5 h-3.5 rotate-180" />
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={collapseAll}
@@ -364,7 +382,7 @@ export function Sidebar({
         )}
 
         {/* ── Menu ── */}
-        <nav className="flex-1 overflow-y-auto p-2">
+        <nav ref={navRef} className="flex-1 overflow-y-auto p-2">
           {filteredSections.map((section) => {
             const Icon = section.icon;
             const isSectionExpanded =
@@ -377,14 +395,11 @@ export function Sidebar({
 
             return (
               <div key={section.sectionCode} className="mb-1">
-                {/* 섹션 헤더 — [아이콘 + 메뉴명] [+ -] [ChevronRight] */}
+                {/* 섹션 헤더 */}
                 <div className="flex items-center group px-1">
-                  {/* 아이콘 (접힌 사이드바용) */}
                   {!isOpen && (
                     <button
-                      onClick={() => {
-                        onToggle();
-                      }}
+                      onClick={() => onToggle()}
                       title={section.title}
                       className={`
                         flex items-center justify-center w-full py-1.5 rounded-lg
@@ -396,10 +411,8 @@ export function Sidebar({
                     </button>
                   )}
 
-                  {/* 펼린 사이드바: [아이콘+메뉴명] [expand버튼들] [chevron] */}
                   {isOpen && (
                     <>
-                      {/* 메뉴명 클릭 → 섹션 토글 */}
                       <button
                         onClick={() => toggleSection(section.sectionCode)}
                         className="flex items-center gap-2 flex-1 py-1.5 pl-2 text-sm font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors min-w-0"
@@ -408,7 +421,6 @@ export function Sidebar({
                         <span className="truncate">{section.title}</span>
                       </button>
 
-                      {/* +/- 버튼 — hover 시 표시 */}
                       {hasNodes && (
                         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                           <button
@@ -419,7 +431,7 @@ export function Sidebar({
                             title={`${section.title} 모두 펼치기`}
                             className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700"
                           >
-                            <Plus className="w-3.5 h-3.5 rotate-180" />
+                            <Plus className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={(e) => {
@@ -434,7 +446,6 @@ export function Sidebar({
                         </div>
                       )}
 
-                      {/* 아래 방향 chevron — 섹션 토글 */}
                       <button
                         onClick={() => toggleSection(section.sectionCode)}
                         className="p-1 shrink-0 hover:bg-gray-100 rounded transition-colors"
@@ -473,8 +484,9 @@ export function Sidebar({
                       : section.items.map((item) => (
                           <button
                             key={item.menuCode}
+                            data-menu-code={item.menuCode}
                             onClick={() => onSelectMenu(item.menuCode)}
-                            style={{ paddingLeft: "12px" }}
+                            style={{ paddingLeft: "16px" }}
                             className={`
                               w-full text-left py-1 pr-3 text-sm rounded-lg
                               ${
@@ -484,7 +496,10 @@ export function Sidebar({
                               }
                             `}
                           >
-                            {item.label}
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-0.5 h-3 bg-slate-200 rounded-full shrink-0" />
+                              <span>{item.label}</span>
+                            </div>
                           </button>
                         ))}
                   </div>

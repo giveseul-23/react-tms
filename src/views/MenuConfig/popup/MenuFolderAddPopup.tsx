@@ -131,7 +131,8 @@ export default function MenuFolderAddPopup({
           <select
             value={form.APPLCODE}
             onChange={set("APPLCODE")}
-            className="w-full h-8 pl-2 pr-8 border border-slate-200 rounded-md text-sm bg-white focus:outline-none focus:border-blue-500 appearance-none"
+            className="w-full h-8 pl-2 pr-8 border border-slate-200 rounded-md text-sm bg-slate-100 cursor-not-allowed text-slate-600 focus:outline-none focus:border-blue-500 appearance-none"
+            disabled
           >
             <option value="">선택</option>
             {applOptions.map((o) => (
