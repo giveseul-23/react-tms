@@ -1,11 +1,22 @@
+// src/app/menu/menuComponentMap.ts
 import TenderReceiveDispatch from "@/views/tender/TenderReceiveDispatch";
 import SearchCondition from "@/views/searchCondition/SearchCondition";
 import MenuConfig from "@/views/MenuConfig/MenuConfig";
+import Welcome from "@/views/welcome/Welcome";
 
 export const MENU_COMPONENT_MAP = {
-  TENDER_RECEIVE: TenderReceiveDispatch,
-  SEARCH_CONDITION: SearchCondition,
-  MENU_CONFIG: MenuConfig,
+  // 기본 홈 화면
+  __WELCOME__: Welcome,
+
+  // 기존 하드코딩 키
+  // TENDER_RECEIVE: TenderReceiveDispatch,
+  // SEARCH_CONDITION: SearchCondition,
+  // MENU_CONFIG: MenuConfig,
+
+  // 서버 실제 MENUCODE
+  MENU_CFG_CNFG: MenuConfig,
+  MENU_CFG_SRCH_COND: SearchCondition,
+  MENU_PLAN_TENDER_RECEIVE: TenderReceiveDispatch,
 } as const;
 
 export type MenuCode = keyof typeof MENU_COMPONENT_MAP;

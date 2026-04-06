@@ -204,8 +204,8 @@ function TreeGridInner<TRow extends TreeRow>(
     if (source.length === 0 && prevSourceLengthRef.current === 0) return;
     prevSourceLengthRef.current = source.length;
     setExpandedIds(buildInitialExpanded(source, defaultExpandLevel));
-  // defaultExpandLevel 은 보통 고정값이므로 source 만 dependency
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // defaultExpandLevel 은 보통 고정값이므로 source 만 dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
 
   // ── 선택 행 상태 (액션바 onClick({ data }) 에 주입) ───────────────────────

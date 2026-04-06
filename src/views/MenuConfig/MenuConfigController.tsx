@@ -1,12 +1,17 @@
-// src/views/menu/MenuConfigController.tsx
+// src/views/MenuConfig/MenuConfigController.tsx
 import { useCallback, MutableRefObject } from "react";
 import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { menuApi } from "@/app/services/menu/menuApi";
 import { useApiHandler } from "@/hooks/useApiHandler";
+import { usePopup } from "@/app/components/popup/PopupContext";
 import { MAIN_COLUMN_DEFS } from "./MenuConfigColumns";
 import { MenuConfigModel } from "./MenuConfigModel";
 import { buildSource } from "./MenuConfig";
+import MenuFolderAddPopup, { type FolderFormData } from "./popup/MenuFolderAddPopup";
+import MenuItemAddPopup, { type MenuItemFormData } from "./popup/MenuItemAddPopup";
+import type { MenuRow } from "./MenuConfig";
+import ConfirmModal from "@/views/common/ConfirmPopup";
 
 type ControllerProps = {
   model: MenuConfigModel;
@@ -20,33 +25,21 @@ export function useMenuConfigController({
   filtersRef,
 }: ControllerProps) {
   const { handleApi } = useApiHandler();
+  const { openPopup, closePopup } = usePopup();
 
-  // ── fetch ──────────────────────────────────────
   const fetchMenuConfigList = useCallback(
     (params: Record<string, unknown>) => menuApi.getMenuConfigList(params),
     [],
   );
 
-  // ── ✅ 핵심 수정 ─────────────────────────────────
   const handleSearch = useCallback(
     (result: any) => {
-      console.log("🔥 onSearch result:", result);
-
       const list = result?.rows ?? [];
-
-      console.log("🔥 rows:", list);
-
       if (!Array.isArray(list)) {
-        console.error("❌ rows is not array:", list);
         model.setSource([]);
         return;
       }
-
-      const source = buildSource(list);
-
-      console.log("🔥 source:", source);
-
-      model.setSource(source);
+      model.setSource(buildSource(list));
     },
     [model],
   );
@@ -58,23 +51,183 @@ export function useMenuConfigController({
     [model],
   );
 
+  const getApplOptions = useCallback(() => {
+    return model.source
+      .filter((r) => r.isVirtualRoot)
+      .map((r) => ({ CODE: r.APPLCODE, NAME: r.APPLNAME || r.APPLCODE }));
+  }, [model.source]);
+
+  // 팝업 폼 데이터 → TreeRow 변환 공통 헬퍼
+  const toNewRow = useCallback(
+    (
+      data: FolderFormData | MenuItemFormData,
+      applOptions: { CODE: string; NAME: string }[],
+    ): MenuRow => {
+      const parentId =
+        data.PARANT_MENU_CD === "-1"
+          ? `__ROOT__${data.APPLCODE}`
+          : data.PARANT_MENU_CD;
+
+      const parentLevel =
+        model.source.find((r) => r.id === parentId)?.level ?? 0;
+
+      return {
+        id: data.MENUCODE,
+        parentId,
+        level: parentLevel + 1,
+        MENUCODE: data.MENUCODE,
+        MSG_CD: data.MSG_CD,
+        MENUNAME: "MENUNAME" in data ? data.MENUNAME : "",
+        MSG_DESC: data.MSG_DESC,
+        APPLCODE: data.APPLCODE,
+        APPLNAME:
+          applOptions.find((o) => o.CODE === data.APPLCODE)?.NAME ??
+          data.APPLCODE,
+        PARANT_MENU_CD: data.PARANT_MENU_CD,
+        LEAFYN: data.LEAFYN,
+        SUPERMENUCODE: data.SUPERMENUCODE,
+        DSPLY_SEQ: data.DSPLY_SEQ,
+        URL: "URL" in data ? data.URL : "",
+        USE_YN: data.USE_YN,
+        RSRC_CNT: 0,
+        isVirtualRoot: false,
+        _isNew: true, // 저장 버튼 클릭 시 신규 식별용
+      } as MenuRow & { _isNew: boolean };
+    },
+    [model.source],
+  );
+
   const mainActions = [
     {
       type: "button" as const,
       key: "모두펼치기",
       label: "모두펼치기",
-      onClick: () => {
-        treeGridRef.current?.expandAll();
-      },
+      onClick: () => treeGridRef.current?.expandAll(),
     },
     {
       type: "button" as const,
       key: "모두접기",
       label: "모두접기",
+      onClick: () => treeGridRef.current?.collapseAll(),
+    },
+
+    // ── 메뉴경로 추가 (폴더, LEAFYN=N) ──────────────────────────
+    {
+      type: "button" as const,
+      key: "메뉴경로추가",
+      label: "메뉴경로추가",
       onClick: () => {
-        treeGridRef.current?.collapseAll();
+        // 행 미선택 시 차단
+        if (!model.selectedRowRef.current) {
+          openPopup({
+            title: "",
+            width: "sm",
+            content: (
+              <ConfirmModal
+                type="check"
+                title="행을 선택하세요"
+                description="메뉴경로를 추가할 상위 항목을 먼저 선택해주세요."
+                onClose={closePopup}
+              />
+            ),
+          });
+          return;
+        }
+        const applOptions = getApplOptions();
+        openPopup({
+          title: "메뉴경로 추가 (폴더)",
+          width: "md",
+          content: (
+            <MenuFolderAddPopup
+              selectedRow={model.selectedRowRef.current}
+              applOptions={applOptions}
+              onConfirm={(data: FolderFormData) => {
+                closePopup();
+                // 서버 호출 없이 source 에 바로 추가 → 그리드에 즉시 반영
+                model.setSource((prev: MenuRow[]) => [
+                  ...prev,
+                  toNewRow(data, applOptions),
+                ]);
+              }}
+              onClose={closePopup}
+            />
+          ),
+        });
       },
     },
+
+    // ── 메뉴 추가 (화면, LEAFYN=Y) ──────────────────────────────
+    {
+      type: "button" as const,
+      key: "메뉴추가",
+      label: "메뉴추가",
+      onClick: () => {
+        // 행 미선택 시 차단
+        if (!model.selectedRowRef.current) {
+          openPopup({
+            title: "",
+            width: "sm",
+            content: (
+              <ConfirmModal
+                type="check"
+                title="행을 선택하세요"
+                description="메뉴를 추가할 상위 항목을 먼저 선택해주세요."
+                onClose={closePopup}
+              />
+            ),
+          });
+          return;
+        }
+        const applOptions = getApplOptions();
+        openPopup({
+          title: "메뉴 추가 (화면)",
+          width: "md",
+          content: (
+            <MenuItemAddPopup
+              selectedRow={model.selectedRowRef.current}
+              applOptions={applOptions}
+              onConfirm={(data: MenuItemFormData) => {
+                closePopup();
+                // 서버 호출 없이 source 에 바로 추가 → 그리드에 즉시 반영
+                model.setSource((prev: MenuRow[]) => [
+                  ...prev,
+                  toNewRow(data, applOptions),
+                ]);
+              }}
+              onClose={closePopup}
+            />
+          ),
+        });
+      },
+    },
+
+    // ── 저장 (_isNew / _isDirty 행만 서버로) ────────────────────
+    {
+      type: "button" as const,
+      key: "저장",
+      label: "저장",
+      onClick: () => {
+        const saveRows = model.source.filter(
+          (r: any) => r._isNew || r._isDirty,
+        );
+        if (saveRows.length === 0) return;
+
+        handleApi(
+          menuApi.saveMenuConfig(saveRows),
+          "저장되었습니다.",
+        ).then(() => {
+          // 저장 완료 후 플래그 제거
+          model.setSource((prev: MenuRow[]) =>
+            prev.map((r: any) => {
+              const { _isNew, _isDirty, ...rest } = r;
+              return rest as MenuRow;
+            }),
+          );
+        });
+      },
+    },
+
+    // ── 엑셀 ────────────────────────────────────────────────────
     {
       type: "group" as const,
       key: "엑셀",

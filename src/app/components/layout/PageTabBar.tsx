@@ -23,8 +23,12 @@ export function PageTabBar({
   if (tabs.length === 0) return null;
 
   const dragIndexRef = useRef<number | null>(null);
-  // dropIndex: 드롭하면 이 인덱스 앞에 삽입
   const [dropIndex, setDropIndex] = useState<number | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    menuCode: string;
+  } | null>(null);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     dragIndexRef.current = index;
@@ -129,10 +133,18 @@ export function PageTabBar({
                 : undefined,
             }}
             onClick={() => onSelect(tab.menuCode)}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setContextMenu({
+                x: e.clientX,
+                y: e.clientY,
+                menuCode: tab.menuCode,
+              });
+            }}
           >
             <span className="max-w-[120px] truncate">{tab.label}</span>
 
-            {tabs.length > 1 && (
+            {tabs.length > 1 && tab.menuCode !== "__WELCOME__" && (
               <button
                 className={`
                   ml-0.5 rounded-full p-0.5
@@ -151,6 +163,56 @@ export function PageTabBar({
           </div>
         );
       })}
+
+      {contextMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-[9990]"
+            onClick={() => setContextMenu(null)}
+          />
+          <div
+            className="fixed z-[9991] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1 text-sm w-[120px]"
+            style={{ top: contextMenu.y, left: contextMenu.x }}
+          >
+            <button
+              disabled={contextMenu.menuCode === "__WELCOME__"}
+              onClick={() => {
+                onClose(contextMenu.menuCode);
+                setContextMenu(null);
+              }}
+              className="w-full text-left px-4 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              탭 닫기
+            </button>
+            <button
+              onClick={() => {
+                tabs
+                  .filter(
+                    (t) =>
+                      t.menuCode !== contextMenu.menuCode &&
+                      t.menuCode !== "__WELCOME__",
+                  )
+                  .forEach((t) => onClose(t.menuCode));
+                setContextMenu(null);
+              }}
+              className="w-full text-left px-4 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
+              다른 탭 닫기
+            </button>
+            <button
+              onClick={() => {
+                tabs
+                  .filter((t) => t.menuCode !== "__WELCOME__")
+                  .forEach((t) => onClose(t.menuCode));
+                setContextMenu(null);
+              }}
+              className="w-full text-left px-4 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
+              모든 탭 닫기
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -23,6 +23,8 @@ export function usePageTabs(initialMenuCode: string, initialLabel: string) {
 
   const closeTab = useCallback(
     (menuCode: string) => {
+      if (menuCode === "__WELCOME__") return; //WELCOME 페이지 못닫음
+
       setTabs((prev) => {
         if (prev.length === 1) return prev;
         const idx = prev.findIndex((t) => t.menuCode === menuCode);
@@ -46,5 +48,12 @@ export function usePageTabs(initialMenuCode: string, initialLabel: string) {
     });
   }, []);
 
-  return { tabs, activeMenuCode, openTab, closeTab, setActiveMenuCode, reorderTabs };
+  return {
+    tabs,
+    activeMenuCode,
+    openTab,
+    closeTab,
+    setActiveMenuCode,
+    reorderTabs,
+  };
 }
