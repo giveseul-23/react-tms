@@ -2,7 +2,7 @@
 import TenderReceiveDispatch from "@/views/tender/TenderReceiveDispatch";
 import SearchCondition from "@/views/searchCondition/SearchCondition";
 import MenuConfig from "@/views/MenuConfig/MenuConfig";
-import Welcome from "@/views/welcome/Welcome";
+import Welcome from "@/views/welcome/WelCome";
 
 export const MENU_COMPONENT_MAP = {
   // 기본 홈 화면

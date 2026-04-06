@@ -30,8 +30,12 @@ export function usePageTabs(initialMenuCode: string, initialLabel: string) {
         const idx = prev.findIndex((t) => t.menuCode === menuCode);
         const next = prev.filter((t) => t.menuCode !== menuCode);
         if (menuCode === activeMenuCode) {
-          const nextActive = next[Math.min(idx, next.length - 1)];
-          setActiveMenuCode(nextActive.menuCode);
+          // 남은 탭 중 가장 가까운 탭으로 이동
+          // next 가 __WELCOME__ 하나뿐이어도 정상 동작
+          const nextActive =
+            next[Math.max(0, Math.min(idx - 1, next.length - 1))];
+          // setTimeout 으로 state 업데이트 순서 보장
+          setTimeout(() => setActiveMenuCode(nextActive.menuCode), 0);
         }
         return next;
       });
