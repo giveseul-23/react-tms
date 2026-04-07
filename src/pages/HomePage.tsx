@@ -85,7 +85,7 @@ export default function HomePage() {
           onReorder={reorderTabs}
         />
 
-        <main className="flex-1 min-h-0 p-6 relative">
+        <main className="flex-1 min-h-0 px-[15px] pt-[15px] pb-0 relative overflow-hidden">
           {mountedMenuCodes.map((menuCode) => {
             const Component = (
               MENU_COMPONENT_MAP as Record<string, React.ComponentType>
@@ -95,7 +95,7 @@ export default function HomePage() {
             return (
               <div
                 key={menuCode}
-                className="absolute inset-6"
+                className="absolute left-[15px] right-[15px] top-[15px] bottom-0 overflow-hidden"
                 style={{
                   display: isActive ? "flex" : "none",
                   flexDirection: "column",

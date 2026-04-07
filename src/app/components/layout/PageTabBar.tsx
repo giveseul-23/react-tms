@@ -70,7 +70,7 @@ export function PageTabBar({
 
   return (
     <div
-      className="flex items-center bg-[rgb(var(--bg))] border-b border-gray-200 shrink-0 h-7 overflow-x-auto overflow-y-hidden"
+      className="flex items-center bg-[rgb(var(--bg))] border-b border-gray-200 shrink-0 h-10 overflow-x-auto overflow-y-hidden"
       style={{ scrollbarWidth: "none" }}
       // 탭 바 맨 끝에 드롭할 수 있도록 바 자체도 처리
       onDragOver={(e) => {
@@ -176,7 +176,7 @@ export function PageTabBar({
             onClick={() => setContextMenu(null)}
           />
           <div
-            className="fixed z-[9991] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1 text-sm w-[120px]"
+            className="fixed z-[9991] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1 text-[13px] w-[120px]"
             style={{ top: contextMenu.y, left: contextMenu.x }}
           >
             <button
