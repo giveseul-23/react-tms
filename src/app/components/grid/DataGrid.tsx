@@ -647,6 +647,9 @@ export default function DataGrid<TRow>({
             mode: "multiRow" as const,
             enableClickSelection: false,
           },
+    selectionColumnDef: {
+      headerClass: "ag-selection-header-center",
+    },
 
     // ─── Escape Hatch: 외부 gridOptions 오버라이드 (최종 우선순위) ──────────
     ...gridOptions,

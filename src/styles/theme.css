@@ -460,20 +460,16 @@
   justify-content: flex-end;
 }
 
-/* 헤더 체크박스 중앙 정렬 */
-.ag-theme-quartz .ag-header-select-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
+/* ── 헤더 체크박스(전체선택) 중앙정렬 ── */
+/* AG Grid v35: .ag-header-select-all 이 .ag-header-cell 의 직접 자식으로 렌더링됨 */
+.ag-selection-header-center {
+  position: relative !important;
 }
 
-.ag-theme-quartz .ag-header-cell.ag-column-select-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ag-theme-quartz .ag-header-select-all {
-  margin: 0 auto;
+.ag-selection-header-center > .ag-header-select-all {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
