@@ -427,14 +427,38 @@ export default function DataGrid<TRow>({
     }
 
     function applyHighlight() {
+      // 선택 범위의 경계(min/max row, col) 계산
+      const keys = selectedCellsRef.current;
+      let minR = Infinity, maxR = -Infinity, minC = Infinity, maxC = -Infinity;
+      keys.forEach((k) => {
+        const [r, c] = k.split(":").map(Number);
+        if (r < minR) minR = r;
+        if (r > maxR) maxR = r;
+        if (c < minC) minC = c;
+        if (c > maxC) maxC = c;
+      });
+
       container.querySelectorAll<HTMLElement>(".ag-cell").forEach((cell) => {
         const coords = getCellCoords(cell);
         if (!coords) return;
-        const selected = selectedCellsRef.current.has(
-          `${coords.rowIndex}:${coords.colIndex}`,
-        );
-        cell.style.backgroundColor = selected ? "rgba(59,130,246,0.15)" : "";
-        cell.style.outline = selected ? "1px solid rgba(59,130,246,0.5)" : "";
+        const { rowIndex: r, colIndex: c } = coords;
+        const selected = keys.has(`${r}:${c}`);
+
+        if (!selected) {
+          cell.style.backgroundColor = "";
+          cell.style.boxShadow = "";
+          return;
+        }
+
+        cell.style.backgroundColor = "rgba(59,130,246,0.15)";
+
+        // 외곽 테두리만 그리기: 선택 범위의 가장자리 셀만 해당 방향에 선 표시
+        const borders: string[] = [];
+        if (r === minR) borders.push("inset 0 1px 0 0 rgba(59,130,246,0.5)");
+        if (r === maxR) borders.push("inset 0 -1px 0 0 rgba(59,130,246,0.5)");
+        if (c === minC) borders.push("inset 1px 0 0 0 rgba(59,130,246,0.5)");
+        if (c === maxC) borders.push("inset -1px 0 0 0 rgba(59,130,246,0.5)");
+        cell.style.boxShadow = borders.join(", ");
       });
     }
 
