@@ -415,11 +415,18 @@
   box-shadow: inset 0 0 0 1px rgb(var(--primary)) !important;
 }
 
-
 /* ── DataGrid 헤더 정렬 헬퍼 ── */
 .ag-header-center .ag-header-cell-label {
   justify-content: center;
 }
 .ag-header-right .ag-header-cell-label {
   justify-content: flex-end;
+}
+
+/* ── 체크박스 제외 헤더 텍스트 중앙정렬 ── */
+.ag-theme-bridge .ag-header-cell:not(.ag-selection-header-center) .ag-header-cell-comp-wrapper {
+  width: 100% !important;
+}
+.ag-theme-bridge .ag-header-cell:not(.ag-selection-header-center) .ag-header-cell-label {
+  justify-content: center;
 }
