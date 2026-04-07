@@ -149,7 +149,7 @@ export function PageTabBar({
           >
             <span>{tab.label}</span>
 
-            {tabs.length > 1 && tab.menuCode !== "__WELCOME__" && (
+            {tabs.length > 1 && tab.menuCode !== "__WELCOME__" && tab.label !== "Home" && (
               <button
                 className={`
                   ml-0.5 rounded-full p-0.5
@@ -176,16 +176,21 @@ export function PageTabBar({
             onClick={() => setContextMenu(null)}
           />
           <div
-            className="fixed z-[9991] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1 text-[13px] w-[120px]"
-            style={{ top: contextMenu.y, left: contextMenu.x }}
+            className="fixed z-[9991] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1 !text-[13px] w-[120px]"
+            style={{
+              top: contextMenu.y,
+              left: contextMenu.x,
+              fontSize: "13px",
+            }}
           >
             <button
-              disabled={contextMenu.menuCode === "__WELCOME__"}
+              disabled={contextMenu.menuCode === "__WELCOME__" || tabs.find((t) => t.menuCode === contextMenu.menuCode)?.label === "Home"}
               onClick={() => {
                 onClose(contextMenu.menuCode);
                 setContextMenu(null);
               }}
               className="w-full text-left px-4 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ fontSize: "inherit" }}
             >
               탭 닫기
             </button>
@@ -195,23 +200,26 @@ export function PageTabBar({
                   .filter(
                     (t) =>
                       t.menuCode !== contextMenu.menuCode &&
-                      t.menuCode !== "__WELCOME__",
+                      t.menuCode !== "__WELCOME__" &&
+                      t.label !== "Home",
                   )
                   .forEach((t) => onClose(t.menuCode));
                 setContextMenu(null);
               }}
               className="w-full text-left px-4 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700"
+              style={{ fontSize: "inherit" }}
             >
               다른 탭 닫기
             </button>
             <button
               onClick={() => {
                 tabs
-                  .filter((t) => t.menuCode !== "__WELCOME__")
+                  .filter((t) => t.menuCode !== "__WELCOME__" && t.label !== "Home")
                   .forEach((t) => onClose(t.menuCode));
                 setContextMenu(null);
               }}
               className="w-full text-left px-4 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700"
+              style={{ fontSize: "inherit" }}
             >
               모든 탭 닫기
             </button>
