@@ -244,7 +244,7 @@ export function SearchFilters({
 
       fetchFn(params)
         .then((res: any) => {
-          const rows = res.data.result ?? res.data.data.allData.data ?? [];
+          const rows = res.data.result ?? res.data.data.allData?.data ?? res.data.data.dsOut ?? [];
 
           const totalCount = computeTotalCount
             ? computeTotalCount(rows) // 외부 함수로 직접 계산

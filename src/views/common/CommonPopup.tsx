@@ -53,7 +53,7 @@ export function CommonPopup({
       fetchFn(extra)
         .then((res: any) => {
           // 응답 데이터를 { CODE, NAME } 형식으로 변환
-          const result = res.data.result ?? res.data.rows ?? [];
+          const result = res.data.result ?? res.data.rows ?? res.data.data ??  [];
           setRows(result);
         })
         .catch(console.error);

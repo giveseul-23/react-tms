@@ -38,7 +38,7 @@ export default function AuthPage() {
     setLoading(true);
 
     try {
-      const res = await authApi.loginMobile({
+      const res = await authApi.loginJwt({
         userId: form.userId,
         password: form.password,
       });

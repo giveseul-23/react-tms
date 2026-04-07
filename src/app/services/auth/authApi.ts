@@ -14,8 +14,8 @@ export type LoginResponse = {
 };
 
 export const authApi = {
-  loginMobile({ userId, password }: LoginRequest) {
-    return apiClient.post<LoginResponse>("/sessionService/loginMobile", {
+  loginJwt({ userId, password }: LoginRequest) {
+    return apiClient.post<LoginResponse>("/sessionService/loginJwt", {
       USERID: btoa(userId),
       PASSWORD: btoa(password),
     });

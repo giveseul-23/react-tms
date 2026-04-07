@@ -16,39 +16,59 @@ const withSession = (payload: any = {}) => {
 };
 
 export const tenderApi = {
+    MENU_CD: "MENU_PLAN_TENDER",  
   ////// SEARCH
   getDispatchList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/openapina/carrier/getDspchList`,
-      withSession(payload),
+      //`/openapina/carrier/getDspchList`,
+      `/tenderReceiveDispatchService/searchPlanDispatch`,
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
+  
   getDispatchStopList(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/getDspchStopList",
-      withSession(payload),
+      //"/openapina/carrier/getDspchStopList",
+      "/tenderReceiveDispatchService/searchPlanStop",
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
   getDispatchSmsHisList(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/getDispatchSmsHisList",
-      withSession(payload),
+      //"/openapina/carrier/getDispatchSmsHisList",
+      "/tenderReceiveDispatchService/searchSmsHistory",
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
   getDispatchApSetlList(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/getDispatchApSetlList",
-      withSession(payload),
+      "/tenderReceiveDispatchService/searchCarrierRate",
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
   getBookingChgCodeName(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/getBookingChgCodeName",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
@@ -56,7 +76,10 @@ export const tenderApi = {
   updateCarrierRate(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/updateCarrierRate",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
@@ -70,42 +93,59 @@ export const tenderApi = {
   onTenderRejected(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onTenderRejected",
-      withSession(payload),
-    );
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),    );
   },
 
   onChangeRegVeh(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onChangeRegVeh",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
   onChangeTempVeh(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onChangeTempVeh",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
   onVehicleChange(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onVehicleChange",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
   onVehicleCancel(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onVehicleCancel",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
   sendSMSForAppInstall(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/sendSMSForAppInstall",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
@@ -113,14 +153,20 @@ export const tenderApi = {
   gridExcelUpload(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/gridExcelUpload",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
   gridExcelAll(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/downloadExcel",
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
       { responseType: "blob" },
     );
   },

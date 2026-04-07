@@ -50,7 +50,7 @@ export default function VehicleAssignPopup({
         ...extraParams,
       })
       .then((res: any) => {
-        setRows(res.data.result ?? []);
+        setRows(res.data.result ?? res.data.data ??  []);
       })
       .catch((err: any) => {
         console.error(err);
