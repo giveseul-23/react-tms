@@ -281,45 +281,26 @@
   accent-color: rgb(var(--primary));
 }
 
-/* ── ag-Grid 체크박스 컬럼 너비 최소화 + 중앙정렬 ── */
+/* ── ag-Grid 체크박스 영역 크기 최소화 ── */
 .ag-theme-bridge .ag-selection-checkbox,
 .ag-theme-bridge .ag-header-select-all {
   padding: 0 !important;
-  margin: 0 auto !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+  margin: 0 !important;
+  width: 14px !important;
+  min-width: 14px !important;
 }
 .ag-theme-bridge .ag-checkbox-input-wrapper {
   width: 14px !important;
   height: 14px !important;
 }
-.ag-theme-bridge .ag-selection-checkbox {
-  width: 100% !important;
+.ag-theme-bridge.ag-ltr .ag-header-select-all,
+.ag-theme-bridge .ag-ltr .ag-header-select-all {
+  margin-right: 0 !important;
+}
+.ag-theme-bridge .ag-header-cell-comp-wrapper {
+  width: auto !important;
   min-width: 0 !important;
-}
-.ag-theme-bridge .ag-header-select-all {
-  width: 100% !important;
-  min-width: 0 !important;
-}
-.ag-theme-bridge .ag-cell[col-id="ag-Grid-AutoColumn"] .ag-cell-wrapper,
-.ag-theme-bridge
-  .ag-header-cell[col-id="ag-Grid-AutoColumn"]
-  .ag-header-cell-comp-wrapper {
-  justify-content: center !important;
-}
-
-/* ── 헤더 체크박스 영역 중앙정렬 ── */
-.ag-theme-bridge .ag-header-cell .ag-header-select-all {
-  width: 100% !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-}
-.ag-theme-bridge .ag-header-cell .ag-header-cell-comp-wrapper {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+  padding: 0 !important;
 }
 
 .ag-theme-quartz .ag-checkbox-input-wrapper {
@@ -458,22 +439,4 @@
 }
 .ag-header-right .ag-header-cell-label {
   justify-content: flex-end;
-}
-
-/* 헤더 체크박스 중앙 정렬 */
-.ag-theme-quartz .ag-header-select-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.ag-theme-quartz .ag-header-cell.ag-column-select-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ag-theme-quartz .ag-header-select-all {
-  margin: 0 auto;
 }
