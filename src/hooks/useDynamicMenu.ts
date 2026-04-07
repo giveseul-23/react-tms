@@ -90,10 +90,10 @@ export function useDynamicMenu() {
   useEffect(() => {
     const { userId } = getSessionFields();
     menuApi
-      .getMenuConfigList({ userId, DYNAMIC_QUERY: "1=1" })
+      .getMenuConfigList({ userId, DYNAMIC_QUERY: "1=1"})
       .then((res: any) => {
         const data: any[] =
-          res.data?.data?.allData?.data ?? res.data?.result ?? [];
+          res.data?.data?.allData?.data ?? res.data?.result ?? res.data?.data?.data ?? [];
         setSections(data.length ? buildSections(data) : []);
       })
       .catch(() => setSections([]))

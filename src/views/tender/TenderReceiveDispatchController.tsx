@@ -88,9 +88,9 @@ export function useTenderReceiveDispatchController({
         tenderApi.getDispatchApSetlList({ DSPCH_NO: row.DSPCH_NO }),
       ])
         .then(([stopRes, smsRes, apSetlRes]: any[]) => {
-          model.setSubStopRowData(stopRes.data.result ?? []);
-          model.setSubSmsHisRowData(smsRes.data.result ?? []);
-          model.setSubApSetlRowData(apSetlRes.data.result ?? []);
+          model.setSubStopRowData(stopRes.data.result ?? stopRes.data.data.dsOut ?? []);
+          model.setSubSmsHisRowData(smsRes.data.result ?? stopRes.data.data.dsOut ??  []);
+          model.setSubApSetlRowData(apSetlRes.data.result ?? stopRes.data.data.dsOut ?? []);
         })
         .catch((err) => {
           console.error("[TenderReceiveDispatch] row click sub-fetch failed", err);

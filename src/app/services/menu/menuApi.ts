@@ -17,10 +17,16 @@ const withSession = (payload: any = {}) => {
 };
 
 export const menuApi = {
+  MENU_CD: "MENU_CFG",
+
   getMenuConfigList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/openapina/carrier/getMenuConfigList`,
-      withSession(payload),
+     // `/openapina/carrier/getMenuConfigList`,
+      `/menuService/search`,
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
@@ -28,7 +34,10 @@ export const menuApi = {
   insertMenuFolder(payload: any) {
     return apiClient.post(
       `/openapina/carrier/insertMenuFolder`,
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
@@ -36,7 +45,10 @@ export const menuApi = {
   insertMenuItem(payload: any) {
     return apiClient.post(
       `/openapina/carrier/insertMenuItem`,
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 
@@ -44,7 +56,10 @@ export const menuApi = {
   saveMenuConfig(payload: any[]) {
     return apiClient.post(
       `/openapina/carrier/saveMenuConfig`,
-      withSession(payload),
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload
+      }),
     );
   },
 };
