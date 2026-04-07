@@ -305,7 +305,7 @@ export function SearchFilters({
         >
           <div className="flex items-center gap-1.5">
             <SlidersHorizontal className="w-4 h-4 text-white mt-px" />
-            <span className="text-sm font-semibold text-white uppercase leading-none">
+            <span className="text-[13px] font-semibold text-white uppercase leading-none">
               조회조건
             </span>
           </div>

@@ -30,6 +30,24 @@ function cls(...xs: Array<string | false | undefined | null>) {
   return xs.filter(Boolean).join(" ");
 }
 
+/** 텍스트 너비 측정 후 드롭다운 최소 너비 계산 */
+function calcDropdownWidth(items: ActionButton[]): number {
+  if (typeof document === "undefined") return 120;
+  const span = document.createElement("span");
+  span.style.cssText =
+    "position:absolute;visibility:hidden;white-space:nowrap;font:11px Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;";
+  document.body.appendChild(span);
+  let max = 0;
+  for (const item of items) {
+    span.textContent = item.label;
+    const w = span.offsetWidth;
+    if (w > max) max = w;
+  }
+  document.body.removeChild(span);
+  // px-3(12px) * 2 + 여유 4px
+  return max + 24 + 4;
+}
+
 /* =======================
  * GridActionsBar
  * ======================= */
@@ -45,6 +63,7 @@ export function GridActionsBar({
   const [dropdownStyle, setDropdownStyle] =
     useState<React.CSSProperties | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const barRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!openKey) return;
@@ -71,7 +90,7 @@ export function GridActionsBar({
   );
 
   return (
-    <div className={cls("relative px-2 py-1 min-w-0", className)}>
+    <div ref={barRef} className={cls("relative px-2 py-1 min-w-0", className)}>
       <div
         ref={scrollRef}
         className="
@@ -96,15 +115,28 @@ export function GridActionsBar({
                 key={a.key}
                 type="button"
                 variant="outline"
-                className="h-6 px-2 text-[11px] gap-1 rounded-lg items-center [&_svg]:size-3 [&_svg]:shrink-0"
+                className="h-6 px-2 !py-0 text-[11px] leading-none gap-1 !rounded-md items-center [&_svg]:size-3 [&_svg]:shrink-0"
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
+                  const barRect = barRef.current?.closest(".border")?.getBoundingClientRect();
+                  const dropdownWidth = calcDropdownWidth(a.items);
+                  const leftAligned = rect.left;
+                  const gridRight = barRect?.right ?? window.innerWidth;
+                  const left = leftAligned + dropdownWidth > gridRight
+                    ? rect.right - dropdownWidth
+                    : leftAligned;
+                  // 아래 공간 부족 시 위로 열기
+                  const estimatedHeight = a.items.length * 26 + 30;
+                  const fitsBelow = rect.bottom + 4 + estimatedHeight <= window.innerHeight;
                   setAnchorEl(e.currentTarget);
                   setDropdownStyle({
                     position: "fixed",
-                    top: rect.bottom + 4,
-                    left: rect.right - 160,
-                    width: 160,
+                    ...(fitsBelow
+                      ? { top: rect.bottom + 4 }
+                      : { bottom: window.innerHeight - rect.top + 4 }),
+                    left,
+                    minWidth: dropdownWidth,
+                    whiteSpace: "nowrap" as const,
                     zIndex: 9999,
                   });
                   setOpenKey((prev) => (prev === a.key ? null : a.key));
@@ -118,7 +150,7 @@ export function GridActionsBar({
                 key={a.key}
                 type="button"
                 variant="outline"
-                className="h-6 px-2 text-[11px] rounded-lg items-center [&_svg]:size-3 [&_svg]:shrink-0"
+                className="h-6 px-2 !py-0 text-[11px] leading-none !rounded-md items-center [&_svg]:size-3 [&_svg]:shrink-0"
                 onClick={a.onClick}
               >
                 {a.label}
@@ -134,9 +166,14 @@ export function GridActionsBar({
         createPortal(
           <div
             data-dropdown
-            className="rounded-lg border border-gray-200 bg-[rgb(var(--bg))] shadow-md p-1"
+            className="flex flex-col rounded-md border border-gray-200 bg-[rgb(var(--bg))] shadow-md py-1"
             style={dropdownStyle}
           >
+            {/* 상위 그룹 제목 */}
+            <div className="px-2 py-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100 mb-0.5">
+              {openGroup.label}
+            </div>
+            {/* 하위 버튼 */}
             {openGroup.items.map((it) => (
               <button
                 key={it.key}
@@ -146,7 +183,7 @@ export function GridActionsBar({
                   it.onClick?.();
                   setOpenKey(null);
                 }}
-                className="w-full rounded-lg px-2 py-1.5 text-[11px] text-left hover:bg-gray-100 dark:hover:text-slate-900 disabled:opacity-50"
+                className="w-full rounded-md px-3 py-1.5 text-[11px] text-left hover:bg-gray-100 dark:hover:text-slate-900 disabled:opacity-50"
               >
                 {it.label}
               </button>

@@ -20,6 +20,15 @@ import type {
   FirstDataRenderedEvent,
 } from "ag-grid-community";
 
+import {
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
+
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
 import { GridTabs } from "./GridTabs";
@@ -589,7 +598,7 @@ export default function DataGrid<TRow>({
       filter: true,
       floatingFilter: true,
     },
-    headerHeight: 22,
+    headerHeight: 28,
     rowHeight: 22,
     onGridReady: handleGridReady,
     onFirstDataRendered: handleFirstDataRendered,
@@ -647,10 +656,11 @@ export default function DataGrid<TRow>({
     ["--ag-font-size" as any]: "11px",
     ["--ag-header-font-size" as any]: "11px",
     ["--ag-row-height" as any]: "22px",
-    ["--ag-header-height" as any]: "22px",
+    ["--ag-header-height" as any]: "28px",
     ["--ag-cell-horizontal-padding" as any]: "3px",
     ["--ag-cell-vertical-padding" as any]: "1px",
     ["--ag-grid-size" as any]: "3px",
+    ["--ag-checkbox-column-width" as any]: "16px",
   };
 
   // ─── 페이지네이션 바 ──────────────────────────────────────────────────────────
@@ -684,7 +694,7 @@ export default function DataGrid<TRow>({
       "px-1.5 py-0.5 border border-gray-300 rounded text-[11px] disabled:opacity-40 hover:bg-gray-100 leading-none";
 
     return (
-      <div className="flex items-center gap-2 px-2 py-1 border-t shrink-0 text-[11px] text-gray-600">
+      <div className="flex items-center gap-2 px-2 py-1 shrink-0 text-[11px] text-gray-600">
         <span className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded border border-gray-300 bg-gray-100 font-medium text-gray-700">
           {totalCount.toLocaleString()}
         </span>
@@ -721,28 +731,28 @@ export default function DataGrid<TRow>({
             onClick={() => onPageChange?.(1)}
             className={btnCls}
           >
-            {"<<"}
+            <ChevronFirst className="w-3 h-3" />
           </button>
           <button
             disabled={isFirst}
             onClick={() => onPageChange?.((currentPage ?? 1) - 1)}
             className={btnCls}
           >
-            {"<"}
+            <ChevronLeft className="w-3 h-3" />
           </button>
           <button
             disabled={isLast}
             onClick={() => onPageChange?.((currentPage ?? 1) + 1)}
             className={btnCls}
           >
-            {">"}
+            <ChevronRight className="w-3 h-3" />
           </button>
           <button
             disabled={isLast}
             onClick={() => onPageChange?.(totalPages)}
             className={btnCls}
           >
-            {">>"}
+            <ChevronLast className="w-3 h-3" />
           </button>
         </div>
       </div>
@@ -752,10 +762,10 @@ export default function DataGrid<TRow>({
   return (
     <div
       ref={gridContainerRef}
-      className="border border-gray-200 rounded-lg bg-[rgb(var(--bg))] flex flex-col h-full min-h-0"
+      className="border border-gray-200 rounded-md bg-[rgb(var(--bg))] flex flex-col h-full min-h-0"
     >
       {layoutType === "tab" && tabs && activeTab && (
-        <div className="px-4 shrink-0">
+        <div className="px-3 shrink-0">
           <GridTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         </div>
       )}
@@ -783,7 +793,7 @@ export default function DataGrid<TRow>({
             </Panel>
             <PanelResizeHandle className="w-2 cursor-col-resize hover:bg-slate-200/70" />
             <Panel defaultSize={30} minSize={20}>
-              <div className="h-full border-l border-gray-200">{rightGrid}</div>
+              <div className="h-full">{rightGrid}</div>
             </Panel>
           </PanelGroup>
         ) : (
@@ -809,7 +819,7 @@ export default function DataGrid<TRow>({
           }`}
           style={{ transitionProperty: "max-height, opacity" }}
         >
-          <div className="border-t border-gray-200 mt-1">
+          <div className="mt-1">
             <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 dark:bg-gray-800">
               <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                 추적 결과

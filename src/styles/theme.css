@@ -271,11 +271,65 @@
 }
 
 .ag-theme-bridge .ag-root-wrapper {
-  border-color: var(--border);
+  border: none;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
 }
 
 .ag-theme-bridge input[type="checkbox"] {
   accent-color: rgb(var(--primary));
+}
+
+/* ── ag-Grid 체크박스 컬럼 너비 최소화 + 중앙정렬 ── */
+.ag-theme-bridge .ag-selection-checkbox,
+.ag-theme-bridge .ag-header-select-all {
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.ag-theme-bridge .ag-checkbox-input-wrapper {
+  width: 14px !important;
+  height: 14px !important;
+}
+.ag-theme-bridge .ag-selection-checkbox {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.ag-theme-bridge .ag-header-select-all {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.ag-theme-bridge .ag-cell[col-id="ag-Grid-AutoColumn"] .ag-cell-wrapper,
+.ag-theme-bridge
+  .ag-header-cell[col-id="ag-Grid-AutoColumn"]
+  .ag-header-cell-comp-wrapper {
+  justify-content: center !important;
+}
+
+/* ── 헤더 체크박스 영역 중앙정렬 ── */
+.ag-theme-bridge .ag-header-cell .ag-header-select-all {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.ag-theme-bridge .ag-header-cell .ag-header-cell-comp-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.ag-theme-quartz .ag-checkbox-input-wrapper {
+  width: 14px;
+  height: 14px;
+}
+
+.ag-theme-quartz .ag-checkbox-input-wrapper::before {
+  width: 14px;
+  height: 14px;
 }
 
 /* ===============================
@@ -340,6 +394,8 @@
 .ag-theme-bridge .ag-floating-filter-input input,
 .ag-theme-bridge .ag-text-field-input {
   background-color: #ffffff !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
 }
 
 /* ===============================
@@ -371,10 +427,53 @@
   color: rgb(var(--fg));
 }
 
+/* ── ag-Grid 셀 포커스/범위선택 테두리 보정 ── */
+.ag-theme-bridge .ag-cell-focus,
+.ag-theme-bridge .ag-cell-range-selected {
+  outline: 1px solid rgb(var(--primary)) !important;
+  outline-offset: -1px;
+  overflow: visible !important;
+  z-index: 1;
+}
+
+/* 선택 행의 모든 셀에 좌우 border 보정 */
+.ag-theme-bridge .ag-row-selected .ag-cell {
+  position: relative;
+}
+.ag-theme-bridge .ag-row-selected .ag-cell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  pointer-events: none;
+}
+
 /* ── DataGrid 헤더 정렬 헬퍼 ── */
 .ag-header-center .ag-header-cell-label {
   justify-content: center;
 }
 .ag-header-right .ag-header-cell-label {
   justify-content: flex-end;
+}
+
+/* 헤더 체크박스 중앙 정렬 */
+.ag-theme-quartz .ag-header-select-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.ag-theme-quartz .ag-header-cell.ag-column-select-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ag-theme-quartz .ag-header-select-all {
+  margin: 0 auto;
 }

@@ -10,8 +10,8 @@ export function GridTabs({
   onChange: (key: string) => void;
 }) {
   return (
-    <div className="border-b border-gray-200">
-      <nav className="flex items-center gap-8">
+    <div className="py-1">
+      <nav className="flex items-center gap-6">
         {tabs.map((t) => {
           const active = t.key === activeTab;
 
@@ -21,7 +21,7 @@ export function GridTabs({
               type="button"
               onClick={() => onChange(t.key)}
               className={[
-                "relative py-3 text-xs",
+                "relative py-1 text-xs",
                 active
                   ? "text-[rgb(var(--fg))] font-medium"
                   : "text-[rgb(var(--fg))] hover:text-gray-700",

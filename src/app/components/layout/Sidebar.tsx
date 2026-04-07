@@ -102,7 +102,7 @@ function MenuNodeRenderer({
         onClick={() => onSelectMenu(node.menuCode)}
         style={{ paddingLeft: `${16 + depth * 16}px` }}
         className={`
-          w-full text-left py-1 pr-3 text-sm rounded-lg transition-colors
+          w-full text-left py-1 pr-3 text-[13px] rounded-lg transition-colors
           ${
             isActive
               ? "bg-[var(--grid-header-bg)] text-[rgb(var(--primary))] font-medium"
@@ -124,7 +124,7 @@ function MenuNodeRenderer({
       <button
         onClick={() => onToggleGroup(node.code)}
         style={{ paddingLeft: `${16 + depth * 16}px` }}
-        className="w-full flex items-center justify-between py-1 pr-3 text-sm text-slate-500 font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors"
+        className="w-full flex items-center justify-between py-1 pr-3 text-[13px] text-slate-500 font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors"
       >
         <div className="flex items-center gap-1.5">
           <div className="w-0.5 h-3 bg-slate-300 rounded-full shrink-0" />
@@ -415,7 +415,7 @@ export function Sidebar({
                     <>
                       <button
                         onClick={() => toggleSection(section.sectionCode)}
-                        className="flex items-center gap-2 flex-1 py-1.7 pl-2 text-sm font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors min-w-0"
+                        className="flex items-center gap-2 flex-1 py-1.7 pl-2 text-[13px] font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors min-w-0"
                       >
                         <Icon className="w-5 h-5 shrink-0" />
                         <span className="truncate">{section.title}</span>
@@ -488,7 +488,7 @@ export function Sidebar({
                             onClick={() => onSelectMenu(item.menuCode)}
                             style={{ paddingLeft: "16px" }}
                             className={`
-                              w-full text-left py-1 pr-3 text-sm rounded-lg
+                              w-full text-left py-1 pr-3 text-[13px] rounded-lg
                               ${
                                 activeMenuCode === item.menuCode
                                   ? "bg-[var(--grid-header-bg)] text-[rgb(var(--primary))] font-medium"
