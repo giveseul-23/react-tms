@@ -415,12 +415,6 @@
   box-shadow: inset 0 0 0 1px rgb(var(--primary)) !important;
 }
 
-/* 선택 행의 모든 셀에 좌우 border 보정 (box-shadow으로 레이아웃 영향 없이) */
-.ag-theme-bridge .ag-row-selected .ag-cell {
-  box-shadow:
-    inset 1px 0 0 var(--border),
-    inset -1px 0 0 var(--border);
-}
 
 /* ── DataGrid 헤더 정렬 헬퍼 ── */
 .ag-header-center .ag-header-cell-label {
