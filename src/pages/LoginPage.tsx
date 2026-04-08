@@ -1,7 +1,7 @@
 // AuthPage.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import loginBgImg from "@/assets/logistics_img3.png";
 import { useNavigate } from "react-router-dom";
 import { authApi, getConfigInfo } from "@/app/services/auth/authApi";
@@ -17,17 +17,37 @@ function cn(...xs: Array<string | false | null | undefined>) {
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
-  const [errorPopup, setErrorPopup] = useState<{ open: boolean; title: string; message: string }>({
+  const [errorPopup, setErrorPopup] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+  }>({
     open: false,
     title: "",
     message: "",
   });
-  const [form, setForm] = useState<FormState>({
-    userId: "",
-    password: "",
+  const [rememberUserId, setRememberUserId] = useState<boolean>(() => {
+    return localStorage.getItem("rememberUserId") === "true";
   });
+  const [form, setForm] = useState<FormState>(() => ({
+    userId:
+      localStorage.getItem("rememberUserId") === "true"
+        ? (localStorage.getItem("savedUserId") ?? "")
+        : "",
+    password: "",
+  }));
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (rememberUserId) {
+      localStorage.setItem("rememberUserId", "true");
+      localStorage.setItem("savedUserId", form.userId);
+    } else {
+      localStorage.removeItem("rememberUserId");
+      localStorage.removeItem("savedUserId");
+    }
+  }, [rememberUserId]);
 
   const showError = (title: string, message: string) => {
     setErrorPopup({ open: true, title, message });
@@ -68,6 +88,10 @@ export default function AuthPage() {
         userGroupName,
         userGroupCode,
       });
+
+      if (rememberUserId) {
+        localStorage.setItem("savedUserId", form.userId);
+      }
 
       await getConfigInfo();
 
@@ -163,6 +187,16 @@ export default function AuthPage() {
                       required
                     />
                   </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberUserId}
+                      onChange={(e) => setRememberUserId(e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-slate-600">Remeber Me</span>
+                  </label>
 
                   <button
                     type="submit"
