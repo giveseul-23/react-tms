@@ -270,10 +270,17 @@ export default function DataGrid<TRow>({
   const finalColumnDefs = useMemo(() => {
     return activeColumnDefs.map((col) => {
       if ("headerName" in col && col.headerName === "No") {
+        const maxNum = String(activeRowData.length || 1);
+        const noWidth = Math.max(
+          measureTextWidth("No") + HEADER_PADDING,
+          measureTextWidth(maxNum) + CELL_PADDING,
+        );
         return {
           ...col,
-          headerName: Lang.get(col.headerName),
-          width: 56,
+          headerName: "No",
+          width: noWidth,
+          minWidth: noWidth,
+          maxWidth: noWidth,
           suppressMenu: true,
           sortable: false,
           filter: false,
