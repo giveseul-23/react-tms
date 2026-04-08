@@ -429,6 +429,15 @@ export default function DataGrid<TRow>({
     function applyHighlight() {
       // 선택 범위의 경계(min/max row, col) 계산
       const keys = selectedCellsRef.current;
+
+      // 범위 선택(2개 이상) 시 AG Grid 셀 포커스 아웃라인 제거
+      if (keys.size > 1) {
+        const api = gridApiRef.current;
+        if (api && !api.isDestroyed?.()) {
+          api.clearFocusedCell();
+        }
+      }
+
       let minR = Infinity,
         maxR = -Infinity,
         minC = Infinity,
@@ -521,7 +530,15 @@ export default function DataGrid<TRow>({
       }
 
       const cell = (e.target as HTMLElement).closest<HTMLElement>(".ag-cell");
-      if (!cell) return;
+      if (!cell) {
+        selectedCellsRef.current = new Set();
+        dragStartRef.current = null;
+        applyHighlight();
+        if (api && !api.isDestroyed?.()) {
+          api.clearFocusedCell();
+        }
+        return;
+      }
       const coords = getCellCoords(cell);
       if (!coords) return;
 
@@ -564,8 +581,21 @@ export default function DataGrid<TRow>({
       if (tsv) navigator.clipboard.writeText(tsv).catch(() => {});
     };
 
+    const onDocumentMouseDown = (e: MouseEvent) => {
+      if (!container.contains(e.target as Node)) {
+        selectedCellsRef.current = new Set();
+        dragStartRef.current = null;
+        applyHighlight();
+        const api = gridApiRef.current;
+        if (api && !api.isDestroyed?.()) {
+          api.clearFocusedCell();
+        }
+      }
+    };
+
     container.addEventListener("mousedown", onMouseDown);
     container.addEventListener("mouseover", onMouseOver);
+    document.addEventListener("mousedown", onDocumentMouseDown);
     document.addEventListener("mouseup", onMouseUp);
     container.addEventListener("scroll", onScroll, true);
     document.addEventListener("keydown", onKeyDown, true);
@@ -573,6 +603,7 @@ export default function DataGrid<TRow>({
     return () => {
       container.removeEventListener("mousedown", onMouseDown);
       container.removeEventListener("mouseover", onMouseOver);
+      document.removeEventListener("mousedown", onDocumentMouseDown);
       document.removeEventListener("mouseup", onMouseUp);
       container.removeEventListener("scroll", onScroll, true);
       document.removeEventListener("keydown", onKeyDown, true);
