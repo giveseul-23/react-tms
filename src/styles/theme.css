@@ -267,7 +267,7 @@
 }
 
 .ag-theme-bridge .ag-row-hover {
-  background-color: var(--muted) !important;
+  background-color: var(--grid-header-bg) !important;
 }
 
 .ag-theme-bridge .ag-root-wrapper {
@@ -424,9 +424,13 @@
 }
 
 /* ── 체크박스 제외 헤더 텍스트 중앙정렬 ── */
-.ag-theme-bridge .ag-header-cell:not(.ag-selection-header-center) .ag-header-cell-comp-wrapper {
+.ag-theme-bridge
+  .ag-header-cell:not(.ag-selection-header-center)
+  .ag-header-cell-comp-wrapper {
   width: 100% !important;
 }
-.ag-theme-bridge .ag-header-cell:not(.ag-selection-header-center) .ag-header-cell-label {
+.ag-theme-bridge
+  .ag-header-cell:not(.ag-selection-header-center)
+  .ag-header-cell-label {
   justify-content: center;
 }

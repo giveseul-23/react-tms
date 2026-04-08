@@ -429,7 +429,10 @@ export default function DataGrid<TRow>({
     function applyHighlight() {
       // 선택 범위의 경계(min/max row, col) 계산
       const keys = selectedCellsRef.current;
-      let minR = Infinity, maxR = -Infinity, minC = Infinity, maxC = -Infinity;
+      let minR = Infinity,
+        maxR = -Infinity,
+        minC = Infinity,
+        maxC = -Infinity;
       keys.forEach((k) => {
         const [r, c] = k.split(":").map(Number);
         if (r < minR) minR = r;
@@ -437,6 +440,14 @@ export default function DataGrid<TRow>({
         if (c < minC) minC = c;
         if (c > maxC) maxC = c;
       });
+
+      // 테마 색상에서 primary RGB 값 읽기
+      const primaryRgb = getComputedStyle(document.documentElement)
+        .getPropertyValue("--primary")
+        .trim(); // e.g. "0 186 237"
+      const rgb = primaryRgb.replace(/ /g, ",");
+      const bgColor = `rgba(${rgb},0.15)`;
+      const borderColor = `rgba(${rgb},0.5)`;
 
       container.querySelectorAll<HTMLElement>(".ag-cell").forEach((cell) => {
         const coords = getCellCoords(cell);
@@ -450,14 +461,14 @@ export default function DataGrid<TRow>({
           return;
         }
 
-        cell.style.backgroundColor = "rgba(59,130,246,0.15)";
+        cell.style.backgroundColor = bgColor;
 
         // 외곽 테두리만 그리기: 선택 범위의 가장자리 셀만 해당 방향에 선 표시
         const borders: string[] = [];
-        if (r === minR) borders.push("inset 0 1px 0 0 rgba(59,130,246,0.5)");
-        if (r === maxR) borders.push("inset 0 -1px 0 0 rgba(59,130,246,0.5)");
-        if (c === minC) borders.push("inset 1px 0 0 0 rgba(59,130,246,0.5)");
-        if (c === maxC) borders.push("inset -1px 0 0 0 rgba(59,130,246,0.5)");
+        if (r === minR) borders.push(`inset 0 1px 0 0 ${borderColor}`);
+        if (r === maxR) borders.push(`inset 0 -1px 0 0 ${borderColor}`);
+        if (c === minC) borders.push(`inset 1px 0 0 0 ${borderColor}`);
+        if (c === maxC) borders.push(`inset -1px 0 0 0 ${borderColor}`);
         cell.style.boxShadow = borders.join(", ");
       });
     }

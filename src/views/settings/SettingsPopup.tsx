@@ -139,9 +139,6 @@ const ToggleSwitch = ({
 export const SettingsPopup: React.FC = () => {
   const { darkMode, themeColor, customColor, applySettings } = useTheme();
 
-  // 팝업 열 때의 원본 값 저장 (취소 시 복원용)
-  const originalRef = useRef({ themeColor, darkMode, customColor });
-
   const [draft, setDraft] = useState<{
     userId: string;
     locale: string;
@@ -165,32 +162,14 @@ export const SettingsPopup: React.FC = () => {
   const setDraftField = <K extends keyof typeof draft>(
     key: K,
     value: (typeof draft)[K],
-  ) => {
-    const next = { ...draft, [key]: value };
-    setDraft(next);
-
-    // 테마/다크모드 변경 시 즉시 미리보기
-    if (key === "themeColor" || key === "darkMode" || key === "customColor") {
-      applySettings({
-        themeColor: next.themeColor,
-        darkMode: next.darkMode,
-        customColor: next.customColor,
-      });
-    }
-  };
+  ) => setDraft((prev) => ({ ...prev, [key]: value }));
 
   const handleThemeChange = (color: ThemeColor, customHex?: string) => {
-    const next = {
-      ...draft,
+    setDraft((prev) => ({
+      ...prev,
       themeColor: color,
-      customColor: color === "CUSTOM" ? (customHex ?? draft.customColor) : draft.customColor,
-    };
-    setDraft(next);
-    applySettings({
-      themeColor: next.themeColor,
-      darkMode: next.darkMode,
-      customColor: next.customColor,
-    });
+      customColor: color === "CUSTOM" ? (customHex ?? prev.customColor) : prev.customColor,
+    }));
   };
 
   const handleApply = () => {
@@ -199,27 +178,15 @@ export const SettingsPopup: React.FC = () => {
       darkMode: draft.darkMode,
       customColor: draft.customColor,
     });
-    // 적용 후 원본 갱신
-    originalRef.current = {
-      themeColor: draft.themeColor,
-      darkMode: draft.darkMode,
-      customColor: draft.customColor,
-    };
   };
 
   const handleCancel = () => {
-    // 원본 테마로 복원
-    applySettings({
-      themeColor: originalRef.current.themeColor,
-      darkMode: originalRef.current.darkMode,
-      customColor: originalRef.current.customColor,
-    });
     setDraft({
       userId: "daseul.ju",
       locale: "대한민국",
-      themeColor: originalRef.current.themeColor,
-      darkMode: originalRef.current.darkMode,
-      customColor: originalRef.current.customColor,
+      themeColor,
+      darkMode,
+      customColor,
     });
     setCurrentPassword("");
     setNewPassword("");
@@ -347,7 +314,7 @@ export const SettingsPopup: React.FC = () => {
         <Button
           size="sm"
           variant="outline"
-          onClick={() => { handleCancel(); closePopup(); }}
+          onClick={closePopup}
           className="h-7 px-4 text-xs
             border-slate-200 dark:border-slate-600
             text-slate-500 dark:text-slate-300
