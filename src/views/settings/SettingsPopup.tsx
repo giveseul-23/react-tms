@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useTheme } from "@/app/context/ThemeContext";
+import React, { useState, useRef } from "react";
+import { useTheme, type ThemeColor } from "@/app/context/ThemeContext";
 import { User, Lock, Palette, Save, X } from "lucide-react";
 import {
   Select,
@@ -12,7 +12,7 @@ import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
 import { usePopup } from "@/app/components/popup/PopupContext";
 
-type ThemeColor = "BLUE" | "GREEN" | "RED" | "ORANGE" | "YELLOW" | "WINE";
+// ThemeColor는 ThemeContext에서 import
 
 const categoryCntryOptions = [
   { value: "전체", label: "전체" },
@@ -30,35 +30,76 @@ const themeOptions: { value: ThemeColor; color: string; label: string }[] = [
 
 type ThemePickerProps = {
   value: ThemeColor;
-  onChange: (value: ThemeColor) => void;
+  customColor?: string;
+  onChange: (value: ThemeColor, customHex?: string) => void;
 };
 
-const ThemePicker = ({ value, onChange }: ThemePickerProps) => (
-  <div role="radiogroup" className="flex items-center gap-2.5">
-    {themeOptions.map((opt) => {
-      const isSelected = opt.value === value;
-      return (
+const ThemePicker = ({ value, customColor, onChange }: ThemePickerProps) => {
+  const colorInputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div role="radiogroup" className="flex items-center gap-2.5">
+      {themeOptions.map((opt) => {
+        const isSelected = opt.value === value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={isSelected}
+            title={opt.label}
+            onClick={() => onChange(opt.value)}
+            className={`
+              h-5 w-5 rounded-full transition-all
+              ${opt.color}
+              ${
+                isSelected
+                  ? "ring-2 ring-offset-1 ring-blue-500 scale-110"
+                  : "hover:scale-105 opacity-70 hover:opacity-100"
+              }
+            `}
+          />
+        );
+      })}
+
+      {/* 커스텀 컬러 피커 */}
+      <div className="relative">
         <button
-          key={opt.value}
           type="button"
           role="radio"
-          aria-checked={isSelected}
-          title={opt.label}
-          onClick={() => onChange(opt.value)}
+          aria-checked={value === "CUSTOM"}
+          title="커스텀 색상"
+          onClick={() => colorInputRef.current?.click()}
           className={`
-            h-5 w-5 rounded-full transition-all
-            ${opt.color}
+            h-5 w-5 rounded-full transition-all border border-dashed border-slate-300 dark:border-slate-500
+            flex items-center justify-center overflow-hidden
             ${
-              isSelected
+              value === "CUSTOM"
                 ? "ring-2 ring-offset-1 ring-blue-500 scale-110"
                 : "hover:scale-105 opacity-70 hover:opacity-100"
             }
           `}
+          style={
+            value === "CUSTOM" && customColor
+              ? { backgroundColor: customColor, borderStyle: "solid" }
+              : undefined
+          }
+        >
+          {!(value === "CUSTOM" && customColor) && (
+            <span className="text-[10px] leading-none text-slate-400">+</span>
+          )}
+        </button>
+        <input
+          ref={colorInputRef}
+          type="color"
+          value={customColor ?? "#6366f1"}
+          onChange={(e) => onChange("CUSTOM", e.target.value)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
-      );
-    })}
-  </div>
-);
+      </div>
+    </div>
+  );
+};
 
 type ToggleSwitchProps = {
   value: boolean;
@@ -96,18 +137,23 @@ const ToggleSwitch = ({
  * SettingsPopup
  * ======================= */
 export const SettingsPopup: React.FC = () => {
-  const { darkMode, themeColor, applySettings } = useTheme();
+  const { darkMode, themeColor, customColor, applySettings } = useTheme();
+
+  // 팝업 열 때의 원본 값 저장 (취소 시 복원용)
+  const originalRef = useRef({ themeColor, darkMode, customColor });
 
   const [draft, setDraft] = useState<{
     userId: string;
     locale: string;
     themeColor: ThemeColor;
     darkMode: boolean;
+    customColor?: string;
   }>({
     userId: "daseul.ju",
     locale: "대한민국",
     themeColor,
     darkMode,
+    customColor,
   });
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -119,14 +165,62 @@ export const SettingsPopup: React.FC = () => {
   const setDraftField = <K extends keyof typeof draft>(
     key: K,
     value: (typeof draft)[K],
-  ) => setDraft((prev) => ({ ...prev, [key]: value }));
+  ) => {
+    const next = { ...draft, [key]: value };
+    setDraft(next);
+
+    // 테마/다크모드 변경 시 즉시 미리보기
+    if (key === "themeColor" || key === "darkMode" || key === "customColor") {
+      applySettings({
+        themeColor: next.themeColor,
+        darkMode: next.darkMode,
+        customColor: next.customColor,
+      });
+    }
+  };
+
+  const handleThemeChange = (color: ThemeColor, customHex?: string) => {
+    const next = {
+      ...draft,
+      themeColor: color,
+      customColor: color === "CUSTOM" ? (customHex ?? draft.customColor) : draft.customColor,
+    };
+    setDraft(next);
+    applySettings({
+      themeColor: next.themeColor,
+      darkMode: next.darkMode,
+      customColor: next.customColor,
+    });
+  };
 
   const handleApply = () => {
-    applySettings({ themeColor: draft.themeColor, darkMode: draft.darkMode });
+    applySettings({
+      themeColor: draft.themeColor,
+      darkMode: draft.darkMode,
+      customColor: draft.customColor,
+    });
+    // 적용 후 원본 갱신
+    originalRef.current = {
+      themeColor: draft.themeColor,
+      darkMode: draft.darkMode,
+      customColor: draft.customColor,
+    };
   };
 
   const handleCancel = () => {
-    setDraft({ userId: "daseul.ju", locale: "대한민국", themeColor, darkMode });
+    // 원본 테마로 복원
+    applySettings({
+      themeColor: originalRef.current.themeColor,
+      darkMode: originalRef.current.darkMode,
+      customColor: originalRef.current.customColor,
+    });
+    setDraft({
+      userId: "daseul.ju",
+      locale: "대한민국",
+      themeColor: originalRef.current.themeColor,
+      darkMode: originalRef.current.darkMode,
+      customColor: originalRef.current.customColor,
+    });
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -236,7 +330,8 @@ export const SettingsPopup: React.FC = () => {
         <FieldRow label="테마 색상">
           <ThemePicker
             value={draft.themeColor}
-            onChange={(v) => setDraftField("themeColor", v)}
+            customColor={draft.customColor}
+            onChange={handleThemeChange}
           />
         </FieldRow>
         <FieldRow label="다크모드">
@@ -252,7 +347,7 @@ export const SettingsPopup: React.FC = () => {
         <Button
           size="sm"
           variant="outline"
-          onClick={closePopup}
+          onClick={() => { handleCancel(); closePopup(); }}
           className="h-7 px-4 text-xs
             border-slate-200 dark:border-slate-600
             text-slate-500 dark:text-slate-300
