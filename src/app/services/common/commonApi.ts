@@ -24,7 +24,7 @@ export type commonResponse = {
 export const commonApi = {
   getCodesAndNames(payload: commonRequest) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/getCodeAndNames",
+      "/appService/getCodeAndNamePage",
       payload,
     );
   },
