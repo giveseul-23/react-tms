@@ -63,39 +63,43 @@ export default function AuthPage() {
         password: form.password,
       });
 
-      const {
-        ACCESS_TOKEN,
-        REFRESH_TOKEN,
-        userId,
-        userNm,
-        userLang,
-        userGroupName,
-        userGroupCode,
-      } = res.data.data;
+      if (res.data.success) {
+        const {
+          ACCESS_TOKEN,
+          REFRESH_TOKEN,
+          userId,
+          userNm,
+          userLang,
+          userGroupName,
+          userGroupCode,
+        } = res.data.data;
 
-      setTokens(
-        ACCESS_TOKEN,
-        REFRESH_TOKEN,
-        userId,
-        userNm,
-        userLang,
-        userGroupName,
-      );
+        setTokens(
+          ACCESS_TOKEN,
+          REFRESH_TOKEN,
+          userId,
+          userNm,
+          userLang,
+          userGroupName,
+        );
 
-      Util.setUtilUserInfo({
-        userNm,
-        userLang,
-        userGroupName,
-        userGroupCode,
-      });
+        Util.setUtilUserInfo({
+          userNm,
+          userLang,
+          userGroupName,
+          userGroupCode,
+        });
 
-      if (rememberUserId) {
-        localStorage.setItem("savedUserId", form.userId);
+        if (rememberUserId) {
+          localStorage.setItem("savedUserId", form.userId);
+        }
+
+        await getConfigInfo();
+
+        navigate("/", { replace: true });
+      } else {
+        showError("로그인 오류", res.data.msg);
       }
-
-      await getConfigInfo();
-
-      navigate("/", { replace: true });
     } catch (err: any) {
       // 네트워크 단절 / 서버 미응답
       if (!err.response) {
