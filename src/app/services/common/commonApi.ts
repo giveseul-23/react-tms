@@ -24,7 +24,7 @@ export type commonResponse = {
 export const commonApi = {
   getCodesAndNames(payload: commonRequest) {
     return apiClient.post<commonResponse>(
-      "/appService/getCodeAndNamePage",
+      "/appService/getCodeAndNames",
       payload,
     );
   },

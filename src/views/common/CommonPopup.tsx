@@ -43,7 +43,7 @@ export function CommonPopup({
           ACCESS_TOKEN,
           ...extra,
         })
-        .then((res: any) => setRows(res.data.result ?? []))
+        .then((res: any) => setRows(res.data.data.dsOut ?? []))
         .catch(console.error);
       return;
     }
@@ -53,7 +53,8 @@ export function CommonPopup({
       fetchFn(extra)
         .then((res: any) => {
           // 응답 데이터를 { CODE, NAME } 형식으로 변환
-          const result = res.data.result ?? res.data.rows ?? res.data.data ??  [];
+          const result =
+            res.data.result ?? res.data.rows ?? res.data.data ?? [];
           setRows(result);
         })
         .catch(console.error);
@@ -107,12 +108,12 @@ export function CommonPopup({
               width: 60,
             },
             {
-              headerName: "코드",
+              headerName: "LBL_CODE",
               field: "CODE",
               width: 120,
             },
             {
-              headerName: "코드명",
+              headerName: "LBL_CODE_NM",
               field: "NAME",
               flex: 1,
               minWidth: 300,

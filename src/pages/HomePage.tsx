@@ -37,8 +37,8 @@ export default function HomePage() {
     setActiveMenuCode,
     reorderTabs,
   } = usePageTabs(
-    "MENU_PLAN_TENDER_RECEIVE", // 기본 탭: 홈(Welcome)
-    mergedLabelMap["MENU_PLAN_TENDER_RECEIVE"] ?? "Home",
+    "MENU_VEHICLE_MGMT", // 기본 탭: 홈(Welcome)
+    mergedLabelMap["MENU_VEHICLE_MGMT"] ?? "Home",
     20,
   );
 
