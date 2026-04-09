@@ -5,6 +5,7 @@ import FormInput from "@/app/components/common/FormInput";
 import FormSelect from "@/app/components/common/FormSelect";
 import FormCheckbox from "@/app/components/common/FormCheckbox";
 import PopupField from "@/app/components/common/PopupField";
+import { Lang } from "@/app/services/common/Lang";
 
 type Props = {
   columns: ColumnDef[];
@@ -59,7 +60,7 @@ export function FormBodyRenderer({
                 key={col.field}
                 col={col}
                 value={data[col.field!]}
-                nameValue={col.nameField ? data[col.nameField] : undefined}
+                nameValue={col.nameValue ? data[col.nameValue] : undefined}
                 onChange={onChange}
                 onPopupSearch={onPopupSearch}
                 options={col.optionsKey ? codeMap[col.optionsKey] : undefined}
@@ -105,15 +106,17 @@ function FormField({
     nameField,
   } = col;
 
+  const headerNameSetLang = Lang.get(headerName);
+
   switch (fieldType) {
     case "popup":
       return (
         <PopupField
-          label={headerName}
+          label={headerNameSetLang}
           required={required}
           codeValue={value ?? ""}
+          nameLabel={Lang.get(nameField ? nameField : undefined)}
           nameValue={nameValue}
-          nameLabel={nameField ? undefined : undefined}
           onSearch={() => onPopupSearch(sqlProp!, field!, nameField)}
           readOnly={readOnly}
         />
@@ -122,7 +125,7 @@ function FormField({
     case "select":
       return (
         <FormSelect
-          label={headerName}
+          label={headerNameSetLang}
           required={required}
           value={value ?? ""}
           options={
@@ -141,7 +144,7 @@ function FormField({
     case "check":
       return (
         <FormCheckbox
-          label={headerName}
+          label={headerNameSetLang}
           checked={value === "Y"}
           onChange={(v) => onChange(field!, v ? "Y" : "N")}
           disabled={readOnly}
@@ -151,7 +154,7 @@ function FormField({
     case "date":
       return (
         <FormInput
-          label={headerName}
+          label={headerNameSetLang}
           required={required}
           value={value ?? ""}
           onChange={(v) => onChange(field!, v)}
@@ -163,7 +166,7 @@ function FormField({
     case "number":
       return (
         <FormInput
-          label={headerName}
+          label={headerNameSetLang}
           required={required}
           value={value ?? ""}
           onChange={(v) => onChange(field!, v)}
@@ -175,7 +178,7 @@ function FormField({
     default: // "text"
       return (
         <FormInput
-          label={headerName}
+          label={headerNameSetLang}
           required={required}
           value={value ?? ""}
           onChange={(v) => onChange(field!, v)}

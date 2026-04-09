@@ -9,11 +9,12 @@ export type commonRequest = {
 };
 
 export type comboOptRequest = {
+  key: string;
   sesUserId: string;
   userId: string;
+  ACCESS_TOKEN: string;
   sqlProp: string;
   keyParam: string;
-  ACCESS_TOKEN: string;
   sesLang: string;
 };
 
@@ -29,11 +30,10 @@ export const commonApi = {
     );
   },
 
-  fetchComboOptions(payload: comboOptRequest[]) {
-    return apiClient.post<commonResponse>(
-      "/openapina/carrier/fetchComboOptions",
-      payload,
-    );
+  fetchComboOptions(payload: commonRequest[]) {
+    return apiClient.post<commonResponse>("/appService/getCodesAndNames", {
+      dsCode: payload,
+    });
   },
 
   /**

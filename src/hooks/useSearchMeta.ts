@@ -160,17 +160,17 @@ export function useSearchMeta(menuCode: string) {
 
         const comboRes = await commonApi.fetchComboOptions(
           comboItems.map((m) => ({
+            key: m.keyParam ?? m.sqlProp,
+            sqlProp: m.sqlProp,
+            keyParam: m.keyParam ?? m.sqlProp,
             sesUserId,
             userId,
-            sqlProp: m.sqlProp,
-            // keyParam 이 null 이면 빈 문자열로 전송 (서버 스펙에 따라 조정)
-            keyParam: m.keyParam ?? "",
             ACCESS_TOKEN,
             sesLang,
           })),
         );
 
-        const optionMap = (comboRes?.data as any) ?? {};
+        const optionMap = comboRes?.data?.data ?? {}; // ← as any 제거
 
         const resolved = baseMeta.map((m) => {
           if (m.type !== "COMBO") return m;
@@ -245,17 +245,18 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
       );
 
       try {
-        const payload: comboOptRequest[] = comboMetas.map((m) => ({
+        const payload = comboMetas.map((m) => ({
+          key: m.keyParam ?? m.sqlProp,
+          sqlProp: m.sqlProp!,
+          keyParam: m.keyParam ?? m.sqlProp,
           sesUserId,
           userId,
-          sqlProp: m.sqlProp!,
-          keyParam: m.keyParam ?? "",
           ACCESS_TOKEN,
           sesLang,
         }));
 
         const res = await commonApi.fetchComboOptions(payload);
-        const optionMap = res?.data ?? {};
+        const optionMap = res?.data?.data ?? {}; // 그대로 유지
 
         const resolved = currentMeta.map((m) => {
           if (m.type !== "COMBO") return m;

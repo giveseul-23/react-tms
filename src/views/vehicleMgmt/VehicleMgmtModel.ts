@@ -5,8 +5,8 @@ import { useCommonStores } from "@/hooks/useCommonStores";
 // 운영상태 컬러맵
 export const VEH_OP_STS_COLOR_MAP: Record<string, string> = {
   "100": "bg-emerald-100 text-emerald-700", // 운영중
-  "200": "bg-amber-100 text-amber-700",     // 휴차
-  "300": "bg-red-100 text-red-700",         // 폐차
+  "200": "bg-amber-100 text-amber-700", // 휴차
+  "300": "bg-red-100 text-red-700", // 폐차
 };
 
 export type GridData = {
@@ -63,9 +63,22 @@ export function useVehicleMgmtModel() {
 
   // ── 공통 코드 스토어 ─────────────────────────────────────────
   const { stores } = useCommonStores({
-    vehOpSts: { sqlProp: "CODE", keyParam: "VEH_OP_STS" },
-    setlTp: { sqlProp: "CODE", keyParam: "SETL_TP" },
-    dlvryTp: { sqlProp: "CODE", keyParam: "DLVRY_TP" },
+    apProcTp: { sqlProp: "CODE", keyParam: "AP_PROC_TP" },
+    vehOpTp: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
+    transTcd: { sqlProp: "CODE", keyParam: "TRANS_TCD" },
+    vehTempTcd: { sqlProp: "CODE", keyParam: "VEH_TEMP_TCD" },
+    vehicleTemperatureRange: {
+      sqlProp: "selectVehicleTemperatureRange",
+      keyParam: "selectVehicleTemperatureRange",
+    },
+    schedTcd: { sqlProp: "CODE", keyParam: "SCHED_TCD" },
+    distTcd: { sqlProp: "CODE", keyParam: "DIST_TCD" },
+    exVehTcd: { sqlProp: "CODE", keyParam: "EX_VEH_TCD" },
+    vehDtlTcd: { sqlProp: "CODE", keyParam: "VEH_DTL_TCD" },
+    fuelTcd: { sqlProp: "CODE", keyParam: "FUEL_TCD" },
+    vehOperScd: { sqlProp: "CODE", keyParam: "VEH_OPER_SCD" },
+    vehGrpCd: { sqlProp: "CODE", keyParam: "VEH_GRP_CD" },
+    vehDspchTp: { sqlProp: "CODE", keyParam: "VEH_DISPATCH_TP" },
   });
 
   // 코드 → 명칭 변환맵
