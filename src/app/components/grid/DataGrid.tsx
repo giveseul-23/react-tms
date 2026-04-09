@@ -722,6 +722,9 @@ export default function DataGrid<TRow>({
           },
     selectionColumnDef: {
       headerClass: "ag-selection-header-center",
+      width: 30,
+      minWidth: 30,
+      maxWidth: 30,
     },
 
     // ─── Escape Hatch: 외부 gridOptions 오버라이드 (최종 우선순위) ──────────

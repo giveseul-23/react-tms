@@ -303,6 +303,16 @@
   padding: 0 !important;
 }
 
+/* ── 체크박스 컬럼 중앙정렬 ── */
+.ag-theme-bridge .ag-selection-header-center {
+  justify-content: center !important;
+}
+.ag-theme-bridge .ag-cell:has(.ag-selection-checkbox) {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
 .ag-theme-quartz .ag-checkbox-input-wrapper {
   width: 14px;
   height: 14px;
