@@ -47,6 +47,9 @@ export function useVehicleMgmtModel() {
   // ── 상세 패널 네비게이션 인덱스 ──────────────────────────────
   const [detailIndex, setDetailIndex] = useState(-1);
 
+  // ── 네비게이션 로딩 ──────────────────────────────────────────
+  const [navigating, setNavigating] = useState(false);
+
   // ── 신규 등록 슬라이드 오버레이 ──────────────────────────────
   const [newSlideOpen, setNewSlideOpen] = useState(false);
   const [newFormData, setNewFormData] = useState<any>({});
@@ -97,6 +100,8 @@ export function useVehicleMgmtModel() {
     setDetailData,
     detailIndex,
     setDetailIndex,
+    navigating,
+    setNavigating,
     closeDetail,
     // new slide
     newSlideOpen,

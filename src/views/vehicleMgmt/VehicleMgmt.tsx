@@ -1,8 +1,8 @@
 // src/views/vehicleMgmt/VehicleMgmt.tsx
 "use client";
 
-import { useRef } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { StandardPageLayout } from "@/app/components/layout/StandardPageLayout";
 import DataGrid from "@/app/components/grid/DataGrid";
@@ -93,6 +93,12 @@ export default function VehicleMgmt() {
   const filtersRef = useRef<Record<string, unknown>>({});
 
   const ctrl = useVehicleMgmtController({ model, searchRef, filtersRef });
+
+  // ── 번호 직접 입력 상태 ───────────────────────────────────────
+  const [jumpInput, setJumpInput] = useState("");
+  useEffect(() => {
+    setJumpInput(String(model.detailIndex + 1));
+  }, [model.detailIndex]);
 
   if (loading) return <Skeleton className="h-24" />;
 
@@ -189,19 +195,42 @@ export default function VehicleMgmt() {
 
       {/* 네비게이션 */}
       <div className="flex items-center justify-between px-3.5 py-2 border-b border-border shrink-0">
-        <span className="text-xs text-muted-foreground">
-          {model.detailIndex + 1} / {model.gridData.totalCount}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <input
+            type="text"
+            value={jumpInput}
+            onChange={(e) => setJumpInput(e.target.value.replace(/\D/g, ""))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const num = Number(jumpInput);
+                if (num >= 1 && num <= model.gridData.totalCount) {
+                  ctrl.handleJumpTo(num);
+                } else {
+                  setJumpInput(String(model.detailIndex + 1));
+                }
+              }
+            }}
+            onBlur={() => setJumpInput(String(model.detailIndex + 1))}
+            disabled={model.navigating}
+            className="w-10 h-[22px] text-xs text-center border border-input rounded bg-background focus:outline-none focus:ring-1 focus:ring-[rgb(var(--primary))]"
+          />
+          <span className="text-xs text-muted-foreground">
+            / {model.gridData.totalCount}
+          </span>
+          {model.navigating && (
+            <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+          )}
+        </div>
         <div className="flex gap-1">
           <button
-            disabled={model.detailIndex <= 0}
+            disabled={model.detailIndex <= 0 || model.navigating}
             onClick={() => ctrl.handleNavigate(-1)}
             className="w-[26px] h-[26px] border border-input rounded-md bg-background flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
           <button
-            disabled={model.detailIndex >= model.gridData.rows.length - 1}
+            disabled={model.detailIndex >= model.gridData.totalCount - 1 || model.navigating}
             onClick={() => ctrl.handleNavigate(1)}
             className="w-[26px] h-[26px] border border-input rounded-md bg-background flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
           >

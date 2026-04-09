@@ -42,29 +42,108 @@ export function useVehicleMgmtController({
   // ── handleRowClicked (행 클릭 → 상세 패널 열기) ──────────────
   const handleRowClicked = useCallback(
     (row: any) => {
-      const idx = model.gridData.rows.findIndex(
-        (r: any) => r.VEH_CD === row.VEH_CD,
+      const localIdx = model.gridData.rows.findIndex(
+        (r: any) => r.VEH_ID === row.VEH_ID,
       );
+      const globalIdx =
+        (model.gridData.page - 1) * model.gridData.limit + localIdx;
       model.setSelectedRow(row);
       model.setDetailData({ ...row });
       model.setDetailMode("edit");
-      model.setDetailIndex(idx);
+      model.setDetailIndex(globalIdx);
       model.setDetailOpen(true);
     },
     [model],
   );
 
-  // ── handleNavigate (상세 패널 이전/다음) ─────────────────────
+  // ── handleNavigate (상세 패널 이전/다음 — 페이지 넘김 지원) ──
   const handleNavigate = useCallback(
-    (dir: number) => {
-      const nextIdx = model.detailIndex + dir;
-      if (nextIdx < 0 || nextIdx >= model.gridData.rows.length) return;
-      const nextRow = model.gridData.rows[nextIdx];
-      model.setSelectedRow(nextRow);
-      model.setDetailData({ ...nextRow });
-      model.setDetailIndex(nextIdx);
+    async (dir: number) => {
+      const nextGlobalIdx = model.detailIndex + dir;
+      if (nextGlobalIdx < 0 || nextGlobalIdx >= model.gridData.totalCount)
+        return;
+
+      const pageSize = model.gridData.limit;
+      const currentPage = model.gridData.page;
+      const nextPage = Math.floor(nextGlobalIdx / pageSize) + 1;
+      const localIdx = nextGlobalIdx % pageSize;
+
+      if (nextPage === currentPage) {
+        // 같은 페이지 내 이동
+        const nextRow = model.gridData.rows[localIdx];
+        model.setSelectedRow(nextRow);
+        model.setDetailData({ ...nextRow });
+        model.setDetailIndex(nextGlobalIdx);
+      } else {
+        // 다른 페이지 → API 호출
+        try {
+          model.setNavigating(true);
+          const res: any = await vehicleMgmtApi.getVehicleList({
+            ...filtersRef.current,
+            page: nextPage,
+            limit: pageSize,
+          });
+          const rows =
+            res.data.result ??
+            res.data.data.allData?.data ??
+            res.data.data.dsOut ??
+            [];
+          const nextRow = rows[localIdx];
+          if (nextRow) {
+            model.setSelectedRow(nextRow);
+            model.setDetailData({ ...nextRow });
+            model.setDetailIndex(nextGlobalIdx);
+          }
+        } finally {
+          model.setNavigating(false);
+        }
+      }
     },
-    [model],
+    [model, filtersRef],
+  );
+
+  // ── handleJumpTo (번호 직접 입력 → 해당 행 이동) ─────────────
+  const handleJumpTo = useCallback(
+    async (targetNum: number) => {
+      const globalIdx = targetNum - 1;
+      if (globalIdx < 0 || globalIdx >= model.gridData.totalCount) return;
+      if (globalIdx === model.detailIndex) return;
+
+      const pageSize = model.gridData.limit;
+      const currentPage = model.gridData.page;
+      const targetPage = Math.floor(globalIdx / pageSize) + 1;
+      const localIdx = globalIdx % pageSize;
+
+      if (targetPage === currentPage) {
+        const row = model.gridData.rows[localIdx];
+        model.setSelectedRow(row);
+        model.setDetailData({ ...row });
+        model.setDetailIndex(globalIdx);
+      } else {
+        try {
+          model.setNavigating(true);
+          const res: any = await vehicleMgmtApi.getVehicleList({
+            ...filtersRef.current,
+            page: targetPage,
+            limit: pageSize,
+          });
+          const rows =
+            res.data.result ??
+            res.data.data.allData?.data ??
+            res.data.data.dsOut ??
+            [];
+          const row = rows[localIdx];
+          if (row) {
+            model.setSelectedRow(row);
+            model.setDetailData({ ...row });
+            model.setDetailIndex(globalIdx);
+          }
+        } finally {
+          model.setNavigating(false);
+        }
+      }
+    },
+    [model, filtersRef],
   );
 
   // ── handleSaveDetail (상세 패널 저장) ────────────────────────
@@ -72,10 +151,9 @@ export function useVehicleMgmtController({
     const data = model.detailData;
     if (!data.VEH_NO?.trim()) return;
 
-    handleApi(
-      vehicleMgmtApi.updateVehicle(data),
-      "저장되었습니다.",
-    ).then(() => searchRef.current?.());
+    handleApi(vehicleMgmtApi.updateVehicle(data), "저장되었습니다.").then(() =>
+      searchRef.current?.(),
+    );
   }, [model, handleApi, searchRef]);
 
   // ── handleDeleteDetail (상세 패널 삭제) ──────────────────────
@@ -138,13 +216,12 @@ export function useVehicleMgmtController({
     const data = model.newFormData;
     if (!data.VEH_NO?.trim()) return;
 
-    handleApi(
-      vehicleMgmtApi.insertVehicle(data),
-      "등록되었습니다.",
-    ).then(() => {
-      model.setNewSlideOpen(false);
-      searchRef.current?.();
-    });
+    handleApi(vehicleMgmtApi.insertVehicle(data), "등록되었습니다.").then(
+      () => {
+        model.setNewSlideOpen(false);
+        searchRef.current?.();
+      },
+    );
   }, [model, handleApi, searchRef]);
 
   // ── mainActions (메인 그리드 툴바) ───────────────────────────
@@ -205,8 +282,7 @@ export function useVehicleMgmtController({
             downExcelSearch({
               columns: MAIN_COLUMN_DEFS({}),
               menuName: "차량관리",
-              fetchFn: () =>
-                vehicleMgmtApi.getVehicleList(filtersRef.current),
+              fetchFn: () => vehicleMgmtApi.getVehicleList(filtersRef.current),
             });
           },
         },
@@ -231,6 +307,7 @@ export function useVehicleMgmtController({
     handleSearch,
     handleRowClicked,
     handleNavigate,
+    handleJumpTo,
     handleSaveDetail,
     handleDeleteDetail,
     handleOpenNew,
