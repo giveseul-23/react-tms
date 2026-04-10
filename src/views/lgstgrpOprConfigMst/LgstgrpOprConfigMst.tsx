@@ -1,7 +1,7 @@
 // src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMst.tsx
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/Search/SearchFilters";
@@ -31,6 +31,20 @@ export default function LgstgrpOprConfigMst() {
     searchRef,
     filtersRef,
   });
+
+  // activeTab 변경 시 4개 그리드 초기화 + 재조회
+  const isTabInit = useRef(true);
+  useEffect(() => {
+    if (isTabInit.current) {
+      isTabInit.current = false;
+      return;
+    }
+    if (!model.activeTab) return;
+    model.resetSubGrids();
+    model.setConfigData({ rows: [], totalCount: 0, page: 1, limit: 20 });
+    // fetchConfigList가 activeTab 변경으로 새로 생성된 후 조회
+    setTimeout(() => searchRef.current?.(1), 0);
+  }, [model.activeTab]);
 
   if (loading) return <Skeleton className="h-24" />;
 
