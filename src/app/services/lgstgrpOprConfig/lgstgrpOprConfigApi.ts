@@ -28,7 +28,7 @@ export const lgstgrpOprConfigApi = {
   // ── 플류운영그룹운영설정 (Top-left) ──────────────────────────────
   getConfigList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/searchConfig",
+      "/lgstGrpConfigMasterService/search",
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -50,8 +50,8 @@ export const lgstgrpOprConfigApi = {
   // ── 설정상세 (Top-right) ─────────────────────────────────────────
   getConfigDetailList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/searchConfigDetail",
-      withSession(payload),
+      "/lgstGrpConfigMasterService/searchDetail",
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
@@ -65,8 +65,8 @@ export const lgstgrpOprConfigApi = {
   // ── 설정코드다국어설정 (Bottom-left) ─────────────────────────────
   getConfigI18nList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/searchConfigI18n",
-      withSession(payload),
+      "/lgstGrpConfigMasterService/searchLang",
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
@@ -80,8 +80,8 @@ export const lgstgrpOprConfigApi = {
   // ── 설정상세코드다국어설정 (Bottom-right) ────────────────────────
   getConfigDetailI18nList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/searchConfigDetailI18n",
-      withSession(payload),
+      "/lgstGrpConfigMasterService/searchDetailLang",
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 

@@ -22,82 +22,110 @@ export function useLgstgrpOprConfigMstController({
   // ── 메인 조회 (Top-left) ──────────────────────────────────────
   const fetchConfigList = useCallback(
     (params: Record<string, unknown>) =>
-      lgstgrpOprConfigApi.getConfigList(params),
+      lgstgrpOprConfigApi.getConfigList({
+        ...params,
+        LGST_GRP_CNFG_GRP_CD: model.activeTab,
+      }),
+    [model.activeTab],
+  );
+
+  // ── 개별 fetch 함수들 ─────────────────────────────────────────
+  const fetchDetail = useCallback(
+    (row: any) => {
+      const configCd = row.CNFG_CD;
+      if (!configCd) return Promise.resolve([]);
+      return lgstgrpOprConfigApi
+        .getConfigDetailList({ CNFG_CD: configCd })
+        .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
+        .catch(() => []);
+    },
     [],
   );
 
-  const handleSearch = useCallback(
-    (data: any) => {
-      model.setConfigData(data);
-      model.resetSubGrids();
+  const fetchI18n = useCallback(
+    (row: any) => {
+      const configCd = row.CNFG_CD;
+      const detailCd = row.CNFG_DTL_CD;
+      if (!configCd) return Promise.resolve([]);
+      return lgstgrpOprConfigApi
+        .getConfigI18nList({ CNFG_CD: configCd, CNFG_DTL_CD: detailCd })
+        .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
+        .catch(() => []);
+    },
+    [],
+  );
+
+  const fetchDetailI18n = useCallback(
+    (row: any) => {
+      const configCd =
+        row.CNFG_CD ?? model.selectedConfigRef.current?.CNFG_CD;
+      const detailCd = row.CNFG_DTL_CD;
+      if (!configCd || !detailCd) return Promise.resolve([]);
+      return lgstgrpOprConfigApi
+        .getConfigDetailI18nList({ CNFG_CD: configCd, CNFG_DTL_CD: detailCd })
+        .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
+        .catch(() => []);
     },
     [model],
   );
 
-  // ── Top-left 행 클릭 → Top-right + Bottom-left 로드 ──────────
+  // ── 행 클릭 핸들러 (각각 독립) ────────────────────────────────
   const handleConfigRowClicked = useCallback(
     (row: any) => {
       model.setSelectedConfig(row);
-      model.resetDetailI18n();
+      model.setSelectedDetail(null);
+      model.setDetailData([]);
+      model.setI18nData([]);
+      model.setDetailI18nData([]);
 
-      const configCd = row.LGST_GRP_OPR_CONFIG_CD;
-      if (!configCd) return;
-
-      Promise.all([
-        lgstgrpOprConfigApi.getConfigDetailList({
-          LGST_GRP_OPR_CONFIG_CD: configCd,
-        }),
-        lgstgrpOprConfigApi.getConfigI18nList({
-          LGST_GRP_OPR_CONFIG_CD: configCd,
-        }),
-      ])
-        .then(([detailRes, i18nRes]: any[]) => {
-          model.setDetailData(
-            detailRes.data.result ?? detailRes.data.data?.dsOut ?? [],
-          );
-          model.setI18nData(
-            i18nRes.data.result ?? i18nRes.data.data?.dsOut ?? [],
-          );
-        })
-        .catch((err) => {
-          console.error(
-            "[LgstgrpOprConfigMst] config row click sub-fetch failed",
-            err,
-          );
-        });
+      fetchDetail(row).then((rows) => model.setDetailData(rows));
+      fetchI18n(row).then((rows) => model.setI18nData(rows));
     },
-    [model],
+    [model, fetchDetail, fetchI18n],
   );
 
-  // ── Top-right 행 클릭 → Bottom-right 로드 ────────────────────
   const handleDetailRowClicked = useCallback(
     (row: any) => {
       model.setSelectedDetail(row);
+      model.setDetailI18nData([]);
 
-      const configCd =
-        row.LGST_GRP_OPR_CONFIG_CD ??
-        model.selectedConfigRef.current?.LGST_GRP_OPR_CONFIG_CD;
-      const detailCd = row.LGST_GRP_OPR_CONFIG_DTL_CD;
-      if (!configCd || !detailCd) return;
-
-      lgstgrpOprConfigApi
-        .getConfigDetailI18nList({
-          LGST_GRP_OPR_CONFIG_CD: configCd,
-          LGST_GRP_OPR_CONFIG_DTL_CD: detailCd,
-        })
-        .then((res: any) => {
-          model.setDetailI18nData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          );
-        })
-        .catch((err) => {
-          console.error(
-            "[LgstgrpOprConfigMst] detail row click sub-fetch failed",
-            err,
-          );
-        });
+      fetchDetailI18n(row).then((rows) => model.setDetailI18nData(rows));
     },
-    [model],
+    [model, fetchDetailI18n],
+  );
+
+  // ── handleSearch: top-left → top-right → bottom-left → bottom-right 순차 조회
+  const handleSearch = useCallback(
+    async (data: any) => {
+      model.setConfigData(data);
+      model.setSelectedConfig(null);
+      model.setSelectedDetail(null);
+      model.setDetailData([]);
+      model.setI18nData([]);
+      model.setDetailI18nData([]);
+
+      const firstRow = data.rows?.[0];
+      if (!firstRow) return;
+
+      // 1. top-left 첫 번째 행 선택
+      model.setSelectedConfig(firstRow);
+
+      // 2. top-right 조회
+      const detailRows = await fetchDetail(firstRow);
+      model.setDetailData(detailRows);
+
+      // 3. bottom-left 조회
+      const i18nRows = await fetchI18n(firstRow);
+      model.setI18nData(i18nRows);
+
+      // 4. bottom-right 조회 (top-right 첫 번째 행 기준)
+      if (detailRows.length > 0) {
+        model.setSelectedDetail(detailRows[0]);
+        const detailI18nRows = await fetchDetailI18n(detailRows[0]);
+        model.setDetailI18nData(detailI18nRows);
+      }
+    },
+    [model, fetchDetail, fetchI18n, fetchDetailI18n],
   );
 
   // ── Top-left 액션 ────────────────────────────────────────────
@@ -107,10 +135,9 @@ export function useLgstgrpOprConfigMstController({
       key: "동기화",
       label: "동기화",
       onClick: () => {
-        handleApi(
-          lgstgrpOprConfigApi.syncConfig({}),
-          "동기화되었습니다.",
-        ).then(() => searchRef.current?.());
+        handleApi(lgstgrpOprConfigApi.syncConfig({}), "동기화되었습니다.").then(
+          () => searchRef.current?.(),
+        );
       },
     },
     {
@@ -122,7 +149,11 @@ export function useLgstgrpOprConfigMstController({
           ...prev,
           rows: [
             ...prev.rows,
-            { _isNew: true, LGST_GRP_OPR_CONFIG_CD: "", LGST_GRP_OPR_CONFIG_NM: "" },
+            {
+              _isNew: true,
+              LGST_GRP_OPR_CONFIG_CD: "",
+              LGST_GRP_OPR_CONFIG_NM: "",
+            },
           ],
           totalCount: prev.totalCount + 1,
         }));
@@ -226,7 +257,10 @@ export function useLgstgrpOprConfigMstController({
       key: "추가",
       label: "추가",
       onClick: () => {
-        if (!model.selectedConfigRef.current || !model.selectedDetailRef.current)
+        if (
+          !model.selectedConfigRef.current ||
+          !model.selectedDetailRef.current
+        )
           return;
         model.setDetailI18nData((prev: any) => [
           ...prev,

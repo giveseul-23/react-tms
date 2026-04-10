@@ -76,15 +76,14 @@ export default function LgstgrpOprConfigMst() {
               <Panel defaultSize={50} minSize={25}>
                 <DataGrid
                   layoutType="plain"
-                  columnDefs={CONFIG_COLUMN_DEFS(
-                    (updater: any) =>
-                      model.setConfigData((prev: any) => ({
-                        ...prev,
-                        rows:
-                          typeof updater === "function"
-                            ? updater(prev.rows)
-                            : updater,
-                      })),
+                  columnDefs={CONFIG_COLUMN_DEFS((updater: any) =>
+                    model.setConfigData((prev: any) => ({
+                      ...prev,
+                      rows:
+                        typeof updater === "function"
+                          ? updater(prev.rows)
+                          : updater,
+                    })),
                   )}
                   rowData={model.configData.rows}
                   totalCount={model.configData.totalCount}
@@ -105,6 +104,11 @@ export default function LgstgrpOprConfigMst() {
                   layoutType="plain"
                   columnDefs={CONFIG_DETAIL_COLUMN_DEFS(model.setDetailData)}
                   rowData={model.detailData}
+                  totalCount={model.configData.totalCount}
+                  currentPage={model.configData.page}
+                  pageSize={model.pageSize}
+                  onPageSizeChange={model.setPageSize}
+                  onPageChange={(page) => searchRef.current?.(page, false)}
                   actions={ctrl.detailActions}
                   onRowClicked={ctrl.handleDetailRowClicked}
                 />

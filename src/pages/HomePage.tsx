@@ -37,7 +37,7 @@ export default function HomePage() {
     setActiveMenuCode,
     reorderTabs,
   } = usePageTabs(
-    "__WELCOME__", // 기본 탭: 홈(Welcome)
+    "MENU_LGSTGRP_OPR_CONFIG_MST", // 기본 탭: 홈(Welcome)
     mergedLabelMap["__WELCOME__"] ?? "Home",
     20,
   );
