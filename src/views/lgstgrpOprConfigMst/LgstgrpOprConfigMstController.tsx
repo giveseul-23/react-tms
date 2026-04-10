@@ -72,15 +72,15 @@ export function useLgstgrpOprConfigMstController({
       model.setI18nData([]);
       model.setDetailI18nData([]);
 
-      fetchDetail(row).then((rows) =>
-        model.setDetailData({
+      fetchDetail(row).then((rows) => {
+        (model.setDetailData({
           rows,
           totalCount: rows.length,
           page: 1,
           limit: 20,
         }),
-      );
-      fetchI18n(row).then((rows) => model.setI18nData(rows));
+          handleDetailRowClicked(rows[0]));
+      });
     },
     [model, fetchDetail, fetchI18n],
   );
@@ -90,8 +90,10 @@ export function useLgstgrpOprConfigMstController({
       model.setSelectedDetail(row);
       model.setDetailI18nData([]);
 
-      fetchI18n(row).then((rows) => model.setI18nData(rows));
-      fetchDetailI18n(row).then((rows) => model.setDetailI18nData(rows));
+      fetchI18n(row).then((rows) => {
+        model.setI18nData(rows);
+        fetchDetailI18n(rows[0]).then((rows) => model.setDetailI18nData(rows));
+      });
     },
     [model, fetchDetailI18n],
   );
