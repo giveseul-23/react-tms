@@ -79,6 +79,8 @@ function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
         includeAll: row.SRCHCONDALLYN === "Y",
         filterValues: parseFilterValues(row.OPRIN),
         defaultValue: row.DEFAULTVALUE || undefined,
+        filterComponent: row.FLTRCMPONM || undefined,
+        filterRefColumn: row.FLTRREFCOLNM || undefined,
       };
     }
 
@@ -86,7 +88,9 @@ function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
       return {
         ...base,
         type: "POPUP",
-        sqlId: row.SQLPROP, // POPUP일 때 sqlprop 필드가 sqlId 역할
+        sqlId: row.SQLPROP,
+        filterComponent: row.FLTRCMPONM || undefined,
+        filterRefColumn: row.FLTRREFCOLNM || undefined,
       };
     }
 
@@ -227,7 +231,6 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
       const { userId, sesUserId, ACCESS_TOKEN, sesLang } = getSessionFields();
       const currentMeta = baseMetaRef.current;
 
-      // keyParam がない場合も sqlProp があれば対象に含める
       const comboMetas = currentMeta.filter(
         (m) => m.type === "COMBO" && m.sqlProp,
       );

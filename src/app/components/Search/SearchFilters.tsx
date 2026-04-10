@@ -598,6 +598,14 @@ export function SearchFilters({
                   case "POPUP": {
                     const baseKey = m.key.replace("_CD", "");
 
+                    if (m.filterComponent && m.filterRefColumn) {
+                      let filterM = meta.filter(
+                        (x) => x.key === m.filterComponent,
+                      );
+                      filterM[0].filterCol = m.filterRefColumn;
+                      filterM[0].filterValueKey = m.key;
+                    }
+
                     return (
                       <SearchFilter
                         {...common}
@@ -630,6 +638,12 @@ export function SearchFilters({
                                   closePopup();
                                 }}
                                 onClose={closePopup}
+                                filterCol={m.filterCol ? m.filterCol : ""}
+                                filterValue={
+                                  m.filterValueKey
+                                    ? getCondition(m.filterValueKey).value
+                                    : ""
+                                }
                               />
                             ),
                             width: "2xl",

@@ -24,11 +24,20 @@ export interface ComboSearchMeta extends SearchMetaBase {
   filterValues?: string[];
   defaultValue?: string;
   options?: { CODE: string; NAME: string }[];
+  /** 필터링 대상 컴포넌트 키 (FLTRCMPONM) */
+  filterComponent?: string;
+  /** 필터링 참조 컬럼명 (FLTRREFCOLNM) */
+  filterRefColumn?: string;
 }
 
 export interface PopupSearchMeta extends SearchMetaBase {
   type: "POPUP";
   sqlId: string;
+  /** 필터링 대상 컴포넌트 키 (FLTRCMPONM) */
+  filterComponent?: string;
+  /** 필터링 참조 컬럼명 (FLTRREFCOLNM) */
+  filterRefColumn?: string;
+  filterCol?: string;
 }
 
 export interface DateRangeSearchMeta extends SearchMetaBase {

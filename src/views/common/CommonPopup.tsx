@@ -16,11 +16,15 @@ export function CommonPopup({
   fetchFn,
   onApply,
   onClose,
+  filterCol,
+  filterValue,
 }: {
   sqlId: string;
   fetchFn?: (params?: any) => Promise<any>;
   onApply: (row: any) => void;
   onClose: () => void;
+  filterCol: string;
+  filterValue: string;
 }) {
   const [rows, setRows] = useState<any[]>([]);
   const [code, setCode] = useState("");
@@ -43,7 +47,17 @@ export function CommonPopup({
           ACCESS_TOKEN,
           ...extra,
         })
-        .then((res: any) => setRows(res.data.data.dsOut ?? []))
+        .then((res: any) => {
+          let datas = res.data.data.dsOut;
+          let filterDatas;
+          if (filterCol !== "") {
+            filterDatas = datas.filter((x) => x[filterCol] === filterValue);
+          } else {
+            filterDatas = datas;
+          }
+
+          setRows(filterDatas ?? []);
+        })
         .catch(console.error);
       return;
     }
