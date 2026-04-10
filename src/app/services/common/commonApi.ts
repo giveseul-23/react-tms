@@ -1,4 +1,5 @@
 import { apiClient } from "@/app/api/client";
+import { getSessionFields } from "@/app/services/auth/auth";
 import type { ServerSearchConditionRow } from "@/features/search/search.meta.types";
 
 export type commonRequest = {
@@ -48,5 +49,22 @@ export const commonApi = {
       sesLang,
       userId,
     });
+  },
+
+  /**
+   * 모듈 기본값 조회
+   * (센차 setModuleDefaultValue → /tmsCommonService/searchDefaultValue 대응)
+   *
+   * 응답 형태: dsOut[0] = { DIV_CD: "MVC^SPLT^모비어스", LGST_GRP_CD: "MV01^SPLT^MV_백암센터", ... }
+   */
+  fetchModuleDefaultValue(
+    module: string,
+    params: Record<string, unknown> = {},
+  ) {
+    const urls: Record<string, string> = {
+      TMS: "/tmsCommonService/searchDefaultValue",
+    };
+    const url = (params.url as string) || urls[module];
+    return apiClient.post(url, { ...getSessionFields(), ...params });
   },
 };

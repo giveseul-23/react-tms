@@ -28,6 +28,10 @@ export function getAccessToken() {
   return sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
+export function getUserId() {
+  return sessionStorage.getItem(USERID);
+}
+
 export function getUserName() {
   return sessionStorage.getItem(USERNM);
 }

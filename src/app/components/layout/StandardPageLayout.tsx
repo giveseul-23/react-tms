@@ -82,6 +82,12 @@ export interface StandardPageLayoutProps {
   excludeKeysRef?: React.MutableRefObject<Set<string>>;
   computeTotalCount?: (rows: any[]) => number;
 
+  // 모듈 기본값 (센차 setModuleDefaultValue 대응)
+  moduleDefault?: string;
+  moduleDefaultParams?: Record<string, unknown>;
+  moduleDefaultRemove?: string[];
+  moduleDefaultSearchParams?: Record<string, string>;
+
   // 그리드: singleGrid XOR dualGrid 중 하나만 전달
   singleGrid?: SingleGridConfig;
   dualGrid?: DualGridConfig;
@@ -108,7 +114,11 @@ export function StandardPageLayout({
   layout = "side",
   onLayoutToggle,
   bottomPanel,
-  computeTotalCount, // ← 추가
+  computeTotalCount,
+  moduleDefault,
+  moduleDefaultParams,
+  moduleDefaultRemove,
+  moduleDefaultSearchParams,
 }: StandardPageLayoutProps) {
   // 그리드 개수 판별: dualGrid 가 있으면 2개, 없으면 1개
   const hasDualGrid = !!dualGrid;
@@ -144,6 +154,10 @@ export function StandardPageLayout({
         layoutToggle={layoutToggleNode}
         excludeKeysRef={excludeKeysRef}
         computeTotalCount={computeTotalCount}
+        moduleDefault={moduleDefault}
+        moduleDefaultParams={moduleDefaultParams}
+        moduleDefaultRemove={moduleDefaultRemove}
+        moduleDefaultSearchParams={moduleDefaultSearchParams}
       />
 
       {/* ── 그리드 영역 ─────────────────────────────────────────── */}

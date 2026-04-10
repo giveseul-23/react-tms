@@ -230,7 +230,10 @@ export default function VehicleMgmt() {
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
           <button
-            disabled={model.detailIndex >= model.gridData.totalCount - 1 || model.navigating}
+            disabled={
+              model.detailIndex >= model.gridData.totalCount - 1 ||
+              model.navigating
+            }
             onClick={() => ctrl.handleNavigate(1)}
             className="w-[26px] h-[26px] border border-input rounded-md bg-background flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
           >
@@ -294,6 +297,7 @@ export default function VehicleMgmt() {
     <>
       <StandardPageLayout
         meta={meta}
+        moduleDefault="TMS"
         fetchFn={ctrl.fetchVehicleList}
         onSearch={ctrl.handleSearch}
         searchRef={searchRef}

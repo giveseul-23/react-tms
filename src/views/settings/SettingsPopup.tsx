@@ -11,6 +11,7 @@ import {
 import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
 import { usePopup } from "@/app/components/popup/PopupContext";
+import { getUserId, getUserName } from "@/app/services/auth/auth";
 
 // ThemeColor는 ThemeContext에서 import
 
@@ -140,13 +141,15 @@ export const SettingsPopup: React.FC = () => {
   const { darkMode, themeColor, customColor, applySettings } = useTheme();
 
   const [draft, setDraft] = useState<{
+    userNm: string;
     userId: string;
     locale: string;
     themeColor: ThemeColor;
     darkMode: boolean;
     customColor?: string;
   }>({
-    userId: "daseul.ju",
+    userNm: getUserName(),
+    userId: getUserId(),
     locale: "대한민국",
     themeColor,
     darkMode,
@@ -168,7 +171,8 @@ export const SettingsPopup: React.FC = () => {
     setDraft((prev) => ({
       ...prev,
       themeColor: color,
-      customColor: color === "CUSTOM" ? (customHex ?? prev.customColor) : prev.customColor,
+      customColor:
+        color === "CUSTOM" ? (customHex ?? prev.customColor) : prev.customColor,
     }));
   };
 
@@ -182,7 +186,8 @@ export const SettingsPopup: React.FC = () => {
 
   const handleCancel = () => {
     setDraft({
-      userId: "daseul.ju",
+      userNm: draft.userNm,
+      userId: draft.userId,
       locale: "대한민국",
       themeColor,
       darkMode,
@@ -199,7 +204,7 @@ export const SettingsPopup: React.FC = () => {
       <SectionBlock icon={<User className="w-3.5 h-3.5" />} title="사용자 정보">
         <FieldRow label="사용자명">
           <Input
-            value="주다슬"
+            value={draft.userNm}
             readOnly
             className="h-7 text-xs
               bg-slate-50 dark:bg-slate-700

@@ -33,6 +33,7 @@ import {
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
 import { showSearchToast } from "@/app/components/ui/SearchToast";
 import type { SearchMeta } from "@/features/search/search.meta.types";
+import { commonApi } from "@/app/services/common/commonApi";
 
 import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
 
@@ -55,6 +56,10 @@ export function SearchFilters({
   layoutToggle,
   excludeKeysRef,
   computeTotalCount,
+  moduleDefault,
+  moduleDefaultParams,
+  moduleDefaultRemove,
+  moduleDefaultSearchParams,
 }: {
   meta: readonly SearchMeta[];
   onSearch: (data: SearchResult) => void;
@@ -66,6 +71,15 @@ export function SearchFilters({
   /** DataGrid 두 개인 화면에서만 전달 — 초기화 버튼 옆에 렌더링 */
   layoutToggle?: ReactNode;
   excludeKeysRef?: React.MutableRefObject<Set<string>>;
+  /** 모듈 기본값 조회 — 모듈명 (예: "TMS"). falsy면 비활성 */
+  moduleDefault?: string;
+  /** 모듈 기본값 API에 추가 전달할 파라미터 */
+  moduleDefaultParams?: Record<string, unknown>;
+  /** 모듈 기본값 응답에서 제외할 키 목록 (센차 remove 대응) */
+  moduleDefaultRemove?: string[];
+  /** 모듈 기본값 API 호출 시 다른 검색조건 값을 파라미터로 전달 (센차 searchParams 대응)
+   *  예: { DIV_CD: "DIV_CD" } → DIV_CD 검색필드의 현재 값을 API param DIV_CD로 전달 */
+  moduleDefaultSearchParams?: Record<string, string>;
 }) {
   const { openPopup, closePopup } = usePopup();
   const [open, setOpen] = useState(false);
@@ -75,6 +89,10 @@ export function SearchFilters({
   const [searchState, setSearchState] = useState<
     Record<string, SearchCondition>
   >({});
+
+  // ── 모듈 기본값 관련 refs ──────────────────────────────────────
+  const moduleDefaultLoaded = useRef(false);
+  const moduleDefaultCache = useRef<Record<string, string> | null>(null);
 
   useEffect(() => {
     // limit을 ref에 즉시 반영 (state 비동기 업데이트 우회)
@@ -140,7 +158,86 @@ export function SearchFilters({
 
   useEffect(() => {
     if (!meta?.length) return;
-    setSearchState(buildInitialSearchState());
+    const initialState = buildInitialSearchState();
+    setSearchState(initialState);
+
+    // ── 모듈 기본값 자동 조회 (센차 setModuleDefaultValue 대응) ──
+    if (moduleDefault && !moduleDefaultLoaded.current) {
+      moduleDefaultLoaded.current = true;
+
+      const apiParams: Record<string, unknown> = { ...moduleDefaultParams };
+
+      // searchParams: 다른 검색필드의 현재 값을 API 파라미터로 전달
+      if (moduleDefaultSearchParams) {
+        for (const [paramKey, fieldKey] of Object.entries(
+          moduleDefaultSearchParams,
+        )) {
+          apiParams[paramKey] = initialState[fieldKey]?.value ?? "";
+        }
+      }
+
+      commonApi
+        .fetchModuleDefaultValue(moduleDefault, apiParams)
+        .then((res: any) => {
+          const data = res.data?.data?.dsOut?.[0];
+          if (!data) return;
+
+          const removeSet = new Set(moduleDefaultRemove ?? []);
+          const defaults: Record<string, string> = {};
+
+          // API 응답 key(예: LGST_GRP_CD)로 meta를 찾는 헬퍼
+          // meta key가 DTL.LGST_GRP_CD 처럼 prefix가 붙어있을 수 있으므로
+          // 정확 일치 → '.' + key 로 끝나는 것 순으로 탐색
+          const findMeta = (apiKey: string) =>
+            meta.find((m) => m.key === apiKey || m.key.endsWith("." + apiKey));
+
+          for (const [key, rawValue] of Object.entries(data)) {
+            if (removeSet.has(key)) continue;
+            const parts = String(rawValue).split("^SPLT^");
+            const code = parts[0] ?? "";
+            const name = parts[1] ?? "";
+
+            const m = findMeta(key);
+            const metaKey = m?.key ?? key;
+
+            if (m?.type === "POPUP") {
+              // POPUP: _CD = code, _NM = name (meta key 기준)
+              const baseKey = metaKey.replace("_CD", "");
+              defaults[`${baseKey}_CD`] = code;
+              if (name) defaults[`${baseKey}_NM`] = name;
+            } else {
+              // COMBO / TEXT 등: code만 세팅 (meta key 기준)
+              defaults[metaKey] = code;
+            }
+          }
+
+          // 캐시 저장 (초기화 시 재적용용)
+          moduleDefaultCache.current = defaults;
+
+          setSearchState((prev) => {
+            const next = { ...prev };
+            for (const [k, v] of Object.entries(defaults)) {
+              if (next[k]) {
+                next[k] = { ...next[k], value: v };
+              } else {
+                // 아직 사용자 입력이 없어 searchState에 없는 필드(COMBO/TEXT/POPUP _NM 등)에 기본값 세팅
+                next[k] = {
+                  key: k,
+                  operator: "equal",
+                  dataType: "STRING",
+                  value: v,
+                  sourceType: k.endsWith("_NM") ? "POPUP" : "NORMAL",
+                };
+              }
+            }
+            return next;
+          });
+        })
+        .catch((err: any) =>
+          console.error("[SearchFilters] fetchModuleDefaultValue failed", err),
+        );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meta, buildInitialSearchState]);
 
   const getCondition = (key: string) => searchState[key];
@@ -167,7 +264,26 @@ export function SearchFilters({
   };
 
   const handleReset = () => {
-    setSearchState(buildInitialSearchState());
+    const initial = buildInitialSearchState();
+
+    // 모듈 기본값이 캐시되어 있으면 초기화 시에도 재적용
+    if (moduleDefaultCache.current) {
+      for (const [k, v] of Object.entries(moduleDefaultCache.current)) {
+        if (initial[k]) {
+          initial[k] = { ...initial[k], value: v };
+        } else {
+          initial[k] = {
+            key: k,
+            operator: "equal",
+            dataType: "STRING",
+            value: v,
+            sourceType: k.endsWith("_NM") ? "POPUP" : "NORMAL",
+          };
+        }
+      }
+    }
+
+    setSearchState(initial);
   };
 
   const handleSearch = useCallback(
@@ -244,7 +360,11 @@ export function SearchFilters({
 
       fetchFn(params)
         .then((res: any) => {
-          const rows = res.data.result ?? res.data.data.allData?.data ?? res.data.data.dsOut ?? [];
+          const rows =
+            res.data.result ??
+            res.data.data.allData?.data ??
+            res.data.data.dsOut ??
+            [];
 
           const totalCount = computeTotalCount
             ? computeTotalCount(rows) // 외부 함수로 직접 계산
