@@ -1,3 +1,11 @@
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
+
 // ── 셀렉트 필드 ──────────────────────────────────────────────────────
 export default function FormSelect({
   label,
@@ -18,17 +26,18 @@ export default function FormSelect({
         {label}
         {required && <span className="text-destructive ml-0.5">*</span>}
       </label>
-      <select
-        className="h-8 rounded-md border border-input bg-input-background px-2 text-xs outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px] cursor-pointer"
-        value={value ?? ""}
-        onChange={(e) => onChange?.(e.target.value)}
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      <Select value={value ?? ""} onValueChange={(v) => onChange?.(v)}>
+        <SelectTrigger className="h-8 px-2 text-xs [&>svg]:h-3 [&>svg]:w-3">
+          <SelectValue placeholder="선택" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value} className="text-xs">
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
