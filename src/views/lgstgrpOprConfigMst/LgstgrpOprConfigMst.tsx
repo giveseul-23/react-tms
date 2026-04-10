@@ -103,9 +103,9 @@ export default function LgstgrpOprConfigMst() {
                 <DataGrid
                   layoutType="plain"
                   columnDefs={CONFIG_DETAIL_COLUMN_DEFS(model.setDetailData)}
-                  rowData={model.detailData}
-                  totalCount={model.configData.totalCount}
-                  currentPage={model.configData.page}
+                  rowData={model.detailData.rows}
+                  totalCount={model.detailData.totalCount}
+                  currentPage={model.detailData.page}
                   pageSize={model.pageSize}
                   onPageSizeChange={model.setPageSize}
                   onPageChange={(page) => searchRef.current?.(page, false)}
@@ -128,6 +128,7 @@ export default function LgstgrpOprConfigMst() {
                   columnDefs={CONFIG_I18N_COLUMN_DEFS(model.setI18nData)}
                   rowData={model.i18nData}
                   actions={ctrl.i18nActions}
+                  subTitle="설정코드다국어설정"
                 />
               </Panel>
 
@@ -142,6 +143,7 @@ export default function LgstgrpOprConfigMst() {
                   )}
                   rowData={model.detailI18nData}
                   actions={ctrl.detailI18nActions}
+                  subTitle="설정상세코드다국어설정"
                 />
               </Panel>
             </PanelGroup>

@@ -53,9 +53,11 @@ function calcDropdownWidth(items: ActionButton[]): number {
  * ======================= */
 export function GridActionsBar({
   actions,
+  subTitle,
   className,
 }: {
   actions: ActionItem[];
+  subTitle?: string;
   className?: string;
 }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
@@ -90,7 +92,12 @@ export function GridActionsBar({
   );
 
   return (
-    <div ref={barRef} className={cls("relative px-2 py-1 min-w-0", className)}>
+    <div ref={barRef} className={cls("relative px-2 py-1 min-w-0 flex items-center", className)}>
+      {subTitle && (
+        <span className="shrink-0 text-[11px] font-semibold text-[rgb(var(--primary))] mr-2">
+          {subTitle}
+        </span>
+      )}
       <div
         ref={scrollRef}
         className="
@@ -99,6 +106,7 @@ export function GridActionsBar({
           overflow-y-hidden
           scrollbar-none
           flex
+          flex-1
         "
         onWheel={(e) => {
           if (!scrollRef.current) return;

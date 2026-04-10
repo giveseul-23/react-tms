@@ -44,15 +44,14 @@ export function useLgstgrpOprConfigMstModel() {
   const [configData, setConfigData] = useState<GridData>(EMPTY_GRID);
 
   // ── Top-right: 설정상세 ────────────────────────────────────────
-  const [detailData, setDetailData] = useState<any[]>([]);
+  const [detailData, setDetailData] = useState<GridData>(EMPTY_GRID);
   const detailDataRef = useRef<any[]>([]);
   const setDetailDataWithRef = useCallback((updater: any) => {
-    const update = (prev: any[]) => {
+    setDetailData((prev) => {
       const next = typeof updater === "function" ? updater(prev) : updater;
-      detailDataRef.current = next;
+      detailDataRef.current = next.rows ?? next;
       return next;
-    };
-    setDetailData(update);
+    });
   }, []);
 
   // ── Bottom-left: 설정코드다국어설정 ────────────────────────────
@@ -96,7 +95,7 @@ export function useLgstgrpOprConfigMstModel() {
 
   // ── 서브그리드 리셋 ────────────────────────────────────────────
   const resetSubGrids = useCallback(() => {
-    setDetailDataWithRef([]);
+    setDetailDataWithRef(EMPTY_GRID);
     setI18nDataWithRef([]);
     setDetailI18nDataWithRef([]);
     setSelectedConfigWithRef(null);

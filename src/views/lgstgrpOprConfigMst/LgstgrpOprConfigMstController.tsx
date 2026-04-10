@@ -74,11 +74,13 @@ export function useLgstgrpOprConfigMstController({
     (row: any) => {
       model.setSelectedConfig(row);
       model.setSelectedDetail(null);
-      model.setDetailData([]);
+      model.setDetailData({ rows: [], totalCount: 0, page: 1, limit: 20 });
       model.setI18nData([]);
       model.setDetailI18nData([]);
 
-      fetchDetail(row).then((rows) => model.setDetailData(rows));
+      fetchDetail(row).then((rows) =>
+        model.setDetailData({ rows, totalCount: rows.length, page: 1, limit: 20 }),
+      );
       fetchI18n(row).then((rows) => model.setI18nData(rows));
     },
     [model, fetchDetail, fetchI18n],
@@ -100,7 +102,7 @@ export function useLgstgrpOprConfigMstController({
       model.setConfigData(data);
       model.setSelectedConfig(null);
       model.setSelectedDetail(null);
-      model.setDetailData([]);
+      model.setDetailData({ rows: [], totalCount: 0, page: 1, limit: 20 });
       model.setI18nData([]);
       model.setDetailI18nData([]);
 
@@ -112,7 +114,7 @@ export function useLgstgrpOprConfigMstController({
 
       // 2. top-right 조회
       const detailRows = await fetchDetail(firstRow);
-      model.setDetailData(detailRows);
+      model.setDetailData({ rows: detailRows, totalCount: detailRows.length, page: 1, limit: 20 });
 
       // 3. bottom-left 조회
       const i18nRows = await fetchI18n(firstRow);

@@ -128,6 +128,7 @@ type DataGridProps<TRow> = {
 
   layoutType?: "tab" | "plain";
   actions: ActionItem[];
+  subTitle?: string;
 
   pagination?: boolean;
 
@@ -176,6 +177,7 @@ export default function DataGrid<TRow>({
   columnDefs = [],
   layoutType = "tab",
   actions,
+  subTitle,
   pagination = false,
   pageSize = 20,
   onRowSelected,
@@ -850,7 +852,7 @@ export default function DataGrid<TRow>({
       )}
 
       <div className="relative z-1 shrink-0 min-w-0 w-full">
-        <GridActionsBar actions={wrappedActionsWithTrack} />
+        <GridActionsBar actions={wrappedActionsWithTrack} subTitle={subTitle} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">
