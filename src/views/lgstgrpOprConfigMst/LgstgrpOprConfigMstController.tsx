@@ -30,36 +30,30 @@ export function useLgstgrpOprConfigMstController({
   );
 
   // ── 개별 fetch 함수들 ─────────────────────────────────────────
-  const fetchDetail = useCallback(
-    (row: any) => {
-      const configCd = row.CNFG_CD;
-      if (!configCd) return Promise.resolve([]);
-      return lgstgrpOprConfigApi
-        .getConfigDetailList({ CNFG_CD: configCd })
-        .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-        .catch(() => []);
-    },
-    [],
-  );
+  const fetchDetail = useCallback((row: any) => {
+    const configCd = row.CNFG_CD;
+    if (!configCd) return Promise.resolve([]);
+    return lgstgrpOprConfigApi
+      .getConfigDetailList({ CNFG_CD: configCd })
+      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
+      .catch(() => []);
+  }, []);
 
-  const fetchI18n = useCallback(
-    (row: any) => {
-      const configCd = row.CNFG_CD;
-      const detailCd = row.CNFG_DTL_CD;
-      if (!configCd) return Promise.resolve([]);
-      return lgstgrpOprConfigApi
-        .getConfigI18nList({ CNFG_CD: configCd, CNFG_DTL_CD: detailCd })
-        .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-        .catch(() => []);
-    },
-    [],
-  );
+  const fetchI18n = useCallback((row: any) => {
+    const configCd = row.CNFG_CD;
+    const detailCd = row.CNFG_DTL_CD;
+    if (!configCd) return Promise.resolve([]);
+    return lgstgrpOprConfigApi
+      .getConfigI18nList({ CNFG_CD: configCd, CNFG_DTL_CD: detailCd })
+      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
+      .catch(() => []);
+  }, []);
 
   const fetchDetailI18n = useCallback(
     (row: any) => {
-      const configCd =
-        row.CNFG_CD ?? model.selectedConfigRef.current?.CNFG_CD;
-      const detailCd = row.CNFG_DTL_CD;
+      const configCd = row.CNFG_CD ?? model.selectedConfigRef.current?.CNFG_CD;
+      const detailCd =
+        row.CNFG_DTL_CD ?? model.selectedDetailRef.current?.CNFG_DTL_CD;
       if (!configCd || !detailCd) return Promise.resolve([]);
       return lgstgrpOprConfigApi
         .getConfigDetailI18nList({ CNFG_CD: configCd, CNFG_DTL_CD: detailCd })
@@ -79,7 +73,12 @@ export function useLgstgrpOprConfigMstController({
       model.setDetailI18nData([]);
 
       fetchDetail(row).then((rows) =>
-        model.setDetailData({ rows, totalCount: rows.length, page: 1, limit: 20 }),
+        model.setDetailData({
+          rows,
+          totalCount: rows.length,
+          page: 1,
+          limit: 20,
+        }),
       );
       fetchI18n(row).then((rows) => model.setI18nData(rows));
     },
@@ -89,6 +88,16 @@ export function useLgstgrpOprConfigMstController({
   const handleDetailRowClicked = useCallback(
     (row: any) => {
       model.setSelectedDetail(row);
+      model.setDetailI18nData([]);
+
+      fetchI18n(row).then((rows) => model.setI18nData(rows));
+      fetchDetailI18n(row).then((rows) => model.setDetailI18nData(rows));
+    },
+    [model, fetchDetailI18n],
+  );
+
+  const handleI18nRowClicked = useCallback(
+    (row: any) => {
       model.setDetailI18nData([]);
 
       fetchDetailI18n(row).then((rows) => model.setDetailI18nData(rows));
@@ -114,7 +123,12 @@ export function useLgstgrpOprConfigMstController({
 
       // 2. top-right 조회
       const detailRows = await fetchDetail(firstRow);
-      model.setDetailData({ rows: detailRows, totalCount: detailRows.length, page: 1, limit: 20 });
+      model.setDetailData({
+        rows: detailRows,
+        totalCount: detailRows.length,
+        page: 1,
+        limit: 20,
+      });
 
       // 3. bottom-left 조회
       const i18nRows = await fetchI18n(firstRow);
@@ -300,6 +314,7 @@ export function useLgstgrpOprConfigMstController({
     handleSearch,
     handleConfigRowClicked,
     handleDetailRowClicked,
+    handleI18nRowClicked,
     configActions,
     detailActions,
     i18nActions,

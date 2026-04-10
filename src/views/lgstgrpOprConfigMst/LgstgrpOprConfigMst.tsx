@@ -128,6 +128,7 @@ export default function LgstgrpOprConfigMst() {
                   columnDefs={CONFIG_I18N_COLUMN_DEFS(model.setI18nData)}
                   rowData={model.i18nData}
                   actions={ctrl.i18nActions}
+                  onRowClicked={ctrl.handleI18nRowClicked}
                   subTitle="설정코드다국어설정"
                 />
               </Panel>
