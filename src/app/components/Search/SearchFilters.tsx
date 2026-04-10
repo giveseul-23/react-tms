@@ -198,9 +198,10 @@ export function SearchFilters({
             const name = parts[1] ?? "";
 
             const m = findMeta(key);
-            const metaKey = m?.key ?? key;
+            if (!m) continue; // meta에 없는 key는 세팅하지 않음
+            const metaKey = m.key;
 
-            if (m?.type === "POPUP") {
+            if (m.type === "POPUP") {
               // POPUP: _CD = code, _NM = name (meta key 기준)
               const baseKey = metaKey.replace("_CD", "");
               defaults[`${baseKey}_CD`] = code;
