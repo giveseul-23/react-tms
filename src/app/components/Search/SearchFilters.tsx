@@ -12,6 +12,7 @@ import {
   RefreshCw,
   ChevronDown,
   SlidersHorizontal,
+  Loader2,
 } from "lucide-react";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { Button } from "@/app/components/ui/button";
@@ -89,6 +90,7 @@ export function SearchFilters({
   const [searchState, setSearchState] = useState<
     Record<string, SearchCondition>
   >({});
+  const [searching, setSearching] = useState(false);
 
   // ── 모듈 기본값 관련 refs ──────────────────────────────────────
   const moduleDefaultLoaded = useRef(false);
@@ -359,6 +361,7 @@ export function SearchFilters({
         };
       }
 
+      setSearching(true);
       fetchFn(params)
         .then((res: any) => {
           const rows =
@@ -398,7 +401,8 @@ export function SearchFilters({
             ),
             width: "sm",
           });
-        });
+        })
+        .finally(() => setSearching(false));
     },
     [
       searchState,
@@ -673,10 +677,15 @@ export function SearchFilters({
               variant="outline"
               size="xs"
               onClick={() => handleSearch(1)}
+              disabled={searching}
               className="btn-primary btn-primary:hover"
             >
-              <Search className="w-3 h-3" />
-              조회
+              {searching ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Search className="w-3 h-3" />
+              )}
+              {searching ? "조회중..." : "조회"}
             </Button>
           </div>
         </CollapsibleContent>

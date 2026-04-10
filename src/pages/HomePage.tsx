@@ -66,8 +66,6 @@ export default function HomePage() {
 
   return (
     <div className="h-screen flex">
-      <SearchToast />
-
       <Sidebar
         isOpen={sidebarOpen}
         sections={menuLoading ? [] : sections}
@@ -86,6 +84,7 @@ export default function HomePage() {
         />
 
         <main className="flex-1 min-h-0 px-[15px] pt-[15px] pb-0 relative overflow-hidden">
+          <SearchToast />
           {mountedMenuCodes.map((menuCode) => {
             const Component = (
               MENU_COMPONENT_MAP as Record<string, React.ComponentType>

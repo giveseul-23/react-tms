@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { CheckCircle2, Search } from "lucide-react";
+import { CheckCircle2, AlertCircle } from "lucide-react";
 
 type ToastState = {
   visible: boolean;
@@ -40,23 +40,37 @@ export function SearchToast() {
 
   if (!state.visible) return null;
 
+  const isEmpty = state.count === 0;
+
   return (
     <div
       className={`
-        fixed bottom-6 left-1/2 -translate-x-1/2 z-50
+        absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50
         flex items-center gap-2.5
-        px-4 py-2.5 rounded-lg shadow-lg
-        bg-white border border-gray-200
-        text-sm text-gray-700
-        animate-in fade-in slide-in-from-bottom-2 duration-200
+        px-5 py-3 rounded-lg shadow-lg
+        text-[13px] font-medium
+        animate-in fade-in slide-in-from-top-2 duration-200
+        ${
+          isEmpty
+            ? "bg-amber-50 border border-amber-300 text-amber-800"
+            : "bg-emerald-50 border border-emerald-300 text-emerald-800"
+        }
       `}
     >
-      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+      {isEmpty ? (
+        <AlertCircle className="w-4.5 h-4.5 text-amber-500 shrink-0" />
+      ) : (
+        <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
+      )}
       <span>
-        조회 완료 —{" "}
-        <span className="font-semibold text-gray-900">
-          {state.count.toLocaleString()}건
-        </span>
+        {isEmpty ? "조회 결과가 없습니다" : (
+          <>
+            조회 완료 —{" "}
+            <span className="font-bold">
+              {state.count.toLocaleString()}건
+            </span>
+          </>
+        )}
       </span>
     </div>
   );

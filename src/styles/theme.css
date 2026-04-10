@@ -404,6 +404,12 @@
   filter: brightness(0.95);
 }
 
+.btn-primary:active {
+  transform: scale(0.96);
+  filter: brightness(0.88);
+  transition: transform 0.08s ease, filter 0.08s ease;
+}
+
 .btn-ghost {
   background: transparent;
   color: rgb(var(--fg));
