@@ -21,34 +21,6 @@ import {
 
 const MENU_CODE = "MENU_VEHICLE_MGMT";
 
-// ── 섹션 제목 ────────────────────────────────────────────────────────
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2.5 pb-1.5 border-b border-border">
-      {children}
-    </div>
-  );
-}
-
-// ── 운영상태 / 정산처리구분 / 차량운영구분 옵션 ──────────────────────
-const STATUS_OPTIONS = [
-  { value: "100", label: "운영중" },
-  { value: "200", label: "휴차" },
-  { value: "300", label: "폐차" },
-];
-
-const SETTLE_OPTIONS = [
-  { value: "10", label: "용차/회당정산" },
-  { value: "20", label: "전속/월정산" },
-  { value: "30", label: "자사" },
-];
-
-const OPER_OPTIONS = [
-  { value: "", label: "모두" },
-  { value: "100", label: "수송" },
-  { value: "200", label: "배송" },
-];
-
 // ── 차량관리 폼 본문 (상세/신규 공통) ─────────────────────────────────
 
 type VehicleFormBodyProps = {

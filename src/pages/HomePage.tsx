@@ -94,7 +94,7 @@ export default function HomePage() {
             return (
               <div
                 key={menuCode}
-                className="absolute left-[15px] right-[15px] top-[15px] bottom-0 overflow-hidden"
+                className="absolute left-[15px] right-[15px] top-[15px] bottom-[15px] overflow-hidden"
                 style={{
                   display: isActive ? "flex" : "none",
                   flexDirection: "column",

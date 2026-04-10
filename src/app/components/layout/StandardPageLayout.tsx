@@ -141,7 +141,7 @@ export function StandardPageLayout({
     );
 
   return (
-    <div className="flex flex-col gap-3 h-full min-h-0 min-w-0">
+    <div className="flex flex-col h-full min-h-0 min-w-0">
       {/* ── 조회조건 ─────────────────────────────────────────────── */}
       <SearchFilters
         meta={meta}
