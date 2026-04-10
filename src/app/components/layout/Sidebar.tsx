@@ -22,6 +22,8 @@ import {
   clearTokens,
 } from "@/app/services/auth/auth";
 
+import logo from "@/assets/gs_logo.png";
+
 interface SidebarProps {
   isOpen: boolean;
   activeMenuCode: string | null;
@@ -312,11 +314,18 @@ export function Sidebar({
           {isOpen ? (
             <>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[rgb(var(--primary))] rounded-lg flex items-center justify-center shrink-0">
-                  <Truck className="w-5 h-5 text-white" />
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" /*{bg-[rgb(var(--primary))]}*/
+                >
+                  {/* <Truck className="w-5 h-5 text-white" /> */}
+                  <img
+                    src={logo}
+                    alt="logo Img"
+                    className="h-[20px] w-[20px]"
+                  />
                 </div>
                 <span className="font-semibold text-lg whitespace-nowrap">
-                  Mobyus TMS
+                  GS Caltex TMS
                 </span>
               </div>
               <button
@@ -331,8 +340,11 @@ export function Sidebar({
               onClick={onToggle}
               className="hidden lg:flex w-full h-full items-center justify-center hover:bg-gray-100"
             >
-              <div className="w-8 h-8 bg-[rgb(var(--primary))] rounded-lg flex items-center justify-center">
-                <Truck className="w-5 h-5 text-white" />
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center" /*{bg-[rgb(var(--primary))]}*/
+              >
+                {/* <Truck className="w-5 h-5 text-white" /> */}
+                <img src={logo} alt="logo Img" className="h-[20px] w-[20px]" />
               </div>
             </button>
           )}
