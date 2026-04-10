@@ -82,7 +82,7 @@ export function SearchFilters({
   moduleDefaultSearchParams?: Record<string, string>;
 }) {
   const { openPopup, closePopup } = usePopup();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [limit, setLimit] = useState(pageSize);
   const limitRef = useRef(pageSize);
 
