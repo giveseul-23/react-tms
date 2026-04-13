@@ -229,12 +229,139 @@ export const ALLOC_ORDER_COLUMN_DEFS = [
 
 // ── 할당주문 탭 · SUB(품목) 그리드 ───────────────────────────
 export const ALLOC_ORDER_SUB_COLUMN_DEFS = [
-  { headerName: "LBL_ITEM_LINE", field: "ITM_LN_SEQ" }, // 품목라인
-  { headerName: "LBL_ITEM_CODE", field: "ITM_CD" }, // 품목코드
-  { headerName: "LBL_ITEM_NAME", field: "ITM_NM" }, // 품목명
+  { headerName: "LBL_ORD_ITM_LINE_NO", field: "ORD_LINE_NO" }, // 품목라인
+  { headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD" }, // 품목코드
+  { headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
   { headerName: "LBL_PLN_ORD_QTY", field: "PLN_ORD_QTY", type: "numeric" }, // 계획주문수량
   { headerName: "LBL_PLN_ORD_QTY_UOM", field: "PLN_ORD_QTY_UOM" }, // 계획주문수량UOM
-  { headerName: "LBL_PLN_STOCK_QTY", field: "PLN_STOCK_QTY", type: "numeric" }, // 계획재고수량
+  { headerName: "LBL_PLN_INV_QTY", field: "PLN_INV_QTY", type: "numeric" }, // 계획재고수량
+  {
+    headerName: "LBL_PLN_INV_QTY_UOM",
+    field: "PLN_INV_QTY_UOM",
+  }, // 계획재고수량
+  { headerName: "LBL_PLN_NET_WGT", field: "PLN_NET_WGT", type: "numeric" },
+  { headerName: "LBL_PLN_GRS_WGT", field: "PLN_GRS_WGT", type: "numeric" },
+  { headerName: "LBL_PLN_PLT_QTY", field: "PLN_PLT_QTY", type: "numeric" },
+  { headerName: "LBL_PLN_RTNR_QTY", field: "PLN_RTNR_QTY", type: "numeric" },
+  { headerName: "LBL_PLN_PBOX_QTY", field: "PLN_PBOX_QTY", type: "numeric" },
+  { headerName: "LBL_PLN_BOX_QTY", field: "PLN_BOX_QTY", type: "numeric" },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY1",
+    field: "PLN_FLEX_QTY1",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY2",
+    field: "PLN_FLEX_QTY2",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY3",
+    field: "PLN_FLEX_QTY4",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY4",
+    field: "PLN_FLEX_QTY4",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY5",
+    field: "PLN_FLEX_QTY5",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_ORD_QTY",
+    field: "CFM_ORD_QTY_UOM",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_INV_QTY",
+    field: "CFM_INV_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_INV_QTY_UOM",
+    field: "CFM_INV_QTY_UOM",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_NET_WGT",
+    field: "CFM_NET_WGT",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_GRS_WGT",
+    field: "CFM_GRS_WGT",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_PLT_QTY",
+    field: "CFM_PLT_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_RTNR_QTY",
+    field: "CFM_RTNR_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_PBOX_QTY",
+    field: "CFM_PBOX_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_BOX_QTY",
+    field: "CFM_BOX_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY1",
+    field: "CFM_FLEX_QTY1",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY2",
+    field: "CFM_FLEX_QTY2",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY3",
+    field: "CFM_FLEX_QTY3",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY4",
+    field: "CFM_FLEX_QTY4",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY5",
+    field: "CFM_FLEX_QTY5",
+    type: "numeric",
+  },
+  { headerName: "LBL_ITEM_REMARK", field: "SHPM_DTL_RSN_DESC" },
+  { headerName: "LBL_FEED_FCD", field: "ITEM_FCD" },
+  { headerName: "LBL_TEMPER_ZONE", field: "TEMP_TCD" },
+  { headerName: "LBL_PLN_INV_QTY_UOM", field: "PLN_INV_QTY_UOM" },
+  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS" },
+  {
+    headerName: "LBL_INSERT_PERSON_ID",
+    field: "CRE_USR_ID",
+  },
+  {
+    headerName: "LBL_INSERT_DATE",
+    field: "CRE_DTTM",
+    fieldType: "text",
+  },
+  {
+    headerName: "LBL_UPDATE_PERSON_ID",
+    field: "UPD_USR_ID",
+  },
+  {
+    headerName: "LBL_UPDATE_TIME",
+    field: "UPD_DTTM",
+  },
 ];
 
 // ── 미할당주문 탭 ────────────────────────────────────────────
@@ -268,10 +395,137 @@ export const UNALLOC_ORDER_COLUMN_DEFS = [
 
 // ── 미할당주문 탭 · SUB(품목) 그리드 ─────────────────────────
 export const UNALLOC_ORDER_SUB_COLUMN_DEFS = [
-  { headerName: "LBL_ITEM_LINE", field: "ITM_LN_SEQ" }, // 품목라인
-  { headerName: "LBL_ITEM_CODE", field: "ITM_CD" }, // 품목코드
-  { headerName: "LBL_ITEM_NAME", field: "ITM_NM" }, // 품목명
+  { headerName: "LBL_ORD_ITM_LINE_NO", field: "ORD_LINE_NO" }, // 품목라인
+  { headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD" }, // 품목코드
+  { headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
   { headerName: "LBL_PLN_ORD_QTY", field: "PLN_ORD_QTY", type: "numeric" }, // 계획주문수량
   { headerName: "LBL_PLN_ORD_QTY_UOM", field: "PLN_ORD_QTY_UOM" }, // 계획주문수량UOM
-  { headerName: "LBL_PLN_STOCK_QTY", field: "PLN_STOCK_QTY", type: "numeric" }, // 계획재고수량
+  { headerName: "LBL_PLN_INV_QTY", field: "PLN_INV_QTY", type: "numeric" }, // 계획재고수량
+  {
+    headerName: "LBL_PLN_INV_QTY_UOM",
+    field: "PLN_INV_QTY_UOM",
+  }, // 계획재고수량
+  { headerName: "LBL_PLN_NET_WGT", field: "PLN_NET_WGT", type: "numeric" },
+  { headerName: "LBL_PLN_GRS_WGT", field: "PLN_GRS_WGT", type: "numeric" },
+  { headerName: "LBL_PLN_PLT_QTY", field: "PLN_PLT_QTY", type: "numeric" },
+  { headerName: "LBL_PLN_RTNR_QTY", field: "PLN_RTNR_QTY", type: "numeric" },
+  { headerName: "LBL_PLN_PBOX_QTY", field: "PLN_PBOX_QTY", type: "numeric" },
+  { headerName: "LBL_PLN_BOX_QTY", field: "PLN_BOX_QTY", type: "numeric" },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY1",
+    field: "PLN_FLEX_QTY1",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY2",
+    field: "PLN_FLEX_QTY2",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY3",
+    field: "PLN_FLEX_QTY4",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY4",
+    field: "PLN_FLEX_QTY4",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY5",
+    field: "PLN_FLEX_QTY5",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_ORD_QTY",
+    field: "CFM_ORD_QTY_UOM",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_INV_QTY",
+    field: "CFM_INV_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_INV_QTY_UOM",
+    field: "CFM_INV_QTY_UOM",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_NET_WGT",
+    field: "CFM_NET_WGT",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_GRS_WGT",
+    field: "CFM_GRS_WGT",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_PLT_QTY",
+    field: "CFM_PLT_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_RTNR_QTY",
+    field: "CFM_RTNR_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_PBOX_QTY",
+    field: "CFM_PBOX_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CFM_BOX_QTY",
+    field: "CFM_BOX_QTY",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY1",
+    field: "CFM_FLEX_QTY1",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY2",
+    field: "CFM_FLEX_QTY2",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY3",
+    field: "CFM_FLEX_QTY3",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY4",
+    field: "CFM_FLEX_QTY4",
+    type: "numeric",
+  },
+  {
+    headerName: "LBL_CONFIRMED_FLEX_QTY5",
+    field: "CFM_FLEX_QTY5",
+    type: "numeric",
+  },
+  { headerName: "LBL_ITEM_REMARK", field: "SHPM_DTL_RSN_DESC" },
+  { headerName: "LBL_FEED_FCD", field: "ITEM_FCD" },
+  { headerName: "LBL_TEMPER_ZONE", field: "TEMP_TCD" },
+  { headerName: "LBL_PLN_INV_QTY_UOM", field: "PLN_INV_QTY_UOM" },
+  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS" },
+  {
+    headerName: "LBL_INSERT_PERSON_ID",
+    field: "CRE_USR_ID",
+  },
+  {
+    headerName: "LBL_INSERT_DATE",
+    field: "CRE_DTTM",
+    fieldType: "text",
+  },
+  {
+    headerName: "LBL_UPDATE_PERSON_ID",
+    field: "UPD_USR_ID",
+  },
+  {
+    headerName: "LBL_UPDATE_TIME",
+    field: "UPD_DTTM",
+  },
 ];
