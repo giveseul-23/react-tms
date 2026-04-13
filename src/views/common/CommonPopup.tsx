@@ -139,6 +139,7 @@ export function CommonPopup({
           pageSize={20}
           rowSelection="single"
           onRowSelected={(row: any) => setSelectedRow(row)}
+          onRowDoubleClicked={(row: any) => onApply(row)}
           disableAutoSize={true}
         />
       </div>

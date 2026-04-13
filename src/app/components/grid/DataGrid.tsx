@@ -134,6 +134,7 @@ type DataGridProps<TRow> = {
 
   onRowSelected?: (row: TRow | null) => void;
   onRowClicked?: (row: TRow) => void;
+  onRowDoubleClicked?: (row: TRow) => void;
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
 
   disableAutoSize?: boolean;
@@ -184,6 +185,7 @@ export default function DataGrid<TRow>({
   renderRightGrid,
   disableAutoSize,
   onRowClicked,
+  onRowDoubleClicked,
   rowSelection: rowSelectionProp,
   onCellValueChanged,
   totalCount,
@@ -713,6 +715,10 @@ export default function DataGrid<TRow>({
       if (e.event?.shiftKey) return;
       if (!e.data) return;
       onRowClicked?.(e.data);
+    },
+    onRowDoubleClicked: (e: any) => {
+      if (!e.data) return;
+      onRowDoubleClicked?.(e.data);
     },
     onCellValueChanged: activeOnCellValueChanged,
     rowSelection:
