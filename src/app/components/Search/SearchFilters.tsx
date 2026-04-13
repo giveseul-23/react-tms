@@ -121,7 +121,7 @@ export function SearchFilters({
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  // YMDT 전용: datetime-local 포맷 ("YYYY-MM-DDTHH:mm")
+  // YMDT 전용: datetime 포맷 ("YYYY-MM-DDTHH:MM:SS")
   const getNowLocal = () => {
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -129,7 +129,17 @@ export function SearchFilters({
     const dd = String(d.getDate()).padStart(2, "0");
     const hh = String(d.getHours()).padStart(2, "0");
     const mi = String(d.getMinutes()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    const ss = String(d.getSeconds()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
+  };
+
+  // YMDT range 기본값: 오늘 00:00:00 ~ 오늘 23:59:59
+  const getTodayAt = (hms: "00:00:00" | "23:59:59") => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}T${hms}`;
   };
 
   const buildInitialSearchState = useCallback(() => {
@@ -139,31 +149,35 @@ export function SearchFilters({
 
     meta.forEach((m) => {
       if (m.type !== "YMD" && m.type !== "YMDT") return;
-      const defaultVal = m.type === "YMDT" ? now : today;
 
       if (m.mode === "N") {
+        // 단일: YMD=오늘 / YMDT=지금(초까지)
         initial[m.key] = {
           key: m.key,
           operator: m.condition ?? "equal",
           dataType: m.dataType,
-          value: defaultVal,
+          value: m.type === "YMDT" ? now : today,
         };
       } else {
+        // 범위: YMD=오늘~오늘 / YMDT=오늘 00:00:00 ~ 오늘 23:59:59
         const fromKey = `${m.key}_FRM`;
         const toKey = `${m.key}_TO`;
+
+        const fromVal = m.type === "YMDT" ? getTodayAt("00:00:00") : today;
+        const toVal = m.type === "YMDT" ? getTodayAt("23:59:59") : today;
 
         initial[fromKey] = {
           key: fromKey,
           operator: m.condition ?? "equal",
           dataType: m.dataType,
-          value: defaultVal,
+          value: fromVal,
         };
 
         initial[toKey] = {
           key: toKey,
           operator: m.condition ?? "equal",
           dataType: m.dataType,
-          value: defaultVal,
+          value: toVal,
         };
       }
     });
