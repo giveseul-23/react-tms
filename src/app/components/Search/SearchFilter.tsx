@@ -64,7 +64,7 @@ type TextFilterProps = BaseFilterProps & {
 type DateMode = "Y" | "N";
 
 type DateRangeFilterProps = BaseFilterProps & {
-  type: "YMD";
+  type: "YMD" | "YMDT";
   label: string;
   fromValue: string;
   toValue: string;
@@ -159,7 +159,7 @@ export function SearchFilter(props: SearchFilterProps) {
               props.onChange("");
             } else if (props.type === "COMBO") {
               props.onChange("");
-            } else if (props.type === "YMD") {
+            } else if (props.type === "YMD" || props.type === "YMDT") {
               if (props.mode === "N") {
                 props.onChange?.("");
               } else {
@@ -180,6 +180,9 @@ export function SearchFilter(props: SearchFilterProps) {
         {props.type === "COMBO" && <ComboFilter {...props} />}
         {props.type === "TEXT" && <TextFilter {...props} />}
         {props.type === "YMD" && <DateRangeFilter {...props} />}
+        {props.type === "YMDT" && (
+          <DateRangeFilter {...props} granularity="datetime" />
+        )}
         {props.type === "POPUP" && <PopupFilter {...props} />}
       </div>
     </div>

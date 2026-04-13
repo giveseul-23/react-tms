@@ -2,7 +2,7 @@
 //
 //  API 응답 형태 (실제 CSV 확인 기준):
 //    키:  소문자  (dbcolumn, columndescr_lang, type, ...)
-//    값:  대문자  (type: "COMBO", "TEXT", "YMD", "POPUP")
+//    값:  대문자  (type: "COMBO", "TEXT", "YMD", "YMDT", "POPUP")
 
 import { useEffect, useRef, useState } from "react";
 import { commonApi, comboOptRequest } from "@/app/services/common/commonApi";
@@ -18,6 +18,7 @@ const TYPE_MAP: Record<string, SearchMeta["type"]> = {
   COMBO: "COMBO",
   POPUP: "POPUP",
   YMD: "YMD",
+  YMDT: "YMDT",
   CHECK: "CHECKBOX",
 };
 
@@ -96,6 +97,10 @@ function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
 
     if (type === "YMD") {
       return { ...base, type: "YMD" };
+    }
+
+    if (type === "YMDT") {
+      return { ...base, type: "YMDT" };
     }
 
     if (type === "CHECKBOX") {

@@ -121,19 +121,32 @@ export function SearchFilters({
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  // YMDT 전용: datetime-local 포맷 ("YYYY-MM-DDTHH:mm")
+  const getNowLocal = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  };
+
   const buildInitialSearchState = useCallback(() => {
     const today = getToday();
+    const now = getNowLocal();
     const initial: Record<string, SearchCondition> = {};
 
     meta.forEach((m) => {
-      if (m.type !== "YMD") return;
+      if (m.type !== "YMD" && m.type !== "YMDT") return;
+      const defaultVal = m.type === "YMDT" ? now : today;
 
       if (m.mode === "N") {
         initial[m.key] = {
           key: m.key,
           operator: m.condition ?? "equal",
           dataType: m.dataType,
-          value: today,
+          value: defaultVal,
         };
       } else {
         const fromKey = `${m.key}_FRM`;
@@ -143,14 +156,14 @@ export function SearchFilters({
           key: fromKey,
           operator: m.condition ?? "equal",
           dataType: m.dataType,
-          value: today,
+          value: defaultVal,
         };
 
         initial[toKey] = {
           key: toKey,
           operator: m.condition ?? "equal",
           dataType: m.dataType,
-          value: today,
+          value: defaultVal,
         };
       }
     });
@@ -294,7 +307,7 @@ export function SearchFilters({
       const missingFields = meta
         .filter((m) => m.required === true)
         .filter((m) => {
-          if (m.type === "YMD") {
+          if (m.type === "YMD" || m.type === "YMDT") {
             if (m.mode === "N") {
               return !searchState[m.key]?.value;
             }
@@ -559,6 +572,54 @@ export function SearchFilters({
                         {...common}
                         key={m.key}
                         type="YMD"
+                        fromValue={getCondition(`${m.key}_FRM`)?.value ?? ""}
+                        toValue={getCondition(`${m.key}_TO`)?.value ?? ""}
+                        onChangeFrom={(v: string) =>
+                          updateCondition(
+                            `${m.key}_FRM`,
+                            v,
+                            m.condition ?? "equal",
+                            m.dataType ?? "STRING",
+                          )
+                        }
+                        onChangeTo={(v: string) =>
+                          updateCondition(
+                            `${m.key}_TO`,
+                            v,
+                            m.condition ?? "equal",
+                            m.dataType ?? "STRING",
+                          )
+                        }
+                      />
+                    );
+
+                  case "YMDT":
+                    if (m.mode === "N") {
+                      return (
+                        <SearchFilter
+                          {...common}
+                          key={m.key}
+                          type="YMDT"
+                          value={getCondition(m.key)?.value ?? ""}
+                          onChange={(v: string) =>
+                            updateCondition(
+                              m.key,
+                              v,
+                              (getCondition(m.key)?.operator ??
+                                m.condition ??
+                                "equal") as any,
+                              m.dataType ?? "STRING",
+                            )
+                          }
+                        />
+                      );
+                    }
+
+                    return (
+                      <SearchFilter
+                        {...common}
+                        key={m.key}
+                        type="YMDT"
                         fromValue={getCondition(`${m.key}_FRM`)?.value ?? ""}
                         toValue={getCondition(`${m.key}_TO`)?.value ?? ""}
                         onChangeFrom={(v: string) =>

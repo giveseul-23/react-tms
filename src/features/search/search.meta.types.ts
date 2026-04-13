@@ -41,7 +41,7 @@ export interface PopupSearchMeta extends SearchMetaBase {
 }
 
 export interface DateRangeSearchMeta extends SearchMetaBase {
-  type: "YMD";
+  type: "YMD" | "YMDT";
   mode?: "Y" | "N";
   granularity?: string;
 }
@@ -60,14 +60,14 @@ export type SearchMeta =
 // ─────────────────────────────────────────────────────────────────────────────
 //  서버 API 응답 원본 타입
 //  키 이름: 소문자 (CSV/API 실제 확인)
-//  값:      대문자 (e.g. type: "COMBO", "TEXT", "YMD", "POPUP")
+//  값:      대문자 (e.g. type: "COMBO", "TEXT", "YMD", "YMDT", "POPUP")
 // ─────────────────────────────────────────────────────────────────────────────
 export interface ServerSearchConditionRow {
   DBCOLUMN: string; // DB 컬럼명 → key
   COLUMNDESCR: string; // 메시지코드 (fallback label)
   LINENUMBER: number; // 표시 순서
   COLUMNDESCR_LANG: string; // 한국어 라벨 → label
-  TYPE: string; // "TEXT" | "COMBO" | "POPUP" | "YMD"
+  TYPE: string; // "TEXT" | "COMBO" | "POPUP" | "YMD" | "YMDT"
   DATATYPE: string; // "STRING" | "NUMBER" | "DATE"
   REQUIREMENT: string; // "Y" | "N"
   DEFAULTVALUE: string; // 기본값
