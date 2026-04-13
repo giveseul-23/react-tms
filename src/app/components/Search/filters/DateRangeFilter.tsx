@@ -41,14 +41,20 @@ export function DateRangeFilter({
   onChangeTo,
 }: DateFilterProps) {
   const inputType = granularity === "datetime" ? "datetime-local" : "date";
+  const isDatetime = granularity === "datetime";
   const today = getToday(granularity);
 
   const from = fromValue || today;
   const to = toValue || today;
 
   const inputClass =
-    "relative h-7 pl-2 pr-6 text-[11px] leading-none tracking-tight " +
+    `relative h-7 pl-2 ${isDatetime ? "pr-10" : "pr-6"} text-[11px] leading-none tracking-tight ` +
     "dark:[color-scheme:dark] dark:text-white";
+
+  // datetime-local 전용 속성: 24h 표기(ko-KR-u-hc-h23) + 초 단위까지 표시
+  const dtExtra = isDatetime
+    ? ({ lang: "ko-KR-u-hc-h23", step: 1 } as const)
+    : {};
 
   /* ---------- single ---------- */
   if (mode === "N") {
@@ -59,6 +65,7 @@ export function DateRangeFilter({
         value={from}
         onChange={(e) => onChangeFrom(e.target.value)}
         className={inputClass}
+        {...dtExtra}
       />
     );
   }
@@ -72,6 +79,7 @@ export function DateRangeFilter({
         value={from}
         onChange={(e) => onChangeFrom(e.target.value)}
         className={inputClass}
+        {...dtExtra}
       />
 
       <span className="text-xs text-muted-foreground select-none">~</span>
@@ -82,6 +90,7 @@ export function DateRangeFilter({
         value={to}
         onChange={(e) => onChangeTo?.(e.target.value)}
         className={inputClass}
+        {...dtExtra}
       />
     </div>
   );

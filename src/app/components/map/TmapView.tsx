@@ -52,6 +52,44 @@ export interface TmapViewProps {
 const DEFAULT_CENTER = { lat: 37.5665, lon: 126.978 }; // 서울시청
 const DEFAULT_ZOOM = 11;
 
+// 현재 테마의 --primary CSS 변수("r g b" 포맷) 를 rgb(...) 로 읽는다.
+function readPrimaryColor(): string {
+  if (typeof window === "undefined") return "rgb(0, 186, 237)";
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue("--primary")
+    .trim();
+  if (!raw) return "rgb(0, 186, 237)";
+  const parts = raw.split(/\s+/);
+  if (parts.length === 3 && parts.every((p) => /^\d+(\.\d+)?$/.test(p))) {
+    return `rgb(${parts.join(", ")})`;
+  }
+  // 이미 색상 문자열(#hex, rgb(..) 등)이면 그대로 사용
+  return raw;
+}
+
+// 기본 마커 아이콘: 트럭 (lucide-react Truck 경로 기반 SVG data URL)
+// - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 정확히 맞춤
+function buildTruckIconUrl(color: string): string {
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
+        fill="${color}" filter="url(#shadow)"/>
+  <g transform="translate(7.5 6.5)" fill="none" stroke="white" stroke-width="1.8"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 18 V4 H1 V15 H3"/>
+    <path d="M14 8 H18 L20 12 V15 H18"/>
+    <circle cx="6" cy="17" r="2"/>
+    <circle cx="16" cy="17" r="2"/>
+  </g>
+</svg>`.trim();
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 // 스크립트 로더 (singleton)
 //
 // TMAP v2 부트스트랩 스크립트는 document.write() 로 실제 SDK(tmapjs2.min.js)를
@@ -250,11 +288,14 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           }
           return;
         }
+        const iconUrl = m.iconUrl ?? buildTruckIconUrl(readPrimaryColor());
         const marker = new Tmapv2.Marker({
           position,
           map: mapRef.current,
           title: m.label ?? m.id,
-          ...(m.iconUrl ? { icon: m.iconUrl } : {}),
+          icon: iconUrl,
+          iconSize: new Tmapv2.Size(36, 42),
+          iconAnchor: new Tmapv2.Point(18, 42), // 핀 끝(좌표 점)을 마커 기준점으로
         });
         if (m.onClick) {
           marker.addListener("click", m.onClick);
