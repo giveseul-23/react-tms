@@ -6,6 +6,7 @@ import Welcome from "@/views/welcome/WelCome";
 import VehicleMgmt from "@/views/vehicleMgmt/VehicleMgmt";
 import LgstgrpOprConfigMst from "@/views/lgstgrpOprConfigMst/LgstgrpOprConfigMst";
 import InTrnstVehCtrl from "@/views/inTrnstVehCtrl/InTrnstVehCtrl";
+import DispatchPlan from "@/views/dispatchPlan/DispatchPlan";
 
 export const MENU_COMPONENT_MAP = {
   // 기본 홈 화면
@@ -23,6 +24,7 @@ export const MENU_COMPONENT_MAP = {
   MENU_VEHICLE_MGMT: VehicleMgmt,
   MENU_LGSTGRP_OPR_CONFIG_MST: LgstgrpOprConfigMst,
   MENU_IN_TRNST_VEH_CTRL: InTrnstVehCtrl,
+  MENU_DISPATCH_PLAN: DispatchPlan,
 } as const;
 
 export type MenuCode = keyof typeof MENU_COMPONENT_MAP;

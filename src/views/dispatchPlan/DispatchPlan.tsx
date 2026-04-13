@@ -1,0 +1,111 @@
+// src/views/dispatchPlan/DispatchPlan.tsx
+// ─────────────────────────────────────────────────────────────
+// 배차관리 (MENU_DISPATCH_PLAN)
+//
+// 레이아웃:
+//   [SearchFilters]
+//   [배차 메인 그리드]  ← 상단
+//   ──── PanelResize ────
+//   [하단 3-tab 그리드: 경유처 / 할당주문 / 미할당주문]
+// ─────────────────────────────────────────────────────────────
+"use client";
+
+import { useRef } from "react";
+import { Skeleton } from "@/app/components/ui/skeleton";
+import { StandardPageLayout } from "@/app/components/layout/StandardPageLayout";
+import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
+import DataGrid from "@/app/components/grid/DataGrid";
+import { useSearchMeta } from "@/hooks/useSearchMeta";
+
+import { useDispatchPlanModel } from "./DispatchPlanModel";
+import { useDispatchPlanController } from "./DispatchPlanController";
+import {
+  MAIN_COLUMN_DEFS,
+  STOP_COLUMN_DEFS,
+  ALLOC_ORDER_COLUMN_DEFS,
+  UNALLOC_ORDER_COLUMN_DEFS,
+} from "./DispatchPlanColumns";
+
+const MENU_CODE = "MENU_DISPATCH_PLAN";
+
+export default function DispatchPlan() {
+  const { meta, loading } = useSearchMeta(MENU_CODE);
+  const model = useDispatchPlanModel();
+
+  const searchRef = useRef<((page?: number) => void) | null>(null);
+  const filtersRef = useRef<Record<string, unknown>>({});
+
+  const ctrl = useDispatchPlanController({ model, searchRef, filtersRef });
+
+  if (loading) return <Skeleton className="h-24" />;
+
+  return (
+    <StandardPageLayout
+      meta={meta}
+      moduleDefault="TMS"
+      fetchFn={ctrl.fetchDispatchPlanList}
+      onSearch={ctrl.handleSearch}
+      searchRef={searchRef}
+      filtersRef={filtersRef}
+      pageSize={model.pageSize}
+      layout={model.layout}
+      onLayoutToggle={() =>
+        model.setLayout((prev: LayoutType) =>
+          prev === "side" ? "vertical" : "side",
+        )
+      }
+      dualGrid={{
+        direction: model.layout === "side" ? "horizontal" : "vertical",
+        defaultTopSize: 55,
+        defaultBottomSize: 45,
+        top: (
+          <DataGrid
+            layoutType="plain"
+            columnDefs={MAIN_COLUMN_DEFS(model.codeMap)}
+            rowData={model.gridData.rows}
+            totalCount={model.gridData.totalCount}
+            currentPage={model.gridData.page}
+            pageSize={model.pageSize}
+            onPageSizeChange={model.setPageSize}
+            onPageChange={(page) => {
+              model.resetSubGrids();
+              searchRef.current?.(page, false);
+            }}
+            actions={ctrl.mainActions}
+            onRowClicked={ctrl.handleRowClicked}
+          />
+        ),
+        bottom: (
+          <DataGrid
+            layoutType="tab"
+            tabs={[
+              { key: "STOP", label: "경유처" },
+              { key: "ALLOC", label: "할당주문" },
+              { key: "UNALLOC", label: "미할당주문" },
+            ]}
+            presets={{
+              STOP: {
+                columnDefs: STOP_COLUMN_DEFS,
+                actions: ctrl.stopActions,
+              },
+              ALLOC: {
+                columnDefs: ALLOC_ORDER_COLUMN_DEFS,
+                actions: ctrl.allocOrderActions,
+              },
+              UNALLOC: {
+                columnDefs: UNALLOC_ORDER_COLUMN_DEFS,
+                actions: ctrl.unallocOrderActions,
+              },
+            }}
+            rowData={{
+              STOP: model.stopRowData,
+              ALLOC: model.allocOrderRowData,
+              UNALLOC: model.unallocOrderRowData,
+            }}
+            actions={[]}
+          />
+        ),
+      }}
+    />
+  );
+}
