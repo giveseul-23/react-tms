@@ -244,6 +244,53 @@ export function useDispatchPlanController({
     { type: "button", key: "주문할당", label: "주문할당", onClick: () => {} },
   ];
 
+  // ── SUB 공통 액션 (상품라인분할 / 상품수량분할) ─────────────
+  const allocSubActions = [
+    { type: "button", key: "상품라인분할", label: "상품라인분할", onClick: () => {} },
+    { type: "button", key: "상품수량분할", label: "상품수량분할", onClick: () => {} },
+  ];
+
+  const unallocSubActions = [
+    { type: "button", key: "상품라인분할", label: "상품라인분할", onClick: () => {} },
+    { type: "button", key: "상품수량분할", label: "상품수량분할", onClick: () => {} },
+  ];
+
+  // ── 할당주문 MAIN 행 클릭 → 품목 조회 ───────────────────────
+  const handleAllocOrderRowClicked = useCallback(
+    (row: any) => {
+      if (!row?.ORD_NO) return;
+      dispatchPlanApi
+        .getAllocOrderItemList({ ORD_NO: row.ORD_NO })
+        .then((res: any) => {
+          model.setAllocSubRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          );
+        })
+        .catch((err) =>
+          console.error("[DispatchPlan] alloc sub-fetch failed", err),
+        );
+    },
+    [model],
+  );
+
+  // ── 미할당주문 MAIN 행 클릭 → 품목 조회 ─────────────────────
+  const handleUnallocOrderRowClicked = useCallback(
+    (row: any) => {
+      if (!row?.ORD_NO) return;
+      dispatchPlanApi
+        .getUnallocOrderItemList({ ORD_NO: row.ORD_NO })
+        .then((res: any) => {
+          model.setUnallocSubRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          );
+        })
+        .catch((err) =>
+          console.error("[DispatchPlan] unalloc sub-fetch failed", err),
+        );
+    },
+    [model],
+  );
+
   return {
     fetchDispatchPlanList,
     handleSearch,
@@ -252,5 +299,9 @@ export function useDispatchPlanController({
     stopActions,
     allocOrderActions,
     unallocOrderActions,
+    allocSubActions,
+    unallocSubActions,
+    handleAllocOrderRowClicked,
+    handleUnallocOrderRowClicked,
   };
 }

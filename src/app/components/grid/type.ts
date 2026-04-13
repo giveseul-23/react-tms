@@ -10,5 +10,6 @@ export type GridPreset<TRow> = {
   columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[];
   actions?: ActionItem[];
   onCellValueChanged?: (params: any) => void;
+  onRowClicked?: (row: TRow) => void;
   gridRef?: React.RefObject<any>; // ← stopEditing 용
 };

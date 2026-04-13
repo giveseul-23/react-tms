@@ -263,6 +263,13 @@ export default function DataGrid<TRow>({
     return onCellValueChanged;
   }, [layoutType, activeTab, presets, onCellValueChanged]);
 
+  const activeOnRowClicked = useMemo(() => {
+    if (layoutType === "tab" && activeTab && presets) {
+      return presets[activeTab].onRowClicked ?? onRowClicked;
+    }
+    return onRowClicked;
+  }, [layoutType, activeTab, presets, onRowClicked]);
+
   const activeGridRef = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
       return presets[activeTab].gridRef ?? internalGridRef;
@@ -714,7 +721,7 @@ export default function DataGrid<TRow>({
       }
       if (e.event?.shiftKey) return;
       if (!e.data) return;
-      onRowClicked?.(e.data);
+      activeOnRowClicked?.(e.data);
     },
     onRowDoubleClicked: (e: any) => {
       if (!e.data) return;
@@ -857,17 +864,30 @@ export default function DataGrid<TRow>({
         </div>
       )}
 
-      <div className="relative z-1 shrink-0 min-w-0 w-full">
-        <GridActionsBar actions={wrappedActionsWithTrack} subTitle={subTitle} />
-      </div>
+      {/* rightGrid 가 없을 때: actions 바가 전체 너비를 차지 */}
+      {!rightGrid && (
+        <div className="relative z-1 shrink-0 min-w-0 w-full">
+          <GridActionsBar
+            actions={wrappedActionsWithTrack}
+            subTitle={subTitle}
+          />
+        </div>
+      )}
 
       <div className="flex-1 min-h-0 overflow-hidden">
         {rightGrid ? (
           <PanelGroup direction="horizontal" className="h-full w-full">
             <Panel defaultSize={70} minSize={30}>
-              <div className="h-full">
+              <div className="h-full flex flex-col min-h-0 border border-gray-200 rounded-md overflow-hidden bg-[rgb(var(--bg))]">
+                {/* rightGrid 가 있을 때: MAIN actions 는 MAIN 패널 내부로 */}
+                <div className="relative z-1 shrink-0 min-w-0 w-full">
+                  <GridActionsBar
+                    actions={wrappedActionsWithTrack}
+                    subTitle={subTitle}
+                  />
+                </div>
                 <div
-                  className="ag-theme-quartz ag-theme-bridge w-full h-full"
+                  className="ag-theme-quartz ag-theme-bridge w-full flex-1 min-h-0"
                   style={gridStyle}
                 >
                   <AgGridReact<TRow>

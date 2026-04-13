@@ -30,12 +30,17 @@ export function useDispatchPlanModel() {
   const [stopRowData, setStopRowData] = useState<any[]>([]);
   const [allocOrderRowData, setAllocOrderRowData] = useState<any[]>([]);
   const [unallocOrderRowData, setUnallocOrderRowData] = useState<any[]>([]);
+  // ── 하단 탭 · SUB(품목) 데이터 ──────────────────────────────
+  const [allocSubRowData, setAllocSubRowData] = useState<any[]>([]);
+  const [unallocSubRowData, setUnallocSubRowData] = useState<any[]>([]);
 
   // ── 서브 그리드 전체 초기화 ─────────────────────────────────
   const resetSubGrids = useCallback(() => {
     setStopRowData([]);
     setAllocOrderRowData([]);
     setUnallocOrderRowData([]);
+    setAllocSubRowData([]);
+    setUnallocSubRowData([]);
     setSelectedHeaderRow(null);
   }, []);
 
@@ -71,6 +76,10 @@ export function useDispatchPlanModel() {
     setAllocOrderRowData,
     unallocOrderRowData,
     setUnallocOrderRowData,
+    allocSubRowData,
+    setAllocSubRowData,
+    unallocSubRowData,
+    setUnallocSubRowData,
     resetSubGrids,
     codeMap,
   };

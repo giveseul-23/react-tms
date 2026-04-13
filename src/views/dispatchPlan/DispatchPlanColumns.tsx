@@ -227,6 +227,16 @@ export const ALLOC_ORDER_COLUMN_DEFS = [
   { headerName: "LBL_CUST_PICKUP_YN", field: "CUST_PICKUP_YN" }, //고객사 픽업 여부
 ];
 
+// ── 할당주문 탭 · SUB(품목) 그리드 ───────────────────────────
+export const ALLOC_ORDER_SUB_COLUMN_DEFS = [
+  { headerName: "LBL_ITEM_LINE", field: "ITM_LN_SEQ" }, // 품목라인
+  { headerName: "LBL_ITEM_CODE", field: "ITM_CD" }, // 품목코드
+  { headerName: "LBL_ITEM_NAME", field: "ITM_NM" }, // 품목명
+  { headerName: "LBL_PLN_ORD_QTY", field: "PLN_ORD_QTY", type: "numeric" }, // 계획주문수량
+  { headerName: "LBL_PLN_ORD_QTY_UOM", field: "PLN_ORD_QTY_UOM" }, // 계획주문수량UOM
+  { headerName: "LBL_PLN_STOCK_QTY", field: "PLN_STOCK_QTY", type: "numeric" }, // 계획재고수량
+];
+
 // ── 미할당주문 탭 ────────────────────────────────────────────
 export const UNALLOC_ORDER_COLUMN_DEFS = [
   { headerName: "No" },
@@ -254,4 +264,14 @@ export const UNALLOC_ORDER_COLUMN_DEFS = [
   { headerName: "LBL_SOLD_TO_CD", field: "SOLD_TO_CD" }, //거래처코드
   { headerName: "LBL_SOLD_TO_NM", field: "SOLD_TO_NM" }, //거래처명
   { headerName: "LBL_CUST_PICKUP_YN", field: "CUST_PICKUP_YN" }, //고객사 픽업 여부
+];
+
+// ── 미할당주문 탭 · SUB(품목) 그리드 ─────────────────────────
+export const UNALLOC_ORDER_SUB_COLUMN_DEFS = [
+  { headerName: "LBL_ITEM_LINE", field: "ITM_LN_SEQ" }, // 품목라인
+  { headerName: "LBL_ITEM_CODE", field: "ITM_CD" }, // 품목코드
+  { headerName: "LBL_ITEM_NAME", field: "ITM_NM" }, // 품목명
+  { headerName: "LBL_PLN_ORD_QTY", field: "PLN_ORD_QTY", type: "numeric" }, // 계획주문수량
+  { headerName: "LBL_PLN_ORD_QTY_UOM", field: "PLN_ORD_QTY_UOM" }, // 계획주문수량UOM
+  { headerName: "LBL_PLN_STOCK_QTY", field: "PLN_STOCK_QTY", type: "numeric" }, // 계획재고수량
 ];

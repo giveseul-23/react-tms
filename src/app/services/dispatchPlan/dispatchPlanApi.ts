@@ -49,6 +49,21 @@ export const dispatchPlanApi = {
     );
   },
 
+  // ── 할당주문 / 미할당주문 SUB (품목 목록) ───────────────────
+  getAllocOrderItemList(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchAllocOrderItem",
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  getUnallocOrderItemList(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchUnallocOrderItem",
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
   // ── 저장 ─────────────────────────────────────────────────────
   saveDispatchPlan(payload: any) {
     return apiClient.post<CommonResponse>(

@@ -24,6 +24,8 @@ import {
   STOP_COLUMN_DEFS,
   ALLOC_ORDER_COLUMN_DEFS,
   UNALLOC_ORDER_COLUMN_DEFS,
+  ALLOC_ORDER_SUB_COLUMN_DEFS,
+  UNALLOC_ORDER_SUB_COLUMN_DEFS,
 } from "./DispatchPlanColumns";
 
 const MENU_CODE = "MENU_DISPATCH_PLAN";
@@ -91,10 +93,12 @@ export default function DispatchPlan() {
               ALLOC: {
                 columnDefs: ALLOC_ORDER_COLUMN_DEFS,
                 actions: ctrl.allocOrderActions,
+                onRowClicked: ctrl.handleAllocOrderRowClicked,
               },
               UNALLOC: {
                 columnDefs: UNALLOC_ORDER_COLUMN_DEFS,
                 actions: ctrl.unallocOrderActions,
+                onRowClicked: ctrl.handleUnallocOrderRowClicked,
               },
             }}
             rowData={{
@@ -103,6 +107,29 @@ export default function DispatchPlan() {
               UNALLOC: model.unallocOrderRowData,
             }}
             actions={[]}
+            renderRightGrid={(activeTabKey) => {
+              if (activeTabKey === "ALLOC") {
+                return (
+                  <DataGrid
+                    layoutType="plain"
+                    columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS}
+                    rowData={model.allocSubRowData}
+                    actions={ctrl.allocSubActions}
+                  />
+                );
+              }
+              if (activeTabKey === "UNALLOC") {
+                return (
+                  <DataGrid
+                    layoutType="plain"
+                    columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS}
+                    rowData={model.unallocSubRowData}
+                    actions={ctrl.unallocSubActions}
+                  />
+                );
+              }
+              return null;
+            }}
           />
         ),
       }}
