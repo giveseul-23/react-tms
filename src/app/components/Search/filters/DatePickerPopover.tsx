@@ -83,7 +83,7 @@ function MonthYearPicker({
               className={cn(
                 "h-9 text-xs rounded border transition-colors",
                 isSelected
-                  ? "bg-primary text-primary-foreground border-primary"
+                  ? "bg-primary border-primary text-[rgb(var(--primary))]"
                   : "border-input bg-background hover:bg-accent",
               )}
             >
@@ -115,7 +115,9 @@ function parseValue(
     const [datePart, timeRaw = "00:00:00"] = value.split("T");
     const parsed = parse(datePart, "yyyy-MM-dd", new Date());
     const time =
-      timeRaw.length === 5 ? `${timeRaw}:00` : timeRaw.slice(0, 8) || "00:00:00";
+      timeRaw.length === 5
+        ? `${timeRaw}:00`
+        : timeRaw.slice(0, 8) || "00:00:00";
     return { date: isValid(parsed) ? parsed : undefined, time };
   }
   const parsed = parse(value, "yyyy-MM-dd", new Date());
@@ -218,6 +220,15 @@ export function DatePickerPopover({
             formatters={{
               formatCaption: (date) =>
                 `${date.getMonth() + 1}월 ${date.getFullYear()}`,
+            }}
+            classNames={{
+              // 선택된 날짜 셀 배경: accent → primary
+              cell: cn(
+                "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
+                "[&:has([aria-selected])]:bg-[rgb(var(--primary))]",
+                "[&:has([aria-selected])]:text-primary-foreground",
+                "[&:has([aria-selected])]:rounded-md",
+              ),
             }}
             components={{
               CaptionLabel: ({ displayMonth }) => (

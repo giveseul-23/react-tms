@@ -11,8 +11,16 @@
   scrollbar-width: none; /* Firefox */
 }
 
+/* picker indicator 의 absolute 기준점을 input 자체로 고정 */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  position: relative;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
   position: absolute;
   right: 2px;
   margin: 0;
