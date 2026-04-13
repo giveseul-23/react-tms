@@ -604,7 +604,7 @@ export function SearchFilters({
 
                     if (m.filterComponent && m.filterRefColumn) {
                       let filterM = meta.filter(
-                        (x) => x.key === m.filterComponent,
+                        (x) => x.key.indexOf(m.filterComponent) > -1,
                       );
                       filterM[0].filterCol = m.filterRefColumn;
                       filterM[0].filterValueKey = m.key;
