@@ -26,7 +26,10 @@ export type TmapMarker = {
   id: string;
   lat: number;
   lon: number;
+  /** 마커 아래 배지 형태로 표시되는 라벨 (예: 차량번호) */
   label?: string;
+  /** 마우스 hover 시 툴팁 (예: 운전자명) */
+  tooltip?: string;
   iconUrl?: string;
   onClick?: () => void;
 };
@@ -67,27 +70,83 @@ function readPrimaryColor(): string {
   return raw;
 }
 
-// 기본 마커 아이콘: 트럭 (lucide-react Truck 경로 기반 SVG data URL)
-// - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 정확히 맞춤
-function buildTruckIconUrl(color: string): string {
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/**
+ * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
+ * label 이 없으면 순수 핀(36x42), 있으면 라벨 포함 가변 폭 이미지.
+ * - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 트럭 정중앙 배치
+ */
+const PIN_W = 36;
+const PIN_H = 42;
+const LABEL_H = 16;
+const LABEL_GAP = 4;
+
+function buildTruckIconUrl(
+  color: string,
+  labelText?: string,
+): {
+  url: string;
+  width: number;
+  height: number;
+  anchorX: number;
+  anchorY: number;
+} {
+  const hasLabel = !!labelText;
+  const labelWidth = hasLabel
+    ? Math.max(40, (labelText as string).length * 7 + 10)
+    : 0;
+  const width = Math.max(PIN_W, labelWidth);
+  const height = hasLabel ? PIN_H + LABEL_GAP + LABEL_H : PIN_H;
+  const pinX = (width - PIN_W) / 2;
+
+  const labelSvg = hasLabel
+    ? `
+  <g transform="translate(${width / 2} ${PIN_H + LABEL_GAP + LABEL_H / 2})">
+    <rect x="-${labelWidth / 2}" y="-${LABEL_H / 2}" width="${labelWidth}" height="${LABEL_H}" rx="4"
+          fill="white" stroke="rgba(0,0,0,0.15)" stroke-width="0.5"/>
+    <text x="0" y="3.5" text-anchor="middle" font-size="10" font-weight="600"
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fill="#222">
+      ${escapeXml(labelText as string)}
+    </text>
+  </g>`
+    : "";
+
   const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <defs>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.35"/>
     </filter>
   </defs>
-  <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
-        fill="${color}" filter="url(#shadow)"/>
-  <g transform="translate(7.5 6.5)" fill="none" stroke="white" stroke-width="1.8"
-     stroke-linecap="round" stroke-linejoin="round">
-    <path d="M14 18 V4 H1 V15 H3"/>
-    <path d="M14 8 H18 L20 12 V15 H18"/>
-    <circle cx="6" cy="17" r="2"/>
-    <circle cx="16" cy="17" r="2"/>
+  <g transform="translate(${pinX} 0)">
+    <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
+          fill="${color}" filter="url(#shadow)"/>
+    <g transform="translate(7.5 6.5)" fill="none" stroke="white" stroke-width="1.8"
+       stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 18 V4 H1 V15 H3"/>
+      <path d="M14 8 H18 L20 12 V15 H18"/>
+      <circle cx="6" cy="17" r="2"/>
+      <circle cx="16" cy="17" r="2"/>
+    </g>
   </g>
+  ${labelSvg}
 </svg>`.trim();
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+  return {
+    url: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`,
+    width,
+    height,
+    anchorX: width / 2,
+    anchorY: PIN_H,
+  };
 }
 
 // 스크립트 로더 (singleton)
@@ -283,19 +342,21 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
         const position = new Tmapv2.LatLng(m.lat, m.lon);
         if (existing) {
           existing.setPosition(position);
-          if (m.label && typeof existing.setTitle === "function") {
-            existing.setTitle(m.label);
+          const titleText = m.tooltip ?? m.label;
+          if (titleText && typeof existing.setTitle === "function") {
+            existing.setTitle(titleText);
           }
           return;
         }
-        const iconUrl = m.iconUrl ?? buildTruckIconUrl(readPrimaryColor());
+        const primary = readPrimaryColor();
+        const built = buildTruckIconUrl(primary, m.label);
         const marker = new Tmapv2.Marker({
           position,
           map: mapRef.current,
-          title: m.label ?? m.id,
-          icon: iconUrl,
-          iconSize: new Tmapv2.Size(36, 42),
-          iconAnchor: new Tmapv2.Point(18, 42), // 핀 끝(좌표 점)을 마커 기준점으로
+          title: m.tooltip ?? m.label ?? m.id,
+          icon: m.iconUrl ?? built.url,
+          iconSize: new Tmapv2.Size(built.width, built.height),
+          iconAnchor: new Tmapv2.Point(built.anchorX, built.anchorY),
         });
         if (m.onClick) {
           marker.addListener("click", m.onClick);

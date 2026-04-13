@@ -45,7 +45,8 @@ export default function InTrnstVehCtrl() {
           id: String(row.DSPCH_NO ?? row.VEH_NO ?? `${lat},${lon}`),
           lat,
           lon,
-          label: row.VEH_NO ?? row.DRVR_NM ?? "",
+          label: row.VEH_NO ?? "",
+          tooltip: row.DRVR_NM ?? row.VEH_NO ?? "",
           onClick: () => ctrl.handleRowClicked(row),
         } as TmapMarker;
       })
