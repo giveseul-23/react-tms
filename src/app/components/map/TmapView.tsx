@@ -11,7 +11,6 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -44,12 +43,24 @@ export type TmapViewHandle = {
 };
 
 export interface TmapViewProps {
-  appKey?: string;
   center?: { lat: number; lon: number };
   zoom?: number;
   markers?: TmapMarker[];
   className?: string;
   onReady?: () => void;
+}
+
+// JSP(운영) 또는 Vite dev 플러그인이 window.__SYS_CONFIG__ 에 주입한
+// TMAP_API_KEY 를 읽는다.
+function readTmapApiKey(): string {
+  const cfg = (window as any).__SYS_CONFIG__;
+  const key = cfg?.TMAP_API_KEY;
+  if (!key) {
+    throw new Error(
+      "TMAP_API_KEY 를 찾지 못했습니다. index.jsp 의 ServiceUtil.getSysConfigValue 주입 또는 vite.config.ts 의 DEV_SYS_CONFIG 설정을 확인하세요.",
+    );
+  }
+  return String(key).trim();
 }
 
 const DEFAULT_CENTER = { lat: 37.5665, lon: 126.978 }; // 서울시청
@@ -243,7 +254,6 @@ function loadTmapScript(appKey: string): Promise<void> {
 export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
   function TmapView(
     {
-      appKey,
       center = DEFAULT_CENTER,
       zoom = DEFAULT_ZOOM,
       markers = [],
@@ -258,24 +268,19 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
     const [error, setError] = useState<string | null>(null);
     const [loaded, setLoaded] = useState(false);
 
-    const effectiveKey = useMemo(
-      () =>
-        appKey ||
-        (import.meta as any).env?.VITE_TMAP_APP_KEY ||
-        "",
-      [appKey],
-    );
-
-    // ── 지도 초기화 ─────────────────────────────────────────────
+    // ── 지도 초기화 (window.__SYS_CONFIG__ 에서 키 읽기 → 스크립트 로드 → Map 생성) ─
     useEffect(() => {
-      if (!effectiveKey) {
-        setError("TMAP appKey 가 설정되지 않았습니다. VITE_TMAP_APP_KEY 환경변수를 확인하세요.");
+      let cancelled = false;
+
+      let key: string;
+      try {
+        key = readTmapApiKey();
+      } catch (e: any) {
+        setError(e?.message ?? "TMAP_API_KEY 로드 실패");
         return;
       }
 
-      let cancelled = false;
-
-      loadTmapScript(effectiveKey)
+      loadTmapScript(key)
         .then(() => {
           if (cancelled || !divRef.current || mapRef.current) return;
           const Tmapv2 = window.Tmapv2;
@@ -297,7 +302,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
       };
       // center/zoom 변화는 imperative API 로 제어
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveKey]);
+    }, []);
 
     // ── 컨테이너 리사이즈 대응 (PanelResize 시 재조정) ──────────
     useEffect(() => {
