@@ -248,6 +248,14 @@
   --grid-header-bg: var(--primary-soft);
 }
 
+/* ── GS #009999 ── */
+[data-theme="GS"] {
+  --primary: 0 153 153; /* #009999         */
+  --primary-hover: 0 130 130; /* #009999 × 85%   */
+  --primary-soft: rgba(0, 153, 153, 0.12);
+  --grid-header-bg: var(--primary-soft);
+}
+
 /* ===============================
    ag-Grid ← App Theme Bridge
    =============================== */

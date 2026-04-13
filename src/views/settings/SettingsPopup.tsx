@@ -27,6 +27,7 @@ const themeOptions: { value: ThemeColor; color: string; label: string }[] = [
   { value: "ORANGE", color: "bg-orange-500", label: "주황" },
   { value: "YELLOW", color: "bg-yellow-400", label: "노랑" },
   { value: "WINE", color: "bg-[#800020]", label: "와인" },
+  { value: "GS", color: "bg-[#009999]", label: "GS" },
 ];
 
 type ThemePickerProps = {
@@ -182,6 +183,7 @@ export const SettingsPopup: React.FC = () => {
       darkMode: draft.darkMode,
       customColor: draft.customColor,
     });
+    closePopup();
   };
 
   const handleCancel = () => {

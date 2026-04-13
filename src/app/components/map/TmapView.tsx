@@ -92,11 +92,15 @@ function escapeXml(s: string): string {
 
 /**
  * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
- * label 이 없으면 순수 핀(36x42), 있으면 라벨 포함 가변 폭 이미지.
  * - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 트럭 정중앙 배치
+ * - 핀 바깥에 테마색 반투명 아웃라인(halo)을 추가 (OUTLINE_PAD 만큼 캔버스 확장)
  */
-const PIN_W = 36;
-const PIN_H = 42;
+const PIN_CORE_W = 36;
+const PIN_CORE_H = 42;
+const OUTLINE_PAD = 5; // 아웃라인용 캔버스 padding (scale 1.18 + stroke 여유)
+const PIN_W = PIN_CORE_W + OUTLINE_PAD * 2;
+const PIN_H = PIN_CORE_H + OUTLINE_PAD * 2;
+const TIP_Y = PIN_CORE_H + OUTLINE_PAD; // SVG 좌표계에서 핀 뾰족한 끝의 y
 const LABEL_H = 16;
 const LABEL_GAP = 4;
 
@@ -122,9 +126,8 @@ function buildTruckIconUrl(
     ? `
   <g transform="translate(${width / 2} ${PIN_H + LABEL_GAP + LABEL_H / 2})">
     <rect x="-${labelWidth / 2}" y="-${LABEL_H / 2}" width="${labelWidth}" height="${LABEL_H}" rx="4"
-          fill="white" stroke="rgba(0,0,0,0.15)" stroke-width="0.5"/>
-    <text x="0" y="3.5" text-anchor="middle" font-size="10" font-weight="600"
-          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fill="#222">
+          fill="${color}" fill-opacity="0.2" />
+    <text x="0" y="3.5" text-anchor="middle" font-size="12" font-weight="600" fill="#222">
       ${escapeXml(labelText as string)}
     </text>
   </g>`
@@ -137,7 +140,14 @@ function buildTruckIconUrl(
       <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.35"/>
     </filter>
   </defs>
-  <g transform="translate(${pinX} 0)">
+  <g transform="translate(${pinX + OUTLINE_PAD} ${OUTLINE_PAD})">
+    <!-- 외곽 링: 본체보다 살짝 크게 확대, 선만 그리고 그림자 미적용 → 선명한 hairline -->
+    <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
+          fill="none"
+          stroke="${color}" stroke-width="1"
+          stroke-linejoin="round"
+          transform="translate(18 21) scale(1.18) translate(-18 -21)"/>
+    <!-- 본체 핀 (drop-shadow filter 적용) -->
     <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
           fill="${color}" filter="url(#shadow)"/>
     <g transform="translate(7.5 6.5)" fill="none" stroke="white" stroke-width="1.8"
@@ -156,7 +166,7 @@ function buildTruckIconUrl(
     width,
     height,
     anchorX: width / 2,
-    anchorY: PIN_H,
+    anchorY: TIP_Y, // 외곽선 바깥 여백 제외한 실제 핀 끝점
   };
 }
 
@@ -227,7 +237,11 @@ function loadTmapScript(appKey: string): Promise<void> {
             if (isSdkReady()) resolve();
             else {
               scriptPromise = null;
-              reject(new Error("TMAP SDK 로드 완료 후에도 클래스를 찾지 못했습니다."));
+              reject(
+                new Error(
+                  "TMAP SDK 로드 완료 후에도 클래스를 찾지 못했습니다.",
+                ),
+              );
             }
           }
         };
@@ -267,6 +281,29 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
     const markerObjsRef = useRef<Map<string, any>>(new Map());
     const [error, setError] = useState<string | null>(null);
     const [loaded, setLoaded] = useState(false);
+    // 현재 테마 primary 색상 (MutationObserver 로 <html> 변화 감지 시 갱신)
+    const [primaryColor, setPrimaryColor] = useState<string>(() =>
+      typeof window === "undefined" ? "rgb(0, 186, 237)" : readPrimaryColor(),
+    );
+    const lastPrimaryRef = useRef<string>(primaryColor);
+
+    // ── 테마 변경 감지: <html> 의 class/style/data-theme 변화에 반응 ────
+    useEffect(() => {
+      if (typeof window === "undefined") return;
+      const root = document.documentElement;
+      const update = () => {
+        const next = readPrimaryColor();
+        setPrimaryColor((prev) => (prev === next ? prev : next));
+      };
+      // 초기 sync (ThemeProvider 의 effect 가 mount 이후 적용될 수 있으므로)
+      update();
+      const mo = new MutationObserver(update);
+      mo.observe(root, {
+        attributes: true,
+        attributeFilter: ["class", "style", "data-theme"],
+      });
+      return () => mo.disconnect();
+    }, []);
 
     // ── 지도 초기화 (window.__SYS_CONFIG__ 에서 키 읽기 → 스크립트 로드 → Map 생성) ─
     useEffect(() => {
@@ -331,9 +368,17 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
       if (!Tmapv2 || !mapRef.current) return;
 
       const prev = markerObjsRef.current;
+
+      // 테마(primary) 가 바뀌었으면 기존 마커 SVG 가 stale 이므로 전부 제거 후 재생성
+      if (lastPrimaryRef.current !== primaryColor) {
+        prev.forEach((obj) => obj.setMap(null));
+        prev.clear();
+        lastPrimaryRef.current = primaryColor;
+      }
+
       const nextIds = new Set(markers.map((m) => m.id));
 
-      // 제거
+      // 사라진 마커 제거
       prev.forEach((obj, id) => {
         if (!nextIds.has(id)) {
           obj.setMap(null);
@@ -353,8 +398,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           }
           return;
         }
-        const primary = readPrimaryColor();
-        const built = buildTruckIconUrl(primary, m.label);
+        const built = buildTruckIconUrl(primaryColor, m.label);
         const marker = new Tmapv2.Marker({
           position,
           map: mapRef.current,
@@ -368,7 +412,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
         }
         prev.set(m.id, marker);
       });
-    }, [loaded, markers]);
+    }, [loaded, markers, primaryColor]);
 
     // ── imperative handle ───────────────────────────────────────
     useImperativeHandle(

@@ -2,7 +2,15 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-export type ThemeColor = "BLUE" | "GREEN" | "RED" | "ORANGE" | "YELLOW" | "WINE" | "CUSTOM";
+export type ThemeColor =
+  | "BLUE"
+  | "GREEN"
+  | "RED"
+  | "ORANGE"
+  | "YELLOW"
+  | "WINE"
+  | "GS"
+  | "CUSTOM";
 
 type ThemeSettings = {
   themeColor: ThemeColor;
