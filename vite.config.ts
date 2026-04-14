@@ -20,7 +20,7 @@ function jspDevMockPlugin(): PluginOption {
     apply: "serve", // dev 서버에서만 적용 (build 시 그대로 두기)
     transformIndexHtml(html) {
       return html.replace(
-        /<%=\s*ServiceUtil\.getSysConfigValue\(\s*\\?"([^"\\]+)\\?"\s*\)\s*%>/g,
+        /<%=\s*ServiceUtil\.getSysConfigValue\(\s*["']([^"']+)["']\s*\)\s*%>/g,
         (_match, key) => DEV_SYS_CONFIG[key] ?? "",
       );
     },
