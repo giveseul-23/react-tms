@@ -160,7 +160,11 @@ export function DatePickerPopover({
     placeholder ?? (withTime ? "YYYY-MM-DD HH:MM:SS" : "YYYY-MM-DD");
 
   const handleToday = () => {
-    setDraftDate(new Date());
+    const today = new Date();
+    const dateStr = format(today, "yyyy-MM-dd");
+    const result = withTime ? `${dateStr}T${draftTime || "00:00:00"}` : dateStr;
+    onChange(result);
+    setOpen(false);
   };
 
   const handleCommit = () => {
