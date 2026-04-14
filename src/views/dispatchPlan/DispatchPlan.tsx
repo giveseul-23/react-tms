@@ -36,8 +36,9 @@ export default function DispatchPlan() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
+  const rawFiltersRef = useRef<Record<string, string>>({});
 
-  const ctrl = useDispatchPlanController({ model, searchRef, filtersRef });
+  const ctrl = useDispatchPlanController({ model, searchRef, filtersRef, rawFiltersRef });
 
   if (loading) return <Skeleton className="h-24" />;
 
@@ -49,6 +50,7 @@ export default function DispatchPlan() {
       onSearch={ctrl.handleSearch}
       searchRef={searchRef}
       filtersRef={filtersRef}
+      rawFiltersRef={rawFiltersRef}
       pageSize={model.pageSize}
       layout={model.layout}
       onLayoutToggle={() =>

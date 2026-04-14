@@ -11,12 +11,14 @@ type ControllerProps = {
   model: DispatchPlanModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
+  rawFiltersRef: MutableRefObject<Record<string, string>>;
 };
 
 export function useDispatchPlanController({
   model,
   searchRef,
   filtersRef,
+  rawFiltersRef,
 }: ControllerProps) {
   const { handleApi } = useApiHandler();
   const { guardHasData } = useGuard();
@@ -45,10 +47,10 @@ export function useDispatchPlanController({
       Promise.all([
         dispatchPlanApi.getStopList({ DSPCH_NO: row.DSPCH_NO }),
         dispatchPlanApi.getAllocOrderList({ DSPCH_NO: row.DSPCH_NO }),
-        dispatchPlanApi.getUnallocOrderList({
-          DLVRY_DT: row.DLVRY_DT,
-          LGST_GRP_CD: row.LGST_GRP_CD,
-        }),
+        // dispatchPlanApi.getUnallocOrderList({
+        //   DLVRY_DT: row.DLVRY_DT,
+        //   LGST_GRP_CD: row.LGST_GRP_CD,
+        // }),
       ])
         .then(([stopRes, allocRes, unallocRes]: any[]) => {
           model.setStopRowData(
@@ -57,9 +59,9 @@ export function useDispatchPlanController({
           model.setAllocOrderRowData(
             allocRes.data.result ?? allocRes.data.data?.dsOut ?? [],
           );
-          model.setUnallocOrderRowData(
-            unallocRes.data.result ?? unallocRes.data.data?.dsOut ?? [],
-          );
+          // model.setUnallocOrderRowData(
+          //   unallocRes.data.result ?? unallocRes.data.data?.dsOut ?? [],
+          // );
         })
         .catch((err) => {
           console.error("[DispatchPlan] row click sub-fetch failed", err);
@@ -68,6 +70,27 @@ export function useDispatchPlanController({
     [model],
   );
 
+  //미할당 탭 조회 (조회조건 개별 값 기반)
+  const handleUnallocOrderSearch = useCallback(() => {
+    let srchObj = rawFiltersRef.current;
+
+    dispatchPlanApi
+      .getUnallocOrderList({
+        DIV_CD: srchObj["SRCH_DSPCH_DIV_CD"],
+        LGST_GRP_CD: srchObj["SRCH_DSPCH_LGST_GRP_CD"],
+        PLN_ID: srchObj["SRCH_DSPCH_PLN_ID"],
+        DLVRT_DT: srchObj["SRCH_DSPCH_DLVRY_DT+FRM"],
+      })
+      .then((res: any) => {
+        model.setUnallocOrderRowData(
+          res.data.result ?? res.data.data?.dsOut ?? [],
+        );
+      })
+      .catch((err) => {
+        console.error("[DispatchPlan] unalloc search failed", err);
+      });
+  }, [model, rawFiltersRef]);
+
   // ── 메인 그리드 액션 ────────────────────────────────────────
   const mainActions = [
     {
@@ -75,8 +98,18 @@ export function useDispatchPlanController({
       key: "배차생성및취소",
       label: "배차생성및취소",
       items: [
-        { type: "button", key: "배차생성", label: "배차생성", onClick: () => {} },
-        { type: "button", key: "배차취소", label: "배차취소", onClick: () => {} },
+        {
+          type: "button",
+          key: "배차생성",
+          label: "배차생성",
+          onClick: () => {},
+        },
+        {
+          type: "button",
+          key: "배차취소",
+          label: "배차취소",
+          onClick: () => {},
+        },
       ],
     },
     {
@@ -102,8 +135,18 @@ export function useDispatchPlanController({
       key: "메모",
       label: "메모",
       items: [
-        { type: "button", key: "메모작성", label: "메모작성", onClick: () => {} },
-        { type: "button", key: "메모삭제", label: "메모삭제", onClick: () => {} },
+        {
+          type: "button",
+          key: "메모작성",
+          label: "메모작성",
+          onClick: () => {},
+        },
+        {
+          type: "button",
+          key: "메모삭제",
+          label: "메모삭제",
+          onClick: () => {},
+        },
       ],
     },
     {
@@ -214,7 +257,12 @@ export function useDispatchPlanController({
         );
       },
     },
-    { type: "button", key: "상하차분할", label: "상하차분할", onClick: () => {} },
+    {
+      type: "button",
+      key: "상하차분할",
+      label: "상하차분할",
+      onClick: () => {},
+    },
     { type: "button", key: "조정▲", label: "조정▲", onClick: () => {} },
     { type: "button", key: "조정▼", label: "조정▼", onClick: () => {} },
     {
@@ -241,18 +289,44 @@ export function useDispatchPlanController({
 
   // ── 미할당주문 액션 ─────────────────────────────────────────
   const unallocOrderActions = [
+    {
+      type: "button",
+      key: "조회",
+      label: "조회",
+      onClick: handleUnallocOrderSearch,
+    },
     { type: "button", key: "주문할당", label: "주문할당", onClick: () => {} },
   ];
 
   // ── SUB 공통 액션 (상품라인분할 / 상품수량분할) ─────────────
   const allocSubActions = [
-    { type: "button", key: "상품라인분할", label: "상품라인분할", onClick: () => {} },
-    { type: "button", key: "상품수량분할", label: "상품수량분할", onClick: () => {} },
+    {
+      type: "button",
+      key: "상품라인분할",
+      label: "상품라인분할",
+      onClick: () => {},
+    },
+    {
+      type: "button",
+      key: "상품수량분할",
+      label: "상품수량분할",
+      onClick: () => {},
+    },
   ];
 
   const unallocSubActions = [
-    { type: "button", key: "상품라인분할", label: "상품라인분할", onClick: () => {} },
-    { type: "button", key: "상품수량분할", label: "상품수량분할", onClick: () => {} },
+    {
+      type: "button",
+      key: "상품라인분할",
+      label: "상품라인분할",
+      onClick: () => {},
+    },
+    {
+      type: "button",
+      key: "상품수량분할",
+      label: "상품수량분할",
+      onClick: () => {},
+    },
   ];
 
   // ── 할당주문 MAIN 행 클릭 → 품목 조회 ───────────────────────

@@ -96,11 +96,21 @@ function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
     }
 
     if (type === "YMD") {
-      return { ...base, type: "YMD" };
+      const rng = (row as any).RNGSRCHYN ?? (row as any).rngsrchyn ?? "Y";
+      return {
+        ...base,
+        type: "YMD",
+        mode: rng === "N" ? "N" : "Y",
+      };
     }
 
     if (type === "YMDT") {
-      return { ...base, type: "YMDT" };
+      const rng = (row as any).RNGSRCHYN ?? (row as any).rngsrchyn ?? "Y";
+      return {
+        ...base,
+        type: "YMDT",
+        mode: rng === "N" ? "N" : "Y",
+      };
     }
 
     if (type === "CHECKBOX") {

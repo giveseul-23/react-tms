@@ -23,7 +23,7 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
   const safeValue =
     dataType === "NUMBER"
       ? normalizedValue
-      : normalizedValue.replace(/'/g, "''");
+      : String(normalizedValue).replace(/'/g, "''");
 
   // 🔥 dateRange 처리 (_FRM / _TO)
   if (key.endsWith("_FRM")) {

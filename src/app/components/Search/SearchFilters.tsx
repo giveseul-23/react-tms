@@ -51,6 +51,7 @@ export function SearchFilters({
   treeGridRef,
   searchRef,
   filtersRef,
+  rawFiltersRef,
   pageSize = 20,
   // fetchFn을 prop으로 주입받아 tenderApi 직접 의존 제거
   fetchFn,
@@ -67,6 +68,7 @@ export function SearchFilters({
   treeGridRef?: React.MutableRefObject<TreeGridHandle>;
   searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
+  rawFiltersRef?: React.MutableRefObject<Record<string, string>>;
   pageSize?: number;
   fetchFn: (params: Record<string, unknown>) => Promise<any>;
   /** DataGrid 두 개인 화면에서만 전달 — 초기화 버튼 옆에 렌더링 */
@@ -388,6 +390,19 @@ export function SearchFilters({
         };
       }
 
+      // rawFiltersRef: 개별 key-value 원본 (DYNAMIC_QUERY 컴파일 전 값)
+      // 네이밍: DSPCH.DIV_CD → SRCH_DSPCH_DIV_CD (dot → _, SRCH_ 접두)
+      if (rawFiltersRef) {
+        const raw: Record<string, string> = {};
+        Object.values(searchState).forEach((v) => {
+          if (v.value != null && v.value !== "" && v.value !== "ALL") {
+            const key = `SRCH_${v.key.replace(/\./g, "_")}`;
+            raw[key] = String(v.value);
+          }
+        });
+        rawFiltersRef.current = raw;
+      }
+
       setSearching(true);
       fetchFn(params)
         .then((res: any) => {
@@ -566,8 +581,10 @@ export function SearchFilters({
                           {...common}
                           key={m.key}
                           type="YMD"
-                          value={getCondition(m.key)?.value ?? ""}
-                          onChange={(v: string) =>
+                          mode="N"
+                          fromValue={getCondition(m.key)?.value ?? ""}
+                          toValue=""
+                          onChangeFrom={(v: string) =>
                             updateCondition(
                               m.key,
                               v,
@@ -586,6 +603,7 @@ export function SearchFilters({
                         {...common}
                         key={m.key}
                         type="YMD"
+                        mode="Y"
                         fromValue={getCondition(`${m.key}_FRM`)?.value ?? ""}
                         toValue={getCondition(`${m.key}_TO`)?.value ?? ""}
                         onChangeFrom={(v: string) =>
@@ -614,8 +632,10 @@ export function SearchFilters({
                           {...common}
                           key={m.key}
                           type="YMDT"
-                          value={getCondition(m.key)?.value ?? ""}
-                          onChange={(v: string) =>
+                          mode="N"
+                          fromValue={getCondition(m.key)?.value ?? ""}
+                          toValue=""
+                          onChangeFrom={(v: string) =>
                             updateCondition(
                               m.key,
                               v,
@@ -634,6 +654,7 @@ export function SearchFilters({
                         {...common}
                         key={m.key}
                         type="YMDT"
+                        mode="Y"
                         fromValue={getCondition(`${m.key}_FRM`)?.value ?? ""}
                         toValue={getCondition(`${m.key}_TO`)?.value ?? ""}
                         onChangeFrom={(v: string) =>

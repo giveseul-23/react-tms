@@ -28,7 +28,7 @@ export const dispatchPlanApi = {
   // ── 하단 탭: 경유처 ─────────────────────────────────────────
   getStopList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/searchStop",
+      "/dispatchPlanService/searchPlanStop",
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -36,7 +36,7 @@ export const dispatchPlanApi = {
   // ── 하단 탭: 할당주문 ───────────────────────────────────────
   getAllocOrderList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/searchAllocOrder",
+      "/dispatchPlanService/searchAssignedShipment",
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -44,7 +44,7 @@ export const dispatchPlanApi = {
   // ── 하단 탭: 미할당주문 ─────────────────────────────────────
   getUnallocOrderList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/searchUnallocOrder",
+      "/dispatchPlanService/searchUnAssignedShipment",
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -52,14 +52,14 @@ export const dispatchPlanApi = {
   // ── 할당주문 / 미할당주문 SUB (품목 목록) ───────────────────
   getAllocOrderItemList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/searchAllocOrderItem",
+      "/dispatchPlanService/searchAssignedShipmentDetail",
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
   getUnallocOrderItemList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/searchUnallocOrderItem",
+      "/dispatchPlanService/searchUnAssignedShipmentDetail",
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },

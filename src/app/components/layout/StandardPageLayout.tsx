@@ -77,6 +77,7 @@ export interface StandardPageLayoutProps {
   onSearch: (data: SearchResult) => void;
   searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
+  rawFiltersRef?: React.MutableRefObject<Record<string, string>>;
   treeGridRef?: React.MutableRefObject<TreeGridHandle>;
   pageSize?: number;
   excludeKeysRef?: React.MutableRefObject<Set<string>>;
@@ -106,6 +107,7 @@ export function StandardPageLayout({
   onSearch,
   searchRef,
   filtersRef,
+  rawFiltersRef,
   treeGridRef,
   pageSize = 20,
   excludeKeysRef,
@@ -148,6 +150,7 @@ export function StandardPageLayout({
         onSearch={onSearch}
         searchRef={searchRef}
         filtersRef={filtersRef}
+        rawFiltersRef={rawFiltersRef}
         treeGridRef={treeGridRef}
         pageSize={pageSize}
         fetchFn={fetchFn}
