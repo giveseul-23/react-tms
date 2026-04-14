@@ -35,10 +35,7 @@ if (html.includes("<!DOCTYPE html>")) {
   html = `${JSP_DIRECTIVES}\n${html}`;
 }
 
-// index.jsp 로 저장
+// index.jsp 로 저장 (index.html 은 그대로 유지)
 fs.writeFileSync(jspPath, html, "utf-8");
 
-// 원본 index.html 제거 (선택: 남기고 싶으면 이 줄 주석 처리)
-fs.unlinkSync(htmlPath);
-
-console.log("[postbuild-jsp] dist/index.html → dist/index.jsp 변환 완료");
+console.log("[postbuild-jsp] dist/index.jsp 생성 완료 (index.html 유지)");
