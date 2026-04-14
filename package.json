@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "build": "vite build --mode qa && node scripts/postbuild-jsp.mjs",
+    "build": "vite build --mode qa",
     "dev": "vite"
   },
   "dependencies": {

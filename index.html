@@ -1,23 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Modernize Web UI Layout</title>
-    <script>
-      // ────────────────────────────────────────────────────────────────
-      // window.__SYS_CONFIG__
-      //   운영(JSP on WAS): 아래 <%= ... %> 를 JSP 가 치환하여 실제 값 주입
-      //   개발(Vite dev)  : vite.config.ts 의 jspDevMockPlugin 이 치환
-      // ────────────────────────────────────────────────────────────────
-      window.__SYS_CONFIG__ = {
-        TMAP_API_KEY: '<%= ServiceUtil.getSysConfigValue("TMAP_API_KEY") %>'
-      };
-    </script>
-  </head>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Modernize Web UI Layout</title>
+    </head>
+
+    <body>
+      <div id="root"></div>
+      <script type="module" src="/src/main.tsx"></script>
+    </body>
+  </html>
