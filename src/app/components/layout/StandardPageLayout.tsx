@@ -164,7 +164,7 @@ export function StandardPageLayout({
       />
 
       {/* ── 그리드 영역 ─────────────────────────────────────────── */}
-      <div className="flex-1 min-h-0 min-w-0 overflow-x-visible">
+      <div className="flex-1 min-h-0 min-w-0 overflow-x-visible mt-4">
         {hasDualGrid ? (
           // ── 분할 그리드 ─────────────────────────────────────────
           <PanelGroup
