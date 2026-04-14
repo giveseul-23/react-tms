@@ -554,25 +554,71 @@ export function SearchFilters({
                     );
 
                   case "COMBO":
-                    return (
-                      <SearchFilter
-                        {...common}
-                        key={m.key}
-                        type="COMBO"
-                        value={condition?.value ?? ""}
-                        options={m.options ?? []}
-                        onChange={(v: string) =>
+                    if (m.filterComponent && m.filterRefColumn) {
+                      let filterM = meta.filter(
+                        (x) => x.key.indexOf(m.filterComponent) > -1,
+                      );
+                      filterM[0].filterCol = m.filterRefColumn;
+                      filterM[0].filterValueKey = m.key;
+                    }
+
+                    {
+                      // filterCol/filterValueKey 가 세팅된 COMBO 는 옵션 필터링
+                      const srcVal = m.filterValueKey
+                        ? getCondition(m.filterValueKey)?.value
+                        : null;
+                      const filteredOptions =
+                        m.filterCol && srcVal && srcVal !== "ALL"
+                          ? (m.options ?? []).filter(
+                              (opt: any) =>
+                                opt.CODE === "ALL" ||
+                                opt[m.filterCol] === srcVal,
+                            )
+                          : (m.options ?? []);
+
+                      // 소스 값 변경 시 현재 선택값이 필터 목록에 없으면 자동 리셋
+                      const curVal = condition?.value ?? "";
+                      if (
+                        m.filterCol &&
+                        srcVal &&
+                        curVal &&
+                        curVal !== "ALL" &&
+                        !filteredOptions.some(
+                          (opt: any) => opt.CODE === curVal,
+                        )
+                      ) {
+                        requestAnimationFrame(() =>
                           updateCondition(
                             m.key,
-                            v,
+                            "",
                             (getCondition(m.key)?.operator ??
                               m.condition ??
                               "equal") as any,
                             m.dataType ?? "STRING",
-                          )
-                        }
-                      />
-                    );
+                          ),
+                        );
+                      }
+
+                      return (
+                        <SearchFilter
+                          {...common}
+                          key={m.key}
+                          type="COMBO"
+                          value={curVal}
+                          options={filteredOptions}
+                          onChange={(v: string) =>
+                            updateCondition(
+                              m.key,
+                              v,
+                              (getCondition(m.key)?.operator ??
+                                m.condition ??
+                                "equal") as any,
+                              m.dataType ?? "STRING",
+                            )
+                          }
+                        />
+                      );
+                    }
 
                   case "YMD":
                     if (m.mode === "N") {
