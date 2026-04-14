@@ -158,7 +158,8 @@ export function GridActionsBar({
                 key={a.key}
                 type="button"
                 variant="outline"
-                className="h-6 px-2 !py-0 text-[11px] leading-none !rounded-md items-center [&_svg]:size-3 [&_svg]:shrink-0"
+                disabled={a.disabled}
+                className="h-6 px-2 !py-0 text-[11px] leading-none !rounded-md items-center [&_svg]:size-3 [&_svg]:shrink-0 disabled:opacity-50"
                 onClick={a.onClick}
               >
                 {a.label}

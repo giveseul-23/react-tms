@@ -72,14 +72,15 @@ export function useDispatchPlanController({
 
   //미할당 탭 조회 (조회조건 개별 값 기반)
   const handleUnallocOrderSearch = useCallback(() => {
-    let srchObj = rawFiltersRef.current;
+    const srchObj = rawFiltersRef.current;
 
+    model.setUnallocSearching(true);
     dispatchPlanApi
       .getUnallocOrderList({
         DIV_CD: srchObj["SRCH_DSPCH_DIV_CD"],
         LGST_GRP_CD: srchObj["SRCH_DSPCH_LGST_GRP_CD"],
         PLN_ID: srchObj["SRCH_DSPCH_PLN_ID"],
-        DLVRY_DT: srchObj["SRCH_DSPCH_DLVRY_DT"].replaceAll("-", ""),
+        DLVRY_DT: srchObj["SRCH_DSPCH_DLVRY_DT"]?.replaceAll("-", ""),
       })
       .then((res: any) => {
         model.setUnallocOrderRowData(
@@ -88,6 +89,9 @@ export function useDispatchPlanController({
       })
       .catch((err) => {
         console.error("[DispatchPlan] unalloc search failed", err);
+      })
+      .finally(() => {
+        model.setUnallocSearching(false);
       });
   }, [model, rawFiltersRef]);
 
@@ -292,7 +296,8 @@ export function useDispatchPlanController({
     {
       type: "button",
       key: "조회",
-      label: "조회",
+      label: model.unallocSearching ? "조회중..." : "조회",
+      disabled: model.unallocSearching,
       onClick: handleUnallocOrderSearch,
     },
     { type: "button", key: "주문할당", label: "주문할당", onClick: () => {} },

@@ -34,6 +34,9 @@ export function useDispatchPlanModel() {
   const [allocSubRowData, setAllocSubRowData] = useState<any[]>([]);
   const [unallocSubRowData, setUnallocSubRowData] = useState<any[]>([]);
 
+  // ── 탭 내 조회 중 상태 ─────────────────────────────────────
+  const [unallocSearching, setUnallocSearching] = useState(false);
+
   // ── 서브 그리드 전체 초기화 ─────────────────────────────────
   const resetSubGrids = useCallback(() => {
     setStopRowData([]);
@@ -80,6 +83,8 @@ export function useDispatchPlanModel() {
     setAllocSubRowData,
     unallocSubRowData,
     setUnallocSubRowData,
+    unallocSearching,
+    setUnallocSearching,
     resetSubGrids,
     codeMap,
   };
