@@ -1,6 +1,6 @@
 // src/views/inTrnstVehCtrl/InTrnstVehCtrlController.tsx
 import { useCallback, MutableRefObject } from "react";
-import { inTrnstVehCtrlApi } from "@/app/services/inTrnstVehCtrl/inTrnstVehCtrlApi";
+import { inTrnstVehCtrlApi } from "@/app/services/cms/inTrnstVehCtrl/inTrnstVehCtrlApi";
 import { InTrnstVehCtrlModel } from "./InTrnstVehCtrlModel";
 
 type ControllerProps = {
@@ -39,7 +39,12 @@ export function useInTrnstVehCtrlController({
       model.setSelectedRow(row);
       const lat = Number(row?.LAT);
       const lon = Number(row?.LON);
-      if (Number.isFinite(lat) && Number.isFinite(lon) && lat !== 0 && lon !== 0) {
+      if (
+        Number.isFinite(lat) &&
+        Number.isFinite(lon) &&
+        lat !== 0 &&
+        lon !== 0
+      ) {
         model.mapRef.current?.panTo(lat, lon, 14);
       }
     },

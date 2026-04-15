@@ -5,7 +5,7 @@ import { Search, X, Check, Truck, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
-import { chgVehicleApi } from "@/app/services/chgVehicle/chgVehicleApi";
+import { chgVehicleApi } from "@/app/services/tms/chgVehicle/chgVehicleApi";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
 type VehicleAssignPopupProps = {
@@ -50,7 +50,7 @@ export default function VehicleAssignPopup({
         ...extraParams,
       })
       .then((res: any) => {
-        setRows(res.data.result ?? res.data.data ??  []);
+        setRows(res.data.result ?? res.data.data ?? []);
       })
       .catch((err: any) => {
         console.error(err);

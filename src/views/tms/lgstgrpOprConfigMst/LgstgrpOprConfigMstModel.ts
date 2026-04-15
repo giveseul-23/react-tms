@@ -1,6 +1,6 @@
 // src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMstModel.ts
 import { useState, useRef, useCallback, useEffect } from "react";
-import { lgstgrpOprConfigApi } from "@/app/services/lgstgrpOprConfig/lgstgrpOprConfigApi";
+import { lgstgrpOprConfigApi } from "@/app/services/tms/lgstgrpOprConfig/lgstgrpOprConfigApi";
 
 export type GridData = {
   rows: any[];

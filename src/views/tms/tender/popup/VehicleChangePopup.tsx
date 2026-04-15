@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Search, X, Check, Truck, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { chgVehicleApi } from "@/app/services/chgVehicle/chgVehicleApi";
+import { chgVehicleApi } from "@/app/services/tms/chgVehicle/chgVehicleApi";
 
 const userId = sessionStorage.getItem("userId");
 const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
@@ -50,7 +50,7 @@ export default function VehicleChangePopup({
         ...extraParams,
       })
       .then((res: any) => {
-        setRows(res.data.result ?? res.data.data ??  []);
+        setRows(res.data.result ?? res.data.data ?? []);
       })
       .catch((err: any) => {
         console.error(err);

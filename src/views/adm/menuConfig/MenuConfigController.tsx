@@ -2,14 +2,18 @@
 import { useCallback, MutableRefObject } from "react";
 import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
-import { menuApi } from "@/app/services/menu/menuApi";
+import { menuApi } from "@/app/services/adm/menu/menuApi";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { MAIN_COLUMN_DEFS } from "./MenuConfigColumns";
 import { MenuConfigModel } from "./MenuConfigModel";
 import { buildSource } from "./MenuConfig";
-import MenuFolderAddPopup, { type FolderFormData } from "./popup/MenuFolderAddPopup";
-import MenuItemAddPopup, { type MenuItemFormData } from "./popup/MenuItemAddPopup";
+import MenuFolderAddPopup, {
+  type FolderFormData,
+} from "./popup/MenuFolderAddPopup";
+import MenuItemAddPopup, {
+  type MenuItemFormData,
+} from "./popup/MenuItemAddPopup";
 import type { MenuRow } from "./MenuConfig";
 import ConfirmModal from "@/views/common/ConfirmPopup";
 
@@ -212,18 +216,17 @@ export function useMenuConfigController({
         );
         if (saveRows.length === 0) return;
 
-        handleApi(
-          menuApi.saveMenuConfig(saveRows),
-          "저장되었습니다.",
-        ).then(() => {
-          // 저장 완료 후 플래그 제거
-          model.setSource((prev: MenuRow[]) =>
-            prev.map((r: any) => {
-              const { _isNew, _isDirty, ...rest } = r;
-              return rest as MenuRow;
-            }),
-          );
-        });
+        handleApi(menuApi.saveMenuConfig(saveRows), "저장되었습니다.").then(
+          () => {
+            // 저장 완료 후 플래그 제거
+            model.setSource((prev: MenuRow[]) =>
+              prev.map((r: any) => {
+                const { _isNew, _isDirty, ...rest } = r;
+                return rest as MenuRow;
+              }),
+            );
+          },
+        );
       },
     },
 

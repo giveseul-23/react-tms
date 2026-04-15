@@ -23,7 +23,7 @@
 //  onActionAfterSearch(엑셀)→ mainActions 내 '엑셀' 그룹 onClick
 // ──────────────────────────────────────────────────────────────────
 import { useCallback, MutableRefObject } from "react";
-import { tenderApi } from "@/app/services/tender/tenderApi";
+import { tenderApi } from "@/app/services/tms/tender/tenderApi.ts";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
