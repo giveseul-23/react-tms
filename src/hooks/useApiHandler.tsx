@@ -1,5 +1,5 @@
 import { usePopup } from "@/app/components/popup/PopupContext";
-import ConfirmModal from "@/views/common/ConfirmPopup";
+import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 
 export function useApiHandler() {
   const { openPopup, closePopup } = usePopup();

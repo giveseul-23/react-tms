@@ -4,12 +4,12 @@
 import { useState, useMemo } from "react";
 import { Sidebar } from "@/app/components/layout/Sidebar";
 import { PageTabBar } from "@/app/components/layout/PageTabBar";
-import { MENU_COMPONENT_MAP } from "@/app/menu/menuComponentMap";
+import { MENU_COMPONENT_MAP } from "@/app/config/menuComponentMap";
 import { usePageTabs } from "@/hooks/usePageTabs";
 import { SearchToast } from "@/app/components/ui/SearchToast";
 import { useDynamicMenu } from "@/hooks/useDynamicMenu";
 import { usePopup } from "@/app/components/popup/PopupContext";
-import ConfirmModal from "@/views/common/ConfirmPopup";
+import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 
 const STATIC_LABEL_MAP: Record<string, string> = {
   __WELCOME__: "Home",

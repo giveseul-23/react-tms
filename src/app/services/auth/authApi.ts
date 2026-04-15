@@ -1,5 +1,5 @@
 // app/services/auth/authApi.ts
-import { apiClient } from "@/app/api/client";
+import { apiClient } from "@/app/http/client";
 import { Util } from "@/app/services/common/Util.ts";
 import { Lang } from "@/app/services/common/Lang.ts";
 

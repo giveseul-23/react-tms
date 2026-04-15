@@ -1,4 +1,4 @@
-import { apiClient } from "@/app/api/client";
+import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
 import type { ServerSearchConditionRow } from "@/features/search/search.meta.types";
 

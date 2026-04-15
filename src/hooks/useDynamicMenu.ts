@@ -18,10 +18,10 @@ import {
   Layers,
   Box,
 } from "lucide-react";
-import { menuApi } from "@/app/services/adm/menu/menuApi";
+import { menuApi } from "@/features/adm/menuConfig/menuApi";
 import { getSessionFields } from "@/app/services/auth/auth";
 import { Lang } from "@/app/services/common/Lang";
-import type { MenuSection, MenuNode } from "@/app/menu/menuConfig";
+import type { MenuSection, MenuNode } from "@/app/config/menuConfig";
 
 const ICON_MAP: Record<string, any> = {
   ADM: Settings2,

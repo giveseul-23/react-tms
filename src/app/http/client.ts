@@ -1,4 +1,4 @@
-// app/api/client.ts
+// app/http/client.ts
 //
 // 요구사항 6: 세션 만료 시 자동 로그아웃 + 로그인 페이지 리디렉션
 //   - 401 Unauthorized → 토큰 + Lang 캐시 정리 후 /login 으로 이동
