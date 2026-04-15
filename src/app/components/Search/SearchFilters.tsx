@@ -393,11 +393,27 @@ export function SearchFilters({
       // rawFiltersRef: 개별 key-value 원본 (DYNAMIC_QUERY 컴파일 전 값)
       // 네이밍: DSPCH.DIV_CD → SRCH_DSPCH_DIV_CD (dot → _, SRCH_ 접두)
       if (rawFiltersRef) {
+        // 날짜 키 집합 구성 (YMD/YMDT 필드의 _FRM/_TO 및 단일키)
+        const dateKeys = new Set<string>();
+        meta.forEach((m) => {
+          if (m.type === "YMD" || m.type === "YMDT") {
+            if (m.mode === "N") {
+              dateKeys.add(m.key);
+            } else {
+              dateKeys.add(`${m.key}_FRM`);
+              dateKeys.add(`${m.key}_TO`);
+            }
+          }
+        });
+
         const raw: Record<string, string> = {};
         Object.values(searchState).forEach((v) => {
           if (v.value != null && v.value !== "" && v.value !== "ALL") {
             const key = `SRCH_${v.key.replace(/\./g, "_")}`;
-            raw[key] = String(v.value);
+            // 날짜 파라미터는 '-' 제거
+            raw[key] = dateKeys.has(v.key)
+              ? String(v.value).replace(/-/g, "")
+              : String(v.value);
           }
         });
         rawFiltersRef.current = raw;

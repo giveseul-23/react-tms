@@ -34,6 +34,21 @@ export function DateRangeFilter({
 }: DateFilterProps) {
   const isDatetime = granularity === "datetime";
 
+  // from-to 유효성 보정: from이 to보다 크면 to를 from으로, to가 from보다 작으면 from을 to로 보정
+  const handleFromChange = (v: string) => {
+    onChangeFrom(v);
+    if (toValue && v && v > toValue) {
+      onChangeTo?.(v);
+    }
+  };
+
+  const handleToChange = (v: string) => {
+    onChangeTo?.(v);
+    if (fromValue && v && v < fromValue) {
+      onChangeFrom(v);
+    }
+  };
+
   /* ---------- single ---------- */
   if (mode === "N") {
     return (
@@ -52,7 +67,7 @@ export function DateRangeFilter({
       <DatePickerPopover
         id={fromId}
         value={fromValue}
-        onChange={onChangeFrom}
+        onChange={handleFromChange}
         withTime={isDatetime}
       />
 
@@ -61,7 +76,7 @@ export function DateRangeFilter({
       <DatePickerPopover
         id={toId}
         value={toValue}
-        onChange={(v) => onChangeTo?.(v)}
+        onChange={handleToChange}
         withTime={isDatetime}
       />
     </div>

@@ -25,22 +25,24 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
       ? normalizedValue
       : String(normalizedValue).replace(/'/g, "''");
 
-  // 🔥 dateRange 처리 (_FRM / _TO)
+  // 🔥 dateRange 처리 (_FRM / _TO) — 날짜값에서 '-' 제거 (YYYYMMDD 형식)
   if (key.endsWith("_FRM")) {
     const baseKey = key.replace("_FRM", "");
+    const dateValue = safeValue.replace(/-/g, "");
     returnStr +=
       dataType === "NUMBER"
-        ? `${baseKey} >= TO_DATE(${safeValue}, 'YYYY-MM-DD')`
-        : `${baseKey} >= TO_DATE('${safeValue}', 'YYYY-MM-DD')`;
+        ? `${baseKey} >= TO_DATE(${dateValue}, 'YYYYMMDD')`
+        : `${baseKey} >= TO_DATE('${dateValue}', 'YYYYMMDD')`;
     return returnStr;
   }
 
   if (key.endsWith("_TO")) {
     const baseKey = key.replace("_TO", "");
+    const dateValue = safeValue.replace(/-/g, "");
     returnStr +=
       dataType === "NUMBER"
-        ? `${baseKey} <= TO_DATE(${safeValue}, 'YYYY-MM-DD')`
-        : `${baseKey} <= TO_DATE('${safeValue}', 'YYYY-MM-DD')`;
+        ? `${baseKey} <= TO_DATE(${dateValue}, 'YYYYMMDD')`
+        : `${baseKey} <= TO_DATE('${dateValue}', 'YYYYMMDD')`;
     return returnStr;
   }
 

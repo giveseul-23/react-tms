@@ -1,24 +1,23 @@
 import React, { useState, useRef } from "react";
 import { useTheme, type ThemeColor } from "@/app/context/ThemeContext";
 import { User, Lock, Palette, Save, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/components/ui/select";
 import { Input } from "@/app/components/ui/input";
 import { Button } from "@/app/components/ui/button";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { getUserId, getUserName } from "@/app/services/auth/auth";
+import { Util } from "@/app/services/common/Util";
 
-// ThemeColor는 ThemeContext에서 import
+// LCL_CD → 표시명 매핑
+const LOCALE_LABEL_MAP: Record<string, string> = {
+  KR: "대한민국",
+  US: "United States",
+  JP: "日本",
+  CN: "中国",
+};
 
-const categoryCntryOptions = [
-  { value: "전체", label: "전체" },
-  { value: "대한민국", label: "대한민국" },
-];
+function getLocaleLabel(code: string): string {
+  return LOCALE_LABEL_MAP[code] ?? code;
+}
 
 const themeOptions: { value: ThemeColor; color: string; label: string }[] = [
   { value: "BLUE", color: "bg-blue-500", label: "파랑" },
@@ -151,7 +150,7 @@ export const SettingsPopup: React.FC = () => {
   }>({
     userNm: getUserName(),
     userId: getUserId(),
-    locale: "대한민국",
+    locale: Util.user.locale || "KR",
     themeColor,
     darkMode,
     customColor,
@@ -190,7 +189,7 @@ export const SettingsPopup: React.FC = () => {
     setDraft({
       userNm: draft.userNm,
       userId: draft.userId,
-      locale: "대한민국",
+      locale: Util.user.locale || "KR",
       themeColor,
       darkMode,
       customColor,
@@ -226,30 +225,15 @@ export const SettingsPopup: React.FC = () => {
           />
         </FieldRow>
         <FieldRow label="로컬">
-          <Select
-            value={draft.locale}
-            onValueChange={(v) => setDraftField("locale", v)}
-          >
-            <SelectTrigger
-              className="h-7 text-xs
-                bg-white dark:bg-slate-800
-                border-slate-200 dark:border-slate-600
-                text-slate-700 dark:text-slate-100"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {categoryCntryOptions.map((opt) => (
-                <SelectItem
-                  key={opt.value}
-                  value={opt.value}
-                  className="text-xs"
-                >
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            value={getLocaleLabel(draft.locale)}
+            readOnly
+            className="h-7 text-xs
+              bg-slate-50 dark:bg-slate-700
+              border-slate-200 dark:border-slate-600
+              text-slate-500 dark:text-slate-400
+              cursor-default"
+          />
         </FieldRow>
       </SectionBlock>
 

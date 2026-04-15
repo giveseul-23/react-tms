@@ -80,7 +80,7 @@ export function useDispatchPlanController({
         DIV_CD: srchObj["SRCH_DSPCH_DIV_CD"],
         LGST_GRP_CD: srchObj["SRCH_DSPCH_LGST_GRP_CD"],
         PLN_ID: srchObj["SRCH_DSPCH_PLN_ID"],
-        DLVRY_DT: srchObj["SRCH_DSPCH_DLVRY_DT"]?.replaceAll("-", ""),
+        DLVRY_DT: srchObj["SRCH_DSPCH_DLVRY_DT"],
       })
       .then((res: any) => {
         model.setUnallocOrderRowData(

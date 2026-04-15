@@ -36,6 +36,7 @@ import type { GridPreset, GridTab } from "./types";
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 
 import { Lang } from "@/app/services/common/Lang";
+import { Util } from "@/app/services/common/Util";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -314,6 +315,15 @@ export default function DataGrid<TRow>({
 
       const colDef = col as ColDef<TRow>;
       const field = (colDef.field ?? colDef.colId ?? "") as string;
+
+      // DTTM 필드: dateFormatType / timeFormatType 에 따른 자동 포맷팅
+      if (field.includes("DTTM")) {
+        return {
+          ...col,
+          headerName: Lang.get(col.headerName),
+          valueFormatter: (params: any) => Util.formatDttm(params.value),
+        };
+      }
 
       // 이미 cellStyle / type 이 지정된 경우 그대로 존중
       if (!(colDef as any).cellStyle && !(colDef as any).type) {
