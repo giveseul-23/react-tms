@@ -12,7 +12,7 @@
 
 import { useRef, useMemo } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import { StandardPageLayout } from "@/app/components/layout/StandardPageLayout";
+import { GridMapPage } from "@/app/components/layout/presets/GridMapPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
@@ -79,27 +79,28 @@ export default function InTrnstVehCtrl() {
   );
 
   return (
-    <StandardPageLayout
-      meta={meta}
-      moduleDefault="TMS"
-      fetchFn={ctrl.fetchInTrnstVehList}
-      onSearch={ctrl.handleSearch}
-      searchRef={searchRef}
-      filtersRef={filtersRef}
-      pageSize={model.pageSize}
-      layout={model.layout}
-      onLayoutToggle={() =>
-        model.setLayout((prev: LayoutType) =>
-          prev === "side" ? "vertical" : "side",
-        )
-      }
-      dualGrid={{
-        direction: model.layout === "side" ? "horizontal" : "vertical",
-        defaultTopSize: 45,
-        defaultBottomSize: 55,
-        top: gridPane,
-        bottom: mapPane,
+    <GridMapPage
+      searchProps={{
+        meta,
+        moduleDefault: "TMS",
+        fetchFn: ctrl.fetchInTrnstVehList,
+        onSearch: ctrl.handleSearch,
+        searchRef,
+        filtersRef,
+        pageSize: model.pageSize,
       }}
+      direction={model.layout === "side" ? "horizontal" : "vertical"}
+      defaultSizes={[45, 55]}
+      layoutToggle={{
+        layout: model.layout,
+        onToggle: () =>
+          model.setLayout((prev: LayoutType) =>
+            prev === "side" ? "vertical" : "side",
+          ),
+      }}
+      storageKey="in-trnst-veh-ctrl"
+      grid={gridPane}
+      map={mapPane}
     />
   );
 }

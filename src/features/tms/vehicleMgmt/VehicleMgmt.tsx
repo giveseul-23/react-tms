@@ -2,14 +2,13 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import { StandardPageLayout } from "@/app/components/layout/StandardPageLayout";
+import { GridFormPage } from "@/app/components/layout/presets/GridFormPage";
+import { FormSheetOverlay } from "@/app/components/layout/FormSheet";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
-import { Sheet, SheetContent } from "@/app/components/ui/sheet";
 
 import { useVehicleMgmtModel } from "./VehicleMgmtModel.ts";
 import { useVehicleMgmtController } from "./VehicleMgmtController.tsx";
@@ -130,199 +129,127 @@ export default function VehicleMgmt() {
       nameField,
     );
 
-  // ── 상세 패널 (우측 슬라이드) ──────────────────────────────────
-  const detailPanel = model.detailOpen && (
-    <div
-      className="shrink-0 border-l border-border bg-background flex flex-col overflow-hidden"
-      style={{
-        width: 390,
-        transition: "width 0.25s ease",
-      }}
+  // ── 상세 패널 헤더 액션 (삭제) ─────────────────────────────────
+  const detailHeaderActions = (
+    <button
+      onClick={ctrl.handleDeleteDetail}
+      className="h-[26px] px-2.5 text-[11px] rounded-md border border-destructive text-destructive bg-background hover:bg-destructive/5"
     >
-      {/* 헤더 */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-[10px] bg-[rgb(var(--primary))]/10 text-[rgb(var(--primary))]">
-            수정
-          </span>
-          <span className="text-[13px] font-medium">
-            {model.detailData?.VEH_NO ?? "상세내역"}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={ctrl.handleDeleteDetail}
-            className="h-[26px] px-2.5 text-[11px] rounded-md border border-destructive text-destructive bg-background hover:bg-destructive/5"
-          >
-            삭제
-          </button>
-          <button
-            onClick={model.closeDetail}
-            className="w-[26px] h-[26px] border border-input rounded-md bg-background flex items-center justify-center text-muted-foreground hover:bg-accent"
-          >
-            <X className="w-3 h-3" />
-          </button>
-        </div>
-      </div>
-
-      {/* 네비게이션 */}
-      <div className="flex items-center justify-between px-3.5 py-2 border-b border-border shrink-0">
-        <div className="flex items-center gap-1.5">
-          <input
-            type="text"
-            value={jumpInput}
-            onChange={(e) => setJumpInput(e.target.value.replace(/\D/g, ""))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                const num = Number(jumpInput);
-                if (num >= 1 && num <= model.gridData.totalCount) {
-                  ctrl.handleJumpTo(num);
-                } else {
-                  setJumpInput(String(model.detailIndex + 1));
-                }
-              }
-            }}
-            onBlur={() => setJumpInput(String(model.detailIndex + 1))}
-            disabled={model.navigating}
-            className="w-10 h-[22px] text-xs text-center border border-input rounded bg-background focus:outline-none focus:ring-1 focus:ring-[rgb(var(--primary))]"
-          />
-          <span className="text-xs text-muted-foreground">
-            / {model.gridData.totalCount}
-          </span>
-          {model.navigating && (
-            <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
-          )}
-        </div>
-        <div className="flex gap-1">
-          <button
-            disabled={model.detailIndex <= 0 || model.navigating}
-            onClick={() => ctrl.handleNavigate(-1)}
-            className="w-[26px] h-[26px] border border-input rounded-md bg-background flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-          <button
-            disabled={
-              model.detailIndex >= model.gridData.totalCount - 1 ||
-              model.navigating
-            }
-            onClick={() => ctrl.handleNavigate(1)}
-            className="w-[26px] h-[26px] border border-input rounded-md bg-background flex items-center justify-center text-muted-foreground hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* 본문 */}
-      <div className="flex-1 overflow-y-auto p-3.5">
-        <VehicleFormBody
-          data={model.detailData}
-          setData={model.setDetailData}
-          mode="edit"
-          onPopupSearch={detailPopupSearch}
-          codeMap={model.codeMap}
-        />
-      </div>
-
-      {/* 푸터 */}
-      <div className="flex gap-2 px-3.5 py-2.5 border-t border-border shrink-0">
-        <button
-          onClick={model.closeDetail}
-          className="flex-1 h-[34px] text-[13px] rounded-md border border-input bg-background hover:bg-accent flex items-center justify-center"
-        >
-          닫기
-        </button>
-        <button
-          onClick={ctrl.handleSaveDetail}
-          className="flex-1 h-[34px] text-[13px] rounded-md text-white flex items-center justify-center"
-          style={{ backgroundColor: "rgb(var(--primary))" }}
-        >
-          저장
-        </button>
-      </div>
-    </div>
+      삭제
+    </button>
   );
 
-  // ── 그리드 + 상세패널 합쳐서 singleGrid 렌더 ──────────────────
-  const gridContent = (
-    <div className="flex h-full min-h-0 overflow-hidden">
-      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        <DataGrid
-          layoutType="plain"
-          columnDefs={MAIN_GRID_COLUMN_DEFS(model.codeMap)}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => searchRef.current?.(page, false)}
-          actions={ctrl.mainActions}
-          onRowClicked={ctrl.handleRowClicked}
-        />
-      </div>
-      {detailPanel}
-    </div>
+  // ── 상세 패널 푸터 (닫기 / 저장) ───────────────────────────────
+  const detailFooter = (
+    <>
+      <button
+        onClick={model.closeDetail}
+        className="flex-1 h-[34px] text-[13px] rounded-md border border-input bg-background hover:bg-accent flex items-center justify-center"
+      >
+        닫기
+      </button>
+      <button
+        onClick={ctrl.handleSaveDetail}
+        className="flex-1 h-[34px] text-[13px] rounded-md text-white flex items-center justify-center"
+        style={{ backgroundColor: "rgb(var(--primary))" }}
+      >
+        저장
+      </button>
+    </>
+  );
+
+  // ── 신규등록 Sheet 푸터 ───────────────────────────────────────
+  const newFormFooter = (
+    <>
+      <button
+        onClick={() => model.setNewSlideOpen(false)}
+        className="flex-1 h-9 text-[13px] rounded-md border border-input bg-background hover:bg-accent flex items-center justify-center"
+      >
+        취소
+      </button>
+      <button
+        onClick={ctrl.handleSaveNew}
+        className="flex-[2] h-9 text-[13px] rounded-md text-white flex items-center justify-center"
+        style={{ backgroundColor: "rgb(var(--primary))" }}
+      >
+        등록 완료
+      </button>
+    </>
   );
 
   return (
     <>
-      <StandardPageLayout
-        meta={meta}
-        moduleDefault="TMS"
-        fetchFn={ctrl.fetchVehicleList}
-        onSearch={ctrl.handleSearch}
-        searchRef={searchRef}
-        filtersRef={filtersRef}
-        pageSize={model.pageSize}
-        singleGrid={{ render: gridContent }}
+      <GridFormPage
+        searchProps={{
+          meta,
+          moduleDefault: "TMS",
+          fetchFn: ctrl.fetchVehicleList,
+          onSearch: ctrl.handleSearch,
+          searchRef,
+          filtersRef,
+          pageSize: model.pageSize,
+        }}
+        grid={
+          <DataGrid
+            layoutType="plain"
+            columnDefs={MAIN_GRID_COLUMN_DEFS(model.codeMap)}
+            rowData={model.gridData.rows}
+            totalCount={model.gridData.totalCount}
+            currentPage={model.gridData.page}
+            pageSize={model.pageSize}
+            onPageSizeChange={model.setPageSize}
+            onPageChange={(page) => searchRef.current?.(page, false)}
+            actions={ctrl.mainActions}
+            onRowClicked={ctrl.handleRowClicked}
+          />
+        }
+        form={{
+          open: model.detailOpen,
+          width: 390,
+          badgeLabel: "수정",
+          title: model.detailData?.VEH_NO ?? "상세내역",
+          headerActions: detailHeaderActions,
+          onClose: model.closeDetail,
+          nav: {
+            current: model.detailIndex + 1,
+            total: model.gridData.totalCount,
+            onPrev: () => ctrl.handleNavigate(-1),
+            onNext: () => ctrl.handleNavigate(1),
+            onJump: (n) => ctrl.handleJumpTo(n),
+            navigating: model.navigating,
+          },
+          jumpInput,
+          onJumpInputChange: setJumpInput,
+          onJumpInputBlur: () => setJumpInput(String(model.detailIndex + 1)),
+          body: (
+            <VehicleFormBody
+              data={model.detailData}
+              setData={model.setDetailData}
+              mode="edit"
+              onPopupSearch={detailPopupSearch}
+              codeMap={model.codeMap}
+            />
+          ),
+          footer: detailFooter,
+        }}
       />
 
       {/* ── 신규 등록 슬라이드 오버레이 ─────────────────────────── */}
-      <Sheet open={model.newSlideOpen} onOpenChange={model.setNewSlideOpen}>
-        <SheetContent
-          side="right"
-          className="w-[520px] sm:max-w-[520px] p-0 gap-0 flex flex-col"
-        >
-          {/* 헤더 */}
-          <div className="flex items-center justify-between px-4 py-3.5 border-b border-border shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-[10px] bg-emerald-100 text-emerald-700">
-                신규 등록
-              </span>
-              <span className="text-sm font-medium">차량 신규 등록</span>
-            </div>
-          </div>
-
-          {/* 본문 */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <VehicleFormBody
-              data={model.newFormData}
-              setData={model.setNewFormData}
-              mode="new"
-              onPopupSearch={newPopupSearch}
-              codeMap={model.codeMap}
-            />
-          </div>
-
-          {/* 푸터 */}
-          <div className="flex gap-2 px-4 py-3 border-t border-border shrink-0">
-            <button
-              onClick={() => model.setNewSlideOpen(false)}
-              className="flex-1 h-9 text-[13px] rounded-md border border-input bg-background hover:bg-accent flex items-center justify-center"
-            >
-              취소
-            </button>
-            <button
-              onClick={ctrl.handleSaveNew}
-              className="flex-[2] h-9 text-[13px] rounded-md text-white flex items-center justify-center"
-              style={{ backgroundColor: "rgb(var(--primary))" }}
-            >
-              등록 완료
-            </button>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <FormSheetOverlay
+        open={model.newSlideOpen}
+        onOpenChange={model.setNewSlideOpen}
+        badgeLabel="신규 등록"
+        title="차량 신규 등록"
+        footer={newFormFooter}
+      >
+        <VehicleFormBody
+          data={model.newFormData}
+          setData={model.setNewFormData}
+          mode="new"
+          onPopupSearch={newPopupSearch}
+          codeMap={model.codeMap}
+        />
+      </FormSheetOverlay>
     </>
   );
 }

@@ -3,7 +3,7 @@
 
 import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import { StandardPageLayout } from "@/app/components/layout/StandardPageLayout";
+import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 import TreeGrid, {
   type TreeRow,
@@ -101,45 +101,45 @@ export default function MenuConfig() {
   if (loading) return <Skeleton className="h-24" />;
 
   return (
-    <StandardPageLayout
-      // 조회조건
-      meta={meta}
-      fetchFn={ctrl.fetchMenuConfigList}
-      onSearch={ctrl.handleSearch}
-      filtersRef={filtersRef}
-      treeGridRef={treeGridRef}
-      // 그리드가 1개 → layout 토글 없음 (StandardPageLayout 내부에서 visible=false 자동 처리)
-      singleGrid={{
-        render: (
-          <TreeGrid<MenuRow>
-            ref={treeGridRef}
-            source={ctrl.source}
-            renderNameCell={renderNameCell}
-            columnDefs={MAIN_COLUMN_DEFS()}
-            nameColumnHeader=""
-            nameColumnWidth={160}
-            sortField="DSPLY_SEQ"
-            defaultExpandLevel={1}
-            getRowId={(p) => p.data.id}
-            actions={ctrl.mainActions}
-            onRowClicked={ctrl.handleRowClicked}
-          />
-        ),
-      }}
-      computeTotalCount={(rows) => {
-        // data 배열이 있는 실제 leaf 노드 수 합산
-        function countLeafs(nodes: any[]): number {
-          return nodes.reduce((acc, node) => {
+    <GridOnlyPage
+      searchProps={{
+        meta,
+        fetchFn: ctrl.fetchMenuConfigList,
+        onSearch: ctrl.handleSearch,
+        filtersRef,
+        treeGridRef,
+        computeTotalCount: (rows) => {
+          // data 배열이 있는 실제 leaf 노드 수 합산
+          function countLeafs(nodes: any[]): number {
+            return nodes.reduce((acc, node) => {
+              const children = node.data ?? [];
+              return children.length > 0
+                ? acc + countLeafs(children)
+                : acc + 1;
+            }, 0);
+          }
+
+          return rows.data.reduce((acc: number, node: any) => {
             const children = node.data ?? [];
             return children.length > 0 ? acc + countLeafs(children) : acc + 1;
           }, 0);
-        }
-
-        return rows.data.reduce((acc, node) => {
-          const children = node.data ?? [];
-          return children.length > 0 ? acc + countLeafs(children) : acc + 1;
-        }, 0);
+        },
       }}
+      grid={
+        <TreeGrid<MenuRow>
+          ref={treeGridRef}
+          source={ctrl.source}
+          renderNameCell={renderNameCell}
+          columnDefs={MAIN_COLUMN_DEFS()}
+          nameColumnHeader=""
+          nameColumnWidth={160}
+          sortField="DSPLY_SEQ"
+          defaultExpandLevel={1}
+          getRowId={(p) => p.data.id}
+          actions={ctrl.mainActions}
+          onRowClicked={ctrl.handleRowClicked}
+        />
+      }
     />
   );
 }

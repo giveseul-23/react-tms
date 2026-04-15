@@ -1,10 +1,10 @@
-// src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMst.tsx
+// src/features/tms/lgstgrpOprConfigMst/LgstgrpOprConfigMst.tsx
 "use client";
 
 import { useRef, useEffect } from "react";
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SearchFilters } from "@/app/components/Search/SearchFilters";
+import { SplitPane } from "@/app/components/layout/SplitPane";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
@@ -82,88 +82,88 @@ export default function LgstgrpOprConfigMst() {
 
       {/* ── 2x2 그리드 레이아웃 ─────────────────────────────────── */}
       <div className="flex-1 min-h-0 min-w-0">
-        <PanelGroup direction="vertical" className="h-full">
+        <SplitPane
+          direction="vertical"
+          defaultSizes={[55, 45]}
+          minSizes={[25, 20]}
+          handleThickness="1.5"
+          storageKey="lgstgrp-opr-config-mst-outer"
+        >
           {/* ── 상단 행 ───────────────────────────────────────── */}
-          <Panel defaultSize={55} minSize={25}>
-            <PanelGroup direction="horizontal" className="h-full">
-              {/* Top-left: 플류운영그룹운영설정 */}
-              <Panel defaultSize={50} minSize={25}>
-                <DataGrid
-                  layoutType="plain"
-                  columnDefs={CONFIG_COLUMN_DEFS((updater: any) =>
-                    model.setConfigData((prev: any) => ({
-                      ...prev,
-                      rows:
-                        typeof updater === "function"
-                          ? updater(prev.rows)
-                          : updater,
-                    })),
-                  )}
-                  rowData={model.configData.rows}
-                  totalCount={model.configData.totalCount}
-                  currentPage={model.configData.page}
-                  pageSize={model.pageSize}
-                  onPageSizeChange={model.setPageSize}
-                  onPageChange={(page) => searchRef.current?.(page, false)}
-                  actions={ctrl.configActions}
-                  onRowClicked={ctrl.handleConfigRowClicked}
-                />
-              </Panel>
+          <SplitPane
+            direction="horizontal"
+            defaultSizes={[50, 50]}
+            minSizes={[25, 25]}
+            handleThickness="1.5"
+            storageKey="lgstgrp-opr-config-mst-top"
+          >
+            {/* Top-left: 플류운영그룹운영설정 */}
+            <DataGrid
+              layoutType="plain"
+              columnDefs={CONFIG_COLUMN_DEFS((updater: any) =>
+                model.setConfigData((prev: any) => ({
+                  ...prev,
+                  rows:
+                    typeof updater === "function"
+                      ? updater(prev.rows)
+                      : updater,
+                })),
+              )}
+              rowData={model.configData.rows}
+              totalCount={model.configData.totalCount}
+              currentPage={model.configData.page}
+              pageSize={model.pageSize}
+              onPageSizeChange={model.setPageSize}
+              onPageChange={(page) => searchRef.current?.(page, false)}
+              actions={ctrl.configActions}
+              onRowClicked={ctrl.handleConfigRowClicked}
+            />
 
-              <PanelResizeHandle className="w-1.5 cursor-col-resize hover:bg-slate-200/70" />
-
-              {/* Top-right: 설정상세 */}
-              <Panel defaultSize={50} minSize={25}>
-                <DataGrid
-                  layoutType="plain"
-                  columnDefs={CONFIG_DETAIL_COLUMN_DEFS(model.setDetailData)}
-                  rowData={model.detailData.rows}
-                  totalCount={model.detailData.totalCount}
-                  currentPage={model.detailData.page}
-                  pageSize={model.pageSize}
-                  onPageSizeChange={model.setPageSize}
-                  onPageChange={(page) => searchRef.current?.(page, false)}
-                  actions={ctrl.detailActions}
-                  onRowClicked={ctrl.handleDetailRowClicked}
-                />
-              </Panel>
-            </PanelGroup>
-          </Panel>
-
-          <PanelResizeHandle className="h-1.5 cursor-row-resize hover:bg-slate-200/70" />
+            {/* Top-right: 설정상세 */}
+            <DataGrid
+              layoutType="plain"
+              columnDefs={CONFIG_DETAIL_COLUMN_DEFS(model.setDetailData)}
+              rowData={model.detailData.rows}
+              totalCount={model.detailData.totalCount}
+              currentPage={model.detailData.page}
+              pageSize={model.pageSize}
+              onPageSizeChange={model.setPageSize}
+              onPageChange={(page) => searchRef.current?.(page, false)}
+              actions={ctrl.detailActions}
+              onRowClicked={ctrl.handleDetailRowClicked}
+            />
+          </SplitPane>
 
           {/* ── 하단 행 ───────────────────────────────────────── */}
-          <Panel defaultSize={45} minSize={20}>
-            <PanelGroup direction="horizontal" className="h-full">
-              {/* Bottom-left: 설정코드다국어설정 */}
-              <Panel defaultSize={50} minSize={25}>
-                <DataGrid
-                  layoutType="plain"
-                  columnDefs={CONFIG_I18N_COLUMN_DEFS(model.setI18nData)}
-                  rowData={model.i18nData}
-                  actions={ctrl.i18nActions}
-                  onRowClicked={ctrl.handleI18nRowClicked}
-                  subTitle="설정코드다국어설정"
-                />
-              </Panel>
+          <SplitPane
+            direction="horizontal"
+            defaultSizes={[50, 50]}
+            minSizes={[25, 25]}
+            handleThickness="1.5"
+            storageKey="lgstgrp-opr-config-mst-bottom"
+          >
+            {/* Bottom-left: 설정코드다국어설정 */}
+            <DataGrid
+              layoutType="plain"
+              columnDefs={CONFIG_I18N_COLUMN_DEFS(model.setI18nData)}
+              rowData={model.i18nData}
+              actions={ctrl.i18nActions}
+              onRowClicked={ctrl.handleI18nRowClicked}
+              subTitle="설정코드다국어설정"
+            />
 
-              <PanelResizeHandle className="w-1.5 cursor-col-resize hover:bg-slate-200/70" />
-
-              {/* Bottom-right: 설정상세코드다국어설정 */}
-              <Panel defaultSize={50} minSize={25}>
-                <DataGrid
-                  layoutType="plain"
-                  columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS(
-                    model.setDetailI18nData,
-                  )}
-                  rowData={model.detailI18nData}
-                  actions={ctrl.detailI18nActions}
-                  subTitle="설정상세코드다국어설정"
-                />
-              </Panel>
-            </PanelGroup>
-          </Panel>
-        </PanelGroup>
+            {/* Bottom-right: 설정상세코드다국어설정 */}
+            <DataGrid
+              layoutType="plain"
+              columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS(
+                model.setDetailI18nData,
+              )}
+              rowData={model.detailI18nData}
+              actions={ctrl.detailI18nActions}
+              subTitle="설정상세코드다국어설정"
+            />
+          </SplitPane>
+        </SplitPane>
       </div>
     </div>
   );
