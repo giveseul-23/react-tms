@@ -11,7 +11,7 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { CommonPopup } from "@/views/common/CommonPopup";
 import { Sheet, SheetContent } from "@/app/components/ui/sheet";
 
-import { useVehicleMgmtModel } from "./VehicleMgmtModel";
+import { useVehicleMgmtModel } from "./VehicleMgmtModel.ts";
 import { useVehicleMgmtController } from "./VehicleMgmtController.tsx";
 import { FormBodyRenderer } from "@/app/components/common/FormBodyRenderer";
 import {

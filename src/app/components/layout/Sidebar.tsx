@@ -15,7 +15,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import type { MenuSection, MenuNode } from "@/app/menu/menuConfig";
-import { SettingsPopup } from "@/views/settings/SettingsPopup";
+import { SettingsPopup } from "@/views/common/settings/SettingsPopup";
 import {
   getUserName,
   getUserGroup,

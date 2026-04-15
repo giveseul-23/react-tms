@@ -6,7 +6,7 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import ConfirmModal from "@/views/common/ConfirmPopup";
-import { VehicleMgmtModel } from "./VehicleMgmtModel";
+import { VehicleMgmtModel } from "./VehicleMgmtModel.ts";
 import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns.tsx";
 
 type ControllerProps = {

@@ -29,11 +29,11 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { CommonPopup } from "@/views/common/CommonPopup";
-import TenderRejectPopup from "@/views/tender/popup/TenderRejectPopup";
-import TemporaryVehicleChangePopup from "@/views/tender/popup/TemporaryVehicleChangePopup";
-import AppInstallSmsPopup from "@/views/tender/popup/AppInstallSmsPopup";
-import VehicleChangePopup from "@/views/tender/popup/VehicleChangePopup";
-import VehicleAssignPopup from "@/views/tender/popup/VehicleAssignPopup";
+import TenderRejectPopup from "@/views/tms/tender/popup/TenderRejectPopup";
+import TemporaryVehicleChangePopup from "@/views/tms/tender/popup/TemporaryVehicleChangePopup";
+import AppInstallSmsPopup from "@/views/tms/tender/popup/AppInstallSmsPopup";
+import VehicleChangePopup from "@/views/tms/tender/popup/VehicleChangePopup";
+import VehicleAssignPopup from "@/views/tms/tender/popup/VehicleAssignPopup";
 import { TenderReceiveDispatchModel } from "./TenderReceiveDispatchModel";
 import { MAIN_COLUMN_DEFS } from "./TenderReceiveDispatchColumns.tsx";
 
@@ -63,7 +63,7 @@ export function useTenderReceiveDispatchController({
   // ── fetchDispatchList (센차: mainInfo store proxy url) ────────
   const fetchDispatchList = useCallback(
     (params: Record<string, unknown>) => tenderApi.getDispatchList(params),
-    []
+    [],
   );
 
   // ── handleSearch (센차: onMainInfoCallback + gridsReset) ──────
@@ -73,7 +73,7 @@ export function useTenderReceiveDispatchController({
       model.setGridData(data);
       model.resetSubGrids();
     },
-    [model]
+    [model],
   );
 
   // ── handleRowClicked (센차: onMainGridClick + searchConnectedGrid) ──
@@ -88,15 +88,24 @@ export function useTenderReceiveDispatchController({
         tenderApi.getDispatchApSetlList({ DSPCH_NO: row.DSPCH_NO }),
       ])
         .then(([stopRes, smsRes, apSetlRes]: any[]) => {
-          model.setSubStopRowData(stopRes.data.result ?? stopRes.data.data.dsOut ?? []);
-          model.setSubSmsHisRowData(smsRes.data.result ?? stopRes.data.data.dsOut ??  []);
-          model.setSubApSetlRowData(apSetlRes.data.result ?? stopRes.data.data.dsOut ?? []);
+          model.setSubStopRowData(
+            stopRes.data.result ?? stopRes.data.data.dsOut ?? [],
+          );
+          model.setSubSmsHisRowData(
+            smsRes.data.result ?? stopRes.data.data.dsOut ?? [],
+          );
+          model.setSubApSetlRowData(
+            apSetlRes.data.result ?? stopRes.data.data.dsOut ?? [],
+          );
         })
         .catch((err) => {
-          console.error("[TenderReceiveDispatch] row click sub-fetch failed", err);
+          console.error(
+            "[TenderReceiveDispatch] row click sub-fetch failed",
+            err,
+          );
         });
     },
-    [model]
+    [model],
   );
 
   // ── handleApSetlCellChange (센차: carrRate grid cell edit) ────
@@ -110,11 +119,11 @@ export function useTenderReceiveDispatchController({
                 [params.colDef.field]: params.newValue,
                 ...(!row._isNew && { _isDirty: true }),
               }
-            : row
-        )
+            : row,
+        ),
       );
     },
-    [model]
+    [model],
   );
 
   // ── 메인 그리드 액션 (센차: TenderReceiveDispatchMain dockedItems toolbar) ──
@@ -155,9 +164,9 @@ export function useTenderReceiveDispatchController({
                 closePopup();
                 handleApi(
                   tenderApi.onTenderRejected(
-                    e.data.map((row: any) => ({ ...row, ...ie.data }))
+                    e.data.map((row: any) => ({ ...row, ...ie.data })),
                   ),
-                  "저장되었습니다."
+                  "저장되었습니다.",
                 ).then(() => searchRef.current?.());
               }}
               onClose={closePopup}
@@ -189,9 +198,9 @@ export function useTenderReceiveDispatchController({
                     closePopup();
                     handleApi(
                       tenderApi.onChangeRegVeh(
-                        e.data.map((row: any) => ({ ...row, ...ie }))
+                        e.data.map((row: any) => ({ ...row, ...ie })),
                       ),
-                      "저장되었습니다."
+                      "저장되었습니다.",
                     ).then(() => searchRef.current?.());
                   }}
                   onClose={closePopup}
@@ -220,7 +229,7 @@ export function useTenderReceiveDispatchController({
                     closePopup();
                     handleApi(
                       tenderApi.onChangeTempVeh({ ...e.data[0], ...ie }),
-                      "저장되었습니다."
+                      "저장되었습니다.",
                     ).then(() => searchRef.current?.());
                   }}
                   onClose={closePopup}
@@ -245,9 +254,9 @@ export function useTenderReceiveDispatchController({
                     closePopup();
                     handleApi(
                       tenderApi.onVehicleChange(
-                        e.data.map((row: any) => ({ ...row, ...ie }))
+                        e.data.map((row: any) => ({ ...row, ...ie })),
                       ),
-                      "저장되었습니다."
+                      "저장되었습니다.",
                     ).then(() => searchRef.current?.());
                   }}
                   onClose={closePopup}
@@ -283,7 +292,7 @@ export function useTenderReceiveDispatchController({
                 closePopup();
                 handleApi(
                   tenderApi.sendSMSForAppInstall({ ...e.data, ...ie.data }),
-                  "저장되었습니다.."
+                  "저장되었습니다..",
                 ).then(() => searchRef.current?.());
               }}
               onClose={closePopup}
@@ -319,7 +328,7 @@ export function useTenderReceiveDispatchController({
           onClick: () => {
             handleApi(
               tenderApi.gridExcelUpload(filtersRef.current),
-              "업로드가 완료되었습니다."
+              "업로드가 완료되었습니다.",
             );
           },
         },
@@ -372,9 +381,7 @@ export function useTenderReceiveDispatchController({
           title: "항목코드",
           content: (
             <CommonPopup
-              fetchFn={(params: any) =>
-                tenderApi.getBookingChgCodeName(params)
-              }
+              fetchFn={(params: any) => tenderApi.getBookingChgCodeName(params)}
               onApply={(row: any) => {
                 closePopup();
                 model.setSubApSetlRowData((prev: any) => [
@@ -403,20 +410,20 @@ export function useTenderReceiveDispatchController({
         model.apSetlGridRef.current?.api?.stopEditing();
 
         const saveRows = model.subApSetlRowDataRef.current.filter(
-          (sub: any) => sub._isNew || sub._isDirty
+          (sub: any) => sub._isNew || sub._isDirty,
         );
         if (saveRows.length === 0) return;
 
         handleApi(
           tenderApi.updateCarrierRate(saveRows),
-          "저장되었습니다."
+          "저장되었습니다.",
         ).then(() => {
           tenderApi
             .getDispatchApSetlList({
               DSPCH_NO: model.selectedHeaderRowRef.current.DSPCH_NO,
             })
             .then((res: any) =>
-              model.setSubApSetlRowData(res.data.result ?? [])
+              model.setSubApSetlRowData(res.data.result ?? []),
             );
         });
       },

@@ -1,12 +1,12 @@
 // src/app/menu/menuComponentMap.ts
-import TenderReceiveDispatch from "@/views/tender/TenderReceiveDispatch";
-import SearchCondition from "@/views/searchCondition/SearchCondition";
-import MenuConfig from "@/views/MenuConfig/MenuConfig";
-import Welcome from "@/views/welcome/WelCome";
-import VehicleMgmt from "@/views/vehicleMgmt/VehicleMgmt";
-import LgstgrpOprConfigMst from "@/views/lgstgrpOprConfigMst/LgstgrpOprConfigMst";
-import InTrnstVehCtrl from "@/views/inTrnstVehCtrl/InTrnstVehCtrl";
-import DispatchPlan from "@/views/dispatchPlan/DispatchPlan";
+import TenderReceiveDispatch from "@/views/tms/tender/TenderReceiveDispatch";
+import SearchCondition from "@/views/adm/searchCondition/SearchCondition";
+import MenuConfig from "@/views/adm/menuConfig/MenuConfig";
+import Welcome from "@/views/common/welcome/WelCome";
+import VehicleMgmt from "@/views/tms/dispatchPlan/vehicleMgmt/VehicleMgmt";
+import LgstgrpOprConfigMst from "@/views/tms/lgstgrpOprConfigMst/LgstgrpOprConfigMst";
+import InTrnstVehCtrl from "@/views/cms/inTrnstVehCtrl/InTrnstVehCtrl";
+import DispatchPlan from "@/views/tms/dispatchPlan/DispatchPlan";
 
 export const MENU_COMPONENT_MAP = {
   // 기본 홈 화면
