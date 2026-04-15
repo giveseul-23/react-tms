@@ -134,7 +134,11 @@ export default function MenuConfig() {
             return children.length > 0 ? acc + countLeafs(children) : acc + 1;
           }, 0);
         }
-        return countLeafs(rows);
+
+        return rows.data.reduce((acc, node) => {
+          const children = node.data ?? [];
+          return children.length > 0 ? acc + countLeafs(children) : acc + 1;
+        }, 0);
       }}
     />
   );

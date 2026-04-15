@@ -37,6 +37,7 @@ import type { SearchMeta } from "@/features/search/search.meta.types";
 import { commonApi } from "@/app/services/common/commonApi";
 
 import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
+import { redirect } from "react-router-dom";
 
 export type SearchResult = {
   rows: any[];
@@ -426,6 +427,7 @@ export function SearchFilters({
             res.data.result ??
             res.data.data.allData?.data ??
             res.data.data.dsOut ??
+            res.data.data ??
             [];
 
           const totalCount = computeTotalCount
@@ -599,9 +601,7 @@ export function SearchFilters({
                         srcVal &&
                         curVal &&
                         curVal !== "ALL" &&
-                        !filteredOptions.some(
-                          (opt: any) => opt.CODE === curVal,
-                        )
+                        !filteredOptions.some((opt: any) => opt.CODE === curVal)
                       ) {
                         requestAnimationFrame(() =>
                           updateCondition(

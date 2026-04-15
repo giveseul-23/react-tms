@@ -35,11 +35,11 @@ export function useMenuConfigController({
   const handleSearch = useCallback(
     (result: any) => {
       const list = result?.rows ?? [];
-      if (!Array.isArray(list)) {
+      if (!Array.isArray(list.data)) {
         model.setSource([]);
         return;
       }
-      model.setSource(buildSource(list));
+      model.setSource(buildSource(list.data));
     },
     [model],
   );
