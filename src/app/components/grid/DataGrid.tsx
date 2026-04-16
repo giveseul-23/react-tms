@@ -43,7 +43,8 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 
 // ─── 오토사이징 유틸 ────────────────────────────────────────────────────────────
 
-const GRID_FONT = "11px -apple-system, BlinkMacSystemFont, sans-serif";
+const GRID_FONT =
+  "11px Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
 let _canvas: HTMLCanvasElement | null = null;
 
 function measureTextWidth(text: string): number {

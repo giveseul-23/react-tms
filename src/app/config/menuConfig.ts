@@ -1,11 +1,14 @@
 export type MenuItem = {
   menuCode: string;
   label: string;
+  /** 동적 컴포넌트 로딩에 사용할 features/ 하위 경로 (.tsx 제외)
+   *  예: "tms/dispatchPlan/DispatchPlan" */
+  url?: string;
 };
 
 // 재귀 중첩 지원
 export type MenuNode =
-  | { type: "item"; menuCode: string; label: string }
+  | { type: "item"; menuCode: string; label: string; url?: string }
   | {
       type: "group";
       code: string;

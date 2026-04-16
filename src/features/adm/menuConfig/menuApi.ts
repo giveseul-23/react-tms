@@ -21,11 +21,11 @@ export const menuApi = {
 
   getMenuConfigList(payload: any) {
     return apiClient.post<commonResponse>(
-     // `/openapina/carrier/getMenuConfigList`,
-      `/menuService/search`,
+      // `/openapina/carrier/getMenuConfigList`,
+      `/menuService/searchByReact`,
       withSession({
         MENU_CD: this.MENU_CD,
-        ...payload
+        ...payload,
       }),
     );
   },
@@ -36,7 +36,7 @@ export const menuApi = {
       `/openapina/carrier/insertMenuFolder`,
       withSession({
         MENU_CD: this.MENU_CD,
-        ...payload
+        ...payload,
       }),
     );
   },
@@ -47,7 +47,7 @@ export const menuApi = {
       `/openapina/carrier/insertMenuItem`,
       withSession({
         MENU_CD: this.MENU_CD,
-        ...payload
+        ...payload,
       }),
     );
   },
@@ -58,7 +58,7 @@ export const menuApi = {
       `/openapina/carrier/saveMenuConfig`,
       withSession({
         MENU_CD: this.MENU_CD,
-        ...payload
+        ...payload,
       }),
     );
   },

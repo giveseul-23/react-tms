@@ -57,6 +57,7 @@ function toMenuNode(node: any): MenuNode | null {
       type: "item",
       menuCode: node.MENUCODE,
       label: node.MSG_DESC || node.MENUNAME || node.MENUCODE,
+      url: node.URL,
     };
   }
   if (node.LEAFYN === "N") {
@@ -76,11 +77,11 @@ function toMenuNode(node: any): MenuNode | null {
 
 function collectItems(
   nodes: MenuNode[],
-): { menuCode: string; label: string }[] {
-  const result: { menuCode: string; label: string }[] = [];
+): { menuCode: string; label: string; url?: string }[] {
+  const result: { menuCode: string; label: string; url?: string }[] = [];
   nodes.forEach((n) => {
     if (n.type === "item")
-      result.push({ menuCode: n.menuCode, label: n.label });
+      result.push({ menuCode: n.menuCode, label: n.label, url: n.url });
     else result.push(...collectItems(n.children));
   });
   return result;
@@ -138,5 +139,13 @@ export function useDynamicMenu() {
     sections.flatMap((s) => s.items.map((i) => [i.menuCode, i.label])),
   );
 
-  return { sections, menuLabelMap, loading };
+  const menuUrlMap: Record<string, string> = Object.fromEntries(
+    sections.flatMap((s) =>
+      s.items
+        .filter((i) => !!i.url)
+        .map((i) => [i.menuCode, i.url as string]),
+    ),
+  );
+
+  return { sections, menuLabelMap, menuUrlMap, loading };
 }
