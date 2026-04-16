@@ -1,6 +1,6 @@
 // src/views/vehicleMgmt/VehicleMgmtController.tsx
 import { useCallback, MutableRefObject } from "react";
-import { vehicleMgmtApi } from "@/features/tms/vehicleMgmt/vehicleMgmtApi.ts";
+import { vehicleMgmtApi } from "@/features/tms/resources/vehicleMgmt/vehicleMgmtApi.ts";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";

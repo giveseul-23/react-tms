@@ -1,6 +1,6 @@
 // src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMstController.tsx
 import { useCallback, MutableRefObject } from "react";
-import { lgstgrpOprConfigApi } from "@/features/tms/lgstgrpOprConfigMst/lgstgrpOprConfigApi";
+import { lgstgrpOprConfigApi } from "@/features/tms/organization/lgstgrpOprConfigMst/lgstgrpOprConfigApi";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { useGuard } from "@/hooks/useGuard";
 import type { LgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel";

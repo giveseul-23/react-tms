@@ -23,17 +23,17 @@
 //  onActionAfterSearch(엑셀)→ mainActions 내 '엑셀' 그룹 onClick
 // ──────────────────────────────────────────────────────────────────
 import { useCallback, MutableRefObject } from "react";
-import { tenderApi } from "@/features/tms/tender/tenderApi.ts";
+import { tenderApi } from "@/features/tms/pln/tender/tenderApi.ts";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
-import TenderRejectPopup from "@/features/tms/tender/popup/TenderRejectPopup";
-import TemporaryVehicleChangePopup from "@/features/tms/tender/popup/TemporaryVehicleChangePopup";
-import AppInstallSmsPopup from "@/features/tms/tender/popup/AppInstallSmsPopup";
-import VehicleChangePopup from "@/features/tms/tender/popup/VehicleChangePopup";
-import VehicleAssignPopup from "@/features/tms/tender/popup/VehicleAssignPopup";
+import TenderRejectPopup from "@/features/tms/pln/tender/popup/TenderRejectPopup";
+import TemporaryVehicleChangePopup from "@/features/tms/pln/tender/popup/TemporaryVehicleChangePopup";
+import AppInstallSmsPopup from "@/features/tms/pln/tender/popup/AppInstallSmsPopup";
+import VehicleChangePopup from "@/features/tms/pln/tender/popup/VehicleChangePopup";
+import VehicleAssignPopup from "@/features/tms/pln/tender/popup/VehicleAssignPopup";
 import { TenderReceiveDispatchModel } from "./TenderReceiveDispatchModel";
 import { MAIN_COLUMN_DEFS } from "./TenderReceiveDispatchColumns.tsx";
 

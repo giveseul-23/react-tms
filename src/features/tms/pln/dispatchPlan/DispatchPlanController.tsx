@@ -1,6 +1,6 @@
 // src/views/dispatchPlan/DispatchPlanController.tsx
 import { useCallback, MutableRefObject } from "react";
-import { dispatchPlanApi } from "@/features/tms/dispatchPlan/dispatchPlanApi";
+import { dispatchPlanApi } from "@/features/tms/pln/dispatchPlan/dispatchPlanApi";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";

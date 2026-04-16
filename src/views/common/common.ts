@@ -1,5 +1,5 @@
 // excelUtils.ts
-import { tenderApi } from "@/features/tms/tender/tenderApi";
+import { tenderApi } from "@/features/tms/pln/tender/tenderApi";
 
 // ────────────────────────────────────────────
 // Types

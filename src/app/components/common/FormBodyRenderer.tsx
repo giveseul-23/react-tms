@@ -2,7 +2,7 @@
 import {
   ColumnDef,
   AREA_LABELS,
-} from "@/features/tms/vehicleMgmt/VehicleMgmtColumns";
+} from "@/features/tms/resources/vehicleMgmt/VehicleMgmtColumns";
 
 import FormInput from "@/app/components/common/FormInput";
 import FormSelect from "@/app/components/common/FormSelect";

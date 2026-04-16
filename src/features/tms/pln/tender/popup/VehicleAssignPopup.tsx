@@ -4,49 +4,49 @@ import { useEffect, useState } from "react";
 import { Search, X, Check, Truck, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { chgVehicleApi } from "@/features/tms/tender/chgVehicleApi";
+import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
+import { chgVehicleApi } from "@/features/tms/pln/tender/chgVehicleApi";
+import { useCommonStores } from "@/hooks/useCommonStores";
 
-const userId = sessionStorage.getItem("userId");
-const ACCESS_TOKEN = sessionStorage.getItem("ACCESS_TOKEN");
-
-type VehicleChangePopupContentProps = {
+type VehicleAssignPopupProps = {
   onApply: (row: any) => void;
   onClose: () => void;
-  initialValues?: Record<string, any>;
 };
 
-const vehicleOperType = "100";
+const vehicleOperType = "110";
 
-export default function VehicleChangePopup({
+export default function VehicleAssignPopup({
   onApply,
   onClose,
-  initialValues = {},
-}: VehicleChangePopupContentProps) {
+}: VehicleAssignPopupProps) {
   const [rows, setRows] = useState<any[]>([]);
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
-  const [logisticsGroupCode, setLogisticsGroupCode] = useState(
-    initialValues.LGST_GRP_CD ?? "",
-  );
-  const [carrierCode, setCarrierCode] = useState(initialValues.CARR_CD ?? "");
-  const [carrierName, setCarrierName] = useState(initialValues.CARR_NM ?? "");
-  const [vehicleCode, setVehicleCode] = useState(initialValues.VEH_ID ?? "");
-  const [vehicleType, setVehicleType] = useState(initialValues.VEH_TP_CD ?? "");
-  const [vehicleNo, setVehicleNo] = useState(initialValues.VEH_NO ?? "");
+  const [vehicleCode, setVehicleCode] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
+  const [vehicleNo, setVehicleNo] = useState("");
+  const [driverName, setDriverName] = useState("");
+  const [region1, setRegion1] = useState("");
+  const [region2, setRegion2] = useState("");
 
   useEffect(() => {
     fetchData({
-      LGST_GRP_CD: logisticsGroupCode,
       VEH_OP_TP: vehicleOperType,
     });
   }, []);
 
+  const { stores } = useCommonStores({
+    preferredZone: {
+      sqlProp: "CODE",
+      keyParam: "PREFERRED ZONE CD",
+    },
+  });
+
   const fetchData = (extraParams: any) => {
+    //todo : 수정
     chgVehicleApi
-      .getDedTruckList({
-        sesUserId: userId,
-        userId,
-        ACCESS_TOKEN,
+      .getConTruckList({
+        VEH_OP_TP: vehicleOperType,
         ...extraParams,
       })
       .then((res: any) => {
@@ -59,31 +59,24 @@ export default function VehicleChangePopup({
 
   const onSearch = () => {
     fetchData({
-      LGST_GRP_CD: logisticsGroupCode,
-      CARR_CD: carrierCode,
-      CARR_NM: carrierName,
-      VEH_ID: vehicleCode,
+      VEH_CD: vehicleCode,
       VEH_TP_CD: vehicleType,
       VEH_NO: vehicleNo,
-      VEH_OP_TP: vehicleOperType,
+      DRVR_NM: driverName,
+      PRFRD_ZN_CD1: region1,
+      PRFRD_ZN_CD2: region2,
     });
   };
 
-  const fields = [
-    {
-      label: "물류운영그룹코드",
-      value: logisticsGroupCode,
-      onChange: setLogisticsGroupCode,
-    },
-    { label: "운송협력사코드", value: carrierCode, onChange: setCarrierCode },
-    { label: "운송협력사명", value: carrierName, onChange: setCarrierName },
+  const textFields = [
     { label: "차량코드", value: vehicleCode, onChange: setVehicleCode },
-    { label: "차량유형코드", value: vehicleType, onChange: setVehicleType },
+    { label: "차량유형", value: vehicleType, onChange: setVehicleType },
     { label: "차량번호", value: vehicleNo, onChange: setVehicleNo },
+    { label: "운전자명", value: driverName, onChange: setDriverName },
   ];
 
   const columnDefs = [
-    { headerName: "No", width: 30 },
+    { headerName: "No", width: 20 },
     {
       field: "LGST_GRP_CD",
       sendField: "RETURN_LGST_GRP_CD",
@@ -95,58 +88,57 @@ export default function VehicleChangePopup({
       hide: true,
     },
     {
-      headerName: "운송협력사코드",
-      field: "CARR_CD",
-      sendField: "RETURN_CARR_CD",
-      width: 130,
-    },
-    {
-      headerName: "운송협력사명",
-      field: "CARR_NM",
-      sendField: "RETURN_CARR_NM",
-      width: 160,
-    },
-    {
-      headerName: "차량코드",
       field: "VEH_ID",
       sendField: "RETURN_VEH_ID",
-      width: 110,
+      hide: true,
     },
     {
       headerName: "차량번호",
-      field: "VEH_NO",
       sendField: "RETURN_VEH_NO",
-      width: 130,
+      field: "VEH_NO",
+      width: 120,
     },
     {
-      headerName: "차량유형",
-      field: "VEH_TP_CD",
-      sendField: "RETURN_VEH_TP_CD",
-      width: 130,
-    },
-    {
-      headerName: "차량유형명",
-      field: "VEH_TP_NM",
-      sendField: "RETURN_VEH_TP_NM",
-      width: 130,
-    },
-    {
-      headerName: "운전자아이디",
-      field: "DRVR_ID",
       sendField: "RETURN_DRVR_ID",
-      width: 110,
+      field: "DRVR_ID",
+      hide: true,
     },
     {
       headerName: "운전자명",
-      field: "DRVR_NM",
       sendField: "RETURN_DRVR_NM",
-      width: 110,
+      field: "DRVR_NM",
+      width: 120,
     },
     {
-      headerName: "축종",
-      field: "AXLE_TYPE",
-      sendField: "RETURN_AXLE_TYPE",
-      width: 90,
+      sendField: "RETURN_VEH_TP_CD",
+      field: "VEH_TP_CD",
+      hide: true,
+    },
+    {
+      headerName: "차량유형명",
+      sendField: "RETURN_VEH_TP_NM",
+      field: "VEH_TP_NM",
+      width: 120,
+    },
+    {
+      field: "PRFRD_ZN_CD1",
+      sendField: "RETURN_PRFRD_ZN_CD1",
+      hide: true,
+    },
+    {
+      field: "PRFRD_ZN_CD2",
+      sendField: "RETURN_PRFRD_ZN_CD2",
+      hide: true,
+    },
+    {
+      headerName: "선호권역1",
+      field: "PRFRD_ZN_NM1",
+      width: 120,
+    },
+    {
+      headerName: "선호권역2",
+      field: "PRFRD_ZN_NM2",
+      width: 120,
     },
   ];
 
@@ -158,7 +150,7 @@ export default function VehicleChangePopup({
           acc[sendKey] = row[col.field];
         }
 
-        acc.CHGVEH_MEMO = "운송사협력사 요청건";
+        acc.CHGVEH_MEMO = "운송협력사 요청";
         return acc;
       },
       {} as Record<string, any>,
@@ -167,7 +159,7 @@ export default function VehicleChangePopup({
 
   return (
     <div className="flex flex-col gap-3 w-full h-full">
-      {/* ── 조회 조건 ── */}
+      {/* 상단 조회 조건 영역 */}
       <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         {/* 헤더 바 */}
         <div className="flex items-center justify-between px-3 py-2 bg-[rgb(var(--primary))]">
@@ -189,9 +181,10 @@ export default function VehicleChangePopup({
           </Button>
         </div>
 
-        {/* 필드 — 테이블형 레이아웃 */}
+        {/* 필드 및 테이블형 레이아웃 */}
         <div className="grid grid-cols-3 divide-x divide-y divide-slate-100">
-          {fields.map((f) => (
+          {/* 텍스트 필드 */}
+          {textFields.map((f) => (
             <div
               key={f.label}
               className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group"
@@ -204,24 +197,52 @@ export default function VehicleChangePopup({
                 onChange={(e) => f.onChange(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && onSearch()}
                 className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full"
-                placeholder="—"
+                placeholder="입력"
               />
             </div>
           ))}
+
+          {/* 선호권역1 */}
+          <div className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group">
+            <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
+              선호권역1
+            </label>
+            <ComboFilter
+              placeholder="선택"
+              options={stores.preferredZone}
+              value={region1}
+              onChange={setRegion1}
+              inputClassName="text-[12px] text-slate-700 bg-transparent outline-none border-none h-auto p-0"
+            />
+          </div>
+
+          {/* 선호권역2 */}
+          <div className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group">
+            <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
+              선호권역2
+            </label>
+            <ComboFilter
+              placeholder="선택"
+              options={stores.preferredZone}
+              value={region2}
+              onChange={setRegion2}
+              inputClassName="text-[12px] text-slate-700 bg-transparent outline-none border-none h-auto p-0"
+            />
+          </div>
         </div>
       </div>
 
-      {/* ── 선택 상태 표시 ── */}
+      {/* 차량 선택 상태 표시 영역 */}
       {selectedRow ? (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
           <Truck className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
           <span className="font-semibold">{selectedRow.VEH_NO}</span>
           <span className="text-blue-300">|</span>
-          <span>{selectedRow.CARR_NM}</span>
-          <span className="text-blue-300">|</span>
           <span>{selectedRow.DRVR_NM}</span>
+          <span className="text-blue-300">|</span>
+          <span>{selectedRow.VEH_TP_NM}</span>
           <span className="ml-auto text-[10px] text-blue-400 font-medium">
-            선택됨 ✓
+            선택됨
           </span>
         </div>
       ) : (
@@ -231,8 +252,8 @@ export default function VehicleChangePopup({
         </div>
       )}
 
-      {/* ── Grid ── */}
-      <div className="h-[400px] shrink-0">
+      {/* 데이터 Grid 영역 */}
+      <div className="h-[350px] shrink-0">
         <DataGrid
           layoutType="plain"
           actions={[]}
@@ -242,11 +263,11 @@ export default function VehicleChangePopup({
           pageSize={20}
           rowSelection="single"
           onRowSelected={(row: any) => setSelectedRow(row)}
-          disableAutoSize={true}
+          disableAutoSize
         />
       </div>
 
-      {/* ── 버튼 영역 ── */}
+      {/* 하단 버튼 영역 */}
       <div className="flex justify-end gap-2 pt-2.5 border-t border-slate-100">
         <Button
           size="sm"
