@@ -57,6 +57,21 @@ const CELL_PADDING = 24;
 const HEADER_PADDING = 32;
 const MIN_COL_WIDTH = 80;
 
+/** cellRenderer 가 반환한 React element 에서 텍스트만 추출 */
+function extractTextFromElement(element: any): string {
+  if (element == null) return "";
+  if (typeof element === "string" || typeof element === "number")
+    return String(element);
+  if (typeof element === "boolean") return "";
+  if (element?.props?.children != null) {
+    const children = element.props.children;
+    if (Array.isArray(children))
+      return children.map(extractTextFromElement).join("");
+    return extractTextFromElement(children);
+  }
+  return "";
+}
+
 function calcOptimalWidths<TRow>(
   columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[],
   rowData: TRow[],
@@ -76,12 +91,36 @@ function calcOptimalWidths<TRow>(
     let maxDataWidth = 0;
     for (const row of rowData) {
       const raw = (row as any)[colDef.field as string];
-      const str =
-        raw == null
-          ? ""
-          : typeof raw === "object"
-            ? JSON.stringify(raw)
-            : String(raw);
+      let str: string;
+
+      if ((colDef as any).cellRenderer) {
+        // cellRenderer(코드→라벨 등)가 있으면 렌더 결과에서 텍스트 추출
+        try {
+          const rendered = (colDef as any).cellRenderer({
+            value: raw,
+            data: row,
+          });
+          str = extractTextFromElement(rendered) || String(raw ?? "");
+        } catch {
+          str = raw == null ? "" : String(raw);
+        }
+      } else if ((colDef as any).valueFormatter) {
+        try {
+          str =
+            (colDef as any).valueFormatter({ value: raw, data: row }) ??
+            String(raw ?? "");
+        } catch {
+          str = raw == null ? "" : String(raw);
+        }
+      } else {
+        str =
+          raw == null
+            ? ""
+            : typeof raw === "object"
+              ? JSON.stringify(raw)
+              : String(raw);
+      }
+
       const w = measureTextWidth(str) + CELL_PADDING;
       if (w > maxDataWidth) maxDataWidth = w;
     }
@@ -94,10 +133,18 @@ function calcOptimalWidths<TRow>(
 
 function applyColumnWidths(api: any, widthMap: Record<string, number>) {
   const cols = api.getColumns?.() ?? [];
+  console.log("[AutoSize] widthMap keys:", Object.keys(widthMap));
+  console.log("[AutoSize] widthMap:", widthMap);
+  console.log(
+    "[AutoSize] grid colIds:",
+    cols.map((c: any) => c.getColId?.()),
+  );
   for (const col of cols) {
     const colId = col.getColId?.();
-    if (!colId || !widthMap[colId]) continue;
-    api.setColumnWidth(colId, widthMap[colId]);
+    const matched = widthMap[colId];
+    console.log(`[AutoSize] colId=${colId}, matched=${matched}`);
+    if (!colId || !matched) continue;
+    api.setColumnWidth(colId, matched);
   }
 }
 
