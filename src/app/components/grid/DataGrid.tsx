@@ -133,16 +133,10 @@ function calcOptimalWidths<TRow>(
 
 function applyColumnWidths(api: any, widthMap: Record<string, number>) {
   const cols = api.getColumns?.() ?? [];
-  console.log("[AutoSize] widthMap keys:", Object.keys(widthMap));
-  console.log("[AutoSize] widthMap:", widthMap);
-  console.log(
-    "[AutoSize] grid colIds:",
-    cols.map((c: any) => c.getColId?.()),
-  );
+
   for (const col of cols) {
     const colId = col.getColId?.();
     const matched = widthMap[colId];
-    console.log(`[AutoSize] colId=${colId}, matched=${matched}`);
     if (!colId || !matched) continue;
     api.setColumnWidth(colId, matched);
   }

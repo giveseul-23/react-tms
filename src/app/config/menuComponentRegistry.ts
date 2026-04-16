@@ -28,6 +28,11 @@ const STATIC_COMPONENTS: Record<string, ComponentType> = {
   __WELCOME__: Welcome,
 };
 
+// lazy() 결과를 캐싱하여 동일 경로에 대해 항상 같은 컴포넌트 참조 반환.
+// 캐싱하지 않으면 렌더 때마다 새 참조가 생겨 React 가 컴포넌트를 언마운트·재마운트하고
+// 기존 state(그리드 데이터 등)가 전부 유실됨.
+const lazyCache = new Map<string, ComponentType>();
+
 /**
  * menuCode + url 로 화면 컴포넌트 반환.
  *  - 정적 매핑 있으면 그대로 (Welcome)
@@ -47,7 +52,10 @@ export function resolveMenuComponent(
   const loader = moduleLoaders[path];
   if (!loader) return null;
 
-  return lazy(loader);
+  if (!lazyCache.has(path)) {
+    lazyCache.set(path, lazy(loader));
+  }
+  return lazyCache.get(path)!;
 }
 
 /**
