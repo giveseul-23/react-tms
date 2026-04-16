@@ -1,43 +1,18 @@
-// src/views/tender/TenderReceiveDispatchController.ts
 // ──────────────────────────────────────────────────────────────────
-//  센차 TenderReceiveDispatchController.js 대응
-//
-//  센차 Controller에 정의된 handler 함수들을
-//  React useCallback 으로 1:1 대응시킵니다.
-//
-//  [Sencha handler → React handler 매핑]
-//  onActionAfterSearch   → handleSearch (조회 콜백)
-//  onMainGridClick       → handleRowClicked (행 클릭)
-//  onMainInfoCallback    → handleSearch 내부 초기화 로직
-//  searchConnectedGrid   → handleRowClicked 내부 Promise.all
-//  onTenderAccepted      → mainActions 내 '운송요청수락' onClick
-//  onTenderRejected      → mainActions 내 '운송요청거절' onClick
-//  onVehicleChange       → mainActions 내 '모바일가입용차' onClick
-//  onChangeRegVeh        → mainActions 내 '지입차' onClick
-//  onChangeTempVeh       → mainActions 내 '임시용차' onClick
-//  onVehicleCancel       → mainActions 내 '운송요청수락취소' onClick
-//  sendSMSForAppInstall  → mainActions 내 '앱설치SMS' onClick
-//  onSaveCarrierRate     → apSetlActions 내 '저장' onClick
-//  onAddCarrierBookingRate→ apSetlActions 내 '추가' onClick
-//  onCarrierRateExcelAll → mainActions 내 '운송비양식다운로드' onClick
-//  onActionAfterSearch(엑셀)→ mainActions 내 '엑셀' 그룹 onClick
+
 // ──────────────────────────────────────────────────────────────────
 import { useCallback, MutableRefObject } from "react";
-import { tenderApi } from "@/features/tms/pln/tender/tenderApi.ts";
+import { countryApi } from "@/features/tms/master/domain/country/CountryApi";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
-import TenderRejectPopup from "@/features/tms/pln/tender/popup/TenderRejectPopup";
-import TemporaryVehicleChangePopup from "@/features/tms/pln/tender/popup/TemporaryVehicleChangePopup";
-import AppInstallSmsPopup from "@/features/tms/pln/tender/popup/AppInstallSmsPopup";
-import VehicleChangePopup from "@/features/tms/pln/tender/popup/VehicleChangePopup";
-import VehicleAssignPopup from "@/features/tms/pln/tender/popup/VehicleAssignPopup";
 import { CountryModel } from "./CountryModel";
 import { MAIN_COLUMN_DEFS } from "./CountryColumns.tsx";
 
 type ControllerProps = {
+  menuCd: string;
   model: CountryModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
@@ -52,6 +27,7 @@ type ControllerProps = {
  * - useGuard: 센차의 isCheckSelectRecord 역할
  */
 export function useCountryController({
+  menuCd,
   model,
   searchRef,
   filtersRef,
@@ -62,7 +38,8 @@ export function useCountryController({
 
   // ── fetchDispatchList (센차: mainInfo store proxy url) ────────
   const fetchDispatchList = useCallback(
-    (params: Record<string, unknown>) => tenderApi.getDispatchList(params),
+    (params: Record<string, unknown>) =>
+      countryApi.getDispatchList(menuCd, { ...params }),
     [],
   );
 
@@ -83,258 +60,41 @@ export function useCountryController({
       model.setSelectedHeaderRow(row);
 
       Promise.all([
-        tenderApi.getDispatchStopList({ DSPCH_NO: row.DSPCH_NO }),
-        tenderApi.getDispatchSmsHisList({ DSPCH_NO: row.DSPCH_NO }),
-        tenderApi.getDispatchApSetlList({ DSPCH_NO: row.DSPCH_NO }),
+        countryApi.getStateList(menuCd, { CTRY_CD: row.CTRY_CD }),
+        countryApi.getZipList(menuCd, { CTRY_CD: row.CTRY_CD }),
       ])
-        .then(([stopRes, smsRes, apSetlRes]: any[]) => {
-          model.setSubStopRowData(
-            stopRes.data.result ?? stopRes.data.data.dsOut ?? [],
+        .then(([stateRes, zipRes, cityRes]: any[]) => {
+          model.setSubStateRowData(
+            stateRes.data.result ?? stateRes.data.data.dsOut ?? [],
           );
-          model.setSubSmsHisRowData(
-            smsRes.data.result ?? stopRes.data.data.dsOut ?? [],
-          );
-          model.setSubApSetlRowData(
-            apSetlRes.data.result ?? stopRes.data.data.dsOut ?? [],
+          model.setSubZipRowData(
+            zipRes.data.result ?? zipRes.data.data.dsOut ?? [],
           );
         })
         .catch((err) => {
-          console.error(
-            "[TenderReceiveDispatch] row click sub-fetch failed",
-            err,
-          );
+          console.error("[Country] row click sub-fetch failed", err);
         });
     },
     [model],
   );
 
-  // ── handleApSetlCellChange (센차: carrRate grid cell edit) ────
-  const handleApSetlCellChange = useCallback(
-    (params: any) => {
-      model.setSubApSetlRowData((prev: any) =>
-        prev.map((row: any) =>
-          row === params.data
-            ? {
-                ...row,
-                [params.colDef.field]: params.newValue,
-                ...(!row._isNew && { _isDirty: true }),
-              }
-            : row,
-        ),
-      );
-    },
-    [model],
-  );
+  const handleStateRowClicked = useCallback(() => {});
 
   // ── 메인 그리드 액션 (센차: TenderReceiveDispatchMain dockedItems toolbar) ──
   const mainActions = [
     // 센차: BTN_TENDER_ACCEPT handler:'onTenderAccepted'
     {
       type: "button",
-      key: "+ 추적",
-      label: "+ 추적",
-      onClick: (e: any) => {
-        if (!e.data?.length) return;
-        model.setTrackRows(e.data);
-        model.setTrackOpen(true);
-      },
+      key: "추가",
+      label: "추가",
+      onClick: (e: any) => {},
     },
     {
       type: "button",
-      key: "운송요청수락",
-      label: "운송요청수락",
-      onClick: (e: any) => {
-        if (!guardHasData(e.data)) return;
-        handleApi(tenderApi.onTenderAccepted(e.data), "저장되었습니다.");
-      },
+      key: "저장",
+      label: "저장",
+      onClick: (e: any) => {},
     },
-    // 센차: BTN_TENDER_REJECT handler:'onTenderRejected' → openWindow RejectReasonPop
-    {
-      type: "button",
-      key: "운송요청거절",
-      label: "운송요청거절",
-      onClick: (e: any) => {
-        if (!guardHasData(e.data)) return;
-        openPopup({
-          title: "운송요청 거절",
-          content: (
-            <TenderRejectPopup
-              reasons={[]}
-              onConfirm={(ie: any) => {
-                closePopup();
-                handleApi(
-                  tenderApi.onTenderRejected(
-                    e.data.map((row: any) => ({ ...row, ...ie.data })),
-                  ),
-                  "저장되었습니다.",
-                ).then(() => searchRef.current?.());
-              }}
-              onClose={closePopup}
-            />
-          ),
-          width: "lg",
-        });
-      },
-    },
-    // 센차: BTN_VEHICLE_CHANGE menu 그룹 → 지입차/모바일가입용차/임시용차
-    {
-      type: "group",
-      key: "차량변경",
-      label: "차량변경",
-      items: [
-        // 센차: BTN_CHANGE_REG_DED_VEH handler:'onChangeRegVeh'
-        {
-          type: "button",
-          key: "지입차",
-          label: "지입차",
-          onClick: (e: any) => {
-            if (!guardHasData(e.data)) return;
-            openPopup({
-              title: "차량변경",
-              content: (
-                <VehicleChangePopup
-                  initialValues={{ LGST_GRP_CD: e.data[0].LGST_GRP_CD }}
-                  onApply={(ie: any) => {
-                    closePopup();
-                    handleApi(
-                      tenderApi.onChangeRegVeh(
-                        e.data.map((row: any) => ({ ...row, ...ie })),
-                      ),
-                      "저장되었습니다.",
-                    ).then(() => searchRef.current?.());
-                  }}
-                  onClose={closePopup}
-                />
-              ),
-              width: "2xl",
-            });
-          },
-        },
-        // 센차: BTN_CHANGE_REG_MBL_VEH handler:'onVehicleChange'
-        {
-          type: "button",
-          key: "모바일가입용차",
-          label: "모바일가입용차",
-          onClick: (e: any) => {
-            if (!guardHasData(e.data)) return;
-            openPopup({
-              title: "임시차량변경",
-              content: (
-                <TemporaryVehicleChangePopup
-                  initialValues={{
-                    VEH_TP_CD: e.data[0].VEH_TP_CD,
-                    CARR_NM: e.data[0].CARR_NM,
-                  }}
-                  onConfirm={(ie: any) => {
-                    closePopup();
-                    handleApi(
-                      tenderApi.onChangeTempVeh({ ...e.data[0], ...ie }),
-                      "저장되었습니다.",
-                    ).then(() => searchRef.current?.());
-                  }}
-                  onClose={closePopup}
-                />
-              ),
-              width: "lg",
-            });
-          },
-        },
-        // 센차: BTN_REG_TEMP_VEH handler:'onChangeTempVeh'
-        {
-          type: "button",
-          key: "임시용차",
-          label: "임시용차",
-          onClick: (e: any) => {
-            if (!guardHasData(e.data)) return;
-            openPopup({
-              title: "임시용차차량변경",
-              content: (
-                <VehicleAssignPopup
-                  onApply={(ie: any) => {
-                    closePopup();
-                    handleApi(
-                      tenderApi.onVehicleChange(
-                        e.data.map((row: any) => ({ ...row, ...ie })),
-                      ),
-                      "저장되었습니다.",
-                    ).then(() => searchRef.current?.());
-                  }}
-                  onClose={closePopup}
-                />
-              ),
-              width: "2xl",
-            });
-          },
-        },
-      ],
-    },
-    // 센차: BTN_VEHICLE_CANCEL handler:'onVehicleCancel'
-    {
-      type: "button",
-      key: "운송요청수락취소",
-      label: "운송요청수락취소",
-      onClick: (e: any) =>
-        handleApi(tenderApi.onVehicleCancel(e.data), "저장되었습니다."),
-    },
-    // 센차: BTN_SEND_SMS_FOR_INSTALL handler:'sendSMSForAppInstall' → openWindow SendSMSPop
-    {
-      type: "button",
-      key: "앱설치SMS",
-      label: "앱설치SMS",
-      onClick: (e: any) => {
-        if (!guardHasData(e.data)) return;
-        openPopup({
-          title: "전화번호입력",
-          content: (
-            <AppInstallSmsPopup
-              reasons={[]}
-              onConfirm={(ie: any) => {
-                closePopup();
-                handleApi(
-                  tenderApi.sendSMSForAppInstall({ ...e.data, ...ie.data }),
-                  "저장되었습니다..",
-                ).then(() => searchRef.current?.());
-              }}
-              onClose={closePopup}
-            />
-          ),
-          width: "lg",
-        });
-      },
-    },
-    // 센차: BTN_CARRIER_RATE_EXCEL_MGMT menu 그룹 → 양식다운/업로드
-    {
-      type: "group",
-      key: "운송비엑셀관리",
-      label: "운송비엑셀관리",
-      items: [
-        {
-          type: "button",
-          key: "운송비양식다운로드",
-          label: "운송비양식다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
-              searchParams: filtersRef.current,
-              menuName: "운송수배현황",
-              fetchFn: (params) => tenderApi.getDispatchList(params),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "운송비업로드",
-          label: "운송비업로드",
-          onClick: () => {
-            handleApi(
-              tenderApi.gridExcelUpload(filtersRef.current),
-              "업로드가 완료되었습니다.",
-            );
-          },
-        },
-      ],
-    },
-    // 센차: BTN_EXCEL menu 그룹 → gridExcelAll / gridExcel
     {
       type: "group",
       key: "엑셀",
@@ -347,8 +107,8 @@ export function useCountryController({
           onClick: () => {
             downExcelSearch({
               columns: MAIN_COLUMN_DEFS({}),
-              menuName: "운송사요청목록",
-              fetchFn: () => tenderApi.getDispatchList(filtersRef.current),
+              menuName: "국가관리",
+              fetchFn: () => countryApi.getDispatchList(filtersRef.current),
             });
           },
         },
@@ -360,7 +120,7 @@ export function useCountryController({
             downExcelSearched({
               columns: MAIN_COLUMN_DEFS({}),
               rows: model.gridData.rows,
-              menuName: "운송사요청목록",
+              menuName: "국가관리",
             });
           },
         },
@@ -368,81 +128,144 @@ export function useCountryController({
     },
   ];
 
-  // ── 운송비내역 서브그리드 액션 (센차: TenderReceiveDispatchCarrRate toolbar) ──
-  const apSetlActions = [
-    // 센차: BTN_ADD handler:'onAddCarrierBookingRate' → openWindow CommonPop
+  // ── 시도 액션
+  const stateActions = [
     {
       type: "button",
-      key: "운송비추가",
+      key: "추가",
       label: "추가",
-      onClick: () => {
-        if (!guardHasData(model.selectedHeaderRowRef.current)) return;
-        openPopup({
-          title: "항목코드",
-          content: (
-            <CommonPopup
-              fetchFn={(params: any) => tenderApi.getBookingChgCodeName(params)}
-              onApply={(row: any) => {
-                closePopup();
-                model.setSubApSetlRowData((prev: any) => [
-                  ...prev,
-                  {
-                    _isNew: true,
-                    DSPCH_NO: model.selectedHeaderRowRef.current.DSPCH_NO,
-                    CHG_CD: row.CODE,
-                    CHG_NM: row.NAME,
-                  },
-                ]);
-              }}
-              onClose={closePopup}
-            />
-          ),
-          width: "2xl",
-        });
-      },
+      onClick: (e: any) => {},
     },
-    // 센차: BTN_SAVE handler:'onSaveCarrierRate' → saveRecord '/tenderReceiveDispatchService/updateCarrierRate'
     {
       type: "button",
-      key: "운송비저장",
+      key: "저장",
       label: "저장",
-      onClick: () => {
-        model.apSetlGridRef.current?.api?.stopEditing();
-
-        const saveRows = model.subApSetlRowDataRef.current.filter(
-          (sub: any) => sub._isNew || sub._isDirty,
-        );
-        if (saveRows.length === 0) return;
-
-        handleApi(
-          tenderApi.updateCarrierRate(saveRows),
-          "저장되었습니다.",
-        ).then(() => {
-          tenderApi
-            .getDispatchApSetlList({
-              DSPCH_NO: model.selectedHeaderRowRef.current.DSPCH_NO,
-            })
-            .then((res: any) =>
-              model.setSubApSetlRowData(res.data.result ?? []),
-            );
-        });
-      },
+      onClick: (e: any) => {},
+    },
+    {
+      type: "group",
+      key: "엑셀",
+      label: "엑셀",
+      items: [
+        {
+          type: "button",
+          key: "조회된모든데이터다운로드",
+          label: "조회된모든데이터다운로드",
+          onClick: () => {
+            downExcelSearch({
+              columns: MAIN_COLUMN_DEFS({}),
+              menuName: "국가관리",
+              fetchFn: () => countryApi.getDispatchList(filtersRef.current),
+            });
+          },
+        },
+        {
+          type: "button",
+          key: "보이는데이터다운로드",
+          label: "보이는데이터다운로드",
+          onClick: () => {
+            downExcelSearched({
+              columns: MAIN_COLUMN_DEFS({}),
+              rows: model.gridData.rows,
+              menuName: "국가관리",
+            });
+          },
+        },
+      ],
     },
   ];
 
-  // ── Bottom-right 액션 ────────────────────────────────────────
-  const cityActions = [
+  // ── 우편번호 액션
+  const zipActions = [
     {
-      type: "button" as const,
+      type: "button",
       key: "추가",
       label: "추가",
-      onClick: () => {},
+      onClick: (e: any) => {},
     },
     {
-      type: "button" as const,
+      type: "button",
       key: "저장",
       label: "저장",
-      onClick: () => {},
+      onClick: (e: any) => {},
+    },
+    {
+      type: "group",
+      key: "엑셀",
+      label: "엑셀",
+      items: [
+        {
+          type: "button",
+          key: "조회된모든데이터다운로드",
+          label: "조회된모든데이터다운로드",
+          onClick: () => {
+            downExcelSearch({
+              columns: MAIN_COLUMN_DEFS({}),
+              menuName: "국가관리",
+              fetchFn: () => countryApi.getDispatchList(filtersRef.current),
+            });
+          },
+        },
+        {
+          type: "button",
+          key: "보이는데이터다운로드",
+          label: "보이는데이터다운로드",
+          onClick: () => {
+            downExcelSearched({
+              columns: MAIN_COLUMN_DEFS({}),
+              rows: model.gridData.rows,
+              menuName: "국가관리",
+            });
+          },
+        },
+      ],
+    },
+  ];
+
+  // ── 시군구 액션
+  const cityActions = [
+    {
+      type: "button",
+      key: "추가",
+      label: "추가",
+      onClick: (e: any) => {},
+    },
+    {
+      type: "button",
+      key: "저장",
+      label: "저장",
+      onClick: (e: any) => {},
+    },
+    {
+      type: "group",
+      key: "엑셀",
+      label: "엑셀",
+      items: [
+        {
+          type: "button",
+          key: "조회된모든데이터다운로드",
+          label: "조회된모든데이터다운로드",
+          onClick: () => {
+            downExcelSearch({
+              columns: MAIN_COLUMN_DEFS({}),
+              menuName: "국가관리",
+              fetchFn: () => countryApi.getDispatchList(filtersRef.current),
+            });
+          },
+        },
+        {
+          type: "button",
+          key: "보이는데이터다운로드",
+          label: "보이는데이터다운로드",
+          onClick: () => {
+            downExcelSearched({
+              columns: MAIN_COLUMN_DEFS({}),
+              rows: model.gridData.rows,
+              menuName: "국가관리",
+            });
+          },
+        },
+      ],
     },
   ];
 
@@ -450,9 +273,9 @@ export function useCountryController({
     fetchDispatchList,
     handleSearch,
     handleRowClicked,
-    handleApSetlCellChange,
     mainActions,
-    apSetlActions,
+    stateActions,
+    zipActions,
     cityActions,
   };
 }

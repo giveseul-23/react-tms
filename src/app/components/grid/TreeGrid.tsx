@@ -503,7 +503,6 @@ function TreeGridInner<TRow extends TreeRow>(
           style={{ ...gridStyle, minWidth: "max-content" }}
         >
           <AgGridReact<TRow>
-            theme="legacy"
             rowData={visibleRows}
             columnDefs={finalColumnDefs}
             defaultColDef={{

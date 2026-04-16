@@ -9,9 +9,6 @@ import React, {
   useEffect,
 } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
-
-ModuleRegistry.registerModules([AllCommunityModule]);
 import type {
   ColDef,
   ColGroupDef,
@@ -684,7 +681,6 @@ export default function DataGrid<TRow>({
       : null;
 
   const commonGridProps = {
-    theme: "legacy" as const,
     columnDefs: finalColumnDefs,
     defaultColDef: {
       resizable: true,

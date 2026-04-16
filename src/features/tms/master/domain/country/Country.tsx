@@ -18,11 +18,10 @@ import {
   CITY_COLUMN_DEFS,
   ZIP_COLUMN_DEFS,
 } from "./CountryColumns.tsx";
-
-const MENU_CODE = "MENU_CNTR_MGMT";
+const MENU_CD = "MENU_CNTR_MGMT";
 
 export default function Country() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
+  const { meta, loading } = useSearchMeta(MENU_CD);
   const model = useCountryModel();
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
@@ -34,6 +33,7 @@ export default function Country() {
   }, []);
 
   const ctrl = useCountryController({
+    menuCd: MENU_CD,
     model,
     searchRef,
     filtersRef,
@@ -60,7 +60,7 @@ export default function Country() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="tender-receive-dispatch"
+      storageKey="country"
       master={
         <DataGrid
           layoutType="plain"
@@ -84,9 +84,8 @@ export default function Country() {
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
-          storageKey="lgstgrp-opr-config-mst-bottom"
+          storageKey="country-sub"
         >
-          {/* Bottom-left: 설정코드다국어설정 */}
           <DataGrid
             layoutType="tab"
             tabs={[
@@ -94,17 +93,20 @@ export default function Country() {
               { key: "ZIP", label: "우편번호" },
             ]}
             presets={{
-              STATE: { columnDefs: STATE_COLUMN_DEFS },
-              ZIP: { columnDefs: ZIP_COLUMN_DEFS },
+              STATE: {
+                columnDefs: STATE_COLUMN_DEFS,
+                actions: ctrl.cityActions,
+              },
+              ZIP: { columnDefs: ZIP_COLUMN_DEFS, actions: ctrl.zipActions },
             }}
             rowData={{
               STATE: model.subStateRowData,
               ZIP: model.subZipRowData,
             }}
             actions={[]}
+            onRowClicked={ctrl.handleStateRowClicked}
           />
 
-          {/* Bottom-right: 설정상세코드다국어설정 */}
           <DataGrid
             layoutType="plain"
             columnDefs={CITY_COLUMN_DEFS}
@@ -114,9 +116,6 @@ export default function Country() {
           />
         </SplitPane>
       }
-      //   bottomSlot={trackPanelContent}
-      //   bottomOpen={model.trackOpen}
-      //   bottomHeight={280}
     />
   );
 }

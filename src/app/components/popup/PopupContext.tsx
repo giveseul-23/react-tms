@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { PopupShell } from "./PopupShell";
 import type { PopupWidth } from "./popup.types";
 
@@ -34,8 +34,10 @@ export function PopupProvider({ children }: { children: React.ReactNode }) {
 
   const top = stack[stack.length - 1];
 
+  const ctxValue = useMemo(() => ({ openPopup, closePopup }), [openPopup, closePopup]);
+
   return (
-    <PopupContext.Provider value={{ openPopup, closePopup }}>
+    <PopupContext.Provider value={ctxValue}>
       {children}
 
       {/* 스택의 최상단 팝업만 렌더링 */}
