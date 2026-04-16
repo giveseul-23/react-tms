@@ -16,7 +16,7 @@ const withSession = (payload: any = {}) => {
 };
 
 export const divisionDefaultApi = {
-  MENU_CD: "MENU_PLAN_TENDER",
+  MENU_CD: "MENU_ORGANIZATION_ENV_DIV_DFT",
   ////// SEARCH
   getDivisionDefaultList(payload: any) {
     return apiClient.post<commonResponse>(

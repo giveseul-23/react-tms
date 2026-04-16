@@ -72,7 +72,7 @@ export function useDivisionDefaultController({
     {
       type: "button",
       key: "저장",
-      label: "추가",
+      label: "저장",
       onClick: () => {},
     },
   ];

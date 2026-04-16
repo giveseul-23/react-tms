@@ -50,6 +50,12 @@ export function useDivisionDefaultModel() {
 
   const resetSubGrids = useCallback(() => {
     setSelectedHeaderRow([]);
+    setSubDetailRowData({
+      rows: [],
+      totalCount: 0,
+      page: 1,
+      limit: 20,
+    });
   }, [setSelectedHeaderRowWithRef]);
 
   return {
