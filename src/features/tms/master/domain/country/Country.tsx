@@ -104,7 +104,7 @@ export default function Country() {
               ZIP: model.subZipRowData,
             }}
             actions={[]}
-            onRowClicked={ctrl.handleStateRowClicked}
+            onRowClicked={ctrl.handleSubRowClicked}
           />
 
           <DataGrid
