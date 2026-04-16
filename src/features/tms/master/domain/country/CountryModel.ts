@@ -60,8 +60,9 @@ export function useCountryModel() {
 
   // ── 공통 코드 스토어 (센차: dspchOpStsList, vehTcd 등) ───────
   const { stores } = useCommonStores({
-    dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
-    apFiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
+    mapTpList: { sqlProp: "CODE", keyParam: "MAP_TP" },
+    ctryTzTcdList: { sqlProp: "CODE", keyParam: "CTRY_TZ_TCD" },
+    // timezoneStore: { sqlProp: "searchTimzones", keyParam: "" },
   });
 
   // 코드 → 명칭 변환 맵 (센차: displayField/valueField + onRenderer)

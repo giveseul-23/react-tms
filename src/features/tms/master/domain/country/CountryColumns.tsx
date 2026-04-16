@@ -10,9 +10,33 @@ export const MAIN_COLUMN_DEFS = (
   { headerName: "LBL_STANDARD_LAT", field: "LAT" },
   { headerName: "LBL_STANDARD_LON", field: "LON" },
   { headerName: "LBL_ZIP_REQ_YN", field: "MSK_USE_YN" },
-  { headerName: "LBL_ROUTE", field: "MAP_TP" },
-  { headerName: "LBL_CTRY_TZ_TCD", field: "CTRY_TZ_TCD" },
-  { headerName: "LBL_CTRY_TZ", field: "CTRY_TZ" },
+  {
+    headerName: "LBL_ROUTE",
+    field: "MAP_TP",
+    cellRenderer: (params: any) => {
+      const code = params.value;
+      const label = codeMap.mapTpList?.[String(code)] ?? code;
+      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
+    },
+  },
+  {
+    headerName: "LBL_CTRY_TZ_TCD",
+    field: "CTRY_TZ_TCD",
+    cellRenderer: (params: any) => {
+      const code = params.value;
+      const label = codeMap.ctryTzTcdList?.[String(code)] ?? code;
+      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
+    },
+  },
+  {
+    headerName: "LBL_CTRY_TZ",
+    field: "CTRY_TZ",
+    cellRenderer: (params: any) => {
+      const code = params.value;
+      const label = codeMap.timezoneStore?.[String(code)] ?? code;
+      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
+    },
+  },
   { headerName: "LBL_VEH_NO", field: "VEH_NO" },
   {
     headerName: "LBL_DELETE",
