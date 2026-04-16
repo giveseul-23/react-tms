@@ -8,7 +8,7 @@ import { SplitPane } from "@/app/components/layout/SplitPane";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useLgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel";
+import { useLgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel.ts";
 import { useLgstgrpOprConfigMstController } from "./LgstgrpOprConfigMstController";
 import {
   CONFIG_COLUMN_DEFS,

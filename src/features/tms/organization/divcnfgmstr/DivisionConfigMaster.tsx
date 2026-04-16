@@ -7,7 +7,7 @@ import { SplitPane } from "@/app/components/layout/SplitPane";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useDivisionConfigMasterModel } from "./DivisionConfigMasterModel";
+import { useDivisionConfigMasterModel } from "./DivisionConfigMasterModel.ts";
 import { useDivisionConfigMasterController } from "./DivisionConfigMasterController";
 import {
   CONFIG_COLUMN_DEFS,

@@ -9,7 +9,7 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { SplitPane } from "@/app/components/layout/SplitPane";
 
-import { useCountryModel } from "./CountryModel";
+import { useCountryModel } from "./CountryModel.ts";
 import { useCountryController } from "./CountryController";
 import {
   MAIN_COLUMN_DEFS,

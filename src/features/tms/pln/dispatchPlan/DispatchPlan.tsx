@@ -1,13 +1,3 @@
-// src/views/dispatchPlan/DispatchPlan.tsx
-// ─────────────────────────────────────────────────────────────
-// 배차관리 (MENU_DISPATCH_PLAN)
-//
-// 레이아웃:
-//   [SearchFilters]
-//   [배차 메인 그리드]  ← 상단
-//   ──── PanelResize ────
-//   [하단 3-tab 그리드: 경유처 / 할당주문 / 미할당주문]
-// ─────────────────────────────────────────────────────────────
 "use client";
 
 import { useRef } from "react";
@@ -17,7 +7,7 @@ import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useDispatchPlanModel } from "./DispatchPlanModel";
+import { useDispatchPlanModel } from "./DispatchPlanModel.ts";
 import { useDispatchPlanController } from "./DispatchPlanController";
 import {
   MAIN_COLUMN_DEFS,
@@ -38,7 +28,12 @@ export default function DispatchPlan() {
   const filtersRef = useRef<Record<string, unknown>>({});
   const rawFiltersRef = useRef<Record<string, string>>({});
 
-  const ctrl = useDispatchPlanController({ model, searchRef, filtersRef, rawFiltersRef });
+  const ctrl = useDispatchPlanController({
+    model,
+    searchRef,
+    filtersRef,
+    rawFiltersRef,
+  });
 
   if (loading) return <Skeleton className="h-24" />;
 
