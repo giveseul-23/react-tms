@@ -278,6 +278,12 @@ export function SearchFieldRenderer({
                 code={getCondition(`${baseKey}_CD`)?.value ?? ""}
                 name={getCondition(`${baseKey}_NM`)?.value ?? ""}
                 sqlId={m.sqlId}
+                onChangeCode={(v: string) =>
+                  updateCondition(`${baseKey}_CD`, v, "equal", m.dataType ?? "STRING", "POPUP")
+                }
+                onChangeName={(v: string) =>
+                  updateCondition(`${baseKey}_NM`, v, "equal", m.dataType ?? "STRING", "POPUP")
+                }
                 onClickSearch={() =>
                   openPopup({
                     title: m.label,
