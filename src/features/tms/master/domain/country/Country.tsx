@@ -1,4 +1,3 @@
-// src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
 import { useRef, useEffect } from "react";

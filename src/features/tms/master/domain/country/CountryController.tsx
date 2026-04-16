@@ -2,12 +2,8 @@
 
 // ──────────────────────────────────────────────────────────────────
 import { useCallback, MutableRefObject } from "react";
-import { countryApi } from "@/features/tms/master/domain/country/CountryApi";
-import { useApiHandler } from "@/hooks/useApiHandler";
-import { usePopup } from "@/app/components/popup/PopupContext";
-import { useGuard } from "@/hooks/useGuard";
+import { countryApi } from "@/features/tms/master/domain/country/CountryApi.ts";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
-import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import { CountryModel } from "./CountryModel";
 import { MAIN_COLUMN_DEFS } from "./CountryColumns.tsx";
 
@@ -18,28 +14,15 @@ type ControllerProps = {
   filtersRef: MutableRefObject<Record<string, unknown>>;
 };
 
-/**
- * useTenderReceiveDispatchController
- *
- * 센차 Controller의 handler 함수들을 React 방식으로 구현합니다.
- * - useApiHandler: 센차의 saveGrid / callAjax 역할
- * - usePopup: 센차의 openWindow 역할
- * - useGuard: 센차의 isCheckSelectRecord 역할
- */
 export function useCountryController({
   menuCd,
   model,
-  searchRef,
   filtersRef,
 }: ControllerProps) {
-  const { handleApi } = useApiHandler();
-  const { openPopup, closePopup } = usePopup();
-  const { guardHasData } = useGuard();
-
   // ── fetchDispatchList (센차: mainInfo store proxy url) ────────
   const fetchDispatchList = useCallback(
     (params: Record<string, unknown>) =>
-      countryApi.getDispatchList(menuCd, { ...params }),
+      countryApi.getCountryList(menuCd, { ...params }),
     [],
   );
 
@@ -141,7 +124,8 @@ export function useCountryController({
             downExcelSearch({
               columns: MAIN_COLUMN_DEFS({}),
               menuName: "국가관리",
-              fetchFn: () => countryApi.getDispatchList(filtersRef.current),
+              fetchFn: () =>
+                countryApi.getCountryList(menuCd, filtersRef.current),
             });
           },
         },
@@ -188,7 +172,8 @@ export function useCountryController({
             downExcelSearch({
               columns: MAIN_COLUMN_DEFS({}),
               menuName: "국가관리",
-              fetchFn: () => countryApi.getDispatchList(filtersRef.current),
+              fetchFn: () =>
+                countryApi.getStateList(menuCd, filtersRef.current),
             });
           },
         },
@@ -235,7 +220,7 @@ export function useCountryController({
             downExcelSearch({
               columns: MAIN_COLUMN_DEFS({}),
               menuName: "국가관리",
-              fetchFn: () => countryApi.getDispatchList(filtersRef.current),
+              fetchFn: () => countryApi.getZipList(menuCd, filtersRef.current),
             });
           },
         },
@@ -282,7 +267,7 @@ export function useCountryController({
             downExcelSearch({
               columns: MAIN_COLUMN_DEFS({}),
               menuName: "국가관리",
-              fetchFn: () => countryApi.getDispatchList(filtersRef.current),
+              fetchFn: () => countryApi.getCityList(menuCd, filtersRef.current),
             });
           },
         },

@@ -17,7 +17,7 @@ const withSession = (payload: any = {}) => {
 
 export const countryApi = {
   ////// SEARCH
-  getDispatchList(menuCd: string, payload: any) {
+  getCountryList(menuCd: string, payload: any) {
     return apiClient.post<commonResponse>(
       `/countryService/search`,
       withSession({ MENU_CD: menuCd, ...payload }),
