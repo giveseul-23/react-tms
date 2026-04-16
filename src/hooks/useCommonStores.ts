@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiClient } from "@/app/http/client";
 import { commonApi } from "@/app/services/common/commonApi";
 import { getSessionFields } from "@/app/services/auth/auth";
 
@@ -13,25 +14,49 @@ export function useCommonStores(
     async function load() {
       try {
         const sessionFields = getSessionFields();
+        const mapped: Record<string, any[]> = {};
 
-        const req = Object.entries(params).map(([key, value]) => ({
-          key: key,
-          sqlProp: value.sqlProp,
-          keyParam: value.keyParam ?? value.sqlProp,
-          ...sessionFields,
-        }));
+        // sqlProp에 '/'가 포함된 항목: 해당 경로로 개별 호출
+        const customEntries = Object.entries(params).filter(([, v]) =>
+          v.sqlProp.includes("/"),
+        );
+        // 나머지: 기존 일괄 호출
+        const batchEntries = Object.entries(params).filter(
+          ([, v]) => !v.sqlProp.includes("/"),
+        );
 
-        const res = await commonApi.fetchComboOptions(req);
-
-        const result = res?.data?.data || [];
-
-        if (result?.success) {
-          const mapped: Record<string, any[]> = {};
-          Object.keys(params).forEach((key) => {
-            mapped[key] = result[key] || [];
+        // 개별 호출
+        const customPromises = customEntries.map(async ([key, value]) => {
+          const res = await apiClient.post(value.sqlProp, {
+            ...sessionFields,
+            keyParam: value.keyParam ?? value.sqlProp,
           });
-          if (!cancelled) setStores(mapped);
+          mapped[key] = res?.data?.data?.dsOut ?? res?.data?.data ?? [];
+        });
+
+        // 일괄 호출
+        let batchPromise: Promise<void> | null = null;
+        if (batchEntries.length > 0) {
+          batchPromise = (async () => {
+            const req = batchEntries.map(([key, value]) => ({
+              key,
+              sqlProp: value.sqlProp,
+              keyParam: value.keyParam ?? value.sqlProp,
+              ...sessionFields,
+            }));
+            const res = await commonApi.fetchComboOptions(req);
+            const result = res?.data?.data || {};
+            if (result?.success) {
+              batchEntries.forEach(([key]) => {
+                mapped[key] = result[key] || [];
+              });
+            }
+          })();
         }
+
+        await Promise.all([...customPromises, batchPromise].filter(Boolean));
+
+        if (!cancelled) setStores(mapped);
       } catch (e) {
         console.error("[useCommonStores]", e);
       }

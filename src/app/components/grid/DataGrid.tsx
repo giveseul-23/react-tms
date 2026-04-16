@@ -92,28 +92,13 @@ function calcOptimalWidths<TRow>(
   return widthMap;
 }
 
-function applyColumnWidths<TRow>(
-  api: any,
-  columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[],
-  widthMap: Record<string, number>,
-) {
-  const updatedDefs = columnDefs.map((col) => {
-    if (!("field" in col) && !("colId" in col)) return col;
-    const colDef = col as ColDef<TRow>;
-    const key = (colDef.colId ?? colDef.field ?? "") as string;
-    const width = widthMap[key];
-    if (!width) return col;
-
-    const base = { ...colDef, width };
-
-    if ((colDef as any).disableMaxWidth === true) {
-      return { ...base, maxWidth: undefined };
-    }
-
-    return base;
-  });
-
-  api.setGridOption("columnDefs", updatedDefs);
+function applyColumnWidths(api: any, widthMap: Record<string, number>) {
+  const cols = api.getColumns?.() ?? [];
+  for (const col of cols) {
+    const colId = col.getColId?.();
+    if (!colId || !widthMap[colId]) continue;
+    api.setColumnWidth(colId, widthMap[colId]);
+  }
 }
 
 // ─── 컴포넌트 ───────────────────────────────────────────────────────────────────
@@ -367,7 +352,7 @@ export default function DataGrid<TRow>({
       );
 
       const widthMap = calcOptimalWidths(sizableCols, rows);
-      applyColumnWidths(api, cols, widthMap);
+      applyColumnWidths(api, widthMap);
     },
     [disableAutoSize],
   );
@@ -766,99 +751,32 @@ export default function DataGrid<TRow>({
 
   // ─── 페이지네이션 바 ──────────────────────────────────────────────────────────
 
-  const PaginationBar = () => {
-    if (totalCount == null) return null;
+  const paginationEmpty = totalCount === 0;
+  const paginationFirst = paginationEmpty || currentPage === 1;
+  const paginationLast = paginationEmpty || currentPage === totalPages;
+  const paginationBtnCls =
+    "px-1.5 py-0.5 border border-gray-300 rounded text-[11px] disabled:opacity-40 hover:bg-gray-100 leading-none";
 
-    const isEmpty = totalCount === 0;
-    const isFirst = isEmpty || currentPage === 1;
-    const isLast = isEmpty || currentPage === totalPages;
+  const commitPageSize = useCallback(() => {
+    const v = parseInt(pageSizeInput);
+    if (!isNaN(v) && v > 0) {
+      onPageSizeChange?.(v);
+    } else {
+      setPageSizeInput(String(pageSize));
+    }
+  }, [pageSizeInput, pageSize, onPageSizeChange]);
 
-    const commitPageSize = () => {
-      const v = parseInt(pageSizeInput);
-      if (!isNaN(v) && v > 0) {
-        onPageSizeChange?.(v);
-      } else {
-        setPageSizeInput(String(pageSize));
-      }
-    };
-
-    const commitPage = () => {
-      const v = parseInt(pageInput);
+  const commitPage = useCallback(
+    (raw?: string) => {
+      const v = parseInt(raw ?? pageInput);
       if (!isNaN(v) && v >= 1 && v <= (totalPages || 1)) {
         onPageChange?.(v);
       } else {
         setPageInput(String(currentPage ?? 1));
       }
-    };
-
-    const btnCls =
-      "px-1.5 py-0.5 border border-gray-300 rounded text-[11px] disabled:opacity-40 hover:bg-gray-100 leading-none";
-
-    return (
-      <div className="flex items-center gap-2 px-2 py-1 shrink-0 text-[11px] text-gray-600">
-        <span className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded border border-gray-300 bg-gray-100 font-medium text-gray-700">
-          {totalCount.toLocaleString()}
-        </span>
-
-        <span className="shrink-0 text-gray-500">페이지당 행 개수:</span>
-        <input
-          type="number"
-          min={1}
-          value={pageSizeInput}
-          onChange={(e) => setPageSizeInput(e.target.value)}
-          onBlur={commitPageSize}
-          onKeyDown={(e) => e.key === "Enter" && commitPageSize()}
-          className="w-14 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
-        />
-
-        <span className="shrink-0 text-gray-500">현재 페이지:</span>
-        <input
-          type="number"
-          min={1}
-          max={totalPages || 1}
-          value={pageInput}
-          onChange={(e) => setPageInput(e.target.value)}
-          onBlur={commitPage}
-          onKeyDown={(e) => e.key === "Enter" && commitPage()}
-          className="w-10 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
-        />
-        <span className="shrink-0 text-gray-500">
-          / {isEmpty ? 0 : totalPages} 페이지
-        </span>
-
-        <div className="ml-auto flex items-center gap-0.5">
-          <button
-            disabled={isFirst}
-            onClick={() => onPageChange?.(1)}
-            className={btnCls}
-          >
-            <ChevronFirst className="w-3 h-3" />
-          </button>
-          <button
-            disabled={isFirst}
-            onClick={() => onPageChange?.((currentPage ?? 1) - 1)}
-            className={btnCls}
-          >
-            <ChevronLeft className="w-3 h-3" />
-          </button>
-          <button
-            disabled={isLast}
-            onClick={() => onPageChange?.((currentPage ?? 1) + 1)}
-            className={btnCls}
-          >
-            <ChevronRight className="w-3 h-3" />
-          </button>
-          <button
-            disabled={isLast}
-            onClick={() => onPageChange?.(totalPages)}
-            className={btnCls}
-          >
-            <ChevronLast className="w-3 h-3" />
-          </button>
-        </div>
-      </div>
-    );
-  };
+    },
+    [pageInput, totalPages, currentPage, onPageChange],
+  );
 
   return (
     <div
@@ -924,7 +842,71 @@ export default function DataGrid<TRow>({
         )}
       </div>
 
-      <PaginationBar />
+      {totalCount != null && (
+        <div className="flex items-center gap-2 px-2 py-1 shrink-0 text-[11px] text-gray-600">
+          <span className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded border border-gray-300 bg-gray-100 font-medium text-gray-700">
+            {totalCount.toLocaleString()}
+          </span>
+
+          <span className="shrink-0 text-gray-500">페이지당 행 개수:</span>
+          <input
+            type="number"
+            min={1}
+            value={pageSizeInput}
+            onChange={(e) => setPageSizeInput(e.target.value)}
+            onBlur={commitPageSize}
+            onKeyDown={(e) => e.key === "Enter" && commitPageSize()}
+            className="w-14 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
+          />
+
+          <span className="shrink-0 text-gray-500">현재 페이지:</span>
+          <input
+            type="number"
+            min={1}
+            max={totalPages || 1}
+            value={pageInput}
+            onChange={(e) => {
+              setPageInput(e.target.value);
+              commitPage(e.target.value);
+            }}
+            className="w-10 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
+          />
+          <span className="shrink-0 text-gray-500">
+            / {paginationEmpty ? 0 : totalPages} 페이지
+          </span>
+
+          <div className="ml-auto flex items-center gap-0.5">
+            <button
+              disabled={paginationFirst}
+              onClick={() => onPageChange?.(1)}
+              className={paginationBtnCls}
+            >
+              <ChevronFirst className="w-3 h-3" />
+            </button>
+            <button
+              disabled={paginationFirst}
+              onClick={() => onPageChange?.((currentPage ?? 1) - 1)}
+              className={paginationBtnCls}
+            >
+              <ChevronLeft className="w-3 h-3" />
+            </button>
+            <button
+              disabled={paginationLast}
+              onClick={() => onPageChange?.((currentPage ?? 1) + 1)}
+              className={paginationBtnCls}
+            >
+              <ChevronRight className="w-3 h-3" />
+            </button>
+            <button
+              disabled={paginationLast}
+              onClick={() => onPageChange?.(totalPages)}
+              className={paginationBtnCls}
+            >
+              <ChevronLast className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {onTrack && (
         <div

@@ -62,7 +62,10 @@ export function useCountryModel() {
   const { stores } = useCommonStores({
     mapTpList: { sqlProp: "CODE", keyParam: "MAP_TP" },
     ctryTzTcdList: { sqlProp: "CODE", keyParam: "CTRY_TZ_TCD" },
-    // timezoneStore: { sqlProp: "searchTimzones", keyParam: "" },
+    timezoneStore: {
+      sqlProp: "/tmsCommonService/searchTimzones",
+      keyParam: "",
+    },
   });
 
   // 코드 → 명칭 변환 맵 (센차: displayField/valueField + onRenderer)
