@@ -8,7 +8,7 @@ import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useTenderReceiveDispatchModel } from "./TenderReceiveDispatchModel";
+import { useTenderReceiveDispatchModel } from "./TenderReceiveDispatchModel.ts";
 import { useTenderReceiveDispatchController } from "./TenderReceiveDispatchController.tsx";
 import {
   MAIN_COLUMN_DEFS,
