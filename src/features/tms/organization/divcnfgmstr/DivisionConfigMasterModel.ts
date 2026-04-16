@@ -148,6 +148,6 @@ export function useDivisionConfigMasterModel() {
   };
 }
 
-export type LgstgrpOprConfigMstModel = ReturnType<
-  typeof useLgstgrpOprConfigMstModel
+export type divisionConfigMasterModel = ReturnType<
+  typeof useDivisionConfigMasterModel
 >;

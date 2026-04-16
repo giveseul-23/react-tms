@@ -3,7 +3,7 @@ import { useCallback, MutableRefObject } from "react";
 import { lgstgrpOprConfigApi } from "@/features/tms/organization/lgstgrpOprConfigMst/LgstgrpOprConfigApi.ts";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { useGuard } from "@/hooks/useGuard";
-import type { LgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel";
+import type { LgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel.ts";
 
 type ControllerProps = {
   model: LgstgrpOprConfigMstModel;

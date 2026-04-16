@@ -2,10 +2,10 @@ import { useCallback, MutableRefObject } from "react";
 import { divisionConfigMasterApi } from "@/features/tms/organization/divcnfgmstr/DivisionConfigMasterApi.ts";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { useGuard } from "@/hooks/useGuard";
-import type { LgstgrpOprConfigMstModel } from "./DivisionConfigMasterModel";
+import type { divisionConfigMasterModel } from "./DivisionConfigMasterModel.ts";
 
 type ControllerProps = {
-  model: LgstgrpOprConfigMstModel;
+  model: divisionConfigMasterModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
 };
