@@ -3,9 +3,12 @@ import { useCallback, MutableRefObject } from "react";
 import { dispatchPlanApi } from "@/features/tms/pln/dispatchPlan/dispatchPlanApi.ts";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { useGuard } from "@/hooks/useGuard";
-import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { DispatchPlanModel } from "./DispatchPlanModel";
 import { MAIN_COLUMN_DEFS } from "./DispatchPlanColumns";
+import {
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
   model: DispatchPlanModel;
@@ -185,10 +188,7 @@ export function useDispatchPlanController({
         },
       ],
     },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
+    makeSaveAction({
       onClick: (e: any) => {
         if (!guardHasData(e.data)) return;
         handleApi(
@@ -196,39 +196,13 @@ export function useDispatchPlanController({
           "저장되었습니다.",
         ).then(() => searchRef.current?.());
       },
-    },
-    {
-      type: "group",
-      key: "엑셀",
-      label: "엑셀",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
-              menuName: "배차관리",
-              fetchFn: () =>
-                dispatchPlanApi.getDispatchPlanList(filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
-          onClick: () => {
-            downExcelSearched({
-              columns: MAIN_COLUMN_DEFS({}),
-              rows: model.gridData.rows,
-              menuName: "배차관리",
-            });
-          },
-        },
-      ],
-    },
+    }),
+    makeExcelGroupAction({
+      columns: MAIN_COLUMN_DEFS({}),
+      menuName: "배차관리",
+      fetchFn: () => dispatchPlanApi.getDispatchPlanList(filtersRef.current),
+      rows: model.gridData.rows,
+    }),
   ];
 
   // ── 경유처 액션 (ETA/상하차분할/조정/순서저장) ───────────────

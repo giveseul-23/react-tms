@@ -4,10 +4,10 @@ import { vehicleMgmtApi } from "@/features/tms/resources/vehicleMgmt/vehicleMgmt
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
-import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { VehicleMgmtModel } from "./VehicleMgmtModel.ts";
 import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns.tsx";
+import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
   model: VehicleMgmtModel;
@@ -269,37 +269,12 @@ export function useVehicleMgmtController({
         ).then(() => searchRef.current?.());
       },
     },
-    {
-      type: "group",
-      key: "엑셀",
-      label: "엑셀",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
-              menuName: "차량관리",
-              fetchFn: () => vehicleMgmtApi.getVehicleList(filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
-          onClick: () => {
-            downExcelSearched({
-              columns: MAIN_COLUMN_DEFS({}),
-              rows: model.gridData.rows,
-              menuName: "차량관리",
-            });
-          },
-        },
-      ],
-    },
+    makeExcelGroupAction({
+      columns: MAIN_COLUMN_DEFS({}),
+      menuName: "차량관리",
+      fetchFn: () => vehicleMgmtApi.getVehicleList(filtersRef.current),
+      rows: model.gridData.rows,
+    }),
   ];
 
   return {

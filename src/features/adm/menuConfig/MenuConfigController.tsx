@@ -16,6 +16,7 @@ import MenuItemAddPopup, {
 } from "./popup/MenuItemAddPopup";
 import type { MenuRow } from "./MenuConfig";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
+import { makeSaveAction } from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
   model: MenuConfigModel;
@@ -206,10 +207,7 @@ export function useMenuConfigController({
     },
 
     // ── 저장 (_isNew / _isDirty 행만 서버로) ────────────────────
-    {
-      type: "button" as const,
-      key: "저장",
-      label: "저장",
+    makeSaveAction({
       onClick: () => {
         const saveRows = model.source.filter(
           (r: any) => r._isNew || r._isDirty,
@@ -228,7 +226,7 @@ export function useMenuConfigController({
           },
         );
       },
-    },
+    }),
 
     // ── 엑셀 ────────────────────────────────────────────────────
     {

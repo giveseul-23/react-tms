@@ -4,6 +4,10 @@ import { lgstgrpOprConfigApi } from "@/features/tms/organization/lgstgrpOprConfi
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { useGuard } from "@/hooks/useGuard";
 import type { LgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel.ts";
+import {
+  makeAddAction,
+  makeSaveAction,
+} from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
   model: LgstgrpOprConfigMstModel;
@@ -158,10 +162,7 @@ export function useLgstgrpOprConfigMstController({
         );
       },
     },
-    {
-      type: "button" as const,
-      key: "추가",
-      label: "추가",
+    makeAddAction({
       onClick: () => {
         model.setConfigData((prev: any) => ({
           ...prev,
@@ -176,11 +177,8 @@ export function useLgstgrpOprConfigMstController({
           totalCount: prev.totalCount + 1,
         }));
       },
-    },
-    {
-      type: "button" as const,
-      key: "저장",
-      label: "저장",
+    }),
+    makeSaveAction({
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -191,15 +189,12 @@ export function useLgstgrpOprConfigMstController({
           "저장되었습니다.",
         ).then(() => searchRef.current?.());
       },
-    },
+    }),
   ];
 
   // ── Top-right 액션 ───────────────────────────────────────────
   const detailActions = [
-    {
-      type: "button" as const,
-      key: "추가",
-      label: "추가",
+    makeAddAction({
       onClick: () => {
         if (!model.selectedConfigRef.current) return;
         model.setDetailData((prev: any) => [
@@ -213,12 +208,9 @@ export function useLgstgrpOprConfigMstController({
           },
         ]);
       },
-    },
-    {
-      type: "button" as const,
-      key: "저장",
-      label: "저장",
-      onClick: (e: any) => {
+    }),
+    makeSaveAction({
+      onClick: (_e: any) => {
         const saveRows = (model.detailDataRef.current ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
         );
@@ -228,15 +220,12 @@ export function useLgstgrpOprConfigMstController({
           "저장되었습니다.",
         );
       },
-    },
+    }),
   ];
 
   // ── Bottom-left 액션 ─────────────────────────────────────────
   const i18nActions = [
-    {
-      type: "button" as const,
-      key: "추가",
-      label: "추가",
+    makeAddAction({
       onClick: () => {
         if (!model.selectedConfigRef.current) return;
         model.setI18nData((prev: any) => [
@@ -250,11 +239,8 @@ export function useLgstgrpOprConfigMstController({
           },
         ]);
       },
-    },
-    {
-      type: "button" as const,
-      key: "저장",
-      label: "저장",
+    }),
+    makeSaveAction({
       onClick: () => {
         const saveRows = (model.i18nDataRef.current ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -265,15 +251,12 @@ export function useLgstgrpOprConfigMstController({
           "저장되었습니다.",
         );
       },
-    },
+    }),
   ];
 
   // ── Bottom-right 액션 ────────────────────────────────────────
   const detailI18nActions = [
-    {
-      type: "button" as const,
-      key: "추가",
-      label: "추가",
+    makeAddAction({
       onClick: () => {
         if (
           !model.selectedConfigRef.current ||
@@ -293,11 +276,8 @@ export function useLgstgrpOprConfigMstController({
           },
         ]);
       },
-    },
-    {
-      type: "button" as const,
-      key: "저장",
-      label: "저장",
+    }),
+    makeSaveAction({
       onClick: () => {
         const saveRows = (model.detailI18nDataRef.current ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -308,7 +288,7 @@ export function useLgstgrpOprConfigMstController({
           "저장되었습니다.",
         );
       },
-    },
+    }),
   ];
 
   return {

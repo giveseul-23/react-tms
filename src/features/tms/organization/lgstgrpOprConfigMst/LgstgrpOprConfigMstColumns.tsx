@@ -1,5 +1,7 @@
 // src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMstColumns.tsx
 
+import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+
 // ── 플류운영그룹운영설정 (Top-left) ────────────────────────────────
 export const CONFIG_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
   { headerName: "No" },
@@ -37,38 +39,13 @@ export const CONFIG_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
     width: 100,
     fieldType: "text",
   },
-  {
-    headerName: "LBL_DELETE",
-    field: "_delete",
-    width: 60,
-    filter: false,
-    floatingFilter: false,
-    cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            onChange={(e) => {
-              if (e.target.checked) {
-                setRowData((prev: any) =>
-                  prev.filter((row: any) => row !== params.data),
-                );
-              }
-            }}
-          />
-        </div>
-      );
-    },
-  },
-  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS", width: 80 },
-  {
-    headerName: "LBL_INSERT_PERSON_ID",
-    field: "CRE_USR_ID",
-    width: 100,
-    fieldType: "text",
-  },
+  ...makeAuditColumns({
+    delete: true,
+    deleteSetRowData: setRowData,
+    rowStatus: true,
+    insertPerson: true,
+    insertPersonOverrides: { width: 100, fieldType: "text" },
+  }),
 ];
 
 // ── 설정상세 (Top-right) ───────────────────────────────────────────
@@ -135,31 +112,10 @@ export const CONFIG_DETAIL_COLUMN_DEFS = (
     editable: true,
     width: 80,
   },
-  {
-    headerName: "LBL_DELETE",
-    field: "_delete",
-    width: 60,
-    filter: false,
-    floatingFilter: false,
-    cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            onChange={(e) => {
-              if (e.target.checked) {
-                setRowData((prev: any) =>
-                  prev.filter((row: any) => row !== params.data),
-                );
-              }
-            }}
-          />
-        </div>
-      );
-    },
-  },
+  ...makeAuditColumns({
+    delete: true,
+    deleteSetRowData: setRowData,
+  }),
 ];
 
 // ── 설정코드다국어설정 (Bottom-left) ───────────────────────────────
@@ -181,34 +137,15 @@ export const CONFIG_I18N_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
     field: "LANG_DESC",
     editable: true,
   },
-  {
-    headerName: "LBL_DELETE",
-    field: "_delete",
-    width: 60,
-    filter: false,
-    floatingFilter: false,
-    cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            onChange={(e) => {
-              if (e.target.checked) {
-                setRowData((prev: any) =>
-                  prev.filter((row: any) => row !== params.data),
-                );
-              }
-            }}
-          />
-        </div>
-      );
-    },
-  },
-  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS", width: 80 },
-  { headerName: "LBL_INSERT_PERSON_ID", field: "CRE_USR_ID", width: 110 },
-  { headerName: "LBL_INSERT_DATE", field: "CRE_DTTM", width: 150 },
+  ...makeAuditColumns({
+    delete: true,
+    deleteSetRowData: setRowData,
+    rowStatus: true,
+    insertPerson: true,
+    insertPersonOverrides: { width: 110 },
+    insertDate: true,
+    insertDateOverrides: { width: 150 },
+  }),
 ];
 
 // ── 설정상세코드다국어설정 (Bottom-right) ──────────────────────────
@@ -237,31 +174,11 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = (
     field: "LANG_DESC",
     editable: true,
   },
-  {
-    headerName: "LBL_DELETE",
-    field: "_delete",
-    width: 60,
-    filter: false,
-    floatingFilter: false,
-    cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            onChange={(e) => {
-              if (e.target.checked) {
-                setRowData((prev: any) =>
-                  prev.filter((row: any) => row !== params.data),
-                );
-              }
-            }}
-          />
-        </div>
-      );
-    },
-  },
-  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS", width: 80 },
-  { headerName: "LBL_INSERT_PERSON_ID", field: "CRE_USR_ID", width: 110 },
+  ...makeAuditColumns({
+    delete: true,
+    deleteSetRowData: setRowData,
+    rowStatus: true,
+    insertPerson: true,
+    insertPersonOverrides: { width: 110 },
+  }),
 ];

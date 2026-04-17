@@ -4,6 +4,7 @@
 import { useCallback, MutableRefObject } from "react";
 import { currencyApi } from "@/features/tms/master/domain/currency/CurrencyApi.ts";
 import { CurrencyModel } from "./CurrencyModel";
+import { makeSaveAction } from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
   menuCd: string;
@@ -32,14 +33,7 @@ export function useCurrencyController({
     [model],
   );
 
-  const mainActions = [
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: (e: any) => {},
-    },
-  ];
+  const mainActions = [makeSaveAction()];
 
   return {
     fetchDispatchList,

@@ -1,3 +1,5 @@
+import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
@@ -30,36 +32,14 @@ export const DETAIL_COLUMN_DEFS = (
   { headerName: "LBL_MAX_VLTN_NTFCTN_CNT", field: "MAX_VLTN_NTFCTN_CNT" },
   { headerName: "LBL_VLTN_NTFCTN_INTRVL", field: "VLTN_NTFCTN_INTRVL" },
   { headerName: "LBL_USE_Y/N", field: "USE_YN" },
-  {
-    headerName: "LBL_DELETE",
-    field: "_delete",
-    width: 60,
-    filter: false,
-    floatingFilter: false,
-    cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            onChange={(e) => {
-              if (e.target.checked) {
-                // setRowData((prev: any) =>
-                //   prev.filter((row: any) => row !== params.data),
-                // );
-              }
-            }}
-          />
-        </div>
-      );
-    },
-  },
-  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS", width: 80 },
-  { headerName: "LBL_INSERT_PERSON_ID", field: "CRE_USR_ID" },
-  { headerName: "LBL_INSERT_DATE", field: "CRE_DTTM" },
-  { headerName: "LBL_UPDATE_PERSON_ID", field: "UPD_USR_ID" },
-  { headerName: "LBL_UPDATE_TIME", field: "UPD_DTTM" },
+  ...makeAuditColumns({
+    delete: true,
+    rowStatus: true,
+    insertPerson: true,
+    insertDate: true,
+    updatePerson: true,
+    updateTime: true,
+  }),
 ];
 
 export const NTFC_CHANNEL_COLUMN_DEFS = (
@@ -77,36 +57,14 @@ export const NTFC_CHANNEL_COLUMN_DEFS = (
   },
   { headerName: "LBL_NTFCTN_MSG_TMPLT", field: "NTFCTN_MSG_TMPLT" },
   { headerName: "LBL_USE_Y/N", field: "USE_YN" },
-  {
-    headerName: "LBL_DELETE",
-    field: "_delete",
-    width: 60,
-    filter: false,
-    floatingFilter: false,
-    cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            onChange={(e) => {
-              if (e.target.checked) {
-                // setRowData((prev: any) =>
-                //   prev.filter((row: any) => row !== params.data),
-                // );
-              }
-            }}
-          />
-        </div>
-      );
-    },
-  },
-  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS", width: 80 },
-  { headerName: "LBL_INSERT_PERSON_ID", field: "CRE_USR_ID" },
-  { headerName: "LBL_INSERT_DATE", field: "CRE_DTTM" },
-  { headerName: "LBL_UPDATE_PERSON_ID", field: "UPD_USR_ID" },
-  { headerName: "LBL_UPDATE_TIME", field: "UPD_DTTM" },
+  ...makeAuditColumns({
+    delete: true,
+    rowStatus: true,
+    insertPerson: true,
+    insertDate: true,
+    updatePerson: true,
+    updateTime: true,
+  }),
 ];
 
 export const NTFC_TARGET_COLUMN_DEFS = [
@@ -116,34 +74,12 @@ export const NTFC_TARGET_COLUMN_DEFS = [
   { headerName: "LBL_MBL_NO", field: "MBL_PHN_NO" },
   { headerName: "LBL_MBL_NO", field: "MBL_PHN_NO" },
   { headerName: "LBL_EMAIL_ADDR", field: "EMAIL_ADDR" },
-  {
-    headerName: "LBL_DELETE",
-    field: "_delete",
-    width: 60,
-    filter: false,
-    floatingFilter: false,
-    cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            onChange={(e) => {
-              if (e.target.checked) {
-                // setRowData((prev: any) =>
-                //   prev.filter((row: any) => row !== params.data),
-                // );
-              }
-            }}
-          />
-        </div>
-      );
-    },
-  },
-  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS", width: 80 },
-  { headerName: "LBL_INSERT_PERSON_ID", field: "CRE_USR_ID" },
-  { headerName: "LBL_INSERT_DATE", field: "CRE_DTTM" },
-  { headerName: "LBL_UPDATE_PERSON_ID", field: "UPD_USR_ID" },
-  { headerName: "LBL_UPDATE_TIME", field: "UPD_DTTM" },
+  ...makeAuditColumns({
+    delete: true,
+    rowStatus: true,
+    insertPerson: true,
+    insertDate: true,
+    updatePerson: true,
+    updateTime: true,
+  }),
 ];

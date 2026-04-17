@@ -3,9 +3,9 @@
 // ──────────────────────────────────────────────────────────────────
 import { useCallback, MutableRefObject } from "react";
 import { countryApi } from "@/features/tms/master/domain/country/CountryApi.ts";
-import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { CountryModel } from "./CountryModel";
 import { MAIN_COLUMN_DEFS } from "./CountryColumns.tsx";
+import { makeCommonActions } from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
   menuCd: string;
@@ -97,195 +97,52 @@ export function useCountryController({
   });
 
   // ── 메인 그리드 액션 (센차: TenderReceiveDispatchMain dockedItems toolbar) ──
-  const mainActions = [
-    // 센차: BTN_TENDER_ACCEPT handler:'onTenderAccepted'
-    {
-      type: "button",
-      key: "추가",
-      label: "추가",
-      onClick: (e: any) => {},
+  const mainActions = makeCommonActions({
+    add: true,
+    save: true,
+    excel: {
+      columns: MAIN_COLUMN_DEFS({}),
+      menuName: "국가관리",
+      fetchFn: () => countryApi.getCountryList(menuCd, filtersRef.current),
+      rows: model.gridData.rows,
     },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: (e: any) => {},
-    },
-    {
-      type: "group",
-      key: "엑셀",
-      label: "엑셀",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
-              menuName: "국가관리",
-              fetchFn: () =>
-                countryApi.getCountryList(menuCd, filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
-          onClick: () => {
-            downExcelSearched({
-              columns: MAIN_COLUMN_DEFS({}),
-              rows: model.gridData.rows,
-              menuName: "국가관리",
-            });
-          },
-        },
-      ],
-    },
-  ];
+  });
 
   // ── 시도 액션
-  const stateActions = [
-    {
-      type: "button",
-      key: "추가",
-      label: "추가",
-      onClick: (e: any) => {},
+  const stateActions = makeCommonActions({
+    add: true,
+    save: true,
+    excel: {
+      columns: MAIN_COLUMN_DEFS({}),
+      menuName: "국가관리",
+      fetchFn: () => countryApi.getStateList(menuCd, filtersRef.current),
+      rows: model.gridData.rows,
     },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: (e: any) => {},
-    },
-    {
-      type: "group",
-      key: "엑셀",
-      label: "엑셀",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
-              menuName: "국가관리",
-              fetchFn: () =>
-                countryApi.getStateList(menuCd, filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
-          onClick: () => {
-            downExcelSearched({
-              columns: MAIN_COLUMN_DEFS({}),
-              rows: model.gridData.rows,
-              menuName: "국가관리",
-            });
-          },
-        },
-      ],
-    },
-  ];
+  });
 
   // ── 우편번호 액션
-  const zipActions = [
-    {
-      type: "button",
-      key: "추가",
-      label: "추가",
-      onClick: (e: any) => {},
+  const zipActions = makeCommonActions({
+    add: true,
+    save: true,
+    excel: {
+      columns: MAIN_COLUMN_DEFS({}),
+      menuName: "국가관리",
+      fetchFn: () => countryApi.getZipList(menuCd, filtersRef.current),
+      rows: model.gridData.rows,
     },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: (e: any) => {},
-    },
-    {
-      type: "group",
-      key: "엑셀",
-      label: "엑셀",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
-              menuName: "국가관리",
-              fetchFn: () => countryApi.getZipList(menuCd, filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
-          onClick: () => {
-            downExcelSearched({
-              columns: MAIN_COLUMN_DEFS({}),
-              rows: model.gridData.rows,
-              menuName: "국가관리",
-            });
-          },
-        },
-      ],
-    },
-  ];
+  });
 
   // ── 시군구 액션
-  const cityActions = [
-    {
-      type: "button",
-      key: "추가",
-      label: "추가",
-      onClick: (e: any) => {},
+  const cityActions = makeCommonActions({
+    add: true,
+    save: true,
+    excel: {
+      columns: MAIN_COLUMN_DEFS({}),
+      menuName: "국가관리",
+      fetchFn: () => countryApi.getCityList(menuCd, filtersRef.current),
+      rows: model.gridData.rows,
     },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: (e: any) => {},
-    },
-    {
-      type: "group",
-      key: "엑셀",
-      label: "엑셀",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
-              menuName: "국가관리",
-              fetchFn: () => countryApi.getCityList(menuCd, filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
-          onClick: () => {
-            downExcelSearched({
-              columns: MAIN_COLUMN_DEFS({}),
-              rows: model.gridData.rows,
-              menuName: "국가관리",
-            });
-          },
-        },
-      ],
-    },
-  ];
+  });
 
   return {
     fetchDispatchList,

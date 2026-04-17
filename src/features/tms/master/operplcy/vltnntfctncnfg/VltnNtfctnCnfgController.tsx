@@ -2,8 +2,12 @@
 import { useCallback, MutableRefObject } from "react";
 import { vltnNtfctnCnfgApi } from "./VltnNtfctnCnfgApi";
 import { VltnNtfctnCnfgModel } from "./VltnNtfctnCnfgModel";
-import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { NTFC_TARGET_COLUMN_DEFS } from "./VltnNtfctnCnfgColumns";
+import {
+  makeAddAction,
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
   model: VltnNtfctnCnfgModel;
@@ -116,12 +120,7 @@ export function useVltnNtfctnCnfgController({
       label: "계약서복사",
       onClick: () => {},
     },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: () => {},
-    },
+    makeSaveAction(),
   ];
 
   const detailActions = [
@@ -131,18 +130,8 @@ export function useVltnNtfctnCnfgController({
       label: "템플릿복사",
       onClick: () => {},
     },
-    {
-      type: "button",
-      key: "추가",
-      label: "추가",
-      onClick: () => {},
-    },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: () => {},
-    },
+    makeAddAction(),
+    makeSaveAction(),
   ];
 
   const channelActions = [
@@ -152,18 +141,8 @@ export function useVltnNtfctnCnfgController({
       label: "템플릿수정",
       onClick: () => {},
     },
-    {
-      type: "button",
-      key: "추가",
-      label: "추가",
-      onClick: () => {},
-    },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: () => {},
-    },
+    makeAddAction(),
+    makeSaveAction(),
   ];
 
   const targetActions = [
@@ -173,50 +152,15 @@ export function useVltnNtfctnCnfgController({
       label: "사용자등록",
       onClick: () => {},
     },
-    {
-      type: "button",
-      key: "추가",
-      label: "추가",
-      onClick: () => {},
-    },
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: () => {},
-    },
-    {
-      type: "group",
-      key: "엑셀",
-      label: "엑셀",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: NTFC_TARGET_COLUMN_DEFS,
-              menuName: "위반알림설정관리",
-              fetchFn: () =>
-                vltnNtfctnCnfgApi.getCountryList(menuCd, filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
-          onClick: () => {
-            downExcelSearched({
-              columns: NTFC_TARGET_COLUMN_DEFS,
-              menuName: "위반알림설정관리",
-              rows: model.gridData.rows,
-            });
-          },
-        },
-      ],
-    },
+    makeAddAction(),
+    makeSaveAction(),
+    makeExcelGroupAction({
+      columns: NTFC_TARGET_COLUMN_DEFS,
+      menuName: "위반알림설정관리",
+      fetchFn: () =>
+        vltnNtfctnCnfgApi.getCountryList(menuCd, filtersRef.current),
+      rows: model.gridData.rows,
+    }),
   ];
 
   return {

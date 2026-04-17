@@ -2,6 +2,7 @@
 import { useCallback, MutableRefObject } from "react";
 import { divisionDefaultApi } from "./DivisionDefaultApi";
 import { DivisionDefaultModel } from "./DivisionDefaultModel";
+import { makeSaveAction } from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
   model: DivisionDefaultModel;
@@ -68,14 +69,7 @@ export function useDivisionDefaultController({
     [model],
   );
 
-  const detailActions = [
-    {
-      type: "button",
-      key: "저장",
-      label: "저장",
-      onClick: () => {},
-    },
-  ];
+  const detailActions = [makeSaveAction()];
 
   return {
     fetchDispatchList,

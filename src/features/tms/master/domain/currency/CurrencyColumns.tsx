@@ -1,3 +1,5 @@
+import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+
 export const MAIN_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
@@ -18,34 +20,12 @@ export const MAIN_COLUMN_DEFS = (
     },
   },
   { headerName: "LBL_DSPL_ORD", field: "DSPLY_SEQ" },
-  {
-    headerName: "LBL_DELETE",
-    field: "_delete",
-    width: 60,
-    filter: false,
-    floatingFilter: false,
-    cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            onChange={(e) => {
-              if (e.target.checked) {
-                // setRowData((prev: any) =>
-                //   prev.filter((row: any) => row !== params.data),
-                // );
-              }
-            }}
-          />
-        </div>
-      );
-    },
-  },
-  { headerName: "LBL_ROW_STATUS", field: "EDIT_STS", width: 80 },
-  { headerName: "LBL_INSERT_PERSON_ID", field: "CRE_USR_ID" },
-  { headerName: "LBL_INSERT_DATE", field: "CRE_DTTM" },
-  { headerName: "LBL_UPDATE_PERSON_ID", field: "UPD_USR_ID" },
-  { headerName: "LBL_UPDATE_TIME", field: "UPD_DTTM" },
+  ...makeAuditColumns({
+    delete: true,
+    rowStatus: true,
+    insertPerson: true,
+    insertDate: true,
+    updatePerson: true,
+    updateTime: true,
+  }),
 ];

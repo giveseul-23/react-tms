@@ -27,7 +27,8 @@ import { tenderApi } from "@/features/tms/pln/tender/tenderApi.ts";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
-import { downExcelSearch, downExcelSearched } from "@/views/common/common";
+import { downExcelSearch } from "@/views/common/common";
+import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import TenderRejectPopup from "@/features/tms/pln/tender/popup/TenderRejectPopup";
 import TemporaryVehicleChangePopup from "@/features/tms/pln/tender/popup/TemporaryVehicleChangePopup";
@@ -335,37 +336,12 @@ export function useTenderReceiveDispatchController({
       ],
     },
     // 센차: BTN_EXCEL menu 그룹 → gridExcelAll / gridExcel
-    {
-      type: "group",
-      key: "엑셀",
-      label: "엑셀",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
-              menuName: "운송사요청목록",
-              fetchFn: () => tenderApi.getDispatchList(filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
-          onClick: () => {
-            downExcelSearched({
-              columns: MAIN_COLUMN_DEFS({}),
-              rows: model.gridData.rows,
-              menuName: "운송사요청목록",
-            });
-          },
-        },
-      ],
-    },
+    makeExcelGroupAction({
+      columns: MAIN_COLUMN_DEFS({}),
+      menuName: "운송사요청목록",
+      fetchFn: () => tenderApi.getDispatchList(filtersRef.current),
+      rows: model.gridData.rows,
+    }),
   ];
 
   // ── 운송비내역 서브그리드 액션 (센차: TenderReceiveDispatchCarrRate toolbar) ──
