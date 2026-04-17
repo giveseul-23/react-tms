@@ -57,11 +57,36 @@ export function useAccountReceivableSubChargeManagementController({
   );
 
   // ── 상세 데이터 fetch ─────────────────────────────────────────
-  const fetchDetail = useCallback((row: any) => {
-    const keyCd = row?.XXX_CD;
-    if (!keyCd) return Promise.resolve([]);
+  const fetchDetail01 = useCallback((row: any) => {
+    const trfCd = row?.AR_TRF_CD;
+    const chgCd = row?.AR_CHG_CD;
+    const subChgCd = row?.AR_SUBCHG_CD;
+    if (!trfCd && chgCd && subChgCd) return Promise.resolve([]);
     return accountReceivableSubChargeManagementApi
-      .getDetailList({ XXX_CD: keyCd })
+      .getDetail01List({
+        AR_TRF_CD: trfCd,
+        AR_CHG_CD: chgCd,
+        AR_SUBCHG_CD: subChgCd,
+      })
+      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
+      .catch((err) => {
+        throw Error(err);
+      });
+  }, []);
+
+  const fetchDetail02 = useCallback((row: any) => {
+    const trfCd = row?.AR_TRF_CD;
+    const chgCd = row?.AR_CHG_CD;
+    const subChgCd = row?.AR_SUBCHG_CD;
+    const costCd = row?.COST_CD;
+    if (!trfCd && chgCd && subChgCd) return Promise.resolve([]);
+    return accountReceivableSubChargeManagementApi
+      .getDetail02List({
+        AR_TRF_CD: trfCd,
+        AR_CHG_CD: chgCd,
+        AR_SUBCHG_CD: subChgCd,
+        COST_CD: costCd,
+      })
       .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
       .catch((err) => {
         throw Error(err);
@@ -71,10 +96,29 @@ export function useAccountReceivableSubChargeManagementController({
   // ── 메인 행 클릭 → 상세 그리드 리로드 ─────────────────────────
   const handleRowClicked = useCallback(
     (row: any) => {
+      model.resetSubGrids();
       model.setSelectedHeaderRow(row);
 
-      fetchDetail(row).then((rows: any) => {
-        model.setSubDetailRowData({
+      fetchDetail01(row).then((rows: any) => {
+        (model.setSubDetail01RowData({
+          rows,
+          totalCount: rows.length,
+          page: 1,
+          limit: model.pageSize,
+        }),
+          handleSub01RowClicked(rows[0]));
+      });
+    },
+    [model],
+  );
+
+  const handleSub01RowClicked = useCallback(
+    (row: any) => {
+      model.setSubDetail02RowData(model.EMPTY_GRID);
+      model.setSelectedSub01Row(row);
+
+      fetchDetail02(row).then((rows: any) => {
+        model.setSubDetail02RowData({
           rows,
           totalCount: rows.length,
           page: 1,
@@ -104,7 +148,7 @@ export function useAccountReceivableSubChargeManagementController({
     makeAddAction({
       onClick: () => {
         if (!model.selectedHeaderRowRef.current) return;
-        model.setSubDetailRowData((prev: any) => ({
+        model.setSubDetail01RowData((prev: any) => ({
           ...prev,
           rows: [
             ...prev.rows,
@@ -131,10 +175,10 @@ export function useAccountReceivableSubChargeManagementController({
       columns: MAIN_COLUMN_DEFS,
       menuName: "화면명",
       fetchFn: () =>
-        accountReceivableSubChargeManagementApi.getDetailList(
+        accountReceivableSubChargeManagementApi.getDetail01List(
           filtersRef.current,
         ),
-      rows: model.subDetailRowData.rows,
+      rows: model.subDetail01RowData.rows,
     }),
   ];
 
@@ -142,6 +186,7 @@ export function useAccountReceivableSubChargeManagementController({
     fetchList,
     handleSearch,
     handleRowClicked,
+    handleSub01RowClicked,
     mainActions,
     detailActions,
   };

@@ -22,6 +22,7 @@
 import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
+import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
@@ -30,7 +31,8 @@ import { useAccountReceivableSubChargeManagementModel } from "./AccountReceivabl
 import { useAccountReceivableSubChargeManagementController } from "./AccountReceivableSubChargeManagementController";
 import {
   MAIN_COLUMN_DEFS,
-  DETAIL_COLUMN_DEFS,
+  DETAIL01_COLUMN_DEFS,
+  DETAIL02_COLUMN_DEFS,
 } from "./AccountReceivableSubChargeManagementColumns";
 
 // TODO: 실제 메뉴 코드로 교체
@@ -56,7 +58,7 @@ export default function Feature() {
   return (
     <MasterDetailPage
       // 초기 Master/Detail 비율 (합=100)
-      defaultSizes={[40, 60]}
+      defaultSizes={[50, 60]}
       searchProps={{
         meta,
         fetchFn: ctrl.fetchList,
@@ -94,16 +96,35 @@ export default function Feature() {
         />
       }
       detail={
-        <DataGrid
-          layoutType="plain"
-          columnDefs={DETAIL_COLUMN_DEFS(model.codeMap)}
-          rowData={model.subDetailRowData.rows}
-          totalCount={model.subDetailRowData.totalCount}
-          currentPage={model.subDetailRowData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          actions={ctrl.detailActions}
-        />
+        <SplitPane
+          direction="horizontal"
+          defaultSizes={[50, 50]}
+          minSizes={[25, 25]}
+          handleThickness="1.5"
+          storageKey="guide-feature-sub"
+        >
+          <DataGrid
+            layoutType="plain"
+            columnDefs={DETAIL01_COLUMN_DEFS(model.codeMap)}
+            rowData={model.subDetail01RowData.rows}
+            totalCount={model.subDetail01RowData.totalCount}
+            currentPage={model.subDetail01RowData.page}
+            pageSize={model.pageSize}
+            onPageSizeChange={model.setPageSize}
+            actions={ctrl.detailActions}
+            onRowClicked={ctrl.handleSub01RowClicked}
+          />
+          <DataGrid
+            layoutType="plain"
+            columnDefs={DETAIL02_COLUMN_DEFS(model.codeMap)}
+            rowData={model.subDetail02RowData.rows}
+            totalCount={model.subDetail02RowData.totalCount}
+            currentPage={model.subDetail02RowData.page}
+            pageSize={model.pageSize}
+            onPageSizeChange={model.setPageSize}
+            actions={ctrl.detailActions}
+          />
+        </SplitPane>
       }
     />
   );

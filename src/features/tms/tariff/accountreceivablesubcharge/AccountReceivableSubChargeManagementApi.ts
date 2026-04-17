@@ -37,7 +37,7 @@ export const accountReceivableSubChargeManagementApi = {
   // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/featureService/search`,
+      `/accountReceivableSubChargeManagementService/search`,
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,
@@ -46,9 +46,20 @@ export const accountReceivableSubChargeManagementApi = {
   },
 
   // ── 상세 조회 ─────────────────────────────────────────────────
-  getDetailList(payload: any) {
+  getDetail01List(payload: any) {
     return apiClient.post<commonResponse>(
-      `/featureService/searchDetail`,
+      `/accountReceivableSubChargeManagementService/searchSub01`,
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload,
+      }),
+    );
+  },
+
+  // ── 상세 조회 ─────────────────────────────────────────────────
+  getDetail02List(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/accountReceivableSubChargeManagementService/searchSub02`,
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,
@@ -59,7 +70,7 @@ export const accountReceivableSubChargeManagementApi = {
   // ── 저장 (추가/수정) ──────────────────────────────────────────
   save(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/featureService/save`,
+      `/accountReceivableSubChargeManagementService/save`,
       withSession(rows),
     );
   },
@@ -67,7 +78,7 @@ export const accountReceivableSubChargeManagementApi = {
   // ── 삭제 ──────────────────────────────────────────────────────
   remove(payload: any) {
     return apiClient.post<commonResponse>(
-      `/featureService/delete`,
+      `/accountReceivableSubChargeManagementService/delete`,
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,

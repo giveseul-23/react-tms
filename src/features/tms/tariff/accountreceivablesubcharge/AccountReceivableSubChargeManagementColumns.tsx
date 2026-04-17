@@ -19,64 +19,163 @@ import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
 export const MAIN_COLUMN_DEFS = [
-  { headerName: "No" }, // 자동 일련번호
   {
-    headerName: "LBL_XXX_CODE",
-    field: "XXX_CD",
+    headerName: "LBL_CUSTOMER_CODE",
+    field: "CUST_CD",
   },
   {
-    headerName: "LBL_XXX_NAME",
-    field: "XXX_NM",
+    headerName: "LBL_CUSTOMER_NAME",
+    field: "CUST_NM",
   },
   {
-    headerName: "LBL_USE_Y/N",
+    headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_LEVEL_CODE",
+    field: "AR_TRF_LCD",
+  },
+  {
+    headerName: "LBL_CUSTOMER_CONTRACT_CODE",
+    field: "CUST_CTRT_CD",
+  },
+  {
+    headerName: "LBL_CUSTOMER_CONTRACT_NAME",
+    field: "CUST_CTRT_NM",
+  },
+  {
+    headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE",
+    field: "AR_TRF_CD",
+  },
+  {
+    headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME",
+    field: "AR_TRF_NM",
+  },
+  {
+    headerName: "LBL_AR_ITEM_CALC_SEQ",
+    field: "CALC_RNK",
+  },
+  {
+    headerName: "LBL_RATE_ITEM_CODE",
+    field: "AR_CHG_CD",
+  },
+  {
+    headerName: "LBL_RATE_ITEM_NAME",
+    field: "AR_CHG_NM",
+  },
+  {
+    headerName: "LBL_SUB_CHARGE_CODE",
+    field: "AR_SUBCHG_CD",
+  },
+  {
+    headerName: "LBL_MIN_COST",
+    field: "MIN_COST",
+  },
+  {
+    headerName: "LBL_MAX_COST",
+    field: "MAX_COST",
+  },
+  {
+    headerName: "LBL_BASIC_COST",
+    field: "BSE_COST",
+  },
+  {
+    headerName: "LBL_RDNG_RCD",
+    field: "RDNG_RCD",
+  },
+  {
+    headerName: "LBL_ACCM_SUM",
+    field: "ACCM_SUM_YN",
+  },
+  {
+    headerName: "LBL_USE_YN",
     field: "USE_YN",
   },
   // 삭제/상태/생성/수정 컬럼을 설정값으로 일괄 추가
   ...makeAuditColumns({
     delete: true,
     rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
+    insertPerson: false,
+    insertDate: false,
+    updatePerson: false,
+    updateTime: false,
   }),
 ];
 
 // ── 상세 그리드 컬럼 (codeMap 주입 — 코드→라벨 치환용) ─────────
-export const DETAIL_COLUMN_DEFS = (
+export const DETAIL01_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
-  { headerName: "No" },
-  { headerName: "LBL_XXX_CODE", field: "XXX_CD" },
+  { headerName: "LBL_CALC_FORMULA_SEQ", field: "SEQ" },
   {
-    // 공통코드 → 라벨 치환 예시
-    headerName: "LBL_XXX_TCD",
-    field: "XXX_TCD",
-    cellRenderer: (params: any) => {
-      const code = params.value;
-      const label = codeMap.xxxTcd?.[String(code)] ?? code;
-      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
-    },
+    headerName: "LBL_COST_CD",
+    field: "COST_CD",
   },
   {
-    // 날짜/일시 필드 — DTTM 포함 시 자동 포맷팅
-    headerName: "LBL_FROM_DTTM",
-    field: "FRM_DTTM",
+    headerName: "LBL_COST_NM",
+    field: "COST_NM",
   },
   {
-    // 숫자 컬럼 — 자동 우측 정렬
-    headerName: "LBL_QTY",
-    field: "QTY",
-    type: "numeric",
+    headerName: "LBL_CLASS_CODE",
+    field: "CLSS_CD",
+  },
+  {
+    headerName: "LBL_CLASS_NAME",
+    field: "CLSS_NM",
+  },
+  {
+    headerName: "LBL_COST_OPTION",
+    field: "OPR",
+  },
+  {
+    headerName: "LBL_COST_UNIT",
+    field: "ADJ_RT",
+  },
+  {
+    headerName: "LBL_COST",
+    field: "COST_AMT",
   },
   ...makeAuditColumns({
     delete: true,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
+    rowStatus: false,
+    insertPerson: false,
+    insertDate: false,
+    updatePerson: false,
+    updateTime: false,
+  }),
+];
+
+export const DETAIL02_COLUMN_DEFS = (
+  codeMap: Record<string, Record<string, string>>,
+) => [
+  { headerName: "LBL_SEQ", field: "COND_SEQ" },
+  {
+    headerName: "LBL_CLASS_CODE",
+    field: "CLSS_CD",
+  },
+  {
+    headerName: "LBL_CLASS_NAME",
+    field: "CLSS_NM",
+  },
+  {
+    headerName: "LBL_CAL_OPTION",
+    field: "OPR",
+  },
+  {
+    headerName: "LBL_OPT_VAL_FROM",
+    field: "FRM_VAL",
+  },
+  {
+    headerName: "LBL_OPT_VAL_TO",
+    field: "TO_VAL",
+  },
+  {
+    headerName: "LBL_AND_OR",
+    field: "LGC_OPR",
+  },
+  ...makeAuditColumns({
+    delete: true,
+    rowStatus: false,
+    insertPerson: false,
+    insertDate: false,
+    updatePerson: false,
+    updateTime: false,
   }),
 ];
 

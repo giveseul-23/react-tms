@@ -27,7 +27,7 @@ export type GridData = {
   limit: number;
 };
 
-const EMPTY_GRID: GridData = {
+export const EMPTY_GRID: GridData = {
   rows: [],
   totalCount: 0,
   page: 1,
@@ -36,7 +36,7 @@ const EMPTY_GRID: GridData = {
 
 export function useAccountReceivableSubChargeManagementModel() {
   // ── 레이아웃 ──────────────────────────────────────────────────
-  const [layout, setLayout] = useState<LayoutType>("side");
+  const [layout, setLayout] = useState<LayoutType>("vertical");
 
   // ── 페이징 ────────────────────────────────────────────────────
   const [pageSize, setPageSize] = useState(20);
@@ -45,7 +45,9 @@ export function useAccountReceivableSubChargeManagementModel() {
   const [gridData, setGridData] = useState<GridData>(EMPTY_GRID);
 
   // ── 상세 그리드 ───────────────────────────────────────────────
-  const [subDetailRowData, setSubDetailRowData] =
+  const [subDetail01RowData, setSubDetail01RowData] =
+    useState<GridData>(EMPTY_GRID);
+  const [subDetail02RowData, setSubDetail02RowData] =
     useState<GridData>(EMPTY_GRID);
 
   // ── 추적 패널 (선택 기능) ─────────────────────────────────────
@@ -61,10 +63,18 @@ export function useAccountReceivableSubChargeManagementModel() {
     selectedHeaderRowRef.current = row;
   }, []);
 
+  const [selectedSub01Row, setSelectedSub01Row] = useState<any>(null);
+  const selectedSub01RowRef = useRef<any>(null);
+  const setSelectedSub01RowWithRef = useCallback((row: any) => {
+    setSelectedHeaderRow(row);
+    selectedHeaderRowRef.current = row;
+  }, []);
+
   // ── 서브 그리드 초기화 유틸 ───────────────────────────────────
   const resetSubGrids = useCallback(() => {
     setSelectedHeaderRowWithRef(null);
-    setSubDetailRowData(EMPTY_GRID);
+    setSubDetail01RowData(EMPTY_GRID);
+    setSubDetail02RowData(EMPTY_GRID);
   }, [setSelectedHeaderRowWithRef]);
 
   // ── 공통 코드 스토어 (자주 쓰는 lookup) ───────────────────────
@@ -96,12 +106,19 @@ export function useAccountReceivableSubChargeManagementModel() {
     // 그리드 데이터
     gridData,
     setGridData,
-    subDetailRowData,
-    setSubDetailRowData,
+    subDetail01RowData,
+    setSubDetail01RowData,
+    subDetail02RowData,
+    setSubDetail02RowData,
     // 선택 행
     selectedHeaderRow,
     selectedHeaderRowRef,
     setSelectedHeaderRow: setSelectedHeaderRowWithRef,
+    // 선택 행 - sub01
+    selectedSub01Row,
+    selectedSub01RowRef,
+    setSelectedSub01RowWithRef: setSelectedSub01Row,
+    setSelectedSub01Row,
     // 추적 패널
     trackOpen,
     setTrackOpen,
@@ -111,6 +128,7 @@ export function useAccountReceivableSubChargeManagementModel() {
     codeMap,
     // 유틸
     resetSubGrids,
+    EMPTY_GRID,
   };
 }
 
