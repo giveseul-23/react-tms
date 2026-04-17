@@ -1,5 +1,4 @@
 export const CNFG_HEADER_COLUMN_DEFS = [
-  { headerName: "No" },
   {
     headerName: "LBL_LGST_GRP_CNFG_GRP_CD",
     field: "LGST_GRP_CNFG_GRP_CD",
@@ -11,7 +10,6 @@ export const CNFG_HEADER_COLUMN_DEFS = [
 ];
 
 export const CNFG_DETAIL_COLUMN_DEFS = [
-  { headerName: "No" },
   {
     headerName: "LBL_LGST_GRP_CNFG_CD",
     field: "CNFG_CD",

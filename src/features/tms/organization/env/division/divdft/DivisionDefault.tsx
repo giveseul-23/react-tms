@@ -34,6 +34,7 @@ export default function TenderReceiveDispatch() {
 
   return (
     <MasterDetailPage
+      defaultSizes={[10, 90]}
       searchProps={{
         meta,
         fetchFn: ctrl.fetchDispatchList,
