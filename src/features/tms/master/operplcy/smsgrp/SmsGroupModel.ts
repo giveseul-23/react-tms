@@ -17,17 +17,15 @@ export function useSmsGroupModel() {
   const [pageSize, setPageSize] = useState(20);
 
   // ── 메인 그리드 데이터 (센차: mainInfo store) ────────────────
-  const [gridData, setGridData] = useState<GridData>({
+  const [gridData, setGridData] = useState<any[]>([]);
+
+  // ── 서브 그리드 데이터 ────────────────────────────────────────
+  const [subDetailRowData, setSubDetailRowData] = useState<GridData>({
     rows: [],
     totalCount: 0,
     page: 1,
     limit: 20,
   });
-
-  // ── 서브 그리드 데이터 ────────────────────────────────────────
-  const [subDetailRowData, setSubDetailRowData] = useState<any[]>([]);
-  const [subChannelRowData, setSubChannelRowData] = useState<any[]>([]);
-  const [subTargetRowData, setSubTargetRowData] = useState<any[]>([]);
 
   // ── 추적 패널 ────────────────────────────────────────────────
   const [trackOpen, setTrackOpen] = useState(false);
@@ -46,9 +44,12 @@ export function useSmsGroupModel() {
 
   const resetSubGrids = useCallback(() => {
     setSelectedHeaderRow([]);
-    setSubDetailRowData([]);
-    setSubChannelRowData([]);
-    setSubTargetRowData([]);
+    setSubDetailRowData({
+      rows: [],
+      totalCount: 0,
+      page: 1,
+      limit: 20,
+    });
   }, [setSelectedHeaderRowWithRef]);
 
   // ── 공통 코드 스토어 (센차: dspchOpStsList, vehTcd 등) ───────
@@ -85,11 +86,7 @@ export function useSmsGroupModel() {
     setSubDetailRowData,
     setSelectedHeaderRow,
     resetSubGrids,
-    subChannelRowData,
-    subTargetRowData,
     codeMap,
-    setSubChannelRowData,
-    setSubTargetRowData,
   };
 }
 

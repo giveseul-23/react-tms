@@ -18,9 +18,9 @@ const withSession = (payload: any = {}) => {
 export const smsGroupApi = {
   MENU_CD: "MENU_SMS_GRP_MGMT",
   ////// SEARCH
-  getVltnNtfctnCnfgList(payload: any) {
+  getSmsGroupList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/vltnNtfctnCnfgService/searchLgst`,
+      `/smsGroupService/search`,
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,
@@ -28,27 +28,9 @@ export const smsGroupApi = {
     );
   },
 
-  getVltnNtfctnCnfgDetailList(payload: any) {
+  getSmsGroupDetailList(payload: any) {
     return apiClient.post<commonResponse>(
-      "/vltnNtfctnCnfgService/searchCnfg",
-      withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload,
-      }),
-    );
-  },
-  getVltnNtfctnCnfgChannelList(payload: any) {
-    return apiClient.post<commonResponse>(
-      "/vltnNtfctnCnfgService/searchChnl",
-      withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload,
-      }),
-    );
-  },
-  getVltnNtfctnCnfgTargetList(payload: any) {
-    return apiClient.post<commonResponse>(
-      "/vltnNtfctnCnfgService/searchRcvr",
+      "/smsGroupService/searchDetail",
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,
