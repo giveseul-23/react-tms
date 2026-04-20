@@ -161,6 +161,8 @@ type DataGridProps<TRow> = {
   onRowClicked?: (row: TRow) => void;
   onRowDoubleClicked?: (row: TRow) => void;
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
+  /** 탭 전환 시 콜백 — 외부에서 activeTab 을 추적할 때 사용 */
+  onTabChange?: (key: string) => void;
 
   disableAutoSize?: boolean;
   rowSelection?: string;
@@ -233,6 +235,7 @@ export default function DataGrid<TRow>({
   codeMap,
   overrideRowData,
   gridOptions,
+  onTabChange,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -317,6 +320,11 @@ export default function DataGrid<TRow>({
     }
     return codeMap;
   }, [layoutType, activeTab, presets, codeMap]);
+
+  const activeRender =
+    layoutType === "tab" && activeTab && presets
+      ? presets[activeTab].render
+      : undefined;
 
   /** No 컬럼 처리 + 자동 정렬 (숫자=우측, _STS=중앙, 기본=좌측) */
   const finalColumnDefs = useMemo(() => {
@@ -858,7 +866,14 @@ export default function DataGrid<TRow>({
     >
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-3 shrink-0">
-          <GridTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+          <GridTabs
+            tabs={tabs}
+            activeTab={activeTab}
+            onChange={(k) => {
+              setActiveTab(k);
+              onTabChange?.(k);
+            }}
+          />
         </div>
       )}
 
@@ -873,7 +888,9 @@ export default function DataGrid<TRow>({
       )}
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        {rightGrid ? (
+        {activeRender ? (
+          activeRender()
+        ) : rightGrid ? (
           <PanelGroup direction="horizontal" className="h-full w-full">
             <Panel defaultSize={70} minSize={30}>
               <div className="h-full flex flex-col min-h-0 border border-gray-200 rounded-md overflow-hidden bg-[rgb(var(--bg))]">
