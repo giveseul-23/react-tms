@@ -60,6 +60,7 @@ export default function Feature() {
       // 초기 Master/Detail 비율 (합=100)
       defaultSizes={[40, 60]}
       searchProps={{
+        moduleDefault: "TMS",
         meta,
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
