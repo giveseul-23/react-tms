@@ -94,25 +94,39 @@ export default function Country() {
             ]}
             presets={{
               STATE: {
-                columnDefs: STATE_COLUMN_DEFS,
+                columnDefs: [],
+                render: () => (
+                  <SplitPane
+                    direction="horizontal"
+                    defaultSizes={[50, 50]}
+                    minSizes={[25, 25]}
+                    handleThickness="1.5"
+                    storageKey="tempoil-register-split"
+                  >
+                    <DataGrid
+                      layoutType="plain"
+                      columnDefs={STATE_COLUMN_DEFS}
+                      rowData={model.subStateRowData}
+                      actions={ctrl.cityActions}
+                      onRowClicked={ctrl.handleSubRowClicked}
+                    />
+                    <DataGrid
+                      layoutType="plain"
+                      columnDefs={CITY_COLUMN_DEFS}
+                      rowData={model.subCityRowData}
+                      actions={ctrl.cityActions}
+                      subTitle="시군구"
+                    />
+                  </SplitPane>
+                ),
                 actions: ctrl.cityActions,
               },
               ZIP: { columnDefs: ZIP_COLUMN_DEFS, actions: ctrl.zipActions },
             }}
             rowData={{
-              STATE: model.subStateRowData,
               ZIP: model.subZipRowData,
             }}
             actions={[]}
-            onRowClicked={ctrl.handleSubRowClicked}
-          />
-
-          <DataGrid
-            layoutType="plain"
-            columnDefs={CITY_COLUMN_DEFS}
-            rowData={model.subCityRowData}
-            actions={ctrl.cityActions}
-            subTitle="시군구"
           />
         </SplitPane>
       }
