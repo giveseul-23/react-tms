@@ -30,14 +30,14 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
-export const featureApi = {
+export const rateApi = {
   // TODO: 실제 메뉴 코드로 교체
   MENU_CD: "MENU_XXX",
 
   // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/featureService/search`,
+      `/rateService/search`,
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,
@@ -46,9 +46,19 @@ export const featureApi = {
   },
 
   // ── 상세 조회 ─────────────────────────────────────────────────
-  getDetailList(payload: any) {
+  getCostInfoList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/featureService/searchDetail`,
+      `/rateService/searchCostInfoList`,
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload,
+      }),
+    );
+  },
+
+  getConditionInfoList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/rateService/searchConditionInfoList`,
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,
@@ -59,7 +69,7 @@ export const featureApi = {
   // ── 저장 (추가/수정) ──────────────────────────────────────────
   save(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/featureService/save`,
+      `/rateService/save`,
       withSession(rows),
     );
   },
@@ -67,7 +77,7 @@ export const featureApi = {
   // ── 삭제 ──────────────────────────────────────────────────────
   remove(payload: any) {
     return apiClient.post<commonResponse>(
-      `/featureService/delete`,
+      `/rateService/delete`,
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,

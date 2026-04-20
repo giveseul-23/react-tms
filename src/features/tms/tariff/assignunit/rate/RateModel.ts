@@ -34,7 +34,7 @@ const EMPTY_GRID: GridData = {
   limit: 20,
 };
 
-export function useFeatureModel() {
+export function useRateModel() {
   // ── 레이아웃 ──────────────────────────────────────────────────
   const [layout, setLayout] = useState<LayoutType>("side");
 
@@ -45,7 +45,9 @@ export function useFeatureModel() {
   const [gridData, setGridData] = useState<GridData>(EMPTY_GRID);
 
   // ── 상세 그리드 ───────────────────────────────────────────────
-  const [subDetailRowData, setSubDetailRowData] =
+  const [subCostInfoRowData, setSubCostInfoRowData] =
+    useState<GridData>(EMPTY_GRID);
+  const [subConditionInfoRowData, setSubConditionInfoRowData] =
     useState<GridData>(EMPTY_GRID);
 
   // ── 추적 패널 (선택 기능) ─────────────────────────────────────
@@ -64,14 +66,34 @@ export function useFeatureModel() {
   // ── 서브 그리드 초기화 유틸 ───────────────────────────────────
   const resetSubGrids = useCallback(() => {
     setSelectedHeaderRowWithRef(null);
-    setSubDetailRowData(EMPTY_GRID);
+    setSubCostInfoRowData(EMPTY_GRID);
+    setSubConditionInfoRowData(EMPTY_GRID);
   }, [setSelectedHeaderRowWithRef]);
 
   // ── 공통 코드 스토어 (자주 쓰는 lookup) ───────────────────────
   // 사용 예: codeMap.xxxTcd["10"] === "라벨"
   const { stores } = useCommonStores({
-    xxxTcd: { sqlProp: "CODE", keyParam: "XXX_TCD" },
-    yyyTcd: { sqlProp: "CODE", keyParam: "YYY_TCD" },
+    operatorTypeList: [
+      { CODE: "*", NAME: "*" },
+      { CODE: "/", NAME: "/" },
+    ],
+    operatorTypeList_AndOr: [
+      { CODE: "AND", NAME: "AND" },
+      { CODE: "OR", NAME: "OR" },
+    ],
+    calcOptTypeList: [
+      { CODE: "=", NAME: "=" },
+      { CODE: "!=", NAME: "!=" },
+      { CODE: ">", NAME: ">" },
+      { CODE: "<", NAME: "<" },
+      { CODE: ">=", NAME: ">=" },
+      { CODE: "<=", NAME: "<=" },
+      { CODE: "BETWEEN", NAME: "BETWEEN" },
+      { CODE: "IN", NAME: "IN" },
+      { CODE: "ALL_IN", NAME: "ALL_IN" },
+      { CODE: "NOT_IN", NAME: "NOT_IN" },
+    ],
+    rdngRcdList: { sqlProp: "CODE", keyParam: "RDNG_RCD" },
   });
 
   // 코드 → 명칭 맵 변환 (Cell Renderer 에서 사용)
@@ -96,8 +118,10 @@ export function useFeatureModel() {
     // 그리드 데이터
     gridData,
     setGridData,
-    subDetailRowData,
-    setSubDetailRowData,
+    subCostInfoRowData,
+    setSubCostInfoRowData,
+    subConditionInfoRowData,
+    setSubConditionInfoRowData,
     // 선택 행
     selectedHeaderRow,
     selectedHeaderRowRef,
@@ -114,4 +138,4 @@ export function useFeatureModel() {
   };
 }
 
-export type FeatureModel = ReturnType<typeof useFeatureModel>;
+export type RateModel = ReturnType<typeof useRateModel>;

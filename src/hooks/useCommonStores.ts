@@ -3,9 +3,11 @@ import { apiClient } from "@/app/http/client";
 import { commonApi } from "@/app/services/common/commonApi";
 import { getSessionFields } from "@/app/services/auth/auth";
 
-export function useCommonStores(
-  params: Record<string, { sqlProp: string; keyParam?: string }>,
-) {
+export type CommonStoreSpec =
+  | { sqlProp: string; keyParam?: string }
+  | Array<Record<string, any>>;
+
+export function useCommonStores(params: Record<string, CommonStoreSpec>) {
   const [stores, setStores] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
@@ -16,12 +18,25 @@ export function useCommonStores(
         const sessionFields = getSessionFields();
         const mapped: Record<string, any[]> = {};
 
+        // 1) 정적 배열: API 호출 없이 바로 주입
+        const staticEntries = Object.entries(params).filter(([, v]) =>
+          Array.isArray(v),
+        ) as [string, Array<Record<string, any>>][];
+        staticEntries.forEach(([key, arr]) => {
+          mapped[key] = arr;
+        });
+
+        // 이하 API 스펙 항목만 처리
+        const apiParams = Object.fromEntries(
+          Object.entries(params).filter(([, v]) => !Array.isArray(v)),
+        ) as Record<string, { sqlProp: string; keyParam?: string }>;
+
         // sqlProp에 '/'가 포함된 항목: 해당 경로로 개별 호출
-        const customEntries = Object.entries(params).filter(([, v]) =>
+        const customEntries = Object.entries(apiParams).filter(([, v]) =>
           v.sqlProp.includes("/"),
         );
         // 나머지: 기존 일괄 호출
-        const batchEntries = Object.entries(params).filter(
+        const batchEntries = Object.entries(apiParams).filter(
           ([, v]) => !v.sqlProp.includes("/"),
         );
 

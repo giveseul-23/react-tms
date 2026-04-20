@@ -27,8 +27,8 @@ import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useFeatureModel } from "./RateModel";
-import { useFeatureController } from "./RateController";
+import { useRateModel } from "./RateModel";
+import { useRateController } from "./RateController";
 import {
   MAIN_COLUMN_DEFS,
   DETAIL01_COLUMN_DEFS,
@@ -40,14 +40,14 @@ const MENU_CODE = "MENU_DSPTCH_RATE";
 
 export default function Feature() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useFeatureModel();
+  const model = useRateModel();
 
   // ── 조회 trigger / 조회 조건 / 검색 영역에서 제외할 key ────────
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
-  const ctrl = useFeatureController({
+  const ctrl = useRateController({
     model,
     searchRef,
     filtersRef,
@@ -106,19 +106,20 @@ export default function Feature() {
           <DataGrid
             layoutType="plain"
             columnDefs={DETAIL01_COLUMN_DEFS(model.codeMap)}
-            rowData={model.subDetailRowData.rows}
-            totalCount={model.subDetailRowData.totalCount}
-            currentPage={model.subDetailRowData.page}
+            rowData={model.subCostInfoRowData.rows}
+            totalCount={model.subCostInfoRowData.totalCount}
+            currentPage={model.subCostInfoRowData.page}
             pageSize={model.pageSize}
             onPageSizeChange={model.setPageSize}
             actions={ctrl.detailActions}
+            onRowClicked={ctrl.handleSubRowClicked}
           />
           <DataGrid
             layoutType="plain"
             columnDefs={DETAIL02_COLUMN_DEFS(model.codeMap)}
-            rowData={model.subDetailRowData.rows}
-            totalCount={model.subDetailRowData.totalCount}
-            currentPage={model.subDetailRowData.page}
+            rowData={model.subConditionInfoRowData.rows}
+            totalCount={model.subConditionInfoRowData.totalCount}
+            currentPage={model.subConditionInfoRowData.page}
             pageSize={model.pageSize}
             onPageSizeChange={model.setPageSize}
             actions={ctrl.detailActions}

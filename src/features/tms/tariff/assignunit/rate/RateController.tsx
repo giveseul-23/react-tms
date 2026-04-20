@@ -16,8 +16,8 @@
 // ────────────────────────────────────────────────────────────────
 
 import { useCallback, MutableRefObject } from "react";
-import { featureApi } from "./RateApi";
-import { FeatureModel } from "./RateModel";
+import { rateApi } from "./RateApi";
+import { RateModel } from "./RateModel";
 import { MAIN_COLUMN_DEFS } from "./RateColumns";
 import {
   makeAddAction,
@@ -27,19 +27,19 @@ import {
 } from "@/app/components/grid/commonActions";
 
 type ControllerProps = {
-  model: FeatureModel;
+  model: RateModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
 };
 
-export function useFeatureController({
+export function useRateController({
   model,
   searchRef,
   filtersRef,
 }: ControllerProps) {
   // ── 조회 API (SearchFilters 가 넘겨주는 params 를 그대로 전달) ─
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => featureApi.getList(params),
+    (params: Record<string, unknown>) => rateApi.getList(params),
     [],
   );
 
@@ -56,11 +56,32 @@ export function useFeatureController({
   );
 
   // ── 상세 데이터 fetch ─────────────────────────────────────────
-  const fetchDetail = useCallback((row: any) => {
-    const keyCd = row?.XXX_CD;
-    if (!keyCd) return Promise.resolve([]);
-    return featureApi
-      .getDetailList({ XXX_CD: keyCd })
+  const fetchCostInfoList = useCallback((row: any) => {
+    const trfCd = row?.TRF_CD;
+    const chgCd = row?.CHG_CD;
+    const subchgCd = row?.SUBCHG_CD;
+    if (!(trfCd && chgCd && subchgCd)) return Promise.resolve([]);
+    return rateApi
+      .getCostInfoList({ TRF_CD: trfCd, CHG_CD: chgCd, SUBCHG_CD: subchgCd })
+      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
+      .catch((err) => {
+        throw Error(err);
+      });
+  }, []);
+
+  const fetchConditionInfoList = useCallback((row: any) => {
+    const trfCd = row?.TRF_CD;
+    const chgCd = row?.CHG_CD;
+    const subchgCd = row?.SUBCHG_CD;
+    const costCd = row?.COST_CD;
+    if (!(trfCd && chgCd && subchgCd && costCd)) return Promise.resolve([]);
+    return rateApi
+      .getConditionInfoList({
+        TRF_CD: trfCd,
+        CHG_CD: chgCd,
+        SUBCHG_CD: subchgCd,
+        COST_CD: costCd,
+      })
       .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
       .catch((err) => {
         throw Error(err);
@@ -71,9 +92,26 @@ export function useFeatureController({
   const handleRowClicked = useCallback(
     (row: any) => {
       model.setSelectedHeaderRow(row);
+      fetchCostInfoList(row).then((rows: any) => {
+        model.setSubCostInfoRowData({
+          rows,
+          totalCount: rows.length,
+          page: 1,
+          limit: model.pageSize,
+        });
 
-      fetchDetail(row).then((rows: any) => {
-        model.setSubDetailRowData({
+        if (rows) {
+          handleSubRowClicked(rows[0]);
+        }
+      });
+    },
+    [model],
+  );
+
+  const handleSubRowClicked = useCallback(
+    (row: any) => {
+      fetchConditionInfoList(row).then((rows: any) => {
+        model.setSubConditionInfoRowData({
           rows,
           totalCount: rows.length,
           page: 1,
@@ -92,7 +130,7 @@ export function useFeatureController({
     excel: {
       columns: MAIN_COLUMN_DEFS,
       menuName: "화면명",
-      fetchFn: () => featureApi.getList(filtersRef.current),
+      fetchFn: () => rateApi.getList(filtersRef.current),
       rows: model.gridData.rows,
     },
   });
@@ -102,7 +140,7 @@ export function useFeatureController({
     makeAddAction({
       onClick: () => {
         if (!model.selectedHeaderRowRef.current) return;
-        model.setSubDetailRowData((prev: any) => ({
+        model.setSubCostInfoRowData((prev: any) => ({
           ...prev,
           rows: [
             ...prev.rows,
@@ -120,14 +158,14 @@ export function useFeatureController({
           (r: any) => r._isNew || r._isDirty,
         );
         if (saveRows.length === 0) return;
-        featureApi.save(saveRows).then(() => searchRef.current?.());
+        rateApi.save(saveRows).then(() => searchRef.current?.());
       },
     }),
     makeExcelGroupAction({
       columns: MAIN_COLUMN_DEFS,
       menuName: "화면명",
-      fetchFn: () => featureApi.getDetailList(filtersRef.current),
-      rows: model.subDetailRowData.rows,
+      fetchFn: () => rateApi.getCostInfoList(filtersRef.current),
+      rows: model.subCostInfoRowData.rows,
     }),
   ];
 
@@ -135,6 +173,7 @@ export function useFeatureController({
     fetchList,
     handleSearch,
     handleRowClicked,
+    handleSubRowClicked,
     mainActions,
     detailActions,
   };
