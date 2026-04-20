@@ -136,6 +136,14 @@ export default function Feature() {
               onPageSizeChange={model.setPageSize}
               actions={ctrl.detail01Actions}
               onRowClicked={ctrl.handleSubCenterRowClicked}
+              gridOptions={{
+                defaultColDef: {
+                  resizable: true,
+                  sortable: true,
+                  filter: false, // 필터 메뉴 자체 비활성화
+                  floatingFilter: false, // 헤더 아래 입력줄 비활성화
+                },
+              }}
             />
             <DataGrid
               layoutType="plain"
@@ -147,6 +155,14 @@ export default function Feature() {
               pageSize={model.pageSize}
               onPageSizeChange={model.setPageSize}
               actions={ctrl.detail01Actions}
+              gridOptions={{
+                defaultColDef: {
+                  resizable: true,
+                  sortable: true,
+                  filter: false, // 필터 메뉴 자체 비활성화
+                  floatingFilter: false, // 헤더 아래 입력줄 비활성화
+                },
+              }}
             />
           </SplitPane>
           <DataGrid

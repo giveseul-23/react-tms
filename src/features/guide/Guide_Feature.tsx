@@ -21,6 +21,7 @@
 
 import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
+import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
@@ -28,10 +29,7 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useFeatureModel } from "./Guide_FeatureModel";
 import { useFeatureController } from "./Guide_FeatureController";
-import {
-  MAIN_COLUMN_DEFS,
-  DETAIL_COLUMN_DEFS,
-} from "./Guide_FeatureColumns";
+import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./Guide_FeatureColumns";
 
 // TODO: 실제 메뉴 코드로 교체
 const MENU_CODE = "MENU_XXX";
