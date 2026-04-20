@@ -133,7 +133,8 @@ export function useTempOilPriceController({
     excel: {
       columns: PERIOD_COLUMN_DEFS,
       menuName: "용차유가 기간별조회",
-      fetchFn: () => tempOilPriceApi.getTempOilPriceByPeriod(filtersRef.current),
+      fetchFn: () =>
+        tempOilPriceApi.getTempOilPriceByPeriod(filtersRef.current),
       rows: model.periodRowData.rows,
     },
   });
