@@ -23,20 +23,14 @@ export const MAIN_COLUMN_DEFS = [
   }),
 ];
 
-export const DETAIL_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
   { headerName: "LBL_SMS_GRP_CD", field: "SMS_GRP_CD" },
   { headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
   {
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
-    cellRenderer: (params: any) => {
-      const code = params.value;
-      const label = codeMap.vltnNtfctnTcd?.[String(code)] ?? code;
-      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
-    },
+    codeKey: "vltnNtfctnTcd",
   },
   { headerName: "LBL_RECEIVER_ID", field: "USR_ID" },
   { headerName: "LBL_RECEIVER_NM", field: "USR_NM" },

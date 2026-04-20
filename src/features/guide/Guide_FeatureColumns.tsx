@@ -43,21 +43,17 @@ export const MAIN_COLUMN_DEFS = [
   }),
 ];
 
-// ── 상세 그리드 컬럼 (codeMap 주입 — 코드→라벨 치환용) ─────────
-export const DETAIL_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+// ── 상세 그리드 컬럼 ─────────────────────────────────────────
+// 공통코드 → 라벨 치환은 컬럼에 codeKey 만 지정하고,
+// DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
+export const DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
   { headerName: "LBL_XXX_CODE", field: "XXX_CD" },
   {
-    // 공통코드 → 라벨 치환 예시
+    // 공통코드 → 라벨 치환 예시 (codeKey 지정)
     headerName: "LBL_XXX_TCD",
     field: "XXX_TCD",
-    cellRenderer: (params: any) => {
-      const code = params.value;
-      const label = codeMap.xxxTcd?.[String(code)] ?? code;
-      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
-    },
+    codeKey: "xxxTcd",
   },
   {
     // 날짜/일시 필드 — DTTM 포함 시 자동 포맷팅

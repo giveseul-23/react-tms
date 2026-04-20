@@ -11,5 +11,6 @@ export type GridPreset<TRow> = {
   actions?: ActionItem[];
   onCellValueChanged?: (params: any) => void;
   onRowClicked?: (row: TRow) => void;
+  codeMap?: Record<string, Record<string, string>>;
   gridRef?: React.RefObject<any>; // ← stopEditing 용
 };

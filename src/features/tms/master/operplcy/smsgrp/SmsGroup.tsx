@@ -62,7 +62,8 @@ export default function TenderReceiveDispatch() {
       detail={
         <DataGrid
           layoutType="plain"
-          columnDefs={DETAIL_COLUMN_DEFS(model.codeMap)}
+          columnDefs={DETAIL_COLUMN_DEFS}
+          codeMap={model.codeMap}
           rowData={model.subDetailRowData.rows}
           totalCount={model.subDetailRowData.totalCount}
           currentPage={model.subDetailRowData.page}

@@ -75,7 +75,8 @@ export default function TenderReceiveDispatch() {
         >
           <DataGrid
             layoutType="plain"
-            columnDefs={DETAIL_COLUMN_DEFS(model.codeMap)}
+            columnDefs={DETAIL_COLUMN_DEFS}
+            codeMap={model.codeMap}
             rowData={model.subDetailRowData}
             actions={ctrl.detailActions}
             onRowClicked={ctrl.handleSubRowClicked}
@@ -86,9 +87,10 @@ export default function TenderReceiveDispatch() {
               { key: "CHANNEL", label: "알림채널" },
               { key: "TARGET", label: "전송대상" },
             ]}
+            codeMap={model.codeMap}
             presets={{
               CHANNEL: {
-                columnDefs: NTFC_CHANNEL_COLUMN_DEFS(model.codeMap),
+                columnDefs: NTFC_CHANNEL_COLUMN_DEFS,
                 actions: ctrl.channelActions,
               },
               TARGET: {

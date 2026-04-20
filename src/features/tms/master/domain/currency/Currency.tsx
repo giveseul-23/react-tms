@@ -45,7 +45,8 @@ export default function Currency() {
       grid={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS(model.codeMap)}
+          columnDefs={MAIN_COLUMN_DEFS}
+          codeMap={model.codeMap}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
           currentPage={model.gridData.page}

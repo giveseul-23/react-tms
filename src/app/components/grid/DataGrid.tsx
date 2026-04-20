@@ -181,6 +181,14 @@ type DataGridProps<TRow> = {
   autoGroupColumnDef?: ColDef<TRow>;
   groupDefaultExpanded?: number; // -1: 전체 펼침, 0: 전체 접힘, N: N 레벨까지
 
+  // ─── 공통 코드 → 라벨 매핑 ────────────────────────────────────────────────
+  /**
+   * 코드 → 라벨 lookup 맵. 컬럼에 codeKey 를 지정하면 해당 맵에서
+   * params.value 를 치환해 자동으로 cellRenderer 를 주입합니다.
+   * 예: codeMap.xxxTcd["10"] === "라벨"
+   */
+  codeMap?: Record<string, Record<string, string>>;
+
   // ─── Escape Hatch ─────────────────────────────────────────────────────────
   /**
    * 외부에서 직접 rowData를 주입합니다.
@@ -222,6 +230,7 @@ export default function DataGrid<TRow>({
   getDataPath,
   autoGroupColumnDef,
   groupDefaultExpanded = -1,
+  codeMap,
   overrideRowData,
   gridOptions,
 }: DataGridProps<TRow>) {
@@ -302,9 +311,32 @@ export default function DataGrid<TRow>({
     return internalGridRef;
   }, [layoutType, activeTab, presets]);
 
+  const activeCodeMap = useMemo(() => {
+    if (layoutType === "tab" && activeTab && presets) {
+      return presets[activeTab].codeMap ?? codeMap;
+    }
+    return codeMap;
+  }, [layoutType, activeTab, presets, codeMap]);
+
   /** No 컬럼 처리 + 자동 정렬 (숫자=우측, _STS=중앙, 기본=좌측) */
   const finalColumnDefs = useMemo(() => {
-    return activeColumnDefs.map((col) => {
+    // codeKey 가 있는 컬럼에 자동 cellRenderer 주입 (이미 cellRenderer 있으면 유지)
+    const prepared = activeColumnDefs.map((col) => {
+      const codeKey = (col as any).codeKey as string | undefined;
+      if (!codeKey || (col as any).cellRenderer) return col;
+      return {
+        ...col,
+        cellRenderer: (params: any) => {
+          const code = params.value;
+          const label = activeCodeMap?.[codeKey]?.[String(code)] ?? code;
+          return (
+            <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>
+          );
+        },
+      };
+    });
+
+    return prepared.map((col) => {
       if ("headerName" in col && col.headerName === "No") {
         const maxNum = String(activeRowData.length || 1);
         const noWidth = Math.max(
@@ -380,7 +412,7 @@ export default function DataGrid<TRow>({
         headerName: Lang.get(col.headerName),
       };
     });
-  }, [activeColumnDefs]);
+  }, [activeColumnDefs, activeCodeMap]);
 
   // ─── 오토사이징 핸들러 ────────────────────────────────────────────────────────
 

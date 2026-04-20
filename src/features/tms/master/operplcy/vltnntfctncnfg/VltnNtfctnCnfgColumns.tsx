@@ -12,19 +12,13 @@ export const MAIN_COLUMN_DEFS = [
   },
 ];
 
-export const DETAIL_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const DETAIL_COLUMN_DEFS = [
   { headerName: "LBL_VLTN_NTFCTN_CNFG_ID", field: "VLTN_NTFCTN_CNFG_ID" },
   { headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
   {
     headerName: "LBL_VLTN_NTFCTN_TCD",
     field: "VLTN_NTFCTN_TCD",
-    cellRenderer: (params: any) => {
-      const code = params.value;
-      const label = codeMap.vltnNtfctnTcd?.[String(code)] ?? code;
-      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
-    },
+    codeKey: "vltnNtfctnTcd",
   },
   { headerName: "LBL_FROM_DTTM", field: "FRM_DTTM" },
   { headerName: "LBL_TO_DTTM", field: "TO_DTTM" },
@@ -42,18 +36,12 @@ export const DETAIL_COLUMN_DEFS = (
   }),
 ];
 
-export const NTFC_CHANNEL_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const NTFC_CHANNEL_COLUMN_DEFS = [
   { headerName: "LBL_VLTN_NTFCTN_CNFG_ID", field: "VLTN_NTFCTN_CNFG_ID" },
   {
     headerName: "LBL_NTFCTN_CHNL_TCD",
     field: "NTFCTN_CHNL_TCD",
-    cellRenderer: (params: any) => {
-      const code = params.value;
-      const label = codeMap.ntfctnChnlTcd?.[String(code)] ?? code;
-      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
-    },
+    codeKey: "ntfctnChnlTcd",
   },
   { headerName: "LBL_NTFCTN_MSG_TMPLT", field: "NTFCTN_MSG_TMPLT" },
   { headerName: "LBL_USE_Y/N", field: "USE_YN" },

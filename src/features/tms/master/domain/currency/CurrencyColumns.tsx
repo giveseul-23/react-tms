@@ -1,8 +1,6 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 
-export const MAIN_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
     headerName: "LBL_CURRENCY_CODE",
@@ -13,11 +11,7 @@ export const MAIN_COLUMN_DEFS = (
   {
     headerName: "LBL_CURR_RDNG_RCD",
     field: "CURR_RDNG_RCD",
-    cellRenderer: (params: any) => {
-      const code = params.value;
-      const label = codeMap.currRdngRcd?.[String(code)] ?? code;
-      return <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>;
-    },
+    codeKey: "currRdngRcd",
   },
   { headerName: "LBL_DSPL_ORD", field: "DSPLY_SEQ" },
   ...makeAuditColumns({

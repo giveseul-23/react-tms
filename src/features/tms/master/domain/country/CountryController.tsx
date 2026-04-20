@@ -101,7 +101,7 @@ export function useCountryController({
     add: true,
     save: true,
     excel: {
-      columns: MAIN_COLUMN_DEFS({}),
+      columns: MAIN_COLUMN_DEFS,
       menuName: "국가관리",
       fetchFn: () => countryApi.getCountryList(menuCd, filtersRef.current),
       rows: model.gridData.rows,
@@ -113,7 +113,7 @@ export function useCountryController({
     add: true,
     save: true,
     excel: {
-      columns: MAIN_COLUMN_DEFS({}),
+      columns: MAIN_COLUMN_DEFS,
       menuName: "국가관리",
       fetchFn: () => countryApi.getStateList(menuCd, filtersRef.current),
       rows: model.gridData.rows,
@@ -125,7 +125,7 @@ export function useCountryController({
     add: true,
     save: true,
     excel: {
-      columns: MAIN_COLUMN_DEFS({}),
+      columns: MAIN_COLUMN_DEFS,
       menuName: "국가관리",
       fetchFn: () => countryApi.getZipList(menuCd, filtersRef.current),
       rows: model.gridData.rows,
@@ -137,7 +137,7 @@ export function useCountryController({
     add: true,
     save: true,
     excel: {
-      columns: MAIN_COLUMN_DEFS({}),
+      columns: MAIN_COLUMN_DEFS,
       menuName: "국가관리",
       fetchFn: () => countryApi.getCityList(menuCd, filtersRef.current),
       rows: model.gridData.rows,
