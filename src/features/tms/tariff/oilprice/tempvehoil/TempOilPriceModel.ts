@@ -39,7 +39,7 @@ export function useTempOilPriceModel() {
   const [layout, setLayout] = useState<LayoutType>("side");
 
   // ── 페이징 ────────────────────────────────────────────────────
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(500);
 
   // ── 탭 A: 유가등록 ────────────────────────────────────────────
   // 좌측 — 물류운영그룹 목록

@@ -14,7 +14,7 @@ export function useInTrnstVehCtrlModel() {
   // 레이아웃: 지도는 좌/우 배치가 자연스러우므로 기본 side
   const [layout, setLayout] = useState<LayoutType>("side");
 
-  const [pageSize, setPageSize] = useState(50);
+  const [pageSize, setPageSize] = useState(500);
 
   const [gridData, setGridData] = useState<GridData>({
     rows: [],

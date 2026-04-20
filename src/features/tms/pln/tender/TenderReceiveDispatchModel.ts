@@ -52,7 +52,7 @@ export function useTenderReceiveDispatchModel() {
   const [layout, setLayout] = useState<LayoutType>("side");
 
   // ── 페이징 (센차: pageSize = Util.rowPerPage) ────────────────
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(500);
 
   // ── 메인 그리드 데이터 (센차: mainInfo store) ────────────────
   const [gridData, setGridData] = useState<GridData>({

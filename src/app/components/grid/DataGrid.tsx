@@ -215,7 +215,7 @@ export default function DataGrid<TRow>({
   actions,
   subTitle,
   pagination = false,
-  pageSize = 20,
+  pageSize = 500,
   onRowSelected,
   renderRightGrid,
   disableAutoSize,

@@ -39,7 +39,7 @@ export function useRateModel() {
   const [layout, setLayout] = useState<LayoutType>("side");
 
   // ── 페이징 ────────────────────────────────────────────────────
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(500);
 
   // ── 메인 그리드 ───────────────────────────────────────────────
   const [gridData, setGridData] = useState<GridData>(EMPTY_GRID);

@@ -38,7 +38,7 @@ export function useLgstgrpOprConfigMstModel() {
   }, []);
 
   // ── 페이징 ─────────────────────────────────────────────────────
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(500);
 
   // ── Top-left: 플류운영그룹운영설정 ─────────────────────────────
   const [configData, setConfigData] = useState<GridData>(EMPTY_GRID);

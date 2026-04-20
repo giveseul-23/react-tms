@@ -20,7 +20,7 @@ export type DetailMode = "view" | "edit" | "new";
 
 export function useVehicleMgmtModel() {
   // ── 페이징 ───────────────────────────────────────────────────
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(500);
 
   // ── 메인 그리드 데이터 ───────────────────────────────────────
   const [gridData, setGridData] = useState<GridData>({
