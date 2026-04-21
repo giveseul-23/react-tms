@@ -92,27 +92,20 @@ export function useDriveHistoryController({
           }));
           map.drawTrace(tracePoints);
 
-          // stop markers — 0=출발(초록) / 중간=순번(노랑) / 마지막=도착(빨강)
+          // stop markers — 핀 내부: 출발=S / 도착=E / 경유지=1,2,3,... / 라벨=LOC_NM
           const routeRows = extractRows(routeRes);
           const stops: StopMarker[] = routeRows.map((r: any, i: number) => {
-            let label: string;
             let kind: "start" | "end" | "via";
-            if (i === 0) {
-              label = "출발";
-              kind = "start";
-            } else if (i === routeRows.length - 1) {
-              label = "도착";
-              kind = "end";
-            } else {
-              label = String(i);
-              kind = "via";
-            }
+            if (i === 0) kind = "start";
+            else if (i === routeRows.length - 1) kind = "end";
+            else kind = "via";
+            const locNm = r.LOC_NM ?? "";
             return {
               id: `stop-${i}`,
               lat: Number(r.LAT),
               lon: Number(r.LON),
-              label,
-              title: r.LOC_NM ?? label,
+              // label: locNm,
+              title: locNm,
               kind,
             };
           });

@@ -118,27 +118,6 @@ const RED_DOT_ICON =
     '<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="#FF0000"/></svg>',
   );
 
-/** 출발 핀 — 초록 물방울형 */
-const START_PIN_ICON =
-  "data:image/svg+xml;charset=UTF-8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="#16a34a" stroke="#FFFFFF" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="#FFFFFF"/></svg>',
-  );
-
-/** 도착 핀 — 빨강 물방울형 */
-const END_PIN_ICON =
-  "data:image/svg+xml;charset=UTF-8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="#dc2626" stroke="#FFFFFF" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="#FFFFFF"/></svg>',
-  );
-
-/** 경유지 핀 — 노랑 물방울형 */
-const VIA_PIN_ICON =
-  "data:image/svg+xml;charset=UTF-8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="#eab308" stroke="#FFFFFF" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="#FFFFFF"/></svg>',
-  );
-
 /**
  * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
  * - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 트럭 정중앙 배치
@@ -152,6 +131,15 @@ const PIN_H = PIN_CORE_H + OUTLINE_PAD * 2;
 const TIP_Y = PIN_CORE_H + OUTLINE_PAD; // SVG 좌표계에서 핀 뾰족한 끝의 y
 const LABEL_H = 16;
 const LABEL_GAP = 4;
+/** 마커 전체 렌더 크기 축소 비율 (SVG 내부 좌표는 그대로, 최종 iconSize 만 축소) */
+const MARKER_SCALE = 0.78;
+
+/** 라벨 배지 폭 계산 — 한글(CJK) 은 약 13px, ASCII 는 약 7px 로 가정 */
+function calcLabelWidth(labelText: string): number {
+  const cjk = (labelText.match(/[ᄀ-ᇿ㄰-㆏가-힯぀-ゟ゠-ヿ一-鿿]/g) || []).length;
+  const other = labelText.length - cjk;
+  return Math.max(40, cjk * 13 + other * 7 + 12);
+}
 
 function buildTruckIconUrl(
   color: string,
@@ -164,9 +152,7 @@ function buildTruckIconUrl(
   anchorY: number;
 } {
   const hasLabel = !!labelText;
-  const labelWidth = hasLabel
-    ? Math.max(40, (labelText as string).length * 7 + 10)
-    : 0;
+  const labelWidth = hasLabel ? calcLabelWidth(labelText as string) : 0;
   const width = Math.max(PIN_W, labelWidth);
   const height = hasLabel ? PIN_H + LABEL_GAP + LABEL_H : PIN_H;
   const pinX = (width - PIN_W) / 2;
@@ -176,7 +162,7 @@ function buildTruckIconUrl(
   <g transform="translate(${width / 2} ${PIN_H + LABEL_GAP + LABEL_H / 2})">
     <rect x="-${labelWidth / 2}" y="-${LABEL_H / 2}" width="${labelWidth}" height="${LABEL_H}" rx="4"
           fill="${color}" fill-opacity="0.2" />
-    <text x="0" y="3.5" text-anchor="middle" font-size="12" font-weight="600" fill="#222">
+    <text x="0" y="3.5" text-anchor="middle" font-size="14" font-weight="600" fill="#222">
       ${escapeXml(labelText as string)}
     </text>
   </g>`
@@ -212,10 +198,76 @@ function buildTruckIconUrl(
 
   return {
     url: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`,
-    width,
-    height,
-    anchorX: width / 2,
-    anchorY: TIP_Y, // 외곽선 바깥 여백 제외한 실제 핀 끝점
+    width: width * MARKER_SCALE,
+    height: height * MARKER_SCALE,
+    anchorX: (width / 2) * MARKER_SCALE,
+    anchorY: TIP_Y * MARKER_SCALE, // 외곽선 바깥 여백 제외한 실제 핀 끝점
+  };
+}
+
+/**
+ * 정차지(출발/도착/경유지) 핀 아이콘 — 트럭 핀과 동일한 형태에서
+ * 내부 아이콘만 문자/숫자(S, E, 1, 2, ...)로 교체하고 아래에 LOC_NM 라벨을 배치한다.
+ */
+function buildStopIconUrl(
+  color: string,
+  innerText: string,
+  labelText?: string,
+): {
+  url: string;
+  width: number;
+  height: number;
+  anchorX: number;
+  anchorY: number;
+} {
+  const hasLabel = !!labelText;
+  const labelWidth = hasLabel ? calcLabelWidth(labelText as string) : 0;
+  const width = Math.max(PIN_W, labelWidth);
+  const height = hasLabel ? PIN_H + LABEL_GAP + LABEL_H : PIN_H;
+  const pinX = (width - PIN_W) / 2;
+
+  const labelSvg = hasLabel
+    ? `
+  <g transform="translate(${width / 2} ${PIN_H + LABEL_GAP + LABEL_H / 2})">
+    <rect x="-${labelWidth / 2}" y="-${LABEL_H / 2}" width="${labelWidth}" height="${LABEL_H}" rx="4"
+          fill="${color}" fill-opacity="0.2" />
+    <text x="0" y="3.5" text-anchor="middle" font-size="14" font-weight="600" fill="#222">
+      ${escapeXml(labelText as string)}
+    </text>
+  </g>`
+    : "";
+
+  // 한 글자(S/E, 한 자리 숫자)는 크게, 두 자리 숫자는 작게
+  const innerFontSize =
+    innerText.length <= 1 ? 18 : innerText.length === 2 ? 14 : 13;
+
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <g transform="translate(${pinX + OUTLINE_PAD} ${OUTLINE_PAD})">
+    <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
+          fill="none"
+          stroke="${color}" stroke-width="1"
+          stroke-linejoin="round"
+          transform="translate(18 21) scale(1.18) translate(-18 -21)"/>
+    <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
+          fill="${color}" filter="url(#shadow)"/>
+    <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+          font-size="${innerFontSize}" font-weight="700" fill="#FFFFFF">${escapeXml(innerText)}</text>
+  </g>
+  ${labelSvg}
+</svg>`.trim();
+
+  return {
+    url: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`,
+    width: width * MARKER_SCALE,
+    height: height * MARKER_SCALE,
+    anchorX: (width / 2) * MARKER_SCALE,
+    anchorY: TIP_Y * MARKER_SCALE,
   };
 }
 
@@ -360,17 +412,16 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
     }, []);
 
     const effectiveKey = useMemo(
-      () =>
-        appKey ||
-        (import.meta as any).env?.VITE_TMAP_APP_KEY ||
-        "",
+      () => appKey || (import.meta as any).env?.VITE_TMAP_APP_KEY || "",
       [appKey],
     );
 
     // ── 지도 초기화 ─────────────────────────────────────────────
     useEffect(() => {
       if (!effectiveKey) {
-        setError("TMAP appKey 가 설정되지 않았습니다. VITE_TMAP_APP_KEY 환경변수를 확인하세요.");
+        setError(
+          "TMAP appKey 가 설정되지 않았습니다. VITE_TMAP_APP_KEY 환경변수를 확인하세요.",
+        );
         return;
       }
 
@@ -542,21 +593,21 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
 
           if (valid.length === 0) return;
 
-          // 시작/끝 핀 — 서로 다른 아이콘 (출발:초록 / 도착:빨강)
+          // 시작/끝 핀 — 트럭 핀과 동일한 스타일(출발:초록 S / 도착:빨강 E)
+          // title 은 생략 — 출발/도착은 hover 툴팁 미표시
           const makeEndpointMarker = (
             p: TracePoint,
             label: string,
-            iconUrl: string,
+            color: string,
+            innerText: string,
           ) => {
-            const labelHtml = `<span style="background:#a8c4ef;color:#000;font-weight:bold;padding:2px 6px;border-radius:5px;border:1px solid #000;">${escapeXml(label)}</span>`;
+            const built = buildStopIconUrl(color, innerText, label);
             return new Tmapv2.Marker({
               position: new Tmapv2.LatLng(p.lat, p.lon),
               map,
-              title: label,
-              label: labelHtml,
-              icon: iconUrl,
-              iconSize: new Tmapv2.Size(28, 36),
-              iconAnchor: new Tmapv2.Point(14, 36),
+              icon: built.url,
+              iconSize: new Tmapv2.Size(built.width, built.height),
+              iconAnchor: new Tmapv2.Point(built.anchorX, built.anchorY),
             });
           };
           // 거쳐간 점 — 선(5px)보다 작은 빨간 원(6x6, 가시 4px)
@@ -575,11 +626,16 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           }
           // 시작/끝 핀 (위 레이어)
           traceAuxMarkersRef.current.push(
-            makeEndpointMarker(valid[0], "출발", START_PIN_ICON),
+            makeEndpointMarker(valid[0], "출발", "#16a34a", "S"),
           );
           if (valid.length > 1) {
             traceAuxMarkersRef.current.push(
-              makeEndpointMarker(valid[valid.length - 1], "도착", END_PIN_ICON),
+              makeEndpointMarker(
+                valid[valid.length - 1],
+                "도착",
+                "#dc2626",
+                "E",
+              ),
             );
 
             // polyline — 검정
@@ -601,7 +657,9 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
             map.setCenter(new Tmapv2.LatLng(valid[0].lat, valid[0].lon));
           } else {
             const bounds = new Tmapv2.LatLngBounds();
-            valid.forEach((p) => bounds.extend(new Tmapv2.LatLng(p.lat, p.lon)));
+            valid.forEach((p) =>
+              bounds.extend(new Tmapv2.LatLng(p.lat, p.lon)),
+            );
             map.fitBounds(bounds, 100);
           }
         },
@@ -636,6 +694,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           stopMarkerObjsRef.current.forEach((obj) => obj.setMap(null));
           stopMarkerObjsRef.current.clear();
 
+          let viaSeq = 0;
           stops.forEach((s) => {
             if (
               !Number.isFinite(s.lat) ||
@@ -646,26 +705,45 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
             ) {
               return;
             }
-            const labelHtml = s.label
-              ? `<span style="background:#a8c4ef;color:#000;font-weight:bold;padding:2px 6px;border-radius:5px;border:1px solid #000;">${escapeXml(s.label)}</span>`
-              : undefined;
 
-            // kind 별 아이콘 결정
-            let iconUrl: string | undefined;
-            if (s.kind === "start") iconUrl = START_PIN_ICON;
-            else if (s.kind === "end") iconUrl = END_PIN_ICON;
-            else if (s.kind === "via") iconUrl = VIA_PIN_ICON;
+            // kind 별 색상 + 핀 내부 텍스트(출발=S, 도착=E, 경유지=1,2,3,...)
+            let color: string;
+            let innerText: string;
+            if (s.kind === "start") {
+              color = "#16a34a";
+              innerText = "S";
+            } else if (s.kind === "end") {
+              color = "#dc2626";
+              innerText = "E";
+            } else if (s.kind === "via") {
+              viaSeq += 1;
+              color = "#eab308";
+              innerText = String(viaSeq);
+            } else {
+              // kind 미지정 — Tmap 기본 핀 유지
+              const marker = new Tmapv2.Marker({
+                position: new Tmapv2.LatLng(s.lat, s.lon),
+                map,
+                title: s.title ?? s.label ?? s.id,
+                label: s.label
+                  ? `<span style="background:#a8c4ef;color:#000;font-weight:bold;padding:2px 6px;border-radius:5px;border:1px solid #000;">${escapeXml(s.label)}</span>`
+                  : undefined,
+              });
+              stopMarkerObjsRef.current.set(s.id, marker);
+              return;
+            }
 
+            const built = buildStopIconUrl(color, innerText, s.label);
             const markerOpts: any = {
               position: new Tmapv2.LatLng(s.lat, s.lon),
               map,
-              title: s.title ?? s.label ?? s.id,
-              label: labelHtml,
+              icon: built.url,
+              iconSize: new Tmapv2.Size(built.width, built.height),
+              iconAnchor: new Tmapv2.Point(built.anchorX, built.anchorY),
             };
-            if (iconUrl) {
-              markerOpts.icon = iconUrl;
-              markerOpts.iconSize = new Tmapv2.Size(28, 36);
-              markerOpts.iconAnchor = new Tmapv2.Point(14, 36);
+            // 출발/도착은 hover 툴팁 미표시 — 경유지만 title 부여
+            if (s.kind === "via") {
+              markerOpts.title = s.title ?? s.label ?? s.id;
             }
             const marker = new Tmapv2.Marker(markerOpts);
             stopMarkerObjsRef.current.set(s.id, marker);
@@ -704,9 +782,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
             return;
           }
           const bounds = new Tmapv2.LatLngBounds();
-          valid.forEach((p) =>
-            bounds.extend(new Tmapv2.LatLng(p.lat, p.lon)),
-          );
+          valid.forEach((p) => bounds.extend(new Tmapv2.LatLng(p.lat, p.lon)));
           map.fitBounds(bounds, 100);
         },
       }),

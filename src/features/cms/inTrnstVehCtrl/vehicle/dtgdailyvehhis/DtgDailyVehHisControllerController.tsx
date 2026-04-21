@@ -35,10 +35,6 @@ export function useDtgDailyVehHisControllerController({
     (data: any) => {
       model.setGridData(data);
       model.setSelectedRow(null);
-      // // 조회 직후 마커 영역에 맞게 지도 fit
-      // requestAnimationFrame(() => {
-      //   model.mapRef.current?.fitMarkers();
-      // });
     },
     [model],
   );

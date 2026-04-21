@@ -106,7 +106,7 @@ export default function InTrnstVehCtrl() {
         paramMode: "RAW",
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
-      defaultSizes={[30, 70]}
+      defaultSizes={[20, 80]}
       layoutToggle={{
         layout: model.layout,
         onToggle: () =>
