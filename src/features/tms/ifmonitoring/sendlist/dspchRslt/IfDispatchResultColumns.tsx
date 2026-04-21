@@ -1,17 +1,16 @@
+import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+
 export const MAIN_COLUMN_DEFS = [
-  { headerName: "No" },
-  { headerName: "LBL_SND_DT", field: "SND_DT" },
-  { headerName: "LBL_IF_ID", field: "IF_ID" },
-  { headerName: "LBL_IF_TYPE", field: "IF_TYPE", codeKey: "ifType" },
-  { headerName: "LBL_USER_REPROCESS_YN", field: "USER_REPROCESS_YN" },
-  { headerName: "LBL_IF_PRC_STS", field: "IF_PRC_STS", codeKey: "ifPrcSts" },
-  { headerName: "LBL_PRC_MSG", field: "PRC_MSG" },
-  { headerName: "LBL_IMS", field: "IMS" },
-  { headerName: "LBL_ORD_NO", field: "ORD_NO" },
-  { headerName: "LBL_DLV_DOC_LINE", field: "DLV_DOC_LINE" },
-  { headerName: "LBL_ORD_TP", field: "ORD_TP", codeKey: "ordTp" },
-  { headerName: "LBL_DLV_DT", field: "DLV_DT" },
-  { headerName: "LBL_DSPCH_NO", field: "DSPCH_NO" },
-  { headerName: "LBL_TPCO_CD", field: "TPCO_CD" },
-  { headerName: "LBL_TPCO_NM", field: "TPCO_NM" },
+  { headerName: "LBL_ITM_CD", field: "CUST_ITEM_CD" },
+  { headerName: "LBL_ITM_NM", field: "CUST_ITEM_NM" },
+  { headerName: "LBL_QTY", field: "PLN_QTY" },
+  { headerName: "LBL_PLANT_CD", field: "PLANT_CD" },
+  { headerName: "LBL_TMS_IF_PRCS_ID", field: "TMS_IF_PRCS_ID" },
+  { headerName: "LBL_TMS_IF_PRCS_START_DTTM", field: "TMS_IF_PRCS_START_DTTM" },
+  { headerName: "LBL_TMS_IF_PRCS_END_DTTM", field: "TMS_IF_PRCS_END_DTTM" },
+  ...makeAuditColumns({
+    insertPerson: true,
+    updatePerson: true,
+    updateTime: true,
+  }),
 ];
