@@ -34,6 +34,18 @@ export type TmapMarker = {
   onClick?: () => void;
 };
 
+export type TracePoint = { lat: number; lon: number };
+
+export type StopMarker = {
+  id: string;
+  lat: number;
+  lon: number;
+  /** 핀 옆 라벨 (예: "출발", "1", "도착") */
+  label?: string;
+  /** hover 시 툴팁 */
+  title?: string;
+};
+
 export type TmapViewHandle = {
   /** 특정 좌표로 지도 중심 이동 */
   panTo: (lat: number, lon: number, zoom?: number) => void;
@@ -41,6 +53,24 @@ export type TmapViewHandle = {
   fitMarkers: () => void;
   /** 원본 map 객체 접근 */
   getMap: () => any | null;
+  // ── 공통 trace API (legacy AbstractMap/TMap 대응) ────────────
+  /** Polyline(주행경로) 그리기 — 기존 trace 는 교체 */
+  drawTrace: (points: TracePoint[], options?: TraceOptions) => void;
+  /** drawTrace 로 그린 Polyline 제거 */
+  clearTrace: () => void;
+  /** trace 포인트 bounds 로 zoom */
+  fitTrace: () => void;
+  /** 정차지(출발/경유/도착) 핀 그리기 — 기존 stop 은 교체 */
+  drawStopMarkers: (stops: StopMarker[]) => void;
+  /** drawStopMarkers 로 그린 핀 제거 */
+  clearStopMarkers: () => void;
+  /** markers + trace + stops 전부를 포함하는 영역으로 zoom (legacy zoomToExtentMap) */
+  fitAll: () => void;
+};
+
+export type TraceOptions = {
+  strokeColor?: string;
+  strokeWeight?: number;
 };
 
 export interface TmapViewProps {
@@ -78,6 +108,27 @@ function escapeXml(s: string): string {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
 }
+
+/** 주행 경로 중간 점 — 빨간 작은 원 (6x6, 선보다 작게) */
+const RED_DOT_ICON =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="#FF0000"/></svg>',
+  );
+
+/** 출발 핀 — 초록 물방울형 */
+const START_PIN_ICON =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="#16a34a" stroke="#FFFFFF" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="#FFFFFF"/></svg>',
+  );
+
+/** 도착 핀 — 빨강 물방울형 */
+const END_PIN_ICON =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="#dc2626" stroke="#FFFFFF" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="#FFFFFF"/></svg>',
+  );
 
 /**
  * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
@@ -269,6 +320,11 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
     const divRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<any>(null);
     const markerObjsRef = useRef<Map<string, any>>(new Map());
+    const tracePolylineRef = useRef<any>(null);
+    const tracePointsRef = useRef<TracePoint[]>([]);
+    /** drawTrace 가 자동 추가하는 보조 마커 (시작/끝 핀 + 중간 점) */
+    const traceAuxMarkersRef = useRef<any[]>([]);
+    const stopMarkerObjsRef = useRef<Map<string, any>>(new Map());
     const [error, setError] = useState<string | null>(null);
     const [loaded, setLoaded] = useState(false);
     // 현재 테마 primary 색상 (MutationObserver 로 <html> 변화 감지 시 갱신)
@@ -451,6 +507,186 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           map.fitBounds(bounds);
         },
         getMap: () => mapRef.current,
+        drawTrace: (points, options) => {
+          const map = mapRef.current;
+          const Tmapv2 = window.Tmapv2;
+          if (!map || !Tmapv2) return;
+
+          // 유효 좌표만
+          const valid = points.filter(
+            (p) =>
+              Number.isFinite(p.lat) &&
+              Number.isFinite(p.lon) &&
+              Math.abs(p.lat) <= 90 &&
+              Math.abs(p.lon) <= 180 &&
+              !(p.lat === 0 && p.lon === 0),
+          );
+          tracePointsRef.current = valid;
+
+          // 기존 polyline + 보조 마커 제거
+          if (tracePolylineRef.current) {
+            tracePolylineRef.current.setMap(null);
+            tracePolylineRef.current = null;
+          }
+          traceAuxMarkersRef.current.forEach((m) => m.setMap(null));
+          traceAuxMarkersRef.current = [];
+
+          if (valid.length === 0) return;
+
+          // 시작/끝 핀 — 서로 다른 아이콘 (출발:초록 / 도착:빨강)
+          const makeEndpointMarker = (
+            p: TracePoint,
+            label: string,
+            iconUrl: string,
+          ) => {
+            const labelHtml = `<span style="background:#a8c4ef;color:#000;font-weight:bold;padding:2px 6px;border-radius:5px;border:1px solid #000;">${escapeXml(label)}</span>`;
+            return new Tmapv2.Marker({
+              position: new Tmapv2.LatLng(p.lat, p.lon),
+              map,
+              title: label,
+              label: labelHtml,
+              icon: iconUrl,
+              iconSize: new Tmapv2.Size(28, 36),
+              iconAnchor: new Tmapv2.Point(14, 36),
+            });
+          };
+          // 거쳐간 점 — 선(5px)보다 작은 빨간 원(6x6, 가시 4px)
+          const makeTracePointMarker = (p: TracePoint) =>
+            new Tmapv2.Marker({
+              position: new Tmapv2.LatLng(p.lat, p.lon),
+              map,
+              icon: RED_DOT_ICON,
+              iconSize: new Tmapv2.Size(6, 6),
+              iconAnchor: new Tmapv2.Point(3, 3),
+            });
+
+          // 중간 포인트 먼저 (아래 레이어)
+          for (let i = 1; i < valid.length - 1; i++) {
+            traceAuxMarkersRef.current.push(makeTracePointMarker(valid[i]));
+          }
+          // 시작/끝 핀 (위 레이어)
+          traceAuxMarkersRef.current.push(
+            makeEndpointMarker(valid[0], "출발", START_PIN_ICON),
+          );
+          if (valid.length > 1) {
+            traceAuxMarkersRef.current.push(
+              makeEndpointMarker(valid[valid.length - 1], "도착", END_PIN_ICON),
+            );
+
+            // polyline — 검정
+            const path = valid.map((p) => new Tmapv2.LatLng(p.lat, p.lon));
+            tracePolylineRef.current = new Tmapv2.Polyline({
+              path,
+              strokeColor: options?.strokeColor ?? "#000000",
+              strokeWeight: options?.strokeWeight ?? 5,
+              strokeStyle: "solid",
+              map,
+              direction: true,
+              directionColor: "#ffffff",
+              directionOpacity: 1,
+            });
+          }
+
+          // 자동 fit
+          if (valid.length === 1) {
+            map.setCenter(new Tmapv2.LatLng(valid[0].lat, valid[0].lon));
+          } else {
+            const bounds = new Tmapv2.LatLngBounds();
+            valid.forEach((p) => bounds.extend(new Tmapv2.LatLng(p.lat, p.lon)));
+            map.fitBounds(bounds, 100);
+          }
+        },
+        clearTrace: () => {
+          if (tracePolylineRef.current) {
+            tracePolylineRef.current.setMap(null);
+            tracePolylineRef.current = null;
+          }
+          traceAuxMarkersRef.current.forEach((m) => m.setMap(null));
+          traceAuxMarkersRef.current = [];
+          tracePointsRef.current = [];
+        },
+        fitTrace: () => {
+          const map = mapRef.current;
+          const Tmapv2 = window.Tmapv2;
+          const pts = tracePointsRef.current;
+          if (!map || !Tmapv2 || pts.length === 0) return;
+          if (pts.length === 1) {
+            map.setCenter(new Tmapv2.LatLng(pts[0].lat, pts[0].lon));
+            return;
+          }
+          const bounds = new Tmapv2.LatLngBounds();
+          pts.forEach((p) => bounds.extend(new Tmapv2.LatLng(p.lat, p.lon)));
+          map.fitBounds(bounds, 100);
+        },
+        drawStopMarkers: (stops) => {
+          const map = mapRef.current;
+          const Tmapv2 = window.Tmapv2;
+          if (!map || !Tmapv2) return;
+
+          // 기존 stop 마커 전부 제거
+          stopMarkerObjsRef.current.forEach((obj) => obj.setMap(null));
+          stopMarkerObjsRef.current.clear();
+
+          stops.forEach((s) => {
+            if (
+              !Number.isFinite(s.lat) ||
+              !Number.isFinite(s.lon) ||
+              Math.abs(s.lat) > 90 ||
+              Math.abs(s.lon) > 180 ||
+              (s.lat === 0 && s.lon === 0)
+            ) {
+              return;
+            }
+            const labelHtml = s.label
+              ? `<span style="background:#a8c4ef;color:#000;font-weight:bold;padding:2px 6px;border-radius:5px;border:1px solid #000;">${escapeXml(s.label)}</span>`
+              : undefined;
+            const marker = new Tmapv2.Marker({
+              position: new Tmapv2.LatLng(s.lat, s.lon),
+              map,
+              title: s.title ?? s.label ?? s.id,
+              label: labelHtml,
+            });
+            stopMarkerObjsRef.current.set(s.id, marker);
+          });
+        },
+        clearStopMarkers: () => {
+          stopMarkerObjsRef.current.forEach((obj) => obj.setMap(null));
+          stopMarkerObjsRef.current.clear();
+        },
+        fitAll: () => {
+          const map = mapRef.current;
+          const Tmapv2 = window.Tmapv2;
+          if (!map || !Tmapv2) return;
+          const pts: { lat: number; lon: number }[] = [
+            ...markers.map((m) => ({ lat: m.lat, lon: m.lon })),
+            ...tracePointsRef.current,
+          ];
+          stopMarkerObjsRef.current.forEach((obj) => {
+            const pos = obj.getPosition?.();
+            if (!pos) return;
+            const lat = pos._lat ?? pos.lat?.();
+            const lon = pos._lng ?? pos.lng?.();
+            if (Number.isFinite(lat) && Number.isFinite(lon)) {
+              pts.push({ lat, lon });
+            }
+          });
+          const valid = pts.filter(
+            (p) =>
+              Number.isFinite(p.lat) &&
+              Number.isFinite(p.lon) &&
+              !(p.lat === 0 && p.lon === 0),
+          );
+          if (valid.length === 0) return;
+          if (valid.length === 1) {
+            map.setCenter(new Tmapv2.LatLng(valid[0].lat, valid[0].lon));
+            return;
+          }
+          const bounds = new Tmapv2.LatLngBounds();
+          valid.forEach((p) =>
+            bounds.extend(new Tmapv2.LatLng(p.lat, p.lon)),
+          );
+          map.fitBounds(bounds, 100);
+        },
       }),
       [markers],
     );

@@ -20,7 +20,29 @@ export const driveHistoryApi = {
   // ── 수송중 차량 조회 ────────────────────────────────────────
   getInTrnstVehList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/driveHistoryService/searchGroupedDrivingRecordsByDate",
+      "/driveHistoryService/search",
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload,
+      }),
+    );
+  },
+
+  // ── 배차 실주행 경로(trace) 조회 ────────────────────────────
+  searchDispathTrace(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/traceService/searchDispathTrace",
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload,
+      }),
+    );
+  },
+
+  // ── 배차 정차지(route) 조회 ────────────────────────────────
+  getDlvryRoute(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/mapService/getDlvryRoute",
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,

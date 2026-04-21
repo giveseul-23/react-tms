@@ -6,7 +6,7 @@ export const MAIN_COLUMN_DEFS = () => [
   {
     headerName: "LBL_DT",
     field: "HIS_DATE",
-    fieldType: "date",
+    cellStyle: { textAlign: "center" },
   },
   {
     headerName: "LBL_DRIVING_HIS_STS",

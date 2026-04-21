@@ -27,4 +27,15 @@ export const dtgDailyVehHisControllerApi = {
       }),
     );
   },
+
+  // ── 일일 운행이력 상세(주행경로) 조회 ───────────────────────
+  searchDtgDailyHistory(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/driveHistoryService/searchDtgDailyHistory",
+      withSession({
+        MENU_CD: this.MENU_CD,
+        ...payload,
+      }),
+    );
+  },
 };

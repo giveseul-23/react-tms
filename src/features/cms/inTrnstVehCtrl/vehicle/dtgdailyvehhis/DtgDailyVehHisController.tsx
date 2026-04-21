@@ -79,7 +79,6 @@ export default function InTrnstVehCtrl() {
       pageSize={model.pageSize}
       onPageSizeChange={model.setPageSize}
       onPageChange={(page) => searchRef.current?.(page, false)}
-      actions={ctrl.mainActions}
       onRowClicked={ctrl.handleRowClicked}
       disableAutoSize
     />
