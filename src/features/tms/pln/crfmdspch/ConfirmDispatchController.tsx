@@ -23,19 +23,21 @@ export function useConfirmDispatchController({
   const fetchSubTabs = useCallback(
     (row: any) => {
       if (!row) return;
-      const params = { DSPCH_NO: row.DSPCH_NO };
+      const params = { DSPCH_NO: row.DSPCH_NO, PLN_ID: row.PLN_ID };
       confirmDispatchApi
-        .getOrderList(params)
+        .getShipmentList(params)
         .then((res: any) =>
           model.setOrderRowData(res.data.result ?? res.data.data?.dsOut ?? []),
         );
       confirmDispatchApi
-        .getReceiptList(params)
+        .getPodList(params)
         .then((res: any) =>
-          model.setReceiptRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setReceiptRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       confirmDispatchApi
-        .getReceiptHistoryList(params)
+        .getPodEventLogList(params)
         .then((res: any) =>
           model.setReceiptHistoryRowData(
             res.data.result ?? res.data.data?.dsOut ?? [],
@@ -69,9 +71,15 @@ export function useConfirmDispatchController({
       model.setSelectedOrderRow(row);
       if (!row) return;
       confirmDispatchApi
-        .getOrderItemList({ DSPCH_NO: row.DSPCH_NO, ORD_NO: row.ORD_NO })
+        .getShipmentDetailList({
+          DSPCH_NO: row.DSPCH_NO,
+          SHPM_ID: row.SHPM_ID,
+          PLN_ID: row.PLN_ID,
+        })
         .then((res: any) =>
-          model.setOrderItemRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setOrderItemRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
     },
     [model],
@@ -89,7 +97,8 @@ export function useConfirmDispatchController({
       type: "button",
       key: "입차시각",
       label: "입차시각",
-      onClick: () => doAction(() => confirmDispatchApi.startArrival(filtersRef.current)),
+      onClick: () =>
+        doAction(() => confirmDispatchApi.startArrival(filtersRef.current)),
     },
     {
       type: "dropdown",
@@ -115,7 +124,9 @@ export function useConfirmDispatchController({
       key: "배차확정취소",
       label: "배차확정취소",
       onClick: () =>
-        doAction(() => confirmDispatchApi.cancelConfirmDispatch(filtersRef.current)),
+        doAction(() =>
+          confirmDispatchApi.cancelConfirmDispatch(filtersRef.current),
+        ),
     },
     {
       type: "dropdown",

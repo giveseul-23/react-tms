@@ -18,35 +18,56 @@ export const confirmDispatchApi = {
 
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchList`,
+      `/confirmDispatchService/searchConfirmDispatch`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
-  getOrderList(payload: any) {
+  getShipmentList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchOrder`,
+      `/confirmDispatchService/searchConfirmDispatchShipment`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
-  getOrderItemList(payload: any) {
+  getShipmentDetailList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchOrderItem`,
+      `/confirmDispatchService/searchConfirmDispatchShipmentDetail`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
-  getReceiptList(payload: any) {
+  getPodList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchReceipt`,
+      `/confirmDispatchService/searchPodByDspchNo`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
-  getReceiptHistoryList(payload: any) {
+  getPodEventLogList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchReceiptHistory`,
+      `/confirmDispatchService/searchPodEventLogByDspchNo`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  getAssignAssistList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/confirmDispatchService/searchAssignAssist`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  getUnassignAssistList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/confirmDispatchService/searchUnassignAssist`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  getDockList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/confirmDispatchService/searchDock`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },

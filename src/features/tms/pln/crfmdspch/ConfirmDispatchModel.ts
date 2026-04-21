@@ -50,12 +50,16 @@ export function useConfirmDispatchModel() {
   }, [setSelectedHeaderRowWithRef]);
 
   const { stores } = useCommonStores({
-    dspchPrgSts: { sqlProp: "CODE", keyParam: "DSPCH_PRG_STS" },
-    assignSts: { sqlProp: "CODE", keyParam: "ASSIGN_STS" },
-    ordTp: { sqlProp: "CODE", keyParam: "ORD_TP" },
-    vehOpTp: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
-    rcptIssueSts: { sqlProp: "CODE", keyParam: "RCPT_ISSUE_STS" },
-    rcptIssueTp: { sqlProp: "CODE", keyParam: "RCPT_ISSUE_TP" },
+    dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
+    stopTp: { sqlProp: "CODE", keyParam: "STOP_TP" },
+    shpmOpSts: { sqlProp: "CODE", keyParam: "SHPM_OP_STS" },
+    itmUom: { sqlProp: "CODE", keyParam: "ITM_UOM" },
+    podTcd: { sqlProp: "CODE", keyParam: "POD_TCD" },
+    podOpSts: { sqlProp: "CODE", keyParam: "POD_OP_STS" },
+    dspchPodOpSts: { sqlProp: "CODE", keyParam: "DSPCH_POD_OP_STS" },
+    podLogEvntCd: { sqlProp: "CODE", keyParam: "POD_LOG_EVNT_CD" },
+    vehOpType: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
+    invSys: { sqlProp: "CODE", keyParam: "HARIM_INV_SYS_ID" },
   });
 
   const codeMap = useMemo(() => {
