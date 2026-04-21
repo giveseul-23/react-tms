@@ -18,7 +18,7 @@ export const ifDispatchResultApi = {
 
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/ifDispatchResultService/searchList`,
+      `/ifDispatchResultService/search`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },

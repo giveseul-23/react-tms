@@ -36,8 +36,16 @@ export function useIfDeliveryDocumentModel() {
   }, [setSelectedHeaderRowWithRef]);
 
   const { stores } = useCommonStores({
-    ifPrcSts: { sqlProp: "CODE", keyParam: "IF_PRC_STS" },
-    ifType: { sqlProp: "CODE", keyParam: "IF_TYPE" },
+    interfaceType: { sqlProp: "CODE", keyParam: "IF_TCD" },
+    interfaceStatus: { sqlProp: "CODE", keyParam: "IF_PRCS_STS" },
+    vehicleTransType: { sqlProp: "CODE", keyParam: "TRANS_TCD" },
+    weightType: { sqlProp: "CODE", keyParam: "WGT_TP" },
+    itemTypeCode: { sqlProp: "CODE", keyParam: "ITEM_TCD" },
+    temporatureTypeCode: { sqlProp: "CODE", keyParam: "ITEM_TCD" },
+    itemUom: { sqlProp: "CODE", keyParam: "ITEM_UOM" },
+    interfaceMessage: { sqlProp: "CODE", keyParam: "IF_PRCS_MSG_CD" },
+    ordCreFlag: { sqlProp: "CODE", keyParam: "HARIM_ORD_CRE_TP_CD" },
+    dlvryTp: { sqlProp: "CODE", keyParam: "HARIM_ORD_DLV_TP_CD" },
   });
 
   const codeMap = useMemo(() => {
@@ -68,4 +76,6 @@ export function useIfDeliveryDocumentModel() {
   };
 }
 
-export type IfDeliveryDocumentModel = ReturnType<typeof useIfDeliveryDocumentModel>;
+export type IfDeliveryDocumentModel = ReturnType<
+  typeof useIfDeliveryDocumentModel
+>;

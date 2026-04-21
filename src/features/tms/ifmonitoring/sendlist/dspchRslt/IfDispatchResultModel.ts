@@ -24,8 +24,10 @@ export function useIfDispatchResultModel() {
   const resetSubGrids = useCallback(() => {}, []);
 
   const { stores } = useCommonStores({
-    ifPrcSts: { sqlProp: "CODE", keyParam: "IF_PRC_STS" },
-    ifType: { sqlProp: "CODE", keyParam: "IF_TYPE" },
+    interfaceType: { sqlProp: "CODE", keyParam: "IF_TCD" },
+    interfaceStatus: { sqlProp: "CODE", keyParam: "IF_PRCS_STS" },
+    invSys: { sqlProp: "CODE", keyParam: "HARIM_INV_SYS_ID" },
+    vehGrpCd: { sqlProp: "CODE", keyParam: "VEH_GRP_CD" },
     ordTp: { sqlProp: "CODE", keyParam: "ORD_TP" },
   });
 

@@ -18,14 +18,14 @@ export const ifDeliveryDocumentApi = {
 
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/ifDeliveryDocumentService/searchList`,
+      `/ifDeliveryDocumentService/search`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
   getDetailList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/ifDeliveryDocumentService/searchDetail`,
+      `/ifDeliveryDocumentService/searchInterfaceDetail`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
