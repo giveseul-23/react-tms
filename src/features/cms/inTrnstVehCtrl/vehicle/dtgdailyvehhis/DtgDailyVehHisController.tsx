@@ -22,7 +22,7 @@ import { useDtgDailyVehHisControllerModel } from "./DtgDailyVehHisControllerMode
 import { useDtgDailyVehHisControllerController } from "./DtgDailyVehHisControllerController";
 import { MAIN_COLUMN_DEFS } from "./DtgDailyVehHisControllerColumns";
 
-const MENU_CODE = "MENU_DRIVE_HISTORY";
+const MENU_CODE = "MENU_DAILY_DTG_VEH_HIS";
 
 export default function InTrnstVehCtrl() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -41,10 +41,19 @@ export default function InTrnstVehCtrl() {
   const markers = useMemo<TmapMarker[]>(() => {
     return (model.gridData.rows ?? [])
       .map((row: any) => {
+        // Number(null)===0 이라 null/빈값을 먼저 거르고 숫자 변환
+        if (
+          row?.LAT == null ||
+          row?.LON == null ||
+          row.LAT === "" ||
+          row.LON === ""
+        ) {
+          return null;
+        }
         const lat = Number(row.LAT);
         const lon = Number(row.LON);
         if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-        if (lat === 0 && lon === 0) return null;
+        if (lat === 0 || lon === 0) return null;
         return {
           id: String(row.DSPCH_NO ?? row.VEH_NO ?? `${lat},${lon}`),
           lat,
@@ -72,6 +81,7 @@ export default function InTrnstVehCtrl() {
       onPageChange={(page) => searchRef.current?.(page, false)}
       actions={ctrl.mainActions}
       onRowClicked={ctrl.handleRowClicked}
+      disableAutoSize
     />
   );
 
@@ -92,9 +102,10 @@ export default function InTrnstVehCtrl() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
+        paramMode: "RAW",
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
-      defaultSizes={[45, 55]}
+      defaultSizes={[30, 70]}
       layoutToggle={{
         layout: model.layout,
         onToggle: () =>

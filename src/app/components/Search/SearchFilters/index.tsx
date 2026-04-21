@@ -26,10 +26,14 @@ import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
 
 import { useSearchState } from "./useSearchState";
 import { useModuleDefault } from "./useModuleDefault";
-import { useSearchExecute, type SearchResult } from "./useSearchExecute";
+import {
+  useSearchExecute,
+  type SearchResult,
+  type ParamMode,
+} from "./useSearchExecute";
 import { SearchFieldRenderer } from "./SearchFieldRenderer";
 
-export type { SearchResult };
+export type { SearchResult, ParamMode };
 
 interface SearchFiltersProps {
   meta: readonly SearchMeta[];
@@ -52,6 +56,8 @@ interface SearchFiltersProps {
   /** 모듈 기본값 API 호출 시 다른 검색조건 값을 파라미터로 전달
    *  예: { DIV_CD: "DIV_CD" } → DIV_CD 필드의 현재 값을 API param DIV_CD로 전달 */
   moduleDefaultSearchParams?: Record<string, string>;
+  /** "RAW" 일 때 DYNAMIC_QUERY 대신 SRCH_* 접두 rawFilters를 그대로 fetchFn에 전달 */
+  paramMode?: ParamMode;
 }
 
 export function SearchFilters({
@@ -69,6 +75,7 @@ export function SearchFilters({
   moduleDefaultParams,
   moduleDefaultRemove,
   moduleDefaultSearchParams,
+  paramMode,
 }: SearchFiltersProps) {
   const [open, setOpen] = useState(true);
 
@@ -109,6 +116,7 @@ export function SearchFilters({
     excludeKeysRef,
     computeTotalCount,
     searchRef,
+    paramMode,
   });
 
   return (

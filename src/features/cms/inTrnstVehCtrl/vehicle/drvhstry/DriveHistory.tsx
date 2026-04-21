@@ -22,7 +22,7 @@ import { useDriveHistoryModel } from "./DriveHistoryModel";
 import { useDriveHistoryController } from "./DriveHistoryController";
 import { MAIN_COLUMN_DEFS } from "./DriveHistoryColumns";
 
-const MENU_CODE = "MENU_DAILY_DTG_VEH_HIS";
+const MENU_CODE = "MENU_DRIVE_HISTORY";
 
 export default function InTrnstVehCtrl() {
   const { meta, loading } = useSearchMeta(MENU_CODE);

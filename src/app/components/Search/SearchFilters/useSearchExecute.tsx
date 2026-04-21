@@ -27,6 +27,8 @@ export type SearchResult = {
   limit: number;
 };
 
+export type ParamMode = "DYNAMIC_QUERY" | "RAW";
+
 interface UseSearchExecuteParams {
   meta: readonly SearchMeta[];
   searchState: SearchState;
@@ -38,6 +40,9 @@ interface UseSearchExecuteParams {
   excludeKeysRef?: React.MutableRefObject<Set<string>>;
   computeTotalCount?: (rows: any[]) => number;
   searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
+  /** "DYNAMIC_QUERY"(기본): { DYNAMIC_QUERY, MENU_CD, page, limit, ...extraParams }
+   *  "RAW": { ...rawFilters(SRCH_* 맵), page, limit, ...extraParams } */
+  paramMode?: ParamMode;
 }
 
 export function useSearchExecute({
@@ -51,6 +56,7 @@ export function useSearchExecute({
   excludeKeysRef,
   computeTotalCount,
   searchRef,
+  paramMode = "DYNAMIC_QUERY",
 }: UseSearchExecuteParams) {
   const { openPopup, closePopup } = usePopup();
   const [searching, setSearching] = useState(false);
@@ -73,6 +79,14 @@ export function useSearchExecute({
             return (
               !searchState[`${m.key}_FRM`]?.value ||
               !searchState[`${m.key}_TO`]?.value
+            );
+          }
+          if (m.type === "POPUP") {
+            // SearchFieldRenderer와 동일 규칙: baseKey = m.key.replace("_CD","")
+            const baseKey = m.key.replace("_CD", "");
+            return (
+              !searchState[`${baseKey}_CD`]?.value ||
+              !searchState[`${baseKey}_NM`]?.value
             );
           }
           return !searchState[m.key]?.value;
@@ -112,55 +126,84 @@ export function useSearchExecute({
       const filteredConditions = conditions.filter(Boolean);
       const whereClause = "1=1" + filteredConditions.join("");
 
-      const params: Record<string, unknown> = {
-        DYNAMIC_QUERY: whereClause,
-        MENU_CD: "test",
-        page: targetPage,
-        limit: limitRef.current,
-        ...extraParams,
-      };
+      // ── rawFilters(SRCH_* 접두 맵) 빌드 ─────────────────────
+      // 네이밍: DSPCH.DIV_CD → SRCH_DSPCH_DIV_CD (dot → _, SRCH_ 접두)
+      const dateKeys = new Set<string>();
+      meta.forEach((m) => {
+        if (m.type === "YMD" || m.type === "YMDT") {
+          if (m.mode === "N") {
+            dateKeys.add(m.key);
+          } else {
+            dateKeys.add(`${m.key}_FRM`);
+            dateKeys.add(`${m.key}_TO`);
+          }
+        }
+      });
+
+      const rawFilters: Record<string, string> = {};
+      Object.values(searchState).forEach((v) => {
+        if (v.value != null && v.value !== "" && v.value !== "ALL") {
+          const key = `SRCH_${v.key.replace(/\./g, "_")}`;
+          // 날짜 파라미터는 '-' 제거
+          rawFilters[key] = dateKeys.has(v.key)
+            ? String(v.value).replace(/-/g, "")
+            : String(v.value);
+        }
+      });
+
+      if (rawFiltersRef) rawFiltersRef.current = rawFilters;
+
+      // ── fetchFn에 전달할 params 조립 ────────────────────────
+      const params: Record<string, unknown> =
+        paramMode === "RAW"
+          ? {
+              ...rawFilters,
+              page: targetPage,
+              limit: limitRef.current,
+              ...extraParams,
+            }
+          : {
+              DYNAMIC_QUERY: whereClause,
+              MENU_CD: "test",
+              page: targetPage,
+              limit: limitRef.current,
+              ...extraParams,
+            };
 
       if (filtersRef) {
-        filtersRef.current = {
-          DYNAMIC_QUERY: whereClause,
-          MENU_CD: "test",
-          ...extraParams,
-        };
-      }
-
-      // ── rawFiltersRef: 개별 key-value 원본 ──────────────────
-      // 네이밍: DSPCH.DIV_CD → SRCH_DSPCH_DIV_CD (dot → _, SRCH_ 접두)
-      if (rawFiltersRef) {
-        // 날짜 키 집합 (YMD/YMDT의 _FRM/_TO 및 단일키)
-        const dateKeys = new Set<string>();
-        meta.forEach((m) => {
-          if (m.type === "YMD" || m.type === "YMDT") {
-            if (m.mode === "N") {
-              dateKeys.add(m.key);
-            } else {
-              dateKeys.add(`${m.key}_FRM`);
-              dateKeys.add(`${m.key}_TO`);
-            }
-          }
-        });
-
-        const raw: Record<string, string> = {};
-        Object.values(searchState).forEach((v) => {
-          if (v.value != null && v.value !== "" && v.value !== "ALL") {
-            const key = `SRCH_${v.key.replace(/\./g, "_")}`;
-            // 날짜 파라미터는 '-' 제거
-            raw[key] = dateKeys.has(v.key)
-              ? String(v.value).replace(/-/g, "")
-              : String(v.value);
-          }
-        });
-        rawFiltersRef.current = raw;
+        const {
+          page: _p,
+          limit: _l,
+          ...rest
+        } = params as Record<string, unknown>;
+        filtersRef.current = rest;
       }
 
       // ── 실제 fetch ─────────────────────────────────────────
+      const showErrorPopup = (message: string) => {
+        openPopup({
+          title: "",
+          content: (
+            <ConfirmModal
+              type="error"
+              title="조회 오류"
+              description={message}
+              onClose={closePopup}
+            />
+          ),
+          width: "sm",
+        });
+      };
+
       setSearching(true);
       fetchFn(params)
         .then((res: any) => {
+          // 서버가 200을 주면서 success:false로 실패를 알리는 경우
+          if (res?.data?.success === false) {
+            showErrorPopup(res.data.msg ?? "조회 중 오류가 발생했습니다.");
+            return;
+          }
+
           const rows =
             res.data.result ??
             res.data.data.allData?.data ??
@@ -185,20 +228,10 @@ export function useSearchExecute({
         .catch((err: any) => {
           const message =
             err?.response?.data?.error?.message ??
+            err?.response?.data?.msg ??
             String(err?.response?.data?.error ?? err?.message ?? err);
 
-          openPopup({
-            title: "",
-            content: (
-              <ConfirmModal
-                type="error"
-                title="조회 오류"
-                description={message}
-                onClose={closePopup}
-              />
-            ),
-            width: "sm",
-          });
+          showErrorPopup(message);
         })
         .finally(() => setSearching(false));
     },
@@ -211,6 +244,7 @@ export function useSearchExecute({
       rawFiltersRef,
       excludeKeysRef,
       computeTotalCount,
+      paramMode,
       openPopup,
       closePopup,
     ],

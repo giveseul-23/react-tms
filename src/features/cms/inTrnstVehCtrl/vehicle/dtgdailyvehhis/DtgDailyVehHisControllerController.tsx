@@ -1,10 +1,10 @@
 // src/views/inTrnstVehCtrl/InTrnstVehCtrlController.tsx
 import { useCallback, MutableRefObject } from "react";
-import { inTrnstVehCtrlApi } from "@/features/cms/inTrnstVehCtrl/inTrnstVehCtrlApi";
-import { InTrnstVehCtrlModel } from "./DtgDailyVehHisControllerModel";
+import { dtgDailyVehHisControllerApi } from "./DtgDailyVehHisControllerApi";
+import { DtgDailyVehHisControllerModel } from "./DtgDailyVehHisControllerModel";
 
 type ControllerProps = {
-  model: InTrnstVehCtrlModel;
+  model: DtgDailyVehHisControllerModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
 };
@@ -14,9 +14,15 @@ export function useDtgDailyVehHisControllerController({
   searchRef,
 }: ControllerProps) {
   // ── fetch ───────────────────────────────────────────────────
+  // useSearchExecute(paramMode:"RAW")가 SRCH_* 접두 rawFilters를 전달 →
+  // 서버가 기대하는 키로 리매핑 후 호출
   const fetchInTrnstVehList = useCallback(
     (params: Record<string, unknown>) =>
-      inTrnstVehCtrlApi.getInTrnstVehList(params),
+      dtgDailyVehHisControllerApi.getInTrnstVehList({
+        SRCH_PSTN_DTTM_FROM: params["SRCH_PSTN_DTTM_FRM"],
+        SRCH_PSTN_DTTM_TO: params["SRCH_PSTN_DTTM_TO"],
+        VEH_NO: params["SRCH_VEH_NO_NM"],
+      }),
     [],
   );
 
@@ -25,10 +31,10 @@ export function useDtgDailyVehHisControllerController({
     (data: any) => {
       model.setGridData(data);
       model.setSelectedRow(null);
-      // 조회 직후 마커 영역에 맞게 지도 fit
-      requestAnimationFrame(() => {
-        model.mapRef.current?.fitMarkers();
-      });
+      // // 조회 직후 마커 영역에 맞게 지도 fit
+      // requestAnimationFrame(() => {
+      //   model.mapRef.current?.fitMarkers();
+      // });
     },
     [model],
   );

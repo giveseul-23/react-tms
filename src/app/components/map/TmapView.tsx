@@ -381,15 +381,34 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
 
       // 추가/갱신
       markers.forEach((m) => {
-        const existing = prev.get(m.id);
+        // 좌표 유효성 방어 — null/NaN이 오면 Tmapv2 내부에서 터짐
+        if (
+          !Number.isFinite(m.lat) ||
+          !Number.isFinite(m.lon) ||
+          Math.abs(m.lat) > 90 ||
+          Math.abs(m.lon) > 180
+        ) {
+          return;
+        }
+        let existing = prev.get(m.id);
         const position = new Tmapv2.LatLng(m.lat, m.lon);
         if (existing) {
-          existing.setPosition(position);
-          const titleText = m.tooltip ?? m.label;
-          if (titleText && typeof existing.setTitle === "function") {
-            existing.setTitle(titleText);
+          try {
+            existing.setPosition(position);
+            const titleText = m.tooltip ?? m.label;
+            if (titleText && typeof existing.setTitle === "function") {
+              existing.setTitle(titleText);
+            }
+            return;
+          } catch (e) {
+            // 기존 마커가 손상된 경우 제거 후 재생성 경로로 fallthrough
+            console.warn("[TmapView] marker.setPosition failed, recreating", e);
+            try {
+              existing.setMap(null);
+            } catch {}
+            prev.delete(m.id);
+            existing = undefined;
           }
-          return;
         }
         const built = buildTruckIconUrl(primaryColor, m.label);
         const marker = new Tmapv2.Marker({

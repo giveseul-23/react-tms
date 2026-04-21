@@ -15,12 +15,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const dtgDailyVehHisControllerApi = {
-  MENU_CD: "MENU_DRIVE_HISTORY",
+  MENU_CD: "MENU_DAILY_DTG_VEH_HIS",
 
   // ── 수송중 차량 조회 ────────────────────────────────────────
   getInTrnstVehList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/inTransitVehicleStatusService/search",
+      "/driveHistoryService/searchGroupedDrivingRecordsByDate",
       withSession({
         MENU_CD: this.MENU_CD,
         ...payload,
