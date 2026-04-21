@@ -1,0 +1,82 @@
+import { apiClient } from "@/app/http/client";
+import { getSessionFields } from "@/app/services/auth/auth";
+
+type commonResponse = {
+  rows: [];
+};
+
+const withSession = (payload: any = {}) => {
+  const sessionFields = getSessionFields();
+  if (Array.isArray(payload)) {
+    return payload.map((item) => ({ ...sessionFields, ...item }));
+  }
+  return { ...sessionFields, ...payload };
+};
+
+export const dispatchManagerCostApi = {
+  MENU_CD: "MENU_DSPCH_AP_APPROVAL_AND_CLOSING",
+
+  getList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/searchList`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  getCostDetailList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/searchCostDetail`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  getWaypointList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/searchWaypoint`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  // 운영자확정취소
+  cancelOperatorConfirm(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/cancelOperatorConfirm`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+  // 관리자승인
+  approveByManager(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/approveByManager`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+  // 관리자승인취소
+  cancelManagerApprove(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/cancelManagerApprove`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+  // 비용마감
+  closeCost(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/closeCost`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+  // 비용마감취소
+  cancelCostClose(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/cancelCostClose`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+  // 비용상세 저장
+  saveCostDetail(rows: any[]) {
+    return apiClient.post<commonResponse>(
+      `/dispatchManagerCostService/saveCostDetail`,
+      withSession(rows),
+    );
+  },
+};

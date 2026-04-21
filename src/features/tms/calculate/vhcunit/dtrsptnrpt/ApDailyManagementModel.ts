@@ -1,0 +1,78 @@
+import { useState, useRef, useCallback, useMemo } from "react";
+import { useCommonStores } from "@/hooks/useCommonStores";
+import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
+
+export type GridData = {
+  rows: any[];
+  totalCount: number;
+  page: number;
+  limit: number;
+};
+
+const EMPTY_GRID: GridData = {
+  rows: [],
+  totalCount: 0,
+  page: 1,
+  limit: 500,
+};
+
+export function useApDailyManagementModel() {
+  const [layout, setLayout] = useState<LayoutType>("vertical");
+  const [pageSize, setPageSize] = useState(500);
+
+  // 메인 — 일일실적 그리드
+  const [gridData, setGridData] = useState<GridData>(EMPTY_GRID);
+
+  // 상세내역 그리드
+  const [detailRowData, setDetailRowData] = useState<GridData>(EMPTY_GRID);
+
+  // 선택 행
+  const [selectedHeaderRow, setSelectedHeaderRow] = useState<any>(null);
+  const selectedHeaderRowRef = useRef<any>(null);
+  const setSelectedHeaderRowWithRef = useCallback((row: any) => {
+    setSelectedHeaderRow(row);
+    selectedHeaderRowRef.current = row;
+  }, []);
+
+  const resetSubGrids = useCallback(() => {
+    setSelectedHeaderRowWithRef(null);
+    setDetailRowData(EMPTY_GRID);
+  }, [setSelectedHeaderRowWithRef]);
+
+  // 공통 코드
+  const { stores } = useCommonStores({
+    setlPrgSts: { sqlProp: "CODE", keyParam: "SETL_PRG_STS" },
+    dlCloseSts: { sqlProp: "CODE", keyParam: "DL_CLOSE_STS" },
+    sndDlvTp: { sqlProp: "CODE", keyParam: "SND_DLV_TP" },
+    editSts: { sqlProp: "CODE", keyParam: "EDIT_STS" },
+  });
+
+  const codeMap = useMemo(() => {
+    const map: Record<string, Record<string, string>> = {};
+    Object.entries(stores).forEach(([storeKey, items]) => {
+      map[storeKey] = {};
+      (items ?? []).forEach((item: any) => {
+        map[storeKey][item.CODE] = item.NAME;
+      });
+    });
+    return map;
+  }, [stores]);
+
+  return {
+    layout,
+    setLayout,
+    pageSize,
+    setPageSize,
+    gridData,
+    setGridData,
+    detailRowData,
+    setDetailRowData,
+    selectedHeaderRow,
+    selectedHeaderRowRef,
+    setSelectedHeaderRow: setSelectedHeaderRowWithRef,
+    resetSubGrids,
+    codeMap,
+  };
+}
+
+export type ApDailyManagementModel = ReturnType<typeof useApDailyManagementModel>;
