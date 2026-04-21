@@ -82,7 +82,6 @@ export default function InTrnstVehCtrl() {
       onRowClicked={ctrl.handleRowClicked}
       disableAutoSize
       rowSelection="single"
-      autoSelectFirstRow
     />
   );
 

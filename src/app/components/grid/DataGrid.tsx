@@ -166,9 +166,6 @@ type DataGridProps<TRow> = {
 
   disableAutoSize?: boolean;
   rowSelection?: string;
-  /** rowData 교체 시(조회 결과 갱신 등) 첫 행을 자동 선택하고 onRowClicked 를 발화.
-   *  기본 true — 비활성화하려면 false 명시. */
-  autoSelectFirstRow?: boolean;
 
   onCellValueChanged?: (params: any) => void;
 
@@ -239,7 +236,6 @@ export default function DataGrid<TRow>({
   overrideRowData,
   gridOptions,
   onTabChange,
-  autoSelectFirstRow = true,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -480,27 +476,7 @@ export default function DataGrid<TRow>({
     });
   }, [activeTab, activeRowData, finalColumnDefs, runAutoSize, disableAutoSize]);
 
-  // ─── rowData 변경 시 첫 행 자동 선택 ──────────────────────────────────────
-  const autoSelectPrevRowDataRef = useRef<TRow[] | null>(null);
-  useEffect(() => {
-    if (!autoSelectFirstRow) return;
-    const api = gridApiRef.current;
-    if (!api || api.isDestroyed?.()) return;
-    // rowData 참조가 바뀌었을 때만 동작 (렌더마다 재선택 방지)
-    if (autoSelectPrevRowDataRef.current === activeRowData) return;
-    autoSelectPrevRowDataRef.current = activeRowData;
-    if (!activeRowData || activeRowData.length === 0) return;
-
-    requestAnimationFrame(() => {
-      if (api.isDestroyed?.()) return;
-      const first = api.getDisplayedRowAtIndex?.(0);
-      if (!first) return;
-      first.setSelected(true, true);
-      if (first.data) onRowClicked?.(first.data);
-    });
-  }, [activeRowData, autoSelectFirstRow, onRowClicked]);
-
-  // ─── 드래그 범위 선택 + Ctrl+C 복사 ──────────────────────────────────────────
+// ─── 드래그 범위 선택 + Ctrl+C 복사 ──────────────────────────────────────────
   useEffect(() => {
     const container = gridContainerRef.current;
     if (!container) return;

@@ -69,7 +69,6 @@ export default function InTrnstVehCtrl() {
       actions={ctrl.mainActions}
       onRowClicked={ctrl.handleRowClicked}
       rowSelection="single"
-      autoSelectFirstRow
     />
   );
 
