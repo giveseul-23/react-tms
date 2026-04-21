@@ -44,6 +44,8 @@ export type StopMarker = {
   label?: string;
   /** hover 시 툴팁 */
   title?: string;
+  /** 핀 종류 — start:초록 / end:빨강 / via:노랑 / undefined=Tmap 기본 */
+  kind?: "start" | "end" | "via";
 };
 
 export type TmapViewHandle = {
@@ -128,6 +130,13 @@ const END_PIN_ICON =
   "data:image/svg+xml;charset=UTF-8," +
   encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="#dc2626" stroke="#FFFFFF" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="#FFFFFF"/></svg>',
+  );
+
+/** 경유지 핀 — 노랑 물방울형 */
+const VIA_PIN_ICON =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="#eab308" stroke="#FFFFFF" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="#FFFFFF"/></svg>',
   );
 
 /**
@@ -640,12 +649,25 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
             const labelHtml = s.label
               ? `<span style="background:#a8c4ef;color:#000;font-weight:bold;padding:2px 6px;border-radius:5px;border:1px solid #000;">${escapeXml(s.label)}</span>`
               : undefined;
-            const marker = new Tmapv2.Marker({
+
+            // kind 별 아이콘 결정
+            let iconUrl: string | undefined;
+            if (s.kind === "start") iconUrl = START_PIN_ICON;
+            else if (s.kind === "end") iconUrl = END_PIN_ICON;
+            else if (s.kind === "via") iconUrl = VIA_PIN_ICON;
+
+            const markerOpts: any = {
               position: new Tmapv2.LatLng(s.lat, s.lon),
               map,
               title: s.title ?? s.label ?? s.id,
               label: labelHtml,
-            });
+            };
+            if (iconUrl) {
+              markerOpts.icon = iconUrl;
+              markerOpts.iconSize = new Tmapv2.Size(28, 36);
+              markerOpts.iconAnchor = new Tmapv2.Point(14, 36);
+            }
+            const marker = new Tmapv2.Marker(markerOpts);
             stopMarkerObjsRef.current.set(s.id, marker);
           });
         },
