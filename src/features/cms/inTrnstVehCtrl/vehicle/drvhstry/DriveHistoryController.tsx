@@ -104,8 +104,7 @@ export function useDriveHistoryController({
               id: `stop-${i}`,
               lat: Number(r.LAT),
               lon: Number(r.LON),
-              // label: locNm,
-              title: locNm,
+              label: locNm,
               kind,
             };
           });

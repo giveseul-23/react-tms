@@ -594,7 +594,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           if (valid.length === 0) return;
 
           // 시작/끝 핀 — 트럭 핀과 동일한 스타일(출발:초록 S / 도착:빨강 E)
-          // title 은 생략 — 출발/도착은 hover 툴팁 미표시
+          // title 은 생략 — 출발/도착/경유지 hover 툴팁 미표시
           const makeEndpointMarker = (
             p: TracePoint,
             label: string,
@@ -741,10 +741,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
               iconSize: new Tmapv2.Size(built.width, built.height),
               iconAnchor: new Tmapv2.Point(built.anchorX, built.anchorY),
             };
-            // 출발/도착은 hover 툴팁 미표시 — 경유지만 title 부여
-            if (s.kind === "via") {
-              markerOpts.title = s.title ?? s.label ?? s.id;
-            }
+            // 출발/도착/경유지 모두 hover 툴팁 미표시 — label 은 SVG 아이콘에 구워져 항상 보임
             const marker = new Tmapv2.Marker(markerOpts);
             stopMarkerObjsRef.current.set(s.id, marker);
           });
