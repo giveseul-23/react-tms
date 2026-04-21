@@ -2,6 +2,18 @@ import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 
 // 메인 그리드
 export const MAIN_COLUMN_DEFS = [
+  { headerName: "No" },
+  { headerName: "LBL_AP_SETL_ID", field: "AP_SETL_ID" },
+  { headerName: "LBL_AP_SETL_GRP_ID", field: "AP_SETL_GRP_ID" },
+  { headerName: "LBL_OP_STATUS", field: "AP_FI_STS_NM" },
+  { headerName: "LBL_PAY_CARRIER_CODE", field: "PAY_CARR_CD" },
+  { headerName: "LBL_PAY_CARRIER_NAME", field: "CARR_NM" },
+  { headerName: "LBL_AP_FROM_DATE", field: "FRM_DTTM" },
+  { headerName: "LBL_AP_END_DATE", field: "TO_DTTM" },
+  { headerName: "LBL_VOS_RATE", field: "VOS_RATE" },
+  { headerName: "LBL_VAT_RATE", field: "VAT_RATE" },
+  { headerName: "LBL_TTL_RATE", field: "TTL_RATE" },
+  { headerName: "LBL_REMARK", field: "RMRK" },
   { headerName: "LBL_FI_TAX_CD", field: "TAX_NM" },
   { headerName: "LBL_TARGET_SYS", field: "TARGET_SYS" },
   { headerName: "LBL_CST_DIST_YN", field: "CST_DIST_YN" },

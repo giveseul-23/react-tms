@@ -25,7 +25,9 @@ export function useApSettlMgmtModel() {
   // 종합내역
   const [summaryRowData, setSummaryRowData] = useState<any[]>([]);
   const [monthlyFareRowData, setMonthlyFareRowData] = useState<any[]>([]);
-  const [hireDispatchPayRowData, setHireDispatchPayRowData] = useState<any[]>([]);
+  const [hireDispatchPayRowData, setHireDispatchPayRowData] = useState<any[]>(
+    [],
+  );
   const [freightPayRowData, setFreightPayRowData] = useState<any[]>([]);
   const [indirectPayRowData, setIndirectPayRowData] = useState<any[]>([]);
 
@@ -56,9 +58,12 @@ export function useApSettlMgmtModel() {
   }, [setSelectedHeaderRowWithRef]);
 
   const { stores } = useCommonStores({
-    prgSts: { sqlProp: "CODE", keyParam: "PRG_STS" },
-    editSts: { sqlProp: "CODE", keyParam: "EDIT_STS" },
-    creatTp: { sqlProp: "CODE", keyParam: "CREAT_TP" },
+    apSetlDetailType: { sqlProp: "CODE", keyParam: "AP_SETL_DTL_TCD" },
+    apSetlDescType: { sqlProp: "CODE", keyParam: "APPLD_VAL_TCD" },
+    fiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
+    costCenter: { sqlProp: "CODE", keyParam: "CST_CNTR_GL_RC_TCD" },
+    cstDistSts: { sqlProp: "CODE", keyParam: "CST_DIST_STS" },
+    cstCntrCd: { sqlProp: "selectCstCntrCodeName" },
   });
 
   const codeMap = useMemo(() => {

@@ -23,17 +23,24 @@ export function useApSettlMgmtController({
   const fetchSubTabs = useCallback(
     (row: any) => {
       if (!row) return;
-      const params = { CLOSE_ID: row.CLOSE_ID };
+      const params = {
+        AP_SETL_ID: row.AP_SETL_ID,
+        LGST_GRP_CD: row.LGST_GRP_CD,
+      };
 
       apSettlMgmtApi
         .getSummaryList(params)
         .then((res: any) =>
-          model.setSummaryRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setSummaryRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       apSettlMgmtApi
         .getMonthlyFareList(params)
         .then((res: any) =>
-          model.setMonthlyFareRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setMonthlyFareRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       apSettlMgmtApi
         .getHireDispatchPayList(params)
@@ -45,27 +52,37 @@ export function useApSettlMgmtController({
       apSettlMgmtApi
         .getFreightPayList(params)
         .then((res: any) =>
-          model.setFreightPayRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setFreightPayRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       apSettlMgmtApi
         .getIndirectPayList(params)
         .then((res: any) =>
-          model.setIndirectPayRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setIndirectPayRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       apSettlMgmtApi
-        .getCostCenterList(params)
+        .getEachCostOrGlList(params)
         .then((res: any) =>
-          model.setCostCenterRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setCostCenterRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       apSettlMgmtApi
-        .getMaterialCostList(params)
+        .getEachItmCostList(params)
         .then((res: any) =>
-          model.setMaterialCostRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setMaterialCostRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       apSettlMgmtApi
-        .getEvidenceList(params)
+        .getDocFileList(params)
         .then((res: any) =>
-          model.setEvidenceRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setEvidenceRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
     },
     [model],
@@ -100,13 +117,15 @@ export function useApSettlMgmtController({
       type: "button",
       key: "마감생성",
       label: "마감생성",
-      onClick: () => doAction(() => apSettlMgmtApi.createClose(filtersRef.current)),
+      onClick: () =>
+        doAction(() => apSettlMgmtApi.createClose(filtersRef.current)),
     },
     {
       type: "button",
       key: "마감취소",
       label: "마감취소",
-      onClick: () => doAction(() => apSettlMgmtApi.cancelClose(filtersRef.current)),
+      onClick: () =>
+        doAction(() => apSettlMgmtApi.cancelClose(filtersRef.current)),
     },
     {
       type: "dropdown",
