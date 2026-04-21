@@ -81,6 +81,8 @@ export default function InTrnstVehCtrl() {
       onPageChange={(page) => searchRef.current?.(page, false)}
       onRowClicked={ctrl.handleRowClicked}
       disableAutoSize
+      rowSelection="single"
+      autoSelectFirstRow
     />
   );
 
