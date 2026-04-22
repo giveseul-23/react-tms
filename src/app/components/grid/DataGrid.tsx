@@ -328,6 +328,39 @@ export default function DataGrid<TRow>({
 
   /** No 컬럼 처리 + 자동 정렬 (숫자=우측, _STS=중앙, 기본=좌측) */
   const finalColumnDefs = useMemo(() => {
+    // noLang === true 면 원문 그대로, 아니면 Lang.get 적용
+    const translate = (col: any): string =>
+      col?.noLang ? col.headerName : Lang.get(col.headerName);
+
+    // ColGroupDef 의 children 재귀 변환 (noLang / codeKey / Lang.get)
+    const walkChildren = (children: any[] | undefined): any[] | undefined => {
+      if (!Array.isArray(children)) return children;
+      return children.map((child) => {
+        const codeKey = child?.codeKey as string | undefined;
+        const withRenderer =
+          codeKey && !child.cellRenderer
+            ? {
+                ...child,
+                cellRenderer: (params: any) => {
+                  const code = params.value;
+                  const label =
+                    activeCodeMap?.[codeKey]?.[String(code)] ?? code;
+                  return (
+                    <span className={`px-2 py-0.5 rounded-lg text-xs`}>
+                      {label}
+                    </span>
+                  );
+                },
+              }
+            : child;
+        return {
+          ...withRenderer,
+          headerName: translate(withRenderer),
+          children: walkChildren(withRenderer.children),
+        };
+      });
+    };
+
     // codeKey 가 있는 컬럼에 자동 cellRenderer 주입 (이미 cellRenderer 있으면 유지)
     const prepared = activeColumnDefs.map((col) => {
       const codeKey = (col as any).codeKey as string | undefined;
@@ -369,11 +402,14 @@ export default function DataGrid<TRow>({
         };
       }
 
+      const translatedChildren = walkChildren((col as any).children);
+
       if ((col as any).disableMaxWidth === true) {
         return {
           ...col,
           maxWidth: null,
-          headerName: Lang.get(col.headerName),
+          headerName: translate(col),
+          ...(translatedChildren ? { children: translatedChildren } : {}),
         };
       }
 
@@ -384,8 +420,9 @@ export default function DataGrid<TRow>({
       if (field.includes("DTTM")) {
         return {
           ...col,
-          headerName: Lang.get(col.headerName),
+          headerName: translate(col),
           valueFormatter: (params: any) => Util.formatDttm(params.value),
+          ...(translatedChildren ? { children: translatedChildren } : {}),
         };
       }
 
@@ -395,9 +432,10 @@ export default function DataGrid<TRow>({
         if (field.endsWith("_STS")) {
           return {
             ...col,
-            headerName: Lang.get(col.headerName),
+            headerName: translate(col),
             cellStyle: { textAlign: "center" },
             headerClass: "ag-header-center",
+            ...(translatedChildren ? { children: translatedChildren } : {}),
           };
         }
 
@@ -408,16 +446,18 @@ export default function DataGrid<TRow>({
         ) {
           return {
             ...col,
-            headerName: Lang.get(col.headerName),
+            headerName: translate(col),
             cellStyle: { textAlign: "right" },
             headerClass: "ag-header-right",
+            ...(translatedChildren ? { children: translatedChildren } : {}),
           };
         }
       }
 
       return {
         ...col,
-        headerName: Lang.get(col.headerName),
+        headerName: translate(col),
+        ...(translatedChildren ? { children: translatedChildren } : {}),
       };
     });
   }, [activeColumnDefs, activeCodeMap]);

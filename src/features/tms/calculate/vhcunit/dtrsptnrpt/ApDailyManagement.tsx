@@ -8,10 +8,6 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useApDailyManagementModel } from "./ApDailyManagementModel";
 import { useApDailyManagementController } from "./ApDailyManagementController";
-import {
-  DAILY_MAIN_COLUMN_DEFS,
-  DAILY_DETAIL_COLUMN_DEFS,
-} from "./ApDailyManagementColumns";
 
 const MENU_CODE = "MENU_AP_DAILY_MGMT";
 
@@ -21,12 +17,14 @@ export default function ApDailyManagement() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
+  const rawFiltersRef = useRef<Record<string, string>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useApDailyManagementController({
     model,
     searchRef,
     filtersRef,
+    rawFiltersRef,
   });
 
   if (loading) return <Skeleton className="h-24" />;
@@ -40,6 +38,7 @@ export default function ApDailyManagement() {
         onSearch: ctrl.handleSearch,
         searchRef,
         filtersRef,
+        rawFiltersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
       }}
@@ -52,12 +51,12 @@ export default function ApDailyManagement() {
           ]}
           presets={{
             DAILY: {
-              columnDefs: DAILY_MAIN_COLUMN_DEFS,
+              columnDefs: model.mainColumnDefs,
               actions: ctrl.mainActions,
               onRowClicked: ctrl.handleRowClicked,
             },
             DETAIL: {
-              columnDefs: DAILY_DETAIL_COLUMN_DEFS,
+              columnDefs: model.detailColumnDefs,
               actions: ctrl.detailActions,
             },
           }}

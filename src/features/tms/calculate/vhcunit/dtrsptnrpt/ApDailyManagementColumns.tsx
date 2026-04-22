@@ -1,7 +1,9 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 
-// 일일실적 (메인) 그리드
-export const DAILY_MAIN_COLUMN_DEFS = [
+// ─────────────────────────────────────────────────────────────
+// 일일실적 (메인) 그리드 — HEAD / TAIL
+// ─────────────────────────────────────────────────────────────
+export const DAILY_MAIN_HEAD = [
   { headerName: "No" },
   { headerName: "LBL_DLVRY_DATE", field: "DLVRY_DT" },
   { headerName: "LBL_FINANCIAL_STATUS", field: "AP_FI_STS", codeKey: "fiSts" },
@@ -25,6 +27,9 @@ export const DAILY_MAIN_COLUMN_DEFS = [
     codeKey: "dlySetlSts",
   },
   { headerName: "LBL_FI_DIST_KM", field: "TTL_DIST" },
+];
+
+export const DAILY_MAIN_TAIL = [
   { headerName: "LBL_AP_ID", field: "DLY_APPLN_ID" },
   ...makeAuditColumns({
     delete: true,
@@ -36,8 +41,10 @@ export const DAILY_MAIN_COLUMN_DEFS = [
   }),
 ];
 
-// 상세내역 그리드
-export const DAILY_DETAIL_COLUMN_DEFS = [
+// ─────────────────────────────────────────────────────────────
+// 상세내역 그리드 — HEAD / TAIL
+// ─────────────────────────────────────────────────────────────
+export const DAILY_DETAIL_HEAD = [
   { headerName: "No" },
   { headerName: "LBL_DLVRY_DATE", field: "DLVRY_DT" },
   { headerName: "LBL_VEH_NO", field: "VEH_NO" },
@@ -128,6 +135,9 @@ export const DAILY_DETAIL_COLUMN_DEFS = [
   { headerName: "LBL_DIST_KM", field: "TTL_DIST" },
   { headerName: "LBL_TRIP_NO", field: "TRIP_ID" },
   { headerName: "LBL_TRIP_SEQ", field: "TRIP_SEQ" },
+];
+
+export const DAILY_DETAIL_TAIL = [
   ...makeAuditColumns({
     delete: true,
     rowStatus: true,
@@ -137,3 +147,100 @@ export const DAILY_DETAIL_COLUMN_DEFS = [
     updateTime: true,
   }),
 ];
+
+// ─────────────────────────────────────────────────────────────
+// 초기 렌더용 (조회 전) — HEAD + TAIL
+// ─────────────────────────────────────────────────────────────
+export const DAILY_MAIN_COLUMN_DEFS = [...DAILY_MAIN_HEAD, ...DAILY_MAIN_TAIL];
+export const DAILY_DETAIL_COLUMN_DEFS = [
+  ...DAILY_DETAIL_HEAD,
+  ...DAILY_DETAIL_TAIL,
+];
+
+// ─────────────────────────────────────────────────────────────
+// 동적 body 컬럼 빌드 (ExtJS createColumns 대응)
+//   - USR_REG_CHG_RSN_REQD_YN == 'Y' → 그룹 (금액 + 사유)
+//   - 그 외 → 단일 숫자 컬럼
+//   - editable 규칙:
+//       subGrid01(detail): 항상 non-editable
+//       mainGrid: USR_REG_CHG_YN == 'Y' 만 editable
+// ─────────────────────────────────────────────────────────────
+type ChgMeta = {
+  CHG_CD: string;
+  CHG_NM: string;
+  USR_REG_CHG_YN?: "Y" | "N";
+  USR_REG_CHG_RSN_REQD_YN?: "Y" | "N";
+};
+
+const numberValueFormatter = (p: any) => {
+  const v = p.value;
+  if (v == null || v === "") return "";
+  const n = typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
+  if (Number.isNaN(n)) return String(v);
+  return n.toLocaleString();
+};
+
+const negativeRedCenterCellStyle = (p: any) => {
+  const v = p.value;
+  const base = { textAlign: "center" as const };
+  if (v == null || v === "") return base;
+  const n = typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
+  return !Number.isNaN(n) && n < 0 ? { ...base, color: "red" } : base;
+};
+
+export function buildDailyColumns(
+  head: any[],
+  tail: any[],
+  chgList: ChgMeta[],
+  opts: { isMainGrid: boolean },
+): any[] {
+  const { isMainGrid } = opts;
+
+  const body = chgList.map((c) => {
+    const editable = isMainGrid ? c.USR_REG_CHG_YN === "Y" : false;
+    const rateField = c.CHG_CD;
+    const reasonField = `${c.CHG_CD}_RSN_DESC`;
+
+    if (c.USR_REG_CHG_RSN_REQD_YN === "Y") {
+      return {
+        headerName: c.CHG_NM,
+        noLang: true,
+        headerClass: "ag-header-center",
+        children: [
+          {
+            headerName: "LBL_RATE",
+            field: rateField,
+            width: 90,
+            headerClass: "ag-header-center",
+            editable,
+            valueFormatter: numberValueFormatter,
+            cellStyle: negativeRedCenterCellStyle,
+            aggFunc: "sum",
+          },
+          {
+            headerName: "LBL_REASON",
+            field: reasonField,
+            width: 90,
+            headerClass: "ag-header-center",
+            editable,
+            cellStyle: { textAlign: "center" },
+          },
+        ],
+      };
+    }
+
+    return {
+      headerName: c.CHG_NM,
+      noLang: true,
+      field: rateField,
+      width: 90,
+      headerClass: "ag-header-center",
+      editable,
+      valueFormatter: numberValueFormatter,
+      cellStyle: negativeRedCenterCellStyle,
+      aggFunc: "sum",
+    };
+  });
+
+  return [...head, ...body, ...tail];
+}

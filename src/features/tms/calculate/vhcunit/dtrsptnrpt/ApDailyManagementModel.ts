@@ -1,6 +1,10 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
+import {
+  DAILY_MAIN_COLUMN_DEFS,
+  DAILY_DETAIL_COLUMN_DEFS,
+} from "./ApDailyManagementColumns";
 
 export type GridData = {
   rows: any[];
@@ -25,6 +29,14 @@ export function useApDailyManagementModel() {
 
   // 상세내역 그리드
   const [detailRowData, setDetailRowData] = useState<GridData>(EMPTY_GRID);
+
+  // 동적 컬럼 (조회 시 CHG_CD 메타로 재생성)
+  const [mainColumnDefs, setMainColumnDefs] = useState<any[]>(
+    DAILY_MAIN_COLUMN_DEFS,
+  );
+  const [detailColumnDefs, setDetailColumnDefs] = useState<any[]>(
+    DAILY_DETAIL_COLUMN_DEFS,
+  );
 
   // 선택 행
   const [selectedHeaderRow, setSelectedHeaderRow] = useState<any>(null);
@@ -67,6 +79,10 @@ export function useApDailyManagementModel() {
     setGridData,
     detailRowData,
     setDetailRowData,
+    mainColumnDefs,
+    setMainColumnDefs,
+    detailColumnDefs,
+    setDetailColumnDefs,
     selectedHeaderRow,
     selectedHeaderRowRef,
     setSelectedHeaderRow: setSelectedHeaderRowWithRef,

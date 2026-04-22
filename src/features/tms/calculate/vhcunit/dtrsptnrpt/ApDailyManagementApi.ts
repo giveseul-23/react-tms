@@ -19,15 +19,28 @@ export const apDailyManagementApi = {
   // 일일실적 메인 조회
   getDailyList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apDailyManagementService/searchDailyList`,
+      `/apDailyManagementService/search`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  // 사용 CHG_CD 조회 (동적 컬럼 메타)
+  getUsedChgCd(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apDailyManagementService/getUsedChgCd`,
+      withSession({
+        module: "TMS",
+        MENU_CD: this.MENU_CD,
+        DF_CHG_OP_DIV_TCD: "DAILY",
+        ...payload,
+      }),
     );
   },
 
   // 상세내역 조회
   getDetailList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apDailyManagementService/searchDetailList`,
+      `/apDailyManagementService/searchDetail`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },

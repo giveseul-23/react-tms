@@ -125,6 +125,7 @@ export function CommonPopup({
               headerName: "LBL_CODE",
               field: "CODE",
               width: 120,
+              cellStyle: { textAlign: "center" },
             },
             {
               headerName: "LBL_CODE_NM",

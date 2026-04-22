@@ -415,7 +415,9 @@
 .btn-primary:active {
   transform: scale(0.96);
   filter: brightness(0.88);
-  transition: transform 0.08s ease, filter 0.08s ease;
+  transition:
+    transform 0.08s ease,
+    filter 0.08s ease;
 }
 
 .btn-ghost {
@@ -450,6 +452,15 @@
 }
 .ag-header-right .ag-header-cell-label {
   justify-content: flex-end;
+}
+/* 그룹 헤더(ColGroupDef) 라벨 중앙정렬 — 기본 테마보다 우선 */
+.ag-theme-bridge .ag-header-group-cell.ag-header-center {
+  justify-content: center !important;
+}
+.ag-theme-bridge .ag-header-group-cell.ag-header-center .ag-header-group-cell-label {
+  justify-content: center !important;
+  text-align: center !important;
+  flex: 1 1 auto;
 }
 
 /* ── 체크박스 제외 헤더 텍스트 중앙정렬 ── */
