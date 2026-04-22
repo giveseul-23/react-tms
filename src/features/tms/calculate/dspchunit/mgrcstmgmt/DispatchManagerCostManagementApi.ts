@@ -18,21 +18,21 @@ export const dispatchManagerCostApi = {
 
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/searchList`,
+      `/dispatchManagerCostManagementService/search`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
   getCostDetailList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/searchCostDetail`,
+      `/dispatchManagerCostManagementService/searchDispatchApplanDetail`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
 
   getWaypointList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/searchWaypoint`,
+      `/dispatchManagerCostManagementService/searchPlanStop`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -40,42 +40,42 @@ export const dispatchManagerCostApi = {
   // 운영자확정취소
   cancelOperatorConfirm(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/cancelOperatorConfirm`,
+      `/dispatchManagerCostManagementService/cancelOperatorConfirm`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   // 관리자승인
   approveByManager(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/approveByManager`,
+      `/dispatchManagerCostManagementService/approveByManager`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   // 관리자승인취소
   cancelManagerApprove(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/cancelManagerApprove`,
+      `/dispatchManagerCostManagementService/cancelManagerApprove`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   // 비용마감
   closeCost(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/closeCost`,
+      `/dispatchManagerCostManagementService/closeCost`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   // 비용마감취소
   cancelCostClose(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/cancelCostClose`,
+      `/dispatchManagerCostManagementService/cancelCostClose`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   // 비용상세 저장
   saveCostDetail(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostService/saveCostDetail`,
+      `/dispatchManagerCostManagementService/saveCostDetail`,
       withSession(rows),
     );
   },

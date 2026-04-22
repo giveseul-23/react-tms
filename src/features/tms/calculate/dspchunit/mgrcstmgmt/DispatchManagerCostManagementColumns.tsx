@@ -1,4 +1,5 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { numberValueFormatter } from "@/app/components/grid/commonFormatters";
 
 // 메인 그리드
 export const MAIN_COLUMN_DEFS = [
@@ -44,9 +45,27 @@ export const COST_DETAIL_COLUMN_DEFS = [
   { headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
   { headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
   { headerName: "LBL_RATE_ITEM_NM", field: "CHG_NM" },
-  { headerName: "LBL_INS_COST", field: "INS_COST" },
-  { headerName: "LBL_ADJ_COST", field: "ADJ_COST" },
-  { headerName: "LBL_CFM_COST", field: "CFM_COST" },
+  {
+    headerName: "LBL_INS_COST",
+    field: "INS_COST",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_ADJ_COST",
+    field: "ADJ_COST",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_CFM_COST",
+    field: "CFM_COST",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
   { headerName: "LBL_OP_ADJUST_REASON", field: "ADJ_RSN" },
   { headerName: "LBL_MG_ADJUST_REASON", field: "CFM_RSN" },
   { headerName: "LBL_ADJ_PERSON_ID", field: "ADJ_USR_ID" },

@@ -40,8 +40,10 @@ export function useDispatchManagerCostModel() {
   }, [setSelectedHeaderRowWithRef]);
 
   const { stores } = useCommonStores({
-    setlPrgSts: { sqlProp: "CODE", keyParam: "SETL_PRG_STS" },
-    costCheck: { sqlProp: "CODE", keyParam: "COST_CHECK" },
+    apType: { sqlProp: "CODE", keyParam: "TM_LEGARCY_AP_TP" },
+    financialStatus: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
+    serviceType: { sqlProp: "CODE", keyParam: "TRF_SVC_TP" },
+    pickDropDiv: { sqlProp: "CODE", keyParam: "STOP_TP" },
   });
 
   const codeMap = useMemo(() => {
@@ -74,4 +76,6 @@ export function useDispatchManagerCostModel() {
   };
 }
 
-export type DispatchManagerCostModel = ReturnType<typeof useDispatchManagerCostModel>;
+export type DispatchManagerCostModel = ReturnType<
+  typeof useDispatchManagerCostModel
+>;

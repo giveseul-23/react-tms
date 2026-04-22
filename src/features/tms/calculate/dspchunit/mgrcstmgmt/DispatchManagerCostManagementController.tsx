@@ -23,16 +23,24 @@ export function useDispatchManagerCostController({
   const fetchSubTabs = useCallback(
     (row: any) => {
       if (!row) return;
-      const params = { DSPCH_NO: row.DSPCH_NO, SETL_DOC_NO: row.SETL_DOC_NO };
+      const params = {
+        DSPCH_NO: row.DSPCH_NO,
+        AP_ID: row.AP_ID,
+        DEFAULT_TYPE: row.DEFAULT_TYPE,
+      };
       dispatchManagerCostApi
         .getCostDetailList(params)
         .then((res: any) =>
-          model.setCostDetailRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setCostDetailRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       dispatchManagerCostApi
         .getWaypointList(params)
         .then((res: any) =>
-          model.setWaypointRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setWaypointRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
     },
     [model],
@@ -77,7 +85,9 @@ export function useDispatchManagerCostController({
       key: "관리자승인",
       label: "관리자승인",
       onClick: () =>
-        doAction(() => dispatchManagerCostApi.approveByManager(filtersRef.current)),
+        doAction(() =>
+          dispatchManagerCostApi.approveByManager(filtersRef.current),
+        ),
     },
     {
       type: "button",
@@ -100,7 +110,9 @@ export function useDispatchManagerCostController({
       key: "비용마감취소",
       label: "비용마감취소",
       onClick: () =>
-        doAction(() => dispatchManagerCostApi.cancelCostClose(filtersRef.current)),
+        doAction(() =>
+          dispatchManagerCostApi.cancelCostClose(filtersRef.current),
+        ),
     },
     makeExcelGroupAction({
       columns: MAIN_COLUMN_DEFS,
