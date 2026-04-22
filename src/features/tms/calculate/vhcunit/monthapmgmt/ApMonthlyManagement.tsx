@@ -8,7 +8,6 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useApMonthlyManagementModel } from "./ApMonthlyManagementModel";
 import { useApMonthlyManagementController } from "./ApMonthlyManagementController";
-import { MAIN_COLUMN_DEFS } from "./ApMonthlyManagementColumns";
 
 const MENU_CODE = "MENU_AP_MONTHLY_MGMT";
 
@@ -18,12 +17,14 @@ export default function ApMonthlyManagement() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
+  const rawFiltersRef = useRef<Record<string, string>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useApMonthlyManagementController({
     model,
     searchRef,
     filtersRef,
+    rawFiltersRef,
   });
 
   if (loading) return <Skeleton className="h-24" />;
@@ -37,13 +38,14 @@ export default function ApMonthlyManagement() {
         onSearch: ctrl.handleSearch,
         searchRef,
         filtersRef,
+        rawFiltersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
       }}
       grid={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={model.mainColumnDefs}
           codeMap={model.codeMap}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}

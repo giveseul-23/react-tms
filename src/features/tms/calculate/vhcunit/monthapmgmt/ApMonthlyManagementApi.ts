@@ -18,8 +18,21 @@ export const apMonthlyManagementApi = {
 
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apMonthlyManagementService/searchList`,
+      `/apMonthlyManagementService/search`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  // 사용 CHG_CD 조회 (동적 컬럼 메타)
+  getUsedChgCd(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apMonthlyManagementService/getUsedChgCd`,
+      withSession({
+        module: "TMS",
+        MENU_CD: this.MENU_CD,
+        DF_CHG_OP_DIV_TCD: "MONTHLY",
+        ...payload,
+      }),
     );
   },
 
