@@ -1,4 +1,5 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { numberValueFormatter } from "@/app/components/grid/commonFormatters";
 
 // 메인 그리드
 export const MAIN_COLUMN_DEFS = [
@@ -10,9 +11,27 @@ export const MAIN_COLUMN_DEFS = [
   { headerName: "LBL_PAY_CARRIER_NAME", field: "CARR_NM" },
   { headerName: "LBL_AP_FROM_DATE", field: "FRM_DTTM" },
   { headerName: "LBL_AP_END_DATE", field: "TO_DTTM" },
-  { headerName: "LBL_VOS_RATE", field: "VOS_RATE" },
-  { headerName: "LBL_VAT_RATE", field: "VAT_RATE" },
-  { headerName: "LBL_TTL_RATE", field: "TTL_RATE" },
+  {
+    headerName: "LBL_VOS_RATE",
+    field: "VOS_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_VAT_RATE",
+    field: "VAT_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_TTL_RATE",
+    field: "TTL_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
   { headerName: "LBL_REMARK", field: "RMRK" },
   { headerName: "LBL_FI_TAX_CD", field: "TAX_NM" },
   { headerName: "LBL_TARGET_SYS", field: "TARGET_SYS" },
@@ -51,7 +70,13 @@ export const SUMMARY_COLUMN_DEFS = [
   },
   { headerName: "LBL_APPLIED_VAL", field: "APPLD_VAL" },
   { headerName: "LBL_DESC", field: "APPLD_VAL_TCD", codeKey: "apSetlDescType" },
-  { headerName: "LBL_RATE", field: "RATE" },
+  {
+    headerName: "LBL_RATE",
+    field: "RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
 ];
 
 // 종합내역 - 월대운임상세내역
@@ -60,7 +85,13 @@ export const MONTHLY_FARE_COLUMN_DEFS = [
   { headerName: "LBL_CARR_NM", field: "CARR_NM" },
   { headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM" },
   { headerName: "LBL_CAR_CNT", field: "VEH_CNT" },
-  { headerName: "LBL_SUM_TOTAL", field: "TTL_RATE" },
+  {
+    headerName: "LBL_SUM_TOTAL",
+    field: "TTL_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
 ];
 
 // 종합내역 - 용차/배차지급내역
@@ -69,7 +100,13 @@ export const HIRE_DISPATCH_PAY_COLUMN_DEFS = [
   { headerName: "LBL_CARR_NM", field: "CARR_NM" },
   { headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM" },
   { headerName: "LBL_DSPCH_CNT", field: "VEH_CNT" },
-  { headerName: "LBL_SUM_TOTAL", field: "TTL_RATE" },
+  {
+    headerName: "LBL_SUM_TOTAL",
+    field: "TTL_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
 ];
 
 // 종합내역 - 물동지급내역
@@ -77,7 +114,13 @@ export const FREIGHT_PAY_COLUMN_DEFS = [
   { headerName: "No" },
   { headerName: "LBL_OPER_TCD", field: "CHG_CD" },
   { headerName: "LBL_OPER_TNM", field: "CHG_NM" },
-  { headerName: "LBL_RATE", field: "RATE" },
+  {
+    headerName: "LBL_RATE",
+    field: "RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
   ...makeAuditColumns({
     insertPerson: true,
     insertDate: true,
@@ -90,8 +133,20 @@ export const FREIGHT_PAY_COLUMN_DEFS = [
 export const INDIRECT_PAY_COLUMN_DEFS = [
   { headerName: "LBL_RATE_ITEM_CODE", field: "CHG_CD" },
   { headerName: "LBL_OPER_TNM", field: "CHG_NM" },
-  { headerName: "LBL_RATE", field: "RATE" },
-  { headerName: "LBL_UNIT_COST", field: "UNIT_RATE" },
+  {
+    headerName: "LBL_RATE",
+    field: "RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_UNIT_COST",
+    field: "UNIT_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
   { headerName: "LBL_APPLIED_VAL", field: "APPLD_VAL" },
   { headerName: "LBL_REASON", field: "RSN_DESC" },
   ...makeAuditColumns({
@@ -108,10 +163,34 @@ export const COST_CENTER_COLUMN_DEFS = [
   { headerName: "LBL_CST_CNTR_CD", field: "CST_CNTR_CD", codeKey: "cstCntrCd" },
   { headerName: "LBL_GL_ACCOUNT_CD", field: "GL_LDGR_CD" },
   { headerName: "LBL_GL_ACCOUNT_NM", field: "GL_LDGR_NM" },
-  { headerName: "LBL_PLANNED_AMOUNT", field: "PLN_RATE" },
-  { headerName: "LBL_CONFIRM_COST", field: "CFM_RATE" },
-  { headerName: "LBL_APPROVAL_RATE", field: "APRVL_RATE" },
-  { headerName: "LBL_DIFF_RATE", field: "DIFF_RATE" },
+  {
+    headerName: "LBL_PLANNED_AMOUNT",
+    field: "PLN_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_CONFIRM_COST",
+    field: "CFM_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_APPROVAL_RATE",
+    field: "APRVL_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_DIFF_RATE",
+    field: "DIFF_RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
   {
     headerName: "LBL_CREATION_TP",
     field: "CST_CNTR_GL_RC_TCD",
@@ -133,7 +212,13 @@ export const MATERIAL_COST_COLUMN_DEFS = [
   { headerName: "LBL_ITEM_NM", field: "ITEM_NM" },
   { headerName: "LBL_PLANT_CD", field: "PLANT_CD" },
   { headerName: "LBL_BATCH_CD", field: "PAS_NO" },
-  { headerName: "LBL_RATE", field: "RATE" },
+  {
+    headerName: "LBL_RATE",
+    field: "RATE",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
   { headerName: "LBL_QTY", field: "QTY" },
   { headerName: "LBL_UOM", field: "QTY_UOM" },
   { headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },

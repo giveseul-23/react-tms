@@ -204,6 +204,16 @@ type DataGridProps<TRow> = {
    * (예: getRowId, suppressMovableColumns, rowClassRules 등)
    */
   gridOptions?: Record<string, any>;
+
+  // ─── renderRightGrid 좌/우 패널 크기 조정 (%) ─────────────────────────────
+  /** 메인(좌측) 패널 초기 크기 — 기본 70 */
+  mainPanelSize?: number;
+  /** 메인(좌측) 패널 최소 크기 — 기본 30 */
+  mainPanelMinSize?: number;
+  /** 오른쪽 패널(renderRightGrid) 초기 크기 — 기본 30 */
+  rightPanelSize?: number;
+  /** 오른쪽 패널(renderRightGrid) 최소 크기 — 기본 20 */
+  rightPanelMinSize?: number;
 };
 
 export default function DataGrid<TRow>({
@@ -236,6 +246,10 @@ export default function DataGrid<TRow>({
   overrideRowData,
   gridOptions,
   onTabChange,
+  mainPanelSize = 70,
+  mainPanelMinSize = 30,
+  rightPanelSize = 30,
+  rightPanelMinSize = 20,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -964,7 +978,7 @@ export default function DataGrid<TRow>({
           activeRender()
         ) : rightGrid ? (
           <PanelGroup direction="horizontal" className="h-full w-full">
-            <Panel defaultSize={70} minSize={30}>
+            <Panel defaultSize={mainPanelSize} minSize={mainPanelMinSize}>
               <div className="h-full flex flex-col min-h-0 border border-gray-200 rounded-md overflow-hidden bg-[rgb(var(--bg))]">
                 {/* rightGrid 가 있을 때: MAIN actions 는 MAIN 패널 내부로 */}
                 <div className="relative z-1 shrink-0 min-w-0 w-full">
@@ -986,7 +1000,7 @@ export default function DataGrid<TRow>({
               </div>
             </Panel>
             <PanelResizeHandle className="w-2 cursor-col-resize hover:bg-slate-200/70" />
-            <Panel defaultSize={30} minSize={20}>
+            <Panel defaultSize={rightPanelSize} minSize={rightPanelMinSize}>
               <div className="h-full">{rightGrid}</div>
             </Panel>
           </PanelGroup>

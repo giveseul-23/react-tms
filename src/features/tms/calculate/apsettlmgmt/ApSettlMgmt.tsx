@@ -115,6 +115,8 @@ export default function ApSettlMgmt() {
           }}
           codeMap={model.codeMap}
           actions={[]}
+          mainPanelSize={30}
+          rightPanelSize={70}
           renderRightGrid={(activeTabKey) => {
             if (activeTabKey === "SUMMARY") {
               return (
