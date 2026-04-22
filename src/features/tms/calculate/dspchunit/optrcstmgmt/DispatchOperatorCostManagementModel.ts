@@ -50,9 +50,17 @@ export function useDispatchOperatorCostModel() {
   }, [setSelectedHeaderRowWithRef]);
 
   const { stores } = useCommonStores({
-    setlPrgSts: { sqlProp: "CODE", keyParam: "SETL_PRG_STS" },
-    dlCloseSts: { sqlProp: "CODE", keyParam: "DL_CLOSE_STS" },
-    locGubun: { sqlProp: "CODE", keyParam: "LOC_GUBUN" },
+    apType: { sqlProp: "CODE", keyParam: "TM_LEGARCY_AP_TP" },
+    financialStatus: { sqlProp: "CODE", keyParam: "DSPCH_FI_STS" },
+    serviceType: { sqlProp: "CODE", keyParam: "TRF_SVC_TP" },
+    pickDropDiv: { sqlProp: "CODE", keyParam: "STOP_TP" },
+    schedTcd: { sqlProp: "CODE", keyParam: "SCHED_TCD" },
+    dsFiStsList: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
+    payTo: { sqlProp: "CODE", keyParam: "PAY_TO" },
+    locTp: { sqlProp: "CODE", keyParam: "LOC_TP" },
+    calTcd: { sqlProp: "CODE", keyParam: "CAL_TCD" },
+    dlySetlSts: { sqlProp: "CODE", keyParam: "DLY_SETL_STS" },
+    cnsigType: { sqlProp: "CODE", keyParam: "HARIM_CONSMT_TP" },
   });
 
   const codeMap = useMemo(() => {
@@ -91,4 +99,6 @@ export function useDispatchOperatorCostModel() {
   };
 }
 
-export type DispatchOperatorCostModel = ReturnType<typeof useDispatchOperatorCostModel>;
+export type DispatchOperatorCostModel = ReturnType<
+  typeof useDispatchOperatorCostModel
+>;

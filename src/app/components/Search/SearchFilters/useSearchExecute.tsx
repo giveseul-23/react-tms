@@ -109,6 +109,35 @@ export function useSearchExecute({
         return;
       }
 
+      // ── POPUP state 키 → DBCOLUMN 치환 헬퍼 ─────────────────
+      //   SearchFieldRenderer 는 POPUP 을 `${baseKey}_CD` / `${baseKey}_NM`
+      //   쌍으로 state 에 저장하지만, SQL/서버 payload 에는 meta.key(= DBCOLUMN)
+      //   를 써야 함.
+      //   예) meta.key="PLN_ID" → state 키 "PLN_ID_CD"/"PLN_ID_NM"
+      //         → SQL/payload 키 "PLN_ID"
+      //   _NM 은 null 반환 → SQL/payload 에서 제외
+      //
+      //   sourceType 에 의존하지 않고 state 키 패턴을 POPUP meta 와 대조.
+      //   (모듈 기본값 세팅 시 sourceType 이 누락되는 케이스 대응)
+      const findPopupMetaForStateKey = (stateKey: string) => {
+        let baseKey: string | null = null;
+        if (stateKey.endsWith("_CD")) baseKey = stateKey.replace(/_CD$/, "");
+        else if (stateKey.endsWith("_NM"))
+          baseKey = stateKey.replace(/_NM$/, "");
+        if (baseKey === null) return null;
+        return (
+          meta.find(
+            (m) => m.type === "POPUP" && m.key.replace("_CD", "") === baseKey,
+          ) ?? null
+        );
+      };
+      const resolveDbColumn = (stateKey: string): string | null => {
+        const popupMeta = findPopupMetaForStateKey(stateKey);
+        if (!popupMeta) return stateKey; // POPUP 아니면 그대로
+        if (stateKey.endsWith("_NM")) return null; // _NM 제외
+        return popupMeta.key; // _CD → meta.key(= DBCOLUMN)
+      };
+
       // ── DYNAMIC_QUERY 빌드 ──────────────────────────────────
       const conditions: string[] = [];
       const extraParams: Record<string, any> = {};
@@ -119,7 +148,10 @@ export function useSearchExecute({
           return;
         }
         if (v.value === "ALL") return;
-        conditions.push(buildSearchCondition(v));
+
+        const dbKey = resolveDbColumn(v.key);
+        if (dbKey === null) return; // POPUP _NM 제외
+        conditions.push(buildSearchCondition({ ...v, key: dbKey }));
       });
 
       // DYNAMIC_QUERY는 항상 "1=1"로 시작 (buildSearchCondition은 " AND ..."를 반환)
@@ -128,6 +160,7 @@ export function useSearchExecute({
 
       // ── rawFilters(SRCH_* 접두 맵) 빌드 ─────────────────────
       // 네이밍: DSPCH.DIV_CD → SRCH_DSPCH_DIV_CD (dot → _, SRCH_ 접두)
+      // rawFilters 는 클라이언트 내부용 — state 키(_CD/_NM 쌍) 그대로 보존
       const dateKeys = new Set<string>();
       meta.forEach((m) => {
         if (m.type === "YMD" || m.type === "YMDT") {
@@ -141,19 +174,28 @@ export function useSearchExecute({
       });
 
       const rawFilters: Record<string, string> = {};
+      // DBCOLUMN 키 맵 — 서버 payload top-level 주입용 (POPUP 치환 적용)
+      const dbColumnFilters: Record<string, string> = {};
       Object.values(searchState).forEach((v) => {
-        if (v.value != null && v.value !== "" && v.value !== "ALL") {
-          const key = `SRCH_${v.key.replace(/\./g, "_")}`;
-          // 날짜 파라미터는 '-' 제거
-          rawFilters[key] = dateKeys.has(v.key)
-            ? String(v.value).replace(/-/g, "")
-            : String(v.value);
-        }
+        if (v.value == null || v.value === "" || v.value === "ALL") return;
+
+        const val = dateKeys.has(v.key)
+          ? String(v.value).replace(/-/g, "")
+          : String(v.value);
+
+        // 클라이언트용: state 키 그대로(SRCH_ 접두)
+        rawFilters[`SRCH_${v.key.replace(/\./g, "_")}`] = val;
+
+        // 서버용: POPUP 은 meta.key(DBCOLUMN) 로 치환, _NM 은 제외
+        const dbKey = resolveDbColumn(v.key);
+        if (dbKey === null) return;
+        dbColumnFilters[dbKey.replace(/\./g, "_")] = val;
       });
 
       if (rawFiltersRef) rawFiltersRef.current = rawFilters;
 
       // ── fetchFn에 전달할 params 조립 ────────────────────────
+      // DYNAMIC_QUERY 모드에서도 DBCOLUMN 키 필드를 평탄화해서 함께 보냄.
       const params: Record<string, unknown> =
         paramMode === "RAW"
           ? {
@@ -165,6 +207,7 @@ export function useSearchExecute({
           : {
               DYNAMIC_QUERY: whereClause,
               MENU_CD: "test",
+              ...dbColumnFilters,
               page: targetPage,
               limit: limitRef.current,
               ...extraParams,

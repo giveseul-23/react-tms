@@ -18,7 +18,7 @@ export const dispatchOperatorCostApi = {
 
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/searchList`,
+      `/dispatchOperatorCostManagementService/search`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -26,7 +26,7 @@ export const dispatchOperatorCostApi = {
   // 비용상세정보
   getCostDetailList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/searchCostDetail`,
+      `/dispatchOperatorCostManagementService/searchDispatchApplanDetail`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -34,7 +34,7 @@ export const dispatchOperatorCostApi = {
   // 비용상세 — 함수 서브
   getCostFunctionList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/searchCostFunction`,
+      `/dispatchOperatorCostManagementService/searchCostInfoList`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -42,7 +42,7 @@ export const dispatchOperatorCostApi = {
   // 경유처
   getWaypointList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/searchWaypoint`,
+      `/dispatchOperatorCostManagementService/searchPlanStop`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -50,7 +50,7 @@ export const dispatchOperatorCostApi = {
   // 증빙문서
   getEvidenceList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/searchEvidence`,
+      `/dispatchOperatorCostManagementService/searchDocFile`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -58,55 +58,55 @@ export const dispatchOperatorCostApi = {
   // 상단 액션
   changeContract(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/changeContract`,
+      `/dispatchOperatorCostManagementService/changeContract`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   calculateCost(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/calculateCost`,
+      `/dispatchOperatorCostManagementService/calculateCost`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   adjustBulkDistance(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/adjustBulkDistance`,
+      `/dispatchOperatorCostManagementService/adjustBulkDistance`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   recalculateMoveDistance(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/recalculateMoveDistance`,
+      `/dispatchOperatorCostManagementService/recalculateMoveDistance`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   closeDaily(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/closeDaily`,
+      `/dispatchOperatorCostManagementService/closeDaily`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   confirmCost(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/confirmCost`,
+      `/dispatchOperatorCostManagementService/confirmCost`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   deleteSettlement(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/deleteSettlement`,
+      `/dispatchOperatorCostManagementService/deleteSettlement`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   save(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/save`,
+      `/dispatchOperatorCostManagementService/save`,
       withSession(rows),
     );
   },
   createClose(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/createClose`,
+      `/dispatchOperatorCostManagementService/createClose`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -114,19 +114,19 @@ export const dispatchOperatorCostApi = {
   // 경유처 - 정산경로 추가/복구/조정
   addSettlementRoute(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/addSettlementRoute`,
+      `/dispatchOperatorCostManagementService/addSettlementRoute`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   restoreRoute(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/restoreRoute`,
+      `/dispatchOperatorCostManagementService/restoreRoute`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
   saveWaypoint(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/saveWaypoint`,
+      `/dispatchOperatorCostManagementService/saveWaypoint`,
       withSession(rows),
     );
   },
@@ -134,13 +134,13 @@ export const dispatchOperatorCostApi = {
   // 증빙문서 - 저장 / 첨부
   saveEvidence(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/saveEvidence`,
+      `/dispatchOperatorCostManagementService/saveEvidence`,
       withSession(rows),
     );
   },
   downloadEvidence(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostService/downloadEvidence`,
+      `/dispatchOperatorCostManagementService/downloadEvidence`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
