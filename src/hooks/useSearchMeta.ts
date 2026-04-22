@@ -67,8 +67,7 @@ function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
       required: row.REQUIREMENT === "Y",
       condition,
       conditionLocked: row.OPERATORFIX === "Y",
-      dataType:
-        (row.DATATYPE?.toLowerCase() as SearchMeta["dataType"]) ?? "STRING",
+      dataType: (row.DATATYPE as SearchMeta["dataType"]) ?? "STRING",
     };
 
     if (type === "COMBO") {

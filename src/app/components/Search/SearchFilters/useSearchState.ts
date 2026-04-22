@@ -90,6 +90,18 @@ export function useSearchState(
     }));
   };
 
+  // state 키 → 대응 meta 찾기 (POPUP 의 _CD/_NM 쌍 포함)
+  const findMetaForStateKey = (k: string): SearchMeta | undefined => {
+    if (k.endsWith("_CD") || k.endsWith("_NM")) {
+      const baseKey = k.replace(/_(CD|NM)$/, "");
+      const popup = meta.find(
+        (m) => m.type === "POPUP" && m.key.replace("_CD", "") === baseKey,
+      );
+      if (popup) return popup;
+    }
+    return meta.find((m) => m.key === k);
+  };
+
   /** 초기화 — 기본값 + 모듈 기본값 캐시 재적용 */
   const handleReset = () => {
     const initial = buildInitialSearchState();
@@ -99,10 +111,11 @@ export function useSearchState(
         if (initial[k]) {
           initial[k] = { ...initial[k], value: v };
         } else {
+          const m = findMetaForStateKey(k);
           initial[k] = {
             key: k,
             operator: "equal",
-            dataType: "STRING",
+            dataType: m?.dataType ?? "STRING",
             value: v,
             sourceType: k.endsWith("_NM") ? "POPUP" : "NORMAL",
           };

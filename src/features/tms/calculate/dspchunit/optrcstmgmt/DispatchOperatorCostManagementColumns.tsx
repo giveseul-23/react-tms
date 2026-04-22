@@ -1,4 +1,5 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { numberValueFormatter } from "@/app/components/grid/commonFormatters";
 
 // 메인 그리드
 export const MAIN_COLUMN_DEFS = [
@@ -77,8 +78,22 @@ export const COST_DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
   { headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
   { headerName: "LBL_RATE_ITEM_NM", field: "CHG_NM" },
-  { headerName: "LBL_INS_COST", field: "INS_COST" },
-  { headerName: "LBL_ADJ_COST", field: "ADJ_COST" },
+  {
+    headerName: "LBL_INS_COST",
+    field: "INS_COST",
+    fieldType: "number",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
+  {
+    headerName: "LBL_ADJ_COST",
+    field: "ADJ_COST",
+    fieldType: "number",
+    aggFunc: "sum",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  },
   { headerName: "LBL_OP_ADJUST_REASON", field: "ADJ_RSN" },
   { headerName: "LBL_DOC_CNT", field: "FILE_CNT" },
   { headerName: "LBL_CAL_TCD", field: "CAL_TCD", codeKey: "calTcd" },
@@ -124,9 +139,21 @@ export const WAYPOINT_COLUMN_DEFS = [
   { headerName: "LBL_PICKDROP_DIV", field: "STOP_TP", codeKey: "pickDropDiv" },
   { headerName: "LBL_DIRECT_DIST", field: "DIRECT_DIST" },
   { headerName: "LBL_ADJ_DIRECT_DIST", field: "ADJ_DIRECT_DIST" },
-  { headerName: "LBL_TRNST_PREVSTOP_DIST", field: "PRVS_DIST" },
-  { headerName: "LBL_ADJ_PRVS_DIST", field: "ADJ_PRVS_DIST" },
-  { headerName: "LBL_DISIT_ADJ_RSN", field: "ADJ_RSN" },
+  {
+    headerName: "LBL_TRNST_PREVSTOP_DIST",
+    field: "PRVS_DIST",
+    fieldType: "number",
+    aggFunc: "sum",
+    summable: true,
+  },
+  {
+    headerName: "LBL_ADJ_PRVS_DIST",
+    field: "ADJ_PRVS_DIST",
+  },
+  {
+    headerName: "LBL_DISIT_ADJ_RSN",
+    field: "ADJ_RSN",
+  },
   { headerName: "LBL_STATE", field: "STATE" },
   { headerName: "LBL_CITY", field: "CITY" },
   { headerName: "LBL_DETAIL_ADDRESS", field: "STREET" },

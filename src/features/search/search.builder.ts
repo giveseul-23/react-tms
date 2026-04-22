@@ -18,7 +18,9 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
   let returnStr = " AND ";
 
   const normalizedValue =
-    dataType === "NUMBER" ? (value ?? "").replace(/,/g, "") : (value ?? "");
+    dataType === "NUMBER"
+      ? String(value ?? "").replace(/,/g, "")
+      : (value ?? "");
 
   const safeValue =
     dataType === "NUMBER"

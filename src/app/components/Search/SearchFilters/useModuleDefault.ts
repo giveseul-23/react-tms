@@ -91,6 +91,19 @@ export function useModuleDefault({
         // 캐시 저장 (reset 시 재적용용)
         moduleDefaultCacheRef.current = defaults;
 
+        // state 키 → 대응 meta 찾기 (POPUP 의 _CD/_NM 쌍 포함)
+        const findMetaForStateKey = (k: string): SearchMeta | undefined => {
+          if (k.endsWith("_CD") || k.endsWith("_NM")) {
+            const baseKey = k.replace(/_(CD|NM)$/, "");
+            const popup = meta.find(
+              (mm) =>
+                mm.type === "POPUP" && mm.key.replace("_CD", "") === baseKey,
+            );
+            if (popup) return popup;
+          }
+          return meta.find((mm) => mm.key === k);
+        };
+
         setSearchState((prev) => {
           const next = { ...prev };
           for (const [k, v] of Object.entries(defaults)) {
@@ -98,10 +111,11 @@ export function useModuleDefault({
               next[k] = { ...next[k], value: v };
             } else {
               // 사용자 입력이 없어 searchState에 없는 필드(COMBO/TEXT/POPUP _NM 등)에 기본값 세팅
+              const mm = findMetaForStateKey(k);
               next[k] = {
                 key: k,
                 operator: "equal",
-                dataType: "STRING",
+                dataType: mm?.dataType ?? "STRING",
                 value: v,
                 sourceType: k.endsWith("_NM") ? "POPUP" : "NORMAL",
               };

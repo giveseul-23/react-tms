@@ -1,34 +1,11 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
-
-// ─────────────────────────────────────────────────────────────
-// 공통 포맷/스타일 헬퍼
-// ─────────────────────────────────────────────────────────────
-const numberValueFormatter = (p: any) => {
-  const v = p.value;
-  if (v == null || v === "") return "";
-  const n = typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
-  if (Number.isNaN(n)) return String(v);
-  return n.toLocaleString();
-};
-
-const CENTER: { textAlign: "center" } = { textAlign: "center" };
-const RIGHT: { textAlign: "right" } = { textAlign: "right" };
-
-const negativeRedCenterCellStyle = (p: any) => {
-  const v = p.value;
-  if (v == null || v === "") return CENTER;
-  const n = typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
-  return !Number.isNaN(n) && n < 0 ? { ...CENTER, color: "red" } : CENTER;
-};
-
-const negativeRedRightCellStyle = (p: any) => {
-  const v = p.value;
-  if (v == null || v === "") return RIGHT;
-  const n = typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
-  return !Number.isNaN(n) && n < 0
-    ? { ...RIGHT, color: "red", backgroundColor: "#FEECEC" }
-    : RIGHT;
-};
+import {
+  CENTER,
+  RIGHT,
+  numberValueFormatter,
+  negativeRedCenterCellStyle,
+  negativeRedRightCellStyle,
+} from "@/app/components/grid/commonFormatters";
 
 // ─────────────────────────────────────────────────────────────
 // 월실적 (메인) — HEAD (ExtJS createMainHeaderColumns 대응)
@@ -129,10 +106,7 @@ export const MONTHLY_MAIN_TAIL = [
 // ─────────────────────────────────────────────────────────────
 // 초기 렌더용 (조회 전) — HEAD + TAIL
 // ─────────────────────────────────────────────────────────────
-export const MAIN_COLUMN_DEFS = [
-  ...MONTHLY_MAIN_HEAD,
-  ...MONTHLY_MAIN_TAIL,
-];
+export const MAIN_COLUMN_DEFS = [...MONTHLY_MAIN_HEAD, ...MONTHLY_MAIN_TAIL];
 
 // ─────────────────────────────────────────────────────────────
 // 동적 body 컬럼 빌드 (ExtJS createColumns BODY 대응)

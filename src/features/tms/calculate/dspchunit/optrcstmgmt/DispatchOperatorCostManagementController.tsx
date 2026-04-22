@@ -16,29 +16,40 @@ export function useDispatchOperatorCostController({
   filtersRef,
 }: ControllerProps) {
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => dispatchOperatorCostApi.getList(params),
+    (params: Record<string, unknown>) =>
+      dispatchOperatorCostApi.getList(params),
     [],
   );
 
   const fetchSubTabs = useCallback(
     (row: any) => {
       if (!row) return;
-      const params = { DSPCH_NO: row.DSPCH_NO, SETL_DOC_NO: row.SETL_DOC_NO };
+      const params = {
+        DSPCH_NO: row.DSPCH_NO,
+        AP_ID: row.AP_ID,
+        DEFAULT_TYPE: row.DEFAULT_TYPE,
+      };
 
       dispatchOperatorCostApi
         .getCostDetailList(params)
         .then((res: any) =>
-          model.setCostDetailRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setCostDetailRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       dispatchOperatorCostApi
         .getWaypointList(params)
         .then((res: any) =>
-          model.setWaypointRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setWaypointRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
       dispatchOperatorCostApi
         .getEvidenceList(params)
         .then((res: any) =>
-          model.setEvidenceRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setEvidenceRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
     },
     [model],
@@ -70,10 +81,12 @@ export function useDispatchOperatorCostController({
       dispatchOperatorCostApi
         .getCostFunctionList({
           DSPCH_NO: row.DSPCH_NO,
-          CTRT_ITEM_CD: row.CTRT_ITEM_CD,
+          CHG_CD: row.CHG_CD,
         })
         .then((res: any) =>
-          model.setCostFunctionRowData(res.data.result ?? res.data.data?.dsOut ?? []),
+          model.setCostFunctionRowData(
+            res.data.result ?? res.data.data?.dsOut ?? [],
+          ),
         );
     },
     [model],
@@ -92,21 +105,27 @@ export function useDispatchOperatorCostController({
       key: "계약변경",
       label: "계약변경",
       onClick: () =>
-        doAction(() => dispatchOperatorCostApi.changeContract(filtersRef.current)),
+        doAction(() =>
+          dispatchOperatorCostApi.changeContract(filtersRef.current),
+        ),
     },
     {
       type: "button",
       key: "비용계산",
       label: "비용계산",
       onClick: () =>
-        doAction(() => dispatchOperatorCostApi.calculateCost(filtersRef.current)),
+        doAction(() =>
+          dispatchOperatorCostApi.calculateCost(filtersRef.current),
+        ),
     },
     {
       type: "button",
       key: "일괄거리조정",
       label: "일괄거리조정",
       onClick: () =>
-        doAction(() => dispatchOperatorCostApi.adjustBulkDistance(filtersRef.current)),
+        doAction(() =>
+          dispatchOperatorCostApi.adjustBulkDistance(filtersRef.current),
+        ),
     },
     {
       type: "button",
@@ -134,7 +153,9 @@ export function useDispatchOperatorCostController({
       key: "정산정보삭제",
       label: "정산정보삭제",
       onClick: () =>
-        doAction(() => dispatchOperatorCostApi.deleteSettlement(filtersRef.current)),
+        doAction(() =>
+          dispatchOperatorCostApi.deleteSettlement(filtersRef.current),
+        ),
     },
     {
       type: "button",
@@ -145,7 +166,9 @@ export function useDispatchOperatorCostController({
           (r: any) => r._isNew || r._isDirty,
         );
         if (saveRows.length === 0) return;
-        dispatchOperatorCostApi.save(saveRows).then(() => searchRef.current?.());
+        dispatchOperatorCostApi
+          .save(saveRows)
+          .then(() => searchRef.current?.());
       },
     },
     {
@@ -185,7 +208,9 @@ export function useDispatchOperatorCostController({
           (r: any) => r._isNew || r._isDirty,
         );
         if (saveRows.length === 0) return;
-        dispatchOperatorCostApi.save(saveRows).then(() => searchRef.current?.());
+        dispatchOperatorCostApi
+          .save(saveRows)
+          .then(() => searchRef.current?.());
       },
     },
     {

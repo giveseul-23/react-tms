@@ -1,35 +1,11 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
-
-// ─────────────────────────────────────────────────────────────
-// 공통 포맷/스타일 헬퍼
-// ─────────────────────────────────────────────────────────────
-const numberValueFormatter = (p: any) => {
-  const v = p.value;
-  if (v == null || v === "") return "";
-  const n = typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
-  if (Number.isNaN(n)) return String(v);
-  return n.toLocaleString();
-};
-
-const CENTER: { textAlign: "center" } = { textAlign: "center" };
-const RIGHT: { textAlign: "right" } = { textAlign: "right" };
-
-const negativeRedCenterCellStyle = (p: any) => {
-  const v = p.value;
-  if (v == null || v === "") return CENTER;
-  const n = typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
-  return !Number.isNaN(n) && n < 0 ? { ...CENTER, color: "red" } : CENTER;
-};
-
-// 음수면 빨강 + 배경색 (메인 createMainHeaderColumns onRenderer 대응)
-const negativeRedRightCellStyle = (p: any) => {
-  const v = p.value;
-  if (v == null || v === "") return RIGHT;
-  const n = typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
-  return !Number.isNaN(n) && n < 0
-    ? { ...RIGHT, color: "red", backgroundColor: "#FEECEC" }
-    : RIGHT;
-};
+import {
+  CENTER,
+  RIGHT,
+  numberValueFormatter,
+  negativeRedCenterCellStyle,
+  negativeRedRightCellStyle,
+} from "@/app/components/grid/commonFormatters";
 
 // TODO: 근무계획/실적 배경색 — workTp / workTpExe 코드 매핑 확정 후 활성화
 //   ExtJS 원본:
