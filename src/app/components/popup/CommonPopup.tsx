@@ -18,6 +18,7 @@ export function CommonPopup({
   onClose,
   filterCol,
   filterValue,
+  extraParams,
 }: {
   sqlId: string;
   fetchFn?: (params?: any) => Promise<any>;
@@ -25,6 +26,8 @@ export function CommonPopup({
   onClose: () => void;
   filterCol: string;
   filterValue: string;
+  /** 동적 SQL 파라미터 — sqlParam1/sqlParam2/sqlParam3/keyParam 형태로 API에 포함 */
+  extraParams?: Record<string, string>;
 }) {
   const [rows, setRows] = useState<any[]>([]);
   const [code, setCode] = useState("");
@@ -45,6 +48,7 @@ export function CommonPopup({
           userId,
           sqlProp: sqlId,
           ACCESS_TOKEN,
+          ...extraParams,
           ...extra,
         })
         .then((res: any) => {

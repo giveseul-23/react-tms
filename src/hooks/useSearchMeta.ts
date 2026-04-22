@@ -68,6 +68,11 @@ function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
       condition,
       conditionLocked: row.OPERATORFIX === "Y",
       dataType: (row.DATATYPE as SearchMeta["dataType"]) ?? "STRING",
+      // 모든 타입 공통 — 서버가 내려주는 동적 SQL 파라미터 참조
+      sqlParam1: row.SQLPARAM1 || undefined,
+      sqlParam2: row.SQLPARAM2 || undefined,
+      sqlParam3: row.SQLPARAM3 || undefined,
+      keyParam: row.KEYPARAM || undefined,
     };
 
     if (type === "COMBO") {

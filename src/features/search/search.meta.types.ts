@@ -10,6 +10,13 @@ interface SearchMetaBase {
   condition?: string;
   conditionLocked?: boolean;
   dataType: SearchMetaDataType;
+  /** sub-API(팝업/콤보) 호출 시 함께 보낼 동적 SQL 파라미터 —
+   *  참조할 다른 필드의 state 키 (서버 메타는 SRCH_ 접두로 내려옴) */
+  sqlParam1?: string;
+  sqlParam2?: string;
+  sqlParam3?: string;
+  /** POPUP 등 4번째 동적 파라미터 — COMBO 는 자체 combo 타입으로 사용 */
+  keyParam?: string;
 }
 
 export interface TextSearchMeta extends SearchMetaBase {

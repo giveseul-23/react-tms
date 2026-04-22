@@ -31,6 +31,27 @@ export function SearchFieldRenderer({
 }: SearchFieldRendererProps) {
   const { openPopup, closePopup } = usePopup();
 
+  // state 키 참조("SRCH_XXX") → 현재 state 값
+  // 서버 메타가 SRCH_ 접두로 내려주므로 접두를 떼고 state 키(DBCOLUMN)로 조회
+  const resolveRef = (ref: string | undefined): string => {
+    if (!ref) return "";
+    const stateKey = ref.replace(/^SRCH_/, "");
+    return String(getCondition(stateKey)?.value ?? "");
+  };
+
+  // 필드 메타의 sqlParam1/2/3/keyParam 을 해석해 서버 payload 용 객체로 변환
+  const buildSqlParams = (m: SearchMeta): Record<string, string> => {
+    const out: Record<string, string> = {};
+    if (m.sqlParam1) out.sqlParam1 = resolveRef(m.sqlParam1);
+    if (m.sqlParam2) out.sqlParam2 = resolveRef(m.sqlParam2);
+    if (m.sqlParam3) out.sqlParam3 = resolveRef(m.sqlParam3);
+    // COMBO 는 keyParam 이 combo 타입 용도라 제외
+    if (m.type !== "COMBO" && m.keyParam) {
+      out.keyParam = resolveRef(m.keyParam);
+    }
+    return out;
+  };
+
   return (
     <>
       {meta.map((m) => {
@@ -314,6 +335,7 @@ export function SearchFieldRenderer({
                             ? getCondition(m.filterValueKey)?.value ?? ""
                             : ""
                         }
+                        extraParams={buildSqlParams(m)}
                       />
                     ),
                     width: "2xl",
