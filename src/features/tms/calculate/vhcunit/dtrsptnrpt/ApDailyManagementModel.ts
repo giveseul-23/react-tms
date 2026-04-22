@@ -53,10 +53,13 @@ export function useApDailyManagementModel() {
 
   // 공통 코드
   const { stores } = useCommonStores({
-    setlPrgSts: { sqlProp: "CODE", keyParam: "SETL_PRG_STS" },
-    dlCloseSts: { sqlProp: "CODE", keyParam: "DL_CLOSE_STS" },
-    sndDlvTp: { sqlProp: "CODE", keyParam: "SND_DLV_TP" },
-    editSts: { sqlProp: "CODE", keyParam: "EDIT_STS" },
+    workTp: { sqlProp: "CODE", keyParam: "WORK_DAY_TP" },
+    workTpExe: { sqlProp: "CODE", keyParam: "EXEC_WORK_DAY_TP" },
+    fiStsList: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
+    dspchOpTpList: { sqlProp: "CODE", keyParam: "DSPCH_OP_TP" },
+    vehicleTransType: { sqlProp: "CODE", keyParam: "TRANS_TCD" },
+    calTcd: { sqlProp: "CODE", keyParam: "CAL_TCD" },
+    dlySetlSts: { sqlProp: "CODE", keyParam: "DLY_SETL_STS" },
   });
 
   const codeMap = useMemo(() => {
@@ -91,4 +94,6 @@ export function useApDailyManagementModel() {
   };
 }
 
-export type ApDailyManagementModel = ReturnType<typeof useApDailyManagementModel>;
+export type ApDailyManagementModel = ReturnType<
+  typeof useApDailyManagementModel
+>;

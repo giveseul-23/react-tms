@@ -1,4 +1,4 @@
-import { useCallback, MutableRefObject } from "react";
+import { useCallback, useRef, MutableRefObject } from "react";
 import { apDailyManagementApi } from "./ApDailyManagementApi";
 import { ApDailyManagementModel } from "./ApDailyManagementModel";
 import {
@@ -23,25 +23,80 @@ export function useApDailyManagementController({
   filtersRef,
   rawFiltersRef,
 }: ControllerProps) {
+  // dynamicColumns 캐시 — DIV_CD + LGST_GRP_CD 조합이 바뀔 때만 재조회
+  const chgCacheRef = useRef<{ key: string; list: any[] }>({
+    key: "",
+    list: [],
+  });
+
   const fetchList = useCallback(
-    (params: Record<string, unknown>) =>
-      apDailyManagementApi.getDailyList(params),
-    [],
+    async (params: Record<string, unknown>) => {
+      const srchObj = rawFiltersRef.current;
+      const divCd = srchObj.SRCH_AP_DIV_CD ?? "";
+      const lgstGrpCd = srchObj.SRCH_AP_LGST_GRP_CD ?? "";
+      const cacheKey = `${divCd}|${lgstGrpCd}`;
+
+      // 1) 동적 컬럼 메타 — 캐시 히트 시 스킵
+      if (chgCacheRef.current.key !== cacheKey) {
+        try {
+          const chgRes: any = await apDailyManagementApi.getUsedChgCd({
+            DIV_CD: divCd,
+            LGST_GRP_CD: lgstGrpCd,
+          });
+          const chgList =
+            chgRes?.data?.result ?? chgRes?.data?.data?.dsOut ?? [];
+
+          chgCacheRef.current = { key: cacheKey, list: chgList };
+
+          // 컬럼 state 갱신 → 데이터 렌더 전에 컬럼이 먼저 세팅됨
+          model.setMainColumnDefs(
+            buildDailyColumns(DAILY_MAIN_HEAD, DAILY_MAIN_TAIL, chgList, {
+              isMainGrid: true,
+            }),
+          );
+          model.setDetailColumnDefs(
+            buildDailyColumns(DAILY_DETAIL_HEAD, DAILY_DETAIL_TAIL, chgList, {
+              isMainGrid: false,
+            }),
+          );
+        } catch (err) {
+          console.error("getUsedChgCd failed", err);
+        }
+      }
+
+      // 2) 목록 조회 — dynamicColumns 동봉
+      return apDailyManagementApi.getDailyList({
+        dynamicColumns: chgCacheRef.current.list,
+        DIV_CD: divCd,
+        LGST_GRP_CD: lgstGrpCd,
+        DLVRY_DT_FROM: srchObj.SRCH_AP_DLVRY_DT_FRM,
+        DLVRY_DT_TO: srchObj.SRCH_AP_DLVRY_DT_TO,
+        ...params,
+      });
+    },
+    [rawFiltersRef, model],
   );
 
-  const fetchDetail = useCallback((row: any) => {
-    if (!row) return Promise.resolve([]);
-    return apDailyManagementApi
-      .getDetailList({
-        DLV_REQ_DT: row.DLV_REQ_DT,
-        VEH_NO: row.VEH_NO,
-        SETL_DOC_NO: row.SETL_DOC_NO,
-      })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
+  const fetchDetail = useCallback(
+    (row: any) => {
+      if (!row) return Promise.resolve([]);
+      const srchObj = rawFiltersRef.current;
+
+      return apDailyManagementApi
+        .getDetailList({
+          dynamicColumns: chgCacheRef.current.list,
+          DIV_CD: srchObj.SRCH_AP_DIV_CD,
+          LGST_GRP_CD: srchObj.SRCH_AP_LGST_GRP_CD,
+          DLVRY_DT_FROM: srchObj.SRCH_AP_DLVRY_DT_FRM,
+          DLVRY_DT_TO: srchObj.SRCH_AP_DLVRY_DT_TO,
+        })
+        .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
+        .catch((err) => {
+          throw Error(err);
+        });
+    },
+    [rawFiltersRef],
+  );
 
   const handleRowClicked = useCallback(
     (row: any) => {
@@ -59,36 +114,12 @@ export function useApDailyManagementController({
   );
 
   const handleSearch = useCallback(
-    async (data: any) => {
+    (data: any) => {
       model.setGridData(data);
       model.resetSubGrids();
-
-      // ExtJS createColumns 대응: 조회 시 CHG_CD 메타 받아 컬럼 재생성
-      try {
-        const srchObj = rawFiltersRef.current;
-
-        const res: any = await apDailyManagementApi.getUsedChgCd({
-          DIV_CD: srchObj.SRCH_AP_DIV_CD,
-          LGST_GRP_CD: srchObj.SRCH_AP_LGST_GRP_CD,
-        });
-        const chgList = res?.data?.result ?? res?.data?.data?.dsOut ?? [];
-        model.setMainColumnDefs(
-          buildDailyColumns(DAILY_MAIN_HEAD, DAILY_MAIN_TAIL, chgList, {
-            isMainGrid: true,
-          }),
-        );
-        model.setDetailColumnDefs(
-          buildDailyColumns(DAILY_DETAIL_HEAD, DAILY_DETAIL_TAIL, chgList, {
-            isMainGrid: false,
-          }),
-        );
-      } catch (err) {
-        console.error("getUsedChgCd failed", err);
-      }
-
       handleRowClicked(data.rows?.[0]);
     },
-    [model, handleRowClicked, filtersRef],
+    [model, handleRowClicked],
   );
 
   const doAction = useCallback(
