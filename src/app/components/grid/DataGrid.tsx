@@ -286,6 +286,35 @@ export default function DataGrid<TRow>({
     return Array.isArray(rowData) ? rowData : [];
   }, [layoutType, activeTab, rowData, overrideRowData]);
 
+  // summable: true 컬럼의 합계를 pinnedBottomRowData 로 생성
+  const summaryRow = useMemo(() => {
+    const collectSummable = (cols: any[]): any[] => {
+      const out: any[] = [];
+      for (const c of cols) {
+        if (c?.summable && c.field) out.push(c);
+        if (Array.isArray(c?.children)) out.push(...collectSummable(c.children));
+      }
+      return out;
+    };
+    const summable = collectSummable(activeColumnDefs as any[]);
+    if (summable.length === 0) return undefined;
+
+    const row: Record<string, any> = {};
+    for (const col of summable) {
+      const field = col.field as string;
+      const total = (activeRowData as any[]).reduce((acc: number, r: any) => {
+        const v = r?.[field];
+        const n =
+          typeof v === "number"
+            ? v
+            : Number(String(v ?? "").replaceAll(",", ""));
+        return Number.isNaN(n) ? acc : acc + n;
+      }, 0);
+      row[field] = total;
+    }
+    return [row];
+  }, [activeColumnDefs, activeRowData]);
+
   const activeActions = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
       return presets[activeTab].actions ?? actions ?? [];
@@ -398,7 +427,9 @@ export default function DataGrid<TRow>({
           cellStyle: { textAlign: "center" },
           headerClass: "ag-header-center",
           valueGetter: (params: ValueGetterParams<TRow>) =>
-            (params.node?.rowIndex ?? 0) + 1,
+            params.node?.rowPinned === "bottom"
+              ? "합계"
+              : (params.node?.rowIndex ?? 0) + 1,
         };
       }
 
@@ -788,6 +819,7 @@ export default function DataGrid<TRow>({
 
   const commonGridProps = {
     columnDefs: finalColumnDefs,
+    pinnedBottomRowData: summaryRow,
     defaultColDef: {
       resizable: true,
       sortable: true,

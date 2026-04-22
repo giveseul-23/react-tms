@@ -463,6 +463,12 @@
   flex: 1 1 auto;
 }
 
+/* 합계 행 (pinnedBottomRowData) — 굵게 + 배경 구분 */
+.ag-theme-bridge .ag-row-pinned {
+  background-color: rgba(0, 0, 0, 0.04);
+  font-weight: 600;
+}
+
 /* ── 체크박스 제외 헤더 텍스트 중앙정렬 ── */
 .ag-theme-bridge
   .ag-header-cell:not(.ag-selection-header-center)

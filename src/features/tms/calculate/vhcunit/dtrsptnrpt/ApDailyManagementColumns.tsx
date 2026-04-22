@@ -575,7 +575,7 @@ export function buildDailyColumns(
             editable,
             valueFormatter: numberValueFormatter,
             cellStyle: negativeRedCenterCellStyle,
-            aggFunc: "sum",
+            summable: true,
           },
           {
             headerName: "LBL_REASON",
@@ -599,6 +599,7 @@ export function buildDailyColumns(
       valueFormatter: numberValueFormatter,
       cellStyle: negativeRedCenterCellStyle,
       aggFunc: "sum",
+      summable: true,
     };
   });
 
