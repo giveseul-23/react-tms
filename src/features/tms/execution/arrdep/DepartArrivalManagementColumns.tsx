@@ -17,9 +17,6 @@ export const MAIN_COLUMN_DEFS = [
   {
     headerName: "LBL_CFM_NET_WGT",
     field: "CFM_NET_WGT",
-    aggFunc: "sum",
-    summable: true,
-    valueFormatter: numberValueFormatter,
   },
   { headerName: "LBL_DLVRY_STT_DTTM", field: "DLVRY_START_DTTM" },
   { headerName: "LBL_DLVRY_STT_USR_ID", field: "DLVRY_START_USR_ID" },
@@ -96,7 +93,6 @@ export const STOPOVER_COLUMN_DEFS = [
   {
     headerName: "LBL_TRNST_PREVSTOP_DIST",
     field: "TRNST_PREVSTOP_DIST",
-    valueFormatter: numberValueFormatter,
   },
   { headerName: "LBL_DETAIL_ADDRESS", field: "DTL_ADDR1" },
   { headerName: "LBL_LATITUDE", field: "LAT" },
@@ -125,22 +121,18 @@ export const ASSIGNED_ORDER_COLUMN_DEFS = [
   {
     headerName: "LBL_PLN_NET_VOL",
     field: "PLN_NET_VOL",
-    valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLN_GRS_VOL",
     field: "PLN_GRS_VOL",
-    valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLN_NET_WGT",
     field: "PLN_NET_WGT",
-    valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLN_GRS_WGT",
     field: "PLN_GRS_WGT",
-    valueFormatter: numberValueFormatter,
   },
   { headerName: "LBL_PLN_PLT_QTY", field: "PLN_PLT_QTY" },
   { headerName: "LBL_PLN_RTNR_QTY", field: "PLN_RTNR_QTY" },
@@ -161,12 +153,10 @@ export const ASSIGNED_ORDER_COLUMN_DEFS = [
   {
     headerName: "LBL_CFM_NET_WGT",
     field: "CFM_NET_WGT",
-    valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CFM_GRS_WGT",
     field: "CFM_GRS_WGT",
-    valueFormatter: numberValueFormatter,
   },
   { headerName: "LBL_CFM_PLT_QTY", field: "CFM_PLT_QTY" },
   { headerName: "LBL_CFM_RTNR_QTY", field: "CFM_RTNR_QTY" },
