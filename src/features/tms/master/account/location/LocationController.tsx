@@ -26,7 +26,7 @@ export function useLocationController({
   const fetchSubTabs = useCallback(
     (row: any) => {
       if (!row) return;
-      const params = { LOC_CD: row.LOC_CD };
+      const params = { LOC_ID: row.LOC_ID };
 
       locationApi
         .getEntryRestrictionList(params)

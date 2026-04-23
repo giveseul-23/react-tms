@@ -22,7 +22,21 @@ const TYPE_MAP: Record<string, SearchMeta["type"]> = {
   CHECK: "CHECKBOX",
 };
 
-const OPERATOR_MAP: Record<string, string> = {
+// 서버 OPRT_TP 공통코드 NAME(SQL 연산자 문자열) → 아이콘 키
+const OPERATOR_NAME_TO_ICON: Record<string, string> = {
+  "=": "equal",
+  LIKE: "percent",
+  "<": "chevronLeft",
+  "<=": "chevronFirst",
+  ">": "chevronRight",
+  ">=": "chevronLast",
+  "<>": "notEqual",
+  IN: "parentheses",
+};
+
+// CODE(서버 코드값) → 아이콘 키. OPRT_TP 공통코드 조회 결과로 동적 구성.
+// 실패/미로딩 시 대비용 fallback.
+const FALLBACK_OPERATOR_MAP: Record<string, string> = {
   "1": "equal",
   "2": "percent",
   "3": "notEqual",
@@ -32,6 +46,45 @@ const OPERATOR_MAP: Record<string, string> = {
   "7": "chevronLast",
   "8": "chevronFirst",
 };
+
+// OPRT_TP 공통코드는 거의 변하지 않으므로 모듈 스코프에 캐시
+let oprtTpPromise: Promise<Record<string, string>> | null = null;
+
+function loadOperatorMap(): Promise<Record<string, string>> {
+  if (oprtTpPromise) return oprtTpPromise;
+
+  const { userId, sesUserId, ACCESS_TOKEN, sesLang } = getSessionFields();
+  oprtTpPromise = commonApi
+    .fetchComboOptions([
+      {
+        key: "OPRT_TP",
+        sqlProp: "CODE",
+        keyParam: "OPRT_TP",
+        sesUserId,
+        userId,
+        ACCESS_TOKEN,
+        sesLang,
+      },
+    ])
+    .then((res) => {
+      const list: Array<{ CODE: string; NAME: string }> =
+        res?.data?.data?.OPRT_TP ?? [];
+      if (!list.length) return FALLBACK_OPERATOR_MAP;
+      const map: Record<string, string> = {};
+      list.forEach((item) => {
+        const iconKey = OPERATOR_NAME_TO_ICON[item.NAME];
+        if (iconKey) map[String(item.CODE)] = iconKey;
+      });
+      return Object.keys(map).length > 0 ? map : FALLBACK_OPERATOR_MAP;
+    })
+    .catch((e) => {
+      console.error("[useSearchMeta] OPRT_TP load failed", e);
+      oprtTpPromise = null; // 다음 호출에서 재시도 가능하도록 리셋
+      return FALLBACK_OPERATOR_MAP;
+    });
+
+  return oprtTpPromise;
+}
 
 // "'2030','2040'" → ["2030","2040"]
 function parseFilterValues(raw: string): string[] {
@@ -50,7 +103,10 @@ function calcSpan(wdt: number): number {
 // 서버 row → SearchMeta 변환
 //  - 키 접근: 소문자 (row.dbcolumn, row.type ...)
 //  - 값 비교: 대문자 (row.type === "COMBO" ...)
-function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
+function toSearchMeta(
+  rows: ServerSearchConditionRow[],
+  operatorMap: Record<string, string>,
+): SearchMeta[] {
   const sorted = [...rows].sort(
     (a, b) => Number(a.LINENUMBER) - Number(b.LINENUMBER),
   );
@@ -58,7 +114,7 @@ function toSearchMeta(rows: ServerSearchConditionRow[]): SearchMeta[] {
   return sorted.map((row): SearchMeta => {
     // 값이 대문자로 오므로 toUpperCase() 후 매핑
     const type: SearchMeta["type"] = TYPE_MAP[row.TYPE] ?? "TEXT";
-    const condition = OPERATOR_MAP[String(row.OPERATOR)] ?? "equal";
+    const condition = operatorMap[String(row.OPERATOR)] ?? "equal";
 
     const base = {
       key: row.DBCOLUMN,
@@ -157,15 +213,18 @@ export function useSearchMeta(menuCode: string) {
       const { userId, sesUserId, ACCESS_TOKEN, sesLang } = getSessionFields();
 
       try {
-        const condRes = await commonApi.fetchSearchCondition(
-          menuCodeRef.current,
-          sesLang,
-          userId,
-        );
+        const [condRes, operatorMap] = await Promise.all([
+          commonApi.fetchSearchCondition(
+            menuCodeRef.current,
+            sesLang,
+            userId,
+          ),
+          loadOperatorMap(),
+        ]);
         const rawRows: ServerSearchConditionRow[] =
           condRes.data?.data?.dsSearchCondition ?? [];
 
-        const baseMeta = toSearchMeta(rawRows);
+        const baseMeta = toSearchMeta(rawRows, operatorMap);
 
         // keyParam 이 없어도 sqlProp 이 있으면 콤보 요청 대상으로 포함
         const comboItems = baseMeta.filter(
