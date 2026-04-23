@@ -28,8 +28,8 @@ export function useDistanceTransitTimeController({
       if (!row) return;
       const params = {
         DIV_CD: row.DIV_CD,
-        FROM_LOC_CD: row.FROM_LOC_CD,
-        TO_LOC_CD: row.TO_LOC_CD,
+        FRM_LOC_ID: row.FRM_LOC_ID,
+        TO_LOC_ID: row.TO_LOC_ID,
       };
       distanceTransitTimeApi
         .getHistoryList(params)

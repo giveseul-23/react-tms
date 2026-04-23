@@ -3,37 +3,40 @@ import { numberValueFormatter } from "@/app/components/grid/commonFormatters";
 
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
-  { headerName: "LBL_DIV_CD", field: "DIV_CD" },
-  { headerName: "LBL_DIV_NM", field: "DIV_NM" },
-  { headerName: "LBL_FROM_LOC_CD", field: "FROM_LOC_CD" },
-  { headerName: "LBL_FROM_LOC_NM", field: "FROM_LOC_NM" },
-  { headerName: "LBL_TO_LOC_CD", field: "TO_LOC_CD" },
-  { headerName: "LBL_TO_LOC_NM", field: "TO_LOC_NM" },
+  { headerName: "LBL_DIVISION_CODE", field: "DIV_CD" },
+  { headerName: "LBL_DIVISION_NAME", field: "DIV_NM" },
+  { headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD" },
+  { headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" },
+  { headerName: "LBL_DESTINATION_CODE", field: "TO_LOC_CD" },
+  { headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" },
   {
-    headerName: "LBL_MOVE_DISTANCE_KM",
-    field: "MOVE_DIST_KM",
-    aggFunc: "sum",
-    summable: true,
-    valueFormatter: numberValueFormatter,
+    headerName: "LBL_TZ_DIST",
+    field: "DIST",
   },
   {
-    headerName: "LBL_TMAP_MOVE_DISTANCE_KM",
-    field: "TMAP_MOVE_DIST_KM",
-    aggFunc: "sum",
-    summable: true,
-    valueFormatter: numberValueFormatter,
+    headerName: "LBL_TZ_DIST_TMAP",
+    field: "TMAP_DIST",
   },
   {
-    headerName: "LBL_TRANS_TIME_MIN",
-    field: "TRANS_TIME_MIN",
-    valueFormatter: numberValueFormatter,
+    headerName: "LBL_TRANSIT_TIME",
+    field: "TRANSITTIME",
   },
   {
-    headerName: "LBL_EXP_TOLL_FEE",
-    field: "EXP_TOLL_FEE",
-    valueFormatter: numberValueFormatter,
+    headerName: "LBL_EXP_TOLL_RATE",
+    field: "RATE",
   },
-  { headerName: "LBL_ROUTE_OPT_TP", field: "ROUTE_OPT_TP" },
+  {
+    headerName: "LBL_ROUTE_SEARCH_OPTION",
+    field: "MAP_RTNG_OPTN_TCD",
+    codeKey: "mapRtngOptnTcd",
+  },
+  { headerName: "LBL_CHG_REASON", field: "CHG_RSN" },
+  { headerName: "LBL_REMARK", field: "RMK" },
+  {
+    headerName: "LBL_PRCS_STS",
+    field: "DTTO_PRCS_STS",
+    codeKey: "dttoPrcsStatus",
+  },
   ...makeAuditColumns({
     delete: true,
     rowStatus: true,
@@ -42,32 +45,33 @@ export const MAIN_COLUMN_DEFS = [
     updatePerson: true,
     updateTime: true,
   }),
+  { headerName: "LBL_DTTO_BASE_TIME", field: "BASE_TIME" },
 ];
 
-// 이력 그리드
+// 이력 그리드 (DistanceTransitTimeSub01)
 export const HISTORY_COLUMN_DEFS = [
   { headerName: "No" },
   {
-    headerName: "LBL_MOVE_DISTANCE_KM",
-    field: "MOVE_DIST_KM",
+    headerName: "LBL_TZ_DIST",
+    field: "DIST",
     valueFormatter: numberValueFormatter,
   },
   {
-    headerName: "LBL_TMAP_MOVE_DISTANCE_KM",
-    field: "TMAP_MOVE_DIST_KM",
+    headerName: "LBL_TZ_DIST_TMAP",
+    field: "TMAP_DIST",
     valueFormatter: numberValueFormatter,
   },
   {
-    headerName: "LBL_TRANS_TIME_MIN",
-    field: "TRANS_TIME_MIN",
+    headerName: "LBL_TRANSIT_TIME",
+    field: "TRANSITTIME",
     valueFormatter: numberValueFormatter,
   },
   {
-    headerName: "LBL_EXP_TOLL_FEE",
-    field: "EXP_TOLL_FEE",
+    headerName: "LBL_EXP_TOLL_RATE",
+    field: "RATE",
     valueFormatter: numberValueFormatter,
   },
-  { headerName: "LBL_CHANGE_REASON", field: "CHG_RSN" },
+  { headerName: "LBL_CHG_REASON", field: "CHG_RSN" },
   ...makeAuditColumns({
     delete: true,
     rowStatus: true,
@@ -76,5 +80,5 @@ export const HISTORY_COLUMN_DEFS = [
     updatePerson: true,
     updateTime: true,
   }),
-  { headerName: "LBL_BASE_TIME", field: "BASE_TM" },
+  { headerName: "LBL_DTTO_BASE_TIME", field: "BASE_TIME" },
 ];

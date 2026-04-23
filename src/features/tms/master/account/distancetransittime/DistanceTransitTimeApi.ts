@@ -25,7 +25,7 @@ export const distanceTransitTimeApi = {
 
   getHistoryList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/distanceTransitTimeService/searchHistory`,
+      `/distanceTransitTimeService/searchAdd`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },

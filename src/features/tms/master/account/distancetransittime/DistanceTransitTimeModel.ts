@@ -36,7 +36,8 @@ export function useDistanceTransitTimeModel() {
   }, [setSelectedHeaderRowWithRef]);
 
   const { stores } = useCommonStores({
-    routeOptTpList: { sqlProp: "CODE", keyParam: "ROUTE_OPT_TP" },
+    dttoPrcsStatus: { sqlProp: "CODE", keyParam: "DTTO_PRCS_STS" },
+    mapRtngOptnTcd: { sqlProp: "CODE", keyParam: "MAP_RTNG_OPTN_TCD" },
   });
 
   const codeMap = useMemo(() => {
