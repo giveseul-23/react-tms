@@ -10,8 +10,16 @@ export const MAIN_COLUMN_DEFS = [
     field: "AR_FI_STS",
     codeKey: "arFiStatus",
   },
-  { headerName: "LBL_AR_SALES_START_BASE_DATE", field: "AR_FRM_DT" },
-  { headerName: "LBL_AR_SALES_END_BASE_DATE", field: "AR_TO_DT" },
+  {
+    headerName: "LBL_AR_SALES_START_BASE_DATE",
+    field: "AR_FRM_DT",
+    fieldType: "date",
+  },
+  {
+    headerName: "LBL_AR_SALES_END_BASE_DATE",
+    field: "AR_TO_DT",
+    fieldType: "date",
+  },
   {
     headerName: "LBL_AR_SALES_CALC_TYPE_CD",
     field: "AR_CALC_TCD",

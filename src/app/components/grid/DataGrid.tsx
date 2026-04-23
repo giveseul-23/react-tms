@@ -471,6 +471,23 @@ export default function DataGrid<TRow>({
         };
       }
 
+      // fieldType: "date" 선언 컬럼 → 'YYYY-MM-DD' 로 잘라서 가운데 정렬
+      // (DB 타입이 TIMESTAMP 라 풀 타임스탬프로 내려오는 경우 대응)
+      if ((colDef as any).fieldType === "date") {
+        return {
+          ...col,
+          headerName: translate(col),
+          valueFormatter: (params: any) => {
+            const v = params?.value;
+            if (v == null || v === "") return "";
+            return String(v).slice(0, 10);
+          },
+          cellStyle: { textAlign: "center" },
+          headerClass: "ag-header-center",
+          ...(translatedChildren ? { children: translatedChildren } : {}),
+        };
+      }
+
       // 이미 cellStyle / type 이 지정된 경우 그대로 존중
       if (!(colDef as any).cellStyle && !(colDef as any).type) {
         // _STS 로 끝나는 상태값 컬럼 → 중앙 정렬
