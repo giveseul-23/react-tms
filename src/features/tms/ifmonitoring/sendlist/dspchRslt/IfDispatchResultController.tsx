@@ -16,7 +16,8 @@ export function useIfDispatchResultController({
   filtersRef,
 }: ControllerProps) {
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => ifDispatchResultApi.getList(params),
+    (params: Record<string, unknown>) =>
+      ifDispatchResultApi.getList({ userTz: "Asia/Seoul", ...params }),
     [],
   );
 

@@ -27,6 +27,16 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
       ? normalizedValue
       : String(normalizedValue).replace(/'/g, "''");
 
+  const formatValue = (v: string): string => {
+    if (dataType === "DATE") {
+      return `TO_DATE('${v.replace(/-/g, "")}', 'YYYYMMDD')`;
+    }
+    if (dataType === "NUMBER") {
+      return v;
+    }
+    return `'${v}'`;
+  };
+
   // 🔥 dateRange 처리 (_FRM / _TO) — 날짜값에서 '-' 제거 (YYYYMMDD 형식)
   if (key.endsWith("_FRM")) {
     const baseKey = key.replace("_FRM", "");
@@ -50,17 +60,11 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
 
   switch (operator) {
     case "equal":
-      returnStr +=
-        dataType === "NUMBER"
-          ? `${key} = ${safeValue}`
-          : `${key} = '${safeValue}'`;
+      returnStr += `${key} = ${formatValue(safeValue)}`;
       break;
 
     case "notEqual":
-      returnStr +=
-        dataType === "NUMBER"
-          ? `(${key} <> ${safeValue} OR ${key} IS NULL)`
-          : `(${key} <> '${safeValue}' OR ${key} IS NULL)`;
+      returnStr += `(${key} <> ${formatValue(safeValue)} OR ${key} IS NULL)`;
       break;
 
     case "percent":
@@ -72,31 +76,19 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
       break;
 
     case "chevronRight":
-      returnStr +=
-        dataType === "NUMBER"
-          ? `${key} > ${safeValue}`
-          : `${key} > '${safeValue}'`;
+      returnStr += `${key} > ${formatValue(safeValue)}`;
       break;
 
     case "chevronLeft":
-      returnStr +=
-        dataType === "NUMBER"
-          ? `${key} < ${safeValue}`
-          : `${key} < '${safeValue}'`;
+      returnStr += `${key} < ${formatValue(safeValue)}`;
       break;
 
     case "chevronLast":
-      returnStr +=
-        dataType === "NUMBER"
-          ? `${key} >= ${safeValue}`
-          : `${key} >= '${safeValue}'`;
+      returnStr += `${key} >= ${formatValue(safeValue)}`;
       break;
 
     case "chevronFirst":
-      returnStr +=
-        dataType === "NUMBER"
-          ? `${key} <= ${safeValue}`
-          : `${key} <= '${safeValue}'`;
+      returnStr += `${key} <= ${formatValue(safeValue)}`;
       break;
 
     case "notUsed":
@@ -120,6 +112,10 @@ function buildInQuery(val: string, dataType?: string): string {
 
       if (dataType === "NUMBER") {
         return trimmed.replace(/,/g, ""); // 🔥 숫자 콤마 제거 + 따옴표 없음
+      }
+
+      if (dataType === "DATE") {
+        return `TO_DATE('${trimmed.replace(/-/g, "")}', 'YYYYMMDD')`;
       }
 
       return `'${trimmed}'`;
