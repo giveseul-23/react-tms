@@ -16,14 +16,15 @@ export function useIfDeliveryDocumentController({
   filtersRef,
 }: ControllerProps) {
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => ifDeliveryDocumentApi.getList(params),
+    (params: Record<string, unknown>) =>
+      ifDeliveryDocumentApi.getList({ userTz: "Asia/Seoul", ...params }),
     [],
   );
 
   const fetchDetail = useCallback((row: any) => {
     if (!row) return Promise.resolve([]);
     return ifDeliveryDocumentApi
-      .getDetailList({ IF_ID: row.IF_ID })
+      .getDetailList({ IF_ID: row.IF_ID, ORD_NO: row.ORD_NO })
       .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
       .catch((err) => {
         throw Error(err);
