@@ -43,6 +43,8 @@ interface UseSearchExecuteParams {
   /** "DYNAMIC_QUERY"(기본): { DYNAMIC_QUERY, MENU_CD, page, limit, ...extraParams }
    *  "RAW": { ...rawFilters(SRCH_* 맵), page, limit, ...extraParams } */
   paramMode?: ParamMode;
+  /** [TEMP-userTz] DATE 필터 tz 보정용 — 서버 완료 시 제거 */
+  userTz?: string;
 }
 
 export function useSearchExecute({
@@ -57,6 +59,7 @@ export function useSearchExecute({
   computeTotalCount,
   searchRef,
   paramMode = "DYNAMIC_QUERY",
+  userTz, // [TEMP-userTz] 서버 완료 시 제거
 }: UseSearchExecuteParams) {
   const { openPopup, closePopup } = usePopup();
   const [searching, setSearching] = useState(false);
@@ -151,7 +154,7 @@ export function useSearchExecute({
 
         const dbKey = resolveDbColumn(v.key);
         if (dbKey === null) return; // POPUP _NM 제외
-        conditions.push(buildSearchCondition({ ...v, key: dbKey }));
+        conditions.push(buildSearchCondition({ ...v, key: dbKey }, userTz)); // [TEMP-userTz] 서버 완료 시 2번째 인자 제거
       });
 
       // DYNAMIC_QUERY는 항상 "1=1"로 시작 (buildSearchCondition은 " AND ..."를 반환)
@@ -290,6 +293,7 @@ export function useSearchExecute({
       paramMode,
       openPopup,
       closePopup,
+      userTz, // [TEMP-userTz] 서버 완료 시 제거
     ],
   );
 

@@ -8,7 +8,10 @@ export type SearchCondition = {
   sourceType?: "POPUP" | "NORMAL";
 };
 
-export function buildSearchCondition(searchCon: SearchCondition): string {
+export function buildSearchCondition(
+  searchCon: SearchCondition,
+  userTz?: string, // [TEMP-userTz] 서버 작업 완료 시 이 파라미터 제거
+): string {
   let { key, operator, dataType, value, sourceType } = searchCon;
 
   if (sourceType === "POPUP" && key.endsWith("_NM")) return "";
@@ -27,36 +30,42 @@ export function buildSearchCondition(searchCon: SearchCondition): string {
       ? normalizedValue
       : String(normalizedValue).replace(/'/g, "''");
 
+  // 날짜 값 → TO_TIMESTAMP 표현식 (hhmmss: 시작='000000', 끝='235959')
+  const toTimestamp = (d: string, hhmmss: "000000" | "235959"): string =>
+    `TO_TIMESTAMP('${d.replace(/-/g, "")}${hhmmss}', 'YYYYMMDDHH24MISS')`;
+
+  // [TEMP-userTz] range date 에만 tz 접미 — 서버 완료 시 withTz 래핑 전부 제거
+  const withTz = (expr: string): string =>
+    userTz ? `${expr} AT TIME ZONE '${userTz}'` : expr;
+
+  // dateRange 처리 (_FRM / _TO): 시작=00:00:00, 끝=23:59:59 + userTz(옵션)
+  if (key.endsWith("_FRM")) {
+    const baseKey = key.replace("_FRM", "");
+    returnStr += `${baseKey} >= ${withTz(toTimestamp(safeValue, "000000"))}`; // [TEMP-userTz]
+    return returnStr;
+  }
+
+  if (key.endsWith("_TO")) {
+    const baseKey = key.replace("_TO", "");
+    returnStr += `${baseKey} <= ${withTz(toTimestamp(safeValue, "235959"))}`; // [TEMP-userTz]
+    return returnStr;
+  }
+
+  // 단일 DATE + equal → 하루 범위로 확장 (tz 미적용)
+  if (dataType === "DATE" && operator === "equal") {
+    returnStr += `${key} >= ${toTimestamp(safeValue, "000000")} AND ${key} <= ${toTimestamp(safeValue, "235959")}`;
+    return returnStr;
+  }
+
   const formatValue = (v: string): string => {
     if (dataType === "DATE") {
-      return `TO_DATE('${v.replace(/-/g, "")}', 'YYYYMMDD')`;
+      return toTimestamp(v, "000000");
     }
     if (dataType === "NUMBER") {
       return v;
     }
     return `'${v}'`;
   };
-
-  // 🔥 dateRange 처리 (_FRM / _TO) — 날짜값에서 '-' 제거 (YYYYMMDD 형식)
-  if (key.endsWith("_FRM")) {
-    const baseKey = key.replace("_FRM", "");
-    const dateValue = safeValue.replace(/-/g, "");
-    returnStr +=
-      dataType === "NUMBER"
-        ? `${baseKey} >= TO_DATE(${dateValue}, 'YYYYMMDD')`
-        : `${baseKey} >= TO_DATE('${dateValue}', 'YYYYMMDD')`;
-    return returnStr;
-  }
-
-  if (key.endsWith("_TO")) {
-    const baseKey = key.replace("_TO", "");
-    const dateValue = safeValue.replace(/-/g, "");
-    returnStr +=
-      dataType === "NUMBER"
-        ? `${baseKey} <= TO_DATE(${dateValue}, 'YYYYMMDD')`
-        : `${baseKey} <= TO_DATE('${dateValue}', 'YYYYMMDD')`;
-    return returnStr;
-  }
 
   switch (operator) {
     case "equal":
@@ -115,7 +124,8 @@ function buildInQuery(val: string, dataType?: string): string {
       }
 
       if (dataType === "DATE") {
-        return `TO_DATE('${trimmed.replace(/-/g, "")}', 'YYYYMMDD')`;
+        const compact = trimmed.replace(/-/g, "");
+        return `TO_TIMESTAMP('${compact}000000', 'YYYYMMDDHH24MISS')`;
       }
 
       return `'${trimmed}'`;

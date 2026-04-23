@@ -39,6 +39,7 @@ export default function IfDispatchResult() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        userTz: "Asia/Seoul", // [TEMP-userTz] 서버 userTz 적용 완료 시 제거
       }}
       grid={
         <DataGrid

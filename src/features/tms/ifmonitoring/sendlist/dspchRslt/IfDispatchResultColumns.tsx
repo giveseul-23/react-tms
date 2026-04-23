@@ -1,6 +1,7 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 
 export const MAIN_COLUMN_DEFS = [
+  { headerName: "No" },
   { headerName: "LBL_ITM_CD", field: "CUST_ITEM_CD" },
   { headerName: "LBL_ITM_NM", field: "CUST_ITEM_NM" },
   { headerName: "LBL_QTY", field: "PLN_QTY" },
