@@ -71,9 +71,10 @@ export function useIndstrlAccdntCmpnstnController({
 
   const fetchChgDetail = useCallback((row: any) => {
     const insrncId = row?.INSRNC_ID;
-    if (!insrncId) return Promise.resolve([]);
+    const apProcTp = row?.AP_PROC_TP;
+    if (!(insrncId && apProcTp)) return Promise.resolve([]);
     return indstrlAccdntCmpnstnApi
-      .getChgList({ INSRNC_ID: insrncId })
+      .getChgList({ INSRNC_ID: insrncId, AP_PROC_TP: apProcTp })
       .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
       .catch((err) => {
         throw Error(err);
