@@ -19,7 +19,7 @@ export const organizationApi = {
   // 디비전 조회
   getDivisionList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/organizationService/searchDivision`,
+      `/organizationService/search`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -27,7 +27,7 @@ export const organizationApi = {
   // 물류운영그룹 조회
   getLogisticsGroupList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/organizationService/searchLogisticsGroup`,
+      `/organizationService/searchLgstGrp`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },

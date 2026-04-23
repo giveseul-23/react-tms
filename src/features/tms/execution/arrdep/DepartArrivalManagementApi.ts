@@ -18,7 +18,7 @@ export const departArrivalManagementApi = {
 
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/search`,
+      `/departArrivalManagementService/searchDepartArrivalManagement`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -26,7 +26,7 @@ export const departArrivalManagementApi = {
   // 경유처
   getStopoverList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/searchStopover`,
+      `/departArrivalManagementService/searchDepartArrivalManagementStop`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -34,7 +34,15 @@ export const departArrivalManagementApi = {
   // 할당주문
   getAssignedOrderList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/searchAssignedOrder`,
+      `/dispatchPlanService/searchAssignedShipment`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  // 할당주문 상세(품목)
+  getAssignedOrderDetailList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchPlanService/searchAssignedShipmentDetail`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },

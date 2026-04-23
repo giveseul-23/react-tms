@@ -38,8 +38,14 @@ export function useDepartArrivalManagementModel() {
   }, [setSelectedHeaderRowWithRef]);
 
   const { stores } = useCommonStores({
-    dspchPrgsSts: { sqlProp: "CODE", keyParam: "DSPCH_PRGS_STS" },
-    vehTpList: { sqlProp: "CODE", keyParam: "VEH_TP" },
+    stopTpList: { sqlProp: "CODE", keyParam: "STOP_TP" },
+    dspchOpStsList: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
+    depArrRegDivList: { sqlProp: "CODE", keyParam: "ARRDEP_REG_DIV" },
+    dspchTpList: { sqlProp: "CODE", keyParam: "DSPCH_TP" },
+    vehOpType: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
+    ordTpList: { sqlProp: "CODE", keyParam: "ORD_TP" },
+    vehTempTcd: { sqlProp: "CODE", keyParam: "VEH_TEMP_TCD" },
+    itmUomList: { sqlProp: "CODE", keyParam: "ITEM_UOM" },
   });
 
   const codeMap = useMemo(() => {

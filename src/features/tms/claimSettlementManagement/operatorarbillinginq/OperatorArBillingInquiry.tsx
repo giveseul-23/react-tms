@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
@@ -25,6 +25,15 @@ export default function OperatorArBillingInquiry() {
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
+
+  // JS onSaveAfterSearch: setCompToParamExclude('PLN.AR_TO_DT')
+  //   → PLN.AR_TO_DT 는 DYNAMIC_QUERY 에서 제외. 값은 fetchList 에서
+  //     buildOperatorArBillingHeaderParams 처럼 AR_FROM_DT / AR_TO_DT 로 재조립.
+  //   state 는 YMD 범위라 _FRM / _TO 로 쪼개져 있음 → 둘 다 exclude.
+  useEffect(() => {
+    excludeKeysRef.current.add("PLN.AR_TO_DT_FRM");
+    excludeKeysRef.current.add("PLN.AR_TO_DT_TO");
+  }, []);
 
   const ctrl = useOperatorArBillingInquiryController({
     model,

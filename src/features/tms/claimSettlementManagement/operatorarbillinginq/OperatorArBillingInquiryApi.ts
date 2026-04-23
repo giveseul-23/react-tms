@@ -18,7 +18,7 @@ export const operatorArBillingInquiryApi = {
 
   getList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/search`,
+      `/operatorArBillingInquiryService/searchOperatorArBillingHeader`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -26,7 +26,7 @@ export const operatorArBillingInquiryApi = {
   // 청구항목
   getBillingItemList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/searchBillingItem`,
+      `/operatorArBillingInquiryService/searchOperatorArBillingChargeDetail`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -34,7 +34,7 @@ export const operatorArBillingInquiryApi = {
   // 주문정보
   getOrderInfoList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/searchOrderInfo`,
+      `/operatorArBillingInquiryService/searchOperatorArBillingShipmentInform`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },
@@ -42,7 +42,15 @@ export const operatorArBillingInquiryApi = {
   // 증빙문서
   getAttachmentList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/searchAttachment`,
+      `/operatorArBillingInquiryService/searchOperatorArBillingAttachment`,
+      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+    );
+  },
+
+  // 매출 이벤트 이력
+  getArEventHistory(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/operatorArBillingInquiryService/searchArEventHistory`,
       withSession({ MENU_CD: this.MENU_CD, ...payload }),
     );
   },

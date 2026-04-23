@@ -28,7 +28,9 @@ export function useOrganizationModel() {
     setLogisticsGroupRowData([]);
   }, []);
 
-  const { stores } = useCommonStores({});
+  const { stores } = useCommonStores({
+    custList: { sqlProp: "selectCustomerCodeName" },
+  });
 
   const codeMap = useMemo(() => {
     const map: Record<string, Record<string, string>> = {};

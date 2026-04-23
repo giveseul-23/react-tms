@@ -40,8 +40,13 @@ export function useOperatorArBillingInquiryModel() {
   }, [setSelectedHeaderRowWithRef]);
 
   const { stores } = useCommonStores({
-    prgsStsList: { sqlProp: "CODE", keyParam: "PRGS_STS" },
-    arCalcTpList: { sqlProp: "CODE", keyParam: "AR_CALC_TP_CD" },
+    arContractLevel: { sqlProp: "CODE", keyParam: "AR_CNTRCT_LCD" },
+    arResultMessage: { sqlProp: "CODE", keyParam: "AR_CALC_RSLT_MSG_CD" },
+    chargeSignType: { sqlProp: "CODE", keyParam: "CHG_SIGN_TP" },
+    arFiStatus: { sqlProp: "CODE", keyParam: "AR_FI_STS" },
+    arCalcTypeCode: { sqlProp: "CODE", keyParam: "AR_CALC_TCD" },
+    arTariffLevelCode: { sqlProp: "CODE", keyParam: "AR_TRF_LCD" },
+    arBaseDateType: { sqlProp: "CODE", keyParam: "AR_STL_BASE_DT_TP" },
   });
 
   const codeMap = useMemo(() => {
