@@ -111,19 +111,51 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-/** 주행 경로 중간 점 — 빨간 작은 원 (6x6, 선보다 작게) */
-const RED_DOT_ICON =
-  "data:image/svg+xml;charset=UTF-8," +
-  encodeURIComponent(`
+/** 두 좌표 사이의 진행 방향(bearing) — 북=0°, 동=90°, 남=180°, 서=270° */
+function computeBearing(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const toDeg = (r: number) => (r * 180) / Math.PI;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x =
+    Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+    Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
+/**
+ * 주행 경로 중간 점 — 노란 삼각 화살표 (회전 적용).
+ * 기존 RED_DOT_ICON 과 동일한 형태 (polygon 5,1 9,9 1,9 + stroke 2 + non-scaling)
+ * 에서 채움색만 노란색으로, transform 으로 진행 방향 반영.
+ *
+ * 성능: 1° 단위로 반올림해서 캐시 — 최대 360개만 생성되고 이후 재사용.
+ */
+const arrowIconCache = new Map<number, string>();
+function RED_DOT_ICON_WITH_BEARING(bearing: number): string {
+  const key = ((Math.round(bearing) % 360) + 360) % 360;
+  const cached = arrowIconCache.get(key);
+  if (cached) return cached;
+  const url =
+    "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 10 10">
-      <polygon points="5,1 9,9 1,9" 
-           fill="#dc2626" 
-           stroke="#000000" 
+      <polygon points="5,1 9,9 1,9"
+           transform="rotate(${key}, 5, 5)"
+           fill="#ffffff"
+           stroke="#000000"
            stroke-width="2"
            stroke-linejoin="round"
            vector-effect="non-scaling-stroke"/>
     </svg>
   `);
+  arrowIconCache.set(key, url);
+  return url;
+}
 /**
  * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
  * - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 트럭 정중앙 배치
@@ -617,19 +649,29 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
             });
           };
 
-          // 거쳐간 점 — 선(5px)보다 작은 빨간 원(6x6, 가시 4px)
-          const makeTracePointMarker = (p: TracePoint) =>
-            new Tmapv2.Marker({
-              position: new Tmapv2.LatLng(p.lat, p.lon),
+          // 거쳐간 점 — 진행 방향(현재→다음)으로 회전된 노란 삼각 화살표
+          // 크기/아웃라인/앵커는 기존 RED_DOT_ICON 과 동일.
+          const makeTracePointMarker = (curr: TracePoint, next: TracePoint) => {
+            const bearing = computeBearing(
+              curr.lat,
+              curr.lon,
+              next.lat,
+              next.lon,
+            );
+            return new Tmapv2.Marker({
+              position: new Tmapv2.LatLng(curr.lat, curr.lon),
               map,
-              icon: RED_DOT_ICON,
+              icon: RED_DOT_ICON_WITH_BEARING(bearing),
               iconSize: new Tmapv2.Size(10, 10),
               iconAnchor: new Tmapv2.Point(10, 10),
             });
+          };
 
           // 중간 포인트 먼저 (아래 레이어)
           for (let i = 1; i < valid.length - 1; i++) {
-            traceAuxMarkersRef.current.push(makeTracePointMarker(valid[i]));
+            traceAuxMarkersRef.current.push(
+              makeTracePointMarker(valid[i], valid[i + 1]),
+            );
           }
           // 시작/끝 핀 (위 레이어)
           traceAuxMarkersRef.current.push(
