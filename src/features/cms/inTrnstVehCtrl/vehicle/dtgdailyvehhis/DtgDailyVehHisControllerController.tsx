@@ -4,6 +4,7 @@ import { dtgDailyVehHisControllerApi } from "./DtgDailyVehHisControllerApi";
 import { DtgDailyVehHisControllerModel } from "./DtgDailyVehHisControllerModel";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
+import type { StopMarker } from "@/app/components/map/TmapView";
 
 type ControllerProps = {
   model: DtgDailyVehHisControllerModel;
@@ -47,6 +48,7 @@ export function useDtgDailyVehHisControllerController({
       // legacy: DRIVING_HIS_YN === 'N' 이면 지도 초기화 후 return
       if (row?.DRIVING_HIS_YN === "N") {
         model.mapRef.current?.clearTrace();
+        model.mapRef.current?.clearStopMarkers();
         return;
       }
 
@@ -96,6 +98,29 @@ export function useDtgDailyVehHisControllerController({
             lon: Number(r.LON),
           }));
           model.mapRef.current?.drawTrace(points);
+
+          // 주행이력의 첫 좌표 = 출발, 마지막 좌표 = 도착 마커
+          const first = rows[0];
+          const last = rows[rows.length - 1];
+          const stops: StopMarker[] = [
+            {
+              id: "trace-start",
+              lat: Number(first.LAT),
+              lon: Number(first.LON),
+              kind: "start",
+              label: first.LOC_NM ?? first.PSTN_DTTM ?? undefined,
+            },
+          ];
+          if (rows.length > 1) {
+            stops.push({
+              id: "trace-end",
+              lat: Number(last.LAT),
+              lon: Number(last.LON),
+              kind: "end",
+              label: last.LOC_NM ?? last.PSTN_DTTM ?? undefined,
+            });
+          }
+          model.mapRef.current?.drawStopMarkers(stops);
         })
         .catch((err: any) => {
           const message =
