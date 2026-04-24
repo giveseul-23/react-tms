@@ -111,36 +111,19 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-/**
- * 주행 경로 중간 거점 — 흰 채움 + 핑크 테두리 원 (이벤트 발생 지점 표시).
- *  stroke 대신 바깥 핑크 원 + 안쪽 흰 원 2개로 구성해서
- *  중심축이 두 shape 간 완벽히 일치 → 폴리라인이 원 정중앙을 통과.
- */
-const TRACE_DOT_ICON =
+/** 주행 경로 중간 점 — 빨간 작은 원 (6x6, 선보다 작게) */
+const RED_DOT_ICON =
   "data:image/svg+xml;charset=UTF-8," +
   encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
-      <circle cx="7" cy="7" r="5" fill="#E91E63"/>
-      <circle cx="7" cy="7" r="3.5" fill="#ffffff"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 10 10">
+      <polygon points="5,1 9,9 1,9" 
+           fill="#dc2626" 
+           stroke="#000000" 
+           stroke-width="2"
+           stroke-linejoin="round"
+           vector-effect="non-scaling-stroke"/>
     </svg>
   `);
-
-/**
- * 출발/도착 거점 — 중간 거점과 동일한 원 모양 + 테두리 색에 맞춘 S/E 텍스트.
- */
-function buildEndpointCircleIcon(letter: string): string {
-  return (
-    "data:image/svg+xml;charset=UTF-8," +
-    encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
-      <circle cx="7" cy="7" r="5" fill="#E91E63"/>
-      <circle cx="7" cy="7" r="3.5" fill="#ffffff"/>
-      <text x="7" y="7" text-anchor="middle" dominant-baseline="central"
-            font-size="5" font-weight="700" fill="#E91E63">${letter}</text>
-    </svg>
-  `)
-  );
-}
 /**
  * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
  * - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 트럭 정중앙 배치
@@ -616,54 +599,63 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
 
           if (valid.length === 0) return;
 
-          // 시작/끝 거점 — 중간 거점과 동일한 원 + 안에 S/E 텍스트.
-          // 원 모양, 크기, 테두리 전부 중간 거점과 동일 (아웃라인 유지).
+          // 시작/끝 핀 — 트럭 핀과 동일한 스타일(출발:초록 S / 도착:빨강 E)
+          // title 은 생략 — 출발/도착/경유지 hover 툴팁 미표시
           const makeEndpointMarker = (
             p: TracePoint,
             label: string,
-            innerText: "S" | "E",
-          ) =>
-            new Tmapv2.Marker({
+            color: string,
+            innerText: string,
+          ) => {
+            const built = buildStopIconUrl(color, innerText, label);
+            return new Tmapv2.Marker({
               position: new Tmapv2.LatLng(p.lat, p.lon),
               map,
-              icon: buildEndpointCircleIcon(innerText),
-              iconSize: new Tmapv2.Size(14, 14),
-              iconAnchor: new Tmapv2.Point(7, 7),
-              title: label,
+              icon: built.url,
+              iconSize: new Tmapv2.Size(built.width, built.height),
+              iconAnchor: new Tmapv2.Point(built.anchorX, built.anchorY),
             });
+          };
 
-          // 거쳐간 점 — 흰 채움 + 핑크 테두리 원 (단일 아이콘 재사용).
-          // viewBox/iconSize/anchor 전부 12 기준으로 중심 픽셀 완전 일치.
+          // 거쳐간 점 — 선(5px)보다 작은 빨간 원(6x6, 가시 4px)
           const makeTracePointMarker = (p: TracePoint) =>
             new Tmapv2.Marker({
               position: new Tmapv2.LatLng(p.lat, p.lon),
               map,
-              icon: TRACE_DOT_ICON,
-              iconSize: new Tmapv2.Size(14, 14),
-              iconAnchor: new Tmapv2.Point(7, 7),
+              icon: RED_DOT_ICON,
+              iconSize: new Tmapv2.Size(10, 10),
+              iconAnchor: new Tmapv2.Point(10, 10),
             });
 
-          // 중간 포인트 (시작/끝 제외)
+          // 중간 포인트 먼저 (아래 레이어)
           for (let i = 1; i < valid.length - 1; i++) {
             traceAuxMarkersRef.current.push(makeTracePointMarker(valid[i]));
           }
-          // 시작/끝 거점 (위 레이어) — S / E 텍스트
+          // 시작/끝 핀 (위 레이어)
           traceAuxMarkersRef.current.push(
-            makeEndpointMarker(valid[0], "출발", "S"),
+            makeEndpointMarker(valid[0], "출발", "#16a34a", "S"),
           );
           if (valid.length > 1) {
             traceAuxMarkersRef.current.push(
-              makeEndpointMarker(valid[valid.length - 1], "도착", "E"),
+              makeEndpointMarker(
+                valid[valid.length - 1],
+                "도착",
+                "#dc2626",
+                "E",
+              ),
             );
 
-            // polyline — 운행 초반 경로 색상 (파랑)
+            // polyline — 검정
             const path = valid.map((p) => new Tmapv2.LatLng(p.lat, p.lon));
             tracePolylineRef.current = new Tmapv2.Polyline({
               path,
-              strokeColor: options?.strokeColor ?? "#1E88E5",
-              strokeWeight: options?.strokeWeight ?? 10,
+              strokeColor: options?.strokeColor ?? "#000000",
+              strokeWeight: options?.strokeWeight ?? 5,
               strokeStyle: "solid",
               map,
+              // direction: true,
+              // directionColor: "#ffffff",
+              // directionOpacity: 1,
             });
           }
 
