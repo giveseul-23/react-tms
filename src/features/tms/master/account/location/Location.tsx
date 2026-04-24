@@ -95,7 +95,7 @@ export default function Location() {
             { key: "ARRIVAL_REQUEST_TIME", label: "도착요구시간관리" },
             { key: "SMS", label: "SMS" },
             { key: "LOCATION_ROLE", label: "착지역할" },
-            { key: "LOC_SALES", label: "LBL_LOC_SALES" },
+            { key: "LOC_SALES", label: "영업조직" },
             { key: "ETC", label: "기타" },
             { key: "ORDER_TYPE_PLAN_ID", label: "주문유형별계획ID" },
           ]}
