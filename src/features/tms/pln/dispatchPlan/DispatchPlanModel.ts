@@ -49,7 +49,7 @@ export function useDispatchPlanModel() {
 
   // ── 공통 코드 ───────────────────────────────────────────────
   const { stores } = useCommonStores({
-    dspchPrgSts: { sqlProp: "CODE", keyParam: "DSPCH_PRG_STS" },
+    dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
     vehOpTp: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
   });
 

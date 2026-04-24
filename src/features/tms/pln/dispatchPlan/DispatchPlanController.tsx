@@ -198,7 +198,7 @@ export function useDispatchPlanController({
       },
     }),
     makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS({}),
+      columns: MAIN_COLUMN_DEFS,
       menuName: "배차관리",
       fetchFn: () => dispatchPlanApi.getDispatchPlanList(filtersRef.current),
       rows: model.gridData.rows,

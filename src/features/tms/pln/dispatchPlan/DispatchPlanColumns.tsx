@@ -2,25 +2,33 @@
 // 배차관리(MENU_DISPATCH_PLAN) 그리드 컬럼 정의
 
 // ── 메인 그리드: 배차 리스트 ─────────────────────────────────
-export const MAIN_COLUMN_DEFS = (
-  _codeMap: Record<string, Record<string, string>>,
-) => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   { headerName: "LBL_REQUESTED_DELIVERY_DATE", field: "DLVRY_DT" }, // 납품요청일
-  { headerName: "LBL_DISPATCH_OPERATIONAL_STATUS", field: "DSPCH_PRG_STS" }, // 배차진행상태
+  {
+    headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
+    field: "DSPCH_OP_STS",
+    codeKey: "dspchOpSts",
+  }, // 배차진행상태
   { headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" }, // 배차번호
   { headerName: "LBL_CARRIER_NAME", field: "CARR_NM" }, // 운송협력사명
   { headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "VEH_OP_TP" }, // 차량운영유형
   { headerName: "LBL_VEH_NO", field: "VEH_NO" }, // 차량번호
   { headerName: "LBL_DRIVER_NAME", field: "DRVR_NM" }, // 운전자명
   { headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_CD" }, // 차량유형
-  { headerName: "LBL_TTL_LD_RT", field: "PLN_LD_RT", type: "numeric" }, // 적재율
+  {
+    headerName: "LBL_TTL_LD_RT",
+    field: "PLN_LD_RT",
+    type: "numeric",
+    decimalPlaces: 1,
+  }, // 적재율
   { headerName: "LBL_MEMO", field: "MEMO_DESC" }, // 메모
   { headerName: "LBL_LANE", field: "STOP_LIST" }, // 경로
   {
     headerName: "LBL_LOADING_RATE_CBM",
     field: "PLN_NET_VOL_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, // 부피
   {
     headerName: "LBL_VOL",
@@ -31,6 +39,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_LOADING_RATE_CBM",
     field: "PLN_GRS_VOL_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, // 총부피적재율
   {
     headerName: "LBL_WGT",
@@ -41,6 +50,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_WGT_LOADING_RATE",
     field: "PLN_NET_WGT_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, // 순중량적재율
   {
     headerName: "LBL_PLT_QTY",
@@ -51,6 +61,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_PLT_QTY_LOADING_RATE",
     field: "PLN_PLT_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //팔레트수량적재율
   {
     headerName: "LBL_RTNR_QTY",
@@ -61,6 +72,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_RTNR_QTY_LOADING_RATE",
     field: "PLN_RTNR_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //롤테이너수량적재율
   {
     headerName: "LBL_PBOX_QTY",
@@ -71,6 +83,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_PBOX_QTY_LOADING_RATE",
     field: "PLN_PBOX_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //PBOX수량적재율
   {
     headerName: "LBL_BOX_QTY",
@@ -81,6 +94,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_BOX_QTY_LOADING_RATE",
     field: "PLN_BOX_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //BOX수량적재율
   {
     headerName: "LBL_FLEX_QTY1",
@@ -91,6 +105,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_LOADING_RATE_FLEX_QTY1",
     field: "PLN_FLEX_QTY1_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //FQ1적재율
   {
     headerName: "LBL_FLEX_QTY2",
@@ -101,6 +116,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_LOADING_RATE_FLEX_QTY2",
     field: "PLN_FLEX_QTY2_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //FQ2적재율
   {
     headerName: "LBL_FLEX_QTY3",
@@ -111,6 +127,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_LOADING_RATE_FLEX_QTY3",
     field: "PLN_FLEX_QTY3_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //FQ3적재율
   {
     headerName: "LBL_FLEX_QTY4",
@@ -121,6 +138,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_LOADING_RATE_FLEX_QTY4",
     field: "PLN_FLEX_QTY4_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //FQ4적재율
   {
     headerName: "LBL_FLEX_QTY5",
@@ -131,6 +149,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_LOADING_RATE_FLEX_QTY5",
     field: "PLN_FLEX_QTY5_RT",
     type: "numeric",
+    decimalPlaces: 1,
   }, //FQ5적재율
   {
     headerName: "LBL_STOP_CNT",

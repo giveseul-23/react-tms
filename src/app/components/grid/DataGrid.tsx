@@ -306,7 +306,8 @@ export default function DataGrid<TRow>({
       const out: any[] = [];
       for (const c of cols) {
         if (c?.summable && c.field) out.push(c);
-        if (Array.isArray(c?.children)) out.push(...collectSummable(c.children));
+        if (Array.isArray(c?.children))
+          out.push(...collectSummable(c.children));
       }
       return out;
     };
@@ -471,9 +472,13 @@ export default function DataGrid<TRow>({
         };
       }
 
-      // fieldType: "date" 선언 컬럼 → 'YYYY-MM-DD' 로 잘라서 가운데 정렬
+      // type: "date" 선언 컬럼 → 'YYYY-MM-DD' 로 잘라서 가운데 정렬
       // (DB 타입이 TIMESTAMP 라 풀 타임스탬프로 내려오는 경우 대응)
-      if ((colDef as any).fieldType === "date") {
+      // legacy: fieldType: "date" 도 호환 (폼용 fieldType 과 혼용되던 관례)
+      if (
+        (colDef as any).type === "date" ||
+        (colDef as any).fieldType === "date"
+      ) {
         return {
           ...col,
           headerName: translate(col),
@@ -488,29 +493,57 @@ export default function DataGrid<TRow>({
         };
       }
 
-      // 이미 cellStyle / type 이 지정된 경우 그대로 존중
+      // type: "numeric" 선언 컬럼 → 우측 정렬 + decimalPlaces 지정 시 소수점 자리수 고정
+      // legacy: dataType/cellDataType: "number" 도 호환
+      const isNumericType =
+        (colDef as any).type === "numeric" ||
+        (colDef as any).dataType === "number" ||
+        (colDef as any).cellDataType === "number";
+      if (isNumericType) {
+        const decimalPlaces = (colDef as any).decimalPlaces as
+          | number
+          | undefined;
+        const hasCustomFormatter =
+          typeof (colDef as any).valueFormatter === "function";
+        const numberFormatter =
+          !hasCustomFormatter && typeof decimalPlaces === "number"
+            ? (params: any) => {
+                const v = params?.value;
+                if (v == null || v === "") return "";
+                const n =
+                  typeof v === "number"
+                    ? v
+                    : Number(String(v).replaceAll(",", ""));
+                if (Number.isNaN(n)) return String(v);
+                return n.toLocaleString(undefined, {
+                  minimumFractionDigits: decimalPlaces,
+                  maximumFractionDigits: decimalPlaces,
+                });
+              }
+            : undefined;
+        const hasCustomStyle = !!(colDef as any).cellStyle;
+        return {
+          ...col,
+          headerName: translate(col),
+          ...(hasCustomStyle
+            ? {}
+            : {
+                cellStyle: { textAlign: "right" },
+                headerClass: "ag-header-right",
+              }),
+          ...(numberFormatter ? { valueFormatter: numberFormatter } : {}),
+          ...(translatedChildren ? { children: translatedChildren } : {}),
+        };
+      }
+
+      // _STS 로 끝나는 상태값 컬럼 → 중앙 정렬 (이미 cellStyle/type 지정된 경우 존중)
       if (!(colDef as any).cellStyle && !(colDef as any).type) {
-        // _STS 로 끝나는 상태값 컬럼 → 중앙 정렬
         if (field.endsWith("_STS")) {
           return {
             ...col,
             headerName: translate(col),
             cellStyle: { textAlign: "center" },
             headerClass: "ag-header-center",
-            ...(translatedChildren ? { children: translatedChildren } : {}),
-          };
-        }
-
-        // 숫자 타입 컬럼 → 우측 정렬
-        if (
-          (colDef as any).dataType === "number" ||
-          (colDef as any).cellDataType === "number"
-        ) {
-          return {
-            ...col,
-            headerName: translate(col),
-            cellStyle: { textAlign: "right" },
-            headerClass: "ag-header-right",
             ...(translatedChildren ? { children: translatedChildren } : {}),
           };
         }
@@ -578,7 +611,7 @@ export default function DataGrid<TRow>({
     });
   }, [activeTab, activeRowData, finalColumnDefs, runAutoSize, disableAutoSize]);
 
-// ─── 드래그 범위 선택 + Ctrl+C 복사 ──────────────────────────────────────────
+  // ─── 드래그 범위 선택 + Ctrl+C 복사 ──────────────────────────────────────────
   useEffect(() => {
     const container = gridContainerRef.current;
     if (!container) return;

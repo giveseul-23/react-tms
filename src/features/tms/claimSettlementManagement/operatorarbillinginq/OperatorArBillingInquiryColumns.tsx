@@ -13,12 +13,12 @@ export const MAIN_COLUMN_DEFS = [
   {
     headerName: "LBL_AR_SALES_START_BASE_DATE",
     field: "AR_FRM_DT",
-    fieldType: "date",
+    type: "date",
   },
   {
     headerName: "LBL_AR_SALES_END_BASE_DATE",
     field: "AR_TO_DT",
-    fieldType: "date",
+    type: "date",
   },
   {
     headerName: "LBL_AR_SALES_CALC_TYPE_CD",

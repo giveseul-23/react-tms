@@ -111,50 +111,35 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-/** 두 좌표 사이의 진행 방향(bearing) — 북=0°, 동=90°, 남=180°, 서=270° */
-function computeBearing(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number {
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const toDeg = (r: number) => (r * 180) / Math.PI;
-  const dLon = toRad(lon2 - lon1);
-  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
-  const x =
-    Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
-    Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
-  return (toDeg(Math.atan2(y, x)) + 360) % 360;
-}
-
 /**
- * 주행 경로 중간 점 — 노란 삼각 화살표 (회전 적용).
- * 기존 RED_DOT_ICON 과 동일한 형태 (polygon 5,1 9,9 1,9 + stroke 2 + non-scaling)
- * 에서 채움색만 노란색으로, transform 으로 진행 방향 반영.
- *
- * 성능: 1° 단위로 반올림해서 캐시 — 최대 360개만 생성되고 이후 재사용.
+ * 주행 경로 중간 거점 — 흰 채움 + 핑크 테두리 원 (이벤트 발생 지점 표시).
+ *  stroke 대신 바깥 핑크 원 + 안쪽 흰 원 2개로 구성해서
+ *  중심축이 두 shape 간 완벽히 일치 → 폴리라인이 원 정중앙을 통과.
  */
-const arrowIconCache = new Map<number, string>();
-function RED_DOT_ICON_WITH_BEARING(bearing: number): string {
-  const key = ((Math.round(bearing) % 360) + 360) % 360;
-  const cached = arrowIconCache.get(key);
-  if (cached) return cached;
-  const url =
-    "data:image/svg+xml;charset=UTF-8," +
-    encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 10 10">
-      <polygon points="5,1 9,9 1,9"
-           transform="rotate(${key}, 5, 5)"
-           fill="#ffffff"
-           stroke="#000000"
-           stroke-width="2"
-           stroke-linejoin="round"
-           vector-effect="non-scaling-stroke"/>
+const TRACE_DOT_ICON =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
+      <circle cx="7" cy="7" r="5" fill="#E91E63"/>
+      <circle cx="7" cy="7" r="3.5" fill="#ffffff"/>
     </svg>
   `);
-  arrowIconCache.set(key, url);
-  return url;
+
+/**
+ * 출발/도착 거점 — 중간 거점과 동일한 원 모양 + 테두리 색에 맞춘 S/E 텍스트.
+ */
+function buildEndpointCircleIcon(letter: string): string {
+  return (
+    "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
+      <circle cx="7" cy="7" r="5" fill="#E91E63"/>
+      <circle cx="7" cy="7" r="3.5" fill="#ffffff"/>
+      <text x="7" y="7" text-anchor="middle" dominant-baseline="central"
+            font-size="5" font-weight="700" fill="#E91E63">${letter}</text>
+    </svg>
+  `)
+  );
 }
 /**
  * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
@@ -631,73 +616,54 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
 
           if (valid.length === 0) return;
 
-          // 시작/끝 핀 — 트럭 핀과 동일한 스타일(출발:초록 S / 도착:빨강 E)
-          // title 은 생략 — 출발/도착/경유지 hover 툴팁 미표시
+          // 시작/끝 거점 — 중간 거점과 동일한 원 + 안에 S/E 텍스트.
+          // 원 모양, 크기, 테두리 전부 중간 거점과 동일 (아웃라인 유지).
           const makeEndpointMarker = (
             p: TracePoint,
             label: string,
-            color: string,
-            innerText: string,
-          ) => {
-            const built = buildStopIconUrl(color, innerText, label);
-            return new Tmapv2.Marker({
+            innerText: "S" | "E",
+          ) =>
+            new Tmapv2.Marker({
               position: new Tmapv2.LatLng(p.lat, p.lon),
               map,
-              icon: built.url,
-              iconSize: new Tmapv2.Size(built.width, built.height),
-              iconAnchor: new Tmapv2.Point(built.anchorX, built.anchorY),
+              icon: buildEndpointCircleIcon(innerText),
+              iconSize: new Tmapv2.Size(14, 14),
+              iconAnchor: new Tmapv2.Point(7, 7),
+              title: label,
             });
-          };
 
-          // 거쳐간 점 — 진행 방향(현재→다음)으로 회전된 노란 삼각 화살표
-          // 크기/아웃라인/앵커는 기존 RED_DOT_ICON 과 동일.
-          const makeTracePointMarker = (curr: TracePoint, next: TracePoint) => {
-            const bearing = computeBearing(
-              curr.lat,
-              curr.lon,
-              next.lat,
-              next.lon,
-            );
-            return new Tmapv2.Marker({
-              position: new Tmapv2.LatLng(curr.lat, curr.lon),
+          // 거쳐간 점 — 흰 채움 + 핑크 테두리 원 (단일 아이콘 재사용).
+          // viewBox/iconSize/anchor 전부 12 기준으로 중심 픽셀 완전 일치.
+          const makeTracePointMarker = (p: TracePoint) =>
+            new Tmapv2.Marker({
+              position: new Tmapv2.LatLng(p.lat, p.lon),
               map,
-              icon: RED_DOT_ICON_WITH_BEARING(bearing),
-              iconSize: new Tmapv2.Size(10, 10),
-              iconAnchor: new Tmapv2.Point(10, 10),
+              icon: TRACE_DOT_ICON,
+              iconSize: new Tmapv2.Size(14, 14),
+              iconAnchor: new Tmapv2.Point(7, 7),
             });
-          };
 
-          // 중간 포인트 먼저 (아래 레이어)
+          // 중간 포인트 (시작/끝 제외)
           for (let i = 1; i < valid.length - 1; i++) {
-            traceAuxMarkersRef.current.push(
-              makeTracePointMarker(valid[i], valid[i + 1]),
-            );
+            traceAuxMarkersRef.current.push(makeTracePointMarker(valid[i]));
           }
-          // 시작/끝 핀 (위 레이어)
+          // 시작/끝 거점 (위 레이어) — S / E 텍스트
           traceAuxMarkersRef.current.push(
-            makeEndpointMarker(valid[0], "출발", "#16a34a", "S"),
+            makeEndpointMarker(valid[0], "출발", "S"),
           );
           if (valid.length > 1) {
             traceAuxMarkersRef.current.push(
-              makeEndpointMarker(
-                valid[valid.length - 1],
-                "도착",
-                "#dc2626",
-                "E",
-              ),
+              makeEndpointMarker(valid[valid.length - 1], "도착", "E"),
             );
 
-            // polyline — 검정
+            // polyline — 운행 초반 경로 색상 (파랑)
             const path = valid.map((p) => new Tmapv2.LatLng(p.lat, p.lon));
             tracePolylineRef.current = new Tmapv2.Polyline({
               path,
-              strokeColor: options?.strokeColor ?? "#000000",
-              strokeWeight: options?.strokeWeight ?? 5,
+              strokeColor: options?.strokeColor ?? "#1E88E5",
+              strokeWeight: options?.strokeWeight ?? 10,
               strokeStyle: "solid",
               map,
-              // direction: true,
-              // directionColor: "#ffffff",
-              // directionOpacity: 1,
             });
           }
 
