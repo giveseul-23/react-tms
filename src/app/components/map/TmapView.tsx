@@ -144,6 +144,8 @@ const LABEL_H = 16;
 const LABEL_GAP = 4;
 /** 마커 전체 렌더 크기 축소 비율 (SVG 내부 좌표는 그대로, 최종 iconSize 만 축소) */
 const MARKER_SCALE = 0.78;
+/** 정차지(출발/도착/경유지) 마커 전용 스케일 */
+const STOP_MARKER_SCALE = MARKER_SCALE * 1.1;
 
 /** 라벨 배지 폭 계산 — 한글(CJK) 은 약 13px, ASCII 는 약 7px 로 가정 */
 function calcLabelWidth(labelText: string): number {
@@ -250,7 +252,7 @@ function buildStopIconUrl(
 
   // 한 글자(S/E, 한 자리 숫자)는 크게, 두 자리 숫자는 작게
   const innerFontSize =
-    innerText.length <= 1 ? 18 : innerText.length === 2 ? 14 : 13;
+    innerText.length <= 1 ? 25 : innerText.length === 2 ? 14 : 13;
 
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -268,7 +270,7 @@ function buildStopIconUrl(
     <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
           fill="${color}" filter="url(#shadow)"/>
     <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
-          font-size="${innerFontSize}" font-weight="700" fill="#FFFFFF">${escapeXml(innerText)}</text>
+          font-size="${innerFontSize}" font-weight="800" fill="#FFFFFF">${escapeXml(innerText)}</text>
   </g>
   ${labelSvg}
 </svg>`.trim();
@@ -279,6 +281,55 @@ function buildStopIconUrl(
     height: height * MARKER_SCALE,
     anchorX: (width / 2) * MARKER_SCALE,
     anchorY: TIP_Y * MARKER_SCALE,
+  };
+}
+
+/**
+ * 정차지 마커 (출발/도착/경유지 공용) — teardrop 핀 + 상단 텍스트.
+ * LOC_NM 라벨은 별도 패널(StopListPanel)에서 표시.
+ * 앵커는 핀 끝점.
+ */
+function buildCircleStopIconUrl(
+  color: string,
+  innerText: string,
+): {
+  url: string;
+  width: number;
+  height: number;
+  anchorX: number;
+  anchorY: number;
+} {
+  const width = PIN_W;
+  const height = PIN_H;
+
+  // 상단 원형 영역 중앙에 꽉 차게 표시 — 2자(출발/도착)는 굵게 크게
+  const innerFontSize =
+    innerText.length <= 1 ? 17 : innerText.length === 2 ? 13 : 10;
+
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <g transform="translate(${OUTLINE_PAD} ${OUTLINE_PAD})">
+    <!-- teardrop 핀 (흰색 테두리) -->
+    <path d="M18 0 C8.06 0 0 8.06 0 18 C0 30 18 42 18 42 C18 42 36 30 36 18 C36 8.06 27.94 0 18 0 Z"
+          fill="${color}" stroke="#FFFFFF" stroke-width="1.5" stroke-linejoin="round"
+          filter="url(#shadow)"/>
+    <!-- 상단 원 중앙 텍스트 (출발/도착/경유지 번호) -->
+    <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+          font-size="${innerFontSize}" font-weight="700" fill="#FFFFFF">${escapeXml(innerText)}</text>
+  </g>
+</svg>`.trim();
+
+  return {
+    url: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`,
+    width: width * STOP_MARKER_SCALE,
+    height: height * STOP_MARKER_SCALE,
+    anchorX: (width / 2) * STOP_MARKER_SCALE,
+    anchorY: TIP_Y * STOP_MARKER_SCALE, // 핀 뾰족한 끝이 latlng 에 찍힘
   };
 }
 
@@ -377,6 +428,150 @@ function loadTmapScript(appKey: string): Promise<void> {
   return scriptPromise;
 }
 
+/**
+ * 정차지 오버레이 패널 — 지도 좌상단 고정, drawStopMarkers 호출 시 자동 표시.
+ * - 각 행: [색상 아웃라인 원형 아이콘(출발/도착/번호)] [LOC_NM]
+ * - 수직 연결선으로 순서 시각화
+ * - 정차지 5개 이상이면 기본 접힘 상태 (헤더 클릭 시 전개)
+ */
+function StopListPanel({ stops }: { stops: StopMarker[] }) {
+  const [expanded, setExpanded] = useState(true);
+  const prevLenRef = useRef(-1);
+
+  // stops 변경 시 — 5개 이상이면 기본 접힘, 미만이면 전개
+  useEffect(() => {
+    if (stops.length !== prevLenRef.current) {
+      setExpanded(stops.length > 0 && stops.length < 5);
+      prevLenRef.current = stops.length;
+    }
+  }, [stops.length]);
+
+  if (stops.length === 0) return null;
+
+  // kind 별 색상 + 아이콘 안 텍스트 매핑 (drawStopMarkers 와 동일 로직)
+  let viaSeq = 0;
+  const rows = stops.map((s) => {
+    let color: string;
+    let inner: string;
+    if (s.kind === "start") {
+      color = "#16a34a";
+      inner = "출발";
+    } else if (s.kind === "end") {
+      color = "#dc2626";
+      inner = "도착";
+    } else if (s.kind === "via") {
+      viaSeq += 1;
+      color = "#eab308";
+      inner = String(viaSeq);
+    } else {
+      color = "#64748b";
+      inner = "";
+    }
+    return { stop: s, color, inner };
+  });
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 12,
+        left: 12,
+        background: "#fff",
+        borderRadius: 8,
+        boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
+        padding: "10px 14px",
+        minWidth: 200,
+        maxWidth: 300,
+        zIndex: 10,
+        fontFamily: "inherit",
+      }}
+    >
+      <div
+        onClick={() => setExpanded((v) => !v)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          cursor: "pointer",
+          userSelect: "none",
+          fontSize: 13,
+          fontWeight: 700,
+          color: "#111827",
+        }}
+      >
+        <span>정차지 {stops.length}개</span>
+        <span style={{ fontSize: 10, color: "#6b7280" }}>
+          {expanded ? "▲" : "▼"}
+        </span>
+      </div>
+      {expanded && (
+        <div style={{ marginTop: 10, position: "relative" }}>
+          {/* 수직 연결선 — 첫 아이콘 중심 ~ 마지막 아이콘 중심 */}
+          {rows.length > 1 && (
+            <div
+              style={{
+                position: "absolute",
+                left: 14,
+                top: 21,
+                bottom: 21,
+                width: 2,
+                background: "#d1d5db",
+                zIndex: 0,
+              }}
+            />
+          )}
+          {rows.map(({ stop, color, inner }) => (
+            <div
+              key={stop.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "6px 0",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  background: "#fff",
+                  border: `2px solid ${color}`,
+                  color: color,
+                  fontSize:
+                    inner.length <= 1 ? 13 : inner.length === 2 ? 10 : 9,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  boxSizing: "border-box",
+                }}
+              >
+                {inner}
+              </div>
+              <span
+                style={{
+                  fontSize: 12,
+                  color: "#374151",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={stop.label ?? undefined}
+              >
+                {stop.label || "-"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
   function TmapView(
     {
@@ -403,6 +598,8 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
     /** zoom_changed 리스너 (Circle 반경 재계산) — 최초 drawTrace 시 1회 등록 */
     const traceZoomListenerRef = useRef<any>(null);
     const stopMarkerObjsRef = useRef<Map<string, any>>(new Map());
+    /** drawStopMarkers 호출 시 StopListPanel 에 그대로 노출 (지도 좌상단 오버레이) */
+    const [stopList, setStopList] = useState<StopMarker[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loaded, setLoaded] = useState(false);
     // 현재 테마 primary 색상 (MutationObserver 로 <html> 변화 감지 시 갱신)
@@ -613,23 +810,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
 
           if (valid.length === 0) return;
 
-          // 시작/끝 핀 — 트럭 핀과 동일한 스타일(출발:초록 S / 도착:빨강 E)
-          // title 은 생략 — 출발/도착/경유지 hover 툴팁 미표시
-          const makeEndpointMarker = (
-            p: TracePoint,
-            label: string,
-            color: string,
-            innerText: string,
-          ) => {
-            const built = buildStopIconUrl(color, innerText, label);
-            return new Tmapv2.Marker({
-              position: new Tmapv2.LatLng(p.lat, p.lon),
-              map,
-              icon: built.url,
-              iconSize: new Tmapv2.Size(built.width, built.height),
-              iconAnchor: new Tmapv2.Point(built.anchorX, built.anchorY),
-            });
-          };
+          // drawTrace 는 폴리라인 + 중간 거점만 그림. 출발/도착은 drawStopMarkers 에서 담당.
 
           // 거쳐간 점 — Tmapv2.Circle 로 polyline 과 동일 canvas 레이어에 렌더
           // (subpixel 오차 없이 선 중심에 정확히 올라감)
@@ -645,25 +826,12 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
               map,
             });
 
-          // 시작/끝 핀 먼저 (위 레이어에 올라가되, polyline 이 그 위에 그려짐)
-          traceAuxMarkersRef.current.push(
-            makeEndpointMarker(valid[0], "출발", "#16a34a", "S"),
-          );
           if (valid.length > 1) {
-            traceAuxMarkersRef.current.push(
-              makeEndpointMarker(
-                valid[valid.length - 1],
-                "도착",
-                "#dc2626",
-                "E",
-              ),
-            );
-
             // polyline — 파랑 + 방향 화살표
             const path = valid.map((p) => new Tmapv2.LatLng(p.lat, p.lon));
             tracePolylineRef.current = new Tmapv2.Polyline({
               path,
-              strokeColor: options?.strokeColor ?? "#1E88E5",
+              strokeColor: options?.strokeColor ?? "#0026ff",
               strokeWeight: options?.strokeWeight ?? 6,
               strokeStyle: "solid",
               direction: true,
@@ -746,6 +914,9 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           stopMarkerObjsRef.current.forEach((obj) => obj.setMap(null));
           stopMarkerObjsRef.current.clear();
 
+          // 패널에도 동일한 순서로 노출
+          setStopList(stops);
+
           let viaSeq = 0;
           stops.forEach((s) => {
             if (
@@ -758,15 +929,15 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
               return;
             }
 
-            // kind 별 색상 + 핀 내부 텍스트(출발=S, 도착=E, 경유지=1,2,3,...)
+            // kind 별 색상 + 핀 상단 텍스트 (출발/도착/경유지 번호)
             let color: string;
             let innerText: string;
             if (s.kind === "start") {
               color = "#16a34a";
-              innerText = "S";
+              innerText = "출발";
             } else if (s.kind === "end") {
               color = "#dc2626";
-              innerText = "E";
+              innerText = "도착";
             } else if (s.kind === "via") {
               viaSeq += 1;
               color = "#eab308";
@@ -785,7 +956,8 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
               return;
             }
 
-            const built = buildStopIconUrl(color, innerText, s.label);
+            // 출발/도착/경유지 모두 teardrop 핀 + 색상 구분 (초록/빨강/노랑)
+            const built = buildCircleStopIconUrl(color, innerText);
             const markerOpts: any = {
               position: new Tmapv2.LatLng(s.lat, s.lon),
               map,
@@ -801,6 +973,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
         clearStopMarkers: () => {
           stopMarkerObjsRef.current.forEach((obj) => obj.setMap(null));
           stopMarkerObjsRef.current.clear();
+          setStopList([]);
         },
         fitAll: () => {
           const map = mapRef.current;
@@ -843,6 +1016,7 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
         className={`relative w-full h-full min-h-0 min-w-0 ${className ?? ""}`}
       >
         <div ref={divRef} className="absolute inset-0" />
+        <StopListPanel stops={stopList} />
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-50 text-sm text-slate-500 p-4 text-center">
             {error}

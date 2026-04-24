@@ -84,7 +84,7 @@ export function useDriveHistoryController({
             return;
           }
 
-          // trace polyline
+          // trace polyline (drawTrace 는 폴리라인 + 중간 거점만, 출발/도착은 drawStopMarkers 에서)
           const traceRows = extractRows(traceRes);
           const tracePoints = traceRows.map((r: any) => ({
             lat: Number(r.LAT),
@@ -92,7 +92,7 @@ export function useDriveHistoryController({
           }));
           map.drawTrace(tracePoints);
 
-          // stop markers — 핀 내부: 출발=S / 도착=E / 경유지=1,2,3,... / 라벨=LOC_NM
+          // stop markers — 출발=S / 도착=E / 경유지=1,2,3,... / 라벨=LOC_NM
           const routeRows = extractRows(routeRes);
           const stops: StopMarker[] = routeRows.map((r: any, i: number) => {
             let kind: "start" | "end" | "via";
