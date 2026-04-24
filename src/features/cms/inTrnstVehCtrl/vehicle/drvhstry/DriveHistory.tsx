@@ -21,8 +21,7 @@ import { TmapView, TmapMarker } from "@/app/components/map/TmapView";
 import { useDriveHistoryModel } from "./DriveHistoryModel";
 import { useDriveHistoryController } from "./DriveHistoryController";
 import { MAIN_COLUMN_DEFS } from "./DriveHistoryColumns";
-
-const MENU_CODE = "MENU_DRIVE_HISTORY";
+export const MENU_CODE = "MENU_DRIVE_HISTORY";
 
 export default function InTrnstVehCtrl() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -89,6 +88,7 @@ export default function InTrnstVehCtrl() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       defaultSizes={[45, 55]}

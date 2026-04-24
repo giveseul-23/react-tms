@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./ApSettlMgmt";
 
 type commonResponse = {
   rows: [];
@@ -14,12 +15,10 @@ const withSession = (payload: any = {}) => {
 };
 
 export const apSettlMgmtApi = {
-  MENU_CD: "MENU_AP_SETTL_MGMT",
-
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchClosingList`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -27,7 +26,7 @@ export const apSettlMgmtApi = {
   getSummaryList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchClosingSummary`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -35,7 +34,7 @@ export const apSettlMgmtApi = {
   getMonthlyFareList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchClosingDetailDf`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -43,7 +42,7 @@ export const apSettlMgmtApi = {
   getHireDispatchPayList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchClosingDetailCf`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -51,7 +50,7 @@ export const apSettlMgmtApi = {
   getFreightPayList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchClosingItemQty`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -59,7 +58,7 @@ export const apSettlMgmtApi = {
   getIndirectPayList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchClosingDetailOverhead`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -67,7 +66,7 @@ export const apSettlMgmtApi = {
   getEachCostOrGlList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchApEachCostOrGl`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -75,7 +74,7 @@ export const apSettlMgmtApi = {
   getEachItmCostList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchApEachItmCost`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -83,14 +82,14 @@ export const apSettlMgmtApi = {
   getDocFileList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/searchDocFile`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   addCostCenter(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/addCostCenter`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   saveCostCenter(rows: any[]) {
@@ -104,31 +103,31 @@ export const apSettlMgmtApi = {
   createClose(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/createClose`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   cancelClose(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/cancelClose`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   sendSap(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/sendSap`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   cancelSapSend(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/cancelSapSend`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   manageAllocation(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/manageAllocation`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   save(rows: any[]) {
@@ -140,7 +139,7 @@ export const apSettlMgmtApi = {
   attachEvidence(payload: any) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/attachEvidence`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

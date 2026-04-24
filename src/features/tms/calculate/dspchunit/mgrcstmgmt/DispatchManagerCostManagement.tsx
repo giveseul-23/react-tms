@@ -14,8 +14,7 @@ import {
   COST_DETAIL_COLUMN_DEFS,
   WAYPOINT_COLUMN_DEFS,
 } from "./DispatchManagerCostManagementColumns";
-
-const MENU_CODE = "MENU_DSPCH_AP_APPROVAL_AND_CLOSING";
+export const MENU_CODE = "MENU_DSPCH_AP_APPROVAL_AND_CLOSING";
 
 export default function DispatchManagerCostManagement() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -45,6 +44,7 @@ export default function DispatchManagerCostManagement() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

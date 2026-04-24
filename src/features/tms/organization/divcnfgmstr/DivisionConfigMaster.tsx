@@ -15,8 +15,7 @@ import {
   CONFIG_I18N_COLUMN_DEFS,
   CONFIG_DETAIL_I18N_COLUMN_DEFS,
 } from "./DivisionConfigMasterColumns";
-
-const MENU_CODE = "MENU_DIV_OPR_CONFIG_MST";
+export const MENU_CODE = "MENU_DIV_OPR_CONFIG_MST";
 
 export default function DivisionConfigMaster() {
   const { meta, loading } = useSearchMeta(MENU_CODE);

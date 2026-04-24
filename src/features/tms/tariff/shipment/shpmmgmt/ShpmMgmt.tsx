@@ -36,9 +36,7 @@ import {
   CENTER_BOTTOM_DETAIL_COLUMN_DEFS,
   LEFT_DETAIL_COLUMN_DEFS,
 } from "./ShpmMgmtColumns";
-
-// TODO: 실제 메뉴 코드로 교체
-const MENU_CODE = "MENU_SHPM_MGMT";
+export const MENU_CODE = "MENU_SHPM_MGMT";
 
 export default function Feature() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -70,6 +68,7 @@ export default function Feature() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "vertical" : "horizontal"}
       layoutToggle={{

@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./DistanceTransitTime";
 
 type commonResponse = {
   rows: [];
@@ -14,47 +15,45 @@ const withSession = (payload: any = {}) => {
 };
 
 export const distanceTransitTimeApi = {
-  MENU_CD: "MENU_DTTO_MGMT",
-
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/distanceTransitTimeService/search`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   getHistoryList(payload: any) {
     return apiClient.post<commonResponse>(
       `/distanceTransitTimeService/searchAdd`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   calculateWithMoveDistance(payload: any) {
     return apiClient.post<commonResponse>(
       `/distanceTransitTimeService/calculateWithMoveDistance`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   calculateWithoutMoveDistance(payload: any) {
     return apiClient.post<commonResponse>(
       `/distanceTransitTimeService/calculateWithoutMoveDistance`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   applyMoveDistance(payload: any) {
     return apiClient.post<commonResponse>(
       `/distanceTransitTimeService/applyMoveDistance`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   changeRouteOption(payload: any) {
     return apiClient.post<commonResponse>(
       `/distanceTransitTimeService/changeRouteOption`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 

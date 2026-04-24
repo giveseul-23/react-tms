@@ -13,8 +13,7 @@ import {
   MAIN_COLUMN_DEFS,
   HISTORY_COLUMN_DEFS,
 } from "./DistanceTransitTimeColumns";
-
-const MENU_CD = "MENU_DTTO_MGMT";
+export const MENU_CD = "MENU_DTTO_MGMT";
 
 export default function DistanceTransitTime() {
   const { meta, loading } = useSearchMeta(MENU_CD);
@@ -44,6 +43,7 @@ export default function DistanceTransitTime() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

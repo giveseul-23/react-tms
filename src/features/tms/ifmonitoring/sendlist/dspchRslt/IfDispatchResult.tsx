@@ -9,8 +9,7 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 import { useIfDispatchResultModel } from "./IfDispatchResultModel";
 import { useIfDispatchResultController } from "./IfDispatchResultController";
 import { MAIN_COLUMN_DEFS } from "./IfDispatchResultColumns";
-
-const MENU_CODE = "MENU_IF_SEND_DSPCH_RSLT";
+export const MENU_CODE = "MENU_IF_SEND_DSPCH_RSLT";
 
 export default function IfDispatchResult() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -40,6 +39,7 @@ export default function IfDispatchResult() {
         pageSize: model.pageSize,
         excludeKeysRef,
         userTz: "Asia/Seoul", // [TEMP-userTz] 서버 userTz 적용 완료 시 제거
+        menuCode: MENU_CODE,
       }}
       grid={
         <DataGrid

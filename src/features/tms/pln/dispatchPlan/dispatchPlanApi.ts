@@ -1,6 +1,7 @@
 // src/app/services/dispatchPlan/dispatchPlanApi.ts
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./DispatchPlan";
 
 type CommonResponse = {
   rows: [];
@@ -15,13 +16,11 @@ const withSession = (payload: any = {}) => {
 };
 
 export const dispatchPlanApi = {
-  MENU_CD: "MENU_DISPATCH_PLAN",
-
   // ── 조회 ─────────────────────────────────────────────────────
   getDispatchPlanList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/search",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -29,7 +28,7 @@ export const dispatchPlanApi = {
   getStopList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/searchPlanStop",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -37,7 +36,7 @@ export const dispatchPlanApi = {
   getAllocOrderList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/searchAssignedShipment",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -45,7 +44,7 @@ export const dispatchPlanApi = {
   getUnallocOrderList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/searchUnAssignedShipment",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -53,14 +52,14 @@ export const dispatchPlanApi = {
   getAllocOrderItemList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/searchAssignedShipmentDetail",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   getUnallocOrderItemList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/searchUnAssignedShipmentDetail",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -68,7 +67,7 @@ export const dispatchPlanApi = {
   saveDispatchPlan(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/save",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -76,7 +75,7 @@ export const dispatchPlanApi = {
   confirmPlan(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/confirmPlan",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -84,14 +83,14 @@ export const dispatchPlanApi = {
   predictEta(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/predictEta",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   calcEta(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/calcEta",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -99,7 +98,7 @@ export const dispatchPlanApi = {
   saveStopOrder(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/saveStopOrder",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -107,7 +106,7 @@ export const dispatchPlanApi = {
   gridExcelAll(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/downloadExcel",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
       { responseType: "blob" },
     );
   },

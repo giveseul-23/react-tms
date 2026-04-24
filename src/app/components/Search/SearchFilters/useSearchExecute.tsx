@@ -27,7 +27,32 @@ export type SearchResult = {
   limit: number;
 };
 
-export type ParamMode = "DYNAMIC_QUERY" | "RAW";
+export type ParamMode = "DYNAMIC_QUERY" | "RAW" | "DS_SEARCH_CONDITION";
+
+// JS ExFieldSetSearchArea.getCompToParam() 반환 형태와 동일.
+// 서버가 이 배열을 순회하며 WHERE 절을 조립함.
+export type DsSearchConditionRow = {
+  rowStatus: "normal";
+  dataType: string;
+  type: string;
+  val0: string; // DBCOLUMN
+  val1: string; // 한글 라벨 (DBCOLUMN DESC)
+  val2: string; // SQL 연산자 문자열 ("=", "LIKE", ">=", ...)
+  val3: string; // 값
+  val4: string; // 보조 (미사용)
+};
+
+// 아이콘 키 → SQL 연산자 문자열 (useSearchMeta 의 NAME→ICON 역방향)
+const ICON_TO_SQL_OP: Record<string, string> = {
+  equal: "=",
+  notEqual: "<>",
+  percent: "LIKE",
+  parentheses: "IN",
+  chevronRight: ">",
+  chevronLeft: "<",
+  chevronLast: ">=",
+  chevronFirst: "<=",
+};
 
 interface UseSearchExecuteParams {
   meta: readonly SearchMeta[];
@@ -40,7 +65,11 @@ interface UseSearchExecuteParams {
   excludeKeysRef?: React.MutableRefObject<Set<string>>;
   computeTotalCount?: (rows: any[]) => number;
   searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
-  /** "DYNAMIC_QUERY"(기본): { DYNAMIC_QUERY, MENU_CD, page, limit, ...extraParams }
+  /** 메뉴 코드 — DYNAMIC_QUERY / DS_SEARCH_CONDITION 모드 payload 의 MENU_CD 로 전송 */
+  menuCode?: string;
+  /** "DS_SEARCH_CONDITION"(기본): { dsSearchCondition: [...], MENU_CD, page, limit, ...extraParams }
+   *     → 서버가 배열로 WHERE 를 조립 (JS ExFieldSetSearchArea 방식).
+   *  "DYNAMIC_QUERY": { DYNAMIC_QUERY, MENU_CD, page, limit, ...extraParams } (레거시)
    *  "RAW": { ...rawFilters(SRCH_* 맵), page, limit, ...extraParams } */
   paramMode?: ParamMode;
   /** [TEMP-userTz] DATE 필터 tz 보정용 — 서버 완료 시 제거 */
@@ -58,7 +87,8 @@ export function useSearchExecute({
   excludeKeysRef,
   computeTotalCount,
   searchRef,
-  paramMode = "DYNAMIC_QUERY",
+  menuCode,
+  paramMode = "DS_SEARCH_CONDITION",
   userTz, // [TEMP-userTz] 서버 완료 시 제거
 }: UseSearchExecuteParams) {
   const { openPopup, closePopup } = usePopup();
@@ -197,6 +227,62 @@ export function useSearchExecute({
 
       if (rawFiltersRef) rawFiltersRef.current = rawFilters;
 
+      // ── dsSearchCondition 배열 빌드 (JS ExFieldSetSearchArea.getCompToParam 대응) ─
+      // DS_SEARCH_CONDITION 모드에서만 사용. 서버가 이 배열로 WHERE 를 조립.
+      const dsSearchCondition: DsSearchConditionRow[] = [];
+      if (paramMode === "DS_SEARCH_CONDITION") {
+        Object.values(searchState).forEach((v) => {
+          if (excludeKeysRef?.current.has(v.key)) return;
+          if (v.value == null || v.value === "" || v.value === "ALL") return;
+          if (v.operator === "notUsed") return;
+
+          const dbKey = resolveDbColumn(v.key);
+          if (dbKey === null) return; // POPUP _NM 제외
+
+          // YMD 범위 _FRM / _TO 접미에 따른 SQL op 결정
+          let baseDbKey = dbKey;
+          let metaKey = v.key;
+          let sqlOp: string;
+
+          if (v.key.endsWith("_FRM")) {
+            baseDbKey = dbKey.replace(/_FRM$/, "");
+            metaKey = v.key.replace(/_FRM$/, "");
+            sqlOp = ">=";
+          } else if (v.key.endsWith("_TO")) {
+            baseDbKey = dbKey.replace(/_TO$/, "");
+            metaKey = v.key.replace(/_TO$/, "");
+            sqlOp = "<=";
+          } else {
+            sqlOp = ICON_TO_SQL_OP[v.operator] ?? "=";
+          }
+
+          const m = meta.find((x) => x.key === metaKey);
+          const label = m?.label ?? baseDbKey;
+          const type = m?.type ?? "TEXT";
+          const dtype = v.dataType ?? m?.dataType ?? "STRING";
+
+          let strVal = String(v.value);
+          if (type === "YMDT") {
+            // YYYY-MM-DDTHH:MM:SS → YYYYMMDDHH24MISS (14자리)
+            strVal = strVal.replace(/[^0-9]/g, "");
+          } else if (dtype === "DATE") {
+            // YYYY-MM-DD → YYYYMMDD
+            strVal = strVal.replace(/-/g, "");
+          }
+
+          dsSearchCondition.push({
+            rowStatus: "normal",
+            dataType: dtype,
+            type,
+            val0: baseDbKey,
+            val1: label,
+            val2: sqlOp,
+            val3: strVal,
+            val4: "",
+          });
+        });
+      }
+
       // ── fetchFn에 전달할 params 조립 ────────────────────────
       // DYNAMIC_QUERY 모드에서도 DBCOLUMN 키 필드를 평탄화해서 함께 보냄.
       const params: Record<string, unknown> =
@@ -207,14 +293,22 @@ export function useSearchExecute({
               limit: limitRef.current,
               ...extraParams,
             }
-          : {
-              DYNAMIC_QUERY: whereClause,
-              MENU_CD: "test",
-              ...dbColumnFilters,
-              page: targetPage,
-              limit: limitRef.current,
-              ...extraParams,
-            };
+          : paramMode === "DS_SEARCH_CONDITION"
+            ? {
+                dsSearchCondition,
+                MENU_CD: menuCode ?? "",
+                page: targetPage,
+                limit: limitRef.current,
+                ...extraParams,
+              }
+            : {
+                DYNAMIC_QUERY: whereClause,
+                MENU_CD: menuCode ?? "",
+                ...dbColumnFilters,
+                page: targetPage,
+                limit: limitRef.current,
+                ...extraParams,
+              };
 
       if (filtersRef) {
         const {
@@ -290,6 +384,7 @@ export function useSearchExecute({
       rawFiltersRef,
       excludeKeysRef,
       computeTotalCount,
+      menuCode,
       paramMode,
       openPopup,
       closePopup,

@@ -16,8 +16,7 @@ import {
   CONFIG_I18N_COLUMN_DEFS,
   CONFIG_DETAIL_I18N_COLUMN_DEFS,
 } from "./LgstgrpOprConfigMstColumns";
-
-const MENU_CODE = "MENU_LGSTGRP_OPR_CONFIG_MST";
+export const MENU_CODE = "MENU_LGSTGRP_OPR_CONFIG_MST";
 
 export default function LgstgrpOprConfigMst() {
   const { meta, loading } = useSearchMeta(MENU_CODE);

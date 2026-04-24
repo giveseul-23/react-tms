@@ -58,6 +58,8 @@ interface SearchFiltersProps {
   moduleDefaultSearchParams?: Record<string, string>;
   /** "RAW" 일 때 DYNAMIC_QUERY 대신 SRCH_* 접두 rawFilters를 그대로 fetchFn에 전달 */
   paramMode?: ParamMode;
+  /** 메뉴 코드 — DYNAMIC_QUERY / DS_SEARCH_CONDITION 모드 payload 의 MENU_CD */
+  menuCode?: string;
   /** [TEMP-userTz] DATE 필터 tz 보정 — 서버 완료 시 제거 */
   userTz?: string;
 }
@@ -78,6 +80,7 @@ export function SearchFilters({
   moduleDefaultRemove,
   moduleDefaultSearchParams,
   paramMode,
+  menuCode,
   userTz, // [TEMP-userTz] 서버 완료 시 제거
 }: SearchFiltersProps) {
   const [open, setOpen] = useState(true);
@@ -119,6 +122,7 @@ export function SearchFilters({
     excludeKeysRef,
     computeTotalCount,
     searchRef,
+    menuCode,
     paramMode,
     userTz, // [TEMP-userTz] 서버 완료 시 제거
   });

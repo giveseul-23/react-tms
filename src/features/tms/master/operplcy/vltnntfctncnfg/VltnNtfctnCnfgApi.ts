@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./VltnNtfctnCnfg";
 
 type commonResponse = {
   rows: [];
@@ -16,13 +17,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const vltnNtfctnCnfgApi = {
-  MENU_CD: "MENU_VLTN_NTFCTN_CNFG",
   ////// SEARCH
   getVltnNtfctnCnfgList(payload: any) {
     return apiClient.post<commonResponse>(
       `/vltnNtfctnCnfgService/searchLgst`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -32,7 +32,7 @@ export const vltnNtfctnCnfgApi = {
     return apiClient.post<commonResponse>(
       "/vltnNtfctnCnfgService/searchCnfg",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -41,7 +41,7 @@ export const vltnNtfctnCnfgApi = {
     return apiClient.post<commonResponse>(
       "/vltnNtfctnCnfgService/searchChnl",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -50,7 +50,7 @@ export const vltnNtfctnCnfgApi = {
     return apiClient.post<commonResponse>(
       "/vltnNtfctnCnfgService/searchRcvr",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

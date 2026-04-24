@@ -17,8 +17,7 @@ import {
   MAIN_COLUMN_DEFS,
   MAIN_GRID_COLUMN_DEFS,
 } from "./VehicleMgmtColumns.tsx";
-
-const MENU_CODE = "MENU_VEHICLE_MGMT";
+export const MENU_CODE = "MENU_VEHICLE_MGMT";
 
 // ── 차량관리 폼 본문 (상세/신규 공통) ─────────────────────────────────
 
@@ -188,6 +187,7 @@ export default function VehicleMgmt() {
           searchRef,
           filtersRef,
           pageSize: model.pageSize,
+          menuCode: MENU_CODE,
         }}
         grid={
           <DataGrid

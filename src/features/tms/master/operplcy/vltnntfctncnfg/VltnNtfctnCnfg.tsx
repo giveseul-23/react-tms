@@ -16,8 +16,7 @@ import {
   NTFC_CHANNEL_COLUMN_DEFS,
   NTFC_TARGET_COLUMN_DEFS,
 } from "./VltnNtfctnCnfgColumns.tsx";
-
-const MENU_CODE = "MENU_VLTN_NTFCTN_CNFG";
+export const MENU_CODE = "MENU_VLTN_NTFCTN_CNFG";
 
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -46,6 +45,7 @@ export default function TenderReceiveDispatch() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

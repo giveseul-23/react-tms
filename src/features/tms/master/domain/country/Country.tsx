@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
+import { useSearchCondition } from "@/hooks/useSearchCondition";
 
 import { SplitPane } from "@/app/components/layout/SplitPane";
 
@@ -17,7 +18,7 @@ import {
   CITY_COLUMN_DEFS,
   ZIP_COLUMN_DEFS,
 } from "./CountryColumns.tsx";
-const MENU_CD = "MENU_CNTR_MGMT";
+export const MENU_CD = "MENU_CNTR_MGMT";
 
 export default function Country() {
   const { meta, loading } = useSearchMeta(MENU_CD);
@@ -27,9 +28,12 @@ export default function Country() {
   const filtersRef = useRef<Record<string, unknown>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
-    excludeKeysRef.current.add("BOOKING");
-  }, []);
+  useSearchCondition({
+    meta,
+    excludeKeysRef,
+    filtersRef,
+    excludes: ["BOOKING"],
+  });
 
   const ctrl = useCountryController({
     menuCd: MENU_CD,
@@ -50,6 +54,7 @@ export default function Country() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CD,
       }}
       direction={model.layout === "vertical" ? "horizontal" : "vertical"}
       layoutToggle={{

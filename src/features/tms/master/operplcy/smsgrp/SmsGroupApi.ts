@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./SmsGroup";
 
 type commonResponse = {
   rows: [];
@@ -16,13 +17,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const smsGroupApi = {
-  MENU_CD: "MENU_SMS_GRP_MGMT",
   ////// SEARCH
   getSmsGroupList(payload: any) {
     return apiClient.post<commonResponse>(
       `/smsGroupService/search`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -32,7 +32,7 @@ export const smsGroupApi = {
     return apiClient.post<commonResponse>(
       "/smsGroupService/searchDetail",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

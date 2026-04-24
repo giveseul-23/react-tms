@@ -15,6 +15,7 @@
 
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./ShpmMgmt";
 
 type commonResponse = {
   rows: [];
@@ -31,14 +32,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const shpmMgmtApi = {
-  MENU_CD: "MENU_SHPM_MGMT",
-
   // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/volumeContractManagementService/search`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -50,7 +49,7 @@ export const shpmMgmtApi = {
     return apiClient.post<commonResponse>(
       `/volumeContractManagementService/searchLgst`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -60,7 +59,7 @@ export const shpmMgmtApi = {
     return apiClient.post<commonResponse>(
       `/volumeContractManagementService/searchZone`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -70,7 +69,7 @@ export const shpmMgmtApi = {
     return apiClient.post<commonResponse>(
       `/volumeContractManagementService/searchRate`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -80,7 +79,7 @@ export const shpmMgmtApi = {
     return apiClient.post<commonResponse>(
       `/volumeContractManagementService/searchZoneCond`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -99,7 +98,7 @@ export const shpmMgmtApi = {
     return apiClient.post<commonResponse>(
       `/volumeContractManagementService/delete`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

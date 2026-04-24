@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./DepartArrivalManagement";
 
 type commonResponse = {
   rows: [];
@@ -14,12 +15,10 @@ const withSession = (payload: any = {}) => {
 };
 
 export const departArrivalManagementApi = {
-  MENU_CD: "MENU_EVENT_MANAGER",
-
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/searchDepartArrivalManagement`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -27,7 +26,7 @@ export const departArrivalManagementApi = {
   getStopoverList(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/searchDepartArrivalManagementStop`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -35,7 +34,7 @@ export const departArrivalManagementApi = {
   getAssignedOrderList(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchPlanService/searchAssignedShipment`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -43,63 +42,63 @@ export const departArrivalManagementApi = {
   getAssignedOrderDetailList(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchPlanService/searchAssignedShipmentDetail`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   inquireReceipt(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/inquireReceipt`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   controlRoute(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/controlRoute`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   startLoading(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/startLoading`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   startTransport(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/startTransport`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   cancelTransport(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/cancelTransport`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   cancelDeliveryComplete(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/cancelDeliveryComplete`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   completeTransport(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/completeTransport`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   resetDispatch(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/resetDispatch`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -120,7 +119,7 @@ export const departArrivalManagementApi = {
   confirmPBoxRecovery(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/confirmPBoxRecovery`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 };

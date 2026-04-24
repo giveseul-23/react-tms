@@ -17,8 +17,7 @@ import {
   WAYPOINT_COLUMN_DEFS,
   EVIDENCE_COLUMN_DEFS,
 } from "./DispatchOperatorCostManagementColumns";
-
-const MENU_CODE = "MENU_DSPCH_AP_CRATN_N_REVW";
+export const MENU_CODE = "MENU_DSPCH_AP_CRATN_N_REVW";
 
 export default function DispatchOperatorCostManagement() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -48,6 +47,7 @@ export default function DispatchOperatorCostManagement() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

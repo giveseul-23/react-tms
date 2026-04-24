@@ -15,6 +15,7 @@
 
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./IndstrlAccdntCmpnstn";
 
 type commonResponse = {
   rows: [];
@@ -31,15 +32,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const indstrlAccdntCmpnstnApi = {
-  // TODO: 실제 메뉴 코드로 교체
-  MENU_CD: "MENU_IACI_MGMT",
-
   // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/iaciService/searchLgst`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -50,7 +48,7 @@ export const indstrlAccdntCmpnstnApi = {
     return apiClient.post<commonResponse>(
       `/iaciService/searchRate`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -60,7 +58,7 @@ export const indstrlAccdntCmpnstnApi = {
     return apiClient.post<commonResponse>(
       `/iaciService/searchChg`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -79,7 +77,7 @@ export const indstrlAccdntCmpnstnApi = {
     return apiClient.post<commonResponse>(
       `/iaciService/delete`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

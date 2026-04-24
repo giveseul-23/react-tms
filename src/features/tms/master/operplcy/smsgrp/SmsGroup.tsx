@@ -11,7 +11,7 @@ import { useSmsGroupModel } from "./SmsGroupModel.ts";
 import { useSmsGroupController } from "./SmsGroupController.tsx";
 import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./SmsGroupColumns.tsx";
 
-const MENU_CODE = "MENU_VLTN_NTFCTN_CNFG";
+export const MENU_CODE = "MENU_VLTN_NTFCTN_CNFG";
 
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -40,6 +40,7 @@ export default function TenderReceiveDispatch() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

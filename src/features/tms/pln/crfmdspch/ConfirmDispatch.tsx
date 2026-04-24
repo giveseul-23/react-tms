@@ -16,8 +16,7 @@ import {
   RECEIPT_COLUMN_DEFS,
   RECEIPT_HISTORY_COLUMN_DEFS,
 } from "./ConfirmDispatchColumns";
-
-const MENU_CODE = "MENU_ASSIGN_CONFIRM";
+export const MENU_CODE = "MENU_ASSIGN_CONFIRM";
 
 export default function ConfirmDispatch() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -47,6 +46,7 @@ export default function ConfirmDispatch() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

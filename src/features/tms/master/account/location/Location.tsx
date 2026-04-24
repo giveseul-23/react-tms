@@ -24,8 +24,7 @@ import {
   ETC_COLUMN_DEFS,
   ORDER_TYPE_PLAN_ID_COLUMN_DEFS,
 } from "./LocationColumns";
-
-const MENU_CD = "MENU_LOCATION_MANAGER";
+export const MENU_CD = "MENU_LOCATION_MANAGER";
 
 export default function Location() {
   const { meta, loading } = useSearchMeta(MENU_CD);
@@ -54,6 +53,7 @@ export default function Location() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

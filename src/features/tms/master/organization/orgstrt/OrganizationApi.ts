@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./Organization";
 
 type commonResponse = {
   rows: [];
@@ -14,13 +15,11 @@ const withSession = (payload: any = {}) => {
 };
 
 export const organizationApi = {
-  MENU_CD: "MENU_ORGANIZATION_STRUCT",
-
   // 디비전 조회
   getDivisionList(payload: any) {
     return apiClient.post<commonResponse>(
       `/organizationService/search`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -28,7 +27,7 @@ export const organizationApi = {
   getLogisticsGroupList(payload: any) {
     return apiClient.post<commonResponse>(
       `/organizationService/searchLgstGrp`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 

@@ -114,10 +114,16 @@ function escapeXml(s: string): string {
 /** 주행 경로 중간 점 — 빨간 작은 원 (6x6, 선보다 작게) */
 const RED_DOT_ICON =
   "data:image/svg+xml;charset=UTF-8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="2" fill="#FF0000"/></svg>',
-  );
-
+  encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 10 10">
+      <polygon points="5,1 9,9 1,9" 
+           fill="#dc2626" 
+           stroke="#000000" 
+           stroke-width="2"
+           stroke-linejoin="round"
+           vector-effect="non-scaling-stroke"/>
+    </svg>
+  `);
 /**
  * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
  * - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 트럭 정중앙 배치
@@ -610,14 +616,15 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
               iconAnchor: new Tmapv2.Point(built.anchorX, built.anchorY),
             });
           };
+
           // 거쳐간 점 — 선(5px)보다 작은 빨간 원(6x6, 가시 4px)
           const makeTracePointMarker = (p: TracePoint) =>
             new Tmapv2.Marker({
               position: new Tmapv2.LatLng(p.lat, p.lon),
               map,
               icon: RED_DOT_ICON,
-              iconSize: new Tmapv2.Size(6, 6),
-              iconAnchor: new Tmapv2.Point(3, 3),
+              iconSize: new Tmapv2.Size(10, 10),
+              iconAnchor: new Tmapv2.Point(10, 10),
             });
 
           // 중간 포인트 먼저 (아래 레이어)
@@ -646,9 +653,9 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
               strokeWeight: options?.strokeWeight ?? 5,
               strokeStyle: "solid",
               map,
-              direction: true,
-              directionColor: "#ffffff",
-              directionOpacity: 1,
+              // direction: true,
+              // directionColor: "#ffffff",
+              // directionOpacity: 1,
             });
           }
 

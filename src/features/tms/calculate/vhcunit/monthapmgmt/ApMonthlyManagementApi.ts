@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./ApMonthlyManagement";
 
 type commonResponse = {
   rows: [];
@@ -14,12 +15,10 @@ const withSession = (payload: any = {}) => {
 };
 
 export const apMonthlyManagementApi = {
-  MENU_CD: "MENU_AP_MONTHLY_MGMT",
-
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apMonthlyManagementService/search`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -29,7 +28,7 @@ export const apMonthlyManagementApi = {
       `/apMonthlyManagementService/getUsedChgCd`,
       withSession({
         module: "TMS",
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         DF_CHG_OP_DIV_TCD: "MONTHLY",
         ...payload,
       }),
@@ -39,21 +38,21 @@ export const apMonthlyManagementApi = {
   createMonthlyResult(payload: any) {
     return apiClient.post<commonResponse>(
       `/apMonthlyManagementService/createMonthlyResult`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   cancelMonthlyResult(payload: any) {
     return apiClient.post<commonResponse>(
       `/apMonthlyManagementService/cancelMonthlyResult`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   uploadManualCostExcel(payload: any) {
     return apiClient.post<commonResponse>(
       `/apMonthlyManagementService/uploadManualCostExcel`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -67,14 +66,14 @@ export const apMonthlyManagementApi = {
   confirm(payload: any) {
     return apiClient.post<commonResponse>(
       `/apMonthlyManagementService/confirm`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   cancelConfirm(payload: any) {
     return apiClient.post<commonResponse>(
       `/apMonthlyManagementService/cancelConfirm`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

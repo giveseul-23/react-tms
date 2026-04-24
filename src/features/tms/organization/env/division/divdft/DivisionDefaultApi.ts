@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./DivisionDefault";
 
 type commonResponse = {
   rows: [];
@@ -16,13 +17,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const divisionDefaultApi = {
-  MENU_CD: "MENU_ORGANIZATION_ENV_DIV_DFT",
   ////// SEARCH
   getDivisionDefaultList(payload: any) {
     return apiClient.post<commonResponse>(
       `/divisionConfigMasterService/search`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -32,7 +32,7 @@ export const divisionDefaultApi = {
     return apiClient.post<commonResponse>(
       "/divisionDefaultService/search",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

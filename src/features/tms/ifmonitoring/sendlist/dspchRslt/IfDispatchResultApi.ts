@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./IfDispatchResult";
 
 type commonResponse = {
   rows: [];
@@ -14,19 +15,17 @@ const withSession = (payload: any = {}) => {
 };
 
 export const ifDispatchResultApi = {
-  MENU_CD: "MENU_IF_SEND_DSPCH_RSLT",
-
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/ifDispatchResultService/search`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   reprocess(payload: any) {
     return apiClient.post<commonResponse>(
       `/ifDispatchResultService/reprocess`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

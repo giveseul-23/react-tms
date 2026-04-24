@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./Location";
 
 type commonResponse = {
   rows: [];
@@ -14,13 +15,11 @@ const withSession = (payload: any = {}) => {
 };
 
 export const locationApi = {
-  MENU_CD: "MENU_LOCATION_MANAGER",
-
   // 메인 착지 조회
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/search`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -28,7 +27,7 @@ export const locationApi = {
   getEntryRestrictionList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchVehTypeInfoList`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -36,7 +35,7 @@ export const locationApi = {
   getAssignedVehicleList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/assignVehList`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -44,7 +43,7 @@ export const locationApi = {
   getExcludedVehicleList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchLocExcldVeh`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -52,7 +51,7 @@ export const locationApi = {
   getDateProhibitionList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchDateProhibition`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -60,7 +59,7 @@ export const locationApi = {
   getRegisteredZoneList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/zoneRegistSearch`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -68,7 +67,7 @@ export const locationApi = {
   getHolidayList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchClosedDay`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -76,7 +75,7 @@ export const locationApi = {
   getPreferredCarrierList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchPreferedCarr`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -84,7 +83,7 @@ export const locationApi = {
   getArrivalRequestTimeList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchDeliveryTimeWindow`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -92,7 +91,7 @@ export const locationApi = {
   getDockList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchDock`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -100,7 +99,7 @@ export const locationApi = {
   getSmsList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchSms`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -108,7 +107,7 @@ export const locationApi = {
   getLocationRoleList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchLocRoleTp`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -116,7 +115,7 @@ export const locationApi = {
   getLocSalesList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchLocSales`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -124,7 +123,7 @@ export const locationApi = {
   getEtcList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchLocEtc`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -132,7 +131,7 @@ export const locationApi = {
   getOrderTypePlanIdList(payload: any) {
     return apiClient.post<commonResponse>(
       `/locationService/searchLocOrdPln`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 

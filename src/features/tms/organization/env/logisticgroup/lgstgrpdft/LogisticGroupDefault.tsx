@@ -15,8 +15,7 @@ import {
   CNFG_DETAIL_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
 } from "./LogisticGroupDefaultColumns.tsx";
-
-const MENU_CODE = "MENU_ORGANIZATION_ENV_LGST_GRP_DFT";
+export const MENU_CODE = "MENU_ORGANIZATION_ENV_LGST_GRP_DFT";
 
 export default function TenderReceiveDispatch() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -45,6 +44,7 @@ export default function TenderReceiveDispatch() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

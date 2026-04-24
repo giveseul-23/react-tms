@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./TenderReceiveDispatch";
 
 type commonResponse = {
   rows: [];
@@ -14,29 +15,26 @@ const withSession = (payload: any = {}) => {
 
   return { ...sessionFields, ...payload };
 };
-
 export const tenderApi = {
-    MENU_CD: "MENU_PLAN_TENDER",  
   ////// SEARCH
   getDispatchList(payload: any) {
     return apiClient.post<commonResponse>(
       //`/openapina/carrier/getDspchList`,
       `/tenderReceiveDispatchService/searchPlanDispatch`,
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
 
-  
   getDispatchStopList(payload: any) {
     return apiClient.post<commonResponse>(
       //"/openapina/carrier/getDspchStopList",
       "/tenderReceiveDispatchService/searchPlanStop",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -46,8 +44,8 @@ export const tenderApi = {
       //"/openapina/carrier/getDispatchSmsHisList",
       "/tenderReceiveDispatchService/searchSmsHistory",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -56,8 +54,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/tenderReceiveDispatchService/searchCarrierRate",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -66,8 +64,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/getBookingChgCodeName",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -77,8 +75,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/updateCarrierRate",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -94,17 +92,18 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onTenderRejected",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
-      }),    );
+        MENU_CD: MENU_CD,
+        ...payload,
+      }),
+    );
   },
 
   onChangeRegVeh(payload: any) {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onChangeRegVeh",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -113,8 +112,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onChangeTempVeh",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -123,8 +122,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onVehicleChange",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -133,8 +132,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/onVehicleCancel",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -143,8 +142,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/sendSMSForAppInstall",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -154,8 +153,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/gridExcelUpload",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
     );
   },
@@ -164,8 +163,8 @@ export const tenderApi = {
     return apiClient.post<commonResponse>(
       "/openapina/carrier/downloadExcel",
       withSession({
-        MENU_CD: this.MENU_CD,
-        ...payload
+        MENU_CD: MENU_CD,
+        ...payload,
       }),
       { responseType: "blob" },
     );

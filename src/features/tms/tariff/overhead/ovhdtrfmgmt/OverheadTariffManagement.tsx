@@ -34,9 +34,7 @@ import {
   DETAIL_LEFT_COLUMN_DEFS,
   DETAIL_RIGHT_COLUMN_DEFS,
 } from "./OverheadTariffManagementColumns";
-
-// TODO: 실제 메뉴 코드로 교체
-const MENU_CODE = "MENU_OVERHEAD_TARIFF_MGMT";
+export const MENU_CODE = "MENU_OVERHEAD_TARIFF_MGMT";
 
 export default function OverheadTariffManagement() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -68,6 +66,7 @@ export default function OverheadTariffManagement() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "vertical" : "horizontal"}
       layoutToggle={{

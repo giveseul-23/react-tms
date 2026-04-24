@@ -1,6 +1,7 @@
 // src/app/services/inTrnstVehCtrl/inTrnstVehCtrlApi.ts
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./DriveHistory";
 
 type CommonResponse = {
   rows: [];
@@ -15,14 +16,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const driveHistoryApi = {
-  MENU_CD: "MENU_DRIVE_HISTORY",
-
   // ── 수송중 차량 조회 ────────────────────────────────────────
   getInTrnstVehList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/driveHistoryService/search",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -33,7 +32,7 @@ export const driveHistoryApi = {
     return apiClient.post<CommonResponse>(
       "/traceService/searchDispathTrace",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -44,7 +43,7 @@ export const driveHistoryApi = {
     return apiClient.post<CommonResponse>(
       "/mapService/getDlvryRoute",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./DispatchOperatorCostManagement";
 
 type commonResponse = {
   rows: [];
@@ -14,12 +15,10 @@ const withSession = (payload: any = {}) => {
 };
 
 export const dispatchOperatorCostApi = {
-  MENU_CD: "MENU_DSPCH_AP_CRATN_N_REVW",
-
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/search`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -27,7 +26,7 @@ export const dispatchOperatorCostApi = {
   getCostDetailList(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/searchDispatchApplanDetail`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -35,7 +34,7 @@ export const dispatchOperatorCostApi = {
   getCostFunctionList(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/searchCostInfoList`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -43,7 +42,7 @@ export const dispatchOperatorCostApi = {
   getWaypointList(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/searchPlanStop`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -51,7 +50,7 @@ export const dispatchOperatorCostApi = {
   getEvidenceList(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/searchDocFile`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -59,43 +58,43 @@ export const dispatchOperatorCostApi = {
   changeContract(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/changeContract`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   calculateCost(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/calculateCost`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   adjustBulkDistance(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/adjustBulkDistance`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   recalculateMoveDistance(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/recalculateMoveDistance`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   closeDaily(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/closeDaily`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   confirmCost(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/confirmCost`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   deleteSettlement(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/deleteSettlement`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   save(rows: any[]) {
@@ -107,7 +106,7 @@ export const dispatchOperatorCostApi = {
   createClose(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/createClose`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -115,13 +114,13 @@ export const dispatchOperatorCostApi = {
   addSettlementRoute(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/addSettlementRoute`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   restoreRoute(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/restoreRoute`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   saveWaypoint(rows: any[]) {
@@ -141,7 +140,7 @@ export const dispatchOperatorCostApi = {
   downloadEvidence(payload: any) {
     return apiClient.post<commonResponse>(
       `/dispatchOperatorCostManagementService/downloadEvidence`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

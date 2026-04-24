@@ -3,50 +3,29 @@ import { operatorArBillingInquiryApi } from "./OperatorArBillingInquiryApi";
 import { OperatorArBillingInquiryModel } from "./OperatorArBillingInquiryModel";
 import { MAIN_COLUMN_DEFS } from "./OperatorArBillingInquiryColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { UseSearchConditionReturn } from "@/hooks/useSearchCondition";
 
 type ControllerProps = {
   model: OperatorArBillingInquiryModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
+  searchCondition: UseSearchConditionReturn;
 };
 
 export function useOperatorArBillingInquiryController({
   model,
   searchRef,
   filtersRef,
+  searchCondition,
 }: ControllerProps) {
-  // JS onSaveAfterSearch + buildOperatorArBillingHeaderParams 매칭:
-  //   - DYNAMIC_QUERY 는 정상 전송. 단 PLN.AR_TO_DT 는 기본 빌더의 TO_TIMESTAMP
-  //     포맷을 쓰지 않도록 excludeKeysRef 로 조건 생성에서 skip.
-  //   - PLN.AR_TO_DT 의 from/to 값은 지정 양식
-  //       AND PLN.AR_TO_DT BETWEEN TO_DATE('YYYY-MM-DD', 'YYYYMMDD')
-  //                            AND TO_DATE('YYYY-MM-DD', 'YYYYMMDD')
-  //     로 직접 만들어 DYNAMIC_QUERY 에 이어붙여 전송.
-  //   - useSearchExecute 가 dbColumnFilters / extraParams 양쪽에 남기는
-  //     PLN_AR_TO_DT_* / PLN.AR_TO_DT_* 흔적은 모두 제거.
-  const fetchList = useCallback((params: Record<string, unknown>) => {
-    const cleaned: Record<string, unknown> = { ...params };
-
-    const from = cleaned["PLN.AR_TO_DT_FRM"] ?? cleaned["PLN_AR_TO_DT_FRM"];
-    const to = cleaned["PLN.AR_TO_DT_TO"] ?? cleaned["PLN_AR_TO_DT_TO"];
-
-    delete cleaned["PLN.AR_TO_DT_FRM"];
-    delete cleaned["PLN.AR_TO_DT_TO"];
-    delete cleaned["PLN_AR_TO_DT_FRM"];
-    delete cleaned["PLN_AR_TO_DT_TO"];
-
-    if (from && to) {
-      const fromStr = String(from).replace(/-/g, "");
-      const toStr = String(to).replace(/-/g, "");
-      const clause =
-        ` AND PLN.AR_TO_DT BETWEEN TO_DATE('${fromStr}', 'YYYYMMDD')` +
-        ` AND TO_DATE('${toStr}', 'YYYYMMDD')`;
-      const existing = String(cleaned.DYNAMIC_QUERY ?? "1=1");
-      cleaned.DYNAMIC_QUERY = existing + clause;
-    }
-
-    return operatorArBillingInquiryApi.getList(cleaned);
-  }, []);
+  // excludes 선언 (Page 의 useSearchCondition) 에 의해:
+  //   - PLN.AR_TO_DT 는 dsSearchCondition 배열에서 자동 제외
+  //   - transformParams 가 AR_FROM_DT / AR_TO_DT 로 리네임 + 하이픈 제거
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) =>
+      operatorArBillingInquiryApi.getList(searchCondition.transformParams(params)),
+    [searchCondition],
+  );
 
   const fetchSubTabs = useCallback(
     (row: any) => {

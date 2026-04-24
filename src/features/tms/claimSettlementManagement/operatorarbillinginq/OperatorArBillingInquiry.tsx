@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
+import { useSearchCondition } from "@/hooks/useSearchCondition";
 
 import { useOperatorArBillingInquiryModel } from "./OperatorArBillingInquiryModel";
 import { useOperatorArBillingInquiryController } from "./OperatorArBillingInquiryController";
@@ -16,7 +17,7 @@ import {
   ATTACHMENT_COLUMN_DEFS,
 } from "./OperatorArBillingInquiryColumns";
 
-const MENU_CD = "MENU_OPERATOR_BILLING_MANAGEMENT";
+export const MENU_CD = "MENU_OPERATOR_BILLING_MANAGEMENT";
 
 export default function OperatorArBillingInquiry() {
   const { meta, loading } = useSearchMeta(MENU_CD);
@@ -26,19 +27,28 @@ export default function OperatorArBillingInquiry() {
   const filtersRef = useRef<Record<string, unknown>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
-  // JS onSaveAfterSearch: setCompToParamExclude('PLN.AR_TO_DT')
-  //   → PLN.AR_TO_DT 는 DYNAMIC_QUERY 에서 제외. 값은 fetchList 에서
-  //     buildOperatorArBillingHeaderParams 처럼 AR_FROM_DT / AR_TO_DT 로 재조립.
-  //   state 는 YMD 범위라 _FRM / _TO 로 쪼개져 있음 → 둘 다 exclude.
-  useEffect(() => {
-    excludeKeysRef.current.add("PLN.AR_TO_DT_FRM");
-    excludeKeysRef.current.add("PLN.AR_TO_DT_TO");
-  }, []);
+  // JS onSaveAfterSearch + buildOperatorArBillingHeaderParams 선언형 대응:
+  //   - PLN.AR_TO_DT 는 dsSearchCondition 배열에서 제외 (_FRM/_TO 자동 처리)
+  //   - 값은 AR_FROM_DT / AR_TO_DT 로 top-level 리네임 + 하이픈 제거
+  //   Controller 는 searchCondition.transformParams(params) 한 줄로 처리.
+  const searchCondition = useSearchCondition({
+    meta,
+    excludeKeysRef,
+    filtersRef,
+    excludes: [
+      {
+        column: "PLN.AR_TO_DT",
+        as: { FROM: "AR_FROM_DT", TO: "AR_TO_DT" },
+        transform: (v) => String(v).replace(/-/g, ""),
+      },
+    ],
+  });
 
   const ctrl = useOperatorArBillingInquiryController({
     model,
     searchRef,
     filtersRef,
+    searchCondition,
   });
 
   if (loading) return <Skeleton className="h-24" />;
@@ -55,6 +65,7 @@ export default function OperatorArBillingInquiry() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

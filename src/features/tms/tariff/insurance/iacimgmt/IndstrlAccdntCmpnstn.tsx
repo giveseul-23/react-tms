@@ -34,9 +34,7 @@ import {
   DETAIL01_COLUMN_DEFS,
   DETAIL02_COLUMN_DEFS,
 } from "./IndstrlAccdntCmpnstnColumns";
-
-// TODO: 실제 메뉴 코드로 교체
-const MENU_CODE = "MENU_IACI_MGMT";
+export const MENU_CODE = "MENU_IACI_MGMT";
 
 export default function IndstrlAccdntCmpnstn() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -68,6 +66,7 @@ export default function IndstrlAccdntCmpnstn() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

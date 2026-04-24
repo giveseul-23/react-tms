@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./ApDailyManagement";
 
 type commonResponse = {
   rows: [];
@@ -14,13 +15,11 @@ const withSession = (payload: any = {}) => {
 };
 
 export const apDailyManagementApi = {
-  MENU_CD: "MENU_AP_DAILY_MGMT",
-
   // 일일실적 메인 조회
   getDailyList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apDailyManagementService/search`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -30,7 +29,7 @@ export const apDailyManagementApi = {
       `/apDailyManagementService/getUsedChgCd`,
       withSession({
         module: "TMS",
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         DF_CHG_OP_DIV_TCD: "DAILY",
         ...payload,
       }),
@@ -41,7 +40,7 @@ export const apDailyManagementApi = {
   getDetailList(payload: any) {
     return apiClient.post<commonResponse>(
       `/apDailyManagementService/searchDetail`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -49,7 +48,7 @@ export const apDailyManagementApi = {
   createDailyResult(payload: any) {
     return apiClient.post<commonResponse>(
       `/apDailyManagementService/createDailyResult`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -57,7 +56,7 @@ export const apDailyManagementApi = {
   cancelDailyResult(payload: any) {
     return apiClient.post<commonResponse>(
       `/apDailyManagementService/cancelDailyResult`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -65,7 +64,7 @@ export const apDailyManagementApi = {
   closeDaily(payload: any) {
     return apiClient.post<commonResponse>(
       `/apDailyManagementService/closeDaily`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -73,7 +72,7 @@ export const apDailyManagementApi = {
   cancelDailyClose(payload: any) {
     return apiClient.post<commonResponse>(
       `/apDailyManagementService/cancelDailyClose`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -81,7 +80,7 @@ export const apDailyManagementApi = {
   recalculate(payload: any) {
     return apiClient.post<commonResponse>(
       `/apDailyManagementService/recalculate`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -97,7 +96,7 @@ export const apDailyManagementApi = {
   uploadFareExcel(payload: any) {
     return apiClient.post<commonResponse>(
       `/apDailyManagementService/uploadFareExcel`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

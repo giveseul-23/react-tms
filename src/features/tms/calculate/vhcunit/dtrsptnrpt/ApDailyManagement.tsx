@@ -8,8 +8,7 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useApDailyManagementModel } from "./ApDailyManagementModel";
 import { useApDailyManagementController } from "./ApDailyManagementController";
-
-const MENU_CODE = "MENU_AP_DAILY_MGMT";
+export const MENU_CODE = "MENU_AP_DAILY_MGMT";
 
 export default function ApDailyManagement() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -41,6 +40,7 @@ export default function ApDailyManagement() {
         rawFiltersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       grid={
         <DataGrid

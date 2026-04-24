@@ -15,6 +15,7 @@
 
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./AccountReceivableSubChargeManagement";
 
 type commonResponse = {
   rows: [];
@@ -31,15 +32,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const accountReceivableSubChargeManagementApi = {
-  // TODO: 실제 메뉴 코드로 교체
-  MENU_CD: "MENU_ACCOUNT_RECEIVABLE_CONTRACT_SUB_CHARGE_MANAGEMENT",
-
   // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/accountReceivableSubChargeManagementService/search`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -50,7 +48,7 @@ export const accountReceivableSubChargeManagementApi = {
     return apiClient.post<commonResponse>(
       `/accountReceivableSubChargeManagementService/searchSub01`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -61,7 +59,7 @@ export const accountReceivableSubChargeManagementApi = {
     return apiClient.post<commonResponse>(
       `/accountReceivableSubChargeManagementService/searchSub02`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -80,7 +78,7 @@ export const accountReceivableSubChargeManagementApi = {
     return apiClient.post<commonResponse>(
       `/accountReceivableSubChargeManagementService/delete`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

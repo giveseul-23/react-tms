@@ -1,14 +1,15 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
+import { useSearchCondition } from "@/hooks/useSearchCondition";
 import { useCurrencyModel } from "./CurrencyModel.ts";
 import { useCurrencyController } from "./CurrencyController";
 import { MAIN_COLUMN_DEFS } from "./CurrencyColumns";
-const MENU_CD = "MENU_CURR_MGMT";
+export const MENU_CD = "MENU_CURR_MGMT";
 
 export default function Currency() {
   const { meta, loading } = useSearchMeta(MENU_CD);
@@ -18,9 +19,12 @@ export default function Currency() {
   const filtersRef = useRef<Record<string, unknown>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
-    excludeKeysRef.current.add("BOOKING");
-  }, []);
+  useSearchCondition({
+    meta,
+    excludeKeysRef,
+    filtersRef,
+    excludes: ["BOOKING"],
+  });
 
   const ctrl = useCurrencyController({
     menuCd: MENU_CD,
@@ -41,6 +45,7 @@ export default function Currency() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CD,
       }}
       grid={
         <DataGrid

@@ -1,12 +1,13 @@
 // src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
+import { useSearchCondition } from "@/hooks/useSearchCondition";
 
 import { useTenderReceiveDispatchModel } from "./TenderReceiveDispatchModel.ts";
 import { useTenderReceiveDispatchController } from "./TenderReceiveDispatchController.tsx";
@@ -17,19 +18,22 @@ import {
   AP_SETL_COLUMN_DEFS,
 } from "./TenderReceiveDispatchColumns.tsx";
 
-const MENU_CODE = "MENU_PLAN_TENDER_RECEIVE";
+export const MENU_CD = "MENU_PLAN_TENDER_RECEIVE";
 
 export default function TenderReceiveDispatch() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
+  const { meta, loading } = useSearchMeta(MENU_CD);
   const model = useTenderReceiveDispatchModel();
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
-    excludeKeysRef.current.add("BOOKING");
-  }, []);
+  useSearchCondition({
+    meta,
+    excludeKeysRef,
+    filtersRef,
+    excludes: ["BOOKING"],
+  });
 
   const ctrl = useTenderReceiveDispatchController({
     model,
@@ -84,6 +88,7 @@ export default function TenderReceiveDispatch() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

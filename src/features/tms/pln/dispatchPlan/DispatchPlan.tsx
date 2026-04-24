@@ -17,8 +17,7 @@ import {
   ALLOC_ORDER_SUB_COLUMN_DEFS,
   UNALLOC_ORDER_SUB_COLUMN_DEFS,
 } from "./DispatchPlanColumns";
-
-const MENU_CODE = "MENU_DISPATCH_PLAN";
+export const MENU_CODE = "MENU_DISPATCH_PLAN";
 
 export default function DispatchPlan() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -48,6 +47,7 @@ export default function DispatchPlan() {
         filtersRef,
         rawFiltersRef,
         pageSize: model.pageSize,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       defaultSizes={[55, 45]}

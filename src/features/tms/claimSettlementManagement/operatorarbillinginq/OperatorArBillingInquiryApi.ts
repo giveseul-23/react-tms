@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./OperatorArBillingInquiry";
 
 type commonResponse = {
   rows: [];
@@ -14,12 +15,10 @@ const withSession = (payload: any = {}) => {
 };
 
 export const operatorArBillingInquiryApi = {
-  MENU_CD: "MENU_OPERATOR_BILLING_MANAGEMENT",
-
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/searchOperatorArBillingHeader`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -27,7 +26,7 @@ export const operatorArBillingInquiryApi = {
   getBillingItemList(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/searchOperatorArBillingChargeDetail`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -35,7 +34,7 @@ export const operatorArBillingInquiryApi = {
   getOrderInfoList(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/searchOperatorArBillingShipmentInform`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -43,7 +42,7 @@ export const operatorArBillingInquiryApi = {
   getAttachmentList(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/searchOperatorArBillingAttachment`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -51,7 +50,7 @@ export const operatorArBillingInquiryApi = {
   getArEventHistory(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/searchArEventHistory`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -59,56 +58,56 @@ export const operatorArBillingInquiryApi = {
   traceCalculation(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/traceCalculation`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   changeContract(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/changeContract`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   recalculateSales(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/recalculateSales`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   dailyClose(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/dailyClose`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   confirmSales(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/confirmSales`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   cancelSettlementDoc(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/cancelSettlementDoc`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   saveMemo(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/saveMemo`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
   uploadSalesExcel(payload: any) {
     return apiClient.post<commonResponse>(
       `/operatorArBillingInquiryService/uploadSalesExcel`,
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 

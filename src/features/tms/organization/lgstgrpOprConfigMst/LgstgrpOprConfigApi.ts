@@ -1,6 +1,7 @@
 // src/app/services/lgstgrpOprConfig/lgstgrpOprConfigApi.ts
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./LgstgrpOprConfigMst";
 
 type CommonResponse = {
   rows: [];
@@ -15,13 +16,11 @@ const withSession = (payload: any = {}) => {
 };
 
 export const lgstgrpOprConfigApi = {
-  MENU_CD: "MENU_LGSTGRP_OPR_CONFIG_MST",
-
   // ── 설정유형 탭 목록 조회 ────────────────────────────────────────
   getConfigTypeList() {
     return apiClient.post<CommonResponse>(
       "/lgstGrpConfigMasterService/searchConfigType",
-      withSession({ MENU_CD: this.MENU_CD }),
+      withSession({ MENU_CD: MENU_CODE }),
     );
   },
 
@@ -29,7 +28,7 @@ export const lgstgrpOprConfigApi = {
   getConfigList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/lgstGrpConfigMasterService/search",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -51,7 +50,7 @@ export const lgstgrpOprConfigApi = {
   getConfigDetailList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/lgstGrpConfigMasterService/searchDetail",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -66,7 +65,7 @@ export const lgstgrpOprConfigApi = {
   getConfigI18nList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/lgstGrpConfigMasterService/searchLang",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
@@ -81,7 +80,7 @@ export const lgstgrpOprConfigApi = {
   getConfigDetailI18nList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/lgstGrpConfigMasterService/searchDetailLang",
-      withSession({ MENU_CD: this.MENU_CD, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 

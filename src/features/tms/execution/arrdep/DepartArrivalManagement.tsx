@@ -14,8 +14,7 @@ import {
   STOPOVER_COLUMN_DEFS,
   ASSIGNED_ORDER_COLUMN_DEFS,
 } from "./DepartArrivalManagementColumns";
-
-const MENU_CD = "MENU_EVENT_MANAGER";
+export const MENU_CD = "MENU_EVENT_MANAGER";
 
 export default function DepartArrivalManagement() {
   const { meta, loading } = useSearchMeta(MENU_CD);
@@ -45,6 +44,7 @@ export default function DepartArrivalManagement() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

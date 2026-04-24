@@ -21,8 +21,7 @@ import { TmapView, TmapMarker } from "@/app/components/map/TmapView";
 import { useInTrnstVehCtrlModel } from "./InTrnstVehCtrlModel";
 import { useInTrnstVehCtrlController } from "./InTrnstVehCtrlController";
 import { MAIN_COLUMN_DEFS } from "./InTrnstVehCtrlColumns";
-
-const MENU_CODE = "MENU_IN_TRNST_VEH_CTRL";
+export const MENU_CODE = "MENU_IN_TRNST_VEH_CTRL";
 
 export default function InTrnstVehCtrl() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -88,6 +87,7 @@ export default function InTrnstVehCtrl() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       defaultSizes={[45, 55]}

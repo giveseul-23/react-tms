@@ -16,6 +16,8 @@ import { useMenuConfigModel } from "./MenuConfigModel";
 import { useMenuConfigController } from "./MenuConfigController";
 import { MAIN_COLUMN_DEFS } from "./MenuConfigColumns";
 
+export const MENU_CD = "MENU_CFG_CNFG";
+
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 export type MenuRow = TreeRow & {
   MENUCODE: string;
@@ -74,13 +76,11 @@ export function buildSource(serverData: any[]): MenuRow[] {
   return result;
 }
 
-const MENU_CODE = "MENU_CFG_CNFG";
-
 export default function MenuConfig() {
   const filtersRef = useRef<Record<string, unknown>>({});
   const treeGridRef = useRef<TreeGridHandle>(null);
 
-  const { meta, loading } = useSearchMeta(MENU_CODE);
+  const { meta, loading } = useSearchMeta(MENU_CD);
   const model = useMenuConfigModel();
   const ctrl = useMenuConfigController({ model, treeGridRef, filtersRef });
 
@@ -113,9 +113,7 @@ export default function MenuConfig() {
           function countLeafs(nodes: any[]): number {
             return nodes.reduce((acc, node) => {
               const children = node.data ?? [];
-              return children.length > 0
-                ? acc + countLeafs(children)
-                : acc + 1;
+              return children.length > 0 ? acc + countLeafs(children) : acc + 1;
             }, 0);
           }
 
@@ -124,6 +122,7 @@ export default function MenuConfig() {
             return children.length > 0 ? acc + countLeafs(children) : acc + 1;
           }, 0);
         },
+        menuCode: MENU_CD,
       }}
       grid={
         <TreeGrid<MenuRow>

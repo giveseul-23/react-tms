@@ -1,6 +1,7 @@
 // src/app/services/menu/menuApi.ts
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./MenuConfig";
 
 type commonResponse = {
   rows: [];
@@ -17,14 +18,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const menuApi = {
-  MENU_CD: "MENU_CFG",
-
   getMenuConfigList(payload: any) {
     return apiClient.post<commonResponse>(
       // `/openapina/carrier/getMenuConfigList`,
       `/menuService/searchByReact`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CD,
         ...payload,
       }),
     );
@@ -35,7 +34,7 @@ export const menuApi = {
     return apiClient.post(
       `/openapina/carrier/insertMenuFolder`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CD,
         ...payload,
       }),
     );
@@ -46,7 +45,7 @@ export const menuApi = {
     return apiClient.post(
       `/openapina/carrier/insertMenuItem`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CD,
         ...payload,
       }),
     );
@@ -57,7 +56,7 @@ export const menuApi = {
     return apiClient.post(
       `/openapina/carrier/saveMenuConfig`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CD,
         ...payload,
       }),
     );

@@ -21,8 +21,7 @@ import { TmapView, TmapMarker } from "@/app/components/map/TmapView";
 import { useDtgDailyVehHisControllerModel } from "./DtgDailyVehHisControllerModel";
 import { useDtgDailyVehHisControllerController } from "./DtgDailyVehHisControllerController";
 import { MAIN_COLUMN_DEFS } from "./DtgDailyVehHisControllerColumns";
-
-const MENU_CODE = "MENU_DAILY_DTG_VEH_HIS";
+export const MENU_CODE = "MENU_DAILY_DTG_VEH_HIS";
 
 export default function InTrnstVehCtrl() {
   const { meta, loading } = useSearchMeta(MENU_CODE);

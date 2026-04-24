@@ -1,6 +1,7 @@
 // src/app/services/inTrnstVehCtrl/inTrnstVehCtrlApi.ts
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./InTrnstVehCtrl";
 
 type CommonResponse = {
   rows: [];
@@ -15,14 +16,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const inTrnstVehCtrlApi = {
-  MENU_CD: "MENU_IN_TRNST_VEH_CTRL",
-
   // ── 수송중 차량 조회 ────────────────────────────────────────
   getInTrnstVehList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/inTransitVehicleStatusService/search",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

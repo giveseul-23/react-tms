@@ -35,8 +35,7 @@ import {
   DETAIL02_COLUMN_DEFS,
 } from "./RateColumns";
 
-// TODO: 실제 메뉴 코드로 교체
-const MENU_CODE = "MENU_DSPTCH_RATE";
+export const MENU_CODE = "MENU_DSPTCH_RATE";
 
 export default function Feature() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -68,6 +67,7 @@ export default function Feature() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "vertical" : "horizontal"}
       layoutToggle={{

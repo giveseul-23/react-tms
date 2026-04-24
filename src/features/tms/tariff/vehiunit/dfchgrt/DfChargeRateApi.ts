@@ -15,6 +15,7 @@
 
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./DfChargeRate";
 
 type commonResponse = {
   rows: [];
@@ -31,15 +32,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const dfChargeRateApi = {
-  // TODO: 실제 메뉴 코드로 교체
-  MENU_CD: "MENU_DF_RATE_MGMT",
-
   // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
     return apiClient.post<commonResponse>(
       `/dfChargeRateService/search`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -50,7 +48,7 @@ export const dfChargeRateApi = {
     return apiClient.post<commonResponse>(
       `/dfChargeRateService/searchRateItem`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -60,7 +58,7 @@ export const dfChargeRateApi = {
     return apiClient.post<commonResponse>(
       `/dfChargeRateService/searchRateCarr`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -70,7 +68,7 @@ export const dfChargeRateApi = {
     return apiClient.post<commonResponse>(
       `/dfChargeRateService/searchRateVehTp`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -80,7 +78,7 @@ export const dfChargeRateApi = {
     return apiClient.post<commonResponse>(
       `/dfChargeRateService/searchRateItmVehType`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -90,7 +88,7 @@ export const dfChargeRateApi = {
     return apiClient.post<commonResponse>(
       `/dfChargeRateService/searchRateItmVeh`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -109,7 +107,7 @@ export const dfChargeRateApi = {
     return apiClient.post<commonResponse>(
       `/dfChargeRateService/delete`,
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

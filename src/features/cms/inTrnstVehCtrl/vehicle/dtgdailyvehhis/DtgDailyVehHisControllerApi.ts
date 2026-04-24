@@ -1,6 +1,7 @@
 // src/app/services/inTrnstVehCtrl/inTrnstVehCtrlApi.ts
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./DtgDailyVehHisController";
 
 type CommonResponse = {
   rows: [];
@@ -15,14 +16,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const dtgDailyVehHisControllerApi = {
-  MENU_CD: "MENU_DAILY_DTG_VEH_HIS",
-
   // ── 수송중 차량 조회 ────────────────────────────────────────
   getInTrnstVehList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/driveHistoryService/searchGroupedDrivingRecordsByDate",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -33,7 +32,7 @@ export const dtgDailyVehHisControllerApi = {
     return apiClient.post<CommonResponse>(
       "/driveHistoryService/searchDtgDailyHistory",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );

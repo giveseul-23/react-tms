@@ -37,9 +37,7 @@ import {
   RT_ITM_VEH_TP_COLUMN_DEFS,
   RT_ITM_VEH_COLUMN_DEFS,
 } from "./DfChargeRateColumns";
-
-// TODO: 실제 메뉴 코드로 교체
-const MENU_CODE = "MENU_DF_RATE_MGMT";
+export const MENU_CODE = "MENU_DF_RATE_MGMT";
 
 export default function Feature() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -70,6 +68,7 @@ export default function Feature() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

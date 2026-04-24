@@ -14,8 +14,7 @@ import {
   OIL_PRICE_COLUMN_DEFS,
   PERIOD_COLUMN_DEFS,
 } from "./TempOilPriceColumns";
-
-const MENU_CODE = "MENU_TEMP_VEH_OIL_PRICE_MGMT";
+export const MENU_CODE = "MENU_TEMP_VEH_OIL_PRICE_MGMT";
 
 export default function TempOilPrice() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -45,6 +44,7 @@ export default function TempOilPrice() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       grid={
         <DataGrid

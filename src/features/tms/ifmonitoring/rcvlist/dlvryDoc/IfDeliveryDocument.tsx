@@ -13,8 +13,7 @@ import {
   MAIN_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
 } from "./IfDeliveryDocumentColumns";
-
-const MENU_CODE = "MENU_IF_RCV_DLVRY_DOC";
+export const MENU_CODE = "MENU_IF_RCV_DLVRY_DOC";
 
 export default function IfDeliveryDocument() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -44,6 +43,7 @@ export default function IfDeliveryDocument() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

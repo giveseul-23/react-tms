@@ -8,8 +8,7 @@ import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useApMonthlyManagementModel } from "./ApMonthlyManagementModel";
 import { useApMonthlyManagementController } from "./ApMonthlyManagementController";
-
-const MENU_CODE = "MENU_AP_MONTHLY_MGMT";
+export const MENU_CODE = "MENU_AP_MONTHLY_MGMT";
 
 export default function ApMonthlyManagement() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -41,6 +40,7 @@ export default function ApMonthlyManagement() {
         rawFiltersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       grid={
         <DataGrid

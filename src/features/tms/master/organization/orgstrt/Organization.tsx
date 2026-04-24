@@ -13,8 +13,7 @@ import {
   DIVISION_COLUMN_DEFS,
   LOGISTICS_GROUP_COLUMN_DEFS,
 } from "./OrganizationColumns";
-
-const MENU_CD = "MENU_ORGANIZATION_STRUCT";
+export const MENU_CD = "MENU_ORGANIZATION_STRUCT";
 
 export default function Organization() {
   const { meta, loading } = useSearchMeta(MENU_CD);
@@ -44,6 +43,7 @@ export default function Organization() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

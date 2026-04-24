@@ -21,8 +21,7 @@ import {
   MATERIAL_COST_COLUMN_DEFS,
   EVIDENCE_COLUMN_DEFS,
 } from "./ApSettlMgmtColumns";
-
-const MENU_CODE = "MENU_AP_SETTL_MGMT";
+export const MENU_CODE = "MENU_AP_SETTL_MGMT";
 
 export default function ApSettlMgmt() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -52,6 +51,7 @@ export default function ApSettlMgmt() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

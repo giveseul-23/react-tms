@@ -34,9 +34,7 @@ import {
   DETAIL01_COLUMN_DEFS,
   DETAIL02_COLUMN_DEFS,
 } from "./AccountReceivableSubChargeManagementColumns";
-
-// TODO: 실제 메뉴 코드로 교체
-const MENU_CODE = "MENU_ACCOUNT_RECEIVABLE_CONTRACT_SUB_CHARGE_MANAGEMENT";
+export const MENU_CODE = "MENU_ACCOUNT_RECEIVABLE_CONTRACT_SUB_CHARGE_MANAGEMENT";
 
 export default function Feature() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
@@ -67,6 +65,7 @@ export default function Feature() {
         filtersRef,
         pageSize: model.pageSize,
         excludeKeysRef,
+        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{

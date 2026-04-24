@@ -1,6 +1,7 @@
 // src/app/services/vehicle/vehicleMgmtApi.ts
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CODE } from "./VehicleMgmt";
 
 type CommonResponse = {
   rows: [];
@@ -15,14 +16,12 @@ const withSession = (payload: any = {}) => {
 };
 
 export const vehicleMgmtApi = {
-  MENU_CD: "MENU_VEHICLE_MGMT",
-
   // ── 조회 ─────────────────────────────────────────────────────
   getVehicleList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/vehicleService/search",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -32,7 +31,7 @@ export const vehicleMgmtApi = {
     return apiClient.post<CommonResponse>(
       "/vehicleService/searchStateInfoList",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -43,7 +42,7 @@ export const vehicleMgmtApi = {
     return apiClient.post<CommonResponse>(
       "/vehicleMgmtService/insertVehicle",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -53,7 +52,7 @@ export const vehicleMgmtApi = {
     return apiClient.post<CommonResponse>(
       "/vehicleMgmtService/updateVehicle",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -63,7 +62,7 @@ export const vehicleMgmtApi = {
     return apiClient.post<CommonResponse>(
       "/vehicleMgmtService/deleteVehicle",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -81,7 +80,7 @@ export const vehicleMgmtApi = {
     return apiClient.post<CommonResponse>(
       "/vehicleMgmtService/changeContact",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -91,7 +90,7 @@ export const vehicleMgmtApi = {
     return apiClient.post<CommonResponse>(
       "/vehicleMgmtService/changeGarageBatch",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
     );
@@ -102,7 +101,7 @@ export const vehicleMgmtApi = {
     return apiClient.post<CommonResponse>(
       "/vehicleMgmtService/downloadExcel",
       withSession({
-        MENU_CD: this.MENU_CD,
+        MENU_CD: MENU_CODE,
         ...payload,
       }),
       { responseType: "blob" },
