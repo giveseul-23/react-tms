@@ -111,19 +111,24 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-/** 주행 경로 중간 점 — 빨간 작은 원 (6x6, 선보다 작게) */
-const RED_DOT_ICON =
-  "data:image/svg+xml;charset=UTF-8," +
-  encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 10 10">
-      <polygon points="5,1 9,9 1,9" 
-           fill="#dc2626" 
-           stroke="#000000" 
-           stroke-width="2"
-           stroke-linejoin="round"
-           vector-effect="non-scaling-stroke"/>
-    </svg>
-  `);
+/**
+ * 주행 경로 중간 거점 설정값 — Polyline 과 같은 canvas 레이어(Tmapv2.Circle)로
+ * 그려서 subpixel 오차 없이 선 중심에 정확히 얹힘.
+ * Circle.radius 는 미터 단위이므로 zoom 변경 시 픽셀 크기 유지를 위해 재계산 필요.
+ */
+const TRACE_DOT_RADIUS_PX = 3.5; // 화면상 원 반경 (px)
+const TRACE_DOT_FILL = "#FFFFFF";
+const TRACE_DOT_STROKE = "#000000";
+const TRACE_DOT_STROKE_WEIGHT = 1;
+/** 중간 거점 샘플링 간격 — N개마다 1개씩 렌더 (조밀한 GPS trace 성능 최적화) */
+const TRACE_DOT_STEP = 15;
+
+/** 주어진 위도/줌에서 target 픽셀 반경을 미터 단위로 변환 (Web Mercator 기준) */
+function pxRadiusToMeters(lat: number, zoom: number, px: number): number {
+  const metersPerPx =
+    (156543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom);
+  return px * metersPerPx;
+}
 /**
  * 트럭 핀 아이콘 + (선택적) 아래쪽 라벨 배지를 포함한 SVG data URL.
  * - translate(7.5, 6.5) 로 핀 상단 원 중심(18,18) 에 트럭 정중앙 배치
@@ -389,8 +394,14 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
     const markerObjsRef = useRef<Map<string, any>>(new Map());
     const tracePolylineRef = useRef<any>(null);
     const tracePointsRef = useRef<TracePoint[]>([]);
-    /** drawTrace 가 자동 추가하는 보조 마커 (시작/끝 핀 + 중간 점) */
+    /** drawTrace 가 자동 추가하는 보조 마커 (시작/끝 핀만) */
     const traceAuxMarkersRef = useRef<any[]>([]);
+    /** 중간 거점 Circle overlay (polyline 과 같은 canvas 레이어) */
+    const traceCirclesRef = useRef<any[]>([]);
+    /** traceCirclesRef 와 동일 순서로 보관하는 중심 위도(radius 재계산용) */
+    const traceCircleCentersRef = useRef<TracePoint[]>([]);
+    /** zoom_changed 리스너 (Circle 반경 재계산) — 최초 drawTrace 시 1회 등록 */
+    const traceZoomListenerRef = useRef<any>(null);
     const stopMarkerObjsRef = useRef<Map<string, any>>(new Map());
     const [error, setError] = useState<string | null>(null);
     const [loaded, setLoaded] = useState(false);
@@ -589,13 +600,16 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           );
           tracePointsRef.current = valid;
 
-          // 기존 polyline + 보조 마커 제거
+          // 기존 polyline + 보조 마커 + 중간 거점 Circle 제거
           if (tracePolylineRef.current) {
             tracePolylineRef.current.setMap(null);
             tracePolylineRef.current = null;
           }
           traceAuxMarkersRef.current.forEach((m) => m.setMap(null));
           traceAuxMarkersRef.current = [];
+          traceCirclesRef.current.forEach((c) => c.setMap(null));
+          traceCirclesRef.current = [];
+          traceCircleCentersRef.current = [];
 
           if (valid.length === 0) return;
 
@@ -617,21 +631,21 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
             });
           };
 
-          // 거쳐간 점 — 선(5px)보다 작은 빨간 원(6x6, 가시 4px)
-          const makeTracePointMarker = (p: TracePoint) =>
-            new Tmapv2.Marker({
-              position: new Tmapv2.LatLng(p.lat, p.lon),
+          // 거쳐간 점 — Tmapv2.Circle 로 polyline 과 동일 canvas 레이어에 렌더
+          // (subpixel 오차 없이 선 중심에 정확히 올라감)
+          const currentZoom = map.getZoom();
+          const makeTracePointCircle = (p: TracePoint) =>
+            new Tmapv2.Circle({
+              center: new Tmapv2.LatLng(p.lat, p.lon),
+              radius: pxRadiusToMeters(p.lat, currentZoom, TRACE_DOT_RADIUS_PX),
+              strokeColor: TRACE_DOT_STROKE,
+              strokeWeight: TRACE_DOT_STROKE_WEIGHT,
+              fillColor: TRACE_DOT_FILL,
+              fillOpacity: 1,
               map,
-              icon: RED_DOT_ICON,
-              iconSize: new Tmapv2.Size(10, 10),
-              iconAnchor: new Tmapv2.Point(10, 10),
             });
 
-          // 중간 포인트 먼저 (아래 레이어)
-          for (let i = 1; i < valid.length - 1; i++) {
-            traceAuxMarkersRef.current.push(makeTracePointMarker(valid[i]));
-          }
-          // 시작/끝 핀 (위 레이어)
+          // 시작/끝 핀 먼저 (위 레이어에 올라가되, polyline 이 그 위에 그려짐)
           traceAuxMarkersRef.current.push(
             makeEndpointMarker(valid[0], "출발", "#16a34a", "S"),
           );
@@ -645,18 +659,46 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
               ),
             );
 
-            // polyline — 검정
+            // polyline — 파랑 + 방향 화살표
             const path = valid.map((p) => new Tmapv2.LatLng(p.lat, p.lon));
             tracePolylineRef.current = new Tmapv2.Polyline({
               path,
-              strokeColor: options?.strokeColor ?? "#000000",
-              strokeWeight: options?.strokeWeight ?? 5,
+              strokeColor: options?.strokeColor ?? "#1E88E5",
+              strokeWeight: options?.strokeWeight ?? 6,
               strokeStyle: "solid",
+              direction: true,
+              directionColor: "#FFFFFF",
+              directionOpacity: 1,
               map,
-              // direction: true,
-              // directionColor: "#ffffff",
-              // directionOpacity: 1,
             });
+
+            // 중간 거점 Circle (polyline 위에 얹힘 — canvas 상위 z-order)
+            // TRACE_DOT_STEP 개마다 1개씩만 렌더 (조밀한 GPS trace 에서 성능/시각 모두 최적)
+            for (
+              let i = TRACE_DOT_STEP;
+              i < valid.length - 1;
+              i += TRACE_DOT_STEP
+            ) {
+              traceCirclesRef.current.push(makeTracePointCircle(valid[i]));
+              traceCircleCentersRef.current.push(valid[i]);
+            }
+
+            // zoom 변경 시 Circle 반경 재계산 (최초 1회만 리스너 등록)
+            if (!traceZoomListenerRef.current) {
+              traceZoomListenerRef.current = () => {
+                const m = mapRef.current;
+                if (!m) return;
+                const z = m.getZoom();
+                const circles = traceCirclesRef.current;
+                const centers = traceCircleCentersRef.current;
+                for (let i = 0; i < circles.length; i++) {
+                  circles[i].setRadius(
+                    pxRadiusToMeters(centers[i].lat, z, TRACE_DOT_RADIUS_PX),
+                  );
+                }
+              };
+              map.addListener("zoom_changed", traceZoomListenerRef.current);
+            }
           }
 
           // 자동 fit
@@ -677,6 +719,9 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
           }
           traceAuxMarkersRef.current.forEach((m) => m.setMap(null));
           traceAuxMarkersRef.current = [];
+          traceCirclesRef.current.forEach((c) => c.setMap(null));
+          traceCirclesRef.current = [];
+          traceCircleCentersRef.current = [];
           tracePointsRef.current = [];
         },
         fitTrace: () => {
