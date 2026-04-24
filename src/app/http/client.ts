@@ -10,12 +10,20 @@ import { API_CONFIG } from "./config";
 import { getAccessToken, clearTokens } from "@/app/services/auth/auth";
 import { Lang } from "@/app/services/common/Lang";
 
+// Vercel rewrites(/api/* → 백엔드) 때문에 백엔드가 발급한 JSESSIONID 가
+// 프론트 도메인에 저장되어 재배포/재시작 후 stale 상태로 계속 전송 → 500 유발.
+// JWT Bearer 인증만 사용하므로 JSESSIONID 는 불필요 — 앱 부트 시 제거.
+if (typeof document !== "undefined") {
+  const expire = "; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  document.cookie = `JSESSIONID=${expire}`;
+  document.cookie = `JSESSIONID=${expire}; domain=${window.location.hostname}`;
+}
+
 export const apiClient = axios.create({
   baseURL: API_CONFIG.baseURL,
   timeout: API_CONFIG.timeout,
   headers: {
     "Content-Type": "application/json",
-    withCredentials: true,
   },
 });
 
