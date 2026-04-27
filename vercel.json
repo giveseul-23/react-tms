@@ -2,31 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://221.149.104.164:21000/api/:path*"
+      "destination": "http://221.149.104.164:21000/:path*"
     },
     {
-      "source": "/((?!api|assets|.*\\..*).*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/index.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
     }
   ]
 }
