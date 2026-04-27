@@ -1,5 +1,7 @@
 "use client";
 
+import { Lang } from "@/app/services/common/Lang";
+
 export function GridTabs({
   tabs,
   activeTab,
@@ -27,7 +29,7 @@ export function GridTabs({
                   : "text-[rgb(var(--fg))] hover:text-gray-700",
               ].join(" ")}
             >
-              {t.label}
+              {Lang.get(t.label)}
               <span
                 className={[
                   "absolute left-0 -bottom-[1px] h-[2px] w-full transition-opacity",

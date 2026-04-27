@@ -123,10 +123,10 @@ export default function ApSettlMgmt() {
                 <DataGrid
                   layoutType="tab"
                   tabs={[
-                    { key: "MONTHLY_FARE", label: "월대운임상세내역" },
-                    { key: "HIRE_DISPATCH", label: "용차/배차지급내역" },
-                    { key: "FREIGHT", label: "물동지급내역" },
-                    { key: "INDIRECT", label: "간접비지급내역" },
+                    { key: "MONTHLY_FARE", label: "LBL_FIXED_VEH_CHARGE" },
+                    { key: "HIRE_DISPATCH", label: "LBL_DSPCH_CHARGE" },
+                    { key: "FREIGHT", label: "LBL_ITM_QTY_RATE" },
+                    { key: "INDIRECT", label: "LBL_OVERHEAD_CHARGE" },
                   ]}
                   presets={{
                     MONTHLY_FARE: {
