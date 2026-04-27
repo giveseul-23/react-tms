@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://221.149.104.164:21000",
+        target: "localhost:8080",
         changeOrigin: true,
       },
     },
@@ -25,9 +25,6 @@ export default defineConfig({
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
         },
-        // entryFileNames: "assets/[name]-[hash].js",
-        // chunkFileNames: "assets/[name]-[hash].js",
-        // assetFileNames: "assets/[name]-[hash].[ext]",
       },
     },
   },
