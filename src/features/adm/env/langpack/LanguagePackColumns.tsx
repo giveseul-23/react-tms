@@ -20,6 +20,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   {
     headerName: "LBL_APPL_CD",
     field: "APPL_CD",
+    codeKey: "SELECT_APPLICATION_CODE_NAME",
   },
   ...makeAuditColumns({
     delete: true,

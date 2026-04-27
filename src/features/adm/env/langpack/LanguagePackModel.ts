@@ -26,7 +26,8 @@ export function useLanguagePackModel() {
 
   // ── 공통 코드 스토어 (언어유형) ─────────────────────────────
   const { stores } = useCommonStores({
-    langGbn: { sqlProp: "CODE", keyParam: "LANG_GBN" },
+    langTypeList: { sqlProp: "CODE", keyParam: "LANG_TP" },
+    applCodeList: { sqlProp: "SELECT_APPLICATION_CODE_NAME" },
   });
 
   // 코드 → 명칭 변환 맵
