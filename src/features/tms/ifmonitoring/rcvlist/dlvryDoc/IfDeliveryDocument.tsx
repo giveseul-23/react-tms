@@ -75,7 +75,7 @@ export default function IfDeliveryDocument() {
       detail={
         <DataGrid
           layoutType="tab"
-          tabs={[{ key: "DETAIL", label: "납품상세" }]}
+          tabs={[{ key: "DETAIL", label: "LBL_DLVRY_DETAIL" }]}
           presets={{
             DETAIL: {
               columnDefs: DETAIL_COLUMN_DEFS,

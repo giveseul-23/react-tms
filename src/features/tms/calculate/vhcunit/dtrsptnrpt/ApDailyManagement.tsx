@@ -46,8 +46,8 @@ export default function ApDailyManagement() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "DAILY", label: "일일실적" },
-            { key: "DETAIL", label: "상세내역" },
+            { key: "DAILY", label: "LBL_DAY_REPORT" },
+            { key: "DETAIL", label: "LBL_DTL_DESC" },
           ]}
           presets={{
             DAILY: {

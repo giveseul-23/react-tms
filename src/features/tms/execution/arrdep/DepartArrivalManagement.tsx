@@ -77,8 +77,8 @@ export default function DepartArrivalManagement() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "STOPOVER", label: "경유처" },
-            { key: "ASSIGNED_ORDER", label: "할당주문" },
+            { key: "STOPOVER", label: "LBL_STOP" },
+            { key: "ASSIGNED_ORDER", label: "LBL_ASSIGNED_SHIPMENTS" },
           ]}
           presets={{
             STOPOVER: {

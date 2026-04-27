@@ -84,8 +84,8 @@ export default function TenderReceiveDispatch() {
           <DataGrid
             layoutType="tab"
             tabs={[
-              { key: "CHANNEL", label: "알림채널" },
-              { key: "TARGET", label: "전송대상" },
+              { key: "CHANNEL", label: "LBL_NTFCTN_CHNL" },
+              { key: "TARGET", label: "LBL_NTFCTN_RCVR" },
             ]}
             codeMap={model.codeMap}
             presets={{

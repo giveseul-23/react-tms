@@ -79,9 +79,9 @@ export default function ConfirmDispatch() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "ORDER", label: "주문정보" },
-            { key: "RECEIPT", label: "인수증" },
-            { key: "HISTORY", label: "인수증 발행이력" },
+            { key: "ORDER", label: "LBL_ORDER_INFO" },
+            { key: "RECEIPT", label: "LBL_POD" },
+            { key: "HISTORY", label: "LBL_POD_ISSUE_HISTORY" },
           ]}
           presets={{
             ORDER: {

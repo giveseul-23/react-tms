@@ -94,8 +94,8 @@ export default function Country() {
           <DataGrid
             layoutType="tab"
             tabs={[
-              { key: "STATE", label: "시도" },
-              { key: "ZIP", label: "우편번호" },
+              { key: "STATE", label: "LBL_STATE" },
+              { key: "ZIP", label: "LBL_ZIP_CODE" },
             ]}
             presets={{
               STATE: {
@@ -120,11 +120,10 @@ export default function Country() {
                       columnDefs={CITY_COLUMN_DEFS}
                       rowData={model.subCityRowData}
                       actions={ctrl.cityActions}
-                      subTitle="시군구"
+                      subTitle="LBL_CITY"
                     />
                   </SplitPane>
                 ),
-                actions: ctrl.cityActions,
               },
               ZIP: { columnDefs: ZIP_COLUMN_DEFS, actions: ctrl.zipActions },
             }}

@@ -120,9 +120,9 @@ export default function TenderReceiveDispatch() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "STOP", label: "경유처" },
-            { key: "SMS_HIS", label: "SMS전송이력" },
-            { key: "AP_SETL", label: "운송비내역" },
+            { key: "STOP", label: "LBL_STOP" },
+            { key: "SMS_HIS", label: "LBL_SMS_HISTORY" },
+            { key: "AP_SETL", label: "LBL_TRANS_COST_HIS" },
           ]}
           presets={{
             STOP: { columnDefs: STOP_COLUMN_DEFS },

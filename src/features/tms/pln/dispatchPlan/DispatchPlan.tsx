@@ -81,9 +81,9 @@ export default function DispatchPlan() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "STOP", label: "경유처" },
-            { key: "ALLOC", label: "할당주문" },
-            { key: "UNALLOC", label: "미할당주문" },
+            { key: "STOP", label: "LBL_STOP" },
+            { key: "ALLOC", label: "LBL_ASSIGNED_SHIPMENTS" },
+            { key: "UNALLOC", label: "LBL_UNASSIGNED_SHIPMENTS" },
           ]}
           presets={{
             STOP: {

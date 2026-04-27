@@ -98,9 +98,9 @@ export default function OperatorArBillingInquiry() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "BILLING_ITEM", label: "청구항목" },
-            { key: "ORDER_INFO", label: "주문정보" },
-            { key: "ATTACHMENT", label: "증빙문서" },
+            { key: "BILLING_ITEM", label: "LBL_CHARGE_DETAIL" },
+            { key: "ORDER_INFO", label: "LBL_ORDER_INFO" },
+            { key: "ATTACHMENT", label: "LBL_SPRT_DOC" },
           ]}
           presets={{
             BILLING_ITEM: {

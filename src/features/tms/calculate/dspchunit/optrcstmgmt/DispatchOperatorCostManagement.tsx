@@ -80,9 +80,9 @@ export default function DispatchOperatorCostManagement() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "COST", label: "비용상세정보" },
-            { key: "WAYPOINT", label: "경유처" },
-            { key: "EVIDENCE", label: "증빙문서" },
+            { key: "COST", label: "LBL_RATE_INFO" },
+            { key: "WAYPOINT", label: "LBL_STOP" },
+            { key: "EVIDENCE", label: "LBL_SPRT_DOC" },
           ]}
           presets={{
             COST: {

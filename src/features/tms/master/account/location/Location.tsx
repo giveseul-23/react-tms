@@ -86,18 +86,18 @@ export default function Location() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "ENTRY_RESTRICTION", label: "진입제약" },
-            { key: "ASSIGNED_VEHICLE", label: "지정차량" },
-            { key: "DATE_PROHIBITION", label: "입차금지" },
-            { key: "REGISTERED_ZONE", label: "등록권역" },
-            { key: "HOLIDAY", label: "휴무일" },
-            { key: "PREFERRED_CARRIER", label: "선호운송협력사" },
-            { key: "ARRIVAL_REQUEST_TIME", label: "도착요구시간관리" },
-            { key: "SMS", label: "SMS" },
-            { key: "LOCATION_ROLE", label: "착지역할" },
-            { key: "LOC_SALES", label: "영업조직" },
-            { key: "ETC", label: "기타" },
-            { key: "ORDER_TYPE_PLAN_ID", label: "주문유형별계획ID" },
+            { key: "ENTRY_RESTRICTION", label: "LBL_RESTRICTED_VEHICLE_TYPE" },
+            { key: "ASSIGNED_VEHICLE", label: "LBL_ASSIGNED_VEHICLE" },
+            { key: "DATE_PROHIBITION", label: "LBL_LOC_EXCLD_VEH" },
+            { key: "REGISTERED_ZONE", label: "LBL_LOCATION_ZONE" },
+            { key: "HOLIDAY", label: "LBL_CLOSED_DAY" },
+            { key: "PREFERRED_CARRIER", label: "LBL_PREFERRED_CARRIER" },
+            { key: "ARRIVAL_REQUEST_TIME", label: "LBL_DELIVERY_TIME_WINDOW" },
+            { key: "SMS", label: "LBL_SMS" },
+            { key: "LOCATION_ROLE", label: "LBL_LOC_ROLE_TP" },
+            { key: "LOC_SALES", label: "LBL_LOC_SALES" },
+            { key: "ETC", label: "LBL_ETC_SETTING" },
+            { key: "ORDER_TYPE_PLAN_ID", label: "LBL_LOC_ORD_PLN" },
           ]}
           presets={{
             ENTRY_RESTRICTION: {

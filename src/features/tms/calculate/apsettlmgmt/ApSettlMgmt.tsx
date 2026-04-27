@@ -84,10 +84,10 @@ export default function ApSettlMgmt() {
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "SUMMARY", label: "종합내역" },
-            { key: "COST_CENTER", label: "코스트센터/계정별내역" },
-            { key: "MATERIAL", label: "원재료비내역" },
-            { key: "EVIDENCE", label: "증빙문서" },
+            { key: "SUMMARY", label: "LBL_SUMMARY_LIST" },
+            { key: "COST_CENTER", label: "LBL_EACH_COST_ACCOUNT" },
+            { key: "MATERIAL", label: "MENU_FI_AP_SETL_ITM" },
+            { key: "EVIDENCE", label: "LBL_SPRT_DOC" },
           ]}
           presets={{
             SUMMARY: {

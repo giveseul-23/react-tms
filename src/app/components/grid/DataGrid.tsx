@@ -1018,7 +1018,7 @@ export default function DataGrid<TRow>({
         <div className="relative z-1 shrink-0 min-w-0 w-full">
           <GridActionsBar
             actions={wrappedActionsWithTrack}
-            subTitle={subTitle}
+            subTitle={subTitle && Lang.get(subTitle)}
           />
         </div>
       )}
@@ -1034,7 +1034,7 @@ export default function DataGrid<TRow>({
                 <div className="relative z-1 shrink-0 min-w-0 w-full">
                   <GridActionsBar
                     actions={wrappedActionsWithTrack}
-                    subTitle={subTitle}
+                    subTitle={subTitle && Lang.get(subTitle)}
                   />
                 </div>
                 <div

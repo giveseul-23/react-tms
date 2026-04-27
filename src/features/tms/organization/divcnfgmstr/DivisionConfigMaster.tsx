@@ -127,7 +127,7 @@ export default function DivisionConfigMaster() {
               rowData={model.i18nData}
               actions={ctrl.i18nActions}
               onRowClicked={ctrl.handleI18nRowClicked}
-              subTitle="설정코드다국어설정"
+              subTitle="LBL_CNFG_CD_LANG_SETTING"
             />
 
             {/* Bottom-right: 설정상세코드다국어설정 */}
@@ -138,7 +138,7 @@ export default function DivisionConfigMaster() {
               )}
               rowData={model.detailI18nData}
               actions={ctrl.detailI18nActions}
-              subTitle="설정상세코드다국어설정"
+              subTitle="LBL_CNFG_DTL_CD_LANG_SETTING"
             />
           </SplitPane>
         </SplitPane>
