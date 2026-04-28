@@ -60,7 +60,7 @@ export default function ConfirmDispatch() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS()}
           codeMap={model.codeMap}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
@@ -85,16 +85,16 @@ export default function ConfirmDispatch() {
           ]}
           presets={{
             ORDER: {
-              columnDefs: ORDER_COLUMN_DEFS,
+              columnDefs: ORDER_COLUMN_DEFS(),
               actions: ctrl.orderActions,
               onRowClicked: ctrl.handleOrderRowClicked,
             },
             RECEIPT: {
-              columnDefs: RECEIPT_COLUMN_DEFS,
+              columnDefs: RECEIPT_COLUMN_DEFS(),
               actions: ctrl.receiptActions,
             },
             HISTORY: {
-              columnDefs: RECEIPT_HISTORY_COLUMN_DEFS,
+              columnDefs: RECEIPT_HISTORY_COLUMN_DEFS(),
               actions: ctrl.receiptHistoryActions,
             },
           }}
@@ -110,7 +110,7 @@ export default function ConfirmDispatch() {
               return (
                 <DataGrid
                   layoutType="plain"
-                  columnDefs={ORDER_ITEM_COLUMN_DEFS}
+                  columnDefs={ORDER_ITEM_COLUMN_DEFS()}
                   rowData={model.orderItemRowData}
                   actions={ctrl.orderItemActions}
                 />
