@@ -83,7 +83,7 @@ export default function Feature() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS(model.setGridData)}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
           currentPage={model.gridData.page}
@@ -114,16 +114,19 @@ export default function Feature() {
             ]}
             presets={{
               RT_ITM: {
-                columnDefs: RT_ITM_COLUMN_DEFS([]),
+                columnDefs: RT_ITM_COLUMN_DEFS([], model.setSubRtItemRowData),
                 actions: ctrl.detailActions,
                 onRowClicked: ctrl.handleSubRowClicked,
               },
               RT_CARR: {
-                columnDefs: RT_CARR_COLUMN_DEFS([]),
+                columnDefs: RT_CARR_COLUMN_DEFS([], model.setSubRtCarrRowData),
                 actions: ctrl.detailActions,
               },
               RT_VEH_TP: {
-                columnDefs: RT_VEH_TP_COLUMN_DEFS([]),
+                columnDefs: RT_VEH_TP_COLUMN_DEFS(
+                  [],
+                  model.setSubRtVehTpRowData,
+                ),
                 actions: ctrl.detailActions,
               },
             }}
@@ -142,11 +145,17 @@ export default function Feature() {
             ]}
             presets={{
               RT_ITM_VEH_TP: {
-                columnDefs: RT_ITM_VEH_TP_COLUMN_DEFS([]),
+                columnDefs: RT_ITM_VEH_TP_COLUMN_DEFS(
+                  [],
+                  model.setSubRtItemVehTpRowData,
+                ),
                 actions: ctrl.detailActions,
               },
               RT_ITM_VEH: {
-                columnDefs: RT_ITM_VEH_COLUMN_DEFS([]),
+                columnDefs: RT_ITM_VEH_COLUMN_DEFS(
+                  [],
+                  model.setSubRtItemVehRowData,
+                ),
                 actions: ctrl.detailActions,
               },
             }}

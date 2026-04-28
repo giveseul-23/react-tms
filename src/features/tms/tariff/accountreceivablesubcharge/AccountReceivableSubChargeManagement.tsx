@@ -80,7 +80,7 @@ export default function Feature() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS(model.setGridData)}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
           currentPage={model.gridData.page}
@@ -104,7 +104,10 @@ export default function Feature() {
         >
           <DataGrid
             layoutType="plain"
-            columnDefs={DETAIL01_COLUMN_DEFS(model.codeMap)}
+            columnDefs={DETAIL01_COLUMN_DEFS(
+              model.codeMap,
+              model.setSubDetail01RowData,
+            )}
             rowData={model.subDetail01RowData.rows}
             totalCount={model.subDetail01RowData.totalCount}
             currentPage={model.subDetail01RowData.page}
@@ -115,7 +118,10 @@ export default function Feature() {
           />
           <DataGrid
             layoutType="plain"
-            columnDefs={DETAIL02_COLUMN_DEFS(model.codeMap)}
+            columnDefs={DETAIL02_COLUMN_DEFS(
+              model.codeMap,
+              model.setSubDetail02RowData,
+            )}
             rowData={model.subDetail02RowData.rows}
             totalCount={model.subDetail02RowData.totalCount}
             currentPage={model.subDetail02RowData.page}

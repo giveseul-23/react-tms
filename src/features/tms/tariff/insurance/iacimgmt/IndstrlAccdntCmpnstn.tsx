@@ -97,7 +97,7 @@ export default function IndstrlAccdntCmpnstn() {
         >
           <DataGrid
             layoutType="plain"
-            columnDefs={DETAIL01_COLUMN_DEFS}
+            columnDefs={DETAIL01_COLUMN_DEFS(model.setSubDetail01RowData)}
             codeMap={model.codeMap}
             rowData={model.subDetail01RowData.rows}
             actions={ctrl.detailActions}
@@ -105,7 +105,7 @@ export default function IndstrlAccdntCmpnstn() {
           />
           <DataGrid
             layoutType="plain"
-            columnDefs={DETAIL02_COLUMN_DEFS}
+            columnDefs={DETAIL02_COLUMN_DEFS(model.setSubDetail02RowData)}
             codeMap={model.codeMap}
             rowData={model.subDetail02RowData.rows}
             actions={ctrl.detailActions}

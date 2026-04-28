@@ -1,4 +1,4 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
 // ── 탭 A 좌측: 물류운영그룹 목록 ───────────────────────────────
 export const MASTER_COLUMN_DEFS = [
@@ -15,7 +15,9 @@ export const MASTER_COLUMN_DEFS = [
 ];
 
 // ── 탭 A 우측: 선택된 그룹의 유가 상세 ────────────────────────
-export const OIL_PRICE_COLUMN_DEFS = [
+export const OIL_PRICE_COLUMN_DEFS = (
+  setGridData?: (updater: any) => void,
+) => [
   {
     type: "text",
     headerName: "LBL_LOGISTICS_GROUP_CODE",
@@ -51,13 +53,7 @@ export const OIL_PRICE_COLUMN_DEFS = [
     headerName: "LBL_AREA_DESCR",
     field: "AREA_DESCR",
   },
-  ...makeAuditColumns({
-    delete: true,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-  }),
+  ...standardAudit(setGridData, { updateTime: false }),
 ];
 
 // ── 탭 B: 기간별 조회 ──────────────────────────────────────────
@@ -97,10 +93,5 @@ export const PERIOD_COLUMN_DEFS = [
     headerName: "LBL_AREA_DESCR",
     field: "AREA_DESCR",
   },
-  ...makeAuditColumns({
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  ...standardAudit(undefined, { delete: false, rowStatus: false }),
 ];

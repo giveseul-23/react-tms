@@ -77,7 +77,7 @@ export default function TempOilPrice() {
                   />
                   <DataGrid
                     layoutType="plain"
-                    columnDefs={OIL_PRICE_COLUMN_DEFS}
+                    columnDefs={OIL_PRICE_COLUMN_DEFS(model.setOilPriceRowData)}
                     rowData={model.oilPriceRowData.rows}
                     actions={ctrl.oilPriceActions}
                   />

@@ -166,7 +166,7 @@ export function useDfChargeRateController({
     add: true,
     save: true,
     excel: {
-      columns: MAIN_COLUMN_DEFS,
+      columns: MAIN_COLUMN_DEFS(),
       menuName: "화면명",
       fetchFn: () => dfChargeRateApi.getList(filtersRef.current),
       rows: model.gridData.rows,
@@ -198,7 +198,7 @@ export function useDfChargeRateController({
       },
     }),
     makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
+      columns: MAIN_COLUMN_DEFS(),
       menuName: "화면명",
       fetchFn: () => dfChargeRateApi.getRateItemList(filtersRef.current),
       rows: model.subRtItemRowData.rows,

@@ -130,7 +130,7 @@ export function useOverheadTariffManagementController({
       add: true,
       save: true,
       excel: {
-        columns: MAIN_COLUMN_DEFS,
+        columns: MAIN_COLUMN_DEFS(),
         menuName: "화면명",
         fetchFn: () => overheadTariffManagementApi.getList(filtersRef.current),
         rows: model.gridData.rows,

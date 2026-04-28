@@ -177,7 +177,7 @@ export function useShpmMgmtController({
       add: true,
       save: true,
       excel: {
-        columns: MAIN_COLUMN_DEFS,
+        columns: MAIN_COLUMN_DEFS(),
         menuName: "화면명",
         fetchFn: () => shpmMgmtApi.getList(filtersRef.current),
         rows: model.gridData.rows,

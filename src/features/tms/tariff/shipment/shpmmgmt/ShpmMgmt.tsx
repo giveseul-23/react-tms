@@ -83,7 +83,7 @@ export default function Feature() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS(model.setGridData)}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
           currentPage={model.gridData.page}
@@ -107,7 +107,7 @@ export default function Feature() {
         >
           <DataGrid
             layoutType="plain"
-            columnDefs={RIGHT_DETAIL_COLUMN_DEFS}
+            columnDefs={RIGHT_DETAIL_COLUMN_DEFS(model.setSubLgstRowData)}
             codeMap={model.codeMap}
             rowData={model.subLgstRowData.rows}
             totalCount={model.subLgstRowData.totalCount}
@@ -126,7 +126,7 @@ export default function Feature() {
           >
             <DataGrid
               layoutType="plain"
-              columnDefs={CENTER_TOP_DETAIL_COLUMN_DEFS}
+              columnDefs={CENTER_TOP_DETAIL_COLUMN_DEFS(model.setSubZoneRowData)}
               codeMap={model.codeMap}
               rowData={model.subZoneRowData.rows}
               totalCount={model.subZoneRowData.totalCount}
@@ -146,7 +146,9 @@ export default function Feature() {
             />
             <DataGrid
               layoutType="plain"
-              columnDefs={CENTER_BOTTOM_DETAIL_COLUMN_DEFS}
+              columnDefs={CENTER_BOTTOM_DETAIL_COLUMN_DEFS(
+                model.setSubZoneCondRowData,
+              )}
               codeMap={model.codeMap}
               rowData={model.subZoneCondRowData.rows}
               totalCount={model.subZoneCondRowData.totalCount}
@@ -166,7 +168,7 @@ export default function Feature() {
           </SplitPane>
           <DataGrid
             layoutType="plain"
-            columnDefs={LEFT_DETAIL_COLUMN_DEFS}
+            columnDefs={LEFT_DETAIL_COLUMN_DEFS(model.setSubRateRowData)}
             codeMap={model.codeMap}
             rowData={model.subRateRowData.rows}
             totalCount={model.subRateRowData.totalCount}

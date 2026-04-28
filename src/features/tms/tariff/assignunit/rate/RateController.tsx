@@ -129,7 +129,7 @@ export function useRateController({
     add: true,
     save: true,
     excel: {
-      columns: MAIN_COLUMN_DEFS,
+      columns: MAIN_COLUMN_DEFS(),
       menuName: "화면명",
       fetchFn: () => rateApi.getList(filtersRef.current),
       rows: model.gridData.rows,
@@ -161,7 +161,7 @@ export function useRateController({
       },
     }),
     makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
+      columns: MAIN_COLUMN_DEFS(),
       menuName: "화면명",
       fetchFn: () => rateApi.getCostInfoList(filtersRef.current),
       rows: model.subCostInfoRowData.rows,

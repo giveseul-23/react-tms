@@ -81,7 +81,7 @@ export default function OverheadTariffManagement() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS(model.setGridData)}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
           currentPage={model.gridData.page}
@@ -105,7 +105,7 @@ export default function OverheadTariffManagement() {
         >
           <DataGrid
             layoutType="plain"
-            columnDefs={DETAIL_LEFT_COLUMN_DEFS}
+            columnDefs={DETAIL_LEFT_COLUMN_DEFS(model.setSubLeftDetailRowData)}
             codeMap={model.codeMap}
             actions={ctrl.detailActions}
             rowData={model.subLeftDetailRowData.rows}
@@ -115,7 +115,7 @@ export default function OverheadTariffManagement() {
           />
           <DataGrid
             layoutType="plain"
-            columnDefs={DETAIL_RIGHT_COLUMN_DEFS}
+            columnDefs={DETAIL_RIGHT_COLUMN_DEFS(model.setSubRightDetailRowData)}
             codeMap={model.codeMap}
             actions={ctrl.detailActions}
             rowData={model.subRightDetailRowData.rows}

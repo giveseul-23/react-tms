@@ -136,7 +136,7 @@ export function useAccountReceivableSubChargeManagementController({
     add: true,
     save: true,
     excel: {
-      columns: MAIN_COLUMN_DEFS,
+      columns: MAIN_COLUMN_DEFS(),
       menuName: "화면명",
       fetchFn: () =>
         accountReceivableSubChargeManagementApi.getList(filtersRef.current),
@@ -171,7 +171,7 @@ export function useAccountReceivableSubChargeManagementController({
       },
     }),
     makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
+      columns: MAIN_COLUMN_DEFS(),
       menuName: "화면명",
       fetchFn: () =>
         accountReceivableSubChargeManagementApi.getDetail01List(

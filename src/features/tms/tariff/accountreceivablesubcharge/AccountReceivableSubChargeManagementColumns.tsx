@@ -4,7 +4,7 @@
 // 사용 방법
 // 1. 이 파일을 대상 폴더로 복사 후 파일명 교체 (예: FeatureColumns.tsx)
 // 2. 각 컬럼 headerName(LBL_*) / field / cellRenderer 를 실제 스펙에 맞게 교체
-// 3. 필요한 audit 컬럼만 makeAuditColumns 설정값으로 켜고 끌 것
+// 3. 필요한 audit 컬럼만 standardAudit 설정값으로 켜고 끌 것
 //
 // 공통 패턴
 // - headerName 은 LBL_* 다국어 키 사용 (Lang.get 자동 적용)
@@ -12,13 +12,13 @@
 // - field 가 "_STS" 로 끝나면 자동 중앙 정렬
 // - type: "numeric" / dataType: "number" → 우측 정렬
 // - "No" headerName 은 자동 일련번호 + 고정 너비
-// - makeAuditColumns: 삭제/상태/생성자/생성일/수정자/수정일 블록 일괄 삽입
+// - standardAudit: 삭제/상태/생성자/생성일/수정자/수정일 블록 일괄 삽입
 // ────────────────────────────────────────────────────────────────
 
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
-export const MAIN_COLUMN_DEFS = [
+export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CODE",
@@ -104,10 +104,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_USE_YN",
     field: "USE_YN",
   },
-  // 삭제/상태/생성/수정 컬럼을 설정값으로 일괄 추가
-  ...makeAuditColumns({
-    delete: true,
-    rowStatus: true,
+  ...standardAudit(setGridData, {
     insertPerson: false,
     insertDate: false,
     updatePerson: false,
@@ -118,6 +115,7 @@ export const MAIN_COLUMN_DEFS = [
 // ── 상세 그리드 컬럼 (codeMap 주입 — 코드→라벨 치환용) ─────────
 export const DETAIL01_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
+  setGridData?: (updater: any) => void,
 ) => [
   { type: "text", headerName: "LBL_CALC_FORMULA_SEQ", field: "SEQ" },
   {
@@ -155,8 +153,7 @@ export const DETAIL01_COLUMN_DEFS = (
     headerName: "LBL_COST",
     field: "COST_AMT",
   },
-  ...makeAuditColumns({
-    delete: true,
+  ...standardAudit(setGridData, {
     rowStatus: false,
     insertPerson: false,
     insertDate: false,
@@ -167,6 +164,7 @@ export const DETAIL01_COLUMN_DEFS = (
 
 export const DETAIL02_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
+  setGridData?: (updater: any) => void,
 ) => [
   { type: "text", headerName: "LBL_SEQ", field: "COND_SEQ" },
   {
@@ -199,8 +197,7 @@ export const DETAIL02_COLUMN_DEFS = (
     headerName: "LBL_AND_OR",
     field: "LGC_OPR",
   },
-  ...makeAuditColumns({
-    delete: true,
+  ...standardAudit(setGridData, {
     rowStatus: false,
     insertPerson: false,
     insertDate: false,
@@ -210,28 +207,18 @@ export const DETAIL02_COLUMN_DEFS = (
 ];
 
 // ────────────────────────────────────────────────────────────────
-// [참고] makeAuditColumns 의 선택적 옵션
+// [참고] standardAudit 의 선택적 옵션
 //
-// 기본 audit 컬럼을 부분적으로만 쓰고 싶을 때 플래그를 false / 생략
-//   makeAuditColumns({
-//     rowStatus: true,
-//     insertPerson: true,
-//     // delete, insertDate, updatePerson, updateTime 는 생략됨
-//   });
+// 기본 audit 컬럼을 부분적으로만 쓰고 싶을 때 두 번째 인자로 false 지정
+//   standardAudit(setRowData, { updatePerson: false, updateTime: false });
 //
 // 삭제 체크 시 행을 실제로 제거하고 싶을 때
-//   makeAuditColumns({
-//     delete: true,
-//     deleteSetRowData: setRowData, // (prev) => prev.filter(...) 호출
-//   });
+//   standardAudit(setRowData); // 첫 인자가 자동으로 deleteSetRowData 역할
 //
 // audit 컬럼의 width / fieldType 등을 개별 오버라이드
-//   makeAuditColumns({
-//     rowStatus: true,
+//   standardAudit(setRowData, {
 //     rowStatusOverrides: { width: 100 },
-//     insertPerson: true,
 //     insertPersonOverrides: { width: 110, fieldType: "text" },
-//     insertDate: true,
 //     insertDateOverrides: { width: 150 },
 //   });
 // ────────────────────────────────────────────────────────────────
