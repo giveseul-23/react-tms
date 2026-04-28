@@ -29,6 +29,7 @@ import type { ColDef, GetRowIdParams, GridReadyEvent } from "ag-grid-community";
 
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 import { Lang } from "@/app/services/common/Lang";
+import { Util } from "@/app/services/common/Util";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -309,10 +310,160 @@ function TreeGridInner<TRow extends TreeRow>(
     [expandedIds, isLastMap, toggle, nameColumnHeader, nameColumnWidth],
   );
 
-  const finalColumnDefs = useMemo<ColDef<TRow>[]>(
-    () => [nameColDef, ...columnDefs],
-    [nameColDef, columnDefs],
-  );
+  // DataGrid 와 동일한 컬럼 처리: Lang.get(headerName), align prop, type 기본값,
+  // DTTM 포맷, type "date"/"numeric"/_STS 자동 정렬, ColGroupDef children 재귀.
+  const finalColumnDefs = useMemo<ColDef<TRow>[]>(() => {
+    const translate = (col: any): string =>
+      col?.noLang ? col.headerName : Lang.get(col.headerName);
+
+    const walkChildren = (children: any[] | undefined): any[] | undefined => {
+      if (!Array.isArray(children)) return children;
+      return children.map((child) => ({
+        ...child,
+        headerName: translate(child),
+        children: walkChildren(child.children),
+      }));
+    };
+
+    const processed = columnDefs.map((col) => {
+      const alignProp = (col as any).align as
+        | "left"
+        | "center"
+        | "right"
+        | undefined;
+      const alignBlock = alignProp
+        ? {
+            cellStyle: { textAlign: alignProp },
+            headerClass: `ag-header-${alignProp}`,
+          }
+        : null;
+      const typeBlock = (col as any).type ? {} : { type: "text" };
+
+      const translatedChildren = walkChildren((col as any).children);
+
+      if ((col as any).disableMaxWidth === true) {
+        return {
+          ...col,
+          maxWidth: null,
+          headerName: translate(col),
+          ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...(alignBlock ?? {}),
+          ...typeBlock,
+        };
+      }
+
+      const colDef = col as ColDef<TRow>;
+      const field = (colDef.field ?? colDef.colId ?? "") as string;
+
+      // DTTM 필드: 자동 포맷
+      if (field.includes("DTTM")) {
+        return {
+          ...col,
+          headerName: translate(col),
+          valueFormatter: (params: any) => Util.formatDttm(params.value),
+          ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...(alignBlock ?? {}),
+          ...typeBlock,
+        };
+      }
+
+      // type: "date" → YYYY-MM-DD 로 자르고 중앙 정렬
+      if (
+        (colDef as any).type === "date" ||
+        (colDef as any).fieldType === "date"
+      ) {
+        return {
+          ...col,
+          headerName: translate(col),
+          valueFormatter: (params: any) => {
+            const v = params?.value;
+            if (v == null || v === "") return "";
+            return String(v).slice(0, 10);
+          },
+          cellStyle: { textAlign: "center" },
+          headerClass: "ag-header-center",
+          ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...(alignBlock ?? {}),
+          ...typeBlock,
+        };
+      }
+
+      // type: "numeric" → 무조건 우측 정렬 + decimalPlaces 포맷.
+      // 사용자 cellStyle 의 textAlign 외 속성(color, font 등)은 보존.
+      const isNumericType =
+        (colDef as any).type === "numeric" ||
+        (colDef as any).dataType === "number" ||
+        (colDef as any).cellDataType === "number";
+      if (isNumericType) {
+        const decimalPlaces = (colDef as any).decimalPlaces as
+          | number
+          | undefined;
+        const hasCustomFormatter =
+          typeof (colDef as any).valueFormatter === "function";
+        const numberFormatter =
+          !hasCustomFormatter && typeof decimalPlaces === "number"
+            ? (params: any) => {
+                const v = params?.value;
+                if (v == null || v === "") return "";
+                const n =
+                  typeof v === "number"
+                    ? v
+                    : Number(String(v).replaceAll(",", ""));
+                if (Number.isNaN(n)) return String(v);
+                return n.toLocaleString(undefined, {
+                  minimumFractionDigits: decimalPlaces,
+                  maximumFractionDigits: decimalPlaces,
+                });
+              }
+            : undefined;
+        const userCellStyle = (colDef as any).cellStyle;
+        const mergedCellStyle = {
+          ...(userCellStyle && typeof userCellStyle === "object"
+            ? userCellStyle
+            : {}),
+          textAlign: "right",
+        };
+        return {
+          ...col,
+          headerName: translate(col),
+          cellStyle: mergedCellStyle,
+          headerClass: "ag-header-right",
+          ...(numberFormatter ? { valueFormatter: numberFormatter } : {}),
+          ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...typeBlock,
+        };
+      }
+
+      // _STS 접미 → 중앙 정렬 (cellStyle/type/align 미지정 시)
+      if (
+        !(colDef as any).cellStyle &&
+        !(colDef as any).type &&
+        !alignProp &&
+        field.endsWith("_STS")
+      ) {
+        return {
+          ...col,
+          headerName: translate(col),
+          cellStyle: { textAlign: "center" },
+          headerClass: "ag-header-center",
+          ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...typeBlock,
+        };
+      }
+
+      return {
+        ...col,
+        headerName: (col as any).headerName
+          ? translate(col)
+          : (col as any).headerName,
+        ...(translatedChildren ? { children: translatedChildren } : {}),
+        ...(alignBlock ?? {}),
+        ...typeBlock,
+      };
+    });
+
+    return [nameColDef, ...processed];
+  }, [nameColDef, columnDefs]);
 
   // ── 드래그 범위 선택 + Ctrl+C 복사 ────────────────────────────────────────
   const gridContainerRef = useRef<HTMLDivElement>(null);

@@ -108,3 +108,51 @@ export function makeAuditColumns(config: AuditColumnsConfig = {}): any[] {
     cols.push(makeUpdateTimeColumn(config.updateTimeOverrides));
   return cols;
 }
+
+/**
+ * makeAuditColumns 의 가장 흔한 조합(전 플래그 ON) 프리셋.
+ * `...standardAudit(setRowData)` 한 줄로 7-필드 audit 블록을 치환.
+ *
+ * 첫 인자(setter) 는 두 가지 모양 모두 자동 처리:
+ *   - 행 배열 setter: setRowData((rows) => filtered)
+ *   - { rows, totalCount, page, limit } 객체 setter: setGridData(prev => ({...}))
+ *   둘 다 그냥 넘기면 됨. 내부에서 prev 모양을 보고 알맞게 위임.
+ *
+ * 일부만 끄거나 override 가 필요하면 두 번째 인자로 부분 설정 전달:
+ *   standardAudit(setRowData, { updatePerson: false })
+ *   standardAudit(setRowData, { insertPersonOverrides: { width: 110 } })
+ */
+export const standardAudit = (
+  setter?: (updater: any) => void,
+  overrides?: Partial<AuditColumnsConfig>,
+) => {
+  // setter 가 받는 prev 가 객체({ rows, ... }) 인지 배열인지 자동 감지하여 어댑팅.
+  const adaptedSetter = setter
+    ? (rowsUpdater: any) =>
+        setter((prev: any) => {
+          if (prev && typeof prev === "object" && Array.isArray(prev.rows)) {
+            return {
+              ...prev,
+              rows:
+                typeof rowsUpdater === "function"
+                  ? rowsUpdater(prev.rows)
+                  : rowsUpdater,
+            };
+          }
+          return typeof rowsUpdater === "function"
+            ? rowsUpdater(prev)
+            : rowsUpdater;
+        })
+    : undefined;
+
+  return makeAuditColumns({
+    delete: true,
+    deleteSetRowData: adaptedSetter,
+    rowStatus: true,
+    insertPerson: true,
+    insertDate: true,
+    updatePerson: true,
+    updateTime: true,
+    ...overrides,
+  });
+};

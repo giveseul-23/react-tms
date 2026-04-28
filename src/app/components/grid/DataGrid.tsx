@@ -524,7 +524,8 @@ export default function DataGrid<TRow>({
         };
       }
 
-      // type: "numeric" 선언 컬럼 → 우측 정렬 + decimalPlaces 지정 시 소수점 자리수 고정
+      // type: "numeric" 선언 컬럼 → 무조건 우측 정렬 + decimalPlaces 지정 시 소수점 자리수 고정.
+      // 사용자 cellStyle 의 textAlign 외 속성(color, font 등)은 보존.
       // legacy: dataType/cellDataType: "number" 도 호환
       const isNumericType =
         (colDef as any).type === "numeric" ||
@@ -552,19 +553,20 @@ export default function DataGrid<TRow>({
                 });
               }
             : undefined;
-        const hasCustomStyle = !!(colDef as any).cellStyle;
+        const userCellStyle = (colDef as any).cellStyle;
+        const mergedCellStyle = {
+          ...(userCellStyle && typeof userCellStyle === "object"
+            ? userCellStyle
+            : {}),
+          textAlign: "right",
+        };
         return {
           ...col,
           headerName: translate(col),
-          ...(hasCustomStyle
-            ? {}
-            : {
-                cellStyle: { textAlign: "right" },
-                headerClass: "ag-header-right",
-              }),
+          cellStyle: mergedCellStyle,
+          headerClass: "ag-header-right",
           ...(numberFormatter ? { valueFormatter: numberFormatter } : {}),
           ...(translatedChildren ? { children: translatedChildren } : {}),
-          ...(alignBlock ?? {}),
           ...typeBlock,
         };
       }

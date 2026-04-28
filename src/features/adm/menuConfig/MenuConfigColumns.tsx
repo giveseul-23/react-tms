@@ -1,9 +1,9 @@
-// src/views/menu/MenuConfigColumns.tsx
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
-export const MAIN_COLUMN_DEFS = () => [
+export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   {
     type: "text",
-    headerName: "메뉴코드 *",
+    headerName: "LBL_MENU_CD",
     field: "MENUCODE",
     width: 160,
     cellRenderer: (p: any) =>
@@ -15,34 +15,29 @@ export const MAIN_COLUMN_DEFS = () => [
   },
   {
     type: "text",
-    headerName: "메뉴명 *",
+    headerName: "LBL_MENU_NM",
     field: "MENUNAME",
     width: 160,
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
   {
     type: "text",
-    headerName: "응용프로그램",
-    field: "APPLNAME",
+    headerName: "LBL_APPL_CD",
+    field: "APPLCODE",
     width: 200,
-    cellRenderer: (p: any) =>
-      p.data.isVirtualRoot ? (
-        <span className="font-semibold">{p.value}</span>
-      ) : (
-        p.value
-      ),
+    codeKey: "codeList",
   },
   {
     type: "text",
-    headerName: "메뉴명 다국어키 *",
+    headerName: "LBL_MLT_LANG_KEY",
     field: "MSG_CD",
     width: 160,
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
   {
     type: "text",
-    headerName: "상위 메뉴 경로",
-    field: "PARANT_MENU_CD",
+    headerName: "LBL_OLDER_MENU_PATH",
+    field: "SUPERMENUCODE",
     width: 120,
     cellRenderer: (p: any) => {
       if (p.data.isVirtualRoot) return "";
@@ -54,18 +49,17 @@ export const MAIN_COLUMN_DEFS = () => [
     },
   },
   {
-    type: "text",
-    headerName: "정렬순서",
+    type: "numeric",
+    headerName: "LBL_ORDER_BY",
     field: "DSPLY_SEQ",
     width: 80,
     filter: false,
     floatingFilter: false,
-    cellStyle: { textAlign: "right" },
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
   {
     type: "text",
-    headerName: "URL",
+    headerName: "LBL_URL_PATH",
     field: "URL",
     minWidth: 200,
     flex: 1,
@@ -74,7 +68,7 @@ export const MAIN_COLUMN_DEFS = () => [
   },
   {
     type: "text",
-    headerName: "사용여부",
+    headerName: "LBL_USE_YN",
     field: "USE_YN",
     width: 70,
     filter: false,
@@ -95,13 +89,20 @@ export const MAIN_COLUMN_DEFS = () => [
     },
   },
   {
-    type: "text",
-    headerName: "소스",
+    type: "numeric",
+    headerName: "LBL_RSRC_CNT",
     field: "RSRC_CNT",
     width: 55,
     filter: false,
     floatingFilter: false,
-    cellStyle: { textAlign: "right" },
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
+  ...standardAudit(setGridData, {
+    delete: false,
+    rowStatus: false,
+    insertPerson: false,
+    insertDate: false,
+    updatePerson: false,
+    updateTime: false,
+  }),
 ];

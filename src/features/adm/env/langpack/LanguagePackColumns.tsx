@@ -1,4 +1,4 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
 export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   {
@@ -24,21 +24,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     type: "text",
     headerName: "LBL_APPL_CD",
     field: "APPL_CD",
-    codeKey: "SELECT_APPLICATION_CODE_NAME",
+    codeKey: "applCodeList",
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setGridData
-      ? (updater: any) =>
-          setGridData((prev: any) => ({
-            ...prev,
-            rows: typeof updater === "function" ? updater(prev.rows) : updater,
-          }))
-      : undefined,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  ...standardAudit(setGridData),
 ];
