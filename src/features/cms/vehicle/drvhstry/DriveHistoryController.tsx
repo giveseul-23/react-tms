@@ -125,25 +125,9 @@ export function useDriveHistoryController({
     [model, openPopup, closePopup],
   );
 
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "새로고침",
-      label: "새로고침",
-      onClick: () => searchRef.current?.(),
-    },
-    {
-      type: "button",
-      key: "전체보기",
-      label: "전체보기",
-      onClick: () => model.mapRef.current?.fitMarkers(),
-    },
-  ];
-
   return {
     fetchInTrnstVehList,
     handleSearch,
     handleRowClicked,
-    mainActions,
   };
 }

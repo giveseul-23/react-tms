@@ -59,12 +59,6 @@ export function useInTrnstVehCtrlController({
       label: "BTN_SP_SIGNATURE_REFRESH",
       onClick: () => searchRef.current?.(),
     },
-    {
-      type: "button",
-      key: "전체보기",
-      label: "전체보기",
-      onClick: () => model.mapRef.current?.fitMarkers(),
-    },
   ];
 
   return {

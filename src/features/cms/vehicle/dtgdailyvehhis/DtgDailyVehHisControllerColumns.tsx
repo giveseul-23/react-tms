@@ -7,12 +7,12 @@ export const MAIN_COLUMN_DEFS = () => [
     type: "text",
     headerName: "LBL_DT",
     field: "HIS_DATE",
-    cellStyle: { textAlign: "center" },
+    align: "center",
   },
   {
     type: "text",
     headerName: "LBL_DRIVING_HIS_STS",
     field: "DRIVING_HIS_YN",
-    cellStyle: { textAlign: "center" },
+    align: "center",
   },
 ];
