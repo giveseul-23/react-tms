@@ -11,6 +11,7 @@ export type FieldType =
 
 export type ColumnDef = {
   headerName: string;
+  type?: string;
   field?: string;
   areaNo?: number; // 폼 그룹 번호
   areaLabel?: string; // 섹션 제목 (areaNo별 첫 컬럼에만 선언)
@@ -24,7 +25,7 @@ export type ColumnDef = {
   nameValue?: string;
   nameField?: string; // 코드에 대응하는 명칭 field
   // select 타입일 때
-  optionsKey?: string; // codeMap의 key
+  codeKey?: string; // codeMap의 key
 };
 
 export const AREA_LABELS: Record<number, string> = {
@@ -193,7 +194,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     field: "AP_PROC_TP",
     areaNo: 0,
     fieldType: "select",
-    optionsKey: "apProcTp",
+    codeKey: "apProcTp",
   },
   {
     type: "text",
@@ -224,7 +225,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     areaNo: 0,
     fieldType: "select",
     required: true,
-    optionsKey: "vehOpTp",
+    codeKey: "vehOpTp",
   },
   {
     type: "text",
@@ -234,7 +235,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     areaNo: 0,
     fieldType: "select",
     required: true,
-    optionsKey: "transTcd",
+    codeKey: "transTcd",
   },
   {
     type: "text",
@@ -244,7 +245,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     areaNo: 0,
     fieldType: "select",
     required: true,
-    optionsKey: "vehTempTcd",
+    codeKey: "vehTempTcd",
   },
   {
     type: "text",
@@ -252,7 +253,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     field: "CHN_A_TMPR_RNG_CD",
     areaNo: 0,
     fieldType: "select",
-    optionsKey: "vehicleTemperatureRange",
+    codeKey: "vehicleTemperatureRange",
   },
   {
     type: "text",
@@ -260,7 +261,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     field: "CHN_B_TMPR_RNG_CD",
     areaNo: 0,
     fieldType: "select",
-    optionsKey: "vehicleTemperatureRange",
+    codeKey: "vehicleTemperatureRange",
   },
   {
     type: "text",
@@ -270,7 +271,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     areaNo: 0,
     fieldType: "select",
     required: true,
-    optionsKey: "schedTcd",
+    codeKey: "schedTcd",
   },
   {
     type: "text",
@@ -280,7 +281,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     areaNo: 0,
     fieldType: "select",
     required: true,
-    optionsKey: "distTcd",
+    codeKey: "distTcd",
   },
   {
     type: "text",
@@ -350,7 +351,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     field: "EX_VEH_TCD",
     areaNo: 1,
     fieldType: "select",
-    optionsKey: "exVehTcd",
+    codeKey: "exVehTcd",
   },
   {
     type: "text",
@@ -358,7 +359,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     field: "VEH_DTL_TCD",
     areaNo: 1,
     fieldType: "select",
-    optionsKey: "vehDtlTcd",
+    codeKey: "vehDtlTcd",
   },
   {
     type: "text",
@@ -367,10 +368,22 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     areaNo: 1,
     fieldType: "select",
     required: true,
-    optionsKey: "fuelTcd",
+    codeKey: "fuelTcd",
   },
-  { type: "text", headerName: "LBL_VOL", field: "LDNG_VOL", areaNo: 1, fieldType: "number" },
-  { type: "text", headerName: "LBL_WGT", field: "LDNG_WGT", areaNo: 1, fieldType: "number" },
+  {
+    type: "text",
+    headerName: "LBL_VOL",
+    field: "LDNG_VOL",
+    areaNo: 1,
+    fieldType: "number",
+  },
+  {
+    type: "text",
+    headerName: "LBL_WGT",
+    field: "LDNG_WGT",
+    areaNo: 1,
+    fieldType: "number",
+  },
   {
     type: "text",
     headerName: "LBL_PALLET_QTY",
@@ -790,7 +803,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     areaNo: 3,
     fieldType: "select",
     required: true,
-    optionsKey: "vehOperScd",
+    codeKey: "vehOperScd",
   },
   {
     type: "text",
@@ -799,7 +812,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     field: "VEH_GRP_CD",
     areaNo: 3,
     fieldType: "select",
-    optionsKey: "vehGrpCd",
+    codeKey: "vehGrpCd",
   },
   {
     type: "text",
@@ -808,7 +821,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     field: "VEH_DISPATCH_TP",
     areaNo: 3,
     fieldType: "select",
-    optionsKey: "vehDspchTp",
+    codeKey: "vehDspchTp",
   },
   {
     type: "text",
@@ -909,27 +922,3 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     formHide: true,
   },
 ];
-
-export const MAIN_GRID_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) =>
-  MAIN_COLUMN_DEFS.map((col) => {
-    if (col.field === "VEH_OPER_SCD") {
-      return {
-        ...col,
-        cellRenderer: (params: any) => {
-          const label =
-            codeMap.vehOperScd?.[String(params.value)] ?? params.value;
-          const cls =
-            VEH_OP_STS_COLOR_MAP[String(params.value)] ??
-            "bg-gray-100 text-gray-600";
-          return (
-            <span className={`px-2 py-0.5 rounded-lg text-xs ${cls}`}>
-              {label}
-            </span>
-          );
-        },
-      };
-    }
-    return col;
-  });

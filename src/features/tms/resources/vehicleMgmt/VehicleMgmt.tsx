@@ -13,10 +13,7 @@ import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import { useVehicleMgmtModel } from "./VehicleMgmtModel.ts";
 import { useVehicleMgmtController } from "./VehicleMgmtController.tsx";
 import { FormBodyRenderer } from "@/app/components/common/FormBodyRenderer";
-import {
-  MAIN_COLUMN_DEFS,
-  MAIN_GRID_COLUMN_DEFS,
-} from "./VehicleMgmtColumns.tsx";
+import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns.tsx";
 export const MENU_CODE = "MENU_VEHICLE_MGMT";
 
 // ── 차량관리 폼 본문 (상세/신규 공통) ─────────────────────────────────
@@ -192,15 +189,16 @@ export default function VehicleMgmt() {
         grid={
           <DataGrid
             layoutType="plain"
-            columnDefs={MAIN_GRID_COLUMN_DEFS(model.codeMap)}
+            columnDefs={MAIN_COLUMN_DEFS}
             rowData={model.gridData.rows}
             totalCount={model.gridData.totalCount}
             currentPage={model.gridData.page}
             pageSize={model.pageSize}
             onPageSizeChange={model.setPageSize}
-            onPageChange={(page) => searchRef.current?.(page, false)}
+            onPageChange={(page) => searchRef.current?.(page)}
             actions={ctrl.mainActions}
             onRowClicked={ctrl.handleRowClicked}
+            codeMap={model.codeMap}
           />
         }
         form={{
