@@ -17,11 +17,12 @@ import {
 // 일일실적 (메인) 그리드 — HEAD (ExtJS createMainHeaderColumns 대응)
 // ─────────────────────────────────────────────────────────────
 export const DAILY_MAIN_HEAD = [
-  { headerName: "No", width: 40, cellStyle: RIGHT, pinned: "left" },
-  { field: "DIV_CD", hide: true },
-  { field: "LGST_GRP_CD", hide: true },
-  { field: "DLY_APPLN_ID", colId: "DLY_APPLN_ID_HIDDEN", hide: true },
+  { type: "text", headerName: "No", width: 40, cellStyle: RIGHT, pinned: "left" },
+  { type: "text", field: "DIV_CD", hide: true },
+  { type: "text", field: "LGST_GRP_CD", hide: true },
+  { type: "text", field: "DLY_APPLN_ID", colId: "DLY_APPLN_ID_HIDDEN", hide: true },
   {
+    type: "text",
     headerName: "LBL_VEH_TRANS_TCD",
     field: "TRANS_TCD",
     width: 80,
@@ -30,6 +31,7 @@ export const DAILY_MAIN_HEAD = [
     codeKey: "vehicleTransType",
   },
   {
+    type: "text",
     headerName: "LBL_DLVRY_DATE",
     field: "DLVRY_DT",
     width: 80,
@@ -38,6 +40,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FINANCIAL_STATUS",
     field: "AP_FI_STS",
     width: 100,
@@ -47,9 +50,10 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
     // TODO: setApFinancialStatusColor 포팅 — 상태값별 배경/글자색
   },
-  { field: "VEH_ID", colId: "VEH_ID_HIDDEN", hide: true },
-  { field: "PAY_CARR_CD", hide: true },
+  { type: "text", field: "VEH_ID", colId: "VEH_ID_HIDDEN", hide: true },
+  { type: "text", field: "PAY_CARR_CD", hide: true },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_TYPE_NAME",
     field: "VEH_TP_NM",
     width: 70,
@@ -57,6 +61,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_NUMBER",
     field: "VEH_NO",
     width: 90,
@@ -65,6 +70,7 @@ export const DAILY_MAIN_HEAD = [
     editable: true,
   },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_TYPE",
     field: "VEH_TP_CD",
     width: 70,
@@ -73,6 +79,7 @@ export const DAILY_MAIN_HEAD = [
     hide: true,
   },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_TYPE",
     field: "VEH_TP_NM",
     colId: "VEH_TP_NM_COMBO",
@@ -82,6 +89,7 @@ export const DAILY_MAIN_HEAD = [
     hide: true,
   },
   {
+    type: "text",
     headerName: "LBL_DRIVER",
     field: "DRVR_NM",
     width: 70,
@@ -90,6 +98,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_PAY_CARRIER",
     field: "PAY_CARR_NM",
     width: 120,
@@ -97,6 +106,7 @@ export const DAILY_MAIN_HEAD = [
     editable: true,
   },
   {
+    type: "text",
     headerName: "LBL_DSPCH_OP_TP",
     field: "DSPCH_OP_TP",
     width: 100,
@@ -105,6 +115,7 @@ export const DAILY_MAIN_HEAD = [
     hide: true,
   },
   {
+    type: "text",
     headerName: "LBL_WORK_TYPE_PLAN",
     field: "WORK_DAY_TP_PLN",
     width: 80,
@@ -114,6 +125,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_WORK_TYPE_EXE",
     field: "WORK_DAY_TP_EXE",
     width: 80,
@@ -122,18 +134,21 @@ export const DAILY_MAIN_HEAD = [
     codeKey: "workTpExe",
   },
   {
+    type: "text",
     headerName: "LBL_CAL_TCD",
     field: "CAL_TCD",
     pinned: "left",
     codeKey: "calTcd",
   },
   {
+    type: "text",
     headerName: "LBL_DLY_SETL_STS",
     field: "DLY_SETL_STS",
     pinned: "left",
     codeKey: "dlySetlSts",
   },
   {
+    type: "text",
     headerName: "LBL_TTL_RTN_CNT",
     field: "TTL_RTN_CNT",
     width: 60,
@@ -142,6 +157,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FI_DIST_KM",
     field: "TTL_DIST",
     width: 90,
@@ -150,6 +166,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_DIST",
     field: "TTL_DIST",
     colId: "TTL_DIST_2",
@@ -159,6 +176,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY4",
     field: "TTL_DSPCH_WGT",
     width: 90,
@@ -167,6 +185,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_DSPCH_SALES_WGT",
     field: "TTL_DSPCH_SALES_WGT",
     width: 90,
@@ -175,6 +194,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_DSPCH_TRANSFER_WGT",
     field: "TTL_DSPCH_TRANSFER_WGT",
     width: 90,
@@ -183,6 +203,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_VOL",
     field: "TTL_DSPCH_VOL",
     width: 90,
@@ -191,6 +212,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY1",
     field: "TTL_DSPCH_FQ1",
     width: 90,
@@ -199,6 +221,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY2",
     field: "TTL_DSPCH_FQ2",
     width: 90,
@@ -207,6 +230,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY3",
     field: "TTL_DSPCH_FQ3",
     width: 90,
@@ -215,6 +239,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_ITEM_WGT",
     field: "TTL_DSPCH_FQ4",
     width: 90,
@@ -223,6 +248,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY5",
     field: "TTL_DSPCH_FQ5",
     width: 90,
@@ -231,6 +257,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_DSPCH_SALES_STOP_CNT",
     field: "TTL_DSPCH_SALES_STOP_CNT",
     width: 90,
@@ -239,6 +266,7 @@ export const DAILY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_ACT_FUEL",
     field: "ACTUAL_FUEL_CNSMPTN",
     width: 90,
@@ -247,6 +275,7 @@ export const DAILY_MAIN_HEAD = [
     editable: true,
   },
   {
+    type: "text",
     headerName: "LBL_AP_MEMO",
     field: "MEMO_DESC",
     width: 120,
@@ -259,6 +288,7 @@ export const DAILY_MAIN_HEAD = [
 // ─────────────────────────────────────────────────────────────
 export const DAILY_MAIN_TAIL = [
   {
+    type: "text",
     headerName: "LBL_AP_ID",
     field: "DLY_APPLN_ID",
     cellStyle: CENTER,
@@ -277,8 +307,9 @@ export const DAILY_MAIN_TAIL = [
 // 상세내역 그리드 — HEAD (ExtJS createSubHeaderColumns 대응)
 // ─────────────────────────────────────────────────────────────
 export const DAILY_DETAIL_HEAD = [
-  { headerName: "No", width: 40, pinned: "left" },
+  { type: "text", headerName: "No", width: 40, pinned: "left" },
   {
+    type: "text",
     headerName: "LBL_DLVRY_DATE",
     field: "DLVRY_DT",
     width: 80,
@@ -287,6 +318,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_TYPE",
     field: "VEH_TP_NM",
     width: 70,
@@ -295,6 +327,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_VEH_NO",
     field: "VEH_NO",
     width: 100,
@@ -303,6 +336,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_DRIVER",
     field: "DRVR_NM",
     width: 100,
@@ -311,6 +345,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_PAY_CARRIER",
     field: "PAY_CARR_NM",
     width: 120,
@@ -318,6 +353,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: true,
   },
   {
+    type: "text",
     headerName: "LBL_TRIP_COUNT",
     field: "RTN_NO",
     width: 60,
@@ -326,6 +362,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_DISPATCH_NO",
     field: "DSPCH_NO",
     width: 120,
@@ -334,6 +371,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_DSPCH_OP_TP",
     field: "DSPCH_OP_TP",
     width: 100,
@@ -341,6 +379,7 @@ export const DAILY_DETAIL_HEAD = [
     codeKey: "dspchOpTpList",
   },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_CODE",
     field: "VEH_ID",
     width: 150,
@@ -349,6 +388,7 @@ export const DAILY_DETAIL_HEAD = [
     hide: true,
   },
   {
+    type: "text",
     headerName: "LBL_BATCH",
     field: "BATCH_NO",
     width: 50,
@@ -356,12 +396,14 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_PLN_DSPCH_ROUTE",
     field: "DSPCH_LOC_DROP",
     width: 450,
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FI_LOC_DROP",
     field: "FI_LOC_DROP",
     width: 450,
@@ -370,6 +412,7 @@ export const DAILY_DETAIL_HEAD = [
     hide: true,
   },
   {
+    type: "text",
     headerName: "LBL_TRIP_YN",
     field: "TRIP_YN",
     width: 70,
@@ -378,6 +421,7 @@ export const DAILY_DETAIL_HEAD = [
     hide: true,
   },
   {
+    type: "text",
     headerName: "LBL_APPROVED_ROTATION_COUNT",
     field: "APPROVAL_RTN_CNT",
     width: 100,
@@ -385,6 +429,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_DIST_KM",
     field: "TTL_DIST",
     width: 70,
@@ -392,6 +437,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TRIP_NO",
     field: "TRIP_ID",
     width: 120,
@@ -400,6 +446,7 @@ export const DAILY_DETAIL_HEAD = [
     hide: true,
   },
   {
+    type: "text",
     headerName: "LBL_TRIP_SEQ",
     field: "TRIP_SEQ",
     width: 120,
@@ -408,6 +455,7 @@ export const DAILY_DETAIL_HEAD = [
     hide: true,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY4",
     field: "TTL_DSPCH_WGT",
     width: 90,
@@ -416,6 +464,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_DSPCH_SALES_WGT",
     field: "TTL_DSPCH_SALES_WGT",
     width: 90,
@@ -424,6 +473,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_DSPCH_TRANSFER_WGT",
     field: "TTL_DSPCH_TRANSFER_WGT",
     width: 90,
@@ -432,6 +482,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_VOL",
     field: "TTL_DSPCH_VOL",
     width: 90,
@@ -440,6 +491,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY1",
     field: "TTL_DSPCH_FQ1",
     width: 90,
@@ -448,6 +500,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY2",
     field: "TTL_DSPCH_FQ2",
     width: 90,
@@ -456,6 +509,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY3",
     field: "TTL_DSPCH_FQ3",
     width: 90,
@@ -464,6 +518,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_ITEM_WGT",
     field: "TTL_DSPCH_FQ4",
     width: 90,
@@ -472,6 +527,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FLEX_QTY5",
     field: "TTL_DSPCH_FQ5",
     width: 90,
@@ -480,6 +536,7 @@ export const DAILY_DETAIL_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_TTL_DSPCH_SALES_STOP_CNT",
     field: "TTL_DSPCH_SALES_STOP_CNT",
     width: 90,
@@ -544,6 +601,7 @@ export function buildDailyColumns(
         headerClass: "ag-header-center",
         children: [
           {
+            type: "text",
             headerName: "LBL_RATE",
             field: rateField,
             width: 90,
@@ -554,6 +612,7 @@ export function buildDailyColumns(
             summable: true,
           },
           {
+            type: "text",
             headerName: "LBL_REASON",
             field: reasonField,
             width: 90,
@@ -566,6 +625,7 @@ export function buildDailyColumns(
     }
 
     return {
+      type: "text",
       headerName: c.CHG_NM,
       noLang: true,
       field: rateField,

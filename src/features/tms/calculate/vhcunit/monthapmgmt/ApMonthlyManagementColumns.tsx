@@ -11,10 +11,11 @@ import {
 // 월실적 (메인) — HEAD (ExtJS createMainHeaderColumns 대응)
 // ─────────────────────────────────────────────────────────────
 export const MONTHLY_MAIN_HEAD = [
-  { headerName: "No", width: 40, cellStyle: RIGHT, pinned: "left" },
-  { field: "DIV_CD", hide: true },
-  { field: "LGST_GRP_CD", hide: true },
+  { type: "text", headerName: "No", width: 40, cellStyle: RIGHT, pinned: "left" },
+  { type: "text", field: "DIV_CD", hide: true },
+  { type: "text", field: "LGST_GRP_CD", hide: true },
   {
+    type: "text",
     headerName: "LBL_AP_ID",
     field: "AP_ID",
     width: 70,
@@ -23,6 +24,7 @@ export const MONTHLY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_DEAD_LINE",
     field: "TO_DTTM",
     width: 80,
@@ -31,6 +33,7 @@ export const MONTHLY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FINANCIAL_STATUS",
     field: "AP_FI_STS",
     width: 100,
@@ -40,8 +43,9 @@ export const MONTHLY_MAIN_HEAD = [
     editable: false,
     // TODO: setApFinancialStatusColor 포팅
   },
-  { field: "VEH_ID", hide: true, pinned: "left" },
+  { type: "text", field: "VEH_ID", hide: true, pinned: "left" },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_NUMBER",
     field: "VEH_NO",
     width: 100,
@@ -50,6 +54,7 @@ export const MONTHLY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_TYPE",
     field: "VEH_TP_NM",
     width: 100,
@@ -58,6 +63,7 @@ export const MONTHLY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_DRIVER_NAME",
     field: "DRVR_NM",
     width: 70,
@@ -66,6 +72,7 @@ export const MONTHLY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_REAL_RTN_CNT",
     field: "TTL_RTN_CNT",
     width: 100,
@@ -73,6 +80,7 @@ export const MONTHLY_MAIN_HEAD = [
     editable: false,
   },
   {
+    type: "text",
     headerName: "LBL_FI_DIST_KM",
     field: "TTL_FI_DIST",
     width: 100,
@@ -87,6 +95,7 @@ export const MONTHLY_MAIN_HEAD = [
 // ─────────────────────────────────────────────────────────────
 export const MONTHLY_MAIN_TAIL = [
   {
+    type: "text",
     headerName: "LBL_DISPATCH_RATE_CD",
     field: "TRF_CD",
     width: 200,
@@ -142,6 +151,7 @@ export function buildMonthlyColumns(
         headerClass: "ag-header-center",
         children: [
           {
+            type: "text",
             headerName: "LBL_RATE",
             field: rateField,
             width: 90,
@@ -152,6 +162,7 @@ export function buildMonthlyColumns(
             summable: true,
           },
           {
+            type: "text",
             headerName: "LBL_REASON",
             field: reasonField,
             width: 90,
@@ -164,6 +175,7 @@ export function buildMonthlyColumns(
     }
 
     return {
+      type: "text",
       headerName: c.CHG_NM,
       noLang: true,
       field: rateField,

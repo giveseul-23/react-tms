@@ -21,38 +21,47 @@ import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
+    type: "text",
     headerName: "LBL_DIVISION_CODE",
     field: "DIV_CD",
   },
   {
+    type: "text",
     headerName: "LBL_DIVISION_NAME",
     field: "DIV_NM",
   },
   {
+    type: "text",
     headerName: "LBL_DISPATCH_RATE_CD",
     field: "TRF_CD",
   },
   {
+    type: "text",
     headerName: "LBL_TARIFF_NAME",
     field: "TRF_NM",
   },
   {
+    type: "text",
     headerName: "LBL_PAY_CARRIER_CODE",
     field: "PAY_CARR_CD",
   },
   {
+    type: "text",
     headerName: "LBL_PAY_CARRIER_NAME",
     field: "PAY_CARR_NM",
   },
   {
+    type: "text",
     headerName: "LBL_FROM_DTTM",
     field: "FRM_DTTM",
   },
   {
+    type: "text",
     headerName: "LBL_TO_DTTM",
     field: "TO_DTTM",
   },
   {
+    type: "text",
     headerName: "LBL_JOB_USE_YN",
     field: "USE_YN",
   },
@@ -73,8 +82,9 @@ export const MAIN_COLUMN_DEFS = [
 // DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
 export const DETAIL_LEFT_COLUMN_DEFS = [
   { headerName: "No" },
-  { headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
+  { type: "text", headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
   {
+    type: "text",
     // 공통코드 → 라벨 치환 예시 (codeKey 지정)
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
@@ -91,20 +101,24 @@ export const DETAIL_LEFT_COLUMN_DEFS = [
 
 export const DETAIL_RIGHT_COLUMN_DEFS = [
   { headerName: "No" },
-  { headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
+  { type: "text", headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
   {
+    type: "text",
     headerName: "LBL_RATE_ITEM_NAME",
     field: "CHG_NM",
   },
   {
+    type: "text",
     headerName: "LBL_OVRHD_CHG_TP",
     field: "OVRHD_CHG_TP",
   },
   {
+    type: "text",
     headerName: "LBL_UNIT_COST",
     field: "UNIT_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_APPLIED_VAL",
     field: "APPLD_VAL",
   },

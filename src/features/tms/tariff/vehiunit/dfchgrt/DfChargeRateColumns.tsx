@@ -21,46 +21,57 @@ import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
+    type: "text",
     headerName: "LBL_TARIFF_CODE",
     field: "TRF_CD",
   },
   {
+    type: "text",
     headerName: "LBL_TARIFF_NAME",
     field: "TRF_NM",
   },
   {
+    type: "text",
     headerName: "LBL_CREATION_TYPE",
     field: "DF_TRF_CRE_TCD",
   },
   {
+    type: "text",
     headerName: "LBL_FROM_DTTM",
     field: "FRM_DTTM",
   },
   {
+    type: "text",
     headerName: "LBL_TO_DTTM",
     field: "TO_DTTM",
   },
   {
+    type: "text",
     headerName: "LBL_VEH_TRANS_TCD",
     field: "TRANS_TCD",
   },
   {
+    type: "text",
     headerName: "LBL_USE_YN",
     field: "USE_YN",
   },
   {
+    type: "text",
     headerName: "LBL_LOGISTICS_GROUP_CODE",
     field: "LGST_GRP_CD",
   },
   {
+    type: "text",
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
   },
   {
+    type: "text",
     headerName: "LBL_DIVISION_CODE",
     field: "DIV_CD",
   },
   {
+    type: "text",
     headerName: "LBL_DIVISION_NAME",
     field: "DIV_NM",
   },
@@ -82,12 +93,14 @@ export const RT_ITM_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
   { headerName: "No" },
-  { headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
+  { type: "text", headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
   {
+    type: "text",
     headerName: "LBL_RATE_ITEM_NAME",
     field: "CHG_NM",
   },
   {
+    type: "text",
     headerName: "LBL_ORDER_BY",
     field: "DISP_SEQ",
   },
@@ -105,12 +118,14 @@ export const RT_CARR_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
   { headerName: "No" },
-  { headerName: "LBL_CARRIER_CODE", field: "CARR_CD" },
+  { type: "text", headerName: "LBL_CARRIER_CODE", field: "CARR_CD" },
   {
+    type: "text",
     headerName: "LBL_CARRIER_NAME",
     field: "CARR_NM",
   },
   {
+    type: "text",
     headerName: "LBL_FROM_DTTM",
     field: "FRM_DTTM",
   },
@@ -128,8 +143,9 @@ export const RT_VEH_TP_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
   { headerName: "No" },
-  { headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
+  { type: "text", headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_TYPE_NAME",
     field: "VEH_TP_NM",
   },
@@ -148,44 +164,54 @@ export const RT_ITM_VEH_TP_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
   { headerName: "No" },
-  { headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
+  { type: "text", headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_TYPE_NAME",
     field: "VEH_TP_NM",
   },
   {
+    type: "text",
     headerName: "LBL_RATE",
     field: "RATE",
   },
   {
+    type: "text",
     headerName: "LBL_MIN_RATE",
     field: "MIN_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_MAX_RATE",
     field: "MAX_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM1",
     field: "PARAM1_VAL",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM2",
     field: "PARAM2_VAL",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM3",
     field: "PARAM3_VAL",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM_DESC1",
     field: "PARAM1_DESC",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM_DESC2",
     field: "PARAM2_DESC",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM_DESC3",
     field: "PARAM3_DESC",
   },
@@ -203,52 +229,64 @@ export const RT_ITM_VEH_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
   { headerName: "No" },
-  { headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM" },
+  { type: "text", headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM" },
   {
+    type: "text",
     headerName: "LBL_VEH_NO",
     field: "VEH_NO",
   },
   {
+    type: "text",
     headerName: "LBL_DRIVER_NM",
     field: "DRVR_NM",
   },
   {
+    type: "text",
     headerName: "LBL_VEHICLE_CODE",
     field: "VEH_ID",
   },
   {
+    type: "text",
     headerName: "LBL_RATE",
     field: "RATE",
   },
   {
+    type: "text",
     headerName: "LBL_MIN_RATE",
     field: "MIN_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_MAX_RATE",
     field: "MAX_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM1",
     field: "PARAM1_VAL",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM2",
     field: "PARAM2_VAL",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM3",
     field: "PARAM3_VAL",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM_DESC1",
     field: "PARAM1_DESC",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM_DESC2",
     field: "PARAM2_DESC",
   },
   {
+    type: "text",
     headerName: "LBL_PARAM_DESC3",
     field: "PARAM3_DESC",
   },

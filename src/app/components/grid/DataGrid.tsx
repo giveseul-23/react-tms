@@ -429,6 +429,22 @@ export default function DataGrid<TRow>({
     });
 
     return prepared.map((col) => {
+      // align prop → cellStyle.textAlign + headerClass. type 별 기본 정렬을 override.
+      const alignProp = (col as any).align as
+        | "left"
+        | "center"
+        | "right"
+        | undefined;
+      const alignBlock = alignProp
+        ? {
+            cellStyle: { textAlign: alignProp },
+            headerClass: `ag-header-${alignProp}`,
+          }
+        : null;
+
+      // type 미지정 시 "text" 기본값. 마지막 스프레드라 type === "date"/"numeric" 체크를 깨지 않음.
+      const typeBlock = (col as any).type ? {} : { type: "text" };
+
       if ("headerName" in col && col.headerName === "No") {
         const maxNum = String(activeRowData.length || 1);
         const noWidth = Math.max(
@@ -452,6 +468,8 @@ export default function DataGrid<TRow>({
             params.node?.rowPinned === "bottom"
               ? "합계"
               : (params.node?.rowIndex ?? 0) + 1,
+          ...(alignBlock ?? {}),
+          ...typeBlock,
         };
       }
 
@@ -463,6 +481,8 @@ export default function DataGrid<TRow>({
           maxWidth: null,
           headerName: translate(col),
           ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...(alignBlock ?? {}),
+          ...typeBlock,
         };
       }
 
@@ -476,6 +496,8 @@ export default function DataGrid<TRow>({
           headerName: translate(col),
           valueFormatter: (params: any) => Util.formatDttm(params.value),
           ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...(alignBlock ?? {}),
+          ...typeBlock,
         };
       }
 
@@ -497,6 +519,8 @@ export default function DataGrid<TRow>({
           cellStyle: { textAlign: "center" },
           headerClass: "ag-header-center",
           ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...(alignBlock ?? {}),
+          ...typeBlock,
         };
       }
 
@@ -540,26 +564,34 @@ export default function DataGrid<TRow>({
               }),
           ...(numberFormatter ? { valueFormatter: numberFormatter } : {}),
           ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...(alignBlock ?? {}),
+          ...typeBlock,
         };
       }
 
-      // _STS 로 끝나는 상태값 컬럼 → 중앙 정렬 (이미 cellStyle/type 지정된 경우 존중)
-      if (!(colDef as any).cellStyle && !(colDef as any).type) {
-        if (field.endsWith("_STS")) {
-          return {
-            ...col,
-            headerName: translate(col),
-            cellStyle: { textAlign: "center" },
-            headerClass: "ag-header-center",
-            ...(translatedChildren ? { children: translatedChildren } : {}),
-          };
-        }
+      // _STS 로 끝나는 상태값 컬럼 → 중앙 정렬 (이미 cellStyle/type/align 지정된 경우 존중)
+      if (
+        !(colDef as any).cellStyle &&
+        !(colDef as any).type &&
+        !alignProp &&
+        field.endsWith("_STS")
+      ) {
+        return {
+          ...col,
+          headerName: translate(col),
+          cellStyle: { textAlign: "center" },
+          headerClass: "ag-header-center",
+          ...(translatedChildren ? { children: translatedChildren } : {}),
+          ...typeBlock,
+        };
       }
 
       return {
         ...col,
         headerName: translate(col),
         ...(translatedChildren ? { children: translatedChildren } : {}),
+        ...(alignBlock ?? {}),
+        ...typeBlock,
       };
     });
   }, [activeColumnDefs, activeCodeMap]);

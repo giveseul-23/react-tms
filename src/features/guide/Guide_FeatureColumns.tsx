@@ -21,14 +21,17 @@ import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
+    type: "text",
     headerName: "LBL_XXX_CODE",
     field: "XXX_CD",
   },
   {
+    type: "text",
     headerName: "LBL_XXX_NAME",
     field: "XXX_NM",
   },
   {
+    type: "text",
     headerName: "LBL_USE_Y/N",
     field: "USE_YN",
   },
@@ -48,14 +51,16 @@ export const MAIN_COLUMN_DEFS = [
 // DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
 export const DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
-  { headerName: "LBL_XXX_CODE", field: "XXX_CD" },
+  { type: "text", headerName: "LBL_XXX_CODE", field: "XXX_CD" },
   {
+    type: "text",
     // 공통코드 → 라벨 치환 예시 (codeKey 지정)
     headerName: "LBL_XXX_TCD",
     field: "XXX_TCD",
     codeKey: "xxxTcd",
   },
   {
+    type: "text",
     // 날짜/일시 필드 — DTTM 포함 시 자동 포맷팅
     headerName: "LBL_FROM_DTTM",
     field: "FRM_DTTM",

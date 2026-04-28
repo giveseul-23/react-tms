@@ -8,6 +8,7 @@
 // 주의: className / DOM 구조 / onChange 동작은 기존 코드와 byte-for-byte 동일하게 유지.
 
 export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
+  type: "text",
   headerName: "LBL_DELETE",
   field: "_delete",
   width: 60,
@@ -34,6 +35,7 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
 });
 
 export const makeRowStatusColumn = (overrides: Record<string, any> = {}) => ({
+  type: "text",
   headerName: "LBL_ROW_STATUS",
   field: "EDIT_STS",
   width: 80,
@@ -43,12 +45,14 @@ export const makeRowStatusColumn = (overrides: Record<string, any> = {}) => ({
 export const makeInsertPersonColumn = (
   overrides: Record<string, any> = {},
 ) => ({
+  type: "text",
   headerName: "LBL_INSERT_PERSON_ID",
   field: "CRE_USR_ID",
   ...overrides,
 });
 
 export const makeInsertDateColumn = (overrides: Record<string, any> = {}) => ({
+  type: "text",
   headerName: "LBL_INSERT_DATE",
   field: "CRE_DTTM",
   ...overrides,
@@ -57,12 +61,14 @@ export const makeInsertDateColumn = (overrides: Record<string, any> = {}) => ({
 export const makeUpdatePersonColumn = (
   overrides: Record<string, any> = {},
 ) => ({
+  type: "text",
   headerName: "LBL_UPDATE_PERSON_ID",
   field: "UPD_USR_ID",
   ...overrides,
 });
 
 export const makeUpdateTimeColumn = (overrides: Record<string, any> = {}) => ({
+  type: "text",
   headerName: "LBL_UPDATE_TIME",
   field: "UPD_DTTM",
   ...overrides,

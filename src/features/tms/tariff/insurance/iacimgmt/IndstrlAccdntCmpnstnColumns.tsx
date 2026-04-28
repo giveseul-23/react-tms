@@ -21,10 +21,12 @@ import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
+    type: "text",
     headerName: "LBL_LOGISTICS_GROUP_CODE",
     field: "LGST_GRP_CD",
   },
   {
+    type: "text",
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
   },
@@ -44,60 +46,74 @@ export const MAIN_COLUMN_DEFS = [
 // DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
 export const DETAIL01_COLUMN_DEFS = [
   { headerName: "No" },
-  { headerName: "LBL_TARIFF_TYPE", field: "AP_PROC_TP" },
+  { type: "text", headerName: "LBL_TARIFF_TYPE", field: "AP_PROC_TP" },
   {
+    type: "text",
     headerName: "LBL_IACI_ID",
     field: "INSRNC_ID",
   },
   {
+    type: "text",
     headerName: "LBL_IACI_CD",
     field: "CHG_CD",
   },
   {
+    type: "text",
     headerName: "LBL_IACI_NM",
     field: "CHG_NM",
   },
   {
+    type: "text",
     headerName: "LBL_FROM_DTTM",
     field: "FRM_DTTM",
   },
   {
+    type: "text",
     headerName: "LBL_TO_DTTM",
     field: "TO_DTTM",
   },
   {
+    type: "text",
     headerName: "LBL_DEDUCTION",
     field: "DEDUCTION_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_INSURANCE_RATE",
     field: "INSURANCE_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_RDNG_RCD1",
     field: "RDNG_RCD1",
   },
   {
+    type: "text",
     headerName: "LBL_BUD_RATE",
     field: "BUD_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_SPPT_RATE",
     field: "SPPT_RATE",
   },
   {
+    type: "text",
     headerName: "LBL_ADD_RATE1",
     field: "EXTRA_RATE1",
   },
   {
+    type: "text",
     headerName: "LBL_ADD_RATE2",
     field: "EXTRA_RATE2",
   },
   {
+    type: "text",
     headerName: "LBL_RDNG_RCD2",
     field: "RDNG_RCD2",
   },
   {
+    type: "text",
     headerName: "LBL_USE_YN",
     field: "USE_YN",
   },
@@ -113,16 +129,19 @@ export const DETAIL01_COLUMN_DEFS = [
 
 export const DETAIL02_COLUMN_DEFS = [
   { headerName: "No" },
-  { headerName: "LBL_IACI_ID", field: "INSRNC_ID" },
+  { type: "text", headerName: "LBL_IACI_ID", field: "INSRNC_ID" },
   {
+    type: "text",
     headerName: "LBL_TARIFF_TYPE",
     field: "AP_PROC_TP",
   },
   {
+    type: "text",
     headerName: "LBL_OPER_TCD",
     field: "CHG_CD",
   },
   {
+    type: "text",
     headerName: "LBL_OPER_TNM",
     field: "CHG_NM",
   },

@@ -2,6 +2,7 @@
 
 export const MAIN_COLUMN_DEFS = () => [
   {
+    type: "text",
     headerName: "메뉴코드 *",
     field: "MENUCODE",
     width: 160,
@@ -13,12 +14,14 @@ export const MAIN_COLUMN_DEFS = () => [
       ),
   },
   {
+    type: "text",
     headerName: "메뉴명 *",
     field: "MENUNAME",
     width: 160,
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
   {
+    type: "text",
     headerName: "응용프로그램",
     field: "APPLNAME",
     width: 200,
@@ -30,12 +33,14 @@ export const MAIN_COLUMN_DEFS = () => [
       ),
   },
   {
+    type: "text",
     headerName: "메뉴명 다국어키 *",
     field: "MSG_CD",
     width: 160,
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
   {
+    type: "text",
     headerName: "상위 메뉴 경로",
     field: "PARANT_MENU_CD",
     width: 120,
@@ -49,6 +54,7 @@ export const MAIN_COLUMN_DEFS = () => [
     },
   },
   {
+    type: "text",
     headerName: "정렬순서",
     field: "DSPLY_SEQ",
     width: 80,
@@ -58,6 +64,7 @@ export const MAIN_COLUMN_DEFS = () => [
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
   {
+    type: "text",
     headerName: "URL",
     field: "URL",
     minWidth: 200,
@@ -66,6 +73,7 @@ export const MAIN_COLUMN_DEFS = () => [
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
   {
+    type: "text",
     headerName: "사용여부",
     field: "USE_YN",
     width: 70,
@@ -87,6 +95,7 @@ export const MAIN_COLUMN_DEFS = () => [
     },
   },
   {
+    type: "text",
     headerName: "소스",
     field: "RSRC_CNT",
     width: 55,

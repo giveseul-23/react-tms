@@ -21,78 +21,97 @@ import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
+    type: "text",
     headerName: "LBL_DIVISION_CODE",
     field: "DIV_CD",
   },
   {
+    type: "text",
     headerName: "LBL_DIVISION_NAME",
     field: "DIV_NM",
   },
   {
+    type: "text",
     headerName: "LBL_LOGISTICS_GROUP_CODE",
     field: "LGST_GRP_CD",
   },
   {
+    type: "text",
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
   },
   {
+    type: "text",
     headerName: "LBL_TARIFF_CODE",
     field: "TRF_CD",
   },
   {
+    type: "text",
     headerName: "LBL_TARIFF_NAME",
     field: "TRF_NM",
   },
   {
+    type: "text",
     headerName: "LBL_CHG_CAL_RNK",
     field: "CHG_CALC_RNK",
   },
   {
+    type: "text",
     headerName: "LBL_RATE_ITEM_CD",
     field: "CHG_CD",
   },
   {
+    type: "text",
     headerName: "LBL_RATE_ITEM_NAME",
     field: "CHG_NM",
   },
   {
+    type: "text",
     headerName: "LBL_SUBCHG_CAL_RNK",
     field: "SUBCHG_CALC_RNK",
   },
   {
+    type: "text",
     headerName: "LBL_SERVICE_CD",
     field: "SUBCHG_CD",
   },
   {
+    type: "text",
     headerName: "LBL_SERVICE_NM",
     field: "SUBCHG_NM",
   },
   {
+    type: "text",
     headerName: "LBL_MIN_COST",
     field: "MIN_COST",
   },
   {
+    type: "text",
     headerName: "LBL_MAX_COST",
     field: "MAX_COST",
   },
   {
+    type: "text",
     headerName: "LBL_BASIC_COST",
     field: "BSE_COST",
   },
   {
+    type: "text",
     headerName: "LBL_RDNG_RCD",
     field: "RDNG_RCD",
   },
   {
+    type: "text",
     headerName: "LBL_ACCM_SUM",
     field: "ACCM_SUM_YN",
   },
   {
+    type: "text",
     headerName: "LBL_STOP_LEVEL_CAL_YN",
     field: "STOP_LEVEL_CAL_YN",
   },
   {
+    type: "text",
     headerName: "LBL_USE_YN",
     field: "USE_YN",
   },
@@ -112,40 +131,49 @@ export const DETAIL01_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
   { headerName: "No" },
-  { headerName: "LBL_TARIFF_CODE", field: "TRF_CD" },
+  { type: "text", headerName: "LBL_TARIFF_CODE", field: "TRF_CD" },
   {
+    type: "text",
     headerName: "LBL_RATE_ITEM_CD",
     field: "CHG_CD",
   },
   {
+    type: "text",
     headerName: "LBL_SERVICE_CD",
     field: "SUBCHG_CD",
   },
   {
+    type: "text",
     headerName: "LBL_ORDER",
     field: "SEQ",
   },
   {
+    type: "text",
     headerName: "LBL_COST_CD",
     field: "COST_CD",
   },
   {
+    type: "text",
     headerName: "LBL_COST_NM",
     field: "COST_NM",
   },
   {
+    type: "text",
     headerName: "LBL_CLASS_NAME",
     field: "CLSS_NM",
   },
   {
+    type: "text",
     headerName: "LBL_COST_OPTION",
     field: "OPR",
   },
   {
+    type: "text",
     headerName: "LBL_COST_UNIT",
     field: "ADJ_RT",
   },
   {
+    type: "text",
     headerName: "LBL_COST",
     field: "COST",
   },
@@ -163,28 +191,34 @@ export const DETAIL02_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
 ) => [
   { headerName: "No" },
-  { headerName: "LBL_ORDER", field: "SEQ" },
+  { type: "text", headerName: "LBL_ORDER", field: "SEQ" },
   {
+    type: "text",
     headerName: "LBL_CLASS_CODE",
     field: "CLSS_CD",
   },
   {
+    type: "text",
     headerName: "LBL_CLASS_NAME",
     field: "CLSS_NM",
   },
   {
+    type: "text",
     headerName: "LBL_CAL_OPTION",
     field: "OPR",
   },
   {
+    type: "text",
     headerName: "LBL_OPT_VAL_FROM",
     field: "FRM_VAL",
   },
   {
+    type: "text",
     headerName: "LBL_OPT_VAL_TO",
     field: "TO_VAL",
   },
   {
+    type: "text",
     headerName: "AND/OR",
     field: "LGC_OPR",
   },
