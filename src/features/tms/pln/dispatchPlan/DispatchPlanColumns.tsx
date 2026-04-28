@@ -1,10 +1,13 @@
-// src/views/dispatchPlan/DispatchPlanColumns.tsx
-// 배차관리(MENU_DISPATCH_PLAN) 그리드 컬럼 정의
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
 // ── 메인 그리드: 배차 리스트 ─────────────────────────────────
-export const MAIN_COLUMN_DEFS = [
+export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_REQUESTED_DELIVERY_DATE", field: "DLVRY_DT" }, // 납품요청일
+  {
+    type: "date",
+    headerName: "LBL_REQUESTED_DELIVERY_DATE",
+    field: "DLVRY_DT",
+  }, // 납품요청일
   {
     type: "text",
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
@@ -13,7 +16,11 @@ export const MAIN_COLUMN_DEFS = [
   }, // 배차진행상태
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" }, // 배차번호
   { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM" }, // 운송협력사명
-  { type: "text", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "VEH_OP_TP" }, // 차량운영유형
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_OPERATION_TYPE",
+    field: "VEH_OP_TP",
+  }, // 차량운영유형
   { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO" }, // 차량번호
   { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM" }, // 운전자명
   { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_CD" }, // 차량유형
@@ -183,40 +190,20 @@ export const MAIN_COLUMN_DEFS = [
     type: "numeric",
   }, //연계배차순서
   { type: "text", headerName: "LBL_ROW_STATUS", field: "EDIT_STS" },
-  {
-    type: "text",
-    headerName: "LBL_INSERT_PERSON_ID",
-    field: "CRE_USR_ID",
-  },
-  {
-    type: "text",
-    headerName: "LBL_INSERT_DATE",
-    field: "CRE_DTTM",
-    fieldType: "text",
-  },
-  {
-    type: "text",
-    headerName: "LBL_UPDATE_PERSON_ID",
-    field: "UPD_USR_ID",
-  },
-  {
-    type: "text",
-    headerName: "LBL_UPDATE_TIME",
-    field: "UPD_DTTM",
-  },
+  ...standardAudit(setGridData),
 ];
 
 // ── 경유처 탭 ────────────────────────────────────────────────
-export const STOP_COLUMN_DEFS = [
+export const STOP_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { type: "text", headerName: "LBL_STOP_SEQUENCE", field: "STOP_SEQ" }, // 순번
   { type: "text", headerName: "LBL_LOCATION_CODE", field: "LOC_CD" }, // 착지코드
   { type: "text", headerName: "LBL_LOCATION_NAME", field: "LOC_NM" }, // 착지명
   { type: "text", headerName: "LBL_DETAIL_ADDRESS1", field: "DTL_ADDR1" }, // 상세주소1
   { type: "text", headerName: "LBL_PICKDROP_DIV", field: "STOP_TP" }, // 착지구분
-  { type: "text", headerName: "LBL_ETA_DTTM", field: "ETA_DTTM" }, // 예상도착시간
-  { type: "text", headerName: "LBL_ETD_DTTM", field: "ETD_DTTM" }, // 예상출발시간
-  { type: "text", headerName: "LBL_ATA_DTTM", field: "ATA_DTTM" }, // 도착시각
-  { type: "text", headerName: "LBL_ATD_DTTM", field: "ATD_DTTM" }, // 출발시각
+  { type: "date", headerName: "LBL_ETA_DTTM", field: "ETA_DTTM" }, // 예상도착시간
+  { type: "date", headerName: "LBL_ETD_DTTM", field: "ETD_DTTM" }, // 예상출발시간
+  { type: "date", headerName: "LBL_ATA_DTTM", field: "ATA_DTTM" }, // 도착시각
+  { type: "date", headerName: "LBL_ATD_DTTM", field: "ATD_DTTM" }, // 출발시각
   {
     headerName: "LBL_TRNST_PREVSTOP_DIST",
     field: "TRNST_PREVSTOP_DIST",
@@ -225,14 +212,20 @@ export const STOP_COLUMN_DEFS = [
 ];
 
 // ── 할당주문 탭 ──────────────────────────────────────────────
-export const ALLOC_ORDER_COLUMN_DEFS = [
+export const ALLOC_ORDER_COLUMN_DEFS = (
+  setGridData?: (updater: any) => void,
+) => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" }, // 출발지명
   { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" }, // 도착지명
-  { type: "text", headerName: "LBL_TO_DETAIL_ADDRESS_1", field: "TO_DTL_ADDR1" }, // 도착지상세주소1
+  {
+    type: "text",
+    headerName: "LBL_TO_DETAIL_ADDRESS_1",
+    field: "TO_DTL_ADDR1",
+  }, // 도착지상세주소1
   { type: "text", headerName: "LBL_DESTINATION_ZIP_CODE", field: "TO_ZIP_CD" }, // 도착지우편번호
   { type: "text", headerName: "LBL_ORDER_TYPE", field: "ORD_TP" }, // 주문유형
-  { type: "text", headerName: "LBL_ITEM_UOM", field: "QTY" }, // 품목단위
+  { type: "numeric", headerName: "LBL_ITEM_UOM", field: "QTY" }, // 품목단위
   { headerName: "LBL_VOL", field: "PLN_VOL", type: "numeric" }, //계획CBM
   { headerName: "LBL_WGT", field: "PLN_WGT", type: "numeric" }, //계획중량
   { headerName: "LBL_FLEX_QTY1", field: "PLN_FLEX_QTY1", type: "numeric" }, //계획FQ1
@@ -245,7 +238,11 @@ export const ALLOC_ORDER_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_SHIPMENT_NUMBER", field: "SHPM_NO" }, //운송주문번호
   { type: "text", headerName: "LBL_DESTINATION_CODE", field: "TO_LOC_CD" }, //도착지코드
   { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD" }, //출발지코드
-  { type: "text", headerName: "LBL_FRM_DETAIL_ADDRESS_1", field: "FRM_DTL_ADDR1" }, //출발지 상세주소 1
+  {
+    type: "text",
+    headerName: "LBL_FRM_DETAIL_ADDRESS_1",
+    field: "FRM_DTL_ADDR1",
+  }, //출발지 상세주소 1
   { type: "text", headerName: "LBL_DEPARTURE_ZIP_CODE", field: "FRM_ZIP_CD" }, //출발지 우편번호
   { type: "text", headerName: "LBL_SHPM_RMRK", field: "SHPM_RSN_DESC" }, //주문비고
   { type: "text", headerName: "LBL_SOLD_TO_CD", field: "SOLD_TO_CD" }, //거래처코드
@@ -254,7 +251,9 @@ export const ALLOC_ORDER_COLUMN_DEFS = [
 ];
 
 // ── 할당주문 탭 · SUB(품목) 그리드 ───────────────────────────
-export const ALLOC_ORDER_SUB_COLUMN_DEFS = [
+export const ALLOC_ORDER_SUB_COLUMN_DEFS = (
+  setGridData?: (updater: any) => void,
+) => [
   { type: "text", headerName: "LBL_ORD_ITM_LINE_NO", field: "ORD_LINE_NO" }, // 품목라인
   { type: "text", headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD" }, // 품목코드
   { type: "text", headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
@@ -371,28 +370,7 @@ export const ALLOC_ORDER_SUB_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_FEED_FCD", field: "ITEM_FCD" },
   { type: "text", headerName: "LBL_TEMPER_ZONE", field: "TEMP_TCD" },
   { type: "text", headerName: "LBL_PLN_INV_QTY_UOM", field: "PLN_INV_QTY_UOM" },
-  { type: "text", headerName: "LBL_ROW_STATUS", field: "EDIT_STS" },
-  {
-    type: "text",
-    headerName: "LBL_INSERT_PERSON_ID",
-    field: "CRE_USR_ID",
-  },
-  {
-    type: "text",
-    headerName: "LBL_INSERT_DATE",
-    field: "CRE_DTTM",
-    fieldType: "text",
-  },
-  {
-    type: "text",
-    headerName: "LBL_UPDATE_PERSON_ID",
-    field: "UPD_USR_ID",
-  },
-  {
-    type: "text",
-    headerName: "LBL_UPDATE_TIME",
-    field: "UPD_DTTM",
-  },
+  ...standardAudit(setGridData),
 ];
 
 // ── 미할당주문 탭 ────────────────────────────────────────────
@@ -400,7 +378,11 @@ export const UNALLOC_ORDER_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" }, // 출발지명
   { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" }, // 도착지명
-  { type: "text", headerName: "LBL_TO_DETAIL_ADDRESS_1", field: "TO_DTL_ADDR1" }, // 도착지상세주소1
+  {
+    type: "text",
+    headerName: "LBL_TO_DETAIL_ADDRESS_1",
+    field: "TO_DTL_ADDR1",
+  }, // 도착지상세주소1
   { type: "text", headerName: "LBL_DESTINATION_ZIP_CODE", field: "TO_ZIP_CD" }, // 도착지우편번호
   { type: "text", headerName: "LBL_ORDER_TYPE", field: "ORD_TP" }, // 주문유형
   { type: "text", headerName: "LBL_ITEM_UOM", field: "QTY" }, // 품목단위
@@ -416,7 +398,11 @@ export const UNALLOC_ORDER_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_SHIPMENT_NUMBER", field: "SHPM_NO" }, //운송주문번호
   { type: "text", headerName: "LBL_DESTINATION_CODE", field: "TO_LOC_CD" }, //도착지코드
   { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD" }, //출발지코드
-  { type: "text", headerName: "LBL_FRM_DETAIL_ADDRESS_1", field: "FRM_DTL_ADDR1" }, //출발지 상세주소 1
+  {
+    type: "text",
+    headerName: "LBL_FRM_DETAIL_ADDRESS_1",
+    field: "FRM_DTL_ADDR1",
+  }, //출발지 상세주소 1
   { type: "text", headerName: "LBL_DEPARTURE_ZIP_CODE", field: "FRM_ZIP_CD" }, //출발지 우편번호
   { type: "text", headerName: "LBL_SHPM_RMRK", field: "SHPM_RSN_DESC" }, //주문비고
   { type: "text", headerName: "LBL_SOLD_TO_CD", field: "SOLD_TO_CD" }, //거래처코드
@@ -425,7 +411,9 @@ export const UNALLOC_ORDER_COLUMN_DEFS = [
 ];
 
 // ── 미할당주문 탭 · SUB(품목) 그리드 ─────────────────────────
-export const UNALLOC_ORDER_SUB_COLUMN_DEFS = [
+export const UNALLOC_ORDER_SUB_COLUMN_DEFS = (
+  setGridData?: (updater: any) => void,
+) => [
   { type: "text", headerName: "LBL_ORD_ITM_LINE_NO", field: "ORD_LINE_NO" }, // 품목라인
   { type: "text", headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD" }, // 품목코드
   { type: "text", headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
@@ -542,26 +530,5 @@ export const UNALLOC_ORDER_SUB_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_FEED_FCD", field: "ITEM_FCD" },
   { type: "text", headerName: "LBL_TEMPER_ZONE", field: "TEMP_TCD" },
   { type: "text", headerName: "LBL_PLN_INV_QTY_UOM", field: "PLN_INV_QTY_UOM" },
-  { type: "text", headerName: "LBL_ROW_STATUS", field: "EDIT_STS" },
-  {
-    type: "text",
-    headerName: "LBL_INSERT_PERSON_ID",
-    field: "CRE_USR_ID",
-  },
-  {
-    type: "text",
-    headerName: "LBL_INSERT_DATE",
-    field: "CRE_DTTM",
-    fieldType: "text",
-  },
-  {
-    type: "text",
-    headerName: "LBL_UPDATE_PERSON_ID",
-    field: "UPD_USR_ID",
-  },
-  {
-    type: "text",
-    headerName: "LBL_UPDATE_TIME",
-    field: "UPD_DTTM",
-  },
+  ...standardAudit(setGridData),
 ];

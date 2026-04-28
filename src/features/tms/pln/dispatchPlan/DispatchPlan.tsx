@@ -62,7 +62,7 @@ export default function DispatchPlan() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS()}
           codeMap={model.codeMap}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
@@ -87,16 +87,16 @@ export default function DispatchPlan() {
           ]}
           presets={{
             STOP: {
-              columnDefs: STOP_COLUMN_DEFS,
+              columnDefs: STOP_COLUMN_DEFS(),
               actions: ctrl.stopActions,
             },
             ALLOC: {
-              columnDefs: ALLOC_ORDER_COLUMN_DEFS,
+              columnDefs: ALLOC_ORDER_COLUMN_DEFS(),
               actions: ctrl.allocOrderActions,
               onRowClicked: ctrl.handleAllocOrderRowClicked,
             },
             UNALLOC: {
-              columnDefs: UNALLOC_ORDER_COLUMN_DEFS,
+              columnDefs: UNALLOC_ORDER_COLUMN_DEFS(),
               actions: ctrl.unallocOrderActions,
               onRowClicked: ctrl.handleUnallocOrderRowClicked,
             },
@@ -112,7 +112,7 @@ export default function DispatchPlan() {
               return (
                 <DataGrid
                   layoutType="plain"
-                  columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS}
+                  columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS()}
                   rowData={model.allocSubRowData}
                   actions={ctrl.allocSubActions}
                 />
@@ -122,7 +122,7 @@ export default function DispatchPlan() {
               return (
                 <DataGrid
                   layoutType="plain"
-                  columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS}
+                  columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS()}
                   rowData={model.unallocSubRowData}
                   actions={ctrl.unallocSubActions}
                 />
