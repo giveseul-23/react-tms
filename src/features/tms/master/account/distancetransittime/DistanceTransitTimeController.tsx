@@ -54,9 +54,8 @@ export function useDistanceTransitTimeController({
     (data: any) => {
       model.setGridData(data);
       model.resetSubGrids();
-      handleRowClicked(data.rows?.[0]);
     },
-    [model, handleRowClicked],
+    [model],
   );
 
   const doAction = useCallback(

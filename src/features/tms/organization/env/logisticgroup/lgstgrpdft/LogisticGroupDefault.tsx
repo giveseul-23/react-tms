@@ -68,12 +68,16 @@ export default function TenderReceiveDispatch() {
             columnDefs={CNFG_HEADER_COLUMN_DEFS}
             rowData={model.cnfgGrpData.rows}
             onRowClicked={ctrl.handleRowClicked}
+            autoSelectFirstRow
+            rowKeys="LGST_GRP_CNFG_GRP_CD"
           />
           <DataGrid
             layoutType="plain"
             columnDefs={CNFG_DETAIL_COLUMN_DEFS}
             rowData={model.subCnfgRowData.rows}
             onRowClicked={ctrl.handleSubRowClicked}
+            autoSelectFirstRow
+            rowKeys="CNFG_CD"
           />
         </SplitPane>
       }

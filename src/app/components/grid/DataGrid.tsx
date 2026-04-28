@@ -160,6 +160,10 @@ type DataGridProps<TRow> = {
   onRowSelected?: (row: TRow | null) => void;
   onRowClicked?: (row: TRow) => void;
   onRowDoubleClicked?: (row: TRow) => void;
+  /** rowData 갱신 시 자동으로 행을 선택해 onRowClicked 를 발화. 이전 선택이 있으면 rowKeys 로 매칭, 없으면 첫 표시 행. */
+  autoSelectFirstRow?: boolean;
+  /** autoSelectFirstRow 의 이전 선택 매칭에 사용할 키 컬럼(들). 미지정 시 항상 첫 표시 행. */
+  rowKeys?: string | string[];
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
   /** 탭 전환 시 콜백 — 외부에서 activeTab 을 추적할 때 사용 */
   onTabChange?: (key: string) => void;
@@ -250,6 +254,8 @@ export default function DataGrid<TRow>({
   mainPanelMinSize = 30,
   rightPanelSize = 30,
   rightPanelMinSize = 20,
+  autoSelectFirstRow,
+  rowKeys,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -270,6 +276,7 @@ export default function DataGrid<TRow>({
 
   const internalGridRef = useRef<any>(null);
   const gridContainerRef = useRef<HTMLDivElement>(null);
+  const prevSelectedRef = useRef<TRow | null>(null);
   const selectedCellsRef = useRef<Set<string>>(new Set());
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<{ rowIndex: number; colIndex: number } | null>(
@@ -611,6 +618,39 @@ export default function DataGrid<TRow>({
     });
   }, [activeTab, activeRowData, finalColumnDefs, runAutoSize, disableAutoSize]);
 
+  // ─── 자동 첫행 선택 (이전 선택을 rowKeys 로 보존, 없으면 첫 표시 행) ─────
+  useEffect(() => {
+    if (!autoSelectFirstRow) return;
+    const api = gridApiRef.current;
+    if (!api || api.isDestroyed?.()) return;
+    if (!activeRowData?.length) return;
+
+    requestAnimationFrame(() => {
+      if (api.isDestroyed?.()) return;
+
+      const keys = Array.isArray(rowKeys)
+        ? rowKeys
+        : rowKeys
+          ? [rowKeys]
+          : [];
+      const prev = prevSelectedRef.current as any;
+
+      let target: any = null;
+      if (prev && keys.length) {
+        api.forEachNode((n: any) => {
+          if (target || !n.data) return;
+          if (keys.every((k) => n.data[k] === prev[k])) target = n;
+        });
+      }
+      if (!target) target = api.getDisplayedRowAtIndex(0);
+
+      if (target && !target.isSelected()) {
+        target.setSelected(true);
+        activeOnRowClicked?.(target.data);
+      }
+    });
+  }, [activeRowData, autoSelectFirstRow, rowKeys, activeOnRowClicked]);
+
   // ─── 드래그 범위 선택 + Ctrl+C 복사 ──────────────────────────────────────────
   useEffect(() => {
     const container = gridContainerRef.current;
@@ -912,6 +952,7 @@ export default function DataGrid<TRow>({
       const rows = e.api.getSelectedRows();
       setSelectedRows(rows);
       if (e.node.isSelected() && e.data) {
+        prevSelectedRef.current = e.data;
         onRowSelected?.(e.data);
       } else {
         setTimeout(() => {
@@ -933,6 +974,7 @@ export default function DataGrid<TRow>({
       }
       if (e.event?.shiftKey) return;
       if (!e.data) return;
+      prevSelectedRef.current = e.data;
       activeOnRowClicked?.(e.data);
     },
     onRowDoubleClicked: (e: any) => {

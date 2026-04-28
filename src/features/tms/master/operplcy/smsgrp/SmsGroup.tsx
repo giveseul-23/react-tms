@@ -58,6 +58,8 @@ export default function TenderReceiveDispatch() {
           rowData={model.gridData}
           onRowClicked={ctrl.handleRowClicked}
           actions={ctrl.mainActions}
+          autoSelectFirstRow
+          rowKeys="SMS_GRP_CD"
         />
       }
       detail={

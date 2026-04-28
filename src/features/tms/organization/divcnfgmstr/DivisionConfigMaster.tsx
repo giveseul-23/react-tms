@@ -87,6 +87,7 @@ export default function DivisionConfigMaster() {
                       : updater,
                 })),
               )}
+              rowSelection="single"
               rowData={model.configData.rows}
               totalCount={model.configData.totalCount}
               currentPage={model.configData.page}
@@ -95,11 +96,14 @@ export default function DivisionConfigMaster() {
               onPageChange={(page) => searchRef.current?.(page, false)}
               actions={ctrl.configActions}
               onRowClicked={ctrl.handleConfigRowClicked}
+              autoSelectFirstRow
+              rowKeys="CNFG_CD"
             />
 
             {/* Top-right: 설정상세 */}
             <DataGrid
               layoutType="plain"
+              rowSelection="single"
               columnDefs={CONFIG_DETAIL_COLUMN_DEFS(model.setDetailData)}
               rowData={model.detailData.rows}
               totalCount={model.detailData.totalCount}
@@ -109,6 +113,8 @@ export default function DivisionConfigMaster() {
               onPageChange={(page) => searchRef.current?.(page, false)}
               actions={ctrl.detailActions}
               onRowClicked={ctrl.handleDetailRowClicked}
+              autoSelectFirstRow
+              rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
             />
           </SplitPane>
 
@@ -123,16 +129,20 @@ export default function DivisionConfigMaster() {
             {/* Bottom-left: 설정코드다국어설정 */}
             <DataGrid
               layoutType="plain"
+              rowSelection="single"
               columnDefs={CONFIG_I18N_COLUMN_DEFS(model.setI18nData)}
               rowData={model.i18nData}
               actions={ctrl.i18nActions}
               onRowClicked={ctrl.handleI18nRowClicked}
               subTitle="LBL_CNFG_CD_LANG_SETTING"
+              autoSelectFirstRow
+              rowKeys={["CNFG_CD", "CNFG_DTL_CD", "LANG_TP"]}
             />
 
             {/* Bottom-right: 설정상세코드다국어설정 */}
             <DataGrid
               layoutType="plain"
+              rowSelection="single"
               columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS(
                 model.setDetailI18nData,
               )}

@@ -30,7 +30,6 @@ export function useSmsGroupController({
     (data: any) => {
       model.setGridData(data.rows);
       model.resetSubGrids();
-      handleRowClicked(data.rows?.[0]);
     },
     [model],
   );

@@ -52,9 +52,8 @@ export function useOrganizationController({
     (data: any) => {
       model.setDivisionGridData(data);
       model.resetSubGrids();
-      handleRowClicked(data.rows?.[0]);
     },
-    [model, handleRowClicked],
+    [model],
   );
 
   const divisionActions = makeCommonActions({

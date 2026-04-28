@@ -66,7 +66,8 @@ export function useDivisionConfigMasterController({
     [model],
   );
 
-  // ── 행 클릭 핸들러 (각각 독립) ────────────────────────────────
+  // ── 행 클릭 핸들러: 각 단계는 자기 자식만 fetch.
+  //    하위 그리드의 autoSelectFirstRow 가 다음 단계의 onRowClicked 를 발화.
   const handleConfigRowClicked = useCallback(
     (row: any) => {
       model.setSelectedConfig(row);
@@ -76,29 +77,26 @@ export function useDivisionConfigMasterController({
       model.setDetailI18nData([]);
 
       fetchDetail(row).then((rows) => {
-        (model.setDetailData({
+        model.setDetailData({
           rows,
           totalCount: rows.length,
           page: 1,
           limit: 20,
-        }),
-          handleDetailRowClicked(rows[0]));
+        });
       });
     },
-    [model, fetchDetail, fetchI18n],
+    [model, fetchDetail],
   );
 
   const handleDetailRowClicked = useCallback(
     (row: any) => {
       model.setSelectedDetail(row);
+      model.setI18nData([]);
       model.setDetailI18nData([]);
 
-      fetchI18n(row).then((rows) => {
-        model.setI18nData(rows);
-        fetchDetailI18n(rows[0]).then((rows) => model.setDetailI18nData(rows));
-      });
+      fetchI18n(row).then((rows) => model.setI18nData(rows));
     },
-    [model, fetchDetailI18n],
+    [model, fetchI18n],
   );
 
   const handleI18nRowClicked = useCallback(
@@ -110,43 +108,18 @@ export function useDivisionConfigMasterController({
     [model, fetchDetailI18n],
   );
 
-  // ── handleSearch: top-left → top-right → bottom-left → bottom-right 순차 조회
+  // ── handleSearch: top-left 만 채움. 이후 cascade 는 각 그리드의
+  //    autoSelectFirstRow 가 onRowClicked 를 자동 발화하며 흘러감.
   const handleSearch = useCallback(
-    async (data: any) => {
+    (data: any) => {
       model.setConfigData(data);
       model.setSelectedConfig(null);
       model.setSelectedDetail(null);
       model.setDetailData({ rows: [], totalCount: 0, page: 1, limit: 20 });
       model.setI18nData([]);
       model.setDetailI18nData([]);
-
-      const firstRow = data.rows?.[0];
-      if (!firstRow) return;
-
-      // 1. top-left 첫 번째 행 선택
-      model.setSelectedConfig(firstRow);
-
-      // 2. top-right 조회
-      const detailRows = await fetchDetail(firstRow);
-      model.setDetailData({
-        rows: detailRows,
-        totalCount: detailRows.length,
-        page: 1,
-        limit: 20,
-      });
-
-      // 3. bottom-left 조회
-      const i18nRows = await fetchI18n(firstRow);
-      model.setI18nData(i18nRows);
-
-      // 4. bottom-right 조회 (top-right 첫 번째 행 기준)
-      if (detailRows.length > 0) {
-        model.setSelectedDetail(detailRows[0]);
-        const detailI18nRows = await fetchDetailI18n(detailRows[0]);
-        model.setDetailI18nData(detailI18nRows);
-      }
     },
-    [model, fetchDetail, fetchI18n, fetchDetailI18n],
+    [model],
   );
 
   // ── Top-left 액션 ────────────────────────────────────────────

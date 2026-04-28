@@ -70,6 +70,8 @@ export default function Organization() {
           }}
           onRowClicked={ctrl.handleRowClicked}
           actions={ctrl.divisionActions}
+          autoSelectFirstRow
+          rowKeys="DIV_CD"
         />
       }
       detail={

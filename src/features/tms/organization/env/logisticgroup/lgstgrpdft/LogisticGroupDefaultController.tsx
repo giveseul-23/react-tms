@@ -32,69 +32,71 @@ export function useLogisticGroupDefaultController({
     (data: any) => {
       model.setcnfgGrpData(data);
       model.resetSubGrids();
-      fetchCnfgDetail(data.rows?.[0]);
     },
     [model],
   );
 
-  const fetchCnfgDetail = useCallback((row: any) => {
-    const configCd = row.LGST_GRP_CNFG_GRP_CD;
-    if (!configCd) return Promise.resolve([]);
-    return logisticGroupDefaultApi
-      .getLgstDefaultCnfgList({
-        LGST_GRP_CNFG_GRP_CD: configCd,
-      })
-      .then((res: any) => {
-        const rows = res.data.data?.dsOut ?? [];
-        model.setSubCnfgRowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: 20,
+  const fetchCnfgDetail = useCallback(
+    (row: any) => {
+      const configCd = row.LGST_GRP_CNFG_GRP_CD;
+      if (!configCd) return Promise.resolve([]);
+      return logisticGroupDefaultApi
+        .getLgstDefaultCnfgList({
+          LGST_GRP_CNFG_GRP_CD: configCd,
+        })
+        .then((res: any) => {
+          const rows = res.data.data?.dsOut ?? [];
+          model.setSubCnfgRowData({
+            rows,
+            totalCount: rows.length,
+            page: 1,
+            limit: 20,
+          });
+        })
+        .catch((err) => {
+          throw Error(err);
         });
+    },
+    [model],
+  );
 
-        fetchDetail(rows[0]);
-      })
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  const fetchDetail = useCallback((row: any) => {
-    const configCd = row.CNFG_CD;
-    if (!configCd) return Promise.resolve([]);
-    return logisticGroupDefaultApi
-      .getLgstDefaultDetailList({
-        CNFG_CD: configCd,
-      })
-      .then((res: any) => {
-        const rows = res.data.data?.dsOut ?? [];
-        model.setSubDetailRowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: 20,
+  const fetchDetail = useCallback(
+    (row: any) => {
+      const configCd = row.CNFG_CD;
+      if (!configCd) return Promise.resolve([]);
+      return logisticGroupDefaultApi
+        .getLgstDefaultDetailList({
+          CNFG_CD: configCd,
+        })
+        .then((res: any) => {
+          const rows = res.data.data?.dsOut ?? [];
+          model.setSubDetailRowData({
+            rows,
+            totalCount: rows.length,
+            page: 1,
+            limit: 20,
+          });
+        })
+        .catch((err) => {
+          throw Error(err);
         });
-      })
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
+    },
+    [model],
+  );
 
   const handleRowClicked = useCallback(
     (row: any) => {
       model.resetSubGrids();
       fetchCnfgDetail(row);
     },
-    [model],
+    [model, fetchCnfgDetail],
   );
 
   const handleSubRowClicked = useCallback(
     (row: any) => {
-      model.resetSubGrids();
-      fetchCnfgDetail(row);
+      fetchDetail(row);
     },
-    [model],
+    [fetchDetail],
   );
 
   const detailActions = [
@@ -112,6 +114,7 @@ export function useLogisticGroupDefaultController({
     fetchDispatchList,
     handleSearch,
     handleRowClicked,
+    handleSubRowClicked,
     detailActions,
   };
 }

@@ -70,6 +70,8 @@ export default function DistanceTransitTime() {
           }}
           onRowClicked={ctrl.handleRowClicked}
           actions={ctrl.mainActions}
+          autoSelectFirstRow
+          rowKeys={["DIV_CD", "FRM_LOC_ID", "TO_LOC_ID"]}
         />
       }
       detail={

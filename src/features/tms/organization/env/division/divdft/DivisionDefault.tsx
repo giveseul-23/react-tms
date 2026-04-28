@@ -59,6 +59,8 @@ export default function TenderReceiveDispatch() {
           columnDefs={MAIN_COLUMN_DEFS}
           rowData={model.gridData.rows}
           onRowClicked={ctrl.handleRowClicked}
+          autoSelectFirstRow
+          rowKeys="CNFG_CD"
         />
       }
       detail={

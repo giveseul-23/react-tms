@@ -28,7 +28,6 @@ export function useDivisionDefaultController({
     (data: any) => {
       model.setGridData(data);
       model.resetSubGrids();
-      fetchDetail(data.rows?.[0]);
     },
     [model],
   );
