@@ -20,7 +20,6 @@ const withSession = (payload: any = {}) => {
 export const menuApi = {
   getMenuConfigList(payload: any) {
     return apiClient.post<commonResponse>(
-      // `/openapina/carrier/getMenuConfigList`,
       `/menuService/searchByReact`,
       withSession({
         MENU_CD: MENU_CD,
@@ -32,7 +31,7 @@ export const menuApi = {
   /** 메뉴경로(폴더) 추가 — LEAFYN = "N" */
   insertMenuFolder(payload: any) {
     return apiClient.post(
-      `/openapina/carrier/insertMenuFolder`,
+      `/menuService/insertMenuFolder`,
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -43,7 +42,7 @@ export const menuApi = {
   /** 메뉴(화면) 추가 — LEAFYN = "Y" */
   insertMenuItem(payload: any) {
     return apiClient.post(
-      `/openapina/carrier/insertMenuItem`,
+      `/menuService/insertMenuItem`,
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -54,7 +53,7 @@ export const menuApi = {
   /** 메뉴 저장 (수정된 행 일괄 저장) */
   saveMenuConfig(payload: any[]) {
     return apiClient.post(
-      `/openapina/carrier/saveMenuConfig`,
+      `/menuService/save`,
       withSession({
         MENU_CD: MENU_CD,
         ...payload,

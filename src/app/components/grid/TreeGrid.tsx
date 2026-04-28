@@ -511,7 +511,6 @@ function TreeGridInner<TRow extends TreeRow>(
             getRowId={getRowId}
             onGridReady={handleGridReady}
             suppressMovableColumns
-            suppressCellFocus
             suppressHorizontalScroll
             // ── 행 선택 처리 ──────────────────────────────────────────────
             rowSelection={{ mode: "multiRow", enableClickSelection: false }}
