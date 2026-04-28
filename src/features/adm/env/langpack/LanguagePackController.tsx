@@ -6,6 +6,7 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
@@ -40,14 +41,6 @@ export function useLanguagePackController({
     [model],
   );
 
-  // ── 셀 변경 시 _isDirty 플래그 부여 ──────────────────────────
-  const handleCellValueChanged = useCallback((params: any) => {
-    if (!params.data._isNew) {
-      params.data._isDirty = true;
-      params.data.EDIT_STS = "U";
-    }
-  }, []);
-
   // ── 추가 ─────────────────────────────────────────────────────
   const handleAdd = useCallback(() => {
     model.setGridData((prev) => ({
@@ -59,7 +52,6 @@ export function useLanguagePackController({
           MSG_DESC: "",
           APPLCODE: "",
           EDIT_STS: "I",
-          _isNew: true,
         },
         ...prev.rows,
       ],
@@ -76,7 +68,6 @@ export function useLanguagePackController({
     const clones = sources.map((r: any) => ({
       ...r,
       EDIT_STS: "I",
-      _isNew: true,
       _selected: false,
       CRE_USR_ID: "",
       CRE_DTTM: "",
@@ -91,11 +82,9 @@ export function useLanguagePackController({
     }));
   }, [model]);
 
-  // ── 저장: _isNew / _isDirty 행만 서버로 ──────────────────────
+  // ── 저장: EDIT_STS 가 마킹된 행만 서버로 ──────────────────────
   const handleSave = useCallback(() => {
-    const saveRows = model.gridData.rows.filter(
-      (r: any) => r._isNew || r._isDirty,
-    );
+    const saveRows = dirtyRows(model.gridData.rows);
     if (saveRows.length === 0) return;
 
     handleApi(langPackApi.saveLangPack(saveRows), "저장되었습니다.").then(
@@ -125,7 +114,6 @@ export function useLanguagePackController({
   return {
     fetchLanguagePackList,
     handleSearch,
-    handleCellValueChanged,
     mainActions,
   };
 }

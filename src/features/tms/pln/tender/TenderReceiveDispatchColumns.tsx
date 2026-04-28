@@ -13,6 +13,7 @@
 //  View/Controller 에서 import 해서 사용합니다.
 // ──────────────────────────────────────────────────────────────────
 import { DISPATCH_STATUS_COLOR_MAP } from "./TenderReceiveDispatchModel";
+import { isInserted } from "@/app/components/grid/gridCommon";
 
 // ── 메인 그리드 컬럼 (센차: TenderReceiveDispatchMain columns) ────
 // codeMap: 공통코드 → 명칭 변환용 (센차: bindStore + displayField)
@@ -67,7 +68,7 @@ export const MAIN_COLUMN_DEFS = (
     headerName: "LBL_REG_RATE",
     field: "RATE",
     type: "numeric",
-    editable: (params: any) => params.data._isNew,
+    editable: (params: any) => isInserted(params.data),
     valueSetter: (params: any) => {
       params.data.RATE = params.newValue;
       return true;
@@ -161,7 +162,7 @@ export const AP_SETL_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
     filter: false,
     floatingFilter: false,
     cellRenderer: (params: any) => {
-      if (!params.data._isNew) return null;
+      if (!isInserted(params.data)) return null;
       return (
         <div className="flex items-center justify-start h-full">
           <input

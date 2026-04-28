@@ -7,6 +7,8 @@
 //
 // 주의: className / DOM 구조 / onChange 동작은 기존 코드와 byte-for-byte 동일하게 유지.
 
+import { ROW_STATUS, isInserted, markDelete } from "./gridCommon";
+
 export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   type: "text",
   headerName: "LBL_DELETE",
@@ -15,17 +17,37 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   filter: false,
   floatingFilter: false,
   cellRenderer: (params: any) => {
-    if (!params.data._isNew) return null;
+    if (!params.data) return null;
     return (
       <div className="flex items-center justify-center h-full">
         <input
           type="checkbox"
           className="ag-input-field-input ag-checkbox-input"
+          checked={params.data.EDIT_STS === ROW_STATUS.DELETE}
           onChange={(e) => {
             if (e.target.checked) {
-              setRowData?.((prev: any) =>
-                prev.filter((row: any) => row !== params.data),
-              );
+              if (isInserted(params.data)) {
+                // INSERT 행은 서버에 안 보냈으니 그냥 제거
+                setRowData?.((prev: any) =>
+                  prev.filter((row: any) => row !== params.data),
+                );
+              } else {
+                // 기존 행은 EDIT_STS = "D" 로 마킹 (배열엔 남김)
+                markDelete(params.data);
+                params.api?.refreshCells({
+                  rowNodes: [params.node],
+                  force: true,
+                });
+              }
+            } else {
+              // 체크 해제 → DELETE 마킹 취소 (UPDATE 로 강등)
+              if (params.data.EDIT_STS === ROW_STATUS.DELETE) {
+                params.data.EDIT_STS = ROW_STATUS.UPDATE;
+                params.api?.refreshCells({
+                  rowNodes: [params.node],
+                  force: true,
+                });
+              }
             }
           }}
         />
@@ -34,11 +56,39 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   },
 });
 
+const ROW_STATUS_LABEL_MAP: Record<string, { label: string; cls: string }> = {
+  I: {
+    label: "추가",
+    cls: "bg-blue-100 text-blue-700 border border-blue-200",
+  },
+  U: {
+    label: "수정",
+    cls: "bg-yellow-100 text-yellow-800 border border-yellow-200",
+  },
+  D: {
+    label: "삭제",
+    cls: "bg-red-100 text-red-700 border border-red-200",
+  },
+};
+
 export const makeRowStatusColumn = (overrides: Record<string, any> = {}) => ({
   type: "text",
   headerName: "LBL_ROW_STATUS",
   field: "EDIT_STS",
   width: 80,
+  cellRenderer: (params: any) => {
+    const cfg = ROW_STATUS_LABEL_MAP[params.value];
+    if (!cfg) return null;
+    return (
+      <span
+        className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium leading-none ${cfg.cls}`}
+      >
+        {cfg.label}
+      </span>
+    );
+  },
+  cellStyle: { textAlign: "center" },
+  headerClass: "ag-header-center",
   ...overrides,
 });
 

@@ -25,6 +25,7 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -195,7 +196,7 @@ export function useShpmMgmtController({
           rows: [
             ...prev.rows,
             {
-              _isNew: true, // 저장 대상 식별 플래그
+              EDIT_STS: "I", // 저장 대상 식별 플래그
               XXX_CD: model.selectedHeaderRowRef.current.XXX_CD,
             },
           ],
@@ -204,9 +205,7 @@ export function useShpmMgmtController({
     }),
     makeSaveAction({
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         shpmMgmtApi.save(saveRows).then(() => searchRef.current?.());
       },
@@ -216,9 +215,7 @@ export function useShpmMgmtController({
   const detail02Actions = [
     makeSaveAction({
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         shpmMgmtApi.save(saveRows).then(() => searchRef.current?.());
       },

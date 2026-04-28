@@ -29,6 +29,7 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch } from "@/views/common/common";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { dirtyRows, isInserted } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import TenderRejectPopup from "@/features/tms/pln/tender/popup/TenderRejectPopup";
@@ -119,7 +120,7 @@ export function useTenderReceiveDispatchController({
             ? {
                 ...row,
                 [params.colDef.field]: params.newValue,
-                ...(!row._isNew && { _isDirty: true }),
+                ...(!isInserted(row) && { EDIT_STS: "U" }),
               }
             : row,
         ),
@@ -364,7 +365,7 @@ export function useTenderReceiveDispatchController({
                 model.setSubApSetlRowData((prev: any) => [
                   ...prev,
                   {
-                    _isNew: true,
+                    EDIT_STS: "I",
                     DSPCH_NO: model.selectedHeaderRowRef.current.DSPCH_NO,
                     CHG_CD: row.CODE,
                     CHG_NM: row.NAME,
@@ -386,9 +387,7 @@ export function useTenderReceiveDispatchController({
       onClick: () => {
         model.apSetlGridRef.current?.api?.stopEditing();
 
-        const saveRows = model.subApSetlRowDataRef.current.filter(
-          (sub: any) => sub._isNew || sub._isDirty,
-        );
+        const saveRows = dirtyRows(model.subApSetlRowDataRef.current);
         if (saveRows.length === 0) return;
 
         handleApi(

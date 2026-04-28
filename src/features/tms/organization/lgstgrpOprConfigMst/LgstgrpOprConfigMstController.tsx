@@ -8,6 +8,7 @@ import {
   makeAddAction,
   makeSaveAction,
 } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -170,7 +171,7 @@ export function useLgstgrpOprConfigMstController({
           rows: [
             ...prev.rows,
             {
-              _isNew: true,
+              EDIT_STS: "I",
               LGST_GRP_OPR_CONFIG_CD: "",
               LGST_GRP_OPR_CONFIG_NM: "",
             },
@@ -181,9 +182,7 @@ export function useLgstgrpOprConfigMstController({
     }),
     makeSaveAction({
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         handleApi(
           lgstgrpOprConfigApi.saveConfig(saveRows),
@@ -201,7 +200,7 @@ export function useLgstgrpOprConfigMstController({
         model.setDetailData((prev: any) => [
           ...prev,
           {
-            _isNew: true,
+            EDIT_STS: "I",
             LGST_GRP_OPR_CONFIG_CD:
               model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
             LGST_GRP_OPR_CONFIG_DTL_CD: "",
@@ -212,9 +211,7 @@ export function useLgstgrpOprConfigMstController({
     }),
     makeSaveAction({
       onClick: (_e: any) => {
-        const saveRows = (model.detailDataRef.current ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(model.detailDataRef.current);
         if (saveRows.length === 0) return;
         handleApi(
           lgstgrpOprConfigApi.saveConfigDetail(saveRows),
@@ -232,7 +229,7 @@ export function useLgstgrpOprConfigMstController({
         model.setI18nData((prev: any) => [
           ...prev,
           {
-            _isNew: true,
+            EDIT_STS: "I",
             LGST_GRP_OPR_CONFIG_CD:
               model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
             LANG_TP: "",
@@ -243,9 +240,7 @@ export function useLgstgrpOprConfigMstController({
     }),
     makeSaveAction({
       onClick: () => {
-        const saveRows = (model.i18nDataRef.current ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(model.i18nDataRef.current);
         if (saveRows.length === 0) return;
         handleApi(
           lgstgrpOprConfigApi.saveConfigI18n(saveRows),
@@ -267,7 +262,7 @@ export function useLgstgrpOprConfigMstController({
         model.setDetailI18nData((prev: any) => [
           ...prev,
           {
-            _isNew: true,
+            EDIT_STS: "I",
             LGST_GRP_OPR_CONFIG_CD:
               model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
             LGST_GRP_OPR_CONFIG_DTL_CD:
@@ -280,9 +275,7 @@ export function useLgstgrpOprConfigMstController({
     }),
     makeSaveAction({
       onClick: () => {
-        const saveRows = (model.detailI18nDataRef.current ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(model.detailI18nDataRef.current);
         if (saveRows.length === 0) return;
         handleApi(
           lgstgrpOprConfigApi.saveConfigDetailI18n(saveRows),

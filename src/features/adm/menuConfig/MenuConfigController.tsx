@@ -17,6 +17,7 @@ import MenuItemAddPopup, {
 import type { MenuRow } from "./MenuConfig";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { makeSaveAction } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -97,8 +98,8 @@ export function useMenuConfigController({
         USE_YN: data.USE_YN,
         RSRC_CNT: 0,
         isVirtualRoot: false,
-        _isNew: true, // 저장 버튼 클릭 시 신규 식별용
-      } as MenuRow & { _isNew: boolean };
+        EDIT_STS: "I", // 저장 버튼 클릭 시 신규 식별용
+      } as MenuRow & { EDIT_STS: string };
     },
     [model.source],
   );
@@ -207,12 +208,10 @@ export function useMenuConfigController({
       },
     },
 
-    // ── 저장 (_isNew / _isDirty 행만 서버로) ────────────────────
+    // ── 저장 (EDIT_STS 가 마킹된 행만 서버로) ────────────────────
     makeSaveAction({
       onClick: () => {
-        const saveRows = model.source.filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(model.source);
         if (saveRows.length === 0) return;
 
         handleApi(menuApi.saveMenuConfig(saveRows), "저장되었습니다.").then(
@@ -220,7 +219,7 @@ export function useMenuConfigController({
             // 저장 완료 후 플래그 제거
             model.setSource((prev: MenuRow[]) =>
               prev.map((r: any) => {
-                const { _isNew, _isDirty, ...rest } = r;
+                const { EDIT_STS, ...rest } = r;
                 return rest as MenuRow;
               }),
             );

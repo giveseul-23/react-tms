@@ -6,6 +6,7 @@ import {
   LOGISTICS_GROUP_COLUMN_DEFS,
 } from "./OrganizationColumns";
 import { makeCommonActions } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 
 type ControllerProps = {
   model: OrganizationModel;
@@ -60,9 +61,7 @@ export function useOrganizationController({
     add: true,
     save: {
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         organizationApi
           .saveDivision(saveRows)
@@ -81,9 +80,7 @@ export function useOrganizationController({
     add: true,
     save: {
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         organizationApi.saveLogisticsGroup(saveRows).then(() => {});
       },

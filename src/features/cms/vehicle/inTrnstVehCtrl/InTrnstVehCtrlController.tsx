@@ -1,6 +1,6 @@
 // src/views/inTrnstVehCtrl/InTrnstVehCtrlController.tsx
 import { useCallback, MutableRefObject } from "react";
-import { inTrnstVehCtrlApi } from "@/features/cms/inTrnstVehCtrl/inTrnstVehCtrlApi";
+import { inTrnstVehCtrlApi } from "@/features/cms/vehicle/inTrnstVehCtrl/InTrnstVehCtrlApi";
 import { InTrnstVehCtrlModel } from "./InTrnstVehCtrlModel";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 

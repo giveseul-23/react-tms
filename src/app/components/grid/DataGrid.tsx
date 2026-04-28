@@ -12,7 +12,6 @@ import { AgGridReact } from "ag-grid-react";
 import type {
   ColDef,
   ColGroupDef,
-  ValueGetterParams,
   GridReadyEvent,
   FirstDataRenderedEvent,
 } from "ag-grid-community";
@@ -33,7 +32,13 @@ import type { GridPreset, GridTab } from "./types";
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 
 import { Lang } from "@/app/services/common/Lang";
-import { Util } from "@/app/services/common/Util";
+import {
+  processColumnDef,
+  wrapActions,
+  withRowStatusTracking,
+} from "./gridCommon";
+
+// (Note: Util.formatDttm 등 컬럼 변환 관련 유틸은 gridUtils/processColumn 으로 이동.)
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -377,255 +382,17 @@ export default function DataGrid<TRow>({
       ? presets[activeTab].render
       : undefined;
 
-  /** No 컬럼 처리 + 자동 정렬 (숫자=우측, _STS=중앙, 기본=좌측) */
-  const finalColumnDefs = useMemo(() => {
-    // noLang === true 면 원문 그대로, 아니면 Lang.get 적용
-    const translate = (col: any): string =>
-      col?.noLang ? col.headerName : Lang.get(col.headerName);
-
-    // ColGroupDef 의 children 재귀 변환 (noLang / codeKey / Lang.get)
-    const walkChildren = (children: any[] | undefined): any[] | undefined => {
-      if (!Array.isArray(children)) return children;
-      return children.map((child) => {
-        const codeKey = child?.codeKey as string | undefined;
-        const withRenderer =
-          codeKey && !child.cellRenderer
-            ? {
-                ...child,
-                cellRenderer: (params: any) => {
-                  const code = params.value;
-                  const label =
-                    activeCodeMap?.[codeKey]?.[String(code)] ?? code;
-                  return (
-                    <span className={`px-2 py-0.5 rounded-lg text-xs`}>
-                      {label}
-                    </span>
-                  );
-                },
-              }
-            : child;
-        return {
-          ...withRenderer,
-          headerName: translate(withRenderer),
-          children: walkChildren(withRenderer.children),
-        };
-      });
-    };
-
-    // codeKey 가 있는 컬럼에 자동 cellRenderer 주입 (이미 cellRenderer 있으면 유지)
-    const prepared = activeColumnDefs.map((col) => {
-      const codeKey = (col as any).codeKey as string | undefined;
-      if (!codeKey || (col as any).cellRenderer) return col;
-      return {
-        ...col,
-        cellRenderer: (params: any) => {
-          const code = params.value;
-          const label = activeCodeMap?.[codeKey]?.[String(code)] ?? code;
-          return (
-            <span className={`px-2 py-0.5 rounded-lg text-xs`}>{label}</span>
-          );
-        },
-      };
-    });
-
-    return prepared.map((col) => {
-      // align prop → cellStyle.textAlign + headerClass. type 별 기본 정렬을 override.
-      const alignProp = (col as any).align as
-        | "left"
-        | "center"
-        | "right"
-        | undefined;
-      const alignBlock = alignProp
-        ? {
-            cellStyle: { textAlign: alignProp },
-            headerClass: `ag-header-${alignProp}`,
-          }
-        : null;
-
-      // type 미지정 시 "text" 기본값. 마지막 스프레드라 type === "date"/"numeric" 체크를 깨지 않음.
-      const typeBlock = (col as any).type ? {} : { type: "text" };
-
-      if ("headerName" in col && col.headerName === "No") {
-        const maxNum = String(activeRowData.length || 1);
-        const noWidth = Math.max(
-          measureTextWidth("No") + HEADER_PADDING,
-          measureTextWidth(maxNum) + CELL_PADDING,
-        );
-        return {
-          ...col,
-          headerName: "No",
-          width: noWidth,
-          minWidth: noWidth,
-          maxWidth: noWidth,
-          suppressMenu: true,
-          sortable: false,
-          filter: false,
-          floatingFilter: false,
-          getQuickFilterText: () => null,
-          cellStyle: { textAlign: "center" },
-          headerClass: "ag-header-center",
-          valueGetter: (params: ValueGetterParams<TRow>) =>
-            params.node?.rowPinned === "bottom"
-              ? "합계"
-              : (params.node?.rowIndex ?? 0) + 1,
-          ...(alignBlock ?? {}),
-          ...typeBlock,
-        };
-      }
-
-      const translatedChildren = walkChildren((col as any).children);
-
-      if ((col as any).disableMaxWidth === true) {
-        return {
-          ...col,
-          maxWidth: null,
-          headerName: translate(col),
-          ...(translatedChildren ? { children: translatedChildren } : {}),
-          ...(alignBlock ?? {}),
-          ...typeBlock,
-        };
-      }
-
-      const colDef = col as ColDef<TRow>;
-      const field = (colDef.field ?? colDef.colId ?? "") as string;
-
-      // DTTM 필드: 자동 포맷팅 + 정렬.
-      // 정렬 우선순위: align prop > type:"date"/"fieldType":"date" 이면 center > 미지정.
-      // 사용자 cellStyle 의 textAlign 외 속성은 보존.
-      if (field.includes("DTTM")) {
-        const isDateTypedDttm =
-          (colDef as any).type === "date" ||
-          (colDef as any).fieldType === "date";
-        const userDttmCellStyle = (colDef as any).cellStyle;
-        const baseDttmCellStyle =
-          userDttmCellStyle && typeof userDttmCellStyle === "object"
-            ? userDttmCellStyle
-            : {};
-        const finalDttmAlign =
-          alignProp ?? (isDateTypedDttm ? "center" : undefined);
-        const dttmAlignBlock = finalDttmAlign
-          ? {
-              cellStyle: {
-                ...baseDttmCellStyle,
-                textAlign: finalDttmAlign,
-              },
-              headerClass: `ag-header-${finalDttmAlign}`,
-            }
-          : null;
-        return {
-          ...col,
-          headerName: translate(col),
-          valueFormatter: (params: any) => Util.formatDttm(params.value),
-          ...(translatedChildren ? { children: translatedChildren } : {}),
-          ...(dttmAlignBlock ?? {}),
-          ...typeBlock,
-        };
-      }
-
-      // type: "date" 선언 컬럼 → 가운데 정렬 + 'YYYY-MM-DD' 슬라이스.
-      // 정렬 우선순위: align prop > type "date" 기본(center).
-      // 사용자 cellStyle 의 textAlign 외 속성(color, font 등)은 보존.
-      // (DB 타입이 TIMESTAMP 라 풀 타임스탬프로 내려오는 경우 대응)
-      // legacy: fieldType: "date" 도 호환 (폼용 fieldType 과 혼용되던 관례)
-      if (
-        (colDef as any).type === "date" ||
-        (colDef as any).fieldType === "date"
-      ) {
-        const userDateCellStyle = (colDef as any).cellStyle;
-        const baseDateCellStyle =
-          userDateCellStyle && typeof userDateCellStyle === "object"
-            ? userDateCellStyle
-            : {};
-        const finalDateAlign = alignProp ?? "center";
-        return {
-          ...col,
-          headerName: translate(col),
-          valueFormatter: (params: any) => {
-            const v = params?.value;
-            if (v == null || v === "") return "";
-            return String(v).slice(0, 10);
-          },
-          cellStyle: { ...baseDateCellStyle, textAlign: finalDateAlign },
-          headerClass: `ag-header-${finalDateAlign}`,
-          ...(translatedChildren ? { children: translatedChildren } : {}),
-          ...typeBlock,
-        };
-      }
-
-      // type: "numeric" 선언 컬럼 → 무조건 우측 정렬 + decimalPlaces 지정 시 소수점 자리수 고정.
-      // 사용자 cellStyle 의 textAlign 외 속성(color, font 등)은 보존.
-      // legacy: dataType/cellDataType: "number" 도 호환
-      const isNumericType =
-        (colDef as any).type === "numeric" ||
-        (colDef as any).dataType === "number" ||
-        (colDef as any).cellDataType === "number";
-      if (isNumericType) {
-        const decimalPlaces = (colDef as any).decimalPlaces as
-          | number
-          | undefined;
-        const hasCustomFormatter =
-          typeof (colDef as any).valueFormatter === "function";
-        const numberFormatter =
-          !hasCustomFormatter && typeof decimalPlaces === "number"
-            ? (params: any) => {
-                const v = params?.value;
-                if (v == null || v === "") return "";
-                const n =
-                  typeof v === "number"
-                    ? v
-                    : Number(String(v).replaceAll(",", ""));
-                if (Number.isNaN(n)) return String(v);
-                return n.toLocaleString(undefined, {
-                  minimumFractionDigits: decimalPlaces,
-                  maximumFractionDigits: decimalPlaces,
-                });
-              }
-            : undefined;
-        // 정렬 우선순위: align prop > type "numeric" 기본(right).
-        // 사용자 cellStyle 의 textAlign 외 속성은 보존.
-        const userCellStyle = (colDef as any).cellStyle;
-        const baseCellStyle =
-          userCellStyle && typeof userCellStyle === "object"
-            ? userCellStyle
-            : {};
-        const finalAlign = alignProp ?? "right";
-        return {
-          ...col,
-          headerName: translate(col),
-          cellStyle: { ...baseCellStyle, textAlign: finalAlign },
-          headerClass: `ag-header-${finalAlign}`,
-          ...(numberFormatter ? { valueFormatter: numberFormatter } : {}),
-          ...(translatedChildren ? { children: translatedChildren } : {}),
-          ...typeBlock,
-        };
-      }
-
-      // _STS 로 끝나는 상태값 컬럼 → 중앙 정렬 (이미 cellStyle/type/align 지정된 경우 존중)
-      if (
-        !(colDef as any).cellStyle &&
-        !(colDef as any).type &&
-        !alignProp &&
-        field.endsWith("_STS")
-      ) {
-        return {
-          ...col,
-          headerName: translate(col),
-          cellStyle: { textAlign: "center" },
-          headerClass: "ag-header-center",
-          ...(translatedChildren ? { children: translatedChildren } : {}),
-          ...typeBlock,
-        };
-      }
-
-      return {
-        ...col,
-        headerName: translate(col),
-        ...(translatedChildren ? { children: translatedChildren } : {}),
-        ...(alignBlock ?? {}),
-        ...typeBlock,
-      };
-    });
-  }, [activeColumnDefs, activeCodeMap]);
+  /** 컬럼 변환은 gridCommon.processColumnDef 가 처리. (Lang/align/type/DTTM/date/numeric/_STS) */
+  const finalColumnDefs = useMemo(
+    () =>
+      activeColumnDefs.map((col) =>
+        processColumnDef(col, {
+          codeMap: activeCodeMap,
+          rowCountForNo: activeRowData.length,
+        }),
+      ),
+    [activeColumnDefs, activeCodeMap, activeRowData.length],
+  );
 
   // ─── 오토사이징 핸들러 ────────────────────────────────────────────────────────
 
@@ -942,29 +709,10 @@ export default function DataGrid<TRow>({
 
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const wrappedActions = useMemo(() => {
-    return activeActions?.map((action) => {
-      if (action.type === "button") {
-        return {
-          ...action,
-          label: Lang.get(action.label),
-          onClick: () => action.onClick?.({ data: selectedRows }),
-        };
-      }
-      if (action.type === "group" || action.type === "dropdown") {
-        return {
-          ...action,
-          label: action.label ? Lang.get(action.label) : action.label,
-          items: action.items.map((item) => ({
-            ...item,
-            label: Lang.get(item.label),
-            onClick: () => item.onClick?.({ data: selectedRows }),
-          })),
-        };
-      }
-      return action;
-    });
-  }, [activeActions, selectedRows]);
+  const wrappedActions = useMemo(
+    () => wrapActions(activeActions, selectedRows),
+    [activeActions, selectedRows],
+  );
 
   const wrappedActionsWithTrack = useMemo(() => {
     if (!onTrack) return wrappedActions;
@@ -1044,7 +792,7 @@ export default function DataGrid<TRow>({
       if (!e.data) return;
       onRowDoubleClicked?.(e.data);
     },
-    onCellValueChanged: activeOnCellValueChanged,
+    onCellValueChanged: withRowStatusTracking(activeOnCellValueChanged),
     rowSelection:
       rowSelectionProp === "single"
         ? { mode: "singleRow" as const, enableClickSelection: true }

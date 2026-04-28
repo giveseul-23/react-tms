@@ -61,7 +61,6 @@ export default function LanguagePack() {
             searchRef.current?.(page);
           }}
           actions={ctrl.mainActions}
-          onCellValueChanged={ctrl.handleCellValueChanged}
         />
       }
     />

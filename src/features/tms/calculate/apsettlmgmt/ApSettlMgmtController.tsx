@@ -3,6 +3,7 @@ import { apSettlMgmtApi } from "./ApSettlMgmtApi";
 import { ApSettlMgmtModel } from "./ApSettlMgmtModel";
 import { MAIN_COLUMN_DEFS } from "./ApSettlMgmtColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -151,9 +152,7 @@ export function useApSettlMgmtController({
       key: "BTB_SAVE",
       label: "BTB_SAVE",
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         apSettlMgmtApi.save(saveRows).then(() => searchRef.current?.());
       },
@@ -203,9 +202,7 @@ export function useApSettlMgmtController({
       key: "BTN_SAVE",
       label: "BTN_SAVE",
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         apSettlMgmtApi
           .saveCostCenter(saveRows)
@@ -241,9 +238,7 @@ export function useApSettlMgmtController({
       key: "BTN_SAVE",
       label: "BTN_SAVE",
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         apSettlMgmtApi.save(saveRows).then(() => searchRef.current?.());
       },

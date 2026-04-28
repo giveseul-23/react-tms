@@ -6,6 +6,7 @@ import {
   makeCommonActions,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -159,9 +160,7 @@ export function useLocationController({
       add: true,
       save: {
         onClick: (e: any) => {
-          const saveRows = (e.data ?? []).filter(
-            (r: any) => r._isNew || r._isDirty,
-          );
+          const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
           locationApi.save(saveRows).then(() => searchRef.current?.());
         },

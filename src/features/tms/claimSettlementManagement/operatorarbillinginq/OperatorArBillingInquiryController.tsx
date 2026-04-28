@@ -3,6 +3,7 @@ import { operatorArBillingInquiryApi } from "./OperatorArBillingInquiryApi";
 import { OperatorArBillingInquiryModel } from "./OperatorArBillingInquiryModel";
 import { MAIN_COLUMN_DEFS } from "./OperatorArBillingInquiryColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { UseSearchConditionReturn } from "@/hooks/useSearchCondition";
 
@@ -186,9 +187,7 @@ export function useOperatorArBillingInquiryController({
       key: "BTN_SAVE",
       label: "BTN_SAVE",
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         operatorArBillingInquiryApi
           .saveBillingItem(saveRows)

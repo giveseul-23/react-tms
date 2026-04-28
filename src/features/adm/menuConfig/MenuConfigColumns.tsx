@@ -63,6 +63,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "URL",
     minWidth: 200,
     flex: 1,
+    editable: true,
     cellStyle: { color: "#555", fontSize: 10 },
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },

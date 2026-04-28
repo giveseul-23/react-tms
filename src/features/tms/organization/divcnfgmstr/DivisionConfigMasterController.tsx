@@ -7,6 +7,7 @@ import {
   makeAddAction,
   makeSaveAction,
 } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -143,7 +144,7 @@ export function useDivisionConfigMasterController({
           rows: [
             ...prev.rows,
             {
-              _isNew: true,
+              EDIT_STS: "I",
               LGST_GRP_OPR_CONFIG_CD: "",
               LGST_GRP_OPR_CONFIG_NM: "",
             },
@@ -154,9 +155,7 @@ export function useDivisionConfigMasterController({
     }),
     makeSaveAction({
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         handleApi(
           divisionConfigMasterApi.saveConfig(saveRows),
@@ -174,7 +173,7 @@ export function useDivisionConfigMasterController({
         model.setDetailData((prev: any) => [
           ...prev,
           {
-            _isNew: true,
+            EDIT_STS: "I",
             LGST_GRP_OPR_CONFIG_CD:
               model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
             LGST_GRP_OPR_CONFIG_DTL_CD: "",
@@ -185,9 +184,7 @@ export function useDivisionConfigMasterController({
     }),
     makeSaveAction({
       onClick: (_e: any) => {
-        const saveRows = (model.detailDataRef.current ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(model.detailDataRef.current);
         if (saveRows.length === 0) return;
         handleApi(
           divisionConfigMasterApi.saveConfigDetail(saveRows),
@@ -205,7 +202,7 @@ export function useDivisionConfigMasterController({
         model.setI18nData((prev: any) => [
           ...prev,
           {
-            _isNew: true,
+            EDIT_STS: "I",
             LGST_GRP_OPR_CONFIG_CD:
               model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
             LANG_TP: "",
@@ -216,9 +213,7 @@ export function useDivisionConfigMasterController({
     }),
     makeSaveAction({
       onClick: () => {
-        const saveRows = (model.i18nDataRef.current ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(model.i18nDataRef.current);
         if (saveRows.length === 0) return;
         handleApi(
           divisionConfigMasterApi.saveConfigI18n(saveRows),
@@ -240,7 +235,7 @@ export function useDivisionConfigMasterController({
         model.setDetailI18nData((prev: any) => [
           ...prev,
           {
-            _isNew: true,
+            EDIT_STS: "I",
             LGST_GRP_OPR_CONFIG_CD:
               model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
             LGST_GRP_OPR_CONFIG_DTL_CD:
@@ -253,9 +248,7 @@ export function useDivisionConfigMasterController({
     }),
     makeSaveAction({
       onClick: () => {
-        const saveRows = (model.detailI18nDataRef.current ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(model.detailI18nDataRef.current);
         if (saveRows.length === 0) return;
         handleApi(
           divisionConfigMasterApi.saveConfigDetailI18n(saveRows),

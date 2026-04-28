@@ -12,6 +12,7 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 
 type ControllerProps = {
   model: TempOilPriceModel;
@@ -100,7 +101,7 @@ export function useTempOilPriceController({
           rows: [
             ...prev.rows,
             {
-              _isNew: true,
+              EDIT_STS: "I",
               LGST_GRP_CD: model.selectedHeaderRowRef.current.LGST_GRP_CD,
               LGST_GRP_NM: model.selectedHeaderRowRef.current.LGST_GRP_NM,
             },
@@ -110,9 +111,7 @@ export function useTempOilPriceController({
     }),
     makeSaveAction({
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         tempOilPriceApi.save(saveRows).then(() => searchRef.current?.());
       },

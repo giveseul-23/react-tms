@@ -7,6 +7,7 @@ import {
   buildMonthlyColumns,
 } from "./ApMonthlyManagementColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -115,9 +116,7 @@ export function useApMonthlyManagementController({
       key: "BTN_SAVE",
       label: "BTN_SAVE",
       onClick: (e: any) => {
-        const saveRows = (e.data ?? []).filter(
-          (r: any) => r._isNew || r._isDirty,
-        );
+        const saveRows = dirtyRows(e.data);
         if (saveRows.length === 0) return;
         apMonthlyManagementApi.save(saveRows).then(() => searchRef.current?.());
       },
