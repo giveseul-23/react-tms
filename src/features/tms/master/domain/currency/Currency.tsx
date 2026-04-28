@@ -50,7 +50,7 @@ export default function Currency() {
       grid={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS()}
           codeMap={model.codeMap}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
@@ -58,7 +58,7 @@ export default function Currency() {
           pageSize={model.pageSize}
           onPageSizeChange={model.setPageSize}
           onPageChange={(page) => {
-            searchRef.current?.(page, false);
+            searchRef.current?.(page);
           }}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.handleRowClicked}

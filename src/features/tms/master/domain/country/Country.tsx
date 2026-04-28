@@ -68,7 +68,7 @@ export default function Country() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS()}
           codeMap={model.codeMap}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
@@ -77,7 +77,7 @@ export default function Country() {
           onPageSizeChange={model.setPageSize}
           onPageChange={(page) => {
             model.resetSubGrids();
-            searchRef.current?.(page, false);
+            searchRef.current?.(page);
           }}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.handleRowClicked}
@@ -110,14 +110,14 @@ export default function Country() {
                   >
                     <DataGrid
                       layoutType="plain"
-                      columnDefs={STATE_COLUMN_DEFS}
+                      columnDefs={STATE_COLUMN_DEFS()}
                       rowData={model.subStateRowData}
                       actions={ctrl.cityActions}
                       onRowClicked={ctrl.handleSubRowClicked}
                     />
                     <DataGrid
                       layoutType="plain"
-                      columnDefs={CITY_COLUMN_DEFS}
+                      columnDefs={CITY_COLUMN_DEFS()}
                       rowData={model.subCityRowData}
                       actions={ctrl.cityActions}
                       subTitle="LBL_CITY"
@@ -125,7 +125,7 @@ export default function Country() {
                   </SplitPane>
                 ),
               },
-              ZIP: { columnDefs: ZIP_COLUMN_DEFS, actions: ctrl.zipActions },
+              ZIP: { columnDefs: ZIP_COLUMN_DEFS(), actions: ctrl.zipActions },
             }}
             rowData={{
               ZIP: model.subZipRowData,

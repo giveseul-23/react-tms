@@ -1,6 +1,6 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
-export const MAIN_COLUMN_DEFS = [
+export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { headerName: "No" },
   {
     type: "text",
@@ -8,20 +8,17 @@ export const MAIN_COLUMN_DEFS = [
     field: "CURR_CD",
   },
   { type: "text", headerName: "LBL_CURRENCY_NAME", field: "CURR_NM" },
-  { type: "text", headerName: "LBL_DECIMAL_PRECISION", field: "DECIMAL_PRECISION" },
+  {
+    type: "numeric",
+    headerName: "LBL_DECIMAL_PRECISION",
+    field: "DECIMAL_PRECISION",
+  },
   {
     type: "text",
     headerName: "LBL_CURR_RDNG_RCD",
     field: "CURR_RDNG_RCD",
     codeKey: "currRdngRcd",
   },
-  { type: "text", headerName: "LBL_DSPL_ORD", field: "DSPLY_SEQ" },
-  ...makeAuditColumns({
-    delete: true,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  { type: "numeric", headerName: "LBL_DSPL_ORD", field: "DSPLY_SEQ" },
+  ...standardAudit(setGridData),
 ];
