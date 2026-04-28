@@ -106,9 +106,9 @@ export function useLanguagePackController({
 
   const mainActions = [
     {
-      type: "button" as const,
-      key: "복사",
-      label: "복사",
+      type: "button",
+      key: "BTN_COPY",
+      label: "BTN_COPY",
       onClick: handleCopy,
     },
     makeAddAction({ onClick: handleAdd }),

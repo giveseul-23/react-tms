@@ -69,8 +69,8 @@ export function useDistanceTransitTimeController({
   const mainActions = [
     {
       type: "button",
-      key: "거리시간계산이동거리적용",
-      label: "거리/시간계산(이동거리적용)",
+      key: "BTN_CALC_DTTO",
+      label: "BTN_CALC_DTTO",
       onClick: () =>
         doAction(() =>
           distanceTransitTimeApi.calculateWithMoveDistance(filtersRef.current),
@@ -78,8 +78,8 @@ export function useDistanceTransitTimeController({
     },
     {
       type: "button",
-      key: "거리시간계산이동거리미적용",
-      label: "거리/시간계산(이동거리미적용)",
+      key: "BTN_CALC_DTTO_NS",
+      label: "BTN_CALC_DTTO_NS",
       onClick: () =>
         doAction(() =>
           distanceTransitTimeApi.calculateWithoutMoveDistance(
@@ -89,8 +89,8 @@ export function useDistanceTransitTimeController({
     },
     {
       type: "button",
-      key: "이동거리적용",
-      label: "이동거리적용",
+      key: "BTN_APPLY_TMAP_DIST",
+      label: "BTN_APPLY_TMAP_DIST",
       onClick: () =>
         doAction(() =>
           distanceTransitTimeApi.applyMoveDistance(filtersRef.current),
@@ -98,8 +98,8 @@ export function useDistanceTransitTimeController({
     },
     {
       type: "button",
-      key: "경로탐색옵션변경",
-      label: "경로탐색옵션변경",
+      key: "BTN_ROUTE_SEARCH_OPTION",
+      label: "BTN_ROUTE_SEARCH_OPTION",
       onClick: () =>
         doAction(() =>
           distanceTransitTimeApi.changeRouteOption(filtersRef.current),
@@ -130,8 +130,8 @@ export function useDistanceTransitTimeController({
   const historyActions = [
     {
       type: "button",
-      key: "거리시간계산이동거리적용",
-      label: "거리/시간계산(이동거리적용)",
+      key: "BTN_CALC_DTTO",
+      label: "BTN_CALC_DTTO",
       onClick: () =>
         doAction(() =>
           distanceTransitTimeApi.calculateWithMoveDistance(filtersRef.current),
@@ -139,8 +139,8 @@ export function useDistanceTransitTimeController({
     },
     {
       type: "button",
-      key: "거리시간계산이동거리미적용",
-      label: "거리/시간계산(이동거리미적용)",
+      key: "BTN_CALC_DTTO_NS",
+      label: "BTN_CALC_DTTO_NS",
       onClick: () =>
         doAction(() =>
           distanceTransitTimeApi.calculateWithoutMoveDistance(
@@ -150,14 +150,14 @@ export function useDistanceTransitTimeController({
     },
     {
       type: "button",
-      key: "추가",
-      label: "추가",
+      key: "BTN_ADD",
+      label: "BTN_ADD",
       onClick: () => {},
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,

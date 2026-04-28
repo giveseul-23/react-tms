@@ -154,8 +154,8 @@ export function useLgstgrpOprConfigMstController({
   const configActions = [
     {
       type: "button" as const,
-      key: "동기화",
-      label: "동기화",
+      key: "LBL_SYNC",
+      label: "LBL_SYNC",
       onClick: () => {
         handleApi(lgstgrpOprConfigApi.syncConfig({}), "동기화되었습니다.").then(
           () => searchRef.current?.(),

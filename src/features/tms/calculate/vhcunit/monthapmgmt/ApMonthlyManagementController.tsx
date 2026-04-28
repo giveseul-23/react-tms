@@ -87,8 +87,8 @@ export function useApMonthlyManagementController({
   const mainActions = [
     {
       type: "button",
-      key: "월실적생성",
-      label: "월실적생성",
+      key: "BTN_CREATE_MONTHLY_AP",
+      label: "BTN_CREATE_MONTHLY_AP",
       onClick: () =>
         doAction(() =>
           apMonthlyManagementApi.createMonthlyResult(filtersRef.current),
@@ -96,8 +96,8 @@ export function useApMonthlyManagementController({
     },
     {
       type: "button",
-      key: "월실적취소",
-      label: "월실적취소",
+      key: "BTN_CANCEL_MONTHLY_AP",
+      label: "BTN_CANCEL_MONTHLY_AP",
       onClick: () =>
         doAction(() =>
           apMonthlyManagementApi.cancelMonthlyResult(filtersRef.current),
@@ -105,14 +105,14 @@ export function useApMonthlyManagementController({
     },
     {
       type: "dropdown",
-      key: "수기비용엑셀양식다운로드",
-      label: "수기비용엑셀양식다운로드",
+      key: "BTN_MANUAL_RATE_MGMT",
+      label: "BTN_MANUAL_RATE_MGMT",
       items: [],
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -123,15 +123,15 @@ export function useApMonthlyManagementController({
     },
     {
       type: "button",
-      key: "확정",
-      label: "확정",
+      key: "BTN_AP_SETTLEMENT_CONFIRM",
+      label: "BTN_AP_SETTLEMENT_CONFIRM",
       onClick: () =>
         doAction(() => apMonthlyManagementApi.confirm(filtersRef.current)),
     },
     {
       type: "button",
-      key: "확정취소",
-      label: "확정취소",
+      key: "BTN_AP_SETTLEMENT_CONFIRM_CANCEL",
+      label: "BTN_AP_SETTLEMENT_CONFIRM_CANCEL",
       onClick: () =>
         doAction(() =>
           apMonthlyManagementApi.cancelConfirm(filtersRef.current),

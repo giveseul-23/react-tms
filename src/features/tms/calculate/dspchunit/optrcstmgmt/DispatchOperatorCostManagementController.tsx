@@ -102,8 +102,8 @@ export function useDispatchOperatorCostController({
   const mainActions = [
     {
       type: "button",
-      key: "계약변경",
-      label: "계약변경",
+      key: "BTN_RATESHOP",
+      label: "BTN_RATESHOP",
       onClick: () =>
         doAction(() =>
           dispatchOperatorCostApi.changeContract(filtersRef.current),
@@ -111,8 +111,8 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "button",
-      key: "비용계산",
-      label: "비용계산",
+      key: "BTN_RATING",
+      label: "BTN_RATING",
       onClick: () =>
         doAction(() =>
           dispatchOperatorCostApi.calculateCost(filtersRef.current),
@@ -120,8 +120,8 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "button",
-      key: "일괄거리조정",
-      label: "일괄거리조정",
+      key: "BTN_ADJ_DISIT",
+      label: "BTN_ADJ_DISIT",
       onClick: () =>
         doAction(() =>
           dispatchOperatorCostApi.adjustBulkDistance(filtersRef.current),
@@ -129,8 +129,8 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "button",
-      key: "이동거리재계산",
-      label: "이동거리재계산",
+      key: "BTN_RECALC_DISTANCE",
+      label: "BTN_RECALC_DISTANCE",
       onClick: () =>
         doAction(() =>
           dispatchOperatorCostApi.recalculateMoveDistance(filtersRef.current),
@@ -138,20 +138,20 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "dropdown",
-      key: "일마감",
-      label: "일마감",
+      key: "BTN_DLY_SETL",
+      label: "BTN_DLY_SETL",
       items: [],
     },
     {
       type: "dropdown",
-      key: "비용확정",
-      label: "비용확정",
+      key: "BTN_CONFIRM_COST",
+      label: "BTN_CONFIRM_COST",
       items: [],
     },
     {
       type: "button",
-      key: "정산정보삭제",
-      label: "정산정보삭제",
+      key: "BTN_DELETE_AP",
+      label: "BTN_DELETE_AP",
       onClick: () =>
         doAction(() =>
           dispatchOperatorCostApi.deleteSettlement(filtersRef.current),
@@ -159,8 +159,8 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -173,21 +173,21 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "button",
-      key: "마감생성",
-      label: "마감생성",
+      key: "BTN_AP_SETTLEMENT_CREATE",
+      label: "BTN_AP_SETTLEMENT_CREATE",
       onClick: () =>
         doAction(() => dispatchOperatorCostApi.createClose(filtersRef.current)),
     },
     {
       type: "dropdown",
-      key: "메모",
-      label: "메모",
+      key: "BTN_MEMO",
+      label: "BTN_MEMO",
       items: [],
     },
     {
       type: "dropdown",
-      key: "운임엑셀업로드",
-      label: "운임엑셀업로드",
+      key: "BTN_FREIGHT_EXCEL_UP",
+      label: "BTN_FREIGHT_EXCEL_UP",
       items: [],
     },
     makeExcelGroupAction({
@@ -201,8 +201,8 @@ export function useDispatchOperatorCostController({
   const costDetailActions = [
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -215,8 +215,8 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "button",
-      key: "증빙문서첨부",
-      label: "증빙문서첨부",
+      key: "BTN_ATTACH_DOC",
+      label: "BTN_ATTACH_DOC",
       onClick: () => {},
     },
   ];
@@ -224,8 +224,8 @@ export function useDispatchOperatorCostController({
   const waypointActions = [
     {
       type: "button",
-      key: "정산경로추가",
-      label: "정산경로추가",
+      key: "BTN_ADD_FI_ROUTE",
+      label: "BTN_ADD_FI_ROUTE",
       onClick: () => {
         if (!model.selectedHeaderRowRef.current) return;
         doAction(() =>
@@ -237,8 +237,8 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "button",
-      key: "경로복구",
-      label: "경로복구",
+      key: "BTN_ROLLBACK_FI_ROUTE",
+      label: "BTN_ROLLBACK_FI_ROUTE",
       onClick: () => {
         if (!model.selectedHeaderRowRef.current) return;
         doAction(() =>
@@ -248,12 +248,22 @@ export function useDispatchOperatorCostController({
         );
       },
     },
-    { type: "button", key: "조정상", label: "조정(▲)", onClick: () => {} },
-    { type: "button", key: "조정하", label: "조정(▼)", onClick: () => {} },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_ADJUST_STOP_SEQ_PLUS",
+      label: "BTN_ADJUST_STOP_SEQ_PLUS",
+      onClick: () => {},
+    },
+    {
+      type: "button",
+      key: "BTN_ADJUST_STOP_SEQ_MINUS",
+      label: "BTN_ADJUST_STOP_SEQ_MINUS",
+      onClick: () => {},
+    },
+    {
+      type: "button",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -269,8 +279,8 @@ export function useDispatchOperatorCostController({
   const evidenceActions = [
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -283,8 +293,8 @@ export function useDispatchOperatorCostController({
     },
     {
       type: "button",
-      key: "첨부파일다운로드",
-      label: "첨부파일 다운로드",
+      key: "LBL_FILE_DOWNLOAD",
+      label: "LBL_FILE_DOWNLOAD",
       onClick: () => {},
     },
   ];

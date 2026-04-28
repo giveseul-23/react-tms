@@ -132,8 +132,8 @@ export function useTenderReceiveDispatchController({
     // 센차: BTN_TENDER_ACCEPT handler:'onTenderAccepted'
     {
       type: "button",
-      key: "+ 추적",
-      label: "+ 추적",
+      key: "LBL_AR_TRACE",
+      label: "LBL_AR_TRACE",
       onClick: (e: any) => {
         if (!e.data?.length) return;
         model.setTrackRows(e.data);
@@ -142,8 +142,8 @@ export function useTenderReceiveDispatchController({
     },
     {
       type: "button",
-      key: "운송요청수락",
-      label: "운송요청수락",
+      key: "BTN_TENDER_ACCEPT",
+      label: "BTN_TENDER_ACCEPT",
       onClick: (e: any) => {
         if (!guardHasData(e.data)) return;
         handleApi(tenderApi.onTenderAccepted(e.data), "저장되었습니다.");
@@ -152,12 +152,12 @@ export function useTenderReceiveDispatchController({
     // 센차: BTN_TENDER_REJECT handler:'onTenderRejected' → openWindow RejectReasonPop
     {
       type: "button",
-      key: "운송요청거절",
-      label: "운송요청거절",
+      key: "BTN_TENDER_REJECT",
+      label: "BTN_TENDER_REJECT",
       onClick: (e: any) => {
         if (!guardHasData(e.data)) return;
         openPopup({
-          title: "운송요청 거절",
+          title: "BTN_TENDER_REJECT",
           content: (
             <TenderRejectPopup
               reasons={[]}
@@ -180,14 +180,14 @@ export function useTenderReceiveDispatchController({
     // 센차: BTN_VEHICLE_CHANGE menu 그룹 → 지입차/모바일가입용차/임시용차
     {
       type: "group",
-      key: "차량변경",
-      label: "차량변경",
+      key: "BTN_VEHICLE_CHANGE",
+      label: "BTN_VEHICLE_CHANGE",
       items: [
         // 센차: BTN_CHANGE_REG_DED_VEH handler:'onChangeRegVeh'
         {
           type: "button",
-          key: "지입차",
-          label: "지입차",
+          key: "BTN_CHANGE_REG_DED_VEH",
+          label: "BTN_CHANGE_REG_DED_VEH",
           onClick: (e: any) => {
             if (!guardHasData(e.data)) return;
             openPopup({
@@ -214,12 +214,12 @@ export function useTenderReceiveDispatchController({
         // 센차: BTN_CHANGE_REG_MBL_VEH handler:'onVehicleChange'
         {
           type: "button",
-          key: "모바일가입용차",
-          label: "모바일가입용차",
+          key: "BTN_CHANGE_REG_MBL_VEH",
+          label: "BTN_CHANGE_REG_MBL_VEH",
           onClick: (e: any) => {
             if (!guardHasData(e.data)) return;
             openPopup({
-              title: "임시차량변경",
+              title: "BTN_CHANGE_REG_MBL_VEH",
               content: (
                 <TemporaryVehicleChangePopup
                   initialValues={{
@@ -243,12 +243,12 @@ export function useTenderReceiveDispatchController({
         // 센차: BTN_REG_TEMP_VEH handler:'onChangeTempVeh'
         {
           type: "button",
-          key: "임시용차",
-          label: "임시용차",
+          key: "BTN_REG_TEMP_VEH",
+          label: "BTN_REG_TEMP_VEH",
           onClick: (e: any) => {
             if (!guardHasData(e.data)) return;
             openPopup({
-              title: "임시용차차량변경",
+              title: "BTN_REG_TEMP_VEH",
               content: (
                 <VehicleAssignPopup
                   onApply={(ie: any) => {
@@ -272,16 +272,16 @@ export function useTenderReceiveDispatchController({
     // 센차: BTN_VEHICLE_CANCEL handler:'onVehicleCancel'
     {
       type: "button",
-      key: "운송요청수락취소",
-      label: "운송요청수락취소",
+      key: "BTN_VEHICLE_CANCEL",
+      label: "BTN_VEHICLE_CANCEL",
       onClick: (e: any) =>
         handleApi(tenderApi.onVehicleCancel(e.data), "저장되었습니다."),
     },
     // 센차: BTN_SEND_SMS_FOR_INSTALL handler:'sendSMSForAppInstall' → openWindow SendSMSPop
     {
       type: "button",
-      key: "앱설치SMS",
-      label: "앱설치SMS",
+      key: "BTN_SEND_SMS_FOR_INSTALL",
+      label: "BTN_SEND_SMS_FOR_INSTALL",
       onClick: (e: any) => {
         if (!guardHasData(e.data)) return;
         openPopup({
@@ -311,8 +311,8 @@ export function useTenderReceiveDispatchController({
       items: [
         {
           type: "button",
-          key: "운송비양식다운로드",
-          label: "운송비양식다운로드",
+          key: "BTN_CARRIER_RATE_EXCEL_FORM_DOWN",
+          label: "BTN_CARRIER_RATE_EXCEL_FORM_DOWN",
           onClick: () => {
             downExcelSearch({
               columns: MAIN_COLUMN_DEFS({}),
@@ -350,7 +350,7 @@ export function useTenderReceiveDispatchController({
     {
       type: "button",
       key: "운송비추가",
-      label: "추가",
+      label: "BTN_ADD",
       onClick: () => {
         if (!guardHasData(model.selectedHeaderRowRef.current)) return;
         openPopup({
@@ -381,7 +381,7 @@ export function useTenderReceiveDispatchController({
     {
       type: "button",
       key: "운송비저장",
-      label: "저장",
+      label: "BTN_SAVE",
       onClick: () => {
         model.apSetlGridRef.current?.api?.stopEditing();
 

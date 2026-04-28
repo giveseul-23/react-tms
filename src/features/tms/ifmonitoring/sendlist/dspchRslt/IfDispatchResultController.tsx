@@ -33,8 +33,8 @@ export function useIfDispatchResultController({
   const mainActions = [
     {
       type: "button",
-      key: "재처리",
-      label: "재처리",
+      key: "BTN_REPRO",
+      label: "BTN_REPRO",
       onClick: () =>
         ifDispatchResultApi
           .reprocess(filtersRef.current)

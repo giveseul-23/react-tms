@@ -28,6 +28,7 @@ import { AgGridReact } from "ag-grid-react";
 import type { ColDef, GetRowIdParams, GridReadyEvent } from "ag-grid-community";
 
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
+import { Lang } from "@/app/services/common/Lang";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -264,14 +265,17 @@ function TreeGridInner<TRow extends TreeRow>(
       if (action.type === "button") {
         return {
           ...action,
+          label: Lang.get(action.label),
           onClick: () => action.onClick?.({ data: selectedRows }),
         };
       }
       if (action.type === "group") {
         return {
           ...action,
+          label: action.label ? Lang.get(action.label) : action.label,
           items: action.items.map((item) => ({
             ...item,
+            label: Lang.get(item.label),
             onClick: () => item.onClick?.({ data: selectedRows }),
           })),
         };

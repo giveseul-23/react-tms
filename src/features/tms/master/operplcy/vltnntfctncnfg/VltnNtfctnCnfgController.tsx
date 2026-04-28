@@ -116,8 +116,8 @@ export function useVltnNtfctnCnfgController({
   const mainActions = [
     {
       type: "button",
-      key: "계약서복사",
-      label: "계약서복사",
+      key: "BUTTON_COPY_CONTRACT",
+      label: "BUTTON_COPY_CONTRACT",
       onClick: () => {},
     },
     makeSaveAction(),
@@ -126,8 +126,8 @@ export function useVltnNtfctnCnfgController({
   const detailActions = [
     {
       type: "button",
-      key: "템플릿복사",
-      label: "템플릿복사",
+      key: "BTN_TEMPLATE_COPY",
+      label: "BTN_TEMPLATE_COPY",
       onClick: () => {},
     },
     makeAddAction(),
@@ -137,8 +137,8 @@ export function useVltnNtfctnCnfgController({
   const channelActions = [
     {
       type: "button",
-      key: "템플릿수정",
-      label: "템플릿수정",
+      key: "BTN_TEMPLATE_UPDATE",
+      label: "BTN_TEMPLATE_UPDATE",
       onClick: () => {},
     },
     makeAddAction(),
@@ -148,8 +148,8 @@ export function useVltnNtfctnCnfgController({
   const targetActions = [
     {
       type: "button",
-      key: "사용자등록",
-      label: "사용자등록",
+      key: "LBL_USR_REGI",
+      label: "LBL_USR_REGI",
       onClick: () => {},
     },
     makeAddAction(),

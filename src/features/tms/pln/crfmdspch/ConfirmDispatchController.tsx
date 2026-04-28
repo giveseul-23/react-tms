@@ -95,34 +95,34 @@ export function useConfirmDispatchController({
   const mainActions = [
     {
       type: "button",
-      key: "입차시각",
-      label: "입차시각",
+      key: "BTN_SP_START_WORK",
+      label: "BTN_SP_START_WORK",
       onClick: () =>
         doAction(() => confirmDispatchApi.startArrival(filtersRef.current)),
     },
     {
       type: "dropdown",
-      key: "상차요청",
-      label: "상차요청",
+      key: "BTN_DISPATCH_LOADING_REQUEST",
+      label: "BTN_DISPATCH_LOADING_REQUEST",
       items: [],
     },
     {
       type: "dropdown",
-      key: "차량변경",
-      label: "차량변경",
+      key: "BTN_VEHICLE_CHANGE",
+      label: "BTN_VEHICLE_CHANGE",
       items: [],
     },
     {
       type: "button",
-      key: "배차확정",
-      label: "배차확정",
+      key: "BTN_DISPATCH_CONFIRM",
+      label: "BTN_DISPATCH_CONFIRM",
       onClick: () =>
         doAction(() => confirmDispatchApi.confirmDispatch(filtersRef.current)),
     },
     {
       type: "button",
-      key: "배차확정취소",
-      label: "배차확정취소",
+      key: "BTN_DISPATCH_CONFIRM_CANCEL",
+      label: "BTN_DISPATCH_CONFIRM_CANCEL",
       onClick: () =>
         doAction(() =>
           confirmDispatchApi.cancelConfirmDispatch(filtersRef.current),
@@ -130,14 +130,14 @@ export function useConfirmDispatchController({
     },
     {
       type: "dropdown",
-      key: "상차의뢰서",
-      label: "상차의뢰서",
+      key: "LBL_LOADING_ORDER",
+      label: "LBL_LOADING_ORDER",
       items: [],
     },
     {
       type: "dropdown",
-      key: "인수증발급",
-      label: "인수증발급",
+      key: "LBL_POD_PRINT",
+      label: "LBL_POD_PRINT",
       items: [],
     },
     makeExcelGroupAction({
@@ -151,8 +151,8 @@ export function useConfirmDispatchController({
   const orderActions = [
     {
       type: "button",
-      key: "실적입력",
-      label: "실적입력",
+      key: "LBL_INPT_PRFR",
+      label: "LBL_INPT_PRFR",
       onClick: () =>
         doAction(() => confirmDispatchApi.inputActual(filtersRef.current)),
     },

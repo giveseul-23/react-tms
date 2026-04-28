@@ -54,8 +54,8 @@ export function useInTrnstVehCtrlController({
   const mainActions = [
     {
       type: "button",
-      key: "새로고침",
-      label: "새로고침",
+      key: "BTN_SP_SIGNATURE_REFRESH",
+      label: "BTN_SP_SIGNATURE_REFRESH",
       onClick: () => searchRef.current?.(),
     },
     {

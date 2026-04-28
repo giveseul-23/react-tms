@@ -104,23 +104,23 @@ export function useMenuConfigController({
 
   const mainActions = [
     {
-      type: "button" as const,
-      key: "모두펼치기",
-      label: "모두펼치기",
+      type: "button",
+      key: "BTN_EXPAND_ALL",
+      label: "BTN_EXPAND_ALL",
       onClick: () => treeGridRef.current?.expandAll(),
     },
     {
-      type: "button" as const,
-      key: "모두접기",
-      label: "모두접기",
+      type: "button",
+      key: "BTN_FOLD_ALL",
+      label: "BTN_FOLD_ALL",
       onClick: () => treeGridRef.current?.collapseAll(),
     },
 
     // ── 메뉴경로 추가 (폴더, LEAFYN=N) ──────────────────────────
     {
-      type: "button" as const,
-      key: "메뉴경로추가",
-      label: "메뉴경로추가",
+      type: "button",
+      key: "BTN_ADD_MENU_PATH",
+      label: "BTN_ADD_MENU_PATH",
       onClick: () => {
         // 행 미선택 시 차단
         if (!model.selectedRowRef.current) {
@@ -163,9 +163,9 @@ export function useMenuConfigController({
 
     // ── 메뉴 추가 (화면, LEAFYN=Y) ──────────────────────────────
     {
-      type: "button" as const,
-      key: "메뉴추가",
-      label: "메뉴추가",
+      type: "button",
+      key: "BTN_ADD_MENU",
+      label: "BTN_ADD_MENU",
       onClick: () => {
         // 행 미선택 시 차단
         if (!model.selectedRowRef.current) {
@@ -230,12 +230,12 @@ export function useMenuConfigController({
 
     // ── 엑셀 ────────────────────────────────────────────────────
     {
-      type: "group" as const,
-      key: "엑셀",
-      label: "엑셀",
+      type: "group",
+      key: "BTN_EXCEL",
+      label: "BTN_EXCEL",
       items: [
         {
-          type: "button" as const,
+          type: "button",
           key: "조회된모든데이터다운로드",
           label: "조회된모든데이터다운로드",
           onClick: () => {
@@ -247,7 +247,7 @@ export function useMenuConfigController({
           },
         },
         {
-          type: "button" as const,
+          type: "button",
           key: "보이는데이터다운로드",
           label: "보이는데이터다운로드",
           onClick: () => {

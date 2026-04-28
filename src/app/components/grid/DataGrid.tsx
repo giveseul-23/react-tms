@@ -844,14 +844,17 @@ export default function DataGrid<TRow>({
       if (action.type === "button") {
         return {
           ...action,
+          label: Lang.get(action.label),
           onClick: () => action.onClick?.({ data: selectedRows }),
         };
       }
       if (action.type === "group") {
         return {
           ...action,
+          label: Lang.get(action.label),
           items: action.items.map((item) => ({
             ...item,
+            label: Lang.get(item.label),
             onClick: () => item.onClick?.({ data: selectedRows }),
           })),
         };
@@ -865,7 +868,7 @@ export default function DataGrid<TRow>({
     const trackAction: ActionItem = {
       type: "button",
       key: "__track__",
-      label: "+ 추적",
+      label: "LBL_AR_TRACE",
       onClick: () => {
         const content = onTrack(selectedRows);
         setTrackContent(content);

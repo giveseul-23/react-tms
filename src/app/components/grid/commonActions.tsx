@@ -48,16 +48,16 @@ export type ExcelGroupActionConfig = {
 
 export const makeAddAction = (config: AddActionConfig = {}) => ({
   type: "button" as const,
-  key: config.key ?? "추가",
-  label: config.label ?? "추가",
+  key: config.key ?? "BTN_ADD",
+  label: config.label ?? "BTN_ADD",
   onClick: config.onClick ?? ((_e: any) => {}),
   ...(config.disabled !== undefined && { disabled: config.disabled }),
 });
 
 export const makeSaveAction = (config: SaveActionConfig = {}) => ({
   type: "button" as const,
-  key: config.key ?? "저장",
-  label: config.label ?? "저장",
+  key: config.key ?? "BTN_SAVE",
+  label: config.label ?? "BTN_SAVE",
   onClick: config.onClick ?? ((_e: any) => {}),
   ...(config.disabled !== undefined && { disabled: config.disabled }),
 });
@@ -97,8 +97,8 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
 
   return {
     type: "group" as const,
-    key: config.key ?? "엑셀",
-    label: config.label ?? "엑셀",
+    key: config.key ?? "BTN_EXCEL",
+    label: config.label ?? "BTN_EXCEL",
     items,
     ...(config.disabled !== undefined && { disabled: config.disabled }),
   };

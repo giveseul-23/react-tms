@@ -71,8 +71,8 @@ export function useDepartArrivalManagementController({
   const mainActions = [
     {
       type: "button",
-      key: "인수증조회",
-      label: "인수증조회",
+      key: "BTN_SHOW_POD",
+      label: "BTN_SHOW_POD",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.inquireReceipt(filtersRef.current),
@@ -80,8 +80,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "배차운행경로관제",
-      label: "배차운행경로관제",
+      key: "BTN_DRIVE_HISTORY",
+      label: "BTN_DRIVE_HISTORY",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.controlRoute(filtersRef.current),
@@ -89,8 +89,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "입자시각",
-      label: "입자시각",
+      key: "BTN_SP_START_WORK",
+      label: "BTN_SP_START_WORK",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.startLoading(filtersRef.current),
@@ -98,8 +98,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "운송출발",
-      label: "운송출발",
+      key: "BTN_START_TRANSPORTATION",
+      label: "BTN_START_TRANSPORTATION",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.startTransport(filtersRef.current),
@@ -107,8 +107,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "운송출발취소",
-      label: "운송출발취소",
+      key: "BTN_RETURN_TO_CONFIRM",
+      label: "BTN_RETURN_TO_CONFIRM",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.cancelTransport(filtersRef.current),
@@ -116,8 +116,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "배송완료운행종료취소",
-      label: "배송완료/운행종료취소",
+      key: "BTN_DLVRY_CONFIRM/OFF_CANCEL",
+      label: "BTN_DLVRY_CONFIRM/OFF_CANCEL",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.cancelDeliveryComplete(filtersRef.current),
@@ -125,8 +125,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "운행종료",
-      label: "운행종료",
+      key: "LBL_DRV_OFF",
+      label: "LBL_DRV_OFF",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.completeTransport(filtersRef.current),
@@ -134,8 +134,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "재설정",
-      label: "재설정",
+      key: "BTN_RE_SET",
+      label: "BTN_RE_SET",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.resetDispatch(filtersRef.current),
@@ -143,8 +143,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -166,14 +166,14 @@ export function useDepartArrivalManagementController({
   const stopoverActions = [
     {
       type: "button",
-      key: "경로조회지도",
-      label: "경로조회(지도)",
+      key: "BTN_SHOW_ROUTE",
+      label: "BTN_SHOW_ROUTE",
       onClick: () => {},
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -186,8 +186,8 @@ export function useDepartArrivalManagementController({
     },
     {
       type: "button",
-      key: "P박스회수확정",
-      label: "P박스회수확정",
+      key: "BTN_SAVE_CNTR",
+      label: "BTN_SAVE_CNTR",
       onClick: () =>
         doAction(() =>
           departArrivalManagementApi.confirmPBoxRecovery({

@@ -132,8 +132,8 @@ export function useApDailyManagementController({
   const mainActions = [
     {
       type: "button",
-      key: "일일실적생성",
-      label: "일일실적생성",
+      key: "BTN_CREATE_DAILY_EXPENSE",
+      label: "BTN_CREATE_DAILY_EXPENSE",
       onClick: () =>
         doAction(() =>
           apDailyManagementApi.createDailyResult(filtersRef.current),
@@ -141,8 +141,8 @@ export function useApDailyManagementController({
     },
     {
       type: "button",
-      key: "일일실적취소",
-      label: "일일실적취소",
+      key: "BTN_CANCEL_DAILY_EXPENSE",
+      label: "BTN_CANCEL_DAILY_EXPENSE",
       onClick: () =>
         doAction(() =>
           apDailyManagementApi.cancelDailyResult(filtersRef.current),
@@ -150,15 +150,15 @@ export function useApDailyManagementController({
     },
     {
       type: "button",
-      key: "일마감",
-      label: "일마감",
+      key: "BTN_DLY_SETL",
+      label: "BTN_DLY_SETL",
       onClick: () =>
         doAction(() => apDailyManagementApi.closeDaily(filtersRef.current)),
     },
     {
       type: "button",
-      key: "일마감취소",
-      label: "일마감취소",
+      key: "BTN_DLY_SETL_CANCEL",
+      label: "BTN_DLY_SETL_CANCEL",
       onClick: () =>
         doAction(() =>
           apDailyManagementApi.cancelDailyClose(filtersRef.current),
@@ -166,32 +166,32 @@ export function useApDailyManagementController({
     },
     {
       type: "dropdown",
-      key: "유류비관리",
-      label: "유류비관리",
+      key: "BTN_FUEL_MGMT",
+      label: "BTN_FUEL_MGMT",
       items: [],
     },
     {
       type: "dropdown",
-      key: "비용등록관리",
-      label: "비용등록관리",
+      key: "BTN_REGI_RATE_MGMT",
+      label: "BTN_REGI_RATE_MGMT",
       items: [],
     },
     {
       type: "dropdown",
-      key: "메모",
-      label: "메모",
+      key: "BTN_MEMO",
+      label: "BTN_MEMO",
       items: [],
     },
     {
       type: "dropdown",
-      key: "재계산",
-      label: "재계산",
+      key: "BTN_RE_CALC",
+      label: "BTN_RE_CALC",
       items: [],
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -202,8 +202,8 @@ export function useApDailyManagementController({
     },
     {
       type: "dropdown",
-      key: "운임엑셀업로드",
-      label: "운임엑셀업로드",
+      key: "BTN_FREIGHT_EXCEL_UP",
+      label: "BTN_FREIGHT_EXCEL_UP",
       items: [],
     },
     makeExcelGroupAction({

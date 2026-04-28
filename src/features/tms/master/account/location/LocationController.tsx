@@ -130,20 +130,30 @@ export function useLocationController({
   );
 
   const mainActions = [
-    { type: "button", key: "지도보기", label: "지도보기", onClick: () => {} },
     {
       type: "button",
-      key: "위경도수정",
-      label: "위경도수정",
+      key: "BTN_VIEW_BY_MAP",
+      label: "BTN_VIEW_BY_MAP",
       onClick: () => {},
     },
     {
       type: "button",
-      key: "지정차량등록",
-      label: "지정차량 등록",
+      key: "BTN_EDIT_LATLON",
+      label: "BTN_EDIT_LATLON",
       onClick: () => {},
     },
-    { type: "button", key: "권역등록", label: "권역등록", onClick: () => {} },
+    {
+      type: "button",
+      key: "BTN_ADD_ASSIGNED_VEHICLE",
+      label: "BTN_ADD_ASSIGNED_VEHICLE",
+      onClick: () => {},
+    },
+    {
+      type: "button",
+      key: "BTN_ADD_ZONE",
+      label: "BTN_ADD_ZONE",
+      onClick: () => {},
+    },
     ...makeCommonActions({
       add: true,
       save: {

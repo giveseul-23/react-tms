@@ -51,8 +51,8 @@ export function useIfDeliveryDocumentController({
   const mainActions = [
     {
       type: "button",
-      key: "재처리",
-      label: "재처리",
+      key: "BTN_REPRO",
+      label: "BTN_REPRO",
       onClick: () => {
         ifDeliveryDocumentApi
           .reprocess(filtersRef.current)

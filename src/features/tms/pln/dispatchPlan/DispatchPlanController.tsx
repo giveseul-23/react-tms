@@ -102,27 +102,27 @@ export function useDispatchPlanController({
   const mainActions = [
     {
       type: "group",
-      key: "배차생성및취소",
-      label: "배차생성및취소",
+      key: "BTN_DISPATCH_CREATE_DELETE",
+      label: "BTN_DISPATCH_CREATE_DELETE",
       items: [
         {
           type: "button",
-          key: "배차생성",
-          label: "배차생성",
+          key: "BTN_DISPATCH_CREATE",
+          label: "BTN_DISPATCH_CREATE",
           onClick: () => {},
         },
         {
           type: "button",
-          key: "배차취소",
-          label: "배차취소",
+          key: "BTN_DISPATCH_CANCEL",
+          label: "BTN_DISPATCH_CANCEL",
           onClick: () => {},
         },
       ],
     },
     {
       type: "group",
-      key: "배차조정",
-      label: "배차조정",
+      key: "BTN_PLAN_REVIEW",
+      label: "BTN_PLAN_REVIEW",
       items: [
         { type: "button", key: "합차", label: "합차", onClick: () => {} },
         { type: "button", key: "분차", label: "분차", onClick: () => {} },
@@ -130,17 +130,27 @@ export function useDispatchPlanController({
     },
     {
       type: "group",
-      key: "차량변경",
-      label: "차량변경",
+      key: "BTN_VEHICLE_CHANGE",
+      label: "BTN_VEHICLE_CHANGE",
       items: [
-        { type: "button", key: "지입차", label: "지입차", onClick: () => {} },
-        { type: "button", key: "용차", label: "용차", onClick: () => {} },
+        {
+          type: "button",
+          key: "BTN_CHANGE_REG_DED_VEH",
+          label: "BTN_CHANGE_REG_DED_VEH",
+          onClick: () => {},
+        },
+        {
+          type: "button",
+          key: "LBL_CONTRACTED_VEHICLE",
+          label: "LBL_CONTRACTED_VEHICLE",
+          onClick: () => {},
+        },
       ],
     },
     {
       type: "group",
-      key: "메모",
-      label: "메모",
+      key: "BTN_MEMO",
+      label: "BTN_MEMO",
       items: [
         {
           type: "button",
@@ -158,8 +168,8 @@ export function useDispatchPlanController({
     },
     {
       type: "group",
-      key: "정보조회",
-      label: "정보조회",
+      key: "BTN_INFO_SHOW",
+      label: "BTN_INFO_SHOW",
       items: [
         {
           type: "button",
@@ -171,13 +181,13 @@ export function useDispatchPlanController({
     },
     {
       type: "group",
-      key: "계획확정",
-      label: "계획확정",
+      key: "BTN_CONFIRM_PLANNED",
+      label: "BTN_CONFIRM_PLANNED",
       items: [
         {
           type: "button",
-          key: "확정",
-          label: "확정",
+          key: "BTN_CONFIRM",
+          label: "BTN_CONFIRM",
           onClick: (e: any) => {
             if (!guardHasData(e.data)) return;
             handleApi(
@@ -209,8 +219,8 @@ export function useDispatchPlanController({
   const stopActions = [
     {
       type: "button",
-      key: "ETA 예측",
-      label: "ETA 예측",
+      key: "BTN_PREDICT_ETA",
+      label: "BTN_PREDICT_ETA",
       onClick: () => {
         if (!model.selectedHeaderRow) return;
         handleApi(
@@ -223,8 +233,8 @@ export function useDispatchPlanController({
     },
     {
       type: "button",
-      key: "ETA 계산",
-      label: "ETA 계산",
+      key: "BTN_CALCULATE_ETA",
+      label: "BTN_CALCULATE_ETA",
       onClick: () => {
         if (!model.selectedHeaderRow) return;
         handleApi(
@@ -237,12 +247,22 @@ export function useDispatchPlanController({
     },
     {
       type: "button",
-      key: "상하차분할",
-      label: "상하차분할",
+      key: "BTN_SPLIT_STOP",
+      label: "BTN_SPLIT_STOP",
       onClick: () => {},
     },
-    { type: "button", key: "조정▲", label: "조정▲", onClick: () => {} },
-    { type: "button", key: "조정▼", label: "조정▼", onClick: () => {} },
+    {
+      type: "button",
+      key: "BTN_ADJUST_STOP_SEQ_PLUS",
+      label: "BTN_ADJUST_STOP_SEQ_PLUS",
+      onClick: () => {},
+    },
+    {
+      type: "button",
+      key: "BTN_ADJUST_STOP_SEQ_MINUS",
+      label: "BTN_ADJUST_STOP_SEQ_MINUS",
+      onClick: () => {},
+    },
     {
       type: "button",
       key: "순서저장",
@@ -269,26 +289,31 @@ export function useDispatchPlanController({
   const unallocOrderActions = [
     {
       type: "button",
-      key: "조회",
+      key: "BTN_SEARCH",
       label: model.unallocSearching ? "조회중..." : "조회",
       disabled: model.unallocSearching,
       onClick: handleUnallocOrderSearch,
     },
-    { type: "button", key: "주문할당", label: "주문할당", onClick: () => {} },
+    {
+      type: "button",
+      key: "BTN_ASSIGN_SHIPMENT",
+      label: "BTN_ASSIGN_SHIPMENT",
+      onClick: () => {},
+    },
   ];
 
   // ── SUB 공통 액션 (상품라인분할 / 상품수량분할) ─────────────
   const allocSubActions = [
     {
       type: "button",
-      key: "상품라인분할",
-      label: "상품라인분할",
+      key: "BTN_ITEM_LINE_SPLIT",
+      label: "BTN_ITEM_LINE_SPLIT",
       onClick: () => {},
     },
     {
       type: "button",
-      key: "상품수량분할",
-      label: "상품수량분할",
+      key: "BTN_ITEM_QTY_SPLIT",
+      label: "BTN_ITEM_QTY_SPLIT",
       onClick: () => {},
     },
   ];
@@ -296,14 +321,14 @@ export function useDispatchPlanController({
   const unallocSubActions = [
     {
       type: "button",
-      key: "상품라인분할",
-      label: "상품라인분할",
+      key: "BTN_ITEM_LINE_SPLIT",
+      label: "BTN_ITEM_LINE_SPLIT",
       onClick: () => {},
     },
     {
       type: "button",
-      key: "상품수량분할",
-      label: "상품수량분할",
+      key: "BTN_ITEM_QTY_SPLIT",
+      label: "BTN_ITEM_QTY_SPLIT",
       onClick: () => {},
     },
   ];

@@ -23,7 +23,9 @@ export function useOperatorArBillingInquiryController({
   //   - transformParams 가 AR_FROM_DT / AR_TO_DT 로 리네임 + 하이픈 제거
   const fetchList = useCallback(
     (params: Record<string, unknown>) =>
-      operatorArBillingInquiryApi.getList(searchCondition.transformParams(params)),
+      operatorArBillingInquiryApi.getList(
+        searchCondition.transformParams(params),
+      ),
     [searchCondition],
   );
 
@@ -82,11 +84,11 @@ export function useOperatorArBillingInquiryController({
   );
 
   const mainActions = [
-    { type: "dropdown", key: "추적", label: "추적", items: [] },
+    { type: "dropdown", key: "LBL_AR_TRACE", label: "LBL_AR_TRACE", items: [] },
     {
       type: "button",
-      key: "계약변경",
-      label: "계약변경",
+      key: "BTN_RATESHOP",
+      label: "BTN_RATESHOP",
       onClick: () =>
         doAction(() =>
           operatorArBillingInquiryApi.changeContract(filtersRef.current),
@@ -94,8 +96,8 @@ export function useOperatorArBillingInquiryController({
     },
     {
       type: "button",
-      key: "매출재계산",
-      label: "매출재계산",
+      key: "LBL_AR_SALES_CALC",
+      label: "LBL_AR_SALES_CALC",
       onClick: () =>
         doAction(() =>
           operatorArBillingInquiryApi.recalculateSales(filtersRef.current),
@@ -103,12 +105,12 @@ export function useOperatorArBillingInquiryController({
     },
     {
       type: "dropdown",
-      key: "일마감",
-      label: "일마감",
+      key: "BTN_DLY_SETL",
+      label: "BTN_DLY_SETL",
       items: [
         {
-          key: "일마감",
-          label: "일마감",
+          key: "BTN_DLY_SETL",
+          label: "BTN_DLY_SETL",
           onClick: () =>
             doAction(() =>
               operatorArBillingInquiryApi.dailyClose(filtersRef.current),
@@ -118,12 +120,12 @@ export function useOperatorArBillingInquiryController({
     },
     {
       type: "dropdown",
-      key: "매출확정",
-      label: "매출확정",
+      key: "LBL_AR_SALES_CONFIRM",
+      label: "LBL_AR_SALES_CONFIRM",
       items: [
         {
-          key: "매출확정",
-          label: "매출확정",
+          key: "LBL_AR_SALES_CONFIRM",
+          label: "LBL_AR_SALES_CONFIRM",
           onClick: () =>
             doAction(() =>
               operatorArBillingInquiryApi.confirmSales(filtersRef.current),
@@ -133,8 +135,8 @@ export function useOperatorArBillingInquiryController({
     },
     {
       type: "button",
-      key: "정산문서취소",
-      label: "정산문서취소",
+      key: "LBL_AR_DELETE_SETTLEMENT_INFO",
+      label: "LBL_AR_DELETE_SETTLEMENT_INFO",
       onClick: () =>
         doAction(() =>
           operatorArBillingInquiryApi.cancelSettlementDoc(filtersRef.current),
@@ -142,14 +144,14 @@ export function useOperatorArBillingInquiryController({
     },
     {
       type: "dropdown",
-      key: "메모",
-      label: "메모",
+      key: "BTN_MEMO",
+      label: "BTN_MEMO",
       items: [],
     },
     {
       type: "dropdown",
-      key: "매출엑셀업로드",
-      label: "매출엑셀업로드",
+      key: "LBL_AR_SALES_EXCEL_UPLOAD",
+      label: "LBL_AR_SALES_EXCEL_UPLOAD",
       items: [],
     },
     makeExcelGroupAction({
@@ -163,8 +165,8 @@ export function useOperatorArBillingInquiryController({
   const billingItemActions = [
     {
       type: "button",
-      key: "계산결과추적",
-      label: "계산결과추적",
+      key: "LBL_AR_CALC_RESULT_TRACE",
+      label: "LBL_AR_CALC_RESULT_TRACE",
       onClick: () =>
         doAction(() =>
           operatorArBillingInquiryApi.traceCalculation({
@@ -174,14 +176,14 @@ export function useOperatorArBillingInquiryController({
     },
     {
       type: "button",
-      key: "추가",
-      label: "추가",
+      key: "BTN_ADD",
+      label: "BTN_ADD",
       onClick: () => {},
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,

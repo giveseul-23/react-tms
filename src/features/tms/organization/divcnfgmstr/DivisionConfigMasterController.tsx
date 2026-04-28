@@ -153,8 +153,8 @@ export function useDivisionConfigMasterController({
   const configActions = [
     {
       type: "button" as const,
-      key: "동기화",
-      label: "동기화",
+      key: "LBL_SYNC",
+      label: "LBL_SYNC",
       onClick: () => {
         handleApi(
           divisionConfigMasterApi.syncConfig({}),

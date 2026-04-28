@@ -115,40 +115,40 @@ export function useApSettlMgmtController({
   const mainActions = [
     {
       type: "button",
-      key: "마감생성",
-      label: "마감생성",
+      key: "BTN_AP_SETTLEMENT_CREATE",
+      label: "BTN_AP_SETTLEMENT_CREATE",
       onClick: () =>
         doAction(() => apSettlMgmtApi.createClose(filtersRef.current)),
     },
     {
       type: "button",
-      key: "마감취소",
-      label: "마감취소",
+      key: "BTN_AP_SETTLEMENT_DELETE",
+      label: "BTN_AP_SETTLEMENT_DELETE",
       onClick: () =>
         doAction(() => apSettlMgmtApi.cancelClose(filtersRef.current)),
     },
     {
       type: "dropdown",
-      key: "SAP전송",
-      label: "SAP전송",
+      key: "BTN_SEND_AP_SETL",
+      label: "BTN_SEND_AP_SETL",
       items: [],
     },
     {
       type: "dropdown",
-      key: "SAP전송취소",
-      label: "SAP전송취소",
+      key: "BTN_SEND_CNCL_AP_SETL",
+      label: "BTN_SEND_CNCL_AP_SETL",
       items: [],
     },
     {
       type: "dropdown",
-      key: "배부관리",
-      label: "배부관리",
+      key: "BTN_MNG_CST_DIST",
+      label: "BTN_MNG_CST_DIST",
       items: [],
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTB_SAVE",
+      label: "BTB_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -159,8 +159,8 @@ export function useApSettlMgmtController({
     },
     {
       type: "button",
-      key: "증빙문서첨부",
-      label: "증빙문서첨부",
+      key: "BTN_ATTACH_DOC",
+      label: "BTN_ATTACH_DOC",
       onClick: () => {},
     },
     makeExcelGroupAction({
@@ -186,8 +186,8 @@ export function useApSettlMgmtController({
   const costCenterActions = [
     {
       type: "button",
-      key: "계정추가",
-      label: "계정추가",
+      key: "BTN_COST_ACCOUNT_ADD",
+      label: "BTN_COST_ACCOUNT_ADD",
       onClick: () => {
         if (!model.selectedHeaderRowRef.current) return;
         doAction(() =>
@@ -199,8 +199,8 @@ export function useApSettlMgmtController({
     },
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -237,8 +237,8 @@ export function useApSettlMgmtController({
   const evidenceActions = [
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
@@ -249,8 +249,8 @@ export function useApSettlMgmtController({
     },
     {
       type: "button",
-      key: "첨부파일다운로드",
-      label: "첨부파일 다운로드",
+      key: "LBL_FILE_DOWNLOAD",
+      label: "LBL_FILE_DOWNLOAD",
       onClick: () => {},
     },
   ];

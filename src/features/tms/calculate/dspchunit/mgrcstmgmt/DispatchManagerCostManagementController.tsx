@@ -73,8 +73,8 @@ export function useDispatchManagerCostController({
   const mainActions = [
     {
       type: "button",
-      key: "운영자확정취소",
-      label: "운영자확정취소",
+      key: "BTN_RATE_OP_CONFIRM_CANCEL",
+      label: "BTN_RATE_OP_CONFIRM_CANCEL",
       onClick: () =>
         doAction(() =>
           dispatchManagerCostApi.cancelOperatorConfirm(filtersRef.current),
@@ -82,8 +82,8 @@ export function useDispatchManagerCostController({
     },
     {
       type: "button",
-      key: "관리자승인",
-      label: "관리자승인",
+      key: "BTN_RATE_MG_CONFIRM",
+      label: "BTN_RATE_MG_CONFIRM",
       onClick: () =>
         doAction(() =>
           dispatchManagerCostApi.approveByManager(filtersRef.current),
@@ -91,8 +91,8 @@ export function useDispatchManagerCostController({
     },
     {
       type: "button",
-      key: "관리자승인취소",
-      label: "관리자승인취소",
+      key: "BTN_RATE_MG_CONFIRM_CANCEL",
+      label: "BTN_RATE_MG_CONFIRM_CANCEL",
       onClick: () =>
         doAction(() =>
           dispatchManagerCostApi.cancelManagerApprove(filtersRef.current),
@@ -100,15 +100,15 @@ export function useDispatchManagerCostController({
     },
     {
       type: "button",
-      key: "비용마감",
-      label: "비용마감",
+      key: "BTN_RATE_CLOSE",
+      label: "BTN_RATE_CLOSE",
       onClick: () =>
         doAction(() => dispatchManagerCostApi.closeCost(filtersRef.current)),
     },
     {
       type: "button",
-      key: "비용마감취소",
-      label: "비용마감취소",
+      key: "BTN_RATE_CLOSE_CANCEL",
+      label: "BTN_RATE_CLOSE_CANCEL",
       onClick: () =>
         doAction(() =>
           dispatchManagerCostApi.cancelCostClose(filtersRef.current),
@@ -125,8 +125,8 @@ export function useDispatchManagerCostController({
   const costDetailActions = [
     {
       type: "button",
-      key: "저장",
-      label: "저장",
+      key: "BTN_SAVE",
+      label: "BTN_SAVE",
       onClick: (e: any) => {
         const saveRows = (e.data ?? []).filter(
           (r: any) => r._isNew || r._isDirty,
