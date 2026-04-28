@@ -56,7 +56,7 @@ export default function TenderReceiveDispatch() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS()}
           rowData={model.gridData.rows}
           onRowClicked={ctrl.handleRowClicked}
           autoSelectFirstRow
@@ -66,7 +66,7 @@ export default function TenderReceiveDispatch() {
       detail={
         <DataGrid
           layoutType="plain"
-          columnDefs={DETAIL_COLUMN_DEFS}
+          columnDefs={DETAIL_COLUMN_DEFS()}
           rowData={model.subDetailRowData.rows}
           totalCount={model.subDetailRowData.totalCount}
           currentPage={model.subDetailRowData.page}

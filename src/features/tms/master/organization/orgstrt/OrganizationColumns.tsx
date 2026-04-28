@@ -1,7 +1,7 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
 // 디비전
-export const DIVISION_COLUMN_DEFS = [
+export const DIVISION_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { headerName: "No" },
   { headerName: "LBL_DIVISION_CODE", field: "DIV_CD" },
   { headerName: "LBL_DIVISION_NAME", field: "DIV_NM" },
@@ -14,18 +14,13 @@ export const DIVISION_COLUMN_DEFS = [
   { headerName: "LBL_REPRESENTITIVE", field: "REP_NM" },
   { headerName: "LBL_EXTERNAL_CODE1", field: "REF1" },
   { headerName: "LBL_EXTERNAL_CODE2", field: "REF2" },
-  ...makeAuditColumns({
-    delete: true,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  ...standardAudit(setGridData),
 ];
 
 // 물류운영그룹
-export const LOGISTICS_GROUP_COLUMN_DEFS = [
+export const LOGISTICS_GROUP_COLUMN_DEFS = (
+  setGridData?: (updater: any) => void,
+) => [
   { headerName: "No" },
   { headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
   { headerName: "LBL_LOGISTICS_GROUP_NAME", field: "LGST_GRP_NM" },
@@ -37,12 +32,5 @@ export const LOGISTICS_GROUP_COLUMN_DEFS = [
   { headerName: "LBL_REPRESENTITIVE", field: "REP_NM" },
   { headerName: "LBL_EXTERNAL_CODE1", field: "REF1" },
   { headerName: "LBL_EXTERNAL_CODE2", field: "REF2" },
-  ...makeAuditColumns({
-    delete: true,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  ...standardAudit(setGridData),
 ];

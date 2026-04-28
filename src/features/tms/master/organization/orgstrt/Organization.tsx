@@ -57,7 +57,7 @@ export default function Organization() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={DIVISION_COLUMN_DEFS}
+          columnDefs={DIVISION_COLUMN_DEFS()}
           codeMap={model.codeMap}
           rowData={model.divisionGridData.rows}
           totalCount={model.divisionGridData.totalCount}
@@ -77,7 +77,7 @@ export default function Organization() {
       detail={
         <DataGrid
           layoutType="plain"
-          columnDefs={LOGISTICS_GROUP_COLUMN_DEFS}
+          columnDefs={LOGISTICS_GROUP_COLUMN_DEFS()}
           codeMap={model.codeMap}
           rowData={model.logisticsGroupRowData}
           actions={ctrl.logisticsGroupActions}

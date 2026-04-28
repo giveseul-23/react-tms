@@ -65,7 +65,7 @@ export default function TenderReceiveDispatch() {
         >
           <DataGrid
             layoutType="plain"
-            columnDefs={CNFG_HEADER_COLUMN_DEFS}
+            columnDefs={CNFG_HEADER_COLUMN_DEFS()}
             rowData={model.cnfgGrpData.rows}
             onRowClicked={ctrl.handleRowClicked}
             autoSelectFirstRow
@@ -73,7 +73,7 @@ export default function TenderReceiveDispatch() {
           />
           <DataGrid
             layoutType="plain"
-            columnDefs={CNFG_DETAIL_COLUMN_DEFS}
+            columnDefs={CNFG_DETAIL_COLUMN_DEFS()}
             rowData={model.subCnfgRowData.rows}
             onRowClicked={ctrl.handleSubRowClicked}
             autoSelectFirstRow
@@ -84,7 +84,7 @@ export default function TenderReceiveDispatch() {
       detail={
         <DataGrid
           layoutType="plain"
-          columnDefs={DETAIL_COLUMN_DEFS}
+          columnDefs={DETAIL_COLUMN_DEFS()}
           rowData={model.subDetailRowData.rows}
           totalCount={model.subDetailRowData.totalCount}
           currentPage={model.subDetailRowData.page}
@@ -92,7 +92,7 @@ export default function TenderReceiveDispatch() {
           onPageSizeChange={model.setPageSize}
           onPageChange={(page) => {
             model.resetSubGrids();
-            searchRef.current?.(page, false);
+            searchRef.current?.(page);
           }}
           actions={ctrl.detailActions}
         />
