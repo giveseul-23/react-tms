@@ -93,7 +93,7 @@ export default function DivisionConfigMaster() {
               currentPage={model.configData.page}
               pageSize={model.pageSize}
               onPageSizeChange={model.setPageSize}
-              onPageChange={(page) => searchRef.current?.(page, false)}
+              onPageChange={(page) => searchRef.current?.(page)}
               actions={ctrl.configActions}
               onRowClicked={ctrl.handleConfigRowClicked}
               autoSelectFirstRow
@@ -110,7 +110,7 @@ export default function DivisionConfigMaster() {
               currentPage={model.detailData.page}
               pageSize={model.pageSize}
               onPageSizeChange={model.setPageSize}
-              onPageChange={(page) => searchRef.current?.(page, false)}
+              onPageChange={(page) => searchRef.current?.(page)}
               actions={ctrl.detailActions}
               onRowClicked={ctrl.handleDetailRowClicked}
               autoSelectFirstRow

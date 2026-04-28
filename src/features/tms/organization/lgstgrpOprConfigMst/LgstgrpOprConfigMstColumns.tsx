@@ -1,15 +1,13 @@
-// src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMstColumns.tsx
-
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
 // ── 플류운영그룹운영설정 (Top-left) ────────────────────────────────
-export const CONFIG_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
+export const CONFIG_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { headerName: "No" },
   {
     type: "text",
     headerName: "LBL_STATUS",
     field: "SIGNAL",
-    cellStyle: { textAlign: "center" },
+    align: "center",
     width: 50,
   },
   {
@@ -44,18 +42,12 @@ export const CONFIG_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
     width: 100,
     fieldType: "text",
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertPersonOverrides: { width: 100, fieldType: "text" },
-  }),
+  ...standardAudit(setGridData),
 ];
 
 // ── 설정상세 (Top-right) ───────────────────────────────────────────
 export const CONFIG_DETAIL_COLUMN_DEFS = (
-  setRowData: (updater: any) => void,
+  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   {
@@ -95,57 +87,49 @@ export const CONFIG_DETAIL_COLUMN_DEFS = (
     headerName: "LBL_CMMN_CD_CNFG_VAL1",
     field: "CNFG_VAL1",
     editable: true,
-    width: 80,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL2",
     field: "CNFG_VAL2",
     editable: true,
-    width: 80,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL3",
     field: "CNFG_VAL3",
     editable: true,
-    width: 80,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL4",
     field: "CNFG_VAL4",
     editable: true,
-    width: 80,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL5",
     field: "CNFG_VAL5",
     editable: true,
-    width: 80,
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-  }),
+  ...standardAudit(setGridData),
 ];
 
 // ── 설정코드다국어설정 (Bottom-left) ───────────────────────────────
-export const CONFIG_I18N_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
+export const CONFIG_I18N_COLUMN_DEFS = (
+  setGridData?: (updater: any) => void,
+) => [
   { headerName: "No" },
   {
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_CD",
     field: "CNFG_CD",
-    width: 200,
   },
   {
     type: "text",
     //언어유형
     headerName: "LBL_LNG_PACK",
     field: "LANG_TP",
-    width: 90,
   },
   {
     type: "text",
@@ -153,20 +137,12 @@ export const CONFIG_I18N_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
     field: "LANG_DESC",
     editable: true,
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertPersonOverrides: { width: 110 },
-    insertDate: true,
-    insertDateOverrides: { width: 150 },
-  }),
+  ...standardAudit(setGridData),
 ];
 
 // ── 설정상세코드다국어설정 (Bottom-right) ──────────────────────────
 export const CONFIG_DETAIL_I18N_COLUMN_DEFS = (
-  setRowData: (updater: any) => void,
+  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   {
@@ -174,19 +150,16 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = (
     //디비전운영설정코드
     headerName: "LBL_DIV_CNFG_CD",
     field: "CNFG_CD",
-    width: 180,
   },
   {
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_DTL_CD",
     field: "CNFG_DTL_CD",
-    width: 200,
   },
   {
     type: "text",
     headerName: "LBL_LNG_PACK",
     field: "LANG_TP",
-    width: 90,
   },
   {
     type: "text",
@@ -194,11 +167,5 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = (
     field: "LANG_DESC",
     editable: true,
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertPersonOverrides: { width: 110 },
-  }),
+  ...standardAudit(setGridData),
 ];

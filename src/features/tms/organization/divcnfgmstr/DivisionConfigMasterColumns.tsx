@@ -1,7 +1,7 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/commonColumns";
 
 // ── (Top-left) ────────────────────────────────
-export const CONFIG_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
+export const CONFIG_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { headerName: "No" },
   {
     type: "text",
@@ -26,20 +26,12 @@ export const CONFIG_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
     headerName: "LBL_DATA_CRE_TCD",
     field: "DATA_CRE_TCD",
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  ...standardAudit(setGridData),
 ];
 
 // ──  (Top-right) ───────────────────────────────────────────
 export const CONFIG_DETAIL_COLUMN_DEFS = (
-  setRowData: (updater: any) => void,
+  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   {
@@ -92,19 +84,13 @@ export const CONFIG_DETAIL_COLUMN_DEFS = (
     editable: true,
     width: 80,
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  ...standardAudit(setGridData),
 ];
 
 // ── 설정코드다국어설정 (Bottom-left) ───────────────────────────────
-export const CONFIG_I18N_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
+export const CONFIG_I18N_COLUMN_DEFS = (
+  setGridData?: (updater: any) => void,
+) => [
   { headerName: "No" },
   {
     type: "text",
@@ -126,20 +112,12 @@ export const CONFIG_I18N_COLUMN_DEFS = (setRowData: (updater: any) => void) => [
     headerName: "LBL_DIV_CNFG_DTL_NM",
     field: "LANG_DESC",
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  ...standardAudit(setGridData),
 ];
 
 // ── 설정상세코드다국어설정 (Bottom-right) ──────────────────────────
 export const CONFIG_DETAIL_I18N_COLUMN_DEFS = (
-  setRowData: (updater: any) => void,
+  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   {
@@ -157,13 +135,5 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = (
     headerName: "LBL_DIV_CNFG_NM",
     field: "LANG_DESC",
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  ...standardAudit(setGridData),
 ];
