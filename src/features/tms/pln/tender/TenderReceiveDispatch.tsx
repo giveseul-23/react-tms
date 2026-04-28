@@ -71,7 +71,7 @@ export default function TenderReceiveDispatch() {
         <DataGrid
           layoutType="plain"
           actions={[]}
-          columnDefs={STOP_COLUMN_DEFS.slice(0, 10)}
+          columnDefs={STOP_COLUMN_DEFS()}
           rowData={model.subStopRowData}
         />
       </div>
@@ -102,7 +102,7 @@ export default function TenderReceiveDispatch() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS(model.codeMap)}
+          columnDefs={MAIN_COLUMN_DEFS()}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
           currentPage={model.gridData.page}
@@ -110,10 +110,11 @@ export default function TenderReceiveDispatch() {
           onPageSizeChange={model.setPageSize}
           onPageChange={(page) => {
             model.resetSubGrids();
-            searchRef.current?.(page, false);
+            searchRef.current?.(page);
           }}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.handleRowClicked}
+          codeMap={model.codeMap}
         />
       }
       detail={
@@ -125,8 +126,8 @@ export default function TenderReceiveDispatch() {
             { key: "AP_SETL", label: "LBL_TRANS_COST_HIS" },
           ]}
           presets={{
-            STOP: { columnDefs: STOP_COLUMN_DEFS },
-            SMS_HIS: { columnDefs: SMS_COLUMN_DEFS },
+            STOP: { columnDefs: STOP_COLUMN_DEFS() },
+            SMS_HIS: { columnDefs: SMS_COLUMN_DEFS() },
             AP_SETL: {
               gridRef: model.apSetlGridRef,
               columnDefs: AP_SETL_COLUMN_DEFS(model.setSubApSetlRowData),
@@ -140,6 +141,7 @@ export default function TenderReceiveDispatch() {
             AP_SETL: model.subApSetlRowData,
           }}
           actions={[]}
+          codeMap={model.codeMap}
         />
       }
       bottomSlot={trackPanelContent}

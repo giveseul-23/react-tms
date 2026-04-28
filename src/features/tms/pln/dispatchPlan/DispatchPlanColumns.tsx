@@ -374,7 +374,7 @@ export const ALLOC_ORDER_SUB_COLUMN_DEFS = (
 ];
 
 // ── 미할당주문 탭 ────────────────────────────────────────────
-export const UNALLOC_ORDER_COLUMN_DEFS = [
+export const UNALLOC_ORDER_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" }, // 출발지명
   { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" }, // 도착지명
