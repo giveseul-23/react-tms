@@ -3,6 +3,7 @@ import { ifDeliveryDocumentApi } from "./IfDeliveryDocumentApi";
 import { IfDeliveryDocumentModel } from "./IfDeliveryDocumentModel";
 import { MAIN_COLUMN_DEFS } from "./IfDeliveryDocumentColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: IfDeliveryDocumentModel;
@@ -48,7 +49,7 @@ export function useIfDeliveryDocumentController({
     [model, handleRowClicked],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_REPRO",

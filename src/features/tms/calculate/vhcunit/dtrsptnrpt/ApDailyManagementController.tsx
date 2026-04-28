@@ -9,6 +9,7 @@ import {
   buildDailyColumns,
 } from "./ApDailyManagementColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: ApDailyManagementModel;
@@ -129,7 +130,7 @@ export function useApDailyManagementController({
     [searchRef],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_CREATE_DAILY_EXPENSE",

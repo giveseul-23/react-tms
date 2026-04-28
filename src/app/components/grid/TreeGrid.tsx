@@ -270,7 +270,7 @@ function TreeGridInner<TRow extends TreeRow>(
           onClick: () => action.onClick?.({ data: selectedRows }),
         };
       }
-      if (action.type === "group") {
+      if (action.type === "group" || action.type === "dropdown") {
         return {
           ...action,
           label: action.label ? Lang.get(action.label) : action.label,
@@ -355,23 +355,52 @@ function TreeGridInner<TRow extends TreeRow>(
       const colDef = col as ColDef<TRow>;
       const field = (colDef.field ?? colDef.colId ?? "") as string;
 
-      // DTTM 필드: 자동 포맷
+      // DTTM 필드: 자동 포맷 + 정렬.
+      // 정렬 우선순위: align prop > type:"date"/"fieldType":"date" 이면 center > 미지정.
+      // 사용자 cellStyle 의 textAlign 외 속성은 보존.
       if (field.includes("DTTM")) {
+        const isDateTypedDttm =
+          (colDef as any).type === "date" ||
+          (colDef as any).fieldType === "date";
+        const userDttmCellStyle = (colDef as any).cellStyle;
+        const baseDttmCellStyle =
+          userDttmCellStyle && typeof userDttmCellStyle === "object"
+            ? userDttmCellStyle
+            : {};
+        const finalDttmAlign =
+          alignProp ?? (isDateTypedDttm ? "center" : undefined);
+        const dttmAlignBlock = finalDttmAlign
+          ? {
+              cellStyle: {
+                ...baseDttmCellStyle,
+                textAlign: finalDttmAlign,
+              },
+              headerClass: `ag-header-${finalDttmAlign}`,
+            }
+          : null;
         return {
           ...col,
           headerName: translate(col),
           valueFormatter: (params: any) => Util.formatDttm(params.value),
           ...(translatedChildren ? { children: translatedChildren } : {}),
-          ...(alignBlock ?? {}),
+          ...(dttmAlignBlock ?? {}),
           ...typeBlock,
         };
       }
 
-      // type: "date" → YYYY-MM-DD 로 자르고 중앙 정렬
+      // type: "date" → 가운데 정렬 + YYYY-MM-DD 슬라이스.
+      // 정렬 우선순위: align prop > type "date" 기본(center).
+      // 사용자 cellStyle 의 textAlign 외 속성(color, font 등)은 보존.
       if (
         (colDef as any).type === "date" ||
         (colDef as any).fieldType === "date"
       ) {
+        const userDateCellStyle = (colDef as any).cellStyle;
+        const baseDateCellStyle =
+          userDateCellStyle && typeof userDateCellStyle === "object"
+            ? userDateCellStyle
+            : {};
+        const finalDateAlign = alignProp ?? "center";
         return {
           ...col,
           headerName: translate(col),
@@ -380,10 +409,9 @@ function TreeGridInner<TRow extends TreeRow>(
             if (v == null || v === "") return "";
             return String(v).slice(0, 10);
           },
-          cellStyle: { textAlign: "center" },
-          headerClass: "ag-header-center",
+          cellStyle: { ...baseDateCellStyle, textAlign: finalDateAlign },
+          headerClass: `ag-header-${finalDateAlign}`,
           ...(translatedChildren ? { children: translatedChildren } : {}),
-          ...(alignBlock ?? {}),
           ...typeBlock,
         };
       }
@@ -416,18 +444,19 @@ function TreeGridInner<TRow extends TreeRow>(
                 });
               }
             : undefined;
+        // 정렬 우선순위: align prop > type "numeric" 기본(right).
+        // 사용자 cellStyle 의 textAlign 외 속성은 보존.
         const userCellStyle = (colDef as any).cellStyle;
-        const mergedCellStyle = {
-          ...(userCellStyle && typeof userCellStyle === "object"
+        const baseCellStyle =
+          userCellStyle && typeof userCellStyle === "object"
             ? userCellStyle
-            : {}),
-          textAlign: "right",
-        };
+            : {};
+        const finalAlign = alignProp ?? "right";
         return {
           ...col,
           headerName: translate(col),
-          cellStyle: mergedCellStyle,
-          headerClass: "ag-header-right",
+          cellStyle: { ...baseCellStyle, textAlign: finalAlign },
+          headerClass: `ag-header-${finalAlign}`,
           ...(numberFormatter ? { valueFormatter: numberFormatter } : {}),
           ...(translatedChildren ? { children: translatedChildren } : {}),
           ...typeBlock,

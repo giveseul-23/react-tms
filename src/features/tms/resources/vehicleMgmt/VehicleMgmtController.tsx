@@ -8,6 +8,7 @@ import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { VehicleMgmtModel } from "./VehicleMgmtModel.ts";
 import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns.tsx";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: VehicleMgmtModel;
@@ -225,7 +226,7 @@ export function useVehicleMgmtController({
   }, [model, handleApi, searchRef]);
 
   // ── mainActions (메인 그리드 툴바) ───────────────────────────
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "신규등록",

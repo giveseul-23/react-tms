@@ -3,6 +3,7 @@ import { operatorArBillingInquiryApi } from "./OperatorArBillingInquiryApi";
 import { OperatorArBillingInquiryModel } from "./OperatorArBillingInquiryModel";
 import { MAIN_COLUMN_DEFS } from "./OperatorArBillingInquiryColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { UseSearchConditionReturn } from "@/hooks/useSearchCondition";
 
 type ControllerProps = {
@@ -83,7 +84,7 @@ export function useOperatorArBillingInquiryController({
     [searchRef],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     { type: "dropdown", key: "LBL_AR_TRACE", label: "LBL_AR_TRACE", items: [] },
     {
       type: "button",
@@ -162,7 +163,7 @@ export function useOperatorArBillingInquiryController({
     }),
   ];
 
-  const billingItemActions = [
+  const billingItemActions: ActionItem[] = [
     {
       type: "button",
       key: "LBL_AR_CALC_RESULT_TRACE",

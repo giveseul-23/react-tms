@@ -6,6 +6,7 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
 
@@ -104,7 +105,7 @@ export function useLanguagePackController({
     );
   }, [model.gridData.rows, handleApi, searchRef]);
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_COPY",

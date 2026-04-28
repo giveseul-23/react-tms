@@ -64,7 +64,7 @@ export default function InTrnstVehCtrl() {
       currentPage={model.gridData.page}
       pageSize={model.pageSize}
       onPageSizeChange={model.setPageSize}
-      onPageChange={(page) => searchRef.current?.(page, false)}
+      onPageChange={(page) => searchRef.current?.(page)}
       actions={ctrl.mainActions}
       onRowClicked={ctrl.handleRowClicked}
     />

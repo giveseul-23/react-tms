@@ -52,7 +52,7 @@ export const makeInsertPersonColumn = (
 });
 
 export const makeInsertDateColumn = (overrides: Record<string, any> = {}) => ({
-  type: "text",
+  type: "date",
   headerName: "LBL_INSERT_DATE",
   field: "CRE_DTTM",
   ...overrides,
@@ -68,7 +68,7 @@ export const makeUpdatePersonColumn = (
 });
 
 export const makeUpdateTimeColumn = (overrides: Record<string, any> = {}) => ({
-  type: "text",
+  type: "date",
   headerName: "LBL_UPDATE_TIME",
   field: "UPD_DTTM",
   ...overrides,

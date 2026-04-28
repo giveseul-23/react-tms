@@ -17,6 +17,7 @@ import MenuItemAddPopup, {
 import type { MenuRow } from "./MenuConfig";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { makeSaveAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: MenuConfigModel;
@@ -102,7 +103,7 @@ export function useMenuConfigController({
     [model.source],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_EXPAND_ALL",

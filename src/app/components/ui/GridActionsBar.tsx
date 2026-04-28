@@ -14,10 +14,13 @@ export type ActionButton = {
   label: string;
   onClick?: () => void;
   disabled?: boolean;
+  /** Button variant (선택). 미지정 시 "outline". */
+  variant?: "default" | "outline" | "primary" | "ghost" | "destructive";
 };
 
 export type ActionGroup = {
-  type: "group";
+  /** "dropdown" 은 "group" 과 동일하게 렌더 (의미상 별칭). */
+  type: "group" | "dropdown";
   key: string;
   label?: string;
   items: ActionButton[];
@@ -25,6 +28,10 @@ export type ActionGroup = {
 };
 
 export type ActionItem = ActionButton | ActionGroup;
+
+/** 그룹/드롭다운 type guard — 렌더링 분기에서 사용. */
+const isGroupLike = (a: ActionItem): a is ActionGroup =>
+  a.type === "group" || a.type === "dropdown";
 
 function cls(...xs: Array<string | false | undefined | null>) {
   return xs.filter(Boolean).join(" ");
@@ -88,7 +95,7 @@ export function GridActionsBar({
   if (!actions?.length) return null;
 
   const openGroup = actions.find(
-    (a): a is ActionGroup => a.type === "group" && a.key === openKey,
+    (a): a is ActionGroup => isGroupLike(a) && a.key === openKey,
   );
 
   return (
@@ -118,7 +125,7 @@ export function GridActionsBar({
       >
         <div className="inline-flex min-w-max items-center gap-1 whitespace-nowrap ml-auto">
           {actions.map((a) =>
-            a.type === "group" ? (
+            isGroupLike(a) ? (
               <Button
                 key={a.key}
                 type="button"
@@ -157,7 +164,7 @@ export function GridActionsBar({
               <Button
                 key={a.key}
                 type="button"
-                variant="outline"
+                variant={(a.variant ?? "outline") as any}
                 disabled={a.disabled}
                 className="h-6 px-2 !py-0 text-[11px] leading-none !rounded-md items-center [&_svg]:size-3 [&_svg]:shrink-0 disabled:opacity-50"
                 onClick={a.onClick}

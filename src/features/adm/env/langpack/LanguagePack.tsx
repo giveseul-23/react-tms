@@ -58,7 +58,7 @@ export default function LanguagePack() {
           pageSize={model.pageSize}
           onPageSizeChange={model.setPageSize}
           onPageChange={(page) => {
-            searchRef.current?.(page, false);
+            searchRef.current?.(page);
           }}
           actions={ctrl.mainActions}
           onCellValueChanged={ctrl.handleCellValueChanged}

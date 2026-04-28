@@ -3,6 +3,7 @@ import { confirmDispatchApi } from "./ConfirmDispatchApi";
 import { ConfirmDispatchModel } from "./ConfirmDispatchModel";
 import { MAIN_COLUMN_DEFS } from "./ConfirmDispatchColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: ConfirmDispatchModel;
@@ -92,7 +93,7 @@ export function useConfirmDispatchController({
     [searchRef],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SP_START_WORK",
@@ -148,7 +149,7 @@ export function useConfirmDispatchController({
     }),
   ];
 
-  const orderActions = [
+  const orderActions: ActionItem[] = [
     {
       type: "button",
       key: "LBL_INPT_PRFR",

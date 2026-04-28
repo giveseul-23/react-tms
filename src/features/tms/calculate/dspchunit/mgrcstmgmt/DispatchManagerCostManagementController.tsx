@@ -3,6 +3,7 @@ import { dispatchManagerCostApi } from "./DispatchManagerCostManagementApi";
 import { DispatchManagerCostModel } from "./DispatchManagerCostManagementModel";
 import { MAIN_COLUMN_DEFS } from "./DispatchManagerCostManagementColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: DispatchManagerCostModel;
@@ -70,7 +71,7 @@ export function useDispatchManagerCostController({
     [searchRef],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_RATE_OP_CONFIRM_CANCEL",
@@ -122,7 +123,7 @@ export function useDispatchManagerCostController({
     }),
   ];
 
-  const costDetailActions = [
+  const costDetailActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SAVE",

@@ -29,6 +29,7 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch } from "@/views/common/common";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import TenderRejectPopup from "@/features/tms/pln/tender/popup/TenderRejectPopup";
 import TemporaryVehicleChangePopup from "@/features/tms/pln/tender/popup/TemporaryVehicleChangePopup";
@@ -128,7 +129,7 @@ export function useTenderReceiveDispatchController({
   );
 
   // ── 메인 그리드 액션 (센차: TenderReceiveDispatchMain dockedItems toolbar) ──
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     // 센차: BTN_TENDER_ACCEPT handler:'onTenderAccepted'
     {
       type: "button",
@@ -345,7 +346,7 @@ export function useTenderReceiveDispatchController({
   ];
 
   // ── 운송비내역 서브그리드 액션 (센차: TenderReceiveDispatchCarrRate toolbar) ──
-  const apSetlActions = [
+  const apSetlActions: ActionItem[] = [
     // 센차: BTN_ADD handler:'onAddCarrierBookingRate' → openWindow CommonPop
     {
       type: "button",

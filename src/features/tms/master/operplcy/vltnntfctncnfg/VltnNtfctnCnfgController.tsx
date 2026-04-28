@@ -8,6 +8,7 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: VltnNtfctnCnfgModel;
@@ -113,7 +114,7 @@ export function useVltnNtfctnCnfgController({
     [model],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BUTTON_COPY_CONTRACT",
@@ -123,7 +124,7 @@ export function useVltnNtfctnCnfgController({
     makeSaveAction(),
   ];
 
-  const detailActions = [
+  const detailActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_TEMPLATE_COPY",
@@ -134,7 +135,7 @@ export function useVltnNtfctnCnfgController({
     makeSaveAction(),
   ];
 
-  const channelActions = [
+  const channelActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_TEMPLATE_UPDATE",
@@ -145,7 +146,7 @@ export function useVltnNtfctnCnfgController({
     makeSaveAction(),
   ];
 
-  const targetActions = [
+  const targetActions: ActionItem[] = [
     {
       type: "button",
       key: "LBL_USR_REGI",

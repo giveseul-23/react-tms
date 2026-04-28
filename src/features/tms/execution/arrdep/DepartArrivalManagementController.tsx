@@ -3,6 +3,7 @@ import { departArrivalManagementApi } from "./DepartArrivalManagementApi";
 import { DepartArrivalManagementModel } from "./DepartArrivalManagementModel";
 import { MAIN_COLUMN_DEFS } from "./DepartArrivalManagementColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: DepartArrivalManagementModel;
@@ -68,7 +69,7 @@ export function useDepartArrivalManagementController({
     [searchRef],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SHOW_POD",
@@ -163,7 +164,7 @@ export function useDepartArrivalManagementController({
     }),
   ];
 
-  const stopoverActions = [
+  const stopoverActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SHOW_ROUTE",

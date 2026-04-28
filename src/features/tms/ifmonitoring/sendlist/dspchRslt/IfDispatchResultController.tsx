@@ -3,6 +3,7 @@ import { ifDispatchResultApi } from "./IfDispatchResultApi";
 import { IfDispatchResultModel } from "./IfDispatchResultModel";
 import { MAIN_COLUMN_DEFS } from "./IfDispatchResultColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: IfDispatchResultModel;
@@ -30,7 +31,7 @@ export function useIfDispatchResultController({
 
   const handleRowClicked = useCallback(() => {}, []);
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_REPRO",

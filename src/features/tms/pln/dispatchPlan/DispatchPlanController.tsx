@@ -9,6 +9,7 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: DispatchPlanModel;
@@ -99,7 +100,7 @@ export function useDispatchPlanController({
   }, [model, rawFiltersRef]);
 
   // ── 메인 그리드 액션 ────────────────────────────────────────
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "group",
       key: "BTN_DISPATCH_CREATE_DELETE",
@@ -216,7 +217,7 @@ export function useDispatchPlanController({
   ];
 
   // ── 경유처 액션 (ETA/상하차분할/조정/순서저장) ───────────────
-  const stopActions = [
+  const stopActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_PREDICT_ETA",
@@ -281,12 +282,12 @@ export function useDispatchPlanController({
   ];
 
   // ── 할당주문 액션 ───────────────────────────────────────────
-  const allocOrderActions = [
+  const allocOrderActions: ActionItem[] = [
     { type: "button", key: "할당해제", label: "할당해제", onClick: () => {} },
   ];
 
   // ── 미할당주문 액션 ─────────────────────────────────────────
-  const unallocOrderActions = [
+  const unallocOrderActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SEARCH",
@@ -303,7 +304,7 @@ export function useDispatchPlanController({
   ];
 
   // ── SUB 공통 액션 (상품라인분할 / 상품수량분할) ─────────────
-  const allocSubActions = [
+  const allocSubActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_ITEM_LINE_SPLIT",
@@ -318,7 +319,7 @@ export function useDispatchPlanController({
     },
   ];
 
-  const unallocSubActions = [
+  const unallocSubActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_ITEM_LINE_SPLIT",

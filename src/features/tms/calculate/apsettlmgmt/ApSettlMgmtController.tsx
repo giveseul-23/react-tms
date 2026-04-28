@@ -3,6 +3,7 @@ import { apSettlMgmtApi } from "./ApSettlMgmtApi";
 import { ApSettlMgmtModel } from "./ApSettlMgmtModel";
 import { MAIN_COLUMN_DEFS } from "./ApSettlMgmtColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: ApSettlMgmtModel;
@@ -112,7 +113,7 @@ export function useApSettlMgmtController({
     [searchRef],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_AP_SETTLEMENT_CREATE",
@@ -183,7 +184,7 @@ export function useApSettlMgmtController({
     }),
   ];
 
-  const costCenterActions = [
+  const costCenterActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_COST_ACCOUNT_ADD",
@@ -234,7 +235,7 @@ export function useApSettlMgmtController({
     }),
   ];
 
-  const evidenceActions = [
+  const evidenceActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SAVE",

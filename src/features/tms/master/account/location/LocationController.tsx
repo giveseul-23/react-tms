@@ -6,6 +6,7 @@ import {
   makeCommonActions,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: LocationModel;
@@ -129,7 +130,7 @@ export function useLocationController({
     [model, handleRowClicked],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_VIEW_BY_MAP",

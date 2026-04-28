@@ -2,6 +2,7 @@
 import { useCallback, MutableRefObject } from "react";
 import { inTrnstVehCtrlApi } from "@/features/cms/inTrnstVehCtrl/inTrnstVehCtrlApi";
 import { InTrnstVehCtrlModel } from "./InTrnstVehCtrlModel";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: InTrnstVehCtrlModel;
@@ -51,7 +52,7 @@ export function useInTrnstVehCtrlController({
     [model],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SP_SIGNATURE_REFRESH",

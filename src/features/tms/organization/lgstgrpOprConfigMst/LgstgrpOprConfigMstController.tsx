@@ -8,6 +8,7 @@ import {
   makeAddAction,
   makeSaveAction,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: LgstgrpOprConfigMstModel;
@@ -151,9 +152,9 @@ export function useLgstgrpOprConfigMstController({
   );
 
   // ── Top-left 액션 ────────────────────────────────────────────
-  const configActions = [
+  const configActions: ActionItem[] = [
     {
-      type: "button" as const,
+      type: "button",
       key: "LBL_SYNC",
       label: "LBL_SYNC",
       onClick: () => {

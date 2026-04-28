@@ -5,6 +5,7 @@ import { DriveHistoryModel } from "./DriveHistoryModel";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import type { StopMarker } from "@/app/components/map/TmapView";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: DriveHistoryModel;
@@ -124,7 +125,7 @@ export function useDriveHistoryController({
     [model, openPopup, closePopup],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "새로고침",

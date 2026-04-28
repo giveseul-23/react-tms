@@ -3,6 +3,7 @@ import { dispatchOperatorCostApi } from "./DispatchOperatorCostManagementApi";
 import { DispatchOperatorCostModel } from "./DispatchOperatorCostManagementModel";
 import { MAIN_COLUMN_DEFS } from "./DispatchOperatorCostManagementColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: DispatchOperatorCostModel;
@@ -99,7 +100,7 @@ export function useDispatchOperatorCostController({
     [searchRef],
   );
 
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_RATESHOP",
@@ -198,7 +199,7 @@ export function useDispatchOperatorCostController({
     }),
   ];
 
-  const costDetailActions = [
+  const costDetailActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SAVE",
@@ -221,7 +222,7 @@ export function useDispatchOperatorCostController({
     },
   ];
 
-  const waypointActions = [
+  const waypointActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_ADD_FI_ROUTE",
@@ -276,7 +277,7 @@ export function useDispatchOperatorCostController({
     },
   ];
 
-  const evidenceActions = [
+  const evidenceActions: ActionItem[] = [
     {
       type: "button",
       key: "BTN_SAVE",

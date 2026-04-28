@@ -25,6 +25,7 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
   model: ShpmMgmtModel;
@@ -164,7 +165,7 @@ export function useShpmMgmtController({
 
   // ── 메인 그리드 액션 ──────────────────────────────────────────
   // 추가 + 저장 + 엑셀 일괄 세팅이 필요하면 makeCommonActions 사용
-  const mainActions = [
+  const mainActions: ActionItem[] = [
     {
       type: "button",
       key: "계약서복사",
