@@ -15,6 +15,12 @@ export type PopupFilterProps = {
   onChangeCode?: (v: string) => void;
   onChangeName?: (v: string) => void;
   onClickSearch: () => void;
+  /**
+   * code/name input 에서 Enter 입력 시 호출.
+   *   - code 필드 Enter → name 자동 비우고 onEnterSubmit(code, "")
+   *   - name 필드 Enter → code 자동 비우고 onEnterSubmit("", name)
+   */
+  onEnterSubmit?: (code: string, name: string) => void;
 
   codeId?: string;
   nameId?: string;
@@ -28,9 +34,28 @@ export function PopupFilter({
   onChangeCode,
   onChangeName,
   onClickSearch,
+  onEnterSubmit,
   codeId,
   nameId,
 }: PopupFilterProps) {
+  const onCodeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    e.stopPropagation();
+    const codeVal = e.currentTarget.value;
+    onChangeName?.("");
+    onEnterSubmit?.(codeVal, "");
+  };
+
+  const onNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    e.stopPropagation();
+    const nameVal = e.currentTarget.value;
+    onChangeCode?.("");
+    onEnterSubmit?.("", nameVal);
+  };
+
   return (
     <div className={cn("w-full min-w-0 flex flex-col gap-2", className)}>
       <div className="flex items-center gap-3">
@@ -39,6 +64,7 @@ export function PopupFilter({
           id={codeId}
           value={code}
           onChange={(e) => onChangeCode(e.target.value)}
+          onKeyDown={onCodeKeyDown}
           placeholder="코드"
           className="w-[110px]"
         />
@@ -49,6 +75,7 @@ export function PopupFilter({
             id={nameId}
             value={name}
             onChange={(e) => onChangeName(e.target.value)}
+            onKeyDown={onNameKeyDown}
             placeholder="코드명"
             className="pr-10"
           />

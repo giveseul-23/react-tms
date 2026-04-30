@@ -18,6 +18,8 @@ export function CommonPopup({
   filterCol = "",
   filterValue = "",
   extraParams,
+  initialCode = "",
+  initialName = "",
 }: {
   sqlId: string;
   fetchFn?: (params?: any) => Promise<any>;
@@ -29,14 +31,22 @@ export function CommonPopup({
   filterValue?: string;
   /** 동적 SQL 파라미터 — sqlParam1/sqlParam2/sqlParam3/keyParam 형태로 API에 포함 */
   extraParams?: Record<string, string>;
+  /** popup 진입 시 미리 채울 코드 검색어 (Enter fallback 시 사용) */
+  initialCode?: string;
+  /** popup 진입 시 미리 채울 코드명 검색어 */
+  initialName?: string;
 }) {
   const [rows, setRows] = useState<any[]>([]);
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
+  const [code, setCode] = useState(initialCode);
+  const [name, setName] = useState(initialName);
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
   useEffect(() => {
-    handleSearch({});
+    handleSearch({
+      ...(initialCode ? { code: initialCode } : {}),
+      ...(initialName ? { name: initialName } : {}),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = (extra: Record<string, any> = {}) => {

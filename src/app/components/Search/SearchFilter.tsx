@@ -87,6 +87,8 @@ type PopupFilterProps = BaseFilterProps & {
   onChangeCode?: (v: string) => void;
   onChangeName?: (v: string) => void;
   onClickSearch: () => void;
+  /** code/name input 에서 Enter 입력 시 호출 (직접 조회 후 단건 자동 적용 등) */
+  onEnterSubmit?: (code: string, name: string) => void;
   required?: boolean;
 };
 

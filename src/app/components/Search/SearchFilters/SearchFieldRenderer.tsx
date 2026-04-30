@@ -6,6 +6,7 @@
 import { SearchFilter } from "@/app/components/Search/SearchFilter";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import { usePopup } from "@/app/components/popup/PopupContext";
+import { commonApi } from "@/app/services/common/commonApi";
 import type { SearchMeta } from "@/features/search/search.meta.types";
 import { SearchCondition } from "@/features/search/search.builder";
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
@@ -52,6 +53,27 @@ export function SearchFieldRenderer({
     return out;
   };
 
+  // 부모 컴포넌트가 재선택되면 filterRef 로 연결된 자식들을 재귀적으로 빈값 처리.
+  // (예: DIV 변경 → LGST_GRP_CD/NM, PLN_ID 등 줄줄이 클리어)
+  const clearDescendants = (parentKey: string) => {
+    const directChildren = meta.filter((x) => x.filterValueKey === parentKey);
+    for (const child of directChildren) {
+      const childOp = (getCondition(child.key)?.operator ??
+        child.condition ??
+        "equal") as any;
+      const childDataType = child.dataType ?? "STRING";
+      if (child.type === "POPUP") {
+        const childBaseKey = child.key.replace("_CD", "");
+        updateCondition(`${childBaseKey}_CD`, "", childOp, childDataType, "POPUP");
+        updateCondition(`${childBaseKey}_NM`, "", childOp, childDataType, "POPUP");
+      } else {
+        updateCondition(child.key, "", childOp, childDataType);
+      }
+      // 손주까지 재귀
+      clearDescendants(child.key);
+    }
+  };
+
   return (
     <>
       {meta.map((m) => {
@@ -63,8 +85,7 @@ export function SearchFieldRenderer({
           label: m.label,
           span: m.span ?? 1,
           requaluired: m.required,
-          condition:
-            getCondition(m.key)?.operator ?? m.condition ?? "equal",
+          condition: getCondition(m.key)?.operator ?? m.condition ?? "equal",
           dataType: m.dataType,
           conditionLocked: m.conditionLocked,
           onConditionChange: m.conditionLocked
@@ -107,23 +128,26 @@ export function SearchFieldRenderer({
               filterM[0].filterValueKey = m.key;
             }
 
-            // filterCol/filterValueKey가 세팅된 COMBO는 옵션 필터링
+            // filterCol/filterValueKey 가 세팅된 COMBO 는 옵션 필터링.
+            //   - 부모 값(srcVal) 이 없으면 옵션 자체를 빈 배열로 → 콤보가 비어 아무 것도 못 고르게
+            //   - 부모 값이 있으면 그 값과 매치되는 옵션만 표시 (ALL 은 항상 포함)
             const srcVal = m.filterValueKey
               ? getCondition(m.filterValueKey)?.value
               : null;
-            const filteredOptions =
-              m.filterCol && srcVal && srcVal !== "ALL"
+            const isFiltered = !!m.filterCol;
+            const filteredOptions = isFiltered
+              ? srcVal && srcVal !== "ALL"
                 ? (m.options ?? []).filter(
                     (opt: any) =>
                       opt.CODE === "ALL" || opt[m.filterCol!] === srcVal,
                   )
-                : (m.options ?? []);
+                : [] // 부모 미선택 → 빈 옵션
+              : (m.options ?? []);
 
-            // 소스 값 변경 시 현재 선택값이 필터 목록에 없으면 자동 리셋
+            // 현재 선택값이 더 이상 유효한 옵션이 아니면 자동 리셋 (부모 비었을 때 포함).
             const curVal = condition?.value ?? "";
             if (
-              m.filterCol &&
-              srcVal &&
+              isFiltered &&
               curVal &&
               curVal !== "ALL" &&
               !filteredOptions.some((opt: any) => opt.CODE === curVal)
@@ -147,7 +171,7 @@ export function SearchFieldRenderer({
                 type="COMBO"
                 value={curVal}
                 options={filteredOptions}
-                onChange={(v: string) =>
+                onChange={(v: string) => {
                   updateCondition(
                     m.key,
                     v,
@@ -155,8 +179,10 @@ export function SearchFieldRenderer({
                       m.condition ??
                       "equal") as any,
                     m.dataType ?? "STRING",
-                  )
-                }
+                  );
+                  // 재선택 → filterRef 로 연결된 자식들 재귀 클리어
+                  clearDescendants(m.key);
+                }}
               />
             );
           }
@@ -291,6 +317,87 @@ export function SearchFieldRenderer({
               filterM[0].filterValueKey = m.key;
             }
 
+            const filterValue = m.filterValueKey
+              ? (getCondition(m.filterValueKey)?.value ?? "")
+              : "";
+
+            const openPickerPopup = (initialCode = "", initialName = "") => {
+              openPopup({
+                title: m.label,
+                content: (
+                  <CommonPopup
+                    sqlId={m.sqlId}
+                    onApply={(row: any) => {
+                      updateCondition(
+                        `${baseKey}_CD`,
+                        row.CODE,
+                        "equal",
+                        m.dataType ?? "STRING",
+                        "POPUP",
+                      );
+                      updateCondition(
+                        `${baseKey}_NM`,
+                        row.NAME,
+                        "equal",
+                        m.dataType ?? "STRING",
+                        "POPUP",
+                      );
+                      // 재선택 → 연결된 자식들 재귀 클리어
+                      clearDescendants(m.key);
+                      closePopup();
+                    }}
+                    onClose={closePopup}
+                    filterCol={m.filterCol ? m.filterCol : ""}
+                    filterValue={filterValue}
+                    extraParams={buildSqlParams(m)}
+                    initialCode={initialCode}
+                    initialName={initialName}
+                  />
+                ),
+                width: "2xl",
+              });
+            };
+
+            // Enter 시 직접 조회 → 1건이면 자동 적용 / 0·2+ 건이면 popup 오픈
+            const onEnterSubmit = async (
+              typedCode: string,
+              typedName: string,
+            ) => {
+              try {
+                const res: any = await commonApi.getCodesAndNames({
+                  key: "dsOut",
+                  sqlProp: m.sqlId,
+                  ...buildSqlParams(m),
+                  ...(typedCode ? { code: typedCode } : {}),
+                  ...(typedName ? { name: typedName } : {}),
+                });
+                const datas: any[] = res?.data?.data?.dsOut ?? [];
+                if (datas.length === 1) {
+                  updateCondition(
+                    `${baseKey}_CD`,
+                    datas[0].CODE,
+                    "equal",
+                    m.dataType ?? "STRING",
+                    "POPUP",
+                  );
+                  updateCondition(
+                    `${baseKey}_NM`,
+                    datas[0].NAME,
+                    "equal",
+                    m.dataType ?? "STRING",
+                    "POPUP",
+                  );
+                  // 재선택 → 연결된 자식들 재귀 클리어
+                  clearDescendants(m.key);
+                  return;
+                }
+                openPickerPopup(typedCode, typedName);
+              } catch (err) {
+                console.error(err);
+                openPickerPopup(typedCode, typedName);
+              }
+            };
+
             return (
               <SearchFilter
                 {...common}
@@ -300,47 +407,25 @@ export function SearchFieldRenderer({
                 name={getCondition(`${baseKey}_NM`)?.value ?? ""}
                 sqlId={m.sqlId}
                 onChangeCode={(v: string) =>
-                  updateCondition(`${baseKey}_CD`, v, "equal", m.dataType ?? "STRING", "POPUP")
+                  updateCondition(
+                    `${baseKey}_CD`,
+                    v,
+                    "equal",
+                    m.dataType ?? "STRING",
+                    "POPUP",
+                  )
                 }
                 onChangeName={(v: string) =>
-                  updateCondition(`${baseKey}_NM`, v, "equal", m.dataType ?? "STRING", "POPUP")
+                  updateCondition(
+                    `${baseKey}_NM`,
+                    v,
+                    "equal",
+                    m.dataType ?? "STRING",
+                    "POPUP",
+                  )
                 }
-                onClickSearch={() =>
-                  openPopup({
-                    title: m.label,
-                    content: (
-                      <CommonPopup
-                        sqlId={m.sqlId}
-                        onApply={(row: any) => {
-                          updateCondition(
-                            `${baseKey}_CD`,
-                            row.CODE,
-                            "equal",
-                            m.dataType ?? "STRING",
-                            "POPUP",
-                          );
-                          updateCondition(
-                            `${baseKey}_NM`,
-                            row.NAME,
-                            "equal",
-                            m.dataType ?? "STRING",
-                            "POPUP",
-                          );
-                          closePopup();
-                        }}
-                        onClose={closePopup}
-                        filterCol={m.filterCol ? m.filterCol : ""}
-                        filterValue={
-                          m.filterValueKey
-                            ? getCondition(m.filterValueKey)?.value ?? ""
-                            : ""
-                        }
-                        extraParams={buildSqlParams(m)}
-                      />
-                    ),
-                    width: "2xl",
-                  })
-                }
+                onClickSearch={() => openPickerPopup()}
+                onEnterSubmit={onEnterSubmit}
               />
             );
           }
