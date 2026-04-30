@@ -85,6 +85,14 @@ export function CommonPopup({
     });
   };
 
+  // Enter 키로 조회 버튼과 동일 동작
+  const onSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      onSearch();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-3 w-full h-full overflow-hidden">
       {/* ================= Search Area ================= */}
@@ -94,6 +102,7 @@ export function CommonPopup({
           value={code}
           placeholder="CODE"
           onChange={(e: any) => setCode(e.target.value)}
+          onKeyDown={onSearchKeyDown}
         />
 
         <span className="text-sm font-medium">코드명</span>
@@ -101,6 +110,7 @@ export function CommonPopup({
           value={name}
           placeholder="NAME"
           onChange={(e: any) => setName(e.target.value)}
+          onKeyDown={onSearchKeyDown}
         />
         <Button
           variant="outline"
