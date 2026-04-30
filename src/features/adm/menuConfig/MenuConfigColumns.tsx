@@ -99,7 +99,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     cellRenderer: (p: any) => (p.data.isVirtualRoot ? "" : p.value),
   },
   ...standardAudit(setGridData, {
-    delete: false,
+    delete: true,
     rowStatus: true,
     insertPerson: false,
     insertDate: false,

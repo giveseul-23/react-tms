@@ -28,6 +28,16 @@ export const menuApi = {
     );
   },
 
+  getMsgCodeName(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/menuService/selectMsgCodeName`,
+      withSession({
+        MENU_CD: MENU_CD,
+        ...payload,
+      }),
+    );
+  },
+
   /** 메뉴경로(폴더) 추가 — LEAFYN = "N" */
   insertMenuFolder(payload: any) {
     return apiClient.post(
@@ -50,14 +60,23 @@ export const menuApi = {
     );
   },
 
-  /** 메뉴 저장 (수정된 행 일괄 저장) */
-  saveMenuConfig(payload: any[]) {
+  /**
+   * 메뉴 저장 — ExtJS Ext.Ajax.request 의 { params, jsonData } 분리 패턴과 동일하게:
+   *   - URL 쿼리스트링 (axios `params`)  → 서버 PARAM_MAP 으로 매핑
+   *   - JSON body (axios 두번째 인자)      → 서버 valueChainData.map 의 최상위 키로 매핑 (dsSave 가 여기로)
+   */
+  saveMenuConfig(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post(
-      `/menuService/save`,
-      withSession({
-        MENU_CD: MENU_CD,
-        ...payload,
-      }),
+      `/menuService/saveWithReact`,
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CD,
+          ...rest,
+        },
+      },
     );
   },
 };

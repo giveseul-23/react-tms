@@ -101,7 +101,7 @@ export default function MenuItemAddPopup({
       width: "2xl",
       content: (
         <CommonPopup
-          sqlId="selectLangPackCode"
+          sqlId="selectMsgCodeName"
           onApply={(row: any) => {
             closePopup();
             if (!row) return;

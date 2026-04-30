@@ -6,7 +6,6 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { commonApi } from "@/app/services/common/commonApi";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { getSessionFields } from "@/app/services/auth/auth";
 
 /* =======================
  * Component
@@ -39,15 +38,12 @@ export function CommonPopup({
   }, []);
 
   const handleSearch = (extra: Record<string, any> = {}) => {
-    const { userId, ACCESS_TOKEN } = getSessionFields();
-    // sqlId가 있으면 기존 commonApi 사용
+    // sqlId가 있으면 기존 commonApi 사용 — 세션은 commonApi 내부에서 URL 쿼리로 자동 부착
     if (sqlId) {
       commonApi
         .getCodesAndNames({
-          sesUserId: userId,
-          userId,
+          key: "dsOut",
           sqlProp: sqlId,
-          ACCESS_TOKEN,
           ...extraParams,
           ...extra,
         })

@@ -3,7 +3,6 @@ import { useCallback, MutableRefObject } from "react";
 import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { menuApi } from "@/features/adm/menuConfig/menuApi";
-import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { MAIN_COLUMN_DEFS } from "./MenuConfigColumns";
 import { MenuConfigModel } from "./MenuConfigModel";
@@ -17,7 +16,7 @@ import MenuItemAddPopup, {
 import type { MenuRow } from "./MenuConfig";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { makeSaveAction } from "@/app/components/grid/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -31,11 +30,15 @@ export function useMenuConfigController({
   treeGridRef,
   filtersRef,
 }: ControllerProps) {
-  const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
 
   const fetchMenuConfigList = useCallback(
     (params: Record<string, unknown>) => menuApi.getMenuConfigList(params),
+    [],
+  );
+
+  const saveMenuConfig = useCallback(
+    (payload: any) => menuApi.saveMenuConfig(payload),
     [],
   );
 
@@ -50,6 +53,14 @@ export function useMenuConfigController({
     },
     [model],
   );
+
+  // ── 저장 (EDIT_STS 마킹 행 → dsSave List<row> 변환 → 저장 → EDIT_STS 정리) ──
+  // 기본 동작은 hook 내부. 추가 파라미터/검증 등이 필요하면 handleSave 를 감싸서 사용.
+  const handleSave = useGridSave<MenuRow>({
+    rows: model.source,
+    setRows: model.setSource,
+    saveFn: saveMenuConfig,
+  });
 
   const handleRowClicked = useCallback(
     (row: any) => {
@@ -208,25 +219,8 @@ export function useMenuConfigController({
       },
     },
 
-    // ── 저장 (EDIT_STS 가 마킹된 행만 서버로) ────────────────────
-    makeSaveAction({
-      onClick: () => {
-        const saveRows = dirtyRows(model.source);
-        if (saveRows.length === 0) return;
-
-        handleApi(menuApi.saveMenuConfig(saveRows), "저장되었습니다.").then(
-          () => {
-            // 저장 완료 후 플래그 제거
-            model.setSource((prev: MenuRow[]) =>
-              prev.map((r: any) => {
-                const { EDIT_STS, ...rest } = r;
-                return rest as MenuRow;
-              }),
-            );
-          },
-        );
-      },
-    }),
+    // ── 저장 (EDIT_STS 기준으로 dsSave 자동 그룹핑 후 서버로) ────
+    makeSaveAction({ onClick: handleSave }),
 
     // ── 엑셀 ────────────────────────────────────────────────────
     {
@@ -264,6 +258,7 @@ export function useMenuConfigController({
   return {
     fetchMenuConfigList,
     handleSearch,
+    handleSave,
     handleRowClicked,
     mainActions,
     source: model.source,

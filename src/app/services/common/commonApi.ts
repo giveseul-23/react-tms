@@ -24,10 +24,21 @@ export type commonResponse = {
 };
 
 export const commonApi = {
-  getCodesAndNames(payload: commonRequest) {
+  /**
+   * 코드 조회 — ExtJS Ext.Ajax.request 의 { params, jsonData } 분리 패턴:
+   *   - URL 쿼리 (axios `params`) → 서버 PARAM_MAP (세션 필드 자동 부착)
+   *   - JSON body                   → valueChainData.map.dsCode (List<row>)
+   *
+   * dsCode 는 단일 row 객체 또는 row 배열 모두 허용 (자동으로 배열로 감쌈).
+   */
+  getCodesAndNames(
+    dsCode: Record<string, any> | Record<string, any>[],
+    params: Record<string, any> = {},
+  ) {
     return apiClient.post<commonResponse>(
-      "/appService/getCodeAndNames",
-      payload,
+      "/appService/getCodesAndNames",
+      { dsCode: Array.isArray(dsCode) ? dsCode : [dsCode] },
+      { params: { ...getSessionFields(), ...params } },
     );
   },
 

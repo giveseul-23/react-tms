@@ -46,6 +46,26 @@ export function dirtyRows<T = any>(rows: T[] | null | undefined): T[] {
   return (rows ?? []).filter(isDirty);
 }
 
+/**
+ * 변경된 행만 추출해 서버 dataset 형태(List<row>)로 변환.
+ *   - EDIT_STS 가 I/U/D 인 행만 포함
+ *   - 각 row 의 EDIT_STS → rowStatus 키로 변경 (ValueChainData 프레임워크 컨벤션)
+ *   - 서버는 dsSave 를 List 로 캐스팅하므로 평탄 array 로 반환
+ */
+export function toDsSave<T = any>(
+  rows: T[] | null | undefined,
+): Array<Record<string, any>> {
+  const out: Array<Record<string, any>> = [];
+  for (const row of rows ?? []) {
+    const sts = (row as any)?.EDIT_STS;
+    if (sts === ROW_STATUS.INSERT || sts === ROW_STATUS.UPDATE || sts === ROW_STATUS.DELETE) {
+      const { EDIT_STS, ...rest } = row as any;
+      out.push({ ...rest, rowStatus: sts });
+    }
+  }
+  return out;
+}
+
 /** 신규(INSERT) 행 여부. */
 export function isInserted(row: any): boolean {
   return row?.EDIT_STS === ROW_STATUS.INSERT;
