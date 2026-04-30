@@ -19,12 +19,14 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     type: "text",
     headerName: "LBL_DESC",
     field: "MSG_DESC",
+    editable: true,
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_APPL_CD",
     field: "APPL_CD",
     codeKey: "applCodeList",
+    editable: true,
   },
   ...standardAudit(setGridData),
 ];

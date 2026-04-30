@@ -37,8 +37,9 @@ export function useMenuConfigController({
     [],
   );
 
+  // useGridSave 가 전달하는 payload({ dsSave, rows }) 중 dsSave 만 사용 — rows 는 무시
   const saveMenuConfig = useCallback(
-    (payload: any) => menuApi.saveMenuConfig(payload),
+    (payload: any) => menuApi.saveMenuConfig({ dsSave: payload.dsSave }),
     [],
   );
 

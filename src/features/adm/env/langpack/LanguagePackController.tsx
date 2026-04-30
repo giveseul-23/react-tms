@@ -6,9 +6,8 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import { useApiHandler } from "@/hooks/useApiHandler";
 import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
 
 type ControllerProps = {
@@ -24,12 +23,21 @@ export function useLanguagePackController({
   searchRef,
   filtersRef,
 }: ControllerProps) {
-  const { handleApi } = useApiHandler();
-
   // ── 조회 fetch ────────────────────────────────────────────────
   const fetchLanguagePackList = useCallback(
     (params: Record<string, unknown>) =>
       langPackApi.getLangPackList(menuCd, { ...params }),
+    [menuCd],
+  );
+
+  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
+  // MENU_CD 는 항상 함께 전송 (서버 PARAM_MAP 으로 들어감).
+  const saveLangPack = useCallback(
+    (payload: any) =>
+      langPackApi.saveLangPack({
+        dsSave: payload.dsSave,
+        MENU_CD: menuCd,
+      }),
     [menuCd],
   );
 
@@ -41,23 +49,12 @@ export function useLanguagePackController({
     [model],
   );
 
-  // ── 추가 ─────────────────────────────────────────────────────
-  const handleAdd = useCallback(() => {
-    model.setGridData((prev) => ({
-      ...prev,
-      rows: [
-        {
-          MSG_CD: "",
-          LANG_GBN: "",
-          MSG_DESC: "",
-          APPLCODE: "",
-          EDIT_STS: "I",
-        },
-        ...prev.rows,
-      ],
-      totalCount: prev.totalCount + 1,
-    }));
-  }, [model]);
+  // ── 추가 (BTN_ADD) — 빈 행 prepend, EDIT_STS = "I" 자동 ───────
+  const handleAdd = useGridAdd({
+    setRows: model.setGridData,
+    newRow: { MSG_CD: "", LANG_GBN: "", MSG_DESC: "", APPLCODE: "" },
+    position: "top",
+  });
 
   // ── 복사: 선택 행을 신규 행으로 복제 ─────────────────────────
   const handleCopy = useCallback(() => {
@@ -82,17 +79,13 @@ export function useLanguagePackController({
     }));
   }, [model]);
 
-  // ── 저장: EDIT_STS 가 마킹된 행만 서버로 ──────────────────────
-  const handleSave = useCallback(() => {
-    const saveRows = dirtyRows(model.gridData.rows);
-    if (saveRows.length === 0) return;
-
-    handleApi(langPackApi.saveLangPack(saveRows), "저장되었습니다.").then(
-      () => {
-        searchRef.current?.();
-      },
-    );
-  }, [model.gridData.rows, handleApi, searchRef]);
+  // ── 저장 (BTN_SAVE) — dirty 행만 saveFn 으로 → 성공 후 재조회 ─
+  const handleSave = useGridSave({
+    rows: model.gridData.rows,
+    setRows: model.setGridData,
+    saveFn: saveLangPack,
+    onSaved: () => searchRef.current?.(),
+  });
 
   const mainActions: ActionItem[] = [
     {

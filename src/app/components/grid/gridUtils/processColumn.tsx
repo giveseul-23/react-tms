@@ -4,6 +4,8 @@
 //
 // 처리 항목:
 //   - codeKey → cellRenderer 자동 주입 (codeMap 의 코드 → 라벨 변환)
+//   - type "combo" + editable + codeKey → cellEditor 로 ComboCellEditor 자동 주입
+//     (평소엔 라벨 텍스트, 편집 시엔 dropdown — 옵션은 codeMap[codeKey] 전체)
 //   - headerName Lang.get (noLang:true 면 원문 유지)
 //   - ColGroupDef.children 재귀 변환
 //   - align prop → cellStyle.textAlign + headerClass (type 정렬보다 우선)
@@ -19,6 +21,7 @@ import type { ColDef, ColGroupDef } from "ag-grid-community";
 
 import { Lang } from "@/app/services/common/Lang";
 import { Util } from "@/app/services/common/Util";
+import { ComboCellEditor } from "@/app/components/grid/cellEditors/ComboCellEditor";
 
 type AnyCol = ColDef<any> | ColGroupDef<any>;
 
@@ -50,24 +53,12 @@ function walkChildren(
 ): any[] | undefined {
   if (!Array.isArray(children)) return children;
   return children.map((child) => {
-    const codeKey = child?.codeKey as string | undefined;
-    const withRenderer =
-      codeKey && !child.cellRenderer
-        ? {
-            ...child,
-            cellRenderer: (params: any) => {
-              const code = params.value;
-              const label = codeMap?.[codeKey]?.[String(code)] ?? code;
-              return (
-                <span className="px-2 py-0.5 rounded-lg text-xs">{label}</span>
-              );
-            },
-          }
-        : child;
+    const withRenderer = injectCodeRenderer(child, codeMap) as any;
+    const withEditor = injectComboEditor(withRenderer, codeMap) as any;
     return {
-      ...withRenderer,
-      headerName: translate(withRenderer),
-      children: walkChildren(withRenderer.children, codeMap),
+      ...withEditor,
+      headerName: translate(withEditor),
+      children: walkChildren(withEditor.children, codeMap),
     };
   });
 }
@@ -89,6 +80,32 @@ function injectCodeRenderer(
   } as AnyCol;
 }
 
+/**
+ * type "combo" + codeKey 컬럼에 cellEditor 자동 주입.
+ *   - 평소엔 위 injectCodeRenderer 가 라벨 텍스트로 표시
+ *   - 편집 시엔 ComboCellEditor 가 codeMap[codeKey] 모든 코드/명을 dropdown 으로 노출
+ *   - 이미 cellEditor 가 정의돼 있으면 유지
+ */
+function injectComboEditor(
+  col: AnyCol,
+  codeMap?: Record<string, Record<string, string>>,
+): AnyCol {
+  const c = col as any;
+  if (c.type !== "combo") return col;
+  const codeKey = c.codeKey as string | undefined;
+  if (!codeKey || c.cellEditor) return col;
+  return {
+    ...col,
+    cellEditor: ComboCellEditor,
+    cellEditorParams: {
+      ...(c.cellEditorParams ?? {}),
+      codeMap: codeMap?.[codeKey] ?? {},
+    },
+    // popup 모드로 띄워야 dropdown 이 셀 경계 밖에서도 잘 보임
+    cellEditorPopup: c.cellEditorPopup ?? true,
+  } as AnyCol;
+}
+
 /** 한 컬럼 변환. 외부에서 잘 안 쓰이지만 export. */
 export function processColumnDef(
   col: AnyCol,
@@ -96,8 +113,8 @@ export function processColumnDef(
 ): AnyCol {
   const codeMap = opts.codeMap;
 
-  // codeKey → cellRenderer
-  const prepared = injectCodeRenderer(col, codeMap);
+  // codeKey → cellRenderer (라벨 표시) + type "combo" 면 cellEditor (dropdown) 주입
+  const prepared = injectComboEditor(injectCodeRenderer(col, codeMap), codeMap);
 
   // "No" 컬럼 (DataGrid 전용 — rowCountForNo 가 없으면 일반 처리)
   if (
