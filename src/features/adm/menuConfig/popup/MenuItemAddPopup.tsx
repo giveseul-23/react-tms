@@ -55,12 +55,12 @@ export default function MenuItemAddPopup({
 
   const [form, setForm] = useState({
     APPLCODE: defaultAppl,
-    MENUCODE: "",
-    MENUNAME: "",
-    MSG_CD: "",
-    MSG_DESC: "",
+    MENUCODE: null,
+    MENUNAME: null,
+    MSG_CD: null,
+    MSG_DESC: null,
     DSPLY_SEQ: "1",
-    URL: "",
+    URL: null,
     USE_YN: "Y" as "Y" | "N",
   });
 

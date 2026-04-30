@@ -129,7 +129,7 @@ export default function MenuConfig() {
           ref={treeGridRef}
           source={ctrl.source}
           renderNameCell={renderNameCell}
-          columnDefs={MAIN_COLUMN_DEFS()}
+          columnDefs={MAIN_COLUMN_DEFS(model.setSource)}
           nameColumnHeader=""
           nameColumnWidth={160}
           sortField="DSPLY_SEQ"

@@ -100,6 +100,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   },
   ...standardAudit(setGridData, {
     delete: true,
+    deleteSetRowData: setGridData,
     rowStatus: true,
     insertPerson: false,
     insertDate: false,

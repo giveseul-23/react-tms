@@ -8,6 +8,12 @@ import { PopupWidth } from "./popup.types";
 
 interface PopupShellProps {
   open: boolean;
+  /**
+   * 스택 최상단 여부 — 기본 true.
+   * false 면 chrome(overlay/dialog) 은 그리지 않고 children 만 hidden 으로 마운트 유지 →
+   * 중첩 popup 에서 하위 popup 의 form state 가 unmount 로 날아가지 않도록 함.
+   */
+  active?: boolean;
   onOpenChange: (open: boolean) => void;
   title?: string;
   children: React.ReactNode;
@@ -27,6 +33,7 @@ const WIDTH_PX: Record<PopupWidth, number> = {
 
 export function PopupShell({
   open,
+  active = true,
   onOpenChange,
   title,
   children,
@@ -110,19 +117,28 @@ export function PopupShell({
           left: pos.x,
         };
 
+  // 비활성(스택 하위) 상태에서는 chrome 의 시각만 숨기고 children 의 트리 위치는 유지 →
+  // active 토글 시 children 이 unmount 되지 않아 form state 보존됨.
+  const finalDialogStyle: React.CSSProperties = active
+    ? dialogStyle
+    : { ...dialogStyle, display: "none" };
+
   return createPortal(
     <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-black/20 z-[9998]"
-        onClick={() => onOpenChange(false)}
-      />
+      {/* Overlay — active 일 때만 보임 */}
+      {active && (
+        <div
+          className="fixed inset-0 bg-black/20 z-[9998]"
+          onClick={() => onOpenChange(false)}
+        />
+      )}
 
-      {/* Dialog */}
+      {/* Dialog — 구조는 active 와 무관하게 항상 동일하게 렌더 (visibility 만 토글) */}
       <div
         ref={dialogRef}
-        style={dialogStyle}
+        style={finalDialogStyle}
         className="rounded-lg shadow-xl bg-white dark:bg-slate-800 overflow-hidden"
+        aria-hidden={!active}
       >
         {/* Header — 항상 고정 표시, shrink 되지 않음 */}
         <div

@@ -51,6 +51,8 @@ export type TreeRow = {
 export type TreeGridHandle = {
   expandAll: () => void;
   collapseAll: () => void;
+  /** 특정 노드를 펼침 — 행 추가 직후 부모 펼치기에 사용. */
+  expand: (id: string) => void;
   expandedIds: Set<string>;
 };
 
@@ -204,14 +206,33 @@ function TreeGridInner<TRow extends TreeRow>(
     buildInitialExpanded(source, defaultExpandLevel),
   );
 
-  // 재조회(source 교체) 시 expandedIds 를 새 source 기준으로 리셋
-  // 이전 source 의 id 가 남아 있으면 그리드가 갱신되지 않은 것처럼 보임
+  // source 변경 시 expandedIds 정리.
+  //   - 빈 → 데이터 로드 (초기 조회): defaults 적용
+  //   - 점진 변경(행 추가/삭제): 기존 expansion 유지 (유효 id 만 필터) → defaults 안 섞음
+  //   - 재조회로 이전 expansion 이 전부 사라진 경우: defaults 복원
   const prevSourceLengthRef = useRef<number>(source.length);
   useEffect(() => {
-    // source 가 실제로 바뀐 경우에만 리셋 (길이 0→0 초기화는 제외)
     if (source.length === 0 && prevSourceLengthRef.current === 0) return;
+    const wasEmpty = prevSourceLengthRef.current === 0;
     prevSourceLengthRef.current = source.length;
-    setExpandedIds(buildInitialExpanded(source, defaultExpandLevel));
+
+    if (wasEmpty) {
+      setExpandedIds(buildInitialExpanded(source, defaultExpandLevel));
+      return;
+    }
+
+    const validIds = new Set(source.map((r) => r.id));
+    setExpandedIds((prev) => {
+      const filtered = new Set<string>();
+      prev.forEach((id) => {
+        if (validIds.has(id)) filtered.add(id);
+      });
+      // 이전엔 펼쳐진 게 있었는데 모두 사라졌다면 재조회로 판단 → defaults 복원
+      if (prev.size > 0 && filtered.size === 0) {
+        return buildInitialExpanded(source, defaultExpandLevel);
+      }
+      return filtered;
+    });
     // defaultExpandLevel 은 보통 고정값이므로 source 만 dependency
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
@@ -253,17 +274,26 @@ function TreeGridInner<TRow extends TreeRow>(
 
   const collapseAll = useCallback(() => setExpandedIds(new Set()), []);
 
+  const expand = useCallback((id: string) => {
+    setExpandedIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
+
   const visibleRows = useMemo(
     () => calcVisibleRows(source, expandedIds, sortField),
     [source, expandedIds, sortField],
   );
 
   // ── 부모에게 명령형 API 노출 ───────────────────────────────────────────────
-  useImperativeHandle(ref, () => ({ expandAll, collapseAll, expandedIds }), [
-    expandAll,
-    collapseAll,
-    expandedIds,
-  ]);
+  useImperativeHandle(
+    ref,
+    () => ({ expandAll, collapseAll, expand, expandedIds }),
+    [expandAll, collapseAll, expand, expandedIds],
+  );
 
   // ── 액션 래핑 (gridCommon.wrapActions 사용) ──────────────────────────────
   const wrappedActions = useMemo<ActionItem[]>(

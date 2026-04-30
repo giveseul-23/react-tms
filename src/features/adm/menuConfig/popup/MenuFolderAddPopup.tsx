@@ -37,15 +37,18 @@ export default function MenuFolderAddPopup({
 }: MenuFolderAddPopupProps) {
   const { openPopup, closePopup } = usePopup();
 
-  // 상위 메뉴코드 — 가상루트(-1) 선택이면 최상위, 아니면 선택 행
+  // 상위 메뉴코드 — 가상루트(-1) 선택이면 "-1" 그대로 보내고 toNewRow 가
+  // __ROOT__${APPLCODE} 로 매핑한다. (MenuItemAddPopup 과 동일 컨벤션)
   const parentMenuCode = selectedRow?.isVirtualRoot
-    ? selectedRow.APPLCODE // 가상루트 선택 시 APPLCODE 를 상위로
+    ? "-1"
     : (selectedRow?.MENUCODE ?? "");
 
-  // 화면 표시용 레이블 — 코드 + 명칭
-  const parentMenuLabel = selectedRow
-    ? `${parentMenuCode}${selectedRow.MSG_DESC ? ` (${selectedRow.MSG_DESC})` : ""}`
-    : parentMenuCode;
+  // 화면 표시용 레이블 — 가상루트면 APPLCODE 노출, 아니면 코드 + 명칭
+  const parentMenuLabel = selectedRow?.isVirtualRoot
+    ? `${selectedRow.APPLCODE} (최상위)`
+    : selectedRow
+      ? `${parentMenuCode}${selectedRow.MSG_DESC ? ` (${selectedRow.MSG_DESC})` : ""}`
+      : parentMenuCode;
 
   const defaultAppl = selectedRow?.APPLCODE ?? applOptions[0]?.CODE ?? "";
 
@@ -104,7 +107,6 @@ export default function MenuFolderAddPopup({
               ...p,
               MSG_CD: code,
               MSG_DESC: name,
-              // MENUCODE 도 자동 세팅 (수정 가능)
               MENUCODE: code,
             }));
           }}

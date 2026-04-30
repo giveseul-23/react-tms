@@ -69,6 +69,21 @@ export function useMenuConfigController({
     [model],
   );
 
+  // 주어진 id 부터 위로 올라가며 ancestor 체인을 expand — 그 한 줄기만 펼침.
+  const expandAncestors = useCallback(
+    (startId: string | null | undefined) => {
+      if (!startId) return;
+      let cur: string | null | undefined = startId;
+      const seen = new Set<string>();
+      while (cur && !seen.has(cur)) {
+        seen.add(cur);
+        treeGridRef.current?.expand(cur);
+        cur = model.source.find((r) => r.id === cur)?.parentId ?? null;
+      }
+    },
+    [model.source, treeGridRef],
+  );
+
   const getApplOptions = useCallback(() => {
     return model.source
       .filter((r) => r.isVirtualRoot)
@@ -162,10 +177,11 @@ export function useMenuConfigController({
               onConfirm={(data: FolderFormData) => {
                 closePopup();
                 // 서버 호출 없이 source 에 바로 추가 → 그리드에 즉시 반영
-                model.setSource((prev: MenuRow[]) => [
-                  ...prev,
-                  toNewRow(data, applOptions),
-                ]);
+                const newRow = toNewRow(data, applOptions);
+                model.setSource((prev: MenuRow[]) => [...prev, newRow]);
+                // 부모 → 가상루트까지 ancestor 체인만 expand
+                // (전체 접힌 상태에서 추가해도 그 한 줄기만 펼쳐 새 row 노출)
+                expandAncestors(newRow.parentId);
               }}
               onClose={closePopup}
             />
@@ -207,10 +223,10 @@ export function useMenuConfigController({
               onConfirm={(data: MenuItemFormData) => {
                 closePopup();
                 // 서버 호출 없이 source 에 바로 추가 → 그리드에 즉시 반영
-                model.setSource((prev: MenuRow[]) => [
-                  ...prev,
-                  toNewRow(data, applOptions),
-                ]);
+                const newRow = toNewRow(data, applOptions);
+                model.setSource((prev: MenuRow[]) => [...prev, newRow]);
+                // 부모 → 가상루트까지 ancestor 체인만 expand
+                expandAncestors(newRow.parentId);
               }}
               onClose={closePopup}
             />

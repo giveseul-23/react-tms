@@ -15,16 +15,18 @@ export function CommonPopup({
   fetchFn,
   onApply,
   onClose,
-  filterCol,
-  filterValue,
+  filterCol = "",
+  filterValue = "",
   extraParams,
 }: {
   sqlId: string;
   fetchFn?: (params?: any) => Promise<any>;
   onApply: (row: any) => void;
   onClose: () => void;
-  filterCol: string;
-  filterValue: string;
+  /** 결과 필터 컬럼 — 비우면 필터 미적용 */
+  filterCol?: string;
+  /** 결과 필터 값 — filterCol 과 함께 사용 */
+  filterValue?: string;
   /** 동적 SQL 파라미터 — sqlParam1/sqlParam2/sqlParam3/keyParam 형태로 API에 포함 */
   extraParams?: Record<string, string>;
 }) {
