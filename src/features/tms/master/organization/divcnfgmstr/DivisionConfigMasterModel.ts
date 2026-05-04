@@ -1,6 +1,5 @@
-// src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMstModel.ts
 import { useState, useRef, useCallback, useEffect } from "react";
-import { lgstgrpOprConfigApi } from "@/features/tms/organization/lgstgrpOprConfigMst/LgstgrpOprConfigApi.ts";
+import { divisionConfigMasterApi } from "@/features/tms/master/organization/divcnfgmstr/DivisionConfigMasterApi";
 
 export type GridData = {
   rows: any[];
@@ -13,13 +12,13 @@ const EMPTY_GRID: GridData = { rows: [], totalCount: 0, page: 1, limit: 20 };
 
 export type ConfigTab = { key: string; label: string };
 
-export function useLgstgrpOprConfigMstModel() {
+export function useDivisionConfigMasterModel() {
   // ── 탭 (API에서 동적 로드) ─────────────────────────────────────
   const [configTabs, setConfigTabs] = useState<ConfigTab[]>([]);
   const [activeTab, setActiveTab] = useState<string>("");
 
   useEffect(() => {
-    lgstgrpOprConfigApi
+    divisionConfigMasterApi
       .getConfigTypeList()
       .then((res: any) => {
         const rows = res.data?.data?.dsOut ?? res.data?.result ?? [];
@@ -149,6 +148,6 @@ export function useLgstgrpOprConfigMstModel() {
   };
 }
 
-export type LgstgrpOprConfigMstModel = ReturnType<
-  typeof useLgstgrpOprConfigMstModel
+export type divisionConfigMasterModel = ReturnType<
+  typeof useDivisionConfigMasterModel
 >;

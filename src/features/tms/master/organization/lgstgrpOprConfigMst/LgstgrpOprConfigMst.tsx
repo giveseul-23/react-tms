@@ -9,13 +9,13 @@ import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useLgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel.ts";
-import { useLgstgrpOprConfigMstController } from "./LgstgrpOprConfigMstController";
+import { useLgstgrpOprConfigMstController } from "./LgstgrpOprConfigMstController.tsx";
 import {
   CONFIG_COLUMN_DEFS,
   CONFIG_DETAIL_COLUMN_DEFS,
   CONFIG_I18N_COLUMN_DEFS,
   CONFIG_DETAIL_I18N_COLUMN_DEFS,
-} from "./LgstgrpOprConfigMstColumns";
+} from "./LgstgrpOprConfigMstColumns.tsx";
 export const MENU_CODE = "MENU_LGSTGRP_OPR_CONFIG_MST";
 
 export default function LgstgrpOprConfigMst() {

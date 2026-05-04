@@ -8,13 +8,13 @@ import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useDivisionConfigMasterModel } from "./DivisionConfigMasterModel.ts";
-import { useDivisionConfigMasterController } from "./DivisionConfigMasterController";
+import { useDivisionConfigMasterController } from "./DivisionConfigMasterController.tsx";
 import {
   CONFIG_COLUMN_DEFS,
   CONFIG_DETAIL_COLUMN_DEFS,
   CONFIG_I18N_COLUMN_DEFS,
   CONFIG_DETAIL_I18N_COLUMN_DEFS,
-} from "./DivisionConfigMasterColumns";
+} from "./DivisionConfigMasterColumns.tsx";
 export const MENU_CODE = "MENU_DIV_OPR_CONFIG_MST";
 
 export default function DivisionConfigMaster() {

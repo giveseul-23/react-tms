@@ -1,8 +1,9 @@
+// src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMstController.tsx
 import { useCallback, MutableRefObject } from "react";
-import { divisionConfigMasterApi } from "@/features/tms/organization/divcnfgmstr/DivisionConfigMasterApi.ts";
+import { lgstgrpOprConfigApi } from "@/features/tms/master/organization/lgstgrpOprConfigMst/LgstgrpOprConfigApi.ts";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { useGuard } from "@/hooks/useGuard";
-import type { divisionConfigMasterModel } from "./DivisionConfigMasterModel.ts";
+import type { LgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel.ts";
 import {
   makeAddAction,
   makeSaveAction,
@@ -11,12 +12,12 @@ import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
-  model: divisionConfigMasterModel;
+  model: LgstgrpOprConfigMstModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
 };
 
-export function useDivisionConfigMasterController({
+export function useLgstgrpOprConfigMstController({
   model,
   searchRef,
   filtersRef,
@@ -27,7 +28,7 @@ export function useDivisionConfigMasterController({
   // ── 메인 조회 (Top-left) ──────────────────────────────────────
   const fetchConfigList = useCallback(
     (params: Record<string, unknown>) =>
-      divisionConfigMasterApi.getConfigList({
+      lgstgrpOprConfigApi.getConfigList({
         ...params,
         LGST_GRP_CNFG_GRP_CD: model.activeTab,
       }),
@@ -38,7 +39,7 @@ export function useDivisionConfigMasterController({
   const fetchDetail = useCallback((row: any) => {
     const configCd = row.CNFG_CD;
     if (!configCd) return Promise.resolve([]);
-    return divisionConfigMasterApi
+    return lgstgrpOprConfigApi
       .getConfigDetailList({ CNFG_CD: configCd })
       .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
       .catch(() => []);
@@ -48,7 +49,7 @@ export function useDivisionConfigMasterController({
     const configCd = row.CNFG_CD;
     const detailCd = row.CNFG_DTL_CD;
     if (!configCd) return Promise.resolve([]);
-    return divisionConfigMasterApi
+    return lgstgrpOprConfigApi
       .getConfigI18nList({ CNFG_CD: configCd, CNFG_DTL_CD: detailCd })
       .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
       .catch(() => []);
@@ -60,7 +61,7 @@ export function useDivisionConfigMasterController({
       const detailCd =
         row.CNFG_DTL_CD ?? model.selectedDetailRef.current?.CNFG_DTL_CD;
       if (!configCd || !detailCd) return Promise.resolve([]);
-      return divisionConfigMasterApi
+      return lgstgrpOprConfigApi
         .getConfigDetailI18nList({ CNFG_CD: configCd, CNFG_DTL_CD: detailCd })
         .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
         .catch(() => []);
@@ -68,8 +69,7 @@ export function useDivisionConfigMasterController({
     [model],
   );
 
-  // ── 행 클릭 핸들러: 각 단계는 자기 자식만 fetch.
-  //    하위 그리드의 autoSelectFirstRow 가 다음 단계의 onRowClicked 를 발화.
+  // ── 행 클릭 핸들러 (각각 독립) ────────────────────────────────
   const handleConfigRowClicked = useCallback(
     (row: any) => {
       model.setSelectedConfig(row);
@@ -79,26 +79,29 @@ export function useDivisionConfigMasterController({
       model.setDetailI18nData([]);
 
       fetchDetail(row).then((rows) => {
-        model.setDetailData({
+        (model.setDetailData({
           rows,
           totalCount: rows.length,
           page: 1,
           limit: 20,
-        });
+        }),
+          handleDetailRowClicked(rows[0]));
       });
     },
-    [model, fetchDetail],
+    [model, fetchDetail, fetchI18n],
   );
 
   const handleDetailRowClicked = useCallback(
     (row: any) => {
       model.setSelectedDetail(row);
-      model.setI18nData([]);
       model.setDetailI18nData([]);
 
-      fetchI18n(row).then((rows) => model.setI18nData(rows));
+      fetchI18n(row).then((rows) => {
+        model.setI18nData(rows);
+        fetchDetailI18n(rows[0]).then((rows) => model.setDetailI18nData(rows));
+      });
     },
-    [model, fetchI18n],
+    [model, fetchDetailI18n],
   );
 
   const handleI18nRowClicked = useCallback(
@@ -110,39 +113,64 @@ export function useDivisionConfigMasterController({
     [model, fetchDetailI18n],
   );
 
-  // ── handleSearch: top-left 만 채움. 이후 cascade 는 각 그리드의
-  //    autoSelectFirstRow 가 onRowClicked 를 자동 발화하며 흘러감.
+  // ── handleSearch: top-left → top-right → bottom-left → bottom-right 순차 조회
   const handleSearch = useCallback(
-    (data: any) => {
+    async (data: any) => {
       model.setConfigData(data);
       model.setSelectedConfig(null);
       model.setSelectedDetail(null);
       model.setDetailData({ rows: [], totalCount: 0, page: 1, limit: 20 });
       model.setI18nData([]);
       model.setDetailI18nData([]);
+
+      const firstRow = data.rows?.[0];
+      if (!firstRow) return;
+
+      // 1. top-left 첫 번째 행 선택
+      model.setSelectedConfig(firstRow);
+
+      // 2. top-right 조회
+      const detailRows = await fetchDetail(firstRow);
+      model.setDetailData({
+        rows: detailRows,
+        totalCount: detailRows.length,
+        page: 1,
+        limit: 20,
+      });
+
+      // 3. bottom-left 조회
+      const i18nRows = await fetchI18n(firstRow);
+      model.setI18nData(i18nRows);
+
+      // 4. bottom-right 조회 (top-right 첫 번째 행 기준)
+      if (detailRows.length > 0) {
+        model.setSelectedDetail(detailRows[0]);
+        const detailI18nRows = await fetchDetailI18n(detailRows[0]);
+        model.setDetailI18nData(detailI18nRows);
+      }
     },
-    [model],
+    [model, fetchDetail, fetchI18n, fetchDetailI18n],
   );
 
   // ── saveFn 들 — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
   const saveConfigFn = useCallback(
     (payload: any) =>
-      divisionConfigMasterApi.saveConfig({ dsSave: payload.dsSave }),
+      lgstgrpOprConfigApi.saveConfig({ dsSave: payload.dsSave }),
     [],
   );
   const saveConfigDetailFn = useCallback(
     (payload: any) =>
-      divisionConfigMasterApi.saveConfigDetail({ dsSave: payload.dsSave }),
+      lgstgrpOprConfigApi.saveConfigDetail({ dsSave: payload.dsSave }),
     [],
   );
   const saveConfigI18nFn = useCallback(
     (payload: any) =>
-      divisionConfigMasterApi.saveConfigI18n({ dsSave: payload.dsSave }),
+      lgstgrpOprConfigApi.saveConfigI18n({ dsSave: payload.dsSave }),
     [],
   );
   const saveConfigDetailI18nFn = useCallback(
     (payload: any) =>
-      divisionConfigMasterApi.saveConfigDetailI18n({ dsSave: payload.dsSave }),
+      lgstgrpOprConfigApi.saveConfigDetailI18n({ dsSave: payload.dsSave }),
     [],
   );
 
@@ -169,10 +197,9 @@ export function useDivisionConfigMasterController({
       key: "LBL_SYNC",
       label: "LBL_SYNC",
       onClick: () => {
-        handleApi(
-          divisionConfigMasterApi.syncConfig({}),
-          "동기화되었습니다.",
-        ).then(() => searchRef.current?.());
+        handleApi(lgstgrpOprConfigApi.syncConfig({}), "동기화되었습니다.").then(
+          () => searchRef.current?.(),
+        );
       },
     },
     makeAddAction({ onClick: handleConfigAdd }),
