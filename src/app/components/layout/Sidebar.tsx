@@ -288,23 +288,12 @@ export function Sidebar({
 
   return (
     <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-          onClick={onToggle}
-        />
-      )}
-
       <aside
         className={`
-          fixed lg:relative inset-y-0 left-0 z-30
+          relative inset-y-0 left-0 z-30
           bg-[rgb(var(--bg))] border-r border-gray-200
-          transform transition-all duration-300 flex flex-col
-          ${
-            isOpen
-              ? "w-60 translate-x-0"
-              : "-translate-x-full lg:translate-x-0 lg:w-14 lg:overflow-hidden"
-          }
+          transition-all duration-300 flex flex-col shrink-0
+          ${isOpen ? "w-60" : "w-14 overflow-hidden"}
         `}
       >
         {/* ── Logo ── */}
@@ -330,7 +319,7 @@ export function Sidebar({
               </div>
               <button
                 onClick={onToggle}
-                className="hidden lg:block p-1 hover:bg-gray-100 rounded"
+                className="block p-1 hover:bg-gray-100 rounded"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -338,7 +327,7 @@ export function Sidebar({
           ) : (
             <button
               onClick={onToggle}
-              className="hidden lg:flex w-full h-full items-center justify-center hover:bg-gray-100"
+              className="flex w-full h-full items-center justify-center hover:bg-gray-100"
             >
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center" /*{bg-[rgb(var(--primary))]}*/
