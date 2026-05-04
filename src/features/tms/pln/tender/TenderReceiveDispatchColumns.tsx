@@ -7,6 +7,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     headerName: "LBL_FINANCIAL_STATUS",
     field: "AP_FI_STS",
     codeKey: "apFiSts",
+    align: "center",
   },
   { type: "text", headerName: "LBL_LOGISTICS_GROUP", field: "LGST_GRP_CD" },
   {

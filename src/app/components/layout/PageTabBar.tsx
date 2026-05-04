@@ -8,17 +8,28 @@ import type { PageTab } from "@/hooks/usePageTabs";
 interface PageTabBarProps {
   tabs: PageTab[];
   activeMenuCode: string;
+  splitMenuCode?: string | null;
   onSelect: (menuCode: string) => void;
   onClose: (menuCode: string) => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
+  /** 탭 드래그 시작 — HomePage가 분할 드롭존을 활성화할 수 있도록 알림 */
+  onDragStartTab?: (menuCode: string) => void;
+  /** 탭 드래그 종료 (드롭/취소 모두) */
+  onDragEndTab?: () => void;
 }
+
+// HomePage <main> 드롭존이 "탭 드래그"를 식별하기 위한 MIME 타입 (보조 채널)
+export const TAB_DRAG_MIME = "application/x-tab-menucode";
 
 export function PageTabBar({
   tabs,
   activeMenuCode,
+  splitMenuCode,
   onSelect,
   onClose,
   onReorder,
+  onDragStartTab,
+  onDragEndTab,
 }: PageTabBarProps) {
   if (tabs.length === 0) return null;
 
@@ -33,6 +44,10 @@ export function PageTabBar({
   const handleDragStart = (e: React.DragEvent, index: number) => {
     dragIndexRef.current = index;
     e.dataTransfer.effectAllowed = "move";
+    // 보조: dataTransfer에도 실어둔다 (외부 드롭존에서 식별 가능하도록)
+    e.dataTransfer.setData(TAB_DRAG_MIME, tabs[index].menuCode);
+    // 주: HomePage state에 직접 알린다
+    onDragStartTab?.(tabs[index].menuCode);
   };
 
   const handleDragOver = (
@@ -66,6 +81,7 @@ export function PageTabBar({
   const handleDragEnd = () => {
     dragIndexRef.current = null;
     setDropIndex(null);
+    onDragEndTab?.();
   };
 
   return (
@@ -97,6 +113,7 @@ export function PageTabBar({
     >
       {tabs.map((tab, index) => {
         const isActive = tab.menuCode === activeMenuCode;
+        const isSplit = tab.menuCode === splitMenuCode;
 
         // 이 탭의 왼쪽에 인디케이터 표시 여부
         const showIndicatorBefore =
@@ -125,7 +142,9 @@ export function PageTabBar({
               ${
                 isActive
                   ? "bg-white text-[rgb(var(--primary))] font-semibold border-b-2 border-b-[rgb(var(--primary))] -mb-px"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                  : isSplit
+                    ? "text-indigo-600 font-medium border-b-2 border-b-indigo-400 -mb-px"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
               }
             `}
             style={{
