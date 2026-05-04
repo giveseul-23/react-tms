@@ -25,7 +25,7 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 
 type ControllerProps = {
   model: AccountReceivableSubChargeManagementModel;
@@ -130,6 +130,13 @@ export function useAccountReceivableSubChargeManagementController({
     [model],
   );
 
+  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
+  const saveDetail = useCallback(
+    (payload: any) =>
+      accountReceivableSubChargeManagementApi.save({ dsSave: payload.dsSave }),
+    [],
+  );
+
   // ── 메인 그리드 액션 ──────────────────────────────────────────
   // 추가 + 저장 + 엑셀 일괄 세팅이 필요하면 makeCommonActions 사용
   const mainActions = makeCommonActions({
@@ -144,32 +151,26 @@ export function useAccountReceivableSubChargeManagementController({
     },
   });
 
+  // ── 상세 그리드 추가/저장 (LanguagePack 패턴) ─────────────────
+  const handleDetailAdd = useGridAdd({
+    setRows: model.setSubDetail01RowData,
+    newRow: () => ({
+      XXX_CD: model.selectedHeaderRowRef.current?.XXX_CD,
+    }),
+    position: "bottom",
+  });
+
+  const handleDetailSave = useGridSave({
+    rows: model.subDetail01RowData.rows,
+    setRows: model.setSubDetail01RowData,
+    saveFn: saveDetail,
+    onSaved: () => searchRef.current?.(),
+  });
+
   // ── 상세 그리드 액션 (onClick 커스터마이즈 예시) ──────────────
   const detailActions = [
-    makeAddAction({
-      onClick: () => {
-        if (!model.selectedHeaderRowRef.current) return;
-        model.setSubDetail01RowData((prev: any) => ({
-          ...prev,
-          rows: [
-            ...prev.rows,
-            {
-              EDIT_STS: "I", // 저장 대상 식별 플래그
-              XXX_CD: model.selectedHeaderRowRef.current.XXX_CD,
-            },
-          ],
-        }));
-      },
-    }),
-    makeSaveAction({
-      onClick: (e: any) => {
-        const saveRows = dirtyRows(e.data);
-        if (saveRows.length === 0) return;
-        accountReceivableSubChargeManagementApi
-          .save(saveRows)
-          .then(() => searchRef.current?.());
-      },
-    }),
+    makeAddAction({ onClick: handleDetailAdd }),
+    makeSaveAction({ onClick: handleDetailSave }),
     makeExcelGroupAction({
       columns: MAIN_COLUMN_DEFS(),
       menuName: "화면명",

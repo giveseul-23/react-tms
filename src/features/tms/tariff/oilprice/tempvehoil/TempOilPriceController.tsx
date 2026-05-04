@@ -12,7 +12,7 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 
 type ControllerProps = {
   model: TempOilPriceModel;
@@ -91,31 +91,33 @@ export function useTempOilPriceController({
     [model],
   );
 
+  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
+  const saveOilPrice = useCallback(
+    (payload: any) => tempOilPriceApi.save({ dsSave: payload.dsSave }),
+    [],
+  );
+
+  // ── 탭 A 우측 추가/저장 (LanguagePack 패턴) ───────────────────
+  const handleOilPriceAdd = useGridAdd({
+    setRows: model.setOilPriceRowData,
+    newRow: () => ({
+      LGST_GRP_CD: model.selectedHeaderRowRef.current?.LGST_GRP_CD,
+      LGST_GRP_NM: model.selectedHeaderRowRef.current?.LGST_GRP_NM,
+    }),
+    position: "bottom",
+  });
+
+  const handleOilPriceSave = useGridSave({
+    rows: model.oilPriceRowData.rows,
+    setRows: model.setOilPriceRowData,
+    saveFn: saveOilPrice,
+    onSaved: () => searchRef.current?.(),
+  });
+
   // ── 탭 A 우측 액션: 추가 / 저장 / 엑셀 ────────────────────────
   const oilPriceActions = [
-    makeAddAction({
-      onClick: () => {
-        if (!model.selectedHeaderRowRef.current) return;
-        model.setOilPriceRowData((prev: any) => ({
-          ...prev,
-          rows: [
-            ...prev.rows,
-            {
-              EDIT_STS: "I",
-              LGST_GRP_CD: model.selectedHeaderRowRef.current.LGST_GRP_CD,
-              LGST_GRP_NM: model.selectedHeaderRowRef.current.LGST_GRP_NM,
-            },
-          ],
-        }));
-      },
-    }),
-    makeSaveAction({
-      onClick: (e: any) => {
-        const saveRows = dirtyRows(e.data);
-        if (saveRows.length === 0) return;
-        tempOilPriceApi.save(saveRows).then(() => searchRef.current?.());
-      },
-    }),
+    makeAddAction({ onClick: handleOilPriceAdd }),
+    makeSaveAction({ onClick: handleOilPriceSave }),
     makeExcelGroupAction({
       columns: OIL_PRICE_COLUMN_DEFS,
       menuName: "용차유가관리",

@@ -25,7 +25,7 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -138,32 +138,33 @@ export function useOverheadTariffManagementController({
     }),
   ];
 
+  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
+  const saveDetail = useCallback(
+    (payload: any) =>
+      overheadTariffManagementApi.save({ dsSave: payload.dsSave }),
+    [],
+  );
+
+  // ── 상세 그리드 추가/저장 (LanguagePack 패턴) ─────────────────
+  const handleDetailAdd = useGridAdd({
+    setRows: model.setSubRightDetailRowData,
+    newRow: () => ({
+      XXX_CD: model.selectedHeaderRowRef.current?.XXX_CD,
+    }),
+    position: "bottom",
+  });
+
+  const handleDetailSave = useGridSave({
+    rows: model.subRightDetailRowData.rows,
+    setRows: model.setSubRightDetailRowData,
+    saveFn: saveDetail,
+    onSaved: () => searchRef.current?.(),
+  });
+
   // ── 상세 그리드 액션 (onClick 커스터마이즈 예시) ──────────────
   const detailActions = [
-    makeAddAction({
-      onClick: () => {
-        if (!model.selectedHeaderRowRef.current) return;
-        model.setSubRightRowData((prev: any) => ({
-          ...prev,
-          rows: [
-            ...prev.rows,
-            {
-              EDIT_STS: "I", // 저장 대상 식별 플래그
-              XXX_CD: model.selectedHeaderRowRef.current.XXX_CD,
-            },
-          ],
-        }));
-      },
-    }),
-    makeSaveAction({
-      onClick: (e: any) => {
-        const saveRows = dirtyRows(e.data);
-        if (saveRows.length === 0) return;
-        overheadTariffManagementApi
-          .save(saveRows)
-          .then(() => searchRef.current?.());
-      },
-    }),
+    makeAddAction({ onClick: handleDetailAdd }),
+    makeSaveAction({ onClick: handleDetailSave }),
   ];
 
   return {

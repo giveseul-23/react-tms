@@ -32,9 +32,17 @@ export const divisionConfigMasterApi = {
   },
 
   saveConfig(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/divisionConfigMasterService/saveConfig",
-      withSession(payload),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 
@@ -54,9 +62,17 @@ export const divisionConfigMasterApi = {
   },
 
   saveConfigDetail(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/divisionConfigMasterService/saveConfigDetail",
-      withSession(payload),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 
@@ -69,9 +85,17 @@ export const divisionConfigMasterApi = {
   },
 
   saveConfigI18n(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/divisionConfigMasterService/saveConfigI18n",
-      withSession(payload),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 
@@ -84,9 +108,17 @@ export const divisionConfigMasterApi = {
   },
 
   saveConfigDetailI18n(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/divisionConfigMasterService/saveConfigDetailI18n",
-      withSession(payload),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 };

@@ -33,9 +33,17 @@ export const lgstgrpOprConfigApi = {
   },
 
   saveConfig(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/lgstGrpOprConfigService/saveConfig",
-      withSession(payload),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 
@@ -55,9 +63,17 @@ export const lgstgrpOprConfigApi = {
   },
 
   saveConfigDetail(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/lgstGrpOprConfigService/saveConfigDetail",
-      withSession(payload),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 
@@ -70,9 +86,17 @@ export const lgstgrpOprConfigApi = {
   },
 
   saveConfigI18n(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/lgstGrpOprConfigService/saveConfigI18n",
-      withSession(payload),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 
@@ -85,9 +109,17 @@ export const lgstgrpOprConfigApi = {
   },
 
   saveConfigDetailI18n(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/lgstGrpOprConfigService/saveConfigDetailI18n",
-      withSession(payload),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 };

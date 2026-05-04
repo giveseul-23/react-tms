@@ -7,7 +7,7 @@ import {
   makeAddAction,
   makeSaveAction,
 } from "@/app/components/grid/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -124,6 +124,44 @@ export function useDivisionConfigMasterController({
     [model],
   );
 
+  // ── saveFn 들 — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
+  const saveConfigFn = useCallback(
+    (payload: any) =>
+      divisionConfigMasterApi.saveConfig({ dsSave: payload.dsSave }),
+    [],
+  );
+  const saveConfigDetailFn = useCallback(
+    (payload: any) =>
+      divisionConfigMasterApi.saveConfigDetail({ dsSave: payload.dsSave }),
+    [],
+  );
+  const saveConfigI18nFn = useCallback(
+    (payload: any) =>
+      divisionConfigMasterApi.saveConfigI18n({ dsSave: payload.dsSave }),
+    [],
+  );
+  const saveConfigDetailI18nFn = useCallback(
+    (payload: any) =>
+      divisionConfigMasterApi.saveConfigDetailI18n({ dsSave: payload.dsSave }),
+    [],
+  );
+
+  // ── Top-left 추가/저장 (LanguagePack 패턴) ───────────────────
+  const handleConfigAdd = useGridAdd({
+    setRows: model.setConfigData,
+    newRow: {
+      LGST_GRP_OPR_CONFIG_CD: "",
+      LGST_GRP_OPR_CONFIG_NM: "",
+    },
+    position: "bottom",
+  });
+  const handleConfigSave = useGridSave({
+    rows: model.configData.rows,
+    setRows: model.setConfigData,
+    saveFn: saveConfigFn,
+    onSaved: () => searchRef.current?.(),
+  });
+
   // ── Top-left 액션 ────────────────────────────────────────────
   const configActions: ActionItem[] = [
     {
@@ -137,125 +175,79 @@ export function useDivisionConfigMasterController({
         ).then(() => searchRef.current?.());
       },
     },
-    makeAddAction({
-      onClick: () => {
-        model.setConfigData((prev: any) => ({
-          ...prev,
-          rows: [
-            ...prev.rows,
-            {
-              EDIT_STS: "I",
-              LGST_GRP_OPR_CONFIG_CD: "",
-              LGST_GRP_OPR_CONFIG_NM: "",
-            },
-          ],
-          totalCount: prev.totalCount + 1,
-        }));
-      },
-    }),
-    makeSaveAction({
-      onClick: (e: any) => {
-        const saveRows = dirtyRows(e.data);
-        if (saveRows.length === 0) return;
-        handleApi(
-          divisionConfigMasterApi.saveConfig(saveRows),
-          "저장되었습니다.",
-        ).then(() => searchRef.current?.());
-      },
-    }),
+    makeAddAction({ onClick: handleConfigAdd }),
+    makeSaveAction({ onClick: handleConfigSave }),
   ];
+
+  // ── Top-right 추가/저장 (LanguagePack 패턴) ──────────────────
+  const handleDetailAdd = useGridAdd({
+    setRows: model.setDetailData,
+    newRow: () => ({
+      LGST_GRP_OPR_CONFIG_CD:
+        model.selectedConfigRef.current?.LGST_GRP_OPR_CONFIG_CD,
+      LGST_GRP_OPR_CONFIG_DTL_CD: "",
+      LGST_GRP_OPR_CONFIG_DTL_NM: "",
+    }),
+    position: "bottom",
+  });
+  const handleDetailSave = useGridSave({
+    rows: model.detailData.rows,
+    setRows: model.setDetailData,
+    saveFn: saveConfigDetailFn,
+  });
 
   // ── Top-right 액션 ───────────────────────────────────────────
   const detailActions = [
-    makeAddAction({
-      onClick: () => {
-        if (!model.selectedConfigRef.current) return;
-        model.setDetailData((prev: any) => [
-          ...prev,
-          {
-            EDIT_STS: "I",
-            LGST_GRP_OPR_CONFIG_CD:
-              model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
-            LGST_GRP_OPR_CONFIG_DTL_CD: "",
-            LGST_GRP_OPR_CONFIG_DTL_NM: "",
-          },
-        ]);
-      },
-    }),
-    makeSaveAction({
-      onClick: (_e: any) => {
-        const saveRows = dirtyRows(model.detailDataRef.current);
-        if (saveRows.length === 0) return;
-        handleApi(
-          divisionConfigMasterApi.saveConfigDetail(saveRows),
-          "저장되었습니다.",
-        );
-      },
-    }),
+    makeAddAction({ onClick: handleDetailAdd }),
+    makeSaveAction({ onClick: handleDetailSave }),
   ];
+
+  // ── Bottom-left 추가/저장 (LanguagePack 패턴) ────────────────
+  const handleI18nAdd = useGridAdd({
+    setRows: model.setI18nData,
+    newRow: () => ({
+      LGST_GRP_OPR_CONFIG_CD:
+        model.selectedConfigRef.current?.LGST_GRP_OPR_CONFIG_CD,
+      LANG_TP: "",
+      LGST_GRP_OPR_CONFIG_NM: "",
+    }),
+    position: "bottom",
+  });
+  const handleI18nSave = useGridSave({
+    rows: model.i18nData,
+    setRows: model.setI18nData,
+    saveFn: saveConfigI18nFn,
+  });
 
   // ── Bottom-left 액션 ─────────────────────────────────────────
   const i18nActions = [
-    makeAddAction({
-      onClick: () => {
-        if (!model.selectedConfigRef.current) return;
-        model.setI18nData((prev: any) => [
-          ...prev,
-          {
-            EDIT_STS: "I",
-            LGST_GRP_OPR_CONFIG_CD:
-              model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
-            LANG_TP: "",
-            LGST_GRP_OPR_CONFIG_NM: "",
-          },
-        ]);
-      },
-    }),
-    makeSaveAction({
-      onClick: () => {
-        const saveRows = dirtyRows(model.i18nDataRef.current);
-        if (saveRows.length === 0) return;
-        handleApi(
-          divisionConfigMasterApi.saveConfigI18n(saveRows),
-          "저장되었습니다.",
-        );
-      },
-    }),
+    makeAddAction({ onClick: handleI18nAdd }),
+    makeSaveAction({ onClick: handleI18nSave }),
   ];
+
+  // ── Bottom-right 추가/저장 (LanguagePack 패턴) ───────────────
+  const handleDetailI18nAdd = useGridAdd({
+    setRows: model.setDetailI18nData,
+    newRow: () => ({
+      LGST_GRP_OPR_CONFIG_CD:
+        model.selectedConfigRef.current?.LGST_GRP_OPR_CONFIG_CD,
+      LGST_GRP_OPR_CONFIG_DTL_CD:
+        model.selectedDetailRef.current?.LGST_GRP_OPR_CONFIG_DTL_CD,
+      LANG_TP: "",
+      LGST_GRP_OPR_CONFIG_DTL_NM: "",
+    }),
+    position: "bottom",
+  });
+  const handleDetailI18nSave = useGridSave({
+    rows: model.detailI18nData,
+    setRows: model.setDetailI18nData,
+    saveFn: saveConfigDetailI18nFn,
+  });
 
   // ── Bottom-right 액션 ────────────────────────────────────────
   const detailI18nActions = [
-    makeAddAction({
-      onClick: () => {
-        if (
-          !model.selectedConfigRef.current ||
-          !model.selectedDetailRef.current
-        )
-          return;
-        model.setDetailI18nData((prev: any) => [
-          ...prev,
-          {
-            EDIT_STS: "I",
-            LGST_GRP_OPR_CONFIG_CD:
-              model.selectedConfigRef.current.LGST_GRP_OPR_CONFIG_CD,
-            LGST_GRP_OPR_CONFIG_DTL_CD:
-              model.selectedDetailRef.current.LGST_GRP_OPR_CONFIG_DTL_CD,
-            LANG_TP: "",
-            LGST_GRP_OPR_CONFIG_DTL_NM: "",
-          },
-        ]);
-      },
-    }),
-    makeSaveAction({
-      onClick: () => {
-        const saveRows = dirtyRows(model.detailI18nDataRef.current);
-        if (saveRows.length === 0) return;
-        handleApi(
-          divisionConfigMasterApi.saveConfigDetailI18n(saveRows),
-          "저장되었습니다.",
-        );
-      },
-    }),
+    makeAddAction({ onClick: handleDetailI18nAdd }),
+    makeSaveAction({ onClick: handleDetailI18nSave }),
   ];
 
   return {

@@ -64,10 +64,21 @@ export const dispatchPlanApi = {
   },
 
   // ── 저장 ─────────────────────────────────────────────────────
+  /**
+   * 저장 — menuConfig/LanguagePack 와 동일한 dsSave 패턴 (URL params + body { dsSave }).
+   */
   saveDispatchPlan(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/save",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 

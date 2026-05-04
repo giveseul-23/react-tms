@@ -25,7 +25,7 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -185,41 +185,45 @@ export function useShpmMgmtController({
     }),
   ];
 
+  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
+  const saveShpm = useCallback(
+    (payload: any) => shpmMgmtApi.save({ dsSave: payload.dsSave }),
+    [],
+  );
+
   // ── 그리드 액션 (onClick 커스터마이즈 예시) ──────────────
 
+  // ── detail01: 추가/저장 (LanguagePack 패턴) ──────────────────
+  const handleDetail01Add = useGridAdd({
+    setRows: model.setSubLgstRowData,
+    newRow: () => ({
+      XXX_CD: model.selectedHeaderRowRef.current?.XXX_CD,
+    }),
+    position: "bottom",
+  });
+
+  const handleDetail01Save = useGridSave({
+    rows: model.subLgstRowData.rows,
+    setRows: model.setSubLgstRowData,
+    saveFn: saveShpm,
+    onSaved: () => searchRef.current?.(),
+  });
+
   const detail01Actions = [
-    makeAddAction({
-      onClick: () => {
-        if (!model.selectedHeaderRowRef.current) return;
-        model.setSubLgstRowData((prev: any) => ({
-          ...prev,
-          rows: [
-            ...prev.rows,
-            {
-              EDIT_STS: "I", // 저장 대상 식별 플래그
-              XXX_CD: model.selectedHeaderRowRef.current.XXX_CD,
-            },
-          ],
-        }));
-      },
-    }),
-    makeSaveAction({
-      onClick: (e: any) => {
-        const saveRows = dirtyRows(e.data);
-        if (saveRows.length === 0) return;
-        shpmMgmtApi.save(saveRows).then(() => searchRef.current?.());
-      },
-    }),
+    makeAddAction({ onClick: handleDetail01Add }),
+    makeSaveAction({ onClick: handleDetail01Save }),
   ];
 
+  // ── detail02: 저장 (LanguagePack 패턴) ───────────────────────
+  const handleDetail02Save = useGridSave({
+    rows: model.subZoneRowData.rows,
+    setRows: model.setSubZoneRowData,
+    saveFn: saveShpm,
+    onSaved: () => searchRef.current?.(),
+  });
+
   const detail02Actions = [
-    makeSaveAction({
-      onClick: (e: any) => {
-        const saveRows = dirtyRows(e.data);
-        if (saveRows.length === 0) return;
-        shpmMgmtApi.save(saveRows).then(() => searchRef.current?.());
-      },
-    }),
+    makeSaveAction({ onClick: handleDetail02Save }),
   ];
 
   return {

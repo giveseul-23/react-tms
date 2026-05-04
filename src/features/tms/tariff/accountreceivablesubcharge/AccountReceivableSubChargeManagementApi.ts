@@ -66,10 +66,21 @@ export const accountReceivableSubChargeManagementApi = {
   },
 
   // ── 저장 (추가/수정) ──────────────────────────────────────────
-  save(rows: any[]) {
+  /**
+   * 저장 — menuConfig/LanguagePack 와 동일한 dsSave 패턴 (URL params + body { dsSave }).
+   */
+  save(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<commonResponse>(
       `/accountReceivableSubChargeManagementService/save`,
-      withSession(rows),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 

@@ -9,6 +9,7 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import { useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
 type ControllerProps = {
@@ -42,6 +43,21 @@ export function useDispatchPlanController({
     },
     [model],
   );
+
+  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
+  const saveDispatchPlanFn = useCallback(
+    (payload: any) =>
+      dispatchPlanApi.saveDispatchPlan({ dsSave: payload.dsSave }),
+    [],
+  );
+
+  // ── 저장 (LanguagePack 패턴) ────────────────────────────────
+  const handleSave = useGridSave({
+    rows: model.gridData.rows,
+    setRows: model.setGridData,
+    saveFn: saveDispatchPlanFn,
+    onSaved: () => searchRef.current?.(),
+  });
 
   // ── 행 클릭: 세 개의 하단 탭 데이터 병렬 조회 ────────────────
   const handleRowClicked = useCallback(
@@ -199,15 +215,7 @@ export function useDispatchPlanController({
         },
       ],
     },
-    makeSaveAction({
-      onClick: (e: any) => {
-        if (!guardHasData(e.data)) return;
-        handleApi(
-          dispatchPlanApi.saveDispatchPlan(e.data),
-          "저장되었습니다.",
-        ).then(() => searchRef.current?.());
-      },
-    }),
+    makeSaveAction({ onClick: handleSave }),
     makeExcelGroupAction({
       columns: MAIN_COLUMN_DEFS,
       menuName: "배차관리",
