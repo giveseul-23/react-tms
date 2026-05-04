@@ -78,7 +78,7 @@ export default function Feature() {
       master={
         <DataGrid
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={MAIN_COLUMN_DEFS()}
           rowData={model.gridData.rows}
           totalCount={model.gridData.totalCount}
           currentPage={model.gridData.page}
@@ -95,7 +95,7 @@ export default function Feature() {
       detail={
         <DataGrid
           layoutType="plain"
-          columnDefs={DETAIL_COLUMN_DEFS}
+          columnDefs={DETAIL_COLUMN_DEFS()}
           codeMap={model.codeMap}
           rowData={model.subDetailRowData.rows}
           totalCount={model.subDetailRowData.totalCount}
