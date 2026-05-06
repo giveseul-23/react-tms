@@ -18,6 +18,7 @@
         --slate-100: #f1f5f9;
         --slate-200: #e2e8f0;
         --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
         --slate-500: #64748b;
         --slate-600: #475569;
         --slate-700: #334155;
@@ -25,18 +26,10 @@
         --slate-900: #0f172a;
       }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
-        font-family:
-          "Pretendard",
-          "Noto Sans KR",
-          -apple-system,
-          sans-serif;
+        font-family: "Pretendard", "Noto Sans KR", -apple-system, sans-serif;
         background: var(--slate-50);
         color: var(--slate-700);
         display: flex;
@@ -45,563 +38,264 @@
 
       /* ── 사이드 네비 ── */
       nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 220px;
-        height: 100vh;
+        position: fixed; top: 0; left: 0;
+        width: 240px; height: 100vh;
         background: white;
         border-right: 1px solid var(--slate-200);
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        z-index: 100;
+        display: flex; flex-direction: column;
+        overflow-y: auto; z-index: 100;
       }
-
-      nav .nav-header {
-        padding: 20px 20px 16px;
-        border-bottom: 1px solid var(--slate-200);
-      }
-
-      nav .nav-header h1 {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--slate-800);
-        letter-spacing: -0.01em;
-      }
-
-      nav .nav-header p {
-        font-size: 11px;
-        color: var(--slate-500);
-        margin-top: 3px;
-      }
-
-      nav ul {
-        list-style: none;
-        padding: 12px 10px;
-        flex: 1;
-      }
-
+      nav .nav-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--slate-200); }
+      nav .nav-header h1 { font-size: 13px; font-weight: 700; color: var(--slate-800); letter-spacing: -0.01em; }
+      nav .nav-header p { font-size: 11px; color: var(--slate-500); margin-top: 3px; }
+      nav ul { list-style: none; padding: 12px 10px; flex: 1; }
       nav ul li a {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 7px 10px;
-        border-radius: 8px;
-        font-size: 13px;
-        color: var(--slate-600);
+        display: flex; align-items: center; gap: 8px;
+        padding: 7px 10px; border-radius: 8px;
+        font-size: 13px; color: var(--slate-600);
         text-decoration: none;
-        transition:
-          background 0.15s,
-          color 0.15s;
+        transition: background 0.15s, color 0.15s;
       }
-
-      nav ul li a:hover {
-        background: var(--slate-100);
-        color: var(--slate-800);
-      }
-      nav ul li a.active {
-        background: var(--primary-light);
-        color: var(--primary);
-        font-weight: 600;
-      }
-
-      nav ul li a .nav-icon {
-        font-size: 14px;
-        width: 20px;
-        text-align: center;
-      }
+      nav ul li a:hover { background: var(--slate-100); color: var(--slate-800); }
+      nav ul li a.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+      nav ul li a .nav-icon { font-size: 14px; width: 20px; text-align: center; }
 
       /* ── 메인 콘텐츠 ── */
       main {
-        margin-left: 220px;
+        margin-left: 240px;
         flex: 1;
         padding: 48px 56px;
-        max-width: calc(960px + 220px);
+        max-width: calc(1040px + 240px);
       }
+
+      /* ── 글로벌 검색바 ── */
+      .global-search {
+        position: sticky; top: 0;
+        z-index: 50;
+        background: var(--slate-50);
+        padding: 12px 0 16px;
+        margin-bottom: 8px;
+      }
+      .global-search-wrap {
+        display: flex; align-items: center; gap: 10px;
+        background: white;
+        border: 2px solid var(--slate-200);
+        border-radius: 12px;
+        padding: 10px 16px;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      .global-search-wrap:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      }
+      .global-search-icon { font-size: 16px; color: var(--slate-400); }
+      .global-search input {
+        flex: 1; border: none; outline: none;
+        font-size: 14px; font-family: inherit;
+        background: transparent; color: var(--slate-800);
+      }
+      .global-search input::placeholder { color: var(--slate-400); }
+      .global-search-clear {
+        cursor: pointer; border: none; background: var(--slate-100);
+        color: var(--slate-500); padding: 4px 10px; border-radius: 6px;
+        font-size: 11px; font-weight: 600;
+      }
+      .global-search-clear:hover { background: var(--slate-200); color: var(--slate-700); }
+      .search-meta {
+        display: flex; gap: 14px; align-items: center;
+        margin-top: 8px; padding: 0 4px;
+        font-size: 11.5px; color: var(--slate-500);
+      }
+      .search-meta strong { color: var(--slate-700); font-weight: 600; }
+      .search-hit-count { color: var(--primary); font-weight: 700; }
+
+      /* 검색에 의해 숨겨진 행 */
+      tr.search-hidden, .ref-section.search-empty { display: none; }
+      tr.search-match td:first-child { background: var(--amber-light); }
+      .ref-section .ref-empty-msg { display: none; padding: 18px; text-align: center; color: var(--slate-400); font-size: 12px; }
+      .ref-section.no-results-shown .ref-empty-msg { display: block; }
 
       .page-header {
-        margin-bottom: 40px;
-        padding-bottom: 28px;
+        margin-bottom: 32px; padding-bottom: 28px;
         border-bottom: 2px solid var(--slate-200);
       }
-
       .page-header .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: var(--primary-light);
-        color: var(--primary);
-        font-size: 11px;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 20px;
-        margin-bottom: 12px;
-        letter-spacing: 0.03em;
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--primary-light); color: var(--primary);
+        font-size: 11px; font-weight: 700;
+        padding: 4px 10px; border-radius: 20px;
+        margin-bottom: 12px; letter-spacing: 0.03em;
       }
-
-      .page-header h1 {
-        font-size: 28px;
-        font-weight: 800;
-        color: var(--slate-800);
-        letter-spacing: -0.03em;
-        line-height: 1.2;
-      }
-
-      .page-header p {
-        font-size: 14px;
-        color: var(--slate-500);
-        margin-top: 10px;
-        line-height: 1.7;
-      }
+      .page-header h1 { font-size: 28px; font-weight: 800; color: var(--slate-800); letter-spacing: -0.03em; line-height: 1.2; }
+      .page-header p { font-size: 14px; color: var(--slate-500); margin-top: 10px; line-height: 1.7; }
 
       /* ── 섹션 ── */
-      section {
-        margin-bottom: 60px;
-        scroll-margin-top: 32px;
-      }
-
+      section { margin-bottom: 60px; scroll-margin-top: 90px; }
       section h2 {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--slate-800);
-        margin-bottom: 20px;
-        padding-bottom: 10px;
+        display: flex; align-items: center; gap: 10px;
+        font-size: 18px; font-weight: 700; color: var(--slate-800);
+        margin-bottom: 20px; padding-bottom: 10px;
         border-bottom: 2px solid var(--slate-200);
       }
-
-      section h2 .section-icon {
-        font-size: 20px;
-      }
-
+      section h2 .section-icon { font-size: 20px; }
       section h3 {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--slate-700);
-        margin: 24px 0 10px;
-        padding-left: 12px;
+        font-size: 14px; font-weight: 600; color: var(--slate-700);
+        margin: 24px 0 10px; padding-left: 12px;
         border-left: 3px solid var(--primary);
       }
-
-      p,
-      li {
-        font-size: 13.5px;
-        line-height: 1.75;
-        color: var(--slate-600);
+      section h4 {
+        font-size: 12.5px; font-weight: 700; color: var(--slate-700);
+        margin: 18px 0 8px;
       }
+      p, li { font-size: 13.5px; line-height: 1.75; color: var(--slate-600); }
 
       /* ── 태그 ── */
       .tag {
-        display: inline-flex;
-        align-items: center;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 4px;
-        border: 1px solid;
-        letter-spacing: 0.02em;
+        display: inline-flex; align-items: center;
+        font-size: 11px; font-weight: 700;
+        padding: 2px 8px; border-radius: 4px;
+        border: 1px solid; letter-spacing: 0.02em;
       }
-      .tag-blue {
-        background: var(--primary-light);
-        color: var(--primary);
-        border-color: #bfdbfe;
-      }
-      .tag-green {
-        background: var(--green-light);
-        color: var(--green);
-        border-color: #a7f3d0;
-      }
-      .tag-amber {
-        background: var(--amber-light);
-        color: var(--amber);
-        border-color: #fde68a;
-      }
-      .tag-rose {
-        background: var(--rose-light);
-        color: var(--rose);
-        border-color: #fecdd3;
-      }
-      .tag-slate {
-        background: var(--slate-100);
-        color: var(--slate-600);
-        border-color: var(--slate-300);
-      }
-      .tag-required {
-        background: #fff1f2;
-        color: #e11d48;
-        border-color: #fecdd3;
-      }
-      .tag-optional {
-        background: var(--slate-100);
-        color: var(--slate-500);
-        border-color: var(--slate-300);
-      }
+      .tag-blue { background: var(--primary-light); color: var(--primary); border-color: #bfdbfe; }
+      .tag-green { background: var(--green-light); color: var(--green); border-color: #a7f3d0; }
+      .tag-amber { background: var(--amber-light); color: var(--amber); border-color: #fde68a; }
+      .tag-rose { background: var(--rose-light); color: var(--rose); border-color: #fecdd3; }
+      .tag-slate { background: var(--slate-100); color: var(--slate-600); border-color: var(--slate-300); }
+      .tag-required { background: #fff1f2; color: #e11d48; border-color: #fecdd3; }
+      .tag-optional { background: var(--slate-100); color: var(--slate-500); border-color: var(--slate-300); }
 
       /* ── 카드 그리드 ── */
-      .card-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
-        margin: 16px 0;
-      }
-
-      .card {
-        background: white;
-        border: 1px solid var(--slate-200);
-        border-radius: 12px;
-        padding: 18px;
-      }
-
-      .card .card-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-
+      .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 16px 0; }
+      .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+      .card { background: white; border: 1px solid var(--slate-200); border-radius: 12px; padding: 18px; }
+      .card .card-title { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
       .card code.file-name {
-        display: block;
-        font-size: 11.5px;
+        display: block; font-size: 11.5px;
         font-family: "JetBrains Mono", "Fira Code", monospace;
-        color: var(--slate-500);
-        margin-bottom: 5px;
+        color: var(--slate-500); margin-bottom: 5px;
       }
-
-      .card p {
-        font-size: 12px;
-        color: var(--slate-500);
-      }
+      .card p { font-size: 12px; color: var(--slate-500); }
 
       /* ── 코드 블록 ── */
-      .code-block {
-        border: 1px solid var(--slate-200);
-        border-radius: 12px;
-        overflow: hidden;
-        margin: 14px 0;
-        position: relative;
-      }
-
+      .code-block { border: 1px solid var(--slate-200); border-radius: 12px; overflow: hidden; margin: 14px 0; position: relative; }
       .code-block .code-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px 16px;
-        background: #1e293b;
-        color: #94a3b8;
-        font-size: 11px;
-        font-family: monospace;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 8px 16px; background: #1e293b; color: #94a3b8;
+        font-size: 11px; font-family: monospace;
       }
-
       .code-block .copy-btn {
-        background: none;
-        border: none;
-        color: #64748b;
-        font-size: 11px;
-        cursor: pointer;
-        padding: 2px 8px;
-        border-radius: 4px;
-        transition:
-          background 0.15s,
-          color 0.15s;
+        background: none; border: none; color: #64748b; font-size: 11px;
+        cursor: pointer; padding: 2px 8px; border-radius: 4px;
+        transition: background 0.15s, color 0.15s;
       }
-
-      .code-block .copy-btn:hover {
-        background: #334155;
-        color: #e2e8f0;
-      }
-      .code-block .copy-btn.copied {
-        color: #4ade80;
-      }
-
+      .code-block .copy-btn:hover { background: #334155; color: #e2e8f0; }
+      .code-block .copy-btn.copied { color: #4ade80; }
       .code-block pre {
-        background: #0f172a;
-        color: #e2e8f0;
+        background: #0f172a; color: #e2e8f0;
         font-size: 12.5px;
         font-family: "JetBrains Mono", "Fira Code", monospace;
-        line-height: 1.7;
-        padding: 20px;
-        overflow-x: auto;
-        margin: 0;
-        white-space: pre;
+        line-height: 1.7; padding: 20px; overflow-x: auto;
+        margin: 0; white-space: pre;
       }
-
-      /* 코드 내 인라인 하이라이트 */
-      .code-block pre .c {
-        color: #64748b;
-        font-style: italic;
-      } /* comment */
-      .code-block pre .k {
-        color: #818cf8;
-      } /* keyword */
-      .code-block pre .s {
-        color: #4ade80;
-      } /* string */
-      .code-block pre .t {
-        color: #38bdf8;
-      } /* type */
-      .code-block pre .fn {
-        color: #fbbf24;
-      } /* function */
+      .code-block pre .c { color: #64748b; font-style: italic; }
+      .code-block pre .k { color: #818cf8; }
+      .code-block pre .s { color: #4ade80; }
+      .code-block pre .t { color: #38bdf8; }
+      .code-block pre .fn { color: #fbbf24; }
 
       /* ── 인라인 코드 ── */
       code {
-        background: var(--slate-100);
-        color: #e11d48;
+        background: var(--slate-100); color: #e11d48;
         font-size: 12px;
         font-family: "JetBrains Mono", "Fira Code", monospace;
-        padding: 1px 6px;
-        border-radius: 4px;
+        padding: 1px 6px; border-radius: 4px;
       }
 
       /* ── 노트/팁 ── */
-      .note,
-      .tip {
-        display: flex;
-        gap: 10px;
-        padding: 12px 16px;
-        border-radius: 10px;
-        margin: 14px 0;
-        font-size: 13px;
-        line-height: 1.65;
+      .note, .tip, .warn {
+        display: flex; gap: 10px;
+        padding: 12px 16px; border-radius: 10px;
+        margin: 14px 0; font-size: 13px; line-height: 1.65;
+      }
+      .note { background: var(--amber-light); border: 1px solid #fde68a; color: #92400e; }
+      .tip { background: var(--primary-light); border: 1px solid #bfdbfe; color: #1e40af; }
+      .warn { background: var(--rose-light); border: 1px solid #fecdd3; color: #9f1239; }
+      .note .note-icon, .tip .tip-icon, .warn .warn-icon {
+        font-size: 15px; flex-shrink: 0; margin-top: 1px;
       }
 
-      .note {
-        background: var(--amber-light);
-        border: 1px solid #fde68a;
-        color: #92400e;
-      }
-      .tip {
-        background: var(--primary-light);
-        border: 1px solid #bfdbfe;
-        color: #1e40af;
-      }
-
-      .note .note-icon,
-      .tip .tip-icon {
-        font-size: 15px;
-        flex-shrink: 0;
-        margin-top: 1px;
-      }
-
-      /* ── 레이아웃 패턴 카드 ── */
-      .pattern-card {
-        border: 1px solid var(--slate-200);
-        border-radius: 14px;
-        overflow: hidden;
-        margin-bottom: 18px;
-      }
-
+      /* ── 패턴 카드 ── */
+      .pattern-card { border: 1px solid var(--slate-200); border-radius: 14px; overflow: hidden; margin-bottom: 18px; background: white; }
       .pattern-card .pattern-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 18px;
-        border-bottom: 1px solid var(--slate-100);
+        display: flex; align-items: center; gap: 10px;
+        padding: 12px 18px; border-bottom: 1px solid var(--slate-100);
       }
-
-      .pattern-card .pattern-header .pattern-example {
-        margin-left: auto;
-        font-size: 11px;
-        color: var(--slate-400);
-      }
-
-      .pattern-card .pattern-body {
-        padding: 18px;
-        background: white;
-      }
-
+      .pattern-card .pattern-header .pattern-example { margin-left: auto; font-size: 11px; color: var(--slate-400); }
+      .pattern-card .pattern-body { padding: 18px; background: white; }
       .pattern-diagram {
-        background: var(--slate-50);
-        border: 1px solid var(--slate-200);
-        border-radius: 8px;
-        padding: 14px;
-        font-family: monospace;
-        font-size: 12px;
-        color: var(--slate-500);
+        background: var(--slate-50); border: 1px solid var(--slate-200);
+        border-radius: 8px; padding: 14px;
+        font-family: monospace; font-size: 12px; color: var(--slate-500);
       }
-
-      .diagram-row {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 6px;
-      }
-
-      .diagram-row:last-child {
-        margin-bottom: 0;
-      }
-
-      .diagram-block {
-        border-radius: 6px;
-        padding: 10px 12px;
-        text-align: center;
-        font-size: 12px;
-        font-family: sans-serif;
-        flex: 1;
-      }
-
-      .db-header {
-        background: #e2e8f0;
-        color: var(--slate-600);
-      }
-      .db-blue {
-        background: #dbeafe;
-        color: #1d4ed8;
-      }
-      .db-green {
-        background: #d1fae5;
-        color: #065f46;
-      }
-      .db-green2 {
-        background: #a7f3d0;
-        color: #065f46;
-      }
-      .db-amber {
-        background: #fef3c7;
-        color: #92400e;
-      }
-
-      .pattern-card .pattern-note {
-        font-size: 12px;
-        color: var(--slate-500);
-        margin-top: 10px;
-      }
+      .diagram-row { display: flex; gap: 8px; margin-bottom: 6px; }
+      .diagram-row:last-child { margin-bottom: 0; }
+      .diagram-block { border-radius: 6px; padding: 10px 12px; text-align: center; font-size: 12px; font-family: sans-serif; flex: 1; }
+      .db-header { background: #e2e8f0; color: var(--slate-600); }
+      .db-blue { background: #dbeafe; color: #1d4ed8; }
+      .db-green { background: #d1fae5; color: #065f46; }
+      .db-green2 { background: #a7f3d0; color: #065f46; }
+      .db-amber { background: #fef3c7; color: #92400e; }
+      .db-rose { background: #fecaca; color: #991b1b; }
+      .pattern-card .pattern-note { font-size: 12px; color: var(--slate-500); margin-top: 10px; }
 
       /* ── 체크리스트 ── */
-      .checklist {
-        list-style: none;
-        counter-reset: checklist;
-      }
-
+      .checklist { list-style: none; counter-reset: checklist; }
       .checklist li {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid var(--slate-100);
-        font-size: 13.5px;
-        color: var(--slate-700);
+        display: flex; align-items: flex-start; gap: 12px;
+        padding: 10px 0; border-bottom: 1px solid var(--slate-100);
+        font-size: 13.5px; color: var(--slate-700);
       }
-
-      .checklist li:last-child {
-        border-bottom: none;
-      }
-
+      .checklist li:last-child { border-bottom: none; }
       .checklist li .step-num {
-        flex-shrink: 0;
-        width: 24px;
-        height: 24px;
-        background: var(--primary-light);
-        color: var(--primary);
+        flex-shrink: 0; width: 24px; height: 24px;
+        background: var(--primary-light); color: var(--primary);
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
-        font-weight: 700;
-        margin-top: 1px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 700; margin-top: 1px;
       }
-
-      .checklist li .step-file {
-        margin-top: 2px;
-        font-size: 12px;
-        font-family: monospace;
-        color: var(--slate-400);
-      }
+      .checklist li .step-file { margin-top: 2px; font-size: 12px; font-family: monospace; color: var(--slate-400); }
 
       /* ── 테이블 ── */
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        margin: 16px 0;
-      }
-
-      thead tr {
-        background: var(--slate-800);
-        color: white;
-      }
-
-      thead th {
-        padding: 10px 14px;
-        text-align: left;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.03em;
-      }
-
-      tbody tr {
-        border-bottom: 1px solid var(--slate-100);
-      }
-      tbody tr:hover {
-        background: var(--slate-50);
-      }
-
-      tbody td {
-        padding: 10px 14px;
-        vertical-align: top;
-      }
-
+      table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+      thead tr { background: var(--slate-800); color: white; }
+      thead th { padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.03em; }
+      tbody tr { border-bottom: 1px solid var(--slate-100); }
+      tbody tr:hover { background: var(--slate-50); }
+      tbody td { padding: 10px 14px; vertical-align: top; }
       tbody td:first-child {
-        font-family: monospace;
-        font-size: 12px;
-        color: #e11d48;
-        white-space: nowrap;
+        font-family: monospace; font-size: 12px; color: #e11d48; white-space: nowrap;
       }
-
-      tbody td .td-desc {
-        color: var(--slate-500);
-        font-size: 12px;
-        margin-top: 2px;
-      }
+      tbody td .td-desc { color: var(--slate-500); font-size: 12px; margin-top: 2px; }
+      tbody td .td-source { color: var(--slate-400); font-size: 11px; margin-top: 4px; font-family: monospace; }
 
       /* ── 변경 포인트 테이블 ── */
-      .change-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        margin: 16px 0;
-      }
-      .change-table th {
-        background: var(--slate-800);
-        color: white;
-        padding: 10px 14px;
-        text-align: left;
-        font-size: 12px;
-      }
-      .change-table td {
-        padding: 10px 14px;
-        border-bottom: 1px solid var(--slate-100);
-        vertical-align: top;
-        font-size: 13px;
-      }
-      .change-table tr:hover td {
-        background: var(--slate-50);
-      }
-      .change-table td:first-child {
-        color: var(--slate-700);
-        font-weight: 500;
-        white-space: nowrap;
-      }
-      .change-table td:last-child {
-        color: var(--slate-500);
-        font-size: 12.5px;
-      }
+      .change-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+      .change-table th { background: var(--slate-800); color: white; padding: 10px 14px; text-align: left; font-size: 12px; }
+      .change-table td { padding: 10px 14px; border-bottom: 1px solid var(--slate-100); vertical-align: top; font-size: 13px; }
+      .change-table tr:hover td { background: var(--slate-50); }
+      .change-table td:first-child { color: var(--slate-700); font-weight: 500; white-space: nowrap; }
+      .change-table td:last-child { color: var(--slate-500); font-size: 12.5px; }
+
+      /* 참조 섹션 헤더 */
+      .ref-section { background: white; border: 1px solid var(--slate-200); border-radius: 12px; padding: 16px 18px; margin-bottom: 18px; }
+      .ref-section h3 { margin-top: 0; }
+      .ref-section table { margin-top: 8px; }
+      .ref-section .ref-summary { font-size: 12px; color: var(--slate-500); margin-bottom: 6px; }
 
       /* ── 스크롤바 ── */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: var(--slate-300);
-        border-radius: 3px;
-      }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 3px; }
     </style>
   </head>
   <body>
@@ -609,860 +303,911 @@
     <nav>
       <div class="nav-header">
         <h1>📘 화면 제작 가이드</h1>
-        <p>StandardPageLayout 기반</p>
+        <p>MasterDetailPage · 5-file MVC</p>
       </div>
       <ul>
-        <li>
-          <a href="#overview" class="active"
-            ><span class="nav-icon">🗂</span> 전체 구조</a
-          >
-        </li>
-        <li>
-          <a href="#layout"><span class="nav-icon">⬜</span> 레이아웃 패턴</a>
-        </li>
-        <li>
-          <a href="#files"><span class="nav-icon">📝</span> 파일별 작성 방법</a>
-        </li>
-        <li>
-          <a href="#treegrid"><span class="nav-icon">🌲</span> 트리 그리드</a>
-        </li>
-        <li>
-          <a href="#checklist"
-            ><span class="nav-icon">✅</span> 신규 화면 체크리스트</a
-          >
-        </li>
-        <li>
-          <a href="#change"
-            ><span class="nav-icon">🔧</span> 레이아웃 변경 포인트</a
-          >
-        </li>
-        <li>
-          <a href="#props"><span class="nav-icon">📋</span> Props 레퍼런스</a>
-        </li>
+        <li><a href="#overview" class="active"><span class="nav-icon">🗂</span> 전체 구조</a></li>
+        <li><a href="#patterns"><span class="nav-icon">🏗</span> 화면 형태별 만드는 방법</a></li>
+        <li><a href="#files"><span class="nav-icon">📝</span> 파일별 작성 방법</a></li>
+        <li><a href="#checklist"><span class="nav-icon">✅</span> 신규 화면 체크리스트</a></li>
+        <li><a href="#props"><span class="nav-icon">🔍</span> 속성/Props 레퍼런스</a></li>
+        <li><a href="#actions"><span class="nav-icon">🔘</span> 액션 팩토리</a></li>
+        <li><a href="#hooks"><span class="nav-icon">🪝</span> Hooks</a></li>
+        <li><a href="#change"><span class="nav-icon">🔧</span> 레이아웃 변경 포인트</a></li>
       </ul>
     </nav>
 
     <!-- ── 메인 ── -->
     <main>
+      <!-- ── 글로벌 검색 ── -->
+      <div class="global-search">
+        <div class="global-search-wrap">
+          <span class="global-search-icon">🔍</span>
+          <input
+            type="search"
+            id="globalSearch"
+            placeholder="속성·prop·hook 이름 또는 의미 검색 (예: codeMap, dualGrid, useGridSave, _DTTM, headerName)"
+            autocomplete="off"
+          />
+          <button class="global-search-clear" onclick="clearSearch()">초기화</button>
+        </div>
+        <div class="search-meta">
+          <span>📋 총 <strong id="totalCount">0</strong>개 항목</span>
+          <span class="search-hit-count" id="hitCount" style="display: none">매칭: <strong id="hitNum">0</strong>건</span>
+          <span style="margin-left: auto; color: var(--slate-400)">팁: 영어 prop명 / 한글 의미 / 자동 포맷팅 키워드(<code>_DTTM</code>, <code>_STS</code>) 모두 검색 가능</span>
+        </div>
+      </div>
+
       <div class="page-header">
         <div class="badge">📘 DEVELOPER GUIDE</div>
         <h1>화면 제작 가이드</h1>
         <p>
-          이 프로젝트의 모든 업무 화면은 <strong>MVC 4-파일 패턴</strong> +
-          <strong>StandardPageLayout</strong>을 기반으로 제작합니다.<br />
+          이 프로젝트의 모든 업무 화면은 <strong>MVC 5-파일 패턴</strong> +
+          <strong>MasterDetailPage</strong>를 기반으로 제작합니다.<br />
           새 화면을 추가하거나 레이아웃을 변경할 때 이 문서를 참고하세요.
         </p>
       </div>
 
+      <!-- ════════════════════════════════════════════════════════ -->
       <!-- ── 1. 전체 구조 ── -->
+      <!-- ════════════════════════════════════════════════════════ -->
       <section id="overview">
         <h2><span class="section-icon">🗂</span> 전체 구조</h2>
-        <p>
-          모든 업무 화면은 아래 4개 파일로 구성됩니다. 각 파일은 단일 책임
-          원칙에 따라 역할이 분리됩니다.
-        </p>
+        <p>모든 업무 화면은 아래 5개 파일로 구성됩니다. 각 파일은 단일 책임 원칙에 따라 역할이 분리됩니다.</p>
 
-        <div class="card-grid" style="margin-top: 16px">
+        <div class="card-grid cols-3" style="margin-top: 16px">
           <div class="card">
             <div class="card-title"><span class="tag tag-blue">View</span></div>
             <code class="file-name">{화면명}.tsx</code>
-            <p>
-              UI 렌더링만 담당. StandardPageLayout 으로 조립. 비즈니스 로직
-              없음.
-            </p>
+            <p>UI 렌더링만 담당. <code>MasterDetailPage</code>로 조립. 비즈니스 로직 없음.</p>
           </div>
           <div class="card">
-            <div class="card-title">
-              <span class="tag tag-green">Model</span>
-            </div>
-            <code class="file-name">{화면명}Model.ts</code>
-            <p>상태(state / ref) 관리. 비즈니스 로직 없음.</p>
-          </div>
-          <div class="card">
-            <div class="card-title">
-              <span class="tag tag-amber">Controller</span>
-            </div>
+            <div class="card-title"><span class="tag tag-amber">Controller</span></div>
             <code class="file-name">{화면명}Controller.tsx</code>
-            <p>이벤트 핸들러 · API 호출 로직.</p>
+            <p>이벤트 핸들러 · API 호출. 액션 정의(<code>useCallback</code>).</p>
           </div>
           <div class="card">
-            <div class="card-title">
-              <span class="tag tag-rose">Columns</span>
-            </div>
+            <div class="card-title"><span class="tag tag-green">Model</span></div>
+            <code class="file-name">{화면명}Model.ts</code>
+            <p>화면 상태(<code>useState</code>/<code>useRef</code>) + 공통코드 codeMap.</p>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="tag tag-rose">Columns</span></div>
             <code class="file-name">{화면명}Columns.tsx</code>
-            <p>그리드 컬럼 정의. Lang.get() 으로 헤더 다국어 처리.</p>
+            <p>그리드 <code>columnDefs</code>. <code>LBL_*</code> 다국어 키 사용.</p>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="tag tag-slate">Api</span></div>
+            <code class="file-name">{화면명}Api.ts</code>
+            <p><code>apiClient.post</code> 호출. <code>MENU_CD</code> + <code>withSession</code> 자동.</p>
           </div>
         </div>
 
         <div class="code-block">
-          <div class="code-header">
-            <span>bash</span>
-            <button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-src/views/{모듈명}/{화면명}/
-├── {화면명}.tsx              ← View   : UI 렌더링만 담당
-├── {화면명}Model.ts          ← Model  : 상태(state/ref) 관리
-├── {화면명}Controller.tsx    ← Controller : 이벤트·API 호출 로직
-└── {화면명}Columns.tsx       ← Columns : 그리드 컬럼 정의</pre
-          >
-        </div>
-      </section>
-
-      <!-- ── 2. 레이아웃 패턴 ── -->
-      <section id="layout">
-        <h2><span class="section-icon">⬜</span> 레이아웃 패턴 3가지</h2>
-        <p>새 화면을 만들기 전에 아래 3가지 중 하나를 선택합니다.</p>
-
-        <!-- 패턴 A -->
-        <div class="pattern-card" style="margin-top: 20px">
-          <div class="pattern-header" style="background: #eff6ff">
-            <span class="tag tag-blue">패턴 A</span>
-            <strong style="font-size: 14px; color: #1e293b">단일 그리드</strong>
-            <span class="pattern-example">예시: 메뉴구성(MenuConfig)</span>
-          </div>
-          <div class="pattern-body">
-            <div class="pattern-diagram">
-              <div class="diagram-row">
-                <div class="diagram-block db-header">
-                  조회조건 (SearchFilters)
-                </div>
-              </div>
-              <div class="diagram-row">
-                <div class="diagram-block db-blue">
-                  그리드 1개 (DataGrid / TreeGrid)
-                </div>
-              </div>
-            </div>
-            <p class="pattern-note">
-              → <code>singleGrid</code> prop 전달. 레이아웃 토글 버튼 자동 숨김.
-            </p>
-          </div>
-        </div>
-
-        <!-- 패턴 B -->
-        <div class="pattern-card">
-          <div class="pattern-header" style="background: #ecfdf5">
-            <span class="tag tag-green">패턴 B</span>
-            <strong style="font-size: 14px; color: #1e293b">분할 그리드</strong>
-            <span class="pattern-example"
-              >예시: 운송사요청목록(TenderReceiveDispatch)</span
-            >
-          </div>
-          <div class="pattern-body">
-            <div class="pattern-diagram">
-              <div class="diagram-row">
-                <div class="diagram-block db-header">
-                  조회조건 (SearchFilters) + 레이아웃 토글 버튼 🔀
-                </div>
-              </div>
-              <div class="diagram-row">
-                <div class="diagram-block db-green">메인 그리드</div>
-                <div class="diagram-block db-green2">서브 그리드 (탭 가능)</div>
-              </div>
-            </div>
-            <p class="pattern-note">
-              → <code>dualGrid</code> prop 전달. <code>layout</code> 상태로 좌우
-              ↔ 상하 전환. 레이아웃 토글 버튼 자동 표시.
-            </p>
-          </div>
-        </div>
-
-        <!-- 패턴 C -->
-        <div class="pattern-card">
-          <div class="pattern-header" style="background: #fffbeb">
-            <span class="tag tag-amber">패턴 C</span>
-            <strong style="font-size: 14px; color: #1e293b"
-              >분할 그리드 + 하단 슬라이드 패널</strong
-            >
-            <span class="pattern-example">예시: 운송사요청목록 추적 패널</span>
-          </div>
-          <div class="pattern-body">
-            <div class="pattern-diagram">
-              <div class="diagram-row">
-                <div class="diagram-block db-header">
-                  조회조건 (SearchFilters) + 레이아웃 토글 버튼 🔀
-                </div>
-              </div>
-              <div class="diagram-row">
-                <div class="diagram-block db-green">메인 그리드</div>
-                <div class="diagram-block db-green2">서브 그리드</div>
-              </div>
-              <div class="diagram-row">
-                <div class="diagram-block db-amber">
-                  하단 슬라이드 패널 (open 상태로 토글)
-                </div>
-              </div>
-            </div>
-            <p class="pattern-note">
-              → <code>dualGrid</code> + <code>bottomPanel</code> prop 전달.
-              <code>bottomPanel.open</code> 으로 접기/펼치기 제어.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ── 3. 파일별 작성 방법 ── -->
-      <section id="files">
-        <h2><span class="section-icon">📝</span> 파일별 작성 방법</h2>
-
-        <!-- Columns -->
-        <h3>Columns 파일</h3>
-        <p>
-          컬럼 정의만 모아두는 파일입니다. View / Controller 에서 import 해
-          사용합니다.
-        </p>
-        <div class="note">
-          <span class="note-icon">⚠️</span> <code>headerName</code>은 반드시
-          <code>Lang.get('코드값')</code> 형태로 작성합니다. 하드코딩 문자열
-          금지.
-        </div>
-        <div class="code-block">
-          <div class="code-header">
-            <span>tsx — {화면명}Columns.tsx</span
-            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-import { Lang } from "@/app/services/common/Lang";
-import type { ColDef } from "ag-grid-community";
-
-export const MAIN_COLUMN_DEFS = (): ColDef[] => [
-  {
-    headerName: Lang.get("COLUMN_CODE"),   // 언어팩 사용
-    field: "CODE",
-    width: 120,
-  },
-  {
-    headerName: Lang.get("COLUMN_NAME"),
-    field: "NAME",
-    flex: 1,
-  },
-];</pre
-          >
-        </div>
-
-        <!-- Model -->
-        <h3>Model 파일</h3>
-        <p>
-          화면에서 사용하는 state 와 ref 만 정의합니다. 비즈니스 로직은 넣지
-          않습니다.
-        </p>
-        <div class="code-block">
-          <div class="code-header">
-            <span>ts — {화면명}Model.ts</span
-            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-import { useState, useRef, useCallback } from "react";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
-
-export function use{화면명}Model() {
-  // ── 레이아웃 (분할 그리드가 있는 경우만)
-  const [layout, setLayout] = useState&lt;LayoutType&gt;("side");
-
-  // ── 페이징
-  const [pageSize, setPageSize] = useState(20);
-
-  // ── 메인 그리드 데이터
-  const [gridData, setGridData] = useState({
-    rows: [] as any[],
-    totalCount: 0,
-    page: 1,
-    limit: 20,
-  });
-
-  // ── 선택 행 (ref 와 state 동시 관리)
-  const [selectedRow, setSelectedRow] = useState&lt;any&gt;(null);
-  const selectedRowRef = useRef&lt;any&gt;(null);
-  const setSelectedRowWithRef = useCallback((row: any) => {
-    setSelectedRow(row);
-    selectedRowRef.current = row;
-  }, []);
-
-  return {
-    layout, setLayout,
-    pageSize, setPageSize,
-    gridData, setGridData,
-    selectedRow,
-    setSelectedRow: setSelectedRowWithRef,
-    selectedRowRef,
-  };
-}
-
-export type {화면명}Model = ReturnType&lt;typeof use{화면명}Model&gt;;</pre
-          >
-        </div>
-        <div class="tip">
-          <span class="tip-icon">💡</span> 서브 그리드가 필요하면
-          <code>subRowData, setSubRowData</code> 상태를 추가합니다.<br />
-          트리 그리드이면 <code>rows</code> 대신
-          <code>source, setSource</code> 상태를 사용합니다.
-        </div>
-
-        <!-- Controller -->
-        <h3>Controller 파일</h3>
-        <p>API 호출과 이벤트 핸들러를 정의합니다.</p>
-        <div class="code-block">
-          <div class="code-header">
-            <span>tsx — {화면명}Controller.tsx</span
-            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-import { useCallback, MutableRefObject } from "react";
-import { useApiHandler } from "@/hooks/useApiHandler";
-import { usePopup } from "@/app/components/popup/PopupContext";
-import { {화면명}Model } from "./{화면명}Model";
-import { {화면명}Api } from "@/features/{모듈}/{화면명}Api";
-
-type ControllerProps = {
-  model: {화면명}Model;
-  searchRef: MutableRefObject&lt;((page?: number) =&gt; void) | null&gt;;
-  filtersRef: MutableRefObject&lt;Record&lt;string, unknown&gt;&gt;;
-};
-
-export function use{화면명}Controller({ model, searchRef, filtersRef }: ControllerProps) {
-  const { handleApi } = useApiHandler();
-  const { openPopup, closePopup } = usePopup();
-
-  // ── 조회 API — SearchFilters 의 fetchFn 으로 주입
-  const fetchList = useCallback(
-    (params: Record&lt;string, unknown&gt;) => {화면명}Api.getList(params),
-    []
-  );
-
-  // ── 조회 결과 콜백 — SearchFilters 의 onSearch 으로 주입
-  const handleSearch = useCallback(
-    (result: any) => { model.setGridData(result); },
-    [model]
-  );
-
-  // ── 행 클릭
-  const handleRowClicked = useCallback(
-    (row: any) => { model.setSelectedRow(row); },
-    [model]
-  );
-
-  // ── 툴바 액션 목록
-  const mainActions = [
-    {
-      type: "button" as const,
-      key: "저장",
-      label: "저장",
-      onClick: (e: any) => {
-        handleApi({화면명}Api.save(e.data), "저장되었습니다.")
-          .then(() => searchRef.current?.());
-      },
-    },
-  ];
-
-  return { fetchList, handleSearch, handleRowClicked, mainActions };
-}</pre
-          >
-        </div>
-
-        <!-- View - 패턴 A -->
-        <h3>View 파일 — 패턴 A (단일 그리드)</h3>
-        <div class="code-block">
-          <div class="code-header">
-            <span>tsx — {화면명}.tsx</span
-            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-"use client";
-
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
-import { StandardPageLayout } from "@/app/components/layout/StandardPageLayout";
-import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
-import { use{화면명}Model } from "./{화면명}Model";
-import { use{화면명}Controller } from "./{화면명}Controller";
-import { MAIN_COLUMN_DEFS } from "./{화면명}Columns";
-
-const MENU_CODE = "MENU_XXX_YYY";   // 서버 조회조건 메타 키
-
-export default function {화면명}() {
-  const searchRef = useRef&lt;((page?: number) =&gt; void) | null&gt;(null);
-  const filtersRef = useRef&lt;Record&lt;string, unknown&gt;&gt;({});
-
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = use{화면명}Model();
-  const ctrl = use{화면명}Controller({ model, searchRef, filtersRef });
-
-  if (loading) return &lt;Skeleton className="h-24" /&gt;;
-
-  return (
-    &lt;StandardPageLayout
-      meta={meta}
-      fetchFn={ctrl.fetchList}
-      onSearch={ctrl.handleSearch}
-      searchRef={searchRef}
-      filtersRef={filtersRef}
-      pageSize={model.pageSize}
-
-      // singleGrid — 레이아웃 토글 버튼 자동 숨김
-      singleGrid={{
-        render: (
-          &lt;DataGrid
-            layoutType="plain"
-            columnDefs={MAIN_COLUMN_DEFS()}
-            rowData={model.gridData.rows}
-            totalCount={model.gridData.totalCount}
-            currentPage={model.gridData.page}
-            pageSize={model.pageSize}
-            onPageSizeChange={model.setPageSize}
-            onPageChange={(page) =&gt; searchRef.current?.(page, false)}
-            actions={ctrl.mainActions}
-            onRowClicked={ctrl.handleRowClicked}
-          /&gt;
-        ),
-      }}
-    /&gt;
-  );
-}</pre
-          >
-        </div>
-
-        <!-- View - 패턴 B -->
-        <h3>View 파일 — 패턴 B (분할 그리드)</h3>
-        <div class="code-block">
-          <div class="code-header">
-            <span>tsx — {화면명}.tsx</span
-            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-return (
-  &lt;StandardPageLayout
-    meta={meta}
-    fetchFn={ctrl.fetchList}
-    onSearch={ctrl.handleSearch}
-    searchRef={searchRef}
-    filtersRef={filtersRef}
-    pageSize={model.pageSize}
-
-    // 레이아웃 토글 — dualGrid 가 있으면 버튼 자동 표시
-    layout={model.layout}
-    onLayoutToggle={() =&gt;
-      model.setLayout((prev) =&gt; prev === "side" ? "vertical" : "side")
-    }
-
-    dualGrid={{
-      direction: model.layout === "side" ? "horizontal" : "vertical",
-      defaultTopSize: 60,     // 상단 60% (기본 50)
-      defaultBottomSize: 40,  // 하단 40% (기본 50)
-      top: (
-        &lt;DataGrid
-          layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS()}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) =&gt; searchRef.current?.(page, false)}
-          actions={ctrl.mainActions}
-          onRowClicked={ctrl.handleRowClicked}
-        /&gt;
-      ),
-      bottom: (
-        &lt;DataGrid
-          layoutType="plain"
-          columnDefs={SUB_COLUMN_DEFS()}
-          rowData={model.subGridData}
-          actions={[]}
-        /&gt;
-      ),
-    }}
-  /&gt;
-);</pre
-          >
-        </div>
-
-        <!-- View - 패턴 C -->
-        <h3>View 파일 — 패턴 C (분할 그리드 + 하단 슬라이드 패널)</h3>
-        <div class="code-block">
-          <div class="code-header">
-            <span>tsx — {화면명}.tsx</span
-            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-return (
-  &lt;StandardPageLayout
-    {/* ... 패턴 B 와 동일 */}
-    dualGrid={{ ... }}
-
-    // 하단 슬라이드 패널
-    bottomPanel={{
-      open: model.panelOpen,   // true/false 로 열기/닫기
-      height: 280,             // 패널 높이 px (기본 280)
-      render: (
-        &lt;div className="h-full border rounded-lg flex flex-col overflow-hidden"&gt;
-          &lt;div className="flex items-center justify-between px-3 py-1.5 bg-[rgb(var(--primary))] shrink-0"&gt;
-            &lt;span className="text-xs font-semibold text-white"&gt;패널 제목&lt;/span&gt;
-            &lt;button onClick={() =&gt; model.setPanelOpen(false)} className="text-xs text-white/70"&gt;
-              닫기
-            &lt;/button&gt;
-          &lt;/div&gt;
-          &lt;div className="flex-1 min-h-0"&gt;
-            &lt;DataGrid layoutType="plain" actions={[]} columnDefs={PANEL_COLUMN_DEFS()} rowData={model.panelData} /&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-      ),
-    }}
-  /&gt;
-);</pre
-          >
-        </div>
-      </section>
-
-      <!-- ── 4. 트리 그리드 ── -->
-      <section id="treegrid">
-        <h2><span class="section-icon">🌲</span> 트리 그리드 화면인 경우</h2>
-        <p>
-          <code>DataGrid</code> 대신 <code>TreeGrid</code>를 사용하는 경우 추가
-          작업이 필요합니다.
-        </p>
-
-        <h3>View 추가 작업</h3>
-        <div class="code-block">
-          <div class="code-header">
-            <span>tsx</span
-            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-// 1. treeGridRef 선언
-const treeGridRef = useRef&lt;TreeGridHandle&gt;(null);
-
-// 2. NameCell 렌더러 정의
-const renderNameCell = (params: any, ctx: TreeCellContext) =&gt; {
-  const row: {화면명}Row = params.data;
-  return (
-    &lt;TreeNameCell
-      id={row.id}
-      level={row.level}
-      label={row.NAME}
-      hasChild={row.LEAFYN === "N"}
-      ctx={ctx}
-    /&gt;
-  );
-};
-
-// 3. StandardPageLayout 에 treeGridRef + computeTotalCount 전달
-&lt;StandardPageLayout
-  treeGridRef={treeGridRef}
-  computeTotalCount={(rows) =&gt; rows.length}  // TOTALCOUNT 없는 트리 데이터용
-  singleGrid={{
-    render: (
-      &lt;TreeGrid
-        ref={treeGridRef}
-        source={ctrl.source}
-        renderNameCell={renderNameCell}
-        columnDefs={MAIN_COLUMN_DEFS()}
-        defaultExpandLevel={1}
-        getRowId={(p) =&gt; p.data.id}
-        actions={ctrl.mainActions}
-        onRowClicked={ctrl.handleRowClicked}
-      /&gt;
-    ),
-  }}
-/&gt;</pre
-          >
-        </div>
-
-        <h3>Controller handleSearch</h3>
-        <div class="code-block">
-          <div class="code-header">
-            <span>ts</span
-            ><button class="copy-btn" onclick="copyCode(this)">복사</button>
-          </div>
-          <pre>
-const handleSearch = useCallback((result: any) => {
-  const list = result?.rows ?? [];
-
-  // DYNAMIC_QUERY 가 "1=1" 이면 전체조회, 그 외엔 필터링 조회
-  const dynamicQuery = String(
-    result?.DYNAMIC_QUERY ?? filtersRef.current?.DYNAMIC_QUERY ?? "1=1"
-  ).trim();
-  const isFiltered = dynamicQuery !== "1=1";
-
-  // buildSource: isFiltered=true 이면 자식 없는 루트 노드 제거
-  model.setSource(buildSource(list, isFiltered));
-}, [model, filtersRef]);</pre
-          >
+          <div class="code-header"><span>folder structure</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+          <pre>src/features/{모듈}/{화면}/
+├── {화면}.tsx               <span class="c">// View       — UI 렌더링만</span>
+├── {화면}Controller.tsx     <span class="c">// Controller — 이벤트·API 호출</span>
+├── {화면}Model.ts           <span class="c">// Model      — 상태 관리</span>
+├── {화면}Columns.tsx        <span class="c">// Columns    — 그리드 컬럼</span>
+└── {화면}Api.ts             <span class="c">// Api        — apiClient 호출</span></pre>
         </div>
 
         <div class="tip">
           <span class="tip-icon">💡</span>
-          <code>buildSource(list, isFiltered)</code> — 두 번째 인자가
-          <code>true</code>이면 <code>data[]</code>가 비어 있는 가상 루트(-1)
-          노드를 트리에서 자동 제외합니다. 전체 조회(<code>false</code>)일 때는
-          빈 루트도 표시합니다.
+          <div>
+            <strong>새 화면을 만들 때</strong>는 <code>src/features/guide/Guide_Feature*.{ts,tsx}</code> 5종 세트를 그대로 복사해 변경하세요.
+            기존 화면을 수정할 때도 동일한 역할 분리를 깨지 마세요.
+          </div>
         </div>
       </section>
 
-      <!-- ── 5. 체크리스트 ── -->
-      <section id="checklist">
-        <h2><span class="section-icon">✅</span> 신규 화면 추가 체크리스트</h2>
-        <p>새 화면을 만들 때 아래 순서대로 진행합니다.</p>
-        <ul class="checklist" style="margin-top: 16px">
-          <li>
-            <div class="step-num">1</div>
-            <div>
-              <strong>폴더 생성</strong>
-              <div class="step-file">src/views/{모듈}/{화면명}/</div>
+      <!-- ════════════════════════════════════════════════════════ -->
+      <!-- ── 2. 화면 형태별 만드는 방법 ── -->
+      <!-- ════════════════════════════════════════════════════════ -->
+      <section id="patterns">
+        <h2><span class="section-icon">🏗</span> 화면 형태별 만드는 방법</h2>
+        <p>실무에서 쓰는 5가지 화면 형태입니다. 시작하기 전에 어떤 형태로 만들지 결정하세요.</p>
+
+        <!-- 패턴 A: 단일 그리드 -->
+        <div class="pattern-card">
+          <div class="pattern-header">
+            <span class="tag tag-blue">패턴 A</span>
+            <strong>단일 그리드</strong>
+            <span class="pattern-example">예: 단순 조회/관리 화면</span>
+          </div>
+          <div class="pattern-body">
+            <p>마스터 리스트 1개만 있는 화면. 가장 간단한 형태.</p>
+            <div class="pattern-diagram" style="margin: 12px 0">
+              <div class="diagram-row"><div class="diagram-block db-header">조회조건 (SearchFilters)</div></div>
+              <div class="diagram-row"><div class="diagram-block db-blue" style="min-height: 90px; display: flex; align-items: center; justify-content: center">DataGrid (메인)</div></div>
             </div>
-          </li>
-          <li>
-            <div class="step-num">2</div>
-            <div>
-              <strong>Columns 파일 작성</strong> — 컬럼 정의, Lang.get() 사용
-              <div class="step-file">{화면명}Columns.tsx</div>
+            <h4>구성</h4>
+            <ul style="padding-left: 20px">
+              <li><code>MasterDetailPage</code>의 <code>master</code>만 채우고 <code>detail</code> 생략</li>
+              <li>또는 <code>SinglePage</code> 프리셋 사용 (있는 경우)</li>
+            </ul>
+            <div class="code-block">
+              <div class="code-header"><span>view (단일 그리드)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="k">return</span> (
+  &lt;<span class="t">MasterDetailPage</span>
+    searchProps={{ meta, fetchFn: ctrl.<span class="fn">fetchList</span>, onSearch: ctrl.<span class="fn">handleSearch</span>,
+                   searchRef, filtersRef, pageSize: model.pageSize, menuCode: <span class="t">MENU_CD</span> }}
+    storageKey=<span class="s">"my-feature"</span>
+    master={
+      &lt;<span class="t">DataGrid</span>
+        layoutType=<span class="s">"plain"</span>
+        columnDefs={<span class="fn">MAIN_COLUMN_DEFS</span>()}
+        rowData={model.gridData.rows}
+        totalCount={model.gridData.totalCount}
+        actions={ctrl.mainActions}
+      /&gt;
+    }
+  /&gt;
+);</pre>
             </div>
-          </li>
-          <li>
-            <div class="step-num">3</div>
-            <div>
-              <strong>Model 파일 작성</strong> — 상태 정의
-              <div class="step-file">{화면명}Model.ts</div>
-            </div>
-          </li>
-          <li>
-            <div class="step-num">4</div>
-            <div>
-              <strong>Controller 파일 작성</strong> — API / 핸들러
-              <div class="step-file">{화면명}Controller.tsx</div>
-            </div>
-          </li>
-          <li>
-            <div class="step-num">5</div>
-            <div>
-              <strong>View 파일 작성</strong> — StandardPageLayout 으로 조립
-              <div class="step-file">{화면명}.tsx</div>
-            </div>
-          </li>
-          <li>
-            <div class="step-num">6</div>
-            <div>
-              <strong>API 파일 추가</strong>
-              <div class="step-file">
-                src/app/services/{모듈}/{화면명}Api.ts
+          </div>
+        </div>
+
+        <!-- 패턴 B: Master + Detail -->
+        <div class="pattern-card">
+          <div class="pattern-header">
+            <span class="tag tag-green">패턴 B</span>
+            <strong>Master-Detail (좌우/상하 분할)</strong>
+            <span class="pattern-example">예: 헤더+상세 동시 조회</span>
+          </div>
+          <div class="pattern-body">
+            <p>메인 그리드에서 행을 클릭하면 상세 그리드가 갱신되는 형태. 가장 일반적.</p>
+            <div class="pattern-diagram" style="margin: 12px 0">
+              <div class="diagram-row"><div class="diagram-block db-header">조회조건</div></div>
+              <div class="diagram-row">
+                <div class="diagram-block db-blue" style="min-height: 90px; display: flex; align-items: center; justify-content: center">Master DataGrid</div>
+                <div class="diagram-block db-green" style="min-height: 90px; display: flex; align-items: center; justify-content: center">Detail DataGrid</div>
               </div>
             </div>
-          </li>
-          <li>
-            <div class="step-num">7</div>
-            <div>
-              <strong>메뉴 컴포넌트 맵 등록</strong>
-              <div class="step-file">src/app/menu/menuComponentMap.ts</div>
+            <h4>구성</h4>
+            <ul style="padding-left: 20px">
+              <li><code>master</code> + <code>detail</code> 양쪽 모두 채움</li>
+              <li><code>direction="horizontal"</code>(side) / <code>"vertical"</code> 토글 지원 → <code>layoutToggle</code></li>
+              <li>Controller의 <code>handleRowClicked</code>에서 detail API 호출</li>
+            </ul>
+            <div class="code-block">
+              <div class="code-header"><span>controller.handleRowClicked</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="k">const</span> handleRowClicked = <span class="fn">useCallback</span>((row) =&gt; {
+  model.<span class="fn">setSelectedHeaderRow</span>(row);
+  featureApi.<span class="fn">getDetailList</span>({ KEY: row.<span class="t">KEY</span> })
+    .then((res) =&gt; model.<span class="fn">setSubDetailRowData</span>(res.data.result ?? []));
+}, [model]);</pre>
             </div>
-          </li>
-          <li>
-            <div class="step-num">8</div>
-            <div>
-              <strong>MENU_CODE 상수 확인</strong> — 서버 담당자에게 메뉴코드
-              확인
+          </div>
+        </div>
+
+        <!-- 패턴 C: Master + Detail (탭) -->
+        <div class="pattern-card">
+          <div class="pattern-header">
+            <span class="tag tag-amber">패턴 C</span>
+            <strong>Master + Detail(탭 그리드)</strong>
+            <span class="pattern-example">예: 운송수배현황(경유지/SMS이력/운송비)</span>
+          </div>
+          <div class="pattern-body">
+            <p>Detail 영역에 여러 탭이 있고, 각 탭마다 다른 그리드를 보여주는 형태. <code>DataGrid</code>의 <code>layoutType="tab"</code> + <code>presets</code> 사용.</p>
+            <div class="pattern-diagram" style="margin: 12px 0">
+              <div class="diagram-row"><div class="diagram-block db-header">조회조건</div></div>
+              <div class="diagram-row">
+                <div class="diagram-block db-blue" style="min-height: 100px; display: flex; align-items: center; justify-content: center">Master DataGrid</div>
+                <div class="diagram-block db-green" style="min-height: 100px">
+                  <div style="font-size: 11px; margin-bottom: 4px">[탭A][탭B][탭C]</div>
+                  <div style="display: flex; align-items: center; justify-content: center; height: 60px">선택된 탭의 DataGrid</div>
+                </div>
+              </div>
             </div>
-          </li>
+            <div class="code-block">
+              <div class="code-header"><span>view.detail (탭 그리드)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre>detail={
+  &lt;<span class="t">DataGrid</span>
+    layoutType=<span class="s">"tab"</span>
+    tabs={[
+      { key: <span class="s">"STOP"</span>,    label: <span class="s">"LBL_STOP"</span> },
+      { key: <span class="s">"SMS_HIS"</span>, label: <span class="s">"LBL_SMS_HISTORY"</span> },
+      { key: <span class="s">"AP_SETL"</span>, label: <span class="s">"LBL_TRANS_COST_HIS"</span> },
+    ]}
+    presets={{
+      STOP:    { columnDefs: <span class="fn">STOP_COLUMN_DEFS</span>() },
+      SMS_HIS: { columnDefs: <span class="fn">SMS_COLUMN_DEFS</span>() },
+      AP_SETL: { columnDefs: <span class="fn">AP_SETL_COLUMN_DEFS</span>(model.setSubApSetlRowData),
+                 onCellValueChanged: ctrl.handleApSetlCellChange,
+                 actions: ctrl.apSetlActions },
+    }}
+    rowData={{
+      STOP:    model.subStopRowData,
+      SMS_HIS: model.subSmsHisRowData,
+      AP_SETL: model.subApSetlRowData,
+    }}
+    actions={[]}
+    codeMap={model.codeMap}
+  /&gt;
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- 패턴 D: Master + Detail + 추적 패널 -->
+        <div class="pattern-card">
+          <div class="pattern-header">
+            <span class="tag tag-rose">패턴 D</span>
+            <strong>Master + Detail + 하단 추적 패널</strong>
+            <span class="pattern-example">예: 운송수배현황 + 추적</span>
+          </div>
+          <div class="pattern-body">
+            <p>패턴 C에 더해 하단에 슬라이드로 열리는 추적 결과 패널이 있는 형태. <code>bottomSlot</code> + <code>bottomOpen</code> 사용.</p>
+            <div class="pattern-diagram" style="margin: 12px 0">
+              <div class="diagram-row"><div class="diagram-block db-header">조회조건</div></div>
+              <div class="diagram-row">
+                <div class="diagram-block db-blue">Master</div>
+                <div class="diagram-block db-green">Detail (탭)</div>
+              </div>
+              <div class="diagram-row"><div class="diagram-block db-rose">하단 추적 패널 (TrackPanel)</div></div>
+            </div>
+            <h4>구성</h4>
+            <ul style="padding-left: 20px">
+              <li>Controller에 <code>makeTrackGroupAction({ onBuy, onSell, ... })</code> 액션 추가 (매입/매출/배차/주문/경유지/인수증)</li>
+              <li>Model에 <code>trackOpen</code>, <code>trackType</code>, <code>trackDspchNos</code> 상태</li>
+              <li>View의 <code>bottomSlot</code>에 <code>&lt;TrackPanel /&gt;</code></li>
+              <li>TrackPanel이 <code>trackApi.getTrackList</code> 호출 + 그리드 렌더 자체 처리 (호출자는 type/dspchNos만 전달)</li>
+            </ul>
+            <div class="code-block">
+              <div class="code-header"><span>controller.openTrack + view.bottomSlot</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="c">// Controller — 어떤 버튼/어떤 param 만 관리</span>
+<span class="k">const</span> openTrack = (type) =&gt; (e) =&gt; {
+  <span class="k">if</span> (!e?.data?.length) <span class="k">return</span>;
+  model.<span class="fn">setTrackType</span>(type);
+  model.<span class="fn">setTrackDspchNos</span>(e.data.<span class="fn">map</span>((r) =&gt; r.<span class="t">DSPCH_NO</span>));
+  model.<span class="fn">setTrackOpen</span>(<span class="k">true</span>);
+};
+<span class="k">const</span> mainActions = [
+  <span class="fn">makeTrackGroupAction</span>({
+    onBuy:  <span class="fn">openTrack</span>(<span class="s">"BUY"</span>),
+    onSell: <span class="fn">openTrack</span>(<span class="s">"SELL"</span>),
+    onDispatch: <span class="fn">openTrack</span>(<span class="s">"DSPCH"</span>),
+    onOrder: <span class="fn">openTrack</span>(<span class="s">"ORD"</span>),
+    onStop:  <span class="fn">openTrack</span>(<span class="s">"STOP"</span>),
+    onPod:   <span class="fn">openTrack</span>(<span class="s">"POD"</span>),
+  }),
+  <span class="fn">makeHistoryAction</span>(),
+];
+
+<span class="c">// View</span>
+&lt;<span class="t">MasterDetailPage</span>
+  master={...} detail={...}
+  bottomSlot={
+    &lt;<span class="t">TrackPanel</span>
+      open={model.trackOpen}
+      onClose={() =&gt; model.<span class="fn">setTrackOpen</span>(<span class="k">false</span>)}
+      trackType={model.trackType}
+      dspchNos={model.trackDspchNos}
+    /&gt;
+  }
+  bottomOpen={model.trackOpen}
+  bottomHeight={280}
+/&gt;</pre>
+            </div>
+            <div class="tip">
+              <span class="tip-icon">💡</span>
+              <div>
+                추적 종류별 컬럼은 <code>src/app/components/track/trackColumns.tsx</code>의 <code>TRACK_COLUMN_DEFS_MAP</code>에서 정의합니다.
+                API endpoint는 <code>trackApi.getTrackList</code> 한 곳.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 패턴 E: 트리 그리드 -->
+        <div class="pattern-card">
+          <div class="pattern-header">
+            <span class="tag tag-slate">패턴 E</span>
+            <strong>트리 그리드</strong>
+            <span class="pattern-example">예: 부서/조직 등 계층형 데이터</span>
+          </div>
+          <div class="pattern-body">
+            <p>계층 데이터를 트리로 펼쳐 보여주는 형태. <code>treeData={true}</code> + <code>getDataPath</code> 지정.</p>
+            <h4>구성</h4>
+            <ul style="padding-left: 20px">
+              <li>Controller <code>handleSearch</code>에서 응답을 <code>flatten</code>해 path 배열로 변환</li>
+              <li><code>DataGrid</code>에 <code>treeData / getDataPath / autoGroupColumnDef / groupDefaultExpanded</code> 전달</li>
+              <li>모두펼치기/접기 액션은 <code>treeGridRef</code>로 제어</li>
+            </ul>
+            <div class="code-block">
+              <div class="code-header"><span>tree-data DataGrid</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre>&lt;<span class="t">DataGrid</span>
+  treeData
+  getDataPath={(row) =&gt; row.path}
+  autoGroupColumnDef={{ headerName: <span class="s">"조직"</span>, field: <span class="s">"NAME"</span> }}
+  groupDefaultExpanded={-1}    <span class="c">// -1: 전체 펼침, 0: 전체 접힘, N: N단계까지</span>
+  rowData={treeRows}
+  columnDefs={...}
+/&gt;</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════ -->
+      <!-- ── 3. 파일별 작성 방법 ── -->
+      <!-- ════════════════════════════════════════════════════════ -->
+      <section id="files">
+        <h2><span class="section-icon">📝</span> 파일별 작성 방법</h2>
+
+        <!-- View -->
+        <h3>View — <code>{화면}.tsx</code></h3>
+        <p>JSX/레이아웃만. 비즈니스 로직 없음.</p>
+        <ul style="padding-left: 20px">
+          <li>레이아웃은 <code>MasterDetailPage</code>(또는 그 변형)로 구성</li>
+          <li>조회 조건 영역은 <code>useSearchMeta(MENU_CODE)</code> + <code>searchProps.meta</code></li>
+          <li>조회 trigger / 조회 조건 / 검색 영역 제외 키는 <code>useRef</code>로 보관</li>
+          <li>레이아웃 토글(<code>"side" | "vertical"</code>)과 화면별 유일한 <code>storageKey</code> 지정</li>
         </ul>
-      </section>
+        <div class="code-block">
+          <div class="code-header"><span>{화면}.tsx 골격</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+          <pre><span class="k">import</span> { useRef } <span class="k">from</span> <span class="s">"react"</span>;
+<span class="k">import</span> { Skeleton } <span class="k">from</span> <span class="s">"@/app/components/ui/skeleton"</span>;
+<span class="k">import</span> { MasterDetailPage } <span class="k">from</span> <span class="s">"@/app/components/layout/presets/MasterDetailPage"</span>;
+<span class="k">import</span> { LayoutType } <span class="k">from</span> <span class="s">"@/app/components/layout/LayoutToggleButton"</span>;
+<span class="k">import</span> DataGrid <span class="k">from</span> <span class="s">"@/app/components/grid/DataGrid"</span>;
+<span class="k">import</span> { useSearchMeta } <span class="k">from</span> <span class="s">"@/hooks/useSearchMeta"</span>;
+<span class="k">import</span> { useSearchCondition } <span class="k">from</span> <span class="s">"@/hooks/useSearchCondition"</span>;
+<span class="k">import</span> { useFeatureModel } <span class="k">from</span> <span class="s">"./FeatureModel"</span>;
+<span class="k">import</span> { useFeatureController } <span class="k">from</span> <span class="s">"./FeatureController"</span>;
+<span class="k">import</span> { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } <span class="k">from</span> <span class="s">"./FeatureColumns"</span>;
 
-      <!-- ── 6. 레이아웃 변경 포인트 ── -->
-      <section id="change">
-        <h2>
-          <span class="section-icon">🔧</span> 레이아웃 변경 시 수정 포인트
-        </h2>
-        <table class="change-table">
-          <thead>
-            <tr>
-              <th>변경 내용</th>
-              <th>수정 위치</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>단일 → 분할 그리드</td>
-              <td>
-                View: <code>singleGrid</code> →
-                <code>dualGrid</code> 교체<br />Model: <code>layout</code> 상태
-                추가<br />View: <code>onLayoutToggle</code> 추가
-              </td>
-            </tr>
-            <tr>
-              <td>분할 그리드 비율 조정</td>
-              <td>
-                <code>dualGrid.defaultTopSize</code> /
-                <code>defaultBottomSize</code> 수정
-              </td>
-            </tr>
-            <tr>
-              <td>하단 슬라이드 패널 추가</td>
-              <td>
-                Model: <code>panelOpen</code> 상태 추가<br />View:
-                <code>bottomPanel</code> prop 추가
-              </td>
-            </tr>
-            <tr>
-              <td>트리 → 일반 그리드 변경</td>
-              <td>
-                Columns: TreeRow 타입 제거<br />View: TreeGrid → DataGrid
-                교체<br />Model: <code>source</code> →
-                <code>gridData</code> 변경
-              </td>
-            </tr>
-            <tr>
-              <td>조회조건 특정 키 제외</td>
-              <td>View: <code>excludeKeysRef.current.add('키')</code></td>
-            </tr>
-            <tr>
-              <td>페이지당 행 수 기본값 변경</td>
-              <td>Model: <code>useState(20)</code> 의 초기값 수정</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+<span class="k">export const</span> <span class="t">MENU_CD</span> = <span class="s">"MENU_XXX"</span>;
 
-      <!-- ── 7. Props 레퍼런스 ── -->
-      <section id="props">
-        <h2>
-          <span class="section-icon">📋</span> StandardPageLayout Props 레퍼런스
-        </h2>
+<span class="k">export default function</span> <span class="fn">Feature</span>() {
+  <span class="k">const</span> { meta, loading } = <span class="fn">useSearchMeta</span>(<span class="t">MENU_CD</span>);
+  <span class="k">const</span> model = <span class="fn">useFeatureModel</span>();
+  <span class="k">const</span> searchRef = <span class="fn">useRef</span>&lt;((page?: <span class="t">number</span>) =&gt; <span class="t">void</span>) | <span class="k">null</span>&gt;(<span class="k">null</span>);
+  <span class="k">const</span> filtersRef = <span class="fn">useRef</span>&lt;<span class="t">Record</span>&lt;<span class="t">string</span>, <span class="t">unknown</span>&gt;&gt;({});
+  <span class="k">const</span> excludeKeysRef = <span class="fn">useRef</span>&lt;<span class="t">Set</span>&lt;<span class="t">string</span>&gt;&gt;(<span class="k">new</span> <span class="t">Set</span>());
+
+  <span class="fn">useSearchCondition</span>({ meta, excludeKeysRef, filtersRef });
+
+  <span class="k">const</span> ctrl = <span class="fn">useFeatureController</span>({ model, searchRef, filtersRef });
+
+  <span class="k">if</span> (loading) <span class="k">return</span> &lt;<span class="t">Skeleton</span> className=<span class="s">"h-24"</span> /&gt;;
+
+  <span class="k">return</span> (
+    &lt;<span class="t">MasterDetailPage</span>
+      searchProps={{ meta, fetchFn: ctrl.fetchList, onSearch: ctrl.handleSearch,
+                     searchRef, filtersRef, pageSize: model.pageSize,
+                     excludeKeysRef, menuCode: <span class="t">MENU_CD</span> }}
+      direction={model.layout === <span class="s">"side"</span> ? <span class="s">"horizontal"</span> : <span class="s">"vertical"</span>}
+      layoutToggle={{ layout: model.layout, onToggle: () =&gt; model.<span class="fn">setLayout</span>(p =&gt; p === <span class="s">"side"</span> ? <span class="s">"vertical"</span> : <span class="s">"side"</span>) }}
+      storageKey=<span class="s">"my-feature"</span>
+      master={...}
+      detail={...}
+    /&gt;
+  );
+}</pre>
+        </div>
+
+        <!-- Controller -->
+        <h3>Controller — <code>{화면}Controller.tsx</code></h3>
+        <ul style="padding-left: 20px">
+          <li><code>fetchList(params)</code> — SearchFilters가 넘기는 params를 그대로 API에 전달</li>
+          <li><code>handleSearch(data)</code> — 조회 성공 시 <code>setGridData</code> + <code>resetSubGrids</code> + 첫 행 자동 선택</li>
+          <li><code>handleRowClicked(row)</code> — 메인 행 선택 시 상세 그리드 reload</li>
+          <li>액션 버튼은 공통 팩토리 사용 (<a href="#actions">→ 액션 팩토리</a>)</li>
+          <li>그리드 추가/저장은 <code>useGridAdd</code> / <code>useGridSave</code> 훅</li>
+          <li>저장 payload는 <code>{ dsSave }</code> 형태 — <code>useGridSave</code>가 만든 payload에서 <code>dsSave</code>만 꺼내 API 전달</li>
+        </ul>
+        <div class="code-block">
+          <div class="code-header"><span>controller 액션 (저장 패턴)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+          <pre><span class="k">const</span> handleSave = <span class="fn">useGridSave</span>({
+  rows: model.detailRows,
+  setRows: model.setDetailRows,
+  saveFn: (payload) =&gt; featureApi.<span class="fn">save</span>({ dsSave: payload.dsSave }),
+  successMessage: <span class="s">"저장되었습니다."</span>,
+  onSaved: () =&gt; searchRef.current?.(),
+});
+
+<span class="k">const</span> mainActions = <span class="fn">makeCommonActions</span>({
+  add: { onClick: handleAdd },
+  save: { onClick: handleSave },
+  excel: { columns: <span class="fn">MAIN_COLUMN_DEFS</span>(), menuName: <span class="s">"내 화면"</span>,
+           fetchFn: () =&gt; featureApi.<span class="fn">getList</span>(filtersRef.current), rows: model.gridData.rows },
+});</pre>
+        </div>
+
+        <!-- Model -->
+        <h3>Model — <code>{화면}Model.ts</code></h3>
+        <ul style="padding-left: 20px">
+          <li>공통 state: <code>layout</code>, <code>pageSize</code>, <code>gridData</code>, <code>subDetailRowData</code>, <code>selectedHeaderRow(+Ref)</code>, <code>codeMap</code></li>
+          <li>초기값: <code>EMPTY_GRID = { rows: [], totalCount: 0, page: 1, limit: 20 }</code></li>
+          <li>메인 행 선택은 <strong>state + ref 동시 보관</strong> (Controller onClick에서 stale closure 방지)</li>
+          <li>공통코드 lookup은 <code>useCommonStores</code>로 받아 <code>codeMap[storeKey][CODE] = NAME</code> 형태로 변환</li>
+        </ul>
+
+        <!-- Columns -->
+        <h3>Columns — <code>{화면}Columns.tsx</code></h3>
+        <ul style="padding-left: 20px">
+          <li><code>headerName</code>은 <code>LBL_*</code> 다국어 키 (Lang.get 자동 적용)</li>
+          <li><code>field</code>에 <code>DTTM</code> 포함 → DataGrid가 자동 날짜 포맷팅</li>
+          <li><code>field</code>가 <code>_STS</code>로 끝나면 자동 중앙 정렬</li>
+          <li><code>type: "numeric"</code> → 우측 정렬</li>
+          <li><code>headerName: "No"</code> → 자동 일련번호 + 고정 너비</li>
+          <li>공통코드 → 라벨 치환은 컬럼에 <code>codeKey</code>만 지정 (cellRenderer는 DataGrid가 자동 주입)</li>
+          <li>audit 컬럼(삭제/상태/생성자/생성일/수정자/수정일)은 <code>...standardAudit(setGridData)</code> 한 줄로 일괄 삽입</li>
+        </ul>
 
         <div class="note">
           <span class="note-icon">⚠️</span>
-          <code>singleGrid</code> 와 <code>dualGrid</code> 는 둘 중 하나만
-          전달합니다. <code>dualGrid</code> 가 있으면 레이아웃 토글 버튼이
-          자동으로 표시되고, <code>singleGrid</code> 만 있으면 자동으로
-          숨겨집니다.
+          <div>
+            <strong>setGridData 전달 컨벤션</strong>
+            <ul style="margin-top: 6px; padding-left: 20px">
+              <li><strong>삭제 컬럼 + 추가 기능(<code>useGridAdd</code>) 둘 다 있으면 필수.</strong> 신규 행(<code>EDIT_STS:"I"</code>) 삭제 시 배열에서 실제로 제거하려면 setter 필요.</li>
+              <li>기존 행만 삭제(서버에서 받은 행) → <code>markDelete</code>가 객체에 직접 <code>EDIT_STS:"D"</code>를 마킹하므로 setter 없이도 작동.</li>
+              <li>삭제 컬럼 자체를 끔(<code>standardAudit(undefined, { delete: false })</code>) → 시그니처에서 <code>setGridData</code> 인자 자체 제거 가능.</li>
+            </ul>
+            <p style="margin-top: 8px">
+              <strong>실무 권장</strong>: 추가 기능이 붙을 가능성이 조금이라도 있으면 항상 <code>MAIN_COLUMN_DEFS(model.setGridData)</code>로 넘기세요. setter를 줘도 추가가 없으면 호출되지 않아 부작용 없음.
+            </p>
+          </div>
         </div>
 
-        <table>
+        <!-- Api -->
+        <h3>Api — <code>{화면}Api.ts</code></h3>
+        <ul style="padding-left: 20px">
+          <li>객체 형태로 export: <code>export const featureApi = { MENU_CD, getList, save, ... }</code></li>
+          <li>모든 요청에 <code>MENU_CD</code> 포함 + <code>withSession()</code>으로 세션 필드 주입</li>
+          <li>저장 API는 <code>dsSave</code> 패턴: body에 <code>{ dsSave }</code>, params에 세션/MENU_CD/그 외 키</li>
+          <li>배열 페이로드일 때도 <code>withSession</code>이 각 원소에 세션 필드 자동 주입</li>
+        </ul>
+        <div class="code-block">
+          <div class="code-header"><span>api 골격</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+          <pre><span class="k">import</span> { apiClient } <span class="k">from</span> <span class="s">"@/app/http/client"</span>;
+<span class="k">import</span> { getSessionFields } <span class="k">from</span> <span class="s">"@/app/services/auth/auth"</span>;
+
+<span class="k">const</span> <span class="t">MENU_CD</span> = <span class="s">"MENU_XXX"</span>;
+
+<span class="k">const</span> <span class="fn">withSession</span> = (payload = {}) =&gt; {
+  <span class="k">const</span> s = <span class="fn">getSessionFields</span>();
+  <span class="k">return</span> <span class="t">Array</span>.<span class="fn">isArray</span>(payload)
+    ? payload.<span class="fn">map</span>((it) =&gt; ({ ...s, ...it }))
+    : { ...s, ...payload };
+};
+
+<span class="k">export const</span> featureApi = {
+  <span class="t">MENU_CD</span>,
+  <span class="fn">getList</span>(payload) {
+    <span class="k">return</span> apiClient.<span class="fn">post</span>(<span class="s">"/featureService/searchList"</span>,
+      <span class="fn">withSession</span>({ <span class="t">MENU_CD</span>, ...payload }));
+  },
+  <span class="fn">save</span>(payload) {
+    <span class="k">return</span> apiClient.<span class="fn">post</span>(<span class="s">"/featureService/save"</span>,
+      <span class="fn">withSession</span>(payload.dsSave));
+  },
+};</pre>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════ -->
+      <!-- ── 4. 신규 화면 체크리스트 ── -->
+      <!-- ════════════════════════════════════════════════════════ -->
+      <section id="checklist">
+        <h2><span class="section-icon">✅</span> 신규 화면 추가 체크리스트</h2>
+        <ol class="checklist">
+          <li><span class="step-num">1</span><div><strong>Guide_Feature 5종 복사</strong><div class="step-file">src/features/guide/Guide_Feature*.{ts,tsx} → 새 폴더로</div></div></li>
+          <li><span class="step-num">2</span><div><strong>파일명/컴포넌트명/import 경로 교체</strong></div></li>
+          <li><span class="step-num">3</span><div><strong>MENU_CD 상수 교체</strong> — 메뉴 코드는 백오피스/메뉴 등록 시 정의된 값</div></li>
+          <li><span class="step-num">4</span><div><strong>Api 파일에 endpoint 채우기</strong><div class="step-file">{화면}Api.ts</div></div></li>
+          <li><span class="step-num">5</span><div><strong>Columns 정의</strong> — <code>LBL_*</code> 다국어 키 + <code>codeKey</code> + <code>standardAudit</code><div class="step-file">{화면}Columns.tsx</div></div></li>
+          <li><span class="step-num">6</span><div><strong>Model의 codeMap 등록</strong> — 공통코드 lookup 필요 시 <code>useCommonStores</code>에 키 추가</div></li>
+          <li><span class="step-num">7</span><div><strong>Controller 액션 정의</strong> — <code>makeCommonActions</code> + 화면별 onClick</div></li>
+          <li><span class="step-num">8</span><div><strong>View에서 화면 형태 결정</strong> — 패턴 A~E 중 선택, <code>storageKey</code>는 화면별 유일값</div></li>
+          <li><span class="step-num">9</span><div><strong>라우터 등록</strong> — App router/메뉴 트리에 신규 화면 path 추가</div></li>
+          <li><span class="step-num">10</span><div><strong>실제 데이터로 검증</strong> — 조회/추가/저장/삭제/엑셀 동작 확인</div></li>
+        </ol>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════ -->
+      <!-- ── 5. 속성/Props 레퍼런스 (검색 가능) ── -->
+      <!-- ════════════════════════════════════════════════════════ -->
+      <section id="props">
+        <h2><span class="section-icon">🔍</span> 속성/Props 레퍼런스 (검색 가능)</h2>
+        <p>상단 글로벌 검색창에 키워드를 입력하면 아래 모든 표가 실시간으로 필터링됩니다.</p>
+
+        <!-- ── MasterDetailPage ── -->
+        <div class="ref-section">
+          <h3>MasterDetailPage</h3>
+          <div class="ref-summary">레이아웃 프리셋 — <code>master</code>+<code>detail</code> 분할 + 조회조건 + 옵셔널 하단 패널</div>
+          <table>
+            <thead><tr><th style="width: 200px">Prop</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="searchprops master detail 조회조건 search props"><td>searchProps</td><td><span class="tag tag-required">필수</span></td><td>조회조건 영역 설정 — <code>meta</code>, <code>fetchFn</code>, <code>onSearch</code>, <code>searchRef</code>, <code>filtersRef</code>, <code>pageSize</code>, <code>excludeKeysRef</code>, <code>menuCode</code> 포함<div class="td-source">@/app/components/layout/presets/MasterDetailPage</div></td></tr>
+              <tr data-search="master 메인 그리드 main grid"><td>master</td><td><span class="tag tag-required">필수</span></td><td>메인(좌측 또는 상단) 그리드 — 보통 <code>&lt;DataGrid /&gt;</code><div class="td-desc">ReactNode</div></td></tr>
+              <tr data-search="detail 상세 grid 상세그리드"><td>detail</td><td><span class="tag tag-required">필수</span></td><td>상세(우측 또는 하단) 그리드 — 단일 또는 탭 DataGrid<div class="td-desc">ReactNode</div></td></tr>
+              <tr data-search="direction horizontal vertical 분할 방향"><td>direction</td><td><span class="tag tag-required">필수</span></td><td>분할 방향 — <code>"horizontal"</code>(좌우) / <code>"vertical"</code>(상하)<div class="td-desc">"horizontal" | "vertical"</div></td></tr>
+              <tr data-search="defaultsizes 초기 비율 master detail size"><td>defaultSizes</td><td><span class="tag tag-optional">선택</span></td><td>초기 master/detail 비율 (합 100), 기본 <code>[50, 50]</code><div class="td-desc">[number, number]</div></td></tr>
+              <tr data-search="layouttoggle 레이아웃 토글 side vertical"><td>layoutToggle</td><td><span class="tag tag-optional">선택</span></td><td>레이아웃 토글 버튼 표시 — <code>{ layout, onToggle }</code> 전달 시 토글 활성화<div class="td-desc">{ layout: LayoutType; onToggle: () =&gt; void }</div></td></tr>
+              <tr data-search="storagekey localstorage 저장 키 사이즈"><td>storageKey</td><td><span class="tag tag-optional">선택</span></td><td>localStorage에 사이즈/레이아웃 저장용 화면별 유일 키<div class="td-desc">string</div></td></tr>
+              <tr data-search="bottomslot 하단 패널 추적"><td>bottomSlot</td><td><span class="tag tag-optional">선택</span></td><td>하단 슬라이드 패널 콘텐츠 — 추적 패널, 부가 정보 등<div class="td-desc">ReactNode</div></td></tr>
+              <tr data-search="bottomopen 하단 열림 상태"><td>bottomOpen</td><td><span class="tag tag-optional">선택</span></td><td>하단 패널 열림 상태<div class="td-desc">boolean</div></td></tr>
+              <tr data-search="bottomheight 하단 패널 높이"><td>bottomHeight</td><td><span class="tag tag-optional">선택</span></td><td>하단 패널 높이(px)<div class="td-desc">number</div></td></tr>
+              <tr data-search="breakpoint 모바일 반응형"><td>breakpoint</td><td><span class="tag tag-optional">선택</span></td><td>모바일/좁은 화면에서 분할 방향 강제<div class="td-desc">{ mobile?: Direction; maxWidth?: number }</div></td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <!-- ── DataGrid ── -->
+        <div class="ref-section">
+          <h3>DataGrid</h3>
+          <div class="ref-summary">ag-grid 기반 그리드 컴포넌트 — 단일/탭/트리 + 페이지네이션 + 액션바 + 코드맵 자동 치환</div>
+          <table>
+            <thead><tr><th style="width: 200px">Prop</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="rowdata 행 데이터 row data"><td>rowData</td><td><span class="tag tag-optional">선택</span></td><td>행 데이터. 배열 또는 탭별 객체 (<code>{ TAB_KEY: rows }</code>)<div class="td-desc">TRow[] | Record&lt;string, TRow[]&gt;</div></td></tr>
+              <tr data-search="columndefs 컬럼 정의 column defs"><td>columnDefs</td><td><span class="tag tag-optional">선택</span></td><td>컬럼 정의 배열 — 보통 <code>{화면}Columns.tsx</code>의 함수가 반환<div class="td-desc">(ColDef | ColGroupDef)[]</div></td></tr>
+              <tr data-search="layouttype tab plain 탭 단일"><td>layoutType</td><td><span class="tag tag-optional">선택</span></td><td>그리드 모드 — <code>"plain"</code>(단일) / <code>"tab"</code>(탭). 기본 <code>"tab"</code><div class="td-desc">"tab" | "plain"</div></td></tr>
+              <tr data-search="tabs 탭 정의"><td>tabs</td><td><span class="tag tag-optional">선택</span></td><td>탭 정의 (<code>layoutType="tab"</code>일 때) — <code>[{ key, label }]</code><div class="td-desc">GridTab[]</div></td></tr>
+              <tr data-search="presets 탭별 설정 columndefs actions"><td>presets</td><td><span class="tag tag-optional">선택</span></td><td>탭별 columnDefs/actions/handlers 묶음<div class="td-desc">Record&lt;string, GridPreset&gt;</div></td></tr>
+              <tr data-search="actions 액션 버튼 toolbar"><td>actions</td><td><span class="tag tag-required">필수</span></td><td>그리드 상단 액션바 버튼 배열 — 공통 팩토리 사용 권장<div class="td-desc">ActionItem[]</div></td></tr>
+              <tr data-search="subtitle 부제목 헤더 라벨"><td>subTitle</td><td><span class="tag tag-optional">선택</span></td><td>액션바 좌측 라벨(다국어 키 가능)<div class="td-desc">string</div></td></tr>
+              <tr data-search="codemap 코드맵 공통코드 라벨 변환"><td>codeMap</td><td><span class="tag tag-optional">선택</span></td><td>공통코드 → 라벨 lookup 맵. 컬럼에 <code>codeKey</code>만 주면 자동 cellRenderer 주입<div class="td-desc">Record&lt;string, Record&lt;string, string&gt;&gt;</div></td></tr>
+              <tr data-search="onrowclicked 행 클릭"><td>onRowClicked</td><td><span class="tag tag-optional">선택</span></td><td>행 클릭 콜백<div class="td-desc">(row: TRow) =&gt; void</div></td></tr>
+              <tr data-search="onrowdoubleclicked 더블클릭"><td>onRowDoubleClicked</td><td><span class="tag tag-optional">선택</span></td><td>행 더블클릭 콜백<div class="td-desc">(row: TRow) =&gt; void</div></td></tr>
+              <tr data-search="onrowselected 행 선택 변경"><td>onRowSelected</td><td><span class="tag tag-optional">선택</span></td><td>행 선택(체크) 변경 콜백<div class="td-desc">(row: TRow | null) =&gt; void</div></td></tr>
+              <tr data-search="autoselectfirstrow 첫 행 자동 선택"><td>autoSelectFirstRow</td><td><span class="tag tag-optional">선택</span></td><td>rowData 갱신 시 첫 행을 자동 선택해 <code>onRowClicked</code> 발화<div class="td-desc">boolean</div></td></tr>
+              <tr data-search="rowkeys 키 컬럼 row identity"><td>rowKeys</td><td><span class="tag tag-optional">선택</span></td><td>autoSelect 시 이전 선택 행 매칭에 사용할 키 컬럼<div class="td-desc">string | string[]</div></td></tr>
+              <tr data-search="totalcount 총 건수"><td>totalCount</td><td><span class="tag tag-optional">선택</span></td><td>전체 건수(페이지네이션 표시용)<div class="td-desc">number</div></td></tr>
+              <tr data-search="currentpage 현재 페이지"><td>currentPage</td><td><span class="tag tag-optional">선택</span></td><td>현재 페이지 번호 (1-indexed)<div class="td-desc">number</div></td></tr>
+              <tr data-search="pagesize 페이지 크기 한 페이지 건수"><td>pageSize</td><td><span class="tag tag-optional">선택</span></td><td>페이지당 행 수 (보통 모델 state)<div class="td-desc">number</div></td></tr>
+              <tr data-search="onpagechange 페이지 변경"><td>onPageChange</td><td><span class="tag tag-optional">선택</span></td><td>페이지 변경 콜백 — 보통 <code>searchRef.current?.(page)</code> 호출<div class="td-desc">(page: number) =&gt; void</div></td></tr>
+              <tr data-search="onpagesizechange 페이지 사이즈 변경"><td>onPageSizeChange</td><td><span class="tag tag-optional">선택</span></td><td>페이지 사이즈 변경 콜백<div class="td-desc">(size: number) =&gt; void</div></td></tr>
+              <tr data-search="pagination 페이지네이션 표시"><td>pagination</td><td><span class="tag tag-optional">선택</span></td><td>페이지네이션 UI 표시 여부<div class="td-desc">boolean</div></td></tr>
+              <tr data-search="rowselection 선택 모드 single multiple"><td>rowSelection</td><td><span class="tag tag-optional">선택</span></td><td>ag-grid 행 선택 모드 — <code>"single"</code> / <code>"multiple"</code><div class="td-desc">string</div></td></tr>
+              <tr data-search="oncellvaluechanged 셀 편집"><td>onCellValueChanged</td><td><span class="tag tag-optional">선택</span></td><td>셀 값 편집 콜백 — 보통 EDIT_STS:"U" 마킹 처리<div class="td-desc">(params) =&gt; void</div></td></tr>
+              <tr data-search="treedata 트리 그리드 계층"><td>treeData</td><td><span class="tag tag-optional">선택</span></td><td>트리 그리드 모드 활성화<div class="td-desc">boolean</div></td></tr>
+              <tr data-search="getdatapath 트리 경로"><td>getDataPath</td><td><span class="tag tag-optional">선택</span></td><td>트리 데이터의 path 배열 추출 함수<div class="td-desc">(data: TRow) =&gt; string[]</div></td></tr>
+              <tr data-search="autogroupcolumndef 그룹 컬럼"><td>autoGroupColumnDef</td><td><span class="tag tag-optional">선택</span></td><td>트리의 그룹(첫 번째 펼침) 컬럼 정의<div class="td-desc">ColDef</div></td></tr>
+              <tr data-search="groupdefaultexpanded 펼침 기본"><td>groupDefaultExpanded</td><td><span class="tag tag-optional">선택</span></td><td>트리 기본 펼침 단계 — <code>-1</code>(전체) / <code>0</code>(전체접힘) / <code>N</code>(N단계)<div class="td-desc">number</div></td></tr>
+              <tr data-search="renderrightgrid 우측 패널 분할"><td>renderRightGrid</td><td><span class="tag tag-optional">선택</span></td><td>탭 모드에서 우측 패널 렌더(좌/우 분할)<div class="td-desc">(activeTabKey: string) =&gt; ReactNode</div></td></tr>
+              <tr data-search="ontabchange 탭 변경 콜백"><td>onTabChange</td><td><span class="tag tag-optional">선택</span></td><td>탭 전환 콜백<div class="td-desc">(key: string) =&gt; void</div></td></tr>
+              <tr data-search="mainpanelsize 메인 패널 크기"><td>mainPanelSize</td><td><span class="tag tag-optional">선택</span></td><td>renderRightGrid 좌측 패널 % (기본 70)<div class="td-desc">number</div></td></tr>
+              <tr data-search="mainpanelminsize 메인 최소"><td>mainPanelMinSize</td><td><span class="tag tag-optional">선택</span></td><td>renderRightGrid 좌측 최소 % (기본 30)<div class="td-desc">number</div></td></tr>
+              <tr data-search="rightpanelsize 우측 크기"><td>rightPanelSize</td><td><span class="tag tag-optional">선택</span></td><td>renderRightGrid 우측 패널 % (기본 30)<div class="td-desc">number</div></td></tr>
+              <tr data-search="rightpanelminsize 우측 최소"><td>rightPanelMinSize</td><td><span class="tag tag-optional">선택</span></td><td>renderRightGrid 우측 최소 % (기본 20)<div class="td-desc">number</div></td></tr>
+              <tr data-search="overrideowdata 외부 행 데이터 강제"><td>overrideRowData</td><td><span class="tag tag-optional">선택</span></td><td>탭/프리셋 무시하고 외부에서 직접 rowData 주입<div class="td-desc">TRow[]</div></td></tr>
+              <tr data-search="gridoptions ag-grid 옵션 escape"><td>gridOptions</td><td><span class="tag tag-optional">선택</span></td><td>AgGridReact 옵션 escape hatch — getRowId, suppressMovableColumns 등<div class="td-desc">Record&lt;string, any&gt;</div></td></tr>
+              <tr data-search="disableautosize 자동 컬럼 너비 끄기"><td>disableAutoSize</td><td><span class="tag tag-optional">선택</span></td><td>컬럼 자동 너비 측정 비활성화<div class="td-desc">boolean</div></td></tr>
+              <tr data-search="ontrack 추적 콜백 (legacy)"><td>onTrack</td><td><span class="tag tag-optional">선택</span></td><td>(legacy) 그리드 자체에 추적 결과 패널 표시 — 새 화면은 <code>TrackPanel</code> 사용 권장<div class="td-desc">(rows: any[]) =&gt; ReactNode</div></td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <!-- ── SplitPane ── -->
+        <div class="ref-section">
+          <h3>SplitPane</h3>
+          <div class="ref-summary">패널 분할 — <code>MasterDetailPage</code>가 내부적으로 사용. detail 내부를 더 분할하고 싶을 때 직접 사용</div>
+          <table>
+            <thead><tr><th style="width: 200px">Prop</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="direction 분할 방향 horizontal vertical splitpane"><td>direction</td><td><span class="tag tag-required">필수</span></td><td>분할 방향<div class="td-desc">"horizontal" | "vertical"</div></td></tr>
+              <tr data-search="defaultsizes 초기 비율 splitpane"><td>defaultSizes</td><td><span class="tag tag-optional">선택</span></td><td>각 패널 초기 % 배열<div class="td-desc">number[]</div></td></tr>
+              <tr data-search="minsizes 최소 크기 splitpane"><td>minSizes</td><td><span class="tag tag-optional">선택</span></td><td>각 패널 최소 % 배열<div class="td-desc">number[]</div></td></tr>
+              <tr data-search="handlethickness 핸들 두께 splitpane"><td>handleThickness</td><td><span class="tag tag-optional">선택</span></td><td>리사이즈 핸들 두께 — <code>"1.5"</code> / <code>"2"</code> (기본 "2")<div class="td-desc">"1.5" | "2"</div></td></tr>
+              <tr data-search="storagekey 저장 키 splitpane"><td>storageKey</td><td><span class="tag tag-optional">선택</span></td><td>localStorage에 사용자 리사이즈 저장용 유일 키<div class="td-desc">string</div></td></tr>
+              <tr data-search="breakpoint 모바일 반응형 splitpane"><td>breakpoint</td><td><span class="tag tag-optional">선택</span></td><td>좁은 화면에서 분할 방향 강제 — <code>{ mobile, maxWidth }</code><div class="td-desc">object</div></td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <!-- ── 컬럼 속성 ── -->
+        <div class="ref-section">
+          <h3>컬럼 정의 속성 (ColDef)</h3>
+          <div class="ref-summary">DataGrid columnDefs 안에 쓰는 속성 — 일부는 자동 포맷팅 트리거</div>
+          <table>
+            <thead><tr><th style="width: 200px">속성/패턴</th><th style="width: 100px">자동동작</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="headername 헤더 라벨 다국어"><td>headerName</td><td><span class="tag tag-optional">옵션</span></td><td>헤더 라벨. <code>LBL_*</code> 형태면 <code>Lang.get</code>로 다국어 변환됨</td></tr>
+              <tr data-search="field 데이터 키 필드"><td>field</td><td>—</td><td>row 데이터의 키 (예: <code>"DSPCH_NO"</code>)</td></tr>
+              <tr data-search="type numeric date text 컬럼 타입"><td>type</td><td>—</td><td><code>"text"</code> / <code>"numeric"</code> / <code>"date"</code> 등 (numeric은 자동 우측 정렬)</td></tr>
+              <tr data-search="datatype number 숫자 우측 정렬"><td>dataType: "number"</td><td><span class="tag tag-blue">자동</span></td><td>우측 정렬 자동 적용</td></tr>
+              <tr data-search="codekey 공통코드 라벨 치환"><td>codeKey</td><td><span class="tag tag-blue">자동</span></td><td>공통코드 → 라벨 치환 — <code>codeMap[codeKey][value]</code> lookup 후 cellRenderer 자동 주입</td></tr>
+              <tr data-search="dttm 일시 날짜 자동 포맷팅"><td>field 에 _DTTM 포함</td><td><span class="tag tag-blue">자동</span></td><td>날짜 포맷팅 자동 적용 (예: <code>CRE_DTTM</code>, <code>UPD_DTTM</code>)</td></tr>
+              <tr data-search="sts status 상태 중앙 정렬"><td>field 가 _STS 로 끝남</td><td><span class="tag tag-blue">자동</span></td><td>중앙 정렬 자동 적용 (예: <code>AP_FI_STS</code>, <code>DSPCH_OP_STS</code>)</td></tr>
+              <tr data-search="no 일련번호 시퀀스 행번호"><td>headerName: "No"</td><td><span class="tag tag-blue">자동</span></td><td>일련번호 + 고정 너비 자동 적용</td></tr>
+              <tr data-search="align 정렬 center right left"><td>align</td><td>—</td><td>셀 정렬 — <code>"left"</code> / <code>"center"</code> / <code>"right"</code></td></tr>
+              <tr data-search="editable 편집 가능"><td>editable</td><td>—</td><td>셀 편집 허용</td></tr>
+              <tr data-search="valuesetter 값 설정 커스텀"><td>valueSetter</td><td>—</td><td>셀 편집 시 값 변환/검증 — boolean 반환</td></tr>
+              <tr data-search="valuegetter 값 추출"><td>valueGetter</td><td>—</td><td>셀 값 동적 계산 — <code>(params) =&gt; value</code></td></tr>
+              <tr data-search="cellrenderer 커스텀 렌더러"><td>cellRenderer</td><td>—</td><td>커스텀 셀 렌더 (보통 <code>codeKey</code> 쓰면 자동이라 직접 작성 불필요)</td></tr>
+              <tr data-search="width 컬럼 너비 고정"><td>width</td><td>—</td><td>고정 컬럼 너비(px). 미지정 시 자동 측정</td></tr>
+              <tr data-search="minwidth 최소 너비"><td>minWidth</td><td>—</td><td>컬럼 최소 너비(px)</td></tr>
+              <tr data-search="hide 숨김 컬럼"><td>hide</td><td>—</td><td>컬럼 숨김</td></tr>
+              <tr data-search="standardaudit 감사 컬럼 일괄 삭제 상태 생성자 setgriddata setrowdata 신규 추가 컨벤션 usegridadd"><td>...standardAudit(setter)</td><td><span class="tag tag-blue">자동</span></td><td>삭제/상태/생성자/생성일/수정자/수정일 7컬럼 일괄 삽입. <strong>삭제 + 추가 기능(<code>useGridAdd</code>) 둘 다 있는 화면은 setter 필수</strong> — 신규 행(<code>EDIT_STS:"I"</code>) 삭제 시 배열 제거에 사용. 기존 행만 삭제하는 화면은 setter 없어도 작동(<code>markDelete</code>가 직접 마킹). <code>{ updatePerson: false }</code> 같은 override 가능.</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <!-- ── ActionItem ── -->
+        <div class="ref-section">
+          <h3>ActionItem (actions 배열의 원소)</h3>
+          <div class="ref-summary">DataGrid <code>actions</code>에 들어가는 객체. <code>ActionButton</code> 또는 <code>ActionGroup</code></div>
+          <table>
+            <thead><tr><th style="width: 200px">Prop</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="type button group dropdown 액션 종류"><td>type</td><td><span class="tag tag-required">필수</span></td><td><code>"button"</code> / <code>"group"</code> / <code>"dropdown"</code> (group과 dropdown은 동일 렌더)</td></tr>
+              <tr data-search="key 액션 키"><td>key</td><td><span class="tag tag-required">필수</span></td><td>고유 키 (React key + 식별용)</td></tr>
+              <tr data-search="label 라벨 액션 버튼"><td>label</td><td><span class="tag tag-required">필수</span></td><td>버튼 라벨 — <code>LBL_*</code> 형태면 다국어 변환</td></tr>
+              <tr data-search="onclick 클릭 핸들러"><td>onClick</td><td><span class="tag tag-optional">선택</span></td><td>클릭 핸들러. <code>e.data</code>로 선택된 행을 받음 — <code>(e: any) =&gt; void</code></td></tr>
+              <tr data-search="disabled 비활성화"><td>disabled</td><td><span class="tag tag-optional">선택</span></td><td>버튼 비활성화</td></tr>
+              <tr data-search="variant 스타일 outline primary"><td>variant</td><td><span class="tag tag-optional">선택</span></td><td>버튼 스타일 — <code>"default"</code> / <code>"outline"</code>(기본) / <code>"primary"</code> / <code>"ghost"</code> / <code>"destructive"</code></td></tr>
+              <tr data-search="items 그룹 하위 버튼"><td>items</td><td><span class="tag tag-required">필수(group)</span></td><td>그룹 타입에서 하위 버튼 배열 (각각 ActionButton)</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <!-- ── TrackPanel ── -->
+        <div class="ref-section">
+          <h3>TrackPanel</h3>
+          <div class="ref-summary">하단 추적 패널 — 호출자는 <code>trackType</code>+<code>dspchNos</code>만 넘기면 내부에서 API 호출 + 그리드 렌더</div>
+          <table>
+            <thead><tr><th style="width: 200px">Prop</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="open 열림 상태 추적"><td>open</td><td><span class="tag tag-required">필수</span></td><td>패널 열림 상태<div class="td-desc">boolean</div></td></tr>
+              <tr data-search="onclose 닫기 콜백 추적"><td>onClose</td><td><span class="tag tag-required">필수</span></td><td>닫기 콜백 — 닫기 버튼 onClick<div class="td-desc">() =&gt; void</div></td></tr>
+              <tr data-search="tracktype buy sell dspch ord stop pod 추적 종류"><td>trackType</td><td><span class="tag tag-required">필수</span></td><td>추적 종류 — <code>"BUY" | "SELL" | "DSPCH" | "ORD" | "STOP" | "POD"</code> 또는 <code>null</code><div class="td-desc">TrackType | null</div></td></tr>
+              <tr data-search="dspchnos 배차번호 리스트 추적"><td>dspchNos</td><td><span class="tag tag-required">필수</span></td><td>관련 배차번호 배열 — Controller에서 <code>e.data.map(r =&gt; r.DSPCH_NO)</code>로 추출<div class="td-desc">string[]</div></td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════ -->
+      <!-- ── 6. 액션 팩토리 ── -->
+      <!-- ════════════════════════════════════════════════════════ -->
+      <section id="actions">
+        <h2><span class="section-icon">🔘</span> 액션 팩토리</h2>
+        <p>Controller에서 액션 버튼을 만들 때 직접 객체 작성 대신 공통 팩토리를 사용하세요. <br />위치: <code>@/app/components/grid/commonActions</code></p>
+
+        <div class="ref-section">
+          <h3>makeAddAction</h3>
+          <div class="ref-summary">"추가" 버튼 — 보통 <code>useGridAdd</code> 훅과 함께 사용</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="onclick 추가 클릭 makeaddaction"><td>onClick</td><td><span class="tag tag-optional">선택</span></td><td>클릭 핸들러 (보통 <code>useGridAdd</code> 결과)<div class="td-desc">(e?: any) =&gt; void</div></td></tr>
+              <tr data-search="label 라벨 추가 makeaddaction"><td>label</td><td><span class="tag tag-optional">선택</span></td><td>버튼 라벨, 기본 <code>"BTN_ADD"</code></td></tr>
+              <tr data-search="key 키 makeaddaction"><td>key</td><td><span class="tag tag-optional">선택</span></td><td>action key, 기본 <code>"BTN_ADD"</code></td></tr>
+              <tr data-search="disabled 비활성 makeaddaction"><td>disabled</td><td><span class="tag tag-optional">선택</span></td><td>비활성화</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>makeSaveAction</h3>
+          <div class="ref-summary">"저장" 버튼 — 보통 <code>useGridSave</code> 훅 결과를 <code>onClick</code>으로 전달</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="onclick 저장 클릭 makesaveaction"><td>onClick</td><td><span class="tag tag-optional">선택</span></td><td>클릭 핸들러 (보통 <code>useGridSave</code> 결과)</td></tr>
+              <tr data-search="label 라벨 저장 makesaveaction"><td>label</td><td><span class="tag tag-optional">선택</span></td><td>버튼 라벨, 기본 <code>"BTN_SAVE"</code></td></tr>
+              <tr data-search="key 키 makesaveaction"><td>key</td><td><span class="tag tag-optional">선택</span></td><td>action key, 기본 <code>"BTN_SAVE"</code></td></tr>
+              <tr data-search="disabled 비활성 makesaveaction"><td>disabled</td><td><span class="tag tag-optional">선택</span></td><td>비활성화</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>makeExcelGroupAction</h3>
+          <div class="ref-summary">"엑셀" 그룹 — 조회된 모든 데이터 / 보이는 데이터 다운로드 2버튼</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="columns 엑셀 컬럼 makeexcelgroupaction"><td>columns</td><td><span class="tag tag-required">필수</span></td><td>다운로드용 컬럼 정의 (<code>MAIN_COLUMN_DEFS()</code>)</td></tr>
+              <tr data-search="menuname 엑셀 파일명"><td>menuName</td><td><span class="tag tag-required">필수</span></td><td>엑셀 파일명에 사용할 메뉴명</td></tr>
+              <tr data-search="fetchfn 엑셀 조회 함수"><td>fetchFn</td><td><span class="tag tag-required">필수</span></td><td>전체 데이터 조회 함수 (paging 무시)</td></tr>
+              <tr data-search="rows 엑셀 보이는 데이터"><td>rows</td><td><span class="tag tag-required">필수</span></td><td>현재 보이는 데이터 (모델의 <code>gridData.rows</code>)</td></tr>
+              <tr data-search="hideall 모든데이터 숨김"><td>hideAll</td><td><span class="tag tag-optional">선택</span></td><td>"조회된모든데이터다운로드" 버튼 숨김</td></tr>
+              <tr data-search="hidevisible 보이는데이터 숨김"><td>hideVisible</td><td><span class="tag tag-optional">선택</span></td><td>"보이는데이터다운로드" 버튼 숨김</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>makeCommonActions</h3>
+          <div class="ref-summary">추가/저장/엑셀 3종을 한번에 구성. <code>[...preActions, ...makeCommonActions({...})]</code> 식으로 합성</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="add 추가 makecommonactions"><td>add</td><td><span class="tag tag-optional">선택</span></td><td><code>true</code> 또는 <code>AddActionConfig</code> — 있으면 추가 버튼 포함</td></tr>
+              <tr data-search="save 저장 makecommonactions"><td>save</td><td><span class="tag tag-optional">선택</span></td><td><code>true</code> 또는 <code>SaveActionConfig</code></td></tr>
+              <tr data-search="excel 엑셀 makecommonactions"><td>excel</td><td><span class="tag tag-optional">선택</span></td><td><code>ExcelGroupActionConfig</code> — 있으면 엑셀 그룹 포함</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>makeTrackGroupAction</h3>
+          <div class="ref-summary">"추적" 드롭다운 그룹 — 매입/매출/배차/주문/경유지/인수증 6개 버튼</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="onbuy 매입 추적 maketrackgroupaction"><td>onBuy</td><td><span class="tag tag-optional">선택</span></td><td>매입 버튼 onClick<div class="td-desc">(e?: any) =&gt; void</div></td></tr>
+              <tr data-search="onsell 매출 추적 maketrackgroupaction"><td>onSell</td><td><span class="tag tag-optional">선택</span></td><td>매출 버튼 onClick</td></tr>
+              <tr data-search="ondispatch 배차 추적 maketrackgroupaction"><td>onDispatch</td><td><span class="tag tag-optional">선택</span></td><td>배차 버튼 onClick</td></tr>
+              <tr data-search="onorder 주문 추적 maketrackgroupaction"><td>onOrder</td><td><span class="tag tag-optional">선택</span></td><td>주문 버튼 onClick</td></tr>
+              <tr data-search="onstop 경유지 추적 maketrackgroupaction"><td>onStop</td><td><span class="tag tag-optional">선택</span></td><td>경유지 버튼 onClick</td></tr>
+              <tr data-search="onpod 인수증 추적 maketrackgroupaction"><td>onPod</td><td><span class="tag tag-optional">선택</span></td><td>인수증 버튼 onClick</td></tr>
+              <tr data-search="label 그룹 라벨 추적 maketrackgroupaction"><td>label / key</td><td><span class="tag tag-optional">선택</span></td><td>그룹 라벨/키, 기본 <code>"추적"</code></td></tr>
+              <tr data-search="disabled 비활성 추적 maketrackgroupaction"><td>disabled</td><td><span class="tag tag-optional">선택</span></td><td>그룹 비활성화</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>makeHistoryAction</h3>
+          <div class="ref-summary">"이력조회" 단일 버튼</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="onclick 이력조회 makehistoryaction"><td>onClick</td><td><span class="tag tag-optional">선택</span></td><td>클릭 핸들러</td></tr>
+              <tr data-search="label 라벨 이력조회 makehistoryaction"><td>label / key</td><td><span class="tag tag-optional">선택</span></td><td>버튼 라벨/키, 기본 <code>"이력조회"</code></td></tr>
+              <tr data-search="disabled 비활성 이력조회 makehistoryaction"><td>disabled</td><td><span class="tag tag-optional">선택</span></td><td>비활성화</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════ -->
+      <!-- ── 7. Hooks ── -->
+      <!-- ════════════════════════════════════════════════════════ -->
+      <section id="hooks">
+        <h2><span class="section-icon">🪝</span> Hooks</h2>
+
+        <div class="ref-section">
+          <h3>useSearchMeta(menuCode)</h3>
+          <div class="ref-summary">메뉴 코드별 조회조건 메타데이터 + 콤보 옵션 자동 로드. View에서 호출</div>
+          <table>
+            <thead><tr><th style="width: 200px">반환</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="meta 검색 메타데이터 usesearchmeta"><td>meta</td><td>조회조건 메타 배열 (콤보 옵션 포함된 상태) — <code>SearchMeta[]</code></td></tr>
+              <tr data-search="loading 로딩 usesearchmeta"><td>loading</td><td>메타 로딩 중 여부 — <code>boolean</code></td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>useSearchCondition({ meta, excludeKeysRef, filtersRef, excludes })</h3>
+          <div class="ref-summary">조회조건 후처리 — YMD 범위 분리(_FRM/_TO), 파라미터 변환, 라벨/컬럼 lookup</div>
+          <table>
+            <thead><tr><th style="width: 200px">반환</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="setcomptoparamexclude 검색 제외 컬럼"><td>setCompToParamExclude(...cols)</td><td>특정 컬럼을 DYNAMIC_QUERY에서 제외</td></tr>
+              <tr data-search="getvaluebylabel 라벨로 값 가져오기"><td>getValueByLabel(...)</td><td>라벨 → 값 lookup</td></tr>
+              <tr data-search="getvaluebycolumn 컬럼으로 값 가져오기"><td>getValueByColumn(...)</td><td>컬럼명 → 값 lookup</td></tr>
+              <tr data-search="transformparams 파라미터 변환"><td>transformParams(params)</td><td>params 가공 (YMD 분리 등)</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>useCommonStores(params)</h3>
+          <div class="ref-summary">공통코드 콤보/lookup 일괄 로드. Model에서 호출 → <code>codeMap</code>으로 변환</div>
+          <table>
+            <thead><tr><th style="width: 200px">인자</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="usecommonstores 공통코드 sqlprop keyparam"><td>params</td><td><code>Record&lt;string, { sqlProp, keyParam? } | Array&gt;</code> — 키별 공통코드 정의</td></tr>
+              <tr data-search="stores 공통코드 결과"><td>반환: { stores }</td><td><code>Record&lt;string, any[]&gt;</code> — 키별 옵션 배열 (CODE/NAME)</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>useApiHandler()</h3>
+          <div class="ref-summary">API 호출 래퍼 — 성공/실패 토스트 자동 표시</div>
+          <table>
+            <thead><tr><th style="width: 200px">반환</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="handleapi 호출 토스트 메시지"><td>handleApi(promise, message?)</td><td>API Promise를 받아 성공 메시지/에러 처리. <code>message</code>는 성공 시 표시</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>useGuard()</h3>
+          <div class="ref-summary">가드 함수 모음 — 데이터 길이 체크 후 자동 모달</div>
+          <table>
+            <thead><tr><th style="width: 200px">반환</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="guardhasdata 선택 데이터 검증"><td>guardHasData(data, message?)</td><td>data 비어있으면 confirm 모달 띄우고 false 반환. 진행 가능 시 true</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>useGridAdd({ setRows, newRow, position })</h3>
+          <div class="ref-summary">그리드 행 추가 — 새 행을 <code>EDIT_STS:"I"</code>로 마킹하여 삽입</div>
+          <table>
+            <thead><tr><th style="width: 200px">인자</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="setrows 행 setter usegridadd"><td>setRows</td><td>행 setter (배열 또는 <code>{rows,...}</code> setter 둘 다 지원)</td></tr>
+              <tr data-search="newrow 신규 행 기본값"><td>newRow</td><td>새 행 기본값 — 보통 <code>{}</code> 또는 헤더 row의 키 일부</td></tr>
+              <tr data-search="position top bottom 추가 위치"><td>position</td><td><code>"top"</code> / <code>"bottom"</code> (기본 "top")</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>useGridSave({ rows, setRows, saveFn, successMessage, onSaved, onEmpty })</h3>
+          <div class="ref-summary">그리드 저장 — dirty 행 추출 → <code>toDsSave</code> → API 호출 → EDIT_STS 클리어 자동 처리</div>
+          <table>
+            <thead><tr><th style="width: 200px">인자</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="rows 행 데이터 usegridsave"><td>rows</td><td>전체 행 (또는 <code>{rows,...}</code>)</td></tr>
+              <tr data-search="setrows 행 setter usegridsave"><td>setRows</td><td>행 setter</td></tr>
+              <tr data-search="savefn 저장 api"><td>saveFn</td><td><code>(payload) =&gt; Promise</code> — payload는 <code>{ dsSave, rows }</code> 형태로 전달됨. <code>payload.dsSave</code>만 API에 넘기면 됨</td></tr>
+              <tr data-search="successmessage 저장 성공 메시지"><td>successMessage</td><td>저장 성공 토스트 메시지</td></tr>
+              <tr data-search="onsaved 저장 후 콜백"><td>onSaved</td><td>저장 성공 후 콜백 (재조회 등)</td></tr>
+              <tr data-search="onempty 변경사항 없음 콜백"><td>onEmpty</td><td>dirty 행이 없을 때 콜백</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════ -->
+      <!-- ── 8. 레이아웃 변경 포인트 ── -->
+      <!-- ════════════════════════════════════════════════════════ -->
+      <section id="change">
+        <h2><span class="section-icon">🔧</span> 레이아웃 변경 포인트</h2>
+        <p>화면 형태/배치를 바꿀 때 어떤 prop을 만지면 되는지 정리.</p>
+
+        <table class="change-table">
           <thead>
-            <tr>
-              <th style="width: 200px">Prop</th>
-              <th style="width: 80px">필수</th>
-              <th>설명</th>
-            </tr>
+            <tr><th style="width: 240px">변경하고 싶은 것</th><th>어디를 만지나</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td>meta</td>
-              <td><span class="tag tag-required">필수</span></td>
-              <td>
-                조회조건 메타 — <code>useSearchMeta()</code> 결과
-                <div class="td-desc">SearchMeta[]</div>
-              </td>
-            </tr>
-            <tr>
-              <td>fetchFn</td>
-              <td><span class="tag tag-required">필수</span></td>
-              <td>
-                조회 API 함수 — Controller 의 fetchList 주입
-                <div class="td-desc">(params) =&gt; Promise</div>
-              </td>
-            </tr>
-            <tr>
-              <td>onSearch</td>
-              <td><span class="tag tag-required">필수</span></td>
-              <td>
-                조회 결과 콜백 — Controller 의 handleSearch 주입
-                <div class="td-desc">(result) =&gt; void</div>
-              </td>
-            </tr>
-            <tr>
-              <td>searchRef</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                외부에서 조회를 트리거할 때 사용 (저장 후 재조회 등)
-                <div class="td-desc">MutableRefObject</div>
-              </td>
-            </tr>
-            <tr>
-              <td>filtersRef</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                현재 필터 파라미터 참조 — 엑셀 다운로드 등에서 사용
-                <div class="td-desc">MutableRefObject</div>
-              </td>
-            </tr>
-            <tr>
-              <td>treeGridRef</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                TreeGrid 전용 ref — 모두펼치기/접기 액션 등에서 사용
-                <div class="td-desc">
-                  MutableRefObject&lt;TreeGridHandle&gt;
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>pageSize</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                페이지 크기, 기본값 20
-                <div class="td-desc">number</div>
-              </td>
-            </tr>
-            <tr>
-              <td>excludeKeysRef</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                DYNAMIC_QUERY 에서 제외할 조회조건 키 목록
-                <div class="td-desc">
-                  MutableRefObject&lt;Set&lt;string&gt;&gt;
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>computeTotalCount</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                트리 데이터처럼 TOTALCOUNT 필드가 없는 경우 건수를 직접 계산
-                <div class="td-desc">(rows: any[]) =&gt; number</div>
-              </td>
-            </tr>
-            <tr>
-              <td>singleGrid</td>
-              <td><span class="tag tag-optional">※ 둘 중 하나</span></td>
-              <td>
-                단일 그리드 렌더링 설정
-                <div class="td-desc">{ render: ReactNode }</div>
-              </td>
-            </tr>
-            <tr>
-              <td>dualGrid</td>
-              <td><span class="tag tag-optional">※ 둘 중 하나</span></td>
-              <td>
-                분할 그리드 설정 (top, bottom, direction, defaultTopSize,
-                defaultBottomSize)
-                <div class="td-desc">DualGridConfig</div>
-              </td>
-            </tr>
-            <tr>
-              <td>layout</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                분할 방향 상태 — dualGrid 사용 시 전달
-                <div class="td-desc">"side" | "vertical"</div>
-              </td>
-            </tr>
-            <tr>
-              <td>onLayoutToggle</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                레이아웃 전환 핸들러 — dualGrid 사용 시 전달
-                <div class="td-desc">() =&gt; void</div>
-              </td>
-            </tr>
-            <tr>
-              <td>bottomPanel</td>
-              <td><span class="tag tag-optional">선택</span></td>
-              <td>
-                하단 슬라이드 패널 설정 (open, height, render)
-                <div class="td-desc">BottomSlidePanel</div>
-              </td>
-            </tr>
+            <tr><td>좌우 분할 ↔ 상하 분할</td><td><code>MasterDetailPage.direction</code> = <code>"horizontal"</code> / <code>"vertical"</code> (사용자 토글은 <code>layoutToggle</code> + Model의 <code>layout</code> state)</td></tr>
+            <tr><td>master/detail 초기 비율</td><td><code>MasterDetailPage.defaultSizes={[40, 60]}</code> 처럼 합 100인 배열</td></tr>
+            <tr><td>레이아웃 토글 버튼 표시</td><td><code>layoutToggle={{ layout, onToggle }}</code> 전달 — 빠지면 토글 없음</td></tr>
+            <tr><td>리사이즈 비율 저장 (사용자별)</td><td><code>storageKey</code>에 화면별 유일 문자열 지정 — 미지정 시 저장 안 됨</td></tr>
+            <tr><td>detail 영역을 더 분할</td><td>detail 안쪽에 <code>&lt;SplitPane&gt;</code> 직접 사용 — 자식으로 그리드 2개 배치</td></tr>
+            <tr><td>detail을 탭으로</td><td>detail의 DataGrid에 <code>layoutType="tab"</code> + <code>tabs</code> + <code>presets</code> + <code>rowData={{TAB_KEY: rows}}</code></td></tr>
+            <tr><td>하단 슬라이드 패널</td><td><code>bottomSlot</code> + <code>bottomOpen</code> + <code>bottomHeight</code> — 추적 패널 등</td></tr>
+            <tr><td>master 또는 detail 한쪽만</td><td>한쪽을 빈 div / Skeleton으로 두고 다른 쪽만 채움 (또는 SinglePage 프리셋이 있으면 사용)</td></tr>
+            <tr><td>모바일/좁은 화면 대응</td><td><code>breakpoint={{ mobile: "vertical", maxWidth: 768 }}</code></td></tr>
+            <tr><td>그리드 자동 컬럼 너비 끄기</td><td>DataGrid에 <code>disableAutoSize</code></td></tr>
+            <tr><td>페이지네이션 숨김</td><td>DataGrid에 <code>pagination={false}</code> 또는 <code>totalCount</code> 미전달</td></tr>
+            <tr><td>액션바 라벨</td><td>DataGrid <code>subTitle</code></td></tr>
+            <tr><td>액션 버튼 추가</td><td>Controller의 <code>actions</code> 배열에 객체/팩토리 추가</td></tr>
           </tbody>
         </table>
+
+        <div class="warn">
+          <span class="warn-icon">⚠️</span>
+          <div>
+            리팩터링 시 <strong>Tailwind className / inline style / 시각 prop</strong>은 byte-for-byte 보존하세요.
+            wrapper <code>&lt;div&gt;</code>를 임의로 추가/제거하면 CSS가 깨질 수 있습니다.
+          </div>
+        </div>
       </section>
     </main>
 
@@ -1483,7 +1228,6 @@ const handleSearch = useCallback((result: any) => {
       // ── 스크롤 시 네비 active 업데이트 ──
       const sections = document.querySelectorAll("section[id]");
       const navLinks = document.querySelectorAll("nav ul li a");
-
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -1499,8 +1243,73 @@ const handleSearch = useCallback((result: any) => {
         },
         { rootMargin: "-30% 0px -60% 0px" },
       );
-
       sections.forEach((s) => observer.observe(s));
+
+      // ── 글로벌 검색: 모든 ref-section 안의 [data-search] 행을 필터링 ──
+      const searchInput = document.getElementById("globalSearch");
+      const totalCountEl = document.getElementById("totalCount");
+      const hitCountEl = document.getElementById("hitCount");
+      const hitNumEl = document.getElementById("hitNum");
+
+      const allRows = Array.from(document.querySelectorAll("tr[data-search]"));
+      const allSections = Array.from(document.querySelectorAll(".ref-section"));
+      totalCountEl.textContent = allRows.length;
+
+      // 각 행의 검색 텍스트(data-search + 첫 셀 텍스트 + 설명) 통합
+      const rowSearchText = new Map();
+      allRows.forEach((tr) => {
+        const dataAttr = (tr.getAttribute("data-search") || "").toLowerCase();
+        const cellText = tr.textContent.replace(/\\s+/g, " ").toLowerCase();
+        rowSearchText.set(tr, dataAttr + " " + cellText);
+      });
+
+      function applyFilter(q) {
+        q = q.trim().toLowerCase();
+        if (!q) {
+          // 초기화
+          allRows.forEach((tr) => tr.classList.remove("search-hidden", "search-match"));
+          allSections.forEach((sec) => sec.classList.remove("search-empty", "no-results-shown"));
+          hitCountEl.style.display = "none";
+          return;
+        }
+        let hit = 0;
+        allRows.forEach((tr) => {
+          const text = rowSearchText.get(tr);
+          if (text && text.includes(q)) {
+            tr.classList.remove("search-hidden");
+            tr.classList.add("search-match");
+            hit++;
+          } else {
+            tr.classList.add("search-hidden");
+            tr.classList.remove("search-match");
+          }
+        });
+        // 매칭 없는 ref-section 은 비어있음 표시
+        allSections.forEach((sec) => {
+          const visible = sec.querySelectorAll("tr[data-search]:not(.search-hidden)").length;
+          if (visible === 0) {
+            sec.classList.add("no-results-shown");
+          } else {
+            sec.classList.remove("no-results-shown");
+          }
+        });
+        hitCountEl.style.display = "";
+        hitNumEl.textContent = hit;
+      }
+
+      searchInput.addEventListener("input", (e) => applyFilter(e.target.value));
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          searchInput.value = "";
+          applyFilter("");
+        }
+      });
+
+      function clearSearch() {
+        searchInput.value = "";
+        applyFilter("");
+        searchInput.focus();
+      }
     </script>
   </body>
 </html>
