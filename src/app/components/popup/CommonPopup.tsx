@@ -21,7 +21,7 @@ export function CommonPopup({
   initialCode = "",
   initialName = "",
 }: {
-  sqlId: string;
+  sqlId?: string;
   fetchFn?: (params?: any) => Promise<any>;
   onApply: (row: any) => void;
   onClose: () => void;

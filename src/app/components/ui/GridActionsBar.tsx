@@ -12,7 +12,7 @@ export type ActionButton = {
   type: "button";
   key: string;
   label: string;
-  onClick?: () => void;
+  onClick?: (e: any) => void;
   disabled?: boolean;
   /** Button variant (선택). 미지정 시 "outline". */
   variant?: "default" | "outline" | "primary" | "ghost" | "destructive";

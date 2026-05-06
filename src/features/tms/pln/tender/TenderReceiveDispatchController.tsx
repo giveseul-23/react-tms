@@ -135,8 +135,8 @@ export function useTenderReceiveDispatchController({
 
   // ── 메인 그리드 액션 (센차: TenderReceiveDispatchMain dockedItems toolbar) ──
   const openTrack = (type: "BUY" | "SELL" | "DSPCH" | "ORD" | "STOP" | "POD") =>
-    (e: any) => {
-      if (!e.data?.length) return;
+    (e?: any) => {
+      if (!e?.data?.length) return;
       const dspchNos = e.data
         .map((r: any) => r.DSPCH_NO)
         .filter(Boolean);
@@ -178,7 +178,6 @@ export function useTenderReceiveDispatchController({
           title: "BTN_TENDER_REJECT",
           content: (
             <TenderRejectPopup
-              reasons={[]}
               onConfirm={(ie: any) => {
                 closePopup();
                 handleApi(
@@ -306,7 +305,6 @@ export function useTenderReceiveDispatchController({
           title: "전화번호입력",
           content: (
             <AppInstallSmsPopup
-              reasons={[]}
               onConfirm={(ie: any) => {
                 closePopup();
                 handleApi(
@@ -333,7 +331,7 @@ export function useTenderReceiveDispatchController({
           label: "BTN_CARRIER_RATE_EXCEL_FORM_DOWN",
           onClick: () => {
             downExcelSearch({
-              columns: MAIN_COLUMN_DEFS({}),
+              columns: MAIN_COLUMN_DEFS(),
               searchParams: filtersRef.current,
               menuName: "운송수배현황",
               fetchFn: (params) => tenderApi.getDispatchList(params),
@@ -355,7 +353,7 @@ export function useTenderReceiveDispatchController({
     },
     // 센차: BTN_EXCEL menu 그룹 → gridExcelAll / gridExcel
     makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS({}),
+      columns: MAIN_COLUMN_DEFS(),
       menuName: "운송사요청목록",
       fetchFn: () => tenderApi.getDispatchList(filtersRef.current),
       rows: model.gridData.rows,
