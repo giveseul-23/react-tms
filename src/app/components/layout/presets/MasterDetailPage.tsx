@@ -38,6 +38,8 @@ export interface MasterDetailPageProps {
   bottomSlot?: ReactNode;
   bottomOpen?: boolean;
   bottomHeight?: number;
+  /** SearchFilters 와 그리드 사이에 들어갈 슬롯 (예: 페이지 외부 탭) */
+  topSlot?: ReactNode;
 }
 
 export function MasterDetailPage({
@@ -52,6 +54,7 @@ export function MasterDetailPage({
   bottomSlot,
   bottomOpen,
   bottomHeight,
+  topSlot,
 }: MasterDetailPageProps) {
   const layoutToggleNode = layoutToggle ? (
     <LayoutToggleButton
@@ -76,15 +79,20 @@ export function MasterDetailPage({
       bottomOpen={bottomOpen}
       bottomHeight={bottomHeight}
     >
-      <SplitPane
-        direction={direction}
-        defaultSizes={defaultSizes}
-        storageKey={storageKey}
-        breakpoint={breakpoint}
-      >
-        <Pane>{master}</Pane>
-        <Pane>{detail}</Pane>
-      </SplitPane>
+      <div className="flex flex-col h-full min-h-0">
+        {topSlot && <div className="shrink-0">{topSlot}</div>}
+        <div className="flex-1 min-h-0">
+          <SplitPane
+            direction={direction}
+            defaultSizes={defaultSizes}
+            storageKey={storageKey}
+            breakpoint={breakpoint}
+          >
+            <Pane>{master}</Pane>
+            <Pane>{detail}</Pane>
+          </SplitPane>
+        </div>
+      </div>
     </PageShell>
   );
 }
