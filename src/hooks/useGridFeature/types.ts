@@ -2,6 +2,7 @@
 // useGridModel + useGridController 가 이 config 를 받아 동작.
 
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 
 export type GridData = {
   rows: any[];
@@ -78,4 +79,7 @@ export interface FeatureConfig {
   /** 외부 탭 등 model 의 특정 key 값이 바뀌면 모든 그리드 + selection 클리어 후 1페이지 재조회.
    *  값은 extras 결과의 key 이름. 첫 마운트는 자동 스킵, 빈 값(falsy)도 스킵. */
   resetOnChange?: string;
+
+  /** Master/Detail 분할 방향 초기값 — model.layout 으로 노출 (기본 "side") */
+  defaultLayout?: LayoutType;
 }

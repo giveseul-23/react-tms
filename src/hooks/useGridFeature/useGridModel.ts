@@ -2,8 +2,16 @@
 // config.grids 에 정의된 모든 그리드의 state/ref + selection state/ref 를
 // 자동 생성하고, 화면별 추가 state(extras) 를 평탄하게 합쳐 반환.
 
-import { useState, useRef, useCallback, useMemo } from "react";
+import {
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { EMPTY_GRID, type FeatureConfig, type GridData } from "./types";
+import type { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 
 export interface GridSlot {
   /** raw state — paginated: GridData, array: any[] */
@@ -36,12 +44,18 @@ export type GridModel = {
   resetSubGrids: () => void;
   /** 모든 그리드 데이터 ref (초기화 등에 사용) */
   gridDataRef: { current: Record<string, any> };
+  /** Master/Detail 분할 방향 — MasterDetailPage 의 direction / layoutToggle 에 연결 */
+  layout: LayoutType;
+  setLayout: Dispatch<SetStateAction<LayoutType>>;
   /** extras 가 spread 되어 평탄하게 모델에 합쳐짐 */
   [key: string]: any;
 };
 
 export function useGridModel(config: FeatureConfig): GridModel {
   const [pageSize, setPageSize] = useState(config.pageSize ?? 500);
+  const [layout, setLayout] = useState<LayoutType>(
+    config.defaultLayout ?? "side",
+  );
 
   // ── 모든 그리드 데이터를 단일 객체 state로 (Rules of Hooks 준수) ──
   const initialData = useMemo(() => {
@@ -137,6 +151,8 @@ export function useGridModel(config: FeatureConfig): GridModel {
     selected,
     resetSubGrids,
     gridDataRef: allDataRef,
+    layout,
+    setLayout,
     ...extras,
   };
 }

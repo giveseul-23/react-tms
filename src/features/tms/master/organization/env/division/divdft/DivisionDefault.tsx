@@ -36,12 +36,11 @@ export default function TenderReceiveDispatch() {
       defaultSizes={[10, 90]}
       searchProps={{
         meta,
-        fetchFn: ctrl.fetchDispatchList,
+        fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
       layoutToggle={{
@@ -54,28 +53,14 @@ export default function TenderReceiveDispatch() {
       storageKey="division-default-dispatch"
       master={
         <DataGrid
-          layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS()}
-          rowData={model.gridData.rows}
-          onRowClicked={ctrl.handleRowClicked}
-          autoSelectFirstRow
-          rowKeys="CNFG_CD"
+          {...ctrl.bind("main", MAIN_COLUMN_DEFS, {
+          })}
         />
       }
       detail={
         <DataGrid
-          layoutType="plain"
-          columnDefs={DETAIL_COLUMN_DEFS()}
-          rowData={model.subDetailRowData.rows}
-          totalCount={model.subDetailRowData.totalCount}
-          currentPage={model.subDetailRowData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
-          actions={ctrl.detailActions}
+          {...ctrl.bind("detail", DETAIL_COLUMN_DEFS, {
+          })}
         />
       }
     />

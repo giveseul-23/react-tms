@@ -129,6 +129,7 @@
 {
   api,                      // 화면 API 객체 (메서드명을 string 으로 참조)
   selections: ["config"],   // state+ref 추적할 그리드 keys
+  defaultLayout: "side",    // 분할 방향 초기값. model.layout / model.setLayout 자동 노출 — View 에서 layoutToggle/direction 에 바로 연결 (기본 "side")
   resetOnChange: "activeTab", // 외부 탭 등 watch key 가 바뀌면 모든 그리드 클리어 + 1페이지 재조회 (첫 마운트/빈 값 자동 스킵)
   fetchListExtraParams: {   // 첫 fetch에 추가 param 주입 (model 참조)
     LGST_GRP_CNFG_GRP_CD: (m) => m.activeTab,
@@ -154,6 +155,7 @@
 - 행 클릭 cascade fetch (`fetchOnRowClickFrom` + `paramMap`)
 - 그리드별 추가/저장 액션 (`useGridAdd` / `useGridSave` 자동 적용)
 - DataGrid 표준 props 묶음: `ctrl.bind("gridKey", COLUMN_DEFS, overrides?)`
+- `layout`/`setLayout` (Master/Detail 분할 방향) — `MasterDetailPage` 의 `direction`/`layoutToggle` 에 바로 연결 가능
 
 ### 화면이 직접 짜는 것
 
