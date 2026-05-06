@@ -1,47 +1,34 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useDivisionConfigMasterModel } from "./DivisionConfigMasterModel.ts";
-import { useDivisionConfigMasterController } from "./DivisionConfigMasterController.tsx";
+import { useDivisionConfigMasterModel } from "./DivisionConfigMasterModel";
+import { useDivisionConfigMasterController } from "./DivisionConfigMasterController";
 import {
   CONFIG_COLUMN_DEFS,
   CONFIG_DETAIL_COLUMN_DEFS,
   CONFIG_I18N_COLUMN_DEFS,
   CONFIG_DETAIL_I18N_COLUMN_DEFS,
 } from "./DivisionConfigMasterColumns.tsx";
+
 export const MENU_CODE = "MENU_DIV_OPR_CONFIG_MST";
 
 export default function DivisionConfigMaster() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useDivisionConfigMasterModel();
-
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
 
+  const model = useDivisionConfigMasterModel();
   const ctrl = useDivisionConfigMasterController({
     model,
     searchRef,
     filtersRef,
   });
-
-  // activeTab 변경 시 4개 그리드 초기화 + 재조회
-  const isTabInit = useRef(true);
-  useEffect(() => {
-    if (isTabInit.current) {
-      isTabInit.current = false;
-      return;
-    }
-    if (!model.activeTab) return;
-    model.resetSubGrids();
-    model.setConfigData({ rows: [], totalCount: 0, page: 1, limit: 20 });
-    setTimeout(() => searchRef.current?.(1), 0);
-  }, [model.activeTab]);
 
   if (loading) return <Skeleton className="h-24" />;
 
@@ -49,7 +36,7 @@ export default function DivisionConfigMaster() {
     <MasterDetailPage
       searchProps={{
         meta,
-        fetchFn: ctrl.fetchConfigList,
+        fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
         searchRef,
         filtersRef,
@@ -66,47 +53,12 @@ export default function DivisionConfigMaster() {
           handleThickness="1.5"
           storageKey="lgstgrp-opr-config-mst-top"
         >
-          {/* Top-left: 플류운영그룹운영설정 */}
           <DataGrid
-            layoutType="plain"
-            columnDefs={CONFIG_COLUMN_DEFS((updater: any) =>
-              model.setConfigData((prev: any) => ({
-                ...prev,
-                rows:
-                  typeof updater === "function"
-                    ? updater(prev.rows)
-                    : updater,
-              })),
-            )}
-            rowSelection="single"
-            rowData={model.configData.rows}
-            totalCount={model.configData.totalCount}
-            currentPage={model.configData.page}
-            pageSize={model.pageSize}
-            onPageSizeChange={model.setPageSize}
-            onPageChange={(page) => searchRef.current?.(page)}
-            actions={ctrl.configActions}
-            onRowClicked={ctrl.handleConfigRowClicked}
-            autoSelectFirstRow
-            rowKeys="CNFG_CD"
+            {...ctrl.bind("config", CONFIG_COLUMN_DEFS, {
+              actions: ctrl.configActions,
+            })}
           />
-
-          {/* Top-right: 설정상세 */}
-          <DataGrid
-            layoutType="plain"
-            rowSelection="single"
-            columnDefs={CONFIG_DETAIL_COLUMN_DEFS(model.setDetailData)}
-            rowData={model.detailData.rows}
-            totalCount={model.detailData.totalCount}
-            currentPage={model.detailData.page}
-            pageSize={model.pageSize}
-            onPageSizeChange={model.setPageSize}
-            onPageChange={(page) => searchRef.current?.(page)}
-            actions={ctrl.detailActions}
-            onRowClicked={ctrl.handleDetailRowClicked}
-            autoSelectFirstRow
-            rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
-          />
+          <DataGrid {...ctrl.bind("detail", CONFIG_DETAIL_COLUMN_DEFS)} />
         </SplitPane>
       }
       detail={
@@ -117,29 +69,9 @@ export default function DivisionConfigMaster() {
           handleThickness="1.5"
           storageKey="lgstgrp-opr-config-mst-bottom"
         >
-          {/* Bottom-left: 설정코드다국어설정 */}
+          <DataGrid {...ctrl.bind("i18n", CONFIG_I18N_COLUMN_DEFS)} />
           <DataGrid
-            layoutType="plain"
-            rowSelection="single"
-            columnDefs={CONFIG_I18N_COLUMN_DEFS(model.setI18nData)}
-            rowData={model.i18nData}
-            actions={ctrl.i18nActions}
-            onRowClicked={ctrl.handleI18nRowClicked}
-            subTitle="LBL_CNFG_CD_LANG_SETTING"
-            autoSelectFirstRow
-            rowKeys={["CNFG_CD", "CNFG_DTL_CD", "LANG_TP"]}
-          />
-
-          {/* Bottom-right: 설정상세코드다국어설정 */}
-          <DataGrid
-            layoutType="plain"
-            rowSelection="single"
-            columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS(
-              model.setDetailI18nData,
-            )}
-            rowData={model.detailI18nData}
-            actions={ctrl.detailI18nActions}
-            subTitle="LBL_CNFG_DTL_CD_LANG_SETTING"
+            {...ctrl.bind("detailI18n", CONFIG_DETAIL_I18N_COLUMN_DEFS)}
           />
         </SplitPane>
       }

@@ -705,6 +705,160 @@
             </div>
           </div>
         </div>
+
+        <!-- 패턴 G: 선언적 framework -->
+        <div class="pattern-card">
+          <div class="pattern-header">
+            <span class="tag tag-green">패턴 G ⭐ 권장</span>
+            <strong>선언적 framework — useGridModel / useGridController</strong>
+            <span class="pattern-example">예: LgstgrpOprConfigMst</span>
+          </div>
+          <div class="pattern-body">
+            <p>
+              여러 그리드(특히 Master-Detail-2x2 같은 4-그리드)에서 반복되는 boilerplate(state 선언 / fetch / save / cascade / add / save 액션)를
+              <code>src/hooks/useGridFeature/</code>의 framework 훅으로 흡수.
+              <strong>Model/Controller는 thin wrapper</strong>가 되고, 화면은 <strong>config 객체</strong>와
+              <strong>JSX 레이아웃</strong>만 작성하면 됩니다.
+            </p>
+            <h4>구성 원칙</h4>
+            <ul style="padding-left: 20px">
+              <li><strong>Model.ts</strong>: <code>featureConfig</code> 선언 + <code>useGridModel(config)</code> 한 줄 호출</li>
+              <li><strong>Controller.tsx</strong>: <code>useGridController({ config, model, searchRef })</code> 호출 + 화면 고유 액션 합성</li>
+              <li><strong>View.tsx</strong>: 레이아웃 자유. <code>&lt;DataGrid {...ctrl.bind("gridKey", COLS)} /&gt;</code> 로 표준 props spread</li>
+              <li><strong>MENU_CODE 위치</strong>: View가 source of truth. Api 는 View 에서 import. Model/Controller 는 module-init 시점에 MENU_CODE 사용 금지(순환 import TDZ 회피)</li>
+            </ul>
+
+            <div class="code-block">
+              <div class="code-header"><span>Model.ts (패턴 G)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="k">import</span> { useEffect, useState } <span class="k">from</span> <span class="s">"react"</span>;
+<span class="k">import</span> { useGridModel } <span class="k">from</span> <span class="s">"@/hooks/useGridFeature/useGridModel"</span>;
+<span class="k">import type</span> { <span class="t">FeatureConfig</span> } <span class="k">from</span> <span class="s">"@/hooks/useGridFeature/types"</span>;
+<span class="k">import</span> { featureApi } <span class="k">from</span> <span class="s">"./FeatureApi"</span>;
+
+<span class="k">export const</span> featureConfig: <span class="t">FeatureConfig</span> = {
+  api: featureApi,
+  selections: [<span class="s">"config"</span>, <span class="s">"detail"</span>],
+  fetchListExtraParams: {
+    <span class="t">LGST_GRP_CNFG_GRP_CD</span>: (m) =&gt; m.activeTab,
+  },
+  extras: () =&gt; {
+    <span class="k">const</span> [activeTab, setActiveTab] = <span class="fn">useState</span>(<span class="s">""</span>);
+    <span class="fn">useEffect</span>(() =&gt; { <span class="c">// 외부 탭 자동 로딩 등 화면별 추가 state</span> }, []);
+    <span class="k">return</span> { activeTab, setActiveTab };
+  },
+  grids: {
+    config: {
+      type: <span class="s">"paginated"</span>,
+      api: { fetch: <span class="s">"getConfigList"</span>, save: <span class="s">"saveConfig"</span> },
+      rowKey: <span class="s">"CNFG_CD"</span>,
+      newRow: () =&gt; ({ <span class="t">CNFG_CD</span>: <span class="s">""</span>, <span class="t">CNFG_NM</span>: <span class="s">""</span> }),
+    },
+    detail: {
+      type: <span class="s">"paginated"</span>,
+      api: { fetch: <span class="s">"getConfigDetailList"</span>, save: <span class="s">"saveConfigDetail"</span> },
+      rowKey: [<span class="s">"CNFG_CD"</span>, <span class="s">"CNFG_DTL_CD"</span>],
+      fetchOnRowClickFrom: <span class="s">"config"</span>,
+      paramMap: (row) =&gt; ({ <span class="t">CNFG_CD</span>: row?.<span class="t">CNFG_CD</span> }),
+      newRow: (m) =&gt; ({ <span class="t">CNFG_CD</span>: m.selected.config?.ref.current?.<span class="t">CNFG_CD</span>, <span class="t">CNFG_DTL_CD</span>: <span class="s">""</span> }),
+    },
+    i18n: {
+      type: <span class="s">"array"</span>,
+      api: { fetch: <span class="s">"getConfigI18nList"</span>, save: <span class="s">"saveConfigI18n"</span> },
+      fetchOnRowClickFrom: <span class="s">"detail"</span>,
+      paramMap: (row) =&gt; ({ <span class="t">CNFG_CD</span>: row?.<span class="t">CNFG_CD</span>, <span class="t">CNFG_DTL_CD</span>: row?.<span class="t">CNFG_DTL_CD</span> }),
+      subTitle: <span class="s">"LBL_CNFG_CD_LANG_SETTING"</span>,
+    },
+  },
+};
+
+<span class="k">export function</span> <span class="fn">useFeatureModel</span>() {
+  <span class="k">return</span> <span class="fn">useGridModel</span>(featureConfig);
+}</pre>
+            </div>
+
+            <div class="code-block">
+              <div class="code-header"><span>Controller.tsx (패턴 G)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="k">import</span> { useGridController } <span class="k">from</span> <span class="s">"@/hooks/useGridFeature/useGridController"</span>;
+<span class="k">import</span> { featureConfig } <span class="k">from</span> <span class="s">"./FeatureModel"</span>;
+
+<span class="k">export function</span> <span class="fn">useFeatureController</span>({ model, searchRef, filtersRef }) {
+  <span class="k">const</span> base = <span class="fn">useGridController</span>({ config: featureConfig, model, searchRef, filtersRef });
+  <span class="c">// 화면 고유 액션이 있으면 base.actions 에 합성</span>
+  <span class="k">const</span> configActions = [
+    { type: <span class="s">"button"</span>, key: <span class="s">"LBL_SYNC"</span>, label: <span class="s">"LBL_SYNC"</span>, onClick: () =&gt; {...} },
+    ...(base.actions.config ?? []),
+  ];
+  <span class="k">return</span> { ...base, configActions };
+}</pre>
+            </div>
+
+            <div class="code-block">
+              <div class="code-header"><span>View.tsx (패턴 G)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="k">export const</span> <span class="t">MENU_CODE</span> = <span class="s">"MENU_XXX"</span>;  <span class="c">// View 가 source of truth</span>
+
+<span class="k">export default function</span> <span class="fn">Feature</span>() {
+  <span class="k">const</span> { meta, loading } = <span class="fn">useSearchMeta</span>(<span class="t">MENU_CODE</span>);
+  <span class="k">const</span> searchRef = <span class="fn">useRef</span>(<span class="k">null</span>);
+  <span class="k">const</span> filtersRef = <span class="fn">useRef</span>({});
+  <span class="k">const</span> model = <span class="fn">useFeatureModel</span>();
+  <span class="k">const</span> ctrl = <span class="fn">useFeatureController</span>({ model, searchRef, filtersRef });
+
+  <span class="k">if</span> (loading) <span class="k">return</span> &lt;<span class="t">Skeleton</span> /&gt;;
+
+  <span class="k">return</span> (
+    &lt;<span class="t">MasterDetailPage</span>
+      searchProps={{ meta, fetchFn: ctrl.fetchList, onSearch: ctrl.handleSearch, searchRef, filtersRef }}
+      direction=<span class="s">"vertical"</span> defaultSizes={[55, 45]}
+      master={
+        &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span>&gt;
+          &lt;<span class="t">DataGrid</span> {...ctrl.<span class="fn">bind</span>(<span class="s">"config"</span>, <span class="t">CONFIG_COLS</span>, { actions: ctrl.configActions })} /&gt;
+          &lt;<span class="t">DataGrid</span> {...ctrl.<span class="fn">bind</span>(<span class="s">"detail"</span>, <span class="t">DETAIL_COLS</span>)} /&gt;
+        &lt;/<span class="t">SplitPane</span>&gt;
+      }
+      detail={
+        &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span>&gt;
+          &lt;<span class="t">DataGrid</span> {...ctrl.<span class="fn">bind</span>(<span class="s">"i18n"</span>, <span class="t">I18N_COLS</span>)} /&gt;
+        &lt;/<span class="t">SplitPane</span>&gt;
+      }
+    /&gt;
+  );
+}</pre>
+            </div>
+
+            <h4>framework가 자동으로 처리하는 것</h4>
+            <ul style="padding-left: 20px">
+              <li>그리드별 state/ref (paginated → <code>GridData</code>, array → <code>any[]</code>)</li>
+              <li>selection state+ref (stale closure 방지)</li>
+              <li><code>fetchList</code> + <code>handleSearch</code> + 행 클릭 cascade fetch</li>
+              <li>그리드별 add/save 액션 (<code>useGridAdd</code> / <code>useGridSave</code> 자동 적용)</li>
+              <li>DataGrid 표준 props 묶음: <code>ctrl.bind(key, COLS, overrides?)</code></li>
+            </ul>
+
+            <h4>화면이 직접 짜는 것 (자유)</h4>
+            <ul style="padding-left: 20px">
+              <li>JSX 레이아웃 (단일 / Master-Detail / 2x2 / 탭 / 트리 등)</li>
+              <li>화면 고유 액션 (예: 동기화 버튼) — Controller에서 <code>base.actions[gridKey]</code>에 합성</li>
+              <li>외부 탭, 화면 고유 useEffect 등 — <code>extras()</code>에서 정의</li>
+            </ul>
+
+            <div class="warn">
+              <span class="warn-icon">⚠️</span>
+              <div>
+                <strong>순환 import 주의</strong>:
+                <code>MENU_CODE</code>는 View에서 정의하고, Api는 View에서 import. Model/Controller는 <strong>module-init 시점</strong>에 <code>MENU_CODE</code>를 쓰지 않도록 주의 (<code>featureConfig</code> 객체 안에 직접 박지 말 것).
+                framework의 <code>FeatureConfig.menuCode</code>는 optional이라 생략 가능.
+              </div>
+            </div>
+
+            <div class="tip">
+              <span class="tip-icon">💡</span>
+              <div>
+                <strong>언제 패턴 G를 안 쓰나</strong>:
+                매우 특수한 화면(popup 다수, 트리+드래그, 지도 위젯)이거나, 그리드 1~2개 단순 조회만 있을 때는 기존 4-1~4-5 패턴 그대로 가도 됩니다.
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ════════════════════════════════════════════════════════ -->
@@ -1244,6 +1398,77 @@
               <tr data-search="successmessage 저장 성공 메시지"><td>successMessage</td><td>저장 성공 토스트 메시지</td></tr>
               <tr data-search="onsaved 저장 후 콜백"><td>onSaved</td><td>저장 성공 후 콜백 (재조회 등)</td></tr>
               <tr data-search="onempty 변경사항 없음 콜백"><td>onEmpty</td><td>dirty 행이 없을 때 콜백</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <!-- ── framework 훅 (패턴 G) ── -->
+        <div class="ref-section">
+          <h3>useGridModel(featureConfig) <span class="tag tag-green">framework</span></h3>
+          <div class="ref-summary">선언적 그리드 모델 — config.grids 기반으로 모든 그리드 state/ref + selection state/ref 자동 생성. <code>extras()</code>의 결과를 평탄하게 spread.</div>
+          <table>
+            <thead><tr><th style="width: 200px">반환</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="grids 그리드 모음 usegridmodel framework"><td>grids[key]</td><td>그리드별 인터페이스 — <code>{ data, rows, setData, ref }</code></td></tr>
+              <tr data-search="selected 선택 행 usegridmodel framework"><td>selected[key]</td><td>선택 행 추적 — <code>{ row, set, ref }</code> (config.selections 에 등록한 키만)</td></tr>
+              <tr data-search="pagesize 페이지 크기 usegridmodel"><td>pageSize / setPageSize</td><td>페이지 크기 (기본 500)</td></tr>
+              <tr data-search="resetsubgrids 서브 그리드 비움"><td>resetSubGrids()</td><td>첫 그리드 외 모두 초기화</td></tr>
+              <tr data-search="extras 화면별 추가 state usegridmodel"><td>...extras</td><td><code>config.extras()</code> 결과가 model 에 spread (예: <code>model.activeTab</code>)</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>useGridController({ config, model, searchRef, filtersRef? }) <span class="tag tag-green">framework</span></h3>
+          <div class="ref-summary">선언적 그리드 컨트롤러 — fetch / handleSearch / cascade fetch / 그리드별 add/save 액션 자동. <code>bind</code>로 DataGrid props 묶음 제공.</div>
+          <table>
+            <thead><tr><th style="width: 200px">반환</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="fetchlist 첫 그리드 조회 usegridcontroller"><td>fetchList(params)</td><td>SearchFilters → 첫 그리드 API 호출. <code>config.fetchListExtraParams</code> 의 추가 param 자동 주입</td></tr>
+              <tr data-search="handlesearch 조회 콜백 usegridcontroller"><td>handleSearch(data)</td><td>첫 그리드 setData + 후속 그리드 cascade fetch</td></tr>
+              <tr data-search="handlerowclicked 행 클릭 usegridcontroller"><td>handleRowClicked[key]</td><td>그리드별 행 클릭 핸들러 — selection set + cascade fetch</td></tr>
+              <tr data-search="actions 액션 그리드별 usegridcontroller"><td>actions[key]</td><td>그리드별 자동 생성된 액션 (add/save/extra)</td></tr>
+              <tr data-search="bind grid props spread usegridcontroller"><td>bind(key, columnDefs, overrides?)</td><td>DataGrid 표준 props 묶음 — layoutType/columnDefs/rowData/actions/페이징/onRowClicked/rowKeys/subTitle 등. <code>overrides</code>로 일부 prop 교체 가능 (예: 화면 고유 actions 합성)</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>FeatureConfig (framework config 타입) <span class="tag tag-green">framework</span></h3>
+          <div class="ref-summary">framework 훅이 받는 선언 객체. Model.ts에서 정의해 useGridModel/useGridController에 주입.</div>
+          <table>
+            <thead><tr><th style="width: 200px">필드</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="api 화면 api 객체 featureconfig"><td>api</td><td><span class="tag tag-required">필수</span></td><td>화면별 API 객체 (메서드명을 string 으로 grids[].api.fetch/save 에서 참조)</td></tr>
+              <tr data-search="grids 그리드 정의 featureconfig"><td>grids</td><td><span class="tag tag-required">필수</span></td><td>그리드 key → <code>GridConfig</code>. 선언 순서가 cascade 흐름</td></tr>
+              <tr data-search="selections 선택 추적 featureconfig"><td>selections</td><td><span class="tag tag-optional">선택</span></td><td>state+ref 로 selectedRow 를 추적할 그리드 keys 배열</td></tr>
+              <tr data-search="fetchlistextraparams 추가 param featureconfig"><td>fetchListExtraParams</td><td><span class="tag tag-optional">선택</span></td><td>첫 그리드 fetchList 에 추가로 보낼 param. 값은 <code>(model) =&gt; any</code> 함수 (외부 탭 등 model 참조 가능)</td></tr>
+              <tr data-search="extras 화면별 state featureconfig"><td>extras</td><td><span class="tag tag-optional">선택</span></td><td>화면별 추가 state Hook — <code>() =&gt; Record</code>. 결과가 model 에 평탄하게 spread</td></tr>
+              <tr data-search="pagesize 페이지 크기 featureconfig"><td>pageSize</td><td><span class="tag tag-optional">선택</span></td><td>페이지 크기 (기본 500)</td></tr>
+              <tr data-search="menucode 메뉴 코드 featureconfig"><td>menuCode</td><td><span class="tag tag-optional">선택</span></td><td>(framework 내부 미사용 — 보통 생략. View 가 source of truth)</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>GridConfig (그리드별 정의) <span class="tag tag-green">framework</span></h3>
+          <div class="ref-summary">FeatureConfig.grids[key] 의 값. 그리드 종류 / API / 행 키 / cascade 흐름 / 신규행 / 추가 액션 등 선언.</div>
+          <table>
+            <thead><tr><th style="width: 200px">필드</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="type paginated array gridconfig"><td>type</td><td><span class="tag tag-required">필수</span></td><td><code>"paginated"</code> → state는 GridData(rows/totalCount/page/limit), <code>"array"</code> → state는 any[]</td></tr>
+              <tr data-search="api fetch save gridconfig"><td>api.fetch / api.save</td><td><span class="tag tag-optional">선택</span></td><td>config.api 객체에서 호출할 메서드 이름 (string). 예: <code>{ fetch: "getConfigList", save: "saveConfig" }</code></td></tr>
+              <tr data-search="rowkey 행 키 자동 선택 gridconfig"><td>rowKey</td><td><span class="tag tag-optional">선택</span></td><td>autoSelectFirstRow의 이전 선택 매칭 키 (<code>"CNFG_CD"</code> 또는 배열)</td></tr>
+              <tr data-search="newrow 신규 행 gridconfig"><td>newRow</td><td><span class="tag tag-optional">선택</span></td><td>useGridAdd 신규행 템플릿 — <code>(model) =&gt; row 객체</code></td></tr>
+              <tr data-search="fetchonrowclickfrom cascade gridconfig"><td>fetchOnRowClickFrom</td><td><span class="tag tag-optional">선택</span></td><td>"이 그리드의 source 그리드 key" — source 행 클릭 시 자동 fetch 발화</td></tr>
+              <tr data-search="parammap 파라미터 매핑 gridconfig"><td>paramMap</td><td><span class="tag tag-optional">선택</span></td><td>fetchOnRowClickFrom 시 source row → API params 매핑 함수</td></tr>
+              <tr data-search="extraactions 추가 액션 gridconfig"><td>extraActions</td><td><span class="tag tag-optional">선택</span></td><td>add/save 외 추가 액션 (ActionItem[])</td></tr>
+              <tr data-search="subtitle 라벨 gridconfig"><td>subTitle</td><td><span class="tag tag-optional">선택</span></td><td>DataGrid subTitle (액션바 좌측 라벨)</td></tr>
+              <tr data-search="autoselectfirstrow 첫 행 gridconfig"><td>autoSelectFirstRow</td><td><span class="tag tag-optional">선택</span></td><td>자동 첫 행 선택 (기본 true — rowKey 가 있을 때만)</td></tr>
             </tbody>
           </table>
           <div class="ref-empty-msg">검색 결과 없음</div>

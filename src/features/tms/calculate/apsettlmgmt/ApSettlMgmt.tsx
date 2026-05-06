@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
@@ -21,16 +20,16 @@ import {
   MATERIAL_COST_COLUMN_DEFS,
   EVIDENCE_COLUMN_DEFS,
 } from "./ApSettlMgmtColumns";
+
 export const MENU_CODE = "MENU_AP_SETTL_MGMT";
 
 export default function ApSettlMgmt() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useApSettlMgmtModel();
-
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
+  const model = useApSettlMgmtModel();
   const ctrl = useApSettlMgmtController({
     model,
     searchRef,
@@ -64,20 +63,10 @@ export default function ApSettlMgmt() {
       storageKey="ap-settl-mgmt"
       master={
         <DataGrid
-          layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS}
-          codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
-          onRowClicked={ctrl.handleRowClicked}
-          actions={ctrl.mainActions}
+          {...ctrl.bind("config", MAIN_COLUMN_DEFS, {
+            actions: ctrl.mainActions,
+            codeMap: model.codeMap,
+          })}
         />
       }
       detail={
@@ -108,10 +97,10 @@ export default function ApSettlMgmt() {
             },
           }}
           rowData={{
-            SUMMARY: model.summaryRowData,
-            COST_CENTER: model.costCenterRowData,
-            MATERIAL: model.materialCostRowData,
-            EVIDENCE: model.evidenceRowData,
+            SUMMARY: model.grids.summary.rows,
+            COST_CENTER: model.grids.costCenter.rows,
+            MATERIAL: model.grids.materialCost.rows,
+            EVIDENCE: model.grids.evidence.rows,
           }}
           codeMap={model.codeMap}
           actions={[]}
@@ -147,10 +136,10 @@ export default function ApSettlMgmt() {
                     },
                   }}
                   rowData={{
-                    MONTHLY_FARE: model.monthlyFareRowData,
-                    HIRE_DISPATCH: model.hireDispatchPayRowData,
-                    FREIGHT: model.freightPayRowData,
-                    INDIRECT: model.indirectPayRowData,
+                    MONTHLY_FARE: model.grids.monthlyFare.rows,
+                    HIRE_DISPATCH: model.grids.hireDispatchPay.rows,
+                    FREIGHT: model.grids.freightPay.rows,
+                    INDIRECT: model.grids.indirectPay.rows,
                   }}
                   actions={[]}
                 />

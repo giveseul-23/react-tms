@@ -8,30 +8,32 @@ import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPa
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useLgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel.ts";
-import { useLgstgrpOprConfigMstController } from "./LgstgrpOprConfigMstController.tsx";
+import { useLgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel";
+import { useLgstgrpOprConfigMstController } from "./LgstgrpOprConfigMstController";
 import {
   CONFIG_COLUMN_DEFS,
   CONFIG_DETAIL_COLUMN_DEFS,
   CONFIG_I18N_COLUMN_DEFS,
   CONFIG_DETAIL_I18N_COLUMN_DEFS,
 } from "./LgstgrpOprConfigMstColumns.tsx";
+
 export const MENU_CODE = "MENU_LGSTGRP_OPR_CONFIG_MST";
+
+type ConfigTab = { key: string; label: string };
 
 export default function LgstgrpOprConfigMst() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useLgstgrpOprConfigMstModel();
-
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
 
+  const model = useLgstgrpOprConfigMstModel();
   const ctrl = useLgstgrpOprConfigMstController({
     model,
     searchRef,
     filtersRef,
   });
 
-  // activeTab 변경 시 4개 그리드 초기화 + 재조회
+  // 탭 변경 시 4 그리드 초기화 + 재조회
   const isTabInit = useRef(true);
   useEffect(() => {
     if (isTabInit.current) {
@@ -40,16 +42,17 @@ export default function LgstgrpOprConfigMst() {
     }
     if (!model.activeTab) return;
     model.resetSubGrids();
-    model.setConfigData({ rows: [], totalCount: 0, page: 1, limit: 20 });
+    model.grids.config.setData({ rows: [], totalCount: 0, page: 1, limit: 20 });
     setTimeout(() => searchRef.current?.(1), 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.activeTab]);
 
   if (loading) return <Skeleton className="h-24" />;
 
-  // ── 페이지 외부 탭 네비게이션 ────────────────────────────────
+  // 외부 탭 네비
   const tabNav = (
     <div className="flex gap-0.5 border-b border-border px-1">
-      {model.configTabs.map((tab) => (
+      {model.configTabs.map((tab: ConfigTab) => (
         <button
           key={tab.key}
           onClick={() => model.setActiveTab(tab.key)}
@@ -72,7 +75,7 @@ export default function LgstgrpOprConfigMst() {
     <MasterDetailPage
       searchProps={{
         meta,
-        fetchFn: ctrl.fetchConfigList,
+        fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
         searchRef,
         filtersRef,
@@ -90,47 +93,12 @@ export default function LgstgrpOprConfigMst() {
           handleThickness="1.5"
           storageKey="lgstgrp-opr-config-mst-top"
         >
-          {/* Top-left: 플류운영그룹운영설정 */}
           <DataGrid
-            layoutType="plain"
-            columnDefs={CONFIG_COLUMN_DEFS((updater: any) =>
-              model.setConfigData((prev: any) => ({
-                ...prev,
-                rows:
-                  typeof updater === "function"
-                    ? updater(prev.rows)
-                    : updater,
-              })),
-            )}
-            rowData={model.configData.rows}
-            totalCount={model.configData.totalCount}
-            currentPage={model.configData.page}
-            pageSize={model.pageSize}
-            onPageSizeChange={model.setPageSize}
-            onPageChange={(page) => searchRef.current?.(page)}
-            actions={ctrl.configActions}
-            onRowClicked={ctrl.handleConfigRowClicked}
-            rowSelection="single"
-            autoSelectFirstRow
-            rowKeys="CNFG_CD"
+            {...ctrl.bind("config", CONFIG_COLUMN_DEFS, {
+              actions: ctrl.configActions,
+            })}
           />
-
-          {/* Top-right: 설정상세 */}
-          <DataGrid
-            layoutType="plain"
-            columnDefs={CONFIG_DETAIL_COLUMN_DEFS(model.setDetailData)}
-            rowData={model.detailData.rows}
-            totalCount={model.detailData.totalCount}
-            currentPage={model.detailData.page}
-            pageSize={model.pageSize}
-            onPageSizeChange={model.setPageSize}
-            onPageChange={(page) => searchRef.current?.(page)}
-            actions={ctrl.detailActions}
-            onRowClicked={ctrl.handleDetailRowClicked}
-            rowSelection="single"
-            autoSelectFirstRow
-            rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
-          />
+          <DataGrid {...ctrl.bind("detail", CONFIG_DETAIL_COLUMN_DEFS)} />
         </SplitPane>
       }
       detail={
@@ -141,29 +109,9 @@ export default function LgstgrpOprConfigMst() {
           handleThickness="1.5"
           storageKey="lgstgrp-opr-config-mst-bottom"
         >
-          {/* Bottom-left: 설정코드다국어설정 */}
+          <DataGrid {...ctrl.bind("i18n", CONFIG_I18N_COLUMN_DEFS)} />
           <DataGrid
-            layoutType="plain"
-            columnDefs={CONFIG_I18N_COLUMN_DEFS(model.setI18nData)}
-            rowData={model.i18nData}
-            actions={ctrl.i18nActions}
-            onRowClicked={ctrl.handleI18nRowClicked}
-            rowSelection="single"
-            subTitle="LBL_CNFG_CD_LANG_SETTING"
-            autoSelectFirstRow
-            rowKeys={["CNFG_CD", "CNFG_DTL_CD", "LANG_TP"]}
-          />
-
-          {/* Bottom-right: 설정상세코드다국어설정 */}
-          <DataGrid
-            layoutType="plain"
-            columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS(
-              model.setDetailI18nData,
-            )}
-            rowData={model.detailI18nData}
-            actions={ctrl.detailI18nActions}
-            rowSelection="single"
-            subTitle="LBL_CNFG_DTL_CD_LANG_SETTING"
+            {...ctrl.bind("detailI18n", CONFIG_DETAIL_I18N_COLUMN_DEFS)}
           />
         </SplitPane>
       }

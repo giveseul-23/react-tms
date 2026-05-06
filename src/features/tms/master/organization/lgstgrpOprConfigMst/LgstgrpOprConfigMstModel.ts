@@ -1,152 +1,100 @@
-// src/views/lgstgrpOprConfigMst/LgstgrpOprConfigMstModel.ts
-import { useState, useRef, useCallback, useEffect } from "react";
-import { lgstgrpOprConfigApi } from "@/features/tms/master/organization/lgstgrpOprConfigMst/LgstgrpOprConfigApi";
+// 화면 고유 Model — useGridModel 베이스 훅에 featureConfig 만 주입.
+// extras 에서 외부 탭(configTabs/activeTab) state + 자동 로드 useEffect 등록.
 
-export type GridData = {
-  rows: any[];
-  totalCount: number;
-  page: number;
-  limit: number;
+import { useEffect, useState } from "react";
+import { useGridModel } from "@/hooks/useGridFeature/useGridModel";
+import type { FeatureConfig } from "@/hooks/useGridFeature/types";
+import { lgstgrpOprConfigApi } from "./LgstgrpOprConfigApi";
+
+type ConfigTab = { key: string; label: string };
+
+// ────────────────────────────────────────────────────────────────
+// Feature config — Model + Controller 공용. 그리드 4종 + cascade 흐름.
+// ────────────────────────────────────────────────────────────────
+export const lgstgrpFeatureConfig: FeatureConfig = {
+  api: lgstgrpOprConfigApi,
+  selections: ["config", "detail"],
+  fetchListExtraParams: {
+    LGST_GRP_CNFG_GRP_CD: (m) => m.activeTab,
+  },
+  extras: () => {
+    const [configTabs, setConfigTabs] = useState<ConfigTab[]>([]);
+    const [activeTab, setActiveTab] = useState<string>("");
+
+    useEffect(() => {
+      lgstgrpOprConfigApi
+        .getConfigTypeList()
+        .then((res: any) => {
+          const rows = res.data?.data?.dsOut ?? res.data?.result ?? [];
+          const tabs: ConfigTab[] = rows.map((r: any) => ({
+            key: r.CODE ?? r.CONFIG_TP_CD,
+            label: r.NAME ?? r.CONFIG_TP_NM ?? r.CODE,
+          }));
+          setConfigTabs(tabs);
+          if (tabs.length > 0) setActiveTab(tabs[0].key);
+        })
+        .catch((err) =>
+          console.error("[LgstgrpOprConfigMst] getConfigTypeList failed", err),
+        );
+    }, []);
+
+    return { configTabs, activeTab, setActiveTab };
+  },
+  grids: {
+    config: {
+      type: "paginated",
+      api: { fetch: "getConfigList", save: "saveConfig" },
+      rowKey: "CNFG_CD",
+      newRow: () => ({ CNFG_CD: "", CNFG_NM: "" }),
+    },
+    detail: {
+      type: "paginated",
+      api: { fetch: "getConfigDetailList", save: "saveConfigDetail" },
+      rowKey: ["CNFG_CD", "CNFG_DTL_CD"],
+      fetchOnRowClickFrom: "config",
+      paramMap: (row) => ({ CNFG_CD: row?.CNFG_CD }),
+      newRow: (m) => ({
+        CNFG_CD: m.selected.config?.ref.current?.CNFG_CD,
+        CNFG_DTL_CD: "",
+        CNFG_DTL_NM: "",
+      }),
+    },
+    i18n: {
+      type: "array",
+      api: { fetch: "getConfigI18nList", save: "saveConfigI18n" },
+      rowKey: ["CNFG_CD", "CNFG_DTL_CD", "LANG_TP"],
+      fetchOnRowClickFrom: "detail",
+      paramMap: (row) => ({
+        CNFG_CD: row?.CNFG_CD,
+        CNFG_DTL_CD: row?.CNFG_DTL_CD,
+      }),
+      newRow: (m) => ({
+        CNFG_CD: m.selected.config?.ref.current?.CNFG_CD,
+        CNFG_DTL_CD: m.selected.detail?.ref.current?.CNFG_DTL_CD,
+        LANG_TP: "",
+      }),
+      subTitle: "LBL_CNFG_CD_LANG_SETTING",
+    },
+    detailI18n: {
+      type: "array",
+      api: { fetch: "getConfigDetailI18nList", save: "saveConfigDetailI18n" },
+      fetchOnRowClickFrom: "i18n",
+      paramMap: (row) => ({
+        CNFG_CD: row?.CNFG_CD,
+        CNFG_DTL_CD: row?.CNFG_DTL_CD,
+      }),
+      newRow: (m) => ({
+        CNFG_CD: m.selected.config?.ref.current?.CNFG_CD,
+        CNFG_DTL_CD: m.selected.detail?.ref.current?.CNFG_DTL_CD,
+        LANG_TP: "",
+      }),
+      subTitle: "LBL_CNFG_DTL_CD_LANG_SETTING",
+    },
+  },
 };
 
-const EMPTY_GRID: GridData = { rows: [], totalCount: 0, page: 1, limit: 20 };
-
-export type ConfigTab = { key: string; label: string };
-
 export function useLgstgrpOprConfigMstModel() {
-  // ── 탭 (API에서 동적 로드) ─────────────────────────────────────
-  const [configTabs, setConfigTabs] = useState<ConfigTab[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("");
-
-  useEffect(() => {
-    lgstgrpOprConfigApi
-      .getConfigTypeList()
-      .then((res: any) => {
-        const rows = res.data?.data?.dsOut ?? res.data?.result ?? [];
-        const tabs: ConfigTab[] = rows.map((r: any) => ({
-          key: r.CODE ?? r.CONFIG_TP_CD,
-          label: r.NAME ?? r.CONFIG_TP_NM ?? r.CODE,
-        }));
-        setConfigTabs(tabs);
-        if (tabs.length > 0 && !activeTab) {
-          setActiveTab(tabs[0].key);
-        }
-      })
-      .catch((err) =>
-        console.error("[LgstgrpOprConfigMst] getConfigTypeList failed", err),
-      );
-  }, []);
-
-  // ── 페이징 ─────────────────────────────────────────────────────
-  const [pageSize, setPageSize] = useState(500);
-
-  // ── Top-left: 플류운영그룹운영설정 ─────────────────────────────
-  const [configData, setConfigData] = useState<GridData>(EMPTY_GRID);
-
-  // ── Top-right: 설정상세 ────────────────────────────────────────
-  const [detailData, setDetailData] = useState<GridData>(EMPTY_GRID);
-  const detailDataRef = useRef<any[]>([]);
-  const setDetailDataWithRef = useCallback((updater: any) => {
-    setDetailData((prev) => {
-      const next = typeof updater === "function" ? updater(prev) : updater;
-      detailDataRef.current = next.rows ?? next;
-      return next;
-    });
-  }, []);
-
-  // ── Bottom-left: 설정코드다국어설정 ────────────────────────────
-  const [i18nData, setI18nData] = useState<any[]>([]);
-  const i18nDataRef = useRef<any[]>([]);
-  const setI18nDataWithRef = useCallback((updater: any) => {
-    const update = (prev: any[]) => {
-      const next = typeof updater === "function" ? updater(prev) : updater;
-      i18nDataRef.current = next;
-      return next;
-    };
-    setI18nData(update);
-  }, []);
-
-  // ── Bottom-right: 설정상세코드다국어설정 ───────────────────────
-  const [detailI18nData, setDetailI18nData] = useState<any[]>([]);
-  const detailI18nDataRef = useRef<any[]>([]);
-  const setDetailI18nDataWithRef = useCallback((updater: any) => {
-    const update = (prev: any[]) => {
-      const next = typeof updater === "function" ? updater(prev) : updater;
-      detailI18nDataRef.current = next;
-      return next;
-    };
-    setDetailI18nData(update);
-  }, []);
-
-  // ── 선택 행 ────────────────────────────────────────────────────
-  const [selectedConfig, setSelectedConfig] = useState<any>(null);
-  const selectedConfigRef = useRef<any>(null);
-  const setSelectedConfigWithRef = useCallback((row: any) => {
-    setSelectedConfig(row);
-    selectedConfigRef.current = row;
-  }, []);
-
-  const [selectedDetail, setSelectedDetail] = useState<any>(null);
-  const selectedDetailRef = useRef<any>(null);
-  const setSelectedDetailWithRef = useCallback((row: any) => {
-    setSelectedDetail(row);
-    selectedDetailRef.current = row;
-  }, []);
-
-  // ── 서브그리드 리셋 ────────────────────────────────────────────
-  const resetSubGrids = useCallback(() => {
-    setDetailDataWithRef(EMPTY_GRID);
-    setI18nDataWithRef([]);
-    setDetailI18nDataWithRef([]);
-    setSelectedConfigWithRef(null);
-    setSelectedDetailWithRef(null);
-  }, [
-    setDetailDataWithRef,
-    setI18nDataWithRef,
-    setDetailI18nDataWithRef,
-    setSelectedConfigWithRef,
-    setSelectedDetailWithRef,
-  ]);
-
-  const resetDetailI18n = useCallback(() => {
-    setDetailI18nDataWithRef([]);
-    setSelectedDetailWithRef(null);
-  }, [setDetailI18nDataWithRef, setSelectedDetailWithRef]);
-
-  return {
-    // tab
-    configTabs,
-    activeTab,
-    setActiveTab,
-    // paging
-    pageSize,
-    setPageSize,
-    // config (top-left)
-    configData,
-    setConfigData,
-    // detail (top-right)
-    detailData,
-    setDetailData: setDetailDataWithRef,
-    detailDataRef,
-    // i18n (bottom-left)
-    i18nData,
-    setI18nData: setI18nDataWithRef,
-    i18nDataRef,
-    // detail i18n (bottom-right)
-    detailI18nData,
-    setDetailI18nData: setDetailI18nDataWithRef,
-    detailI18nDataRef,
-    // selected rows
-    selectedConfig,
-    setSelectedConfig: setSelectedConfigWithRef,
-    selectedConfigRef,
-    selectedDetail,
-    setSelectedDetail: setSelectedDetailWithRef,
-    selectedDetailRef,
-    // reset
-    resetSubGrids,
-    resetDetailI18n,
-  };
+  return useGridModel(lgstgrpFeatureConfig);
 }
 
 export type LgstgrpOprConfigMstModel = ReturnType<

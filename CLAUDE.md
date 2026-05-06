@@ -101,6 +101,64 @@
 - 저장 API는 `dsSave` 패턴: body에 `{ dsSave }`, params에 세션/MENU_CD/그 외 키
 - 배열 페이로드일 때도 `withSession`이 각 원소에 세션 필드 자동 주입
 
+## 4-6. (권장) 선언적 framework — `useGridModel` / `useGridController`
+
+여러 그리드를 가진 화면(특히 Master-Detail-2x2 같은 4-그리드 화면)은 boilerplate를 줄이기 위해 **`src/hooks/useGridFeature/`** 의 framework 훅을 사용한다. **참조 화면**: `src/features/tms/master/organization/lgstgrpOprConfigMst/`.
+
+### 핵심 아이디어
+
+- **Model.ts**: `featureConfig` 객체를 선언하고 `useGridModel(config)` 한 줄 호출
+- **Controller.tsx**: `useGridController({ config, model, searchRef })` 호출 + 화면 고유 액션만 합성
+- **View.tsx**: 레이아웃 자유. `<DataGrid {...ctrl.bind("gridKey", COLS)} />` 로 표준 props 한 번에 spread
+
+### `featureConfig` 주요 필드
+
+```ts
+{
+  api,                      // 화면 API 객체 (메서드명을 string 으로 참조)
+  selections: ["config"],   // state+ref 추적할 그리드 keys
+  fetchListExtraParams: {   // 첫 fetch에 추가 param 주입 (model 참조)
+    LGST_GRP_CNFG_GRP_CD: (m) => m.activeTab,
+  },
+  extras: () => {           // 화면별 추가 state — Hook으로 호출됨
+    const [activeTab, setActiveTab] = useState("");
+    return { activeTab, setActiveTab };
+  },
+  grids: {
+    config:     { type: "paginated", api: { fetch: "getConfigList", save: "saveConfig" }, rowKey: "CNFG_CD", newRow: () => ({...}) },
+    detail:     { type: "paginated", api: {...}, fetchOnRowClickFrom: "config", paramMap: (row) => ({...}), newRow: (m) => ({...}) },
+    i18n:       { type: "array",     api: {...}, fetchOnRowClickFrom: "detail", subTitle: "LBL_..." },
+    detailI18n: { type: "array",     api: {...}, fetchOnRowClickFrom: "i18n" },
+  },
+}
+```
+
+### framework가 자동으로 처리
+
+- 그리드별 state/ref 생성 (paginated → `GridData`, array → `any[]`)
+- selection state+ref (stale closure 방지)
+- `fetchList`(첫 그리드) + `handleSearch`(첫 그리드 set + cascade)
+- 행 클릭 cascade fetch (`fetchOnRowClickFrom` + `paramMap`)
+- 그리드별 추가/저장 액션 (`useGridAdd` / `useGridSave` 자동 적용)
+- DataGrid 표준 props 묶음: `ctrl.bind("gridKey", COLUMN_DEFS, overrides?)`
+
+### 화면이 직접 짜는 것
+
+- View JSX 레이아웃 (단일 / Master-Detail / 2x2 / 탭 / 트리 등 자유)
+- 화면 고유 액션 (예: 동기화 버튼) → Controller에서 `base.actions.config` 에 합성 후 별도 export
+- 외부 탭, 화면 고유 useEffect 등 → `extras()` 안에서 정의
+
+### 순환 import 주의
+
+- `MENU_CODE` 는 **View** 에서 정의/export
+- Api 는 View 에서 import (함수 본문에서만 사용 — 안전)
+- Model/Controller 는 module-init 시점에 `MENU_CODE` 를 사용하지 않음 (`featureConfig` 객체에 안 넣음). framework 의 `FeatureConfig.menuCode` 는 optional.
+
+### 언제 framework 안 쓰나
+
+- 매우 특수한 화면 (popup 다수, 트리 + 드래그, 지도 위젯 등) — 기존 4-1~4-5 패턴 그대로
+- 그리드 1~2개에 단순 조회만 — framework 적용해도 큰 이득 없음
+
 ## 5. 기타 규칙
 
 - **응답 언어**: 사용자가 한국어로 말하면 한국어로 답한다 (코드 주석도 기존 한국어 컨벤션 유지).

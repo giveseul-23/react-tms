@@ -1,178 +1,115 @@
-import { useCallback, MutableRefObject } from "react";
+// 화면 고유 Controller — useGridController 베이스 훅에 featureConfig 주입.
+// 화면 고유 액션(시작 처리, 배차 확정 등)은 base.actions 에 합성해 추가 반환.
+
+import { MutableRefObject, useMemo } from "react";
+import { useGridController } from "@/hooks/useGridFeature/useGridController";
 import { confirmDispatchApi } from "./ConfirmDispatchApi";
-import { ConfirmDispatchModel } from "./ConfirmDispatchModel";
+import {
+  confirmDispatchFeatureConfig,
+  type ConfirmDispatchModel,
+} from "./ConfirmDispatchModel";
 import { MAIN_COLUMN_DEFS } from "./ConfirmDispatchColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
-type ControllerProps = {
+interface ControllerArgs {
   model: ConfirmDispatchModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
 export function useConfirmDispatchController({
   model,
   searchRef,
   filtersRef,
-}: ControllerProps) {
-  const fetchList = useCallback(
-    (params: Record<string, unknown>) => confirmDispatchApi.getList(params),
-    [],
-  );
+}: ControllerArgs) {
+  const base = useGridController({
+    config: confirmDispatchFeatureConfig,
+    model,
+    searchRef,
+    filtersRef,
+  });
 
-  const fetchSubTabs = useCallback(
-    (row: any) => {
-      if (!row) return;
-      const params = { DSPCH_NO: row.DSPCH_NO, PLN_ID: row.PLN_ID };
-      confirmDispatchApi
-        .getShipmentList(params)
-        .then((res: any) =>
-          model.setOrderRowData(res.data.result ?? res.data.data?.dsOut ?? []),
-        );
-      confirmDispatchApi
-        .getPodList(params)
-        .then((res: any) =>
-          model.setReceiptRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
+  const doAction = (apiCall: () => Promise<any>) => {
+    apiCall().then(() => searchRef.current?.());
+  };
+
+  // ── 화면 고유: master(config) 액션 ────────────────────────────
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_SP_START_WORK",
+        label: "BTN_SP_START_WORK",
+        onClick: () =>
+          doAction(() => confirmDispatchApi.startArrival(filtersRef.current)),
+      },
+      {
+        type: "dropdown",
+        key: "BTN_DISPATCH_LOADING_REQUEST",
+        label: "BTN_DISPATCH_LOADING_REQUEST",
+        items: [],
+      },
+      {
+        type: "dropdown",
+        key: "BTN_VEHICLE_CHANGE",
+        label: "BTN_VEHICLE_CHANGE",
+        items: [],
+      },
+      {
+        type: "button",
+        key: "BTN_DISPATCH_CONFIRM",
+        label: "BTN_DISPATCH_CONFIRM",
+        onClick: () =>
+          doAction(() => confirmDispatchApi.confirmDispatch(filtersRef.current)),
+      },
+      {
+        type: "button",
+        key: "BTN_DISPATCH_CONFIRM_CANCEL",
+        label: "BTN_DISPATCH_CONFIRM_CANCEL",
+        onClick: () =>
+          doAction(() =>
+            confirmDispatchApi.cancelConfirmDispatch(filtersRef.current),
           ),
-        );
-      confirmDispatchApi
-        .getPodEventLogList(params)
-        .then((res: any) =>
-          model.setReceiptHistoryRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-    },
-    [model],
+      },
+      {
+        type: "dropdown",
+        key: "LBL_LOADING_ORDER",
+        label: "LBL_LOADING_ORDER",
+        items: [],
+      },
+      {
+        type: "dropdown",
+        key: "LBL_POD_PRINT",
+        label: "LBL_POD_PRINT",
+        items: [],
+      },
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS,
+        menuName: "배차확정",
+        fetchFn: () => confirmDispatchApi.getList(filtersRef.current),
+        rows: model.grids.config.rows,
+      }),
+    ],
+    [filtersRef, searchRef, model.grids.config.rows],
   );
 
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-      model.setOrderItemRowData([]);
-      model.setSelectedOrderRow(null);
-      fetchSubTabs(row);
-    },
-    [model, fetchSubTabs],
+  const orderActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "LBL_INPT_PRFR",
+        label: "LBL_INPT_PRFR",
+        onClick: () =>
+          doAction(() => confirmDispatchApi.inputActual(filtersRef.current)),
+      },
+    ],
+    [filtersRef, searchRef],
   );
-
-  const handleSearch = useCallback(
-    (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
-      handleRowClicked(data.rows?.[0]);
-    },
-    [model, handleRowClicked],
-  );
-
-  const handleOrderRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedOrderRow(row);
-      if (!row) return;
-      confirmDispatchApi
-        .getShipmentDetailList({
-          DSPCH_NO: row.DSPCH_NO,
-          SHPM_ID: row.SHPM_ID,
-          PLN_ID: row.PLN_ID,
-        })
-        .then((res: any) =>
-          model.setOrderItemRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-    },
-    [model],
-  );
-
-  const doAction = useCallback(
-    (apiCall: () => Promise<any>) => {
-      apiCall().then(() => searchRef.current?.());
-    },
-    [searchRef],
-  );
-
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_SP_START_WORK",
-      label: "BTN_SP_START_WORK",
-      onClick: () =>
-        doAction(() => confirmDispatchApi.startArrival(filtersRef.current)),
-    },
-    {
-      type: "dropdown",
-      key: "BTN_DISPATCH_LOADING_REQUEST",
-      label: "BTN_DISPATCH_LOADING_REQUEST",
-      items: [],
-    },
-    {
-      type: "dropdown",
-      key: "BTN_VEHICLE_CHANGE",
-      label: "BTN_VEHICLE_CHANGE",
-      items: [],
-    },
-    {
-      type: "button",
-      key: "BTN_DISPATCH_CONFIRM",
-      label: "BTN_DISPATCH_CONFIRM",
-      onClick: () =>
-        doAction(() => confirmDispatchApi.confirmDispatch(filtersRef.current)),
-    },
-    {
-      type: "button",
-      key: "BTN_DISPATCH_CONFIRM_CANCEL",
-      label: "BTN_DISPATCH_CONFIRM_CANCEL",
-      onClick: () =>
-        doAction(() =>
-          confirmDispatchApi.cancelConfirmDispatch(filtersRef.current),
-        ),
-    },
-    {
-      type: "dropdown",
-      key: "LBL_LOADING_ORDER",
-      label: "LBL_LOADING_ORDER",
-      items: [],
-    },
-    {
-      type: "dropdown",
-      key: "LBL_POD_PRINT",
-      label: "LBL_POD_PRINT",
-      items: [],
-    },
-    makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
-      menuName: "배차확정",
-      fetchFn: () => confirmDispatchApi.getList(filtersRef.current),
-      rows: model.gridData.rows,
-    }),
-  ];
-
-  const orderActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "LBL_INPT_PRFR",
-      label: "LBL_INPT_PRFR",
-      onClick: () =>
-        doAction(() => confirmDispatchApi.inputActual(filtersRef.current)),
-    },
-  ];
-
-  const orderItemActions: any[] = [];
-
-  const receiptActions: any[] = [];
-  const receiptHistoryActions: any[] = [];
 
   return {
-    fetchList,
-    handleSearch,
-    handleRowClicked,
-    handleOrderRowClicked,
+    ...base,
     mainActions,
     orderActions,
-    orderItemActions,
-    receiptActions,
-    receiptHistoryActions,
   };
 }

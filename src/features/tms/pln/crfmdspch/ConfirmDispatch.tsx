@@ -16,16 +16,16 @@ import {
   RECEIPT_COLUMN_DEFS,
   RECEIPT_HISTORY_COLUMN_DEFS,
 } from "./ConfirmDispatchColumns";
+
 export const MENU_CODE = "MENU_ASSIGN_CONFIRM";
 
 export default function ConfirmDispatch() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useConfirmDispatchModel();
-
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
   const excludeKeysRef = useRef<Set<string>>(new Set());
 
+  const model = useConfirmDispatchModel();
   const ctrl = useConfirmDispatchController({
     model,
     searchRef,
@@ -59,20 +59,10 @@ export default function ConfirmDispatch() {
       storageKey="confirm-dispatch"
       master={
         <DataGrid
-          layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS()}
-          codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
-          onRowClicked={ctrl.handleRowClicked}
-          actions={ctrl.mainActions}
+          {...ctrl.bind("config", MAIN_COLUMN_DEFS, {
+            actions: ctrl.mainActions,
+            codeMap: model.codeMap,
+          })}
         />
       }
       detail={
@@ -87,21 +77,21 @@ export default function ConfirmDispatch() {
             ORDER: {
               columnDefs: ORDER_COLUMN_DEFS(),
               actions: ctrl.orderActions,
-              onRowClicked: ctrl.handleOrderRowClicked,
+              onRowClicked: ctrl.handleRowClicked.order,
             },
             RECEIPT: {
               columnDefs: RECEIPT_COLUMN_DEFS(),
-              actions: ctrl.receiptActions,
+              actions: ctrl.actions.receipt ?? [],
             },
             HISTORY: {
               columnDefs: RECEIPT_HISTORY_COLUMN_DEFS(),
-              actions: ctrl.receiptHistoryActions,
+              actions: ctrl.actions.receiptHistory ?? [],
             },
           }}
           rowData={{
-            ORDER: model.orderRowData,
-            RECEIPT: model.receiptRowData,
-            HISTORY: model.receiptHistoryRowData,
+            ORDER: model.grids.order.rows,
+            RECEIPT: model.grids.receipt.rows,
+            HISTORY: model.grids.receiptHistory.rows,
           }}
           codeMap={model.codeMap}
           actions={[]}
@@ -111,8 +101,8 @@ export default function ConfirmDispatch() {
                 <DataGrid
                   layoutType="plain"
                   columnDefs={ORDER_ITEM_COLUMN_DEFS()}
-                  rowData={model.orderItemRowData}
-                  actions={ctrl.orderItemActions}
+                  rowData={model.grids.orderItem.rows}
+                  actions={ctrl.actions.orderItem ?? []}
                 />
               );
             }
