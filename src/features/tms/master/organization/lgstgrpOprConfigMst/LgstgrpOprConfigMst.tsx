@@ -116,6 +116,7 @@ export default function LgstgrpOprConfigMst() {
               onPageChange={(page) => searchRef.current?.(page, false)}
               actions={ctrl.configActions}
               onRowClicked={ctrl.handleConfigRowClicked}
+              rowSelection="single"
               autoSelectFirstRow
               rowKeys="CNFG_CD"
             />
@@ -132,6 +133,7 @@ export default function LgstgrpOprConfigMst() {
               onPageChange={(page) => searchRef.current?.(page, false)}
               actions={ctrl.detailActions}
               onRowClicked={ctrl.handleDetailRowClicked}
+              rowSelection="single"
               autoSelectFirstRow
               rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
             />
@@ -152,6 +154,7 @@ export default function LgstgrpOprConfigMst() {
               rowData={model.i18nData}
               actions={ctrl.i18nActions}
               onRowClicked={ctrl.handleI18nRowClicked}
+              rowSelection="single"
               subTitle="LBL_CNFG_CD_LANG_SETTING"
               autoSelectFirstRow
               rowKeys={["CNFG_CD", "CNFG_DTL_CD", "LANG_TP"]}
@@ -165,6 +168,7 @@ export default function LgstgrpOprConfigMst() {
               )}
               rowData={model.detailI18nData}
               actions={ctrl.detailI18nActions}
+              rowSelection="single"
               subTitle="LBL_CNFG_DTL_CD_LANG_SETTING"
             />
           </SplitPane>

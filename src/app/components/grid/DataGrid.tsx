@@ -552,7 +552,6 @@ export default function DataGrid<TRow>({
         .getPropertyValue("--primary")
         .trim(); // e.g. "0 186 237"
       const rgb = primaryRgb.replace(/ /g, ",");
-      const bgColor = `rgba(${rgb},0.15)`;
       const borderColor = `rgba(${rgb},0.5)`;
 
       container.querySelectorAll<HTMLElement>(".ag-cell").forEach((cell) => {
@@ -562,12 +561,13 @@ export default function DataGrid<TRow>({
         const selected = keys.has(`${r}:${c}`);
 
         if (!selected) {
-          cell.style.backgroundColor = "";
+          cell.classList.remove("cell-range-bg");
           cell.style.boxShadow = "";
           return;
         }
 
-        cell.style.backgroundColor = bgColor;
+        // 배경은 CSS 클래스로 적용 (theme.css 의 ag-row-selected !important 를 이기는 specificity)
+        cell.classList.add("cell-range-bg");
 
         // 외곽 테두리만 그리기: 선택 범위의 가장자리 셀만 해당 방향에 선 표시
         const borders: string[] = [];
@@ -697,6 +697,26 @@ export default function DataGrid<TRow>({
     container.addEventListener("scroll", onScroll, true);
     document.addEventListener("keydown", onKeyDown, true);
 
+    // ag-grid 가 행 선택/refresh 시 셀 DOM 을 재렌더하면서
+    // cell-range-bg 클래스/inline box-shadow 를 지워버리는 문제 보완 —
+    // 선택 셀이 있는 동안만 DOM 변경을 감지해 highlight 재적용
+    let rafId: number | null = null;
+    const reapply = () => {
+      if (selectedCellsRef.current.size === 0) return;
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        applyHighlight();
+      });
+    };
+    const observer = new MutationObserver(reapply);
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
     return () => {
       container.removeEventListener("mousedown", onMouseDown);
       container.removeEventListener("mouseover", onMouseOver);
@@ -704,6 +724,8 @@ export default function DataGrid<TRow>({
       document.removeEventListener("mouseup", onMouseUp);
       container.removeEventListener("scroll", onScroll, true);
       document.removeEventListener("keydown", onKeyDown, true);
+      observer.disconnect();
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, []);
 

@@ -392,14 +392,60 @@ function TreeGridInner<TRow extends TreeRow>(
     }
 
     function applyHighlight() {
+      // 선택 범위의 경계(min/max row, col) 계산
+      const keys = selectedCellsRef.current;
+
+      // 범위 선택(2개 이상) 시 AG Grid 셀 포커스 아웃라인 제거
+      if (keys.size > 1) {
+        const api = gridApiRef.current;
+        if (api && !api.isDestroyed?.()) {
+          api.clearFocusedCell();
+        }
+      }
+
+      let minR = Infinity,
+        maxR = -Infinity,
+        minC = Infinity,
+        maxC = -Infinity;
+      keys.forEach((k) => {
+        const [r, c] = k.split(":").map(Number);
+        if (r < minR) minR = r;
+        if (r > maxR) maxR = r;
+        if (c < minC) minC = c;
+        if (c > maxC) maxC = c;
+      });
+
+      // 테마 색상에서 primary RGB 값 읽기
+      const primaryRgb = getComputedStyle(document.documentElement)
+        .getPropertyValue("--primary")
+        .trim();
+      const rgb = primaryRgb.replace(/ /g, ",");
+      const borderColor = `rgba(${rgb},0.5)`;
+
       container.querySelectorAll<HTMLElement>(".ag-cell").forEach((cell) => {
         const coords = getCellCoords(cell);
         if (!coords) return;
-        const sel = selectedCellsRef.current.has(
-          `${coords.rowIndex}:${coords.colIndex}`,
-        );
-        // cell.style.backgroundColor = sel ? "rgba(59,130,246,0.15)" : "";
-        cell.style.outline = sel ? "1px solid rgba(59,130,246,0.5)" : "";
+        const { rowIndex: r, colIndex: c } = coords;
+        const selected = keys.has(`${r}:${c}`);
+
+        if (!selected) {
+          cell.classList.remove("cell-range-bg");
+          cell.style.boxShadow = "";
+          cell.style.outline = "";
+          return;
+        }
+
+        // 배경은 CSS 클래스로 적용 (theme.css 의 ag-row-selected !important 를 이기는 specificity)
+        cell.classList.add("cell-range-bg");
+        cell.style.outline = "";
+
+        // 외곽 테두리만 그리기: 선택 범위의 가장자리 셀만 해당 방향에 선 표시
+        const borders: string[] = [];
+        if (r === minR) borders.push(`inset 0 1px 0 0 ${borderColor}`);
+        if (r === maxR) borders.push(`inset 0 -1px 0 0 ${borderColor}`);
+        if (c === minC) borders.push(`inset 1px 0 0 0 ${borderColor}`);
+        if (c === maxC) borders.push(`inset -1px 0 0 0 ${borderColor}`);
+        cell.style.boxShadow = borders.join(", ");
       });
     }
 
@@ -493,12 +539,35 @@ function TreeGridInner<TRow extends TreeRow>(
     document.addEventListener("mouseup", onMouseUp);
     container.addEventListener("scroll", onScroll, true);
     document.addEventListener("keydown", onKeyDown, true);
+
+    // ag-grid 가 행 선택/refresh 시 셀 DOM 을 재렌더하면서
+    // cell-range-bg 클래스/inline box-shadow 를 지워버리는 문제 보완 —
+    // 선택 셀이 있는 동안만 DOM 변경을 감지해 highlight 재적용
+    let rafId: number | null = null;
+    const reapply = () => {
+      if (selectedCellsRef.current.size === 0) return;
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        applyHighlight();
+      });
+    };
+    const observer = new MutationObserver(reapply);
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
     return () => {
       container.removeEventListener("mousedown", onMouseDown);
       container.removeEventListener("mouseover", onMouseOver);
       document.removeEventListener("mouseup", onMouseUp);
       container.removeEventListener("scroll", onScroll, true);
       document.removeEventListener("keydown", onKeyDown, true);
+      observer.disconnect();
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, []);
 
