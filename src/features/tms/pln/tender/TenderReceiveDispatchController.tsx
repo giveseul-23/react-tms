@@ -99,10 +99,10 @@ export function useTenderReceiveDispatchController({
             stopRes.data.result ?? stopRes.data.data.dsOut ?? [],
           );
           model.setSubSmsHisRowData(
-            smsRes.data.result ?? stopRes.data.data.dsOut ?? [],
+            smsRes.data.result ?? smsRes.data.data.dsOut ?? [],
           );
           model.setSubApSetlRowData(
-            apSetlRes.data.result ?? stopRes.data.data.dsOut ?? [],
+            apSetlRes.data.result ?? apSetlRes.data.data.dsOut ?? [],
           );
         })
         .catch((err) => {
@@ -134,12 +134,10 @@ export function useTenderReceiveDispatchController({
   );
 
   // ── 메인 그리드 액션 (센차: TenderReceiveDispatchMain dockedItems toolbar) ──
-  const openTrack = (type: "BUY" | "SELL" | "DSPCH" | "ORD" | "STOP" | "POD") =>
-    (e?: any) => {
+  const openTrack =
+    (type: "BUY" | "SELL" | "DSPCH" | "ORD" | "STOP" | "POD") => (e?: any) => {
       if (!e?.data?.length) return;
-      const dspchNos = e.data
-        .map((r: any) => r.DSPCH_NO)
-        .filter(Boolean);
+      const dspchNos = e.data.map((r: any) => r.DSPCH_NO).filter(Boolean);
       model.setTrackType(type);
       model.setTrackDspchNos(dspchNos);
       model.setTrackOpen(true);

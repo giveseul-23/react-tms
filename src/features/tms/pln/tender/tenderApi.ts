@@ -30,7 +30,6 @@ export const tenderApi = {
 
   getDispatchStopList(payload: any) {
     return apiClient.post<commonResponse>(
-      //"/openapina/carrier/getDspchStopList",
       "/tenderReceiveDispatchService/searchPlanStop",
       withSession({
         MENU_CD: MENU_CD,
@@ -41,7 +40,6 @@ export const tenderApi = {
 
   getDispatchSmsHisList(payload: any) {
     return apiClient.post<commonResponse>(
-      //"/openapina/carrier/getDispatchSmsHisList",
       "/tenderReceiveDispatchService/searchSmsHistory",
       withSession({
         MENU_CD: MENU_CD,
