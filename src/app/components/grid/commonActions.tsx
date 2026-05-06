@@ -62,6 +62,82 @@ export const makeSaveAction = (config: SaveActionConfig = {}) => ({
   ...(config.disabled !== undefined && { disabled: config.disabled }),
 });
 
+// ────────────────────────────────────────────────────────────────
+// 추적 그룹 / 이력조회
+// ────────────────────────────────────────────────────────────────
+
+export type TrackGroupActionConfig = {
+  onBuy?: (e?: any) => void;       // 매입
+  onSell?: (e?: any) => void;      // 매출
+  onDispatch?: (e?: any) => void;  // 배차
+  onOrder?: (e?: any) => void;     // 주문
+  onStop?: (e?: any) => void;      // 경유지
+  onPod?: (e?: any) => void;       // 인수증
+  label?: string;
+  key?: string;
+  disabled?: boolean;
+};
+
+export const makeTrackGroupAction = (config: TrackGroupActionConfig = {}) => ({
+  type: "group" as const,
+  key: config.key ?? "추적",
+  label: config.label ?? "추적",
+  items: [
+    {
+      type: "button" as const,
+      key: "매입",
+      label: "매입",
+      onClick: config.onBuy ?? ((_e: any) => {}),
+    },
+    {
+      type: "button" as const,
+      key: "매출",
+      label: "매출",
+      onClick: config.onSell ?? ((_e: any) => {}),
+    },
+    {
+      type: "button" as const,
+      key: "배차",
+      label: "배차",
+      onClick: config.onDispatch ?? ((_e: any) => {}),
+    },
+    {
+      type: "button" as const,
+      key: "주문",
+      label: "주문",
+      onClick: config.onOrder ?? ((_e: any) => {}),
+    },
+    {
+      type: "button" as const,
+      key: "경유지",
+      label: "경유지",
+      onClick: config.onStop ?? ((_e: any) => {}),
+    },
+    {
+      type: "button" as const,
+      key: "인수증",
+      label: "인수증",
+      onClick: config.onPod ?? ((_e: any) => {}),
+    },
+  ],
+  ...(config.disabled !== undefined && { disabled: config.disabled }),
+});
+
+export type HistoryActionConfig = {
+  onClick?: (e?: any) => void;
+  label?: string;
+  key?: string;
+  disabled?: boolean;
+};
+
+export const makeHistoryAction = (config: HistoryActionConfig = {}) => ({
+  type: "button" as const,
+  key: config.key ?? "이력조회",
+  label: config.label ?? "이력조회",
+  onClick: config.onClick ?? ((_e: any) => {}),
+  ...(config.disabled !== undefined && { disabled: config.disabled }),
+});
+
 export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
   const items: any[] = [];
 

@@ -28,7 +28,11 @@ import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch } from "@/views/common/common";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import {
+  makeExcelGroupAction,
+  makeTrackGroupAction,
+  makeHistoryAction,
+} from "@/app/components/grid/commonActions";
 import { dirtyRows, isInserted } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
@@ -130,18 +134,30 @@ export function useTenderReceiveDispatchController({
   );
 
   // ── 메인 그리드 액션 (센차: TenderReceiveDispatchMain dockedItems toolbar) ──
+  const openTrack = (type: "BUY" | "SELL" | "DSPCH" | "ORD" | "STOP" | "POD") =>
+    (e: any) => {
+      if (!e.data?.length) return;
+      const dspchNos = e.data
+        .map((r: any) => r.DSPCH_NO)
+        .filter(Boolean);
+      model.setTrackType(type);
+      model.setTrackDspchNos(dspchNos);
+      model.setTrackOpen(true);
+    };
+
   const mainActions: ActionItem[] = [
+    // 추적 그룹 — trackType과 DSPCH_NO 추출 후 공통 패널 오픈
+    makeTrackGroupAction({
+      onBuy: openTrack("BUY"),
+      onSell: openTrack("SELL"),
+      onDispatch: openTrack("DSPCH"),
+      onOrder: openTrack("ORD"),
+      onStop: openTrack("STOP"),
+      onPod: openTrack("POD"),
+    }),
+    // 이력조회 — onClick 비워둠 (사용자가 콘텐츠/API 채울 자리)
+    makeHistoryAction(),
     // 센차: BTN_TENDER_ACCEPT handler:'onTenderAccepted'
-    {
-      type: "button",
-      key: "LBL_AR_TRACE",
-      label: "LBL_AR_TRACE",
-      onClick: (e: any) => {
-        if (!e.data?.length) return;
-        model.setTrackRows(e.data);
-        model.setTrackOpen(true);
-      },
-    },
     {
       type: "button",
       key: "BTN_TENDER_ACCEPT",

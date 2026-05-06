@@ -16,6 +16,7 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
+import type { TrackType } from "@/app/components/track/trackColumns";
 
 // 배차/정산 상태 컬러맵 (센차: setDispatchOperationStatusColor)
 export const DISPATCH_STATUS_COLOR_MAP: Record<string, string> = {
@@ -74,7 +75,8 @@ export function useTenderReceiveDispatchModel() {
 
   // ── 추적 패널 ────────────────────────────────────────────────
   const [trackOpen, setTrackOpen] = useState(false);
-  const [trackRows, setTrackRows] = useState<any[]>([]);
+  const [trackType, setTrackType] = useState<TrackType | null>(null);
+  const [trackDspchNos, setTrackDspchNos] = useState<string[]>([]);
 
   // ── 선택 행 (센차: selectedRecord) ───────────────────────────
   const [selectedHeaderRow, setSelectedHeaderRow] = useState<any>(null);
@@ -148,8 +150,10 @@ export function useTenderReceiveDispatchModel() {
     // track panel
     trackOpen,
     setTrackOpen,
-    trackRows,
-    setTrackRows,
+    trackType,
+    setTrackType,
+    trackDspchNos,
+    setTrackDspchNos,
     // selected row
     selectedHeaderRow,
     setSelectedHeaderRow: setSelectedHeaderRowWithRef,
