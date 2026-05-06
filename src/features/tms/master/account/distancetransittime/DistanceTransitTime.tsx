@@ -21,7 +21,6 @@ export default function DistanceTransitTime() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useDistanceTransitTimeController({
     model,
@@ -42,7 +41,6 @@ export default function DistanceTransitTime() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

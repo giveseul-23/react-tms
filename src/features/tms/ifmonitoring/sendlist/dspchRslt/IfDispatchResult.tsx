@@ -17,7 +17,6 @@ export default function IfDispatchResult() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useIfDispatchResultController({
     model,
@@ -37,7 +36,6 @@ export default function IfDispatchResult() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         userTz: "Asia/Seoul", // [TEMP-userTz] 서버 userTz 적용 완료 시 제거
         menuCode: MENU_CODE,
       }}

@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState, useRef, ReactNode } from "react";
+import React, { useState, useRef, useMemo, ReactNode } from "react";
 import {
   Search,
   RefreshCw,
@@ -32,6 +32,10 @@ import {
   type ParamMode,
 } from "./useSearchExecute";
 import { SearchFieldRenderer } from "./SearchFieldRenderer";
+import {
+  useSearchCondition,
+  type ExcludeSpec,
+} from "@/hooks/useSearchCondition";
 
 export type { SearchResult, ParamMode };
 
@@ -47,7 +51,10 @@ interface SearchFiltersProps {
   fetchFn: (params: Record<string, unknown>) => Promise<any>;
   /** DataGrid 두 개인 화면에서만 전달 — 초기화 버튼 옆에 렌더링 */
   layoutToggle?: ReactNode;
-  excludeKeysRef?: React.MutableRefObject<Set<string>>;
+  /** 검색 payload 에서 제외할 키 선언. 문자열 또는 {column, as, transform} 형태.
+   *  지정 시 SearchFilters 가 내부에서 useSearchCondition 호출 + fetchFn 자동 wrap.
+   *  Controller 에서 transformParams 직접 호출 불필요. */
+  excludes?: readonly ExcludeSpec[];
   computeTotalCount?: (rows: any[]) => number;
   /** 모듈 기본값 조회 — 모듈명 (예: "TMS"). falsy면 비활성 */
   moduleDefault?: string;
@@ -73,7 +80,7 @@ export function SearchFilters({
   pageSize = 20,
   fetchFn,
   layoutToggle,
-  excludeKeysRef,
+  excludes,
   computeTotalCount,
   moduleDefault,
   moduleDefaultParams,
@@ -110,16 +117,31 @@ export function SearchFilters({
     moduleDefaultCacheRef,
   });
 
-  // 3) 조회 실행
+  // 3) 제외 키 / 키 리네임 — excludes 선언 시 자동 처리
+  const searchCondition = useSearchCondition({
+    meta,
+    filtersRef,
+    excludes,
+  });
+  const wrappedFetchFn = useMemo(
+    () =>
+      excludes && excludes.length > 0
+        ? (params: Record<string, unknown>) =>
+            fetchFn(searchCondition.transformParams(params))
+        : fetchFn,
+    [excludes, fetchFn, searchCondition],
+  );
+
+  // 4) 조회 실행
   const { searching, handleSearch } = useSearchExecute({
     meta,
     searchState,
-    fetchFn,
+    fetchFn: wrappedFetchFn,
     onSearch,
     pageSize,
     filtersRef,
     rawFiltersRef,
-    excludeKeysRef,
+    excludeKeysRef: searchCondition.excludeKeysRef,
     computeTotalCount,
     searchRef,
     menuCode,

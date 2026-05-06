@@ -54,11 +54,23 @@
 - 레이아웃은 `MasterDetailPage` / `SplitPane` (`@/app/components/layout/...`)로 구성
 - Master/Detail 그리드는 `DataGrid` (`@/app/components/grid/DataGrid`)
 - 조회 조건 영역은 `useSearchMeta(MENU_CODE)` 결과를 `MasterDetailPage.searchProps.meta`로 전달
-- 조회 trigger / 조회 조건 / 검색 영역 제외 키는 ref로 보관:
+- 조회 trigger / 조회 조건은 ref로 보관:
   ```ts
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
+  ```
+- 검색 payload 에서 제외할 키나 키 리네임이 필요하면 `searchProps.excludes`에 선언만 — `SearchFilters`가 내부에서 `useSearchCondition`을 호출하고 `fetchFn`을 자동 wrap. View 에서 `excludeKeysRef` 직접 만들거나 `useSearchCondition` 호출하지 말 것.
+  ```ts
+  searchProps={{
+    ...,
+    excludes: ["BOOKING"],                                       // 단순 제외
+    // 또는 키 리네임 + 값 변환:
+    excludes: [
+      { column: "PLN.AR_TO_DT",
+        as: { FROM: "AR_FROM_DT", TO: "AR_TO_DT" },
+        transform: (v) => String(v).replace(/-/g, "") },
+    ],
+  }}
   ```
 - 레이아웃 토글(`"side" | "vertical"`)과 `storageKey`(localStorage용 화면별 유일값)를 반드시 지정
 
@@ -117,6 +129,7 @@
 {
   api,                      // 화면 API 객체 (메서드명을 string 으로 참조)
   selections: ["config"],   // state+ref 추적할 그리드 keys
+  resetOnChange: "activeTab", // 외부 탭 등 watch key 가 바뀌면 모든 그리드 클리어 + 1페이지 재조회 (첫 마운트/빈 값 자동 스킵)
   fetchListExtraParams: {   // 첫 fetch에 추가 param 주입 (model 참조)
     LGST_GRP_CNFG_GRP_CD: (m) => m.activeTab,
   },
@@ -146,7 +159,7 @@
 
 - View JSX 레이아웃 (단일 / Master-Detail / 2x2 / 탭 / 트리 등 자유)
 - 화면 고유 액션 (예: 동기화 버튼) → Controller에서 `base.actions.config` 에 합성 후 별도 export
-- 외부 탭, 화면 고유 useEffect 등 → `extras()` 안에서 정의
+- 외부 탭, 화면 고유 useEffect 등 → `extras()` 안에서 정의 (탭 state는 `extras`에 두고, View 에서 `MasterDetailPage`의 `outerTabs={{ tabs, activeTab, onChange }}` prop 으로 넘김 — 인라인 JSX 금지)
 
 ### 순환 import 주의
 

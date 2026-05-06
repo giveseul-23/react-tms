@@ -25,7 +25,6 @@ export default function DispatchOperatorCostManagement() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useDispatchOperatorCostController({
     model,
@@ -46,7 +45,6 @@ export default function DispatchOperatorCostManagement() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

@@ -6,7 +6,6 @@ import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPa
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
-import { useSearchCondition } from "@/hooks/useSearchCondition";
 
 import { SplitPane } from "@/app/components/layout/SplitPane";
 
@@ -26,14 +25,6 @@ export default function Country() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
-
-  useSearchCondition({
-    meta,
-    excludeKeysRef,
-    filtersRef,
-    excludes: ["BOOKING"],
-  });
 
   const ctrl = useCountryController({
     menuCd: MENU_CD,
@@ -53,7 +44,7 @@ export default function Country() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
+        excludes: ["BOOKING"],
         menuCode: MENU_CD,
       }}
       direction={model.layout === "vertical" ? "horizontal" : "vertical"}

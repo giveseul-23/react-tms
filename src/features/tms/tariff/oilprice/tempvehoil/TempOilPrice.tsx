@@ -22,7 +22,6 @@ export default function TempOilPrice() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
   const activeTabRef = useRef<string>("REGISTER");
 
   const ctrl = useTempOilPriceController({
@@ -43,7 +42,6 @@ export default function TempOilPrice() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CODE,
       }}
       grid={

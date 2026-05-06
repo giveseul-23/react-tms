@@ -74,4 +74,8 @@ export interface FeatureConfig {
 
   /** 페이지 크기 (기본 500) */
   pageSize?: number;
+
+  /** 외부 탭 등 model 의 특정 key 값이 바뀌면 모든 그리드 + selection 클리어 후 1페이지 재조회.
+   *  값은 extras 결과의 key 이름. 첫 마운트는 자동 스킵, 빈 값(falsy)도 스킵. */
+  resetOnChange?: string;
 }

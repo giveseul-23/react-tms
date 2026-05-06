@@ -23,7 +23,6 @@ export default function ConfirmDispatch() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const model = useConfirmDispatchModel();
   const ctrl = useConfirmDispatchController({
@@ -45,7 +44,6 @@ export default function ConfirmDispatch() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

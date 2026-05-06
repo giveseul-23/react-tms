@@ -6,7 +6,6 @@ import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPa
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
-import { useSearchCondition } from "@/hooks/useSearchCondition";
 
 import { useOperatorArBillingInquiryModel } from "./OperatorArBillingInquiryModel";
 import { useOperatorArBillingInquiryController } from "./OperatorArBillingInquiryController";
@@ -25,30 +24,11 @@ export default function OperatorArBillingInquiry() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
-
-  // JS onSaveAfterSearch + buildOperatorArBillingHeaderParams 선언형 대응:
-  //   - PLN.AR_TO_DT 는 dsSearchCondition 배열에서 제외 (_FRM/_TO 자동 처리)
-  //   - 값은 AR_FROM_DT / AR_TO_DT 로 top-level 리네임 + 하이픈 제거
-  //   Controller 는 searchCondition.transformParams(params) 한 줄로 처리.
-  const searchCondition = useSearchCondition({
-    meta,
-    excludeKeysRef,
-    filtersRef,
-    excludes: [
-      {
-        column: "PLN.AR_TO_DT",
-        as: { FROM: "AR_FROM_DT", TO: "AR_TO_DT" },
-        transform: (v) => String(v).replace(/-/g, ""),
-      },
-    ],
-  });
 
   const ctrl = useOperatorArBillingInquiryController({
     model,
     searchRef,
     filtersRef,
-    searchCondition,
   });
 
   if (loading) return <Skeleton className="h-24" />;
@@ -64,7 +44,13 @@ export default function OperatorArBillingInquiry() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
+        excludes: [
+          {
+            column: "PLN.AR_TO_DT",
+            as: { FROM: "AR_FROM_DT", TO: "AR_TO_DT" },
+            transform: (v) => String(v).replace(/-/g, ""),
+          },
+        ],
         menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

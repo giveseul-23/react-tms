@@ -5,7 +5,6 @@ import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
-import { useSearchCondition } from "@/hooks/useSearchCondition";
 import { useLanguagePackModel } from "./LanguagePackModel";
 import { useLanguagePackController } from "./LanguagePackController";
 import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
@@ -18,13 +17,6 @@ export default function LanguagePack() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
-
-  useSearchCondition({
-    meta,
-    excludeKeysRef,
-    filtersRef,
-  });
 
   const ctrl = useLanguagePackController({
     menuCd: MENU_CD,
@@ -44,7 +36,6 @@ export default function LanguagePack() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CD,
       }}
       grid={

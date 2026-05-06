@@ -638,10 +638,10 @@
             <span class="pattern-example">예: LgstgrpOprConfigMst, DivisionConfigMaster</span>
           </div>
           <div class="pattern-body">
-            <p>화면 전체에 걸친 외부 탭과 4개 그리드(2x2 분할)를 동시에 가지는 형태. <code>MasterDetailPage</code>의 <code>master</code> / <code>detail</code>에 각각 <code>SplitPane</code>을 한 번 더 끼워서 만든다. 외부 탭은 <code>topSlot</code>에 전달.</p>
+            <p>화면 전체에 걸친 외부 탭과 4개 그리드(2x2 분할)를 동시에 가지는 형태. <code>MasterDetailPage</code>의 <code>master</code> / <code>detail</code>에 각각 <code>SplitPane</code>을 한 번 더 끼워서 만든다. 외부 탭은 <code>outerTabs</code> prop으로 선언적으로 전달.</p>
             <div class="pattern-diagram" style="margin: 12px 0">
               <div class="diagram-row"><div class="diagram-block db-header">조회조건</div></div>
-              <div class="diagram-row"><div class="diagram-block db-amber">탭 네비 (외부 — topSlot)</div></div>
+              <div class="diagram-row"><div class="diagram-block db-amber">탭 네비 (외부 — outerTabs)</div></div>
               <div class="diagram-row">
                 <div class="diagram-block db-blue">Top-L</div>
                 <div class="diagram-block db-blue">Top-R</div>
@@ -655,51 +655,43 @@
             <ul style="padding-left: 20px">
               <li><code>MasterDetailPage</code>의 <code>direction="vertical"</code> + <code>defaultSizes={[55, 45]}</code> 등으로 상/하 분할</li>
               <li><code>master</code> / <code>detail</code>에 각각 <code>&lt;SplitPane direction="horizontal"&gt;</code> 끼워서 좌/우 분할 → 총 4 그리드</li>
-              <li>탭 네비게이션 JSX를 <code>topSlot</code> prop으로 전달 — SearchFilters와 그리드 사이에 렌더됨</li>
+              <li>외부 탭을 <code>outerTabs={{ tabs, activeTab, onChange }}</code> prop으로 선언 — <code>OuterTabs</code> 공용 컴포넌트가 SearchFilters와 그리드 사이에 자동 렌더됨</li>
               <li>외부/내부 SplitPane 모두 <strong>화면별 유일한 storageKey</strong> 지정 (3개 — outer/top/bottom)</li>
-              <li>탭 변경 시 4개 그리드 초기화 + 재조회: <code>useEffect</code>에서 <code>resetSubGrids</code> + <code>setConfigData(EMPTY)</code> + <code>searchRef.current?.()</code></li>
+              <li>탭 변경 시 4개 그리드 초기화 + 재조회: <code>featureConfig.resetOnChange: "activeTab"</code> 한 줄 — framework 가 useEffect 자동 등록 (첫 마운트/빈 값 자동 스킵)</li>
             </ul>
             <div class="code-block">
               <div class="code-header"><span>view (패턴 F)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
-              <pre><span class="k">const</span> tabNav = (
-  &lt;div className=<span class="s">"flex gap-0.5 border-b border-border px-1"</span>&gt;
-    {model.configTabs.<span class="fn">map</span>((tab) =&gt; (
-      &lt;button key={tab.key} onClick={() =&gt; model.<span class="fn">setActiveTab</span>(tab.key)}&gt;
-        {tab.label}
-      &lt;/button&gt;
-    ))}
-  &lt;/div&gt;
-);
-
-<span class="k">return</span> (
-  &lt;<span class="t">MasterDetailPage</span>
-    searchProps={{ meta, fetchFn: ctrl.<span class="fn">fetchConfigList</span>, onSearch: ctrl.<span class="fn">handleSearch</span>,
-                   searchRef, filtersRef, pageSize: model.pageSize }}
-    topSlot={tabNav}                        <span class="c">// SearchFilters와 그리드 사이</span>
-    direction=<span class="s">"vertical"</span>
-    defaultSizes={[55, 45]}
-    storageKey=<span class="s">"my-page-outer"</span>
-    master={
-      &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span> defaultSizes={[50, 50]}
-                  handleThickness=<span class="s">"1.5"</span> storageKey=<span class="s">"my-page-top"</span>&gt;
-        &lt;<span class="t">DataGrid</span> /&gt;   <span class="c">// Top-L</span>
-        &lt;<span class="t">DataGrid</span> /&gt;   <span class="c">// Top-R</span>
-      &lt;/<span class="t">SplitPane</span>&gt;
-    }
-    detail={
-      &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span> defaultSizes={[50, 50]}
-                  handleThickness=<span class="s">"1.5"</span> storageKey=<span class="s">"my-page-bottom"</span>&gt;
-        &lt;<span class="t">DataGrid</span> /&gt;   <span class="c">// Bottom-L</span>
-        &lt;<span class="t">DataGrid</span> /&gt;   <span class="c">// Bottom-R</span>
-      &lt;/<span class="t">SplitPane</span>&gt;
-    }
-  /&gt;
-);</pre>
+              <pre>&lt;<span class="t">MasterDetailPage</span>
+  searchProps={{ meta, fetchFn: ctrl.<span class="fn">fetchConfigList</span>, onSearch: ctrl.<span class="fn">handleSearch</span>,
+                 searchRef, filtersRef, pageSize: model.pageSize }}
+  outerTabs={{                            <span class="c">// 페이지 외부 탭 — OuterTabs 자동 렌더</span>
+    tabs: model.configTabs,
+    activeTab: model.activeTab,
+    onChange: model.setActiveTab,
+  }}
+  direction=<span class="s">"vertical"</span>
+  defaultSizes={[55, 45]}
+  storageKey=<span class="s">"my-page-outer"</span>
+  master={
+    &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span> defaultSizes={[50, 50]}
+                handleThickness=<span class="s">"1.5"</span> storageKey=<span class="s">"my-page-top"</span>&gt;
+      &lt;<span class="t">DataGrid</span> /&gt;   <span class="c">// Top-L</span>
+      &lt;<span class="t">DataGrid</span> /&gt;   <span class="c">// Top-R</span>
+    &lt;/<span class="t">SplitPane</span>&gt;
+  }
+  detail={
+    &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span> defaultSizes={[50, 50]}
+                handleThickness=<span class="s">"1.5"</span> storageKey=<span class="s">"my-page-bottom"</span>&gt;
+      &lt;<span class="t">DataGrid</span> /&gt;   <span class="c">// Bottom-L</span>
+      &lt;<span class="t">DataGrid</span> /&gt;   <span class="c">// Bottom-R</span>
+    &lt;/<span class="t">SplitPane</span>&gt;
+  }
+/&gt;</pre>
             </div>
             <div class="tip">
               <span class="tip-icon">💡</span>
               <div>
-                외부 탭이 없는 단순 2x2 그리드는 <code>topSlot</code>만 빼고 동일한 구조로 만들면 됩니다 (예: <code>DivisionConfigMaster</code>).
+                외부 탭이 없는 단순 2x2 그리드는 <code>outerTabs</code>만 빼고 동일한 구조로 만들면 됩니다 (예: <code>DivisionConfigMaster</code>).
                 탭이 단일 그리드 내부 콘텐츠 전환 용도라면 패턴 C(<code>layoutType="tab"</code>)를 사용하세요 — 패턴 F는 <strong>페이지 전체</strong> 4그리드 묶음을 갈아끼우는 케이스 한정.
               </div>
             </div>
@@ -896,9 +888,6 @@
   <span class="k">const</span> model = <span class="fn">useFeatureModel</span>();
   <span class="k">const</span> searchRef = <span class="fn">useRef</span>&lt;((page?: <span class="t">number</span>) =&gt; <span class="t">void</span>) | <span class="k">null</span>&gt;(<span class="k">null</span>);
   <span class="k">const</span> filtersRef = <span class="fn">useRef</span>&lt;<span class="t">Record</span>&lt;<span class="t">string</span>, <span class="t">unknown</span>&gt;&gt;({});
-  <span class="k">const</span> excludeKeysRef = <span class="fn">useRef</span>&lt;<span class="t">Set</span>&lt;<span class="t">string</span>&gt;&gt;(<span class="k">new</span> <span class="t">Set</span>());
-
-  <span class="fn">useSearchCondition</span>({ meta, excludeKeysRef, filtersRef });
 
   <span class="k">const</span> ctrl = <span class="fn">useFeatureController</span>({ model, searchRef, filtersRef });
 
@@ -908,7 +897,8 @@
     &lt;<span class="t">MasterDetailPage</span>
       searchProps={{ meta, fetchFn: ctrl.fetchList, onSearch: ctrl.handleSearch,
                      searchRef, filtersRef, pageSize: model.pageSize,
-                     excludeKeysRef, menuCode: <span class="t">MENU_CD</span> }}
+                     excludes: [<span class="s">"BOOKING"</span>],   <span class="c">// 검색 payload 에서 제외할 키 (선택)</span>
+                     menuCode: <span class="t">MENU_CD</span> }}
       direction={model.layout === <span class="s">"side"</span> ? <span class="s">"horizontal"</span> : <span class="s">"vertical"</span>}
       layoutToggle={{ layout: model.layout, onToggle: () =&gt; model.<span class="fn">setLayout</span>(p =&gt; p === <span class="s">"side"</span> ? <span class="s">"vertical"</span> : <span class="s">"side"</span>) }}
       storageKey=<span class="s">"my-feature"</span>
@@ -1052,14 +1042,15 @@
           <table>
             <thead><tr><th style="width: 200px">Prop</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
             <tbody>
-              <tr data-search="searchprops master detail 조회조건 search props"><td>searchProps</td><td><span class="tag tag-required">필수</span></td><td>조회조건 영역 설정 — <code>meta</code>, <code>fetchFn</code>, <code>onSearch</code>, <code>searchRef</code>, <code>filtersRef</code>, <code>pageSize</code>, <code>excludeKeysRef</code>, <code>menuCode</code> 포함<div class="td-source">@/app/components/layout/presets/MasterDetailPage</div></td></tr>
+              <tr data-search="searchprops master detail 조회조건 search props"><td>searchProps</td><td><span class="tag tag-required">필수</span></td><td>조회조건 영역 설정 — <code>meta</code>, <code>fetchFn</code>, <code>onSearch</code>, <code>searchRef</code>, <code>filtersRef</code>, <code>pageSize</code>, <code>excludes</code>(선택 — payload 에서 제외/리네임할 키 선언), <code>menuCode</code> 포함<div class="td-source">@/app/components/layout/presets/MasterDetailPage</div></td></tr>
               <tr data-search="master 메인 그리드 main grid"><td>master</td><td><span class="tag tag-required">필수</span></td><td>메인(좌측 또는 상단) 그리드 — 보통 <code>&lt;DataGrid /&gt;</code><div class="td-desc">ReactNode</div></td></tr>
               <tr data-search="detail 상세 grid 상세그리드"><td>detail</td><td><span class="tag tag-required">필수</span></td><td>상세(우측 또는 하단) 그리드 — 단일 또는 탭 DataGrid<div class="td-desc">ReactNode</div></td></tr>
               <tr data-search="direction horizontal vertical 분할 방향"><td>direction</td><td><span class="tag tag-required">필수</span></td><td>분할 방향 — <code>"horizontal"</code>(좌우) / <code>"vertical"</code>(상하)<div class="td-desc">"horizontal" | "vertical"</div></td></tr>
               <tr data-search="defaultsizes 초기 비율 master detail size"><td>defaultSizes</td><td><span class="tag tag-optional">선택</span></td><td>초기 master/detail 비율 (합 100), 기본 <code>[50, 50]</code><div class="td-desc">[number, number]</div></td></tr>
               <tr data-search="layouttoggle 레이아웃 토글 side vertical"><td>layoutToggle</td><td><span class="tag tag-optional">선택</span></td><td>레이아웃 토글 버튼 표시 — <code>{ layout, onToggle }</code> 전달 시 토글 활성화<div class="td-desc">{ layout: LayoutType; onToggle: () =&gt; void }</div></td></tr>
               <tr data-search="storagekey localstorage 저장 키 사이즈"><td>storageKey</td><td><span class="tag tag-optional">선택</span></td><td>localStorage에 사이즈/레이아웃 저장용 화면별 유일 키<div class="td-desc">string</div></td></tr>
-              <tr data-search="topslot 외부 탭 페이지 패턴 F searchfilters 사이"><td>topSlot</td><td><span class="tag tag-optional">선택</span></td><td>SearchFilters와 그리드 사이에 들어갈 슬롯 — 페이지 외부 탭(패턴 F) 등<div class="td-desc">ReactNode</div></td></tr>
+              <tr data-search="outertabs 외부 탭 페이지 패턴 F 선언적"><td>outerTabs</td><td><span class="tag tag-optional">선택</span></td><td>페이지 외부 탭(패턴 F) — 선언적으로 전달하면 <code>OuterTabs</code> 컴포넌트가 <code>topSlot</code> 위에 자동 렌더됨<div class="td-desc">{ tabs: { key, label }[]; activeTab: string; onChange: (key: string) =&gt; void }</div></td></tr>
+              <tr data-search="topslot 임의 슬롯 searchfilters 사이"><td>topSlot</td><td><span class="tag tag-optional">선택</span></td><td>SearchFilters와 그리드 사이에 들어갈 임의 ReactNode 슬롯 — 외부 탭은 <code>outerTabs</code> 사용 권장<div class="td-desc">ReactNode</div></td></tr>
               <tr data-search="bottomslot 하단 패널 추적"><td>bottomSlot</td><td><span class="tag tag-optional">선택</span></td><td>하단 슬라이드 패널 콘텐츠 — 추적 패널, 부가 정보 등<div class="td-desc">ReactNode</div></td></tr>
               <tr data-search="bottomopen 하단 열림 상태"><td>bottomOpen</td><td><span class="tag tag-optional">선택</span></td><td>하단 패널 열림 상태<div class="td-desc">boolean</div></td></tr>
               <tr data-search="bottomheight 하단 패널 높이"><td>bottomHeight</td><td><span class="tag tag-optional">선택</span></td><td>하단 패널 높이(px)<div class="td-desc">number</div></td></tr>
@@ -1321,15 +1312,16 @@
         </div>
 
         <div class="ref-section">
-          <h3>useSearchCondition({ meta, excludeKeysRef, filtersRef, excludes })</h3>
-          <div class="ref-summary">조회조건 후처리 — YMD 범위 분리(_FRM/_TO), 파라미터 변환, 라벨/컬럼 lookup</div>
+          <h3>useSearchCondition({ meta, filtersRef, excludes }) <span class="tag tag-optional">선택</span></h3>
+          <div class="ref-summary">화면이 직접 호출할 일은 거의 없음 — <code>SearchFilters</code> 가 <code>searchProps.excludes</code> 선언 시 내부에서 자동 호출 + <code>fetchFn</code> 자동 wrap. 이 훅을 직접 호출하는 건 <code>getValueByLabel</code> / <code>getValueByColumn</code> 같은 lookup 메서드가 필요할 때만.</div>
           <table>
             <thead><tr><th style="width: 200px">반환</th><th>설명</th></tr></thead>
             <tbody>
+              <tr data-search="excludekeysref 제외 키 ref"><td>excludeKeysRef</td><td>제외 키 Set — 외부 ref 미전달 시 내부 자체 생성된 ref 가 노출됨</td></tr>
               <tr data-search="setcomptoparamexclude 검색 제외 컬럼"><td>setCompToParamExclude(...cols)</td><td>특정 컬럼을 DYNAMIC_QUERY에서 제외</td></tr>
               <tr data-search="getvaluebylabel 라벨로 값 가져오기"><td>getValueByLabel(...)</td><td>라벨 → 값 lookup</td></tr>
               <tr data-search="getvaluebycolumn 컬럼으로 값 가져오기"><td>getValueByColumn(...)</td><td>컬럼명 → 값 lookup</td></tr>
-              <tr data-search="transformparams 파라미터 변환"><td>transformParams(params)</td><td>params 가공 (YMD 분리 등)</td></tr>
+              <tr data-search="transformparams 파라미터 변환"><td>transformParams(params)</td><td>params 가공 (YMD 분리, 키 리네임 등) — SearchFilters 가 자동 적용하므로 직접 호출 불필요</td></tr>
             </tbody>
           </table>
           <div class="ref-empty-msg">검색 결과 없음</div>
@@ -1446,6 +1438,7 @@
               <tr data-search="grids 그리드 정의 featureconfig"><td>grids</td><td><span class="tag tag-required">필수</span></td><td>그리드 key → <code>GridConfig</code>. 선언 순서가 cascade 흐름</td></tr>
               <tr data-search="selections 선택 추적 featureconfig"><td>selections</td><td><span class="tag tag-optional">선택</span></td><td>state+ref 로 selectedRow 를 추적할 그리드 keys 배열</td></tr>
               <tr data-search="fetchlistextraparams 추가 param featureconfig"><td>fetchListExtraParams</td><td><span class="tag tag-optional">선택</span></td><td>첫 그리드 fetchList 에 추가로 보낼 param. 값은 <code>(model) =&gt; any</code> 함수 (외부 탭 등 model 참조 가능)</td></tr>
+              <tr data-search="resetonchange 외부 탭 재조회 클리어 featureconfig"><td>resetOnChange</td><td><span class="tag tag-optional">선택</span></td><td>extras 결과 key 이름 — 그 값이 바뀌면 모든 그리드 + selection 자동 클리어 후 1페이지 재조회. 외부 탭 전환에 사용 (예: <code>"activeTab"</code>). 첫 마운트/빈 값은 자동 스킵<div class="td-desc">string</div></td></tr>
               <tr data-search="extras 화면별 state featureconfig"><td>extras</td><td><span class="tag tag-optional">선택</span></td><td>화면별 추가 state Hook — <code>() =&gt; Record</code>. 결과가 model 에 평탄하게 spread</td></tr>
               <tr data-search="pagesize 페이지 크기 featureconfig"><td>pageSize</td><td><span class="tag tag-optional">선택</span></td><td>페이지 크기 (기본 500)</td></tr>
               <tr data-search="menucode 메뉴 코드 featureconfig"><td>menuCode</td><td><span class="tag tag-optional">선택</span></td><td>(framework 내부 미사용 — 보통 생략. View 가 source of truth)</td></tr>

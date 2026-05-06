@@ -46,7 +46,6 @@ export default function Feature() {
   // ── 조회 trigger / 조회 조건 / 검색 영역에서 제외할 key ────────
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useDfChargeRateController({
     model,
@@ -67,7 +66,6 @@ export default function Feature() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

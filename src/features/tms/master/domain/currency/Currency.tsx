@@ -5,7 +5,6 @@ import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
-import { useSearchCondition } from "@/hooks/useSearchCondition";
 import { useCurrencyModel } from "./CurrencyModel.ts";
 import { useCurrencyController } from "./CurrencyController";
 import { MAIN_COLUMN_DEFS } from "./CurrencyColumns";
@@ -17,14 +16,6 @@ export default function Currency() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
-
-  useSearchCondition({
-    meta,
-    excludeKeysRef,
-    filtersRef,
-    excludes: ["BOOKING"],
-  });
 
   const ctrl = useCurrencyController({
     menuCd: MENU_CD,
@@ -44,7 +35,7 @@ export default function Currency() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
+        excludes: ["BOOKING"],
         menuCode: MENU_CD,
       }}
       grid={

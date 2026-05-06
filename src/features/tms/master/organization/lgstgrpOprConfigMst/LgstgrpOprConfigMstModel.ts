@@ -14,6 +14,7 @@ type ConfigTab = { key: string; label: string };
 export const lgstgrpFeatureConfig: FeatureConfig = {
   api: lgstgrpOprConfigApi,
   selections: ["config", "detail"],
+  resetOnChange: "activeTab",
   fetchListExtraParams: {
     LGST_GRP_CNFG_GRP_CD: (m) => m.activeTab,
   },

@@ -5,30 +5,24 @@ import { MAIN_COLUMN_DEFS } from "./OperatorArBillingInquiryColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { UseSearchConditionReturn } from "@/hooks/useSearchCondition";
 
 type ControllerProps = {
   model: OperatorArBillingInquiryModel;
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
-  searchCondition: UseSearchConditionReturn;
 };
 
 export function useOperatorArBillingInquiryController({
   model,
   searchRef,
   filtersRef,
-  searchCondition,
 }: ControllerProps) {
-  // excludes 선언 (Page 의 useSearchCondition) 에 의해:
-  //   - PLN.AR_TO_DT 는 dsSearchCondition 배열에서 자동 제외
-  //   - transformParams 가 AR_FROM_DT / AR_TO_DT 로 리네임 + 하이픈 제거
+  // PLN.AR_TO_DT 제외 + AR_FROM_DT / AR_TO_DT 리네임은 View 의
+  // searchProps.excludes 선언으로 자동 처리됨 (SearchFilters 가 fetchFn 자동 wrap).
   const fetchList = useCallback(
     (params: Record<string, unknown>) =>
-      operatorArBillingInquiryApi.getList(
-        searchCondition.transformParams(params),
-      ),
-    [searchCondition],
+      operatorArBillingInquiryApi.getList(params),
+    [],
   );
 
   const fetchSubTabs = useCallback(

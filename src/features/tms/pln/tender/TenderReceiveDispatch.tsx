@@ -7,7 +7,6 @@ import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPa
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
-import { useSearchCondition } from "@/hooks/useSearchCondition";
 
 import { useTenderReceiveDispatchModel } from "./TenderReceiveDispatchModel.ts";
 import { useTenderReceiveDispatchController } from "./TenderReceiveDispatchController.tsx";
@@ -27,14 +26,6 @@ export default function TenderReceiveDispatch() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
-
-  useSearchCondition({
-    meta,
-    excludeKeysRef,
-    filtersRef,
-    excludes: ["BOOKING"],
-  });
 
   const ctrl = useTenderReceiveDispatchController({
     model,
@@ -53,7 +44,7 @@ export default function TenderReceiveDispatch() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
+        excludes: ["BOOKING"],
         menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

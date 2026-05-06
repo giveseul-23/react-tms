@@ -19,7 +19,6 @@ export default function TenderReceiveDispatch() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useSmsGroupController({
     model,
@@ -39,7 +38,6 @@ export default function TenderReceiveDispatch() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

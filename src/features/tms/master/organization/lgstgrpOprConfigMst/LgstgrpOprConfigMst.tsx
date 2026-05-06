@@ -1,7 +1,7 @@
 // src/features/tms/master/organization/lgstgrpOprConfigMst/LgstgrpOprConfigMst.tsx
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
@@ -19,8 +19,6 @@ import {
 
 export const MENU_CODE = "MENU_LGSTGRP_OPR_CONFIG_MST";
 
-type ConfigTab = { key: string; label: string };
-
 export default function LgstgrpOprConfigMst() {
   const { meta, loading } = useSearchMeta(MENU_CODE);
   const searchRef = useRef<((page?: number) => void) | null>(null);
@@ -33,43 +31,7 @@ export default function LgstgrpOprConfigMst() {
     filtersRef,
   });
 
-  // 탭 변경 시 4 그리드 초기화 + 재조회
-  const isTabInit = useRef(true);
-  useEffect(() => {
-    if (isTabInit.current) {
-      isTabInit.current = false;
-      return;
-    }
-    if (!model.activeTab) return;
-    model.resetSubGrids();
-    model.grids.config.setData({ rows: [], totalCount: 0, page: 1, limit: 20 });
-    setTimeout(() => searchRef.current?.(1), 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model.activeTab]);
-
   if (loading) return <Skeleton className="h-24" />;
-
-  // 외부 탭 네비
-  const tabNav = (
-    <div className="flex gap-0.5 border-b border-border px-1">
-      {model.configTabs.map((tab: ConfigTab) => (
-        <button
-          key={tab.key}
-          onClick={() => model.setActiveTab(tab.key)}
-          className={`
-            px-3 py-1.5 text-[11px] font-medium border-b-2 transition-colors
-            ${
-              model.activeTab === tab.key
-                ? "text-[rgb(var(--primary))] border-[rgb(var(--primary))]"
-                : "text-muted-foreground border-transparent hover:text-foreground"
-            }
-          `}
-        >
-          {tab.label}
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <MasterDetailPage
@@ -81,7 +43,11 @@ export default function LgstgrpOprConfigMst() {
         filtersRef,
         pageSize: model.pageSize,
       }}
-      topSlot={tabNav}
+      outerTabs={{
+        tabs: model.configTabs,
+        activeTab: model.activeTab,
+        onChange: model.setActiveTab,
+      }}
       direction="vertical"
       defaultSizes={[55, 45]}
       storageKey="lgstgrp-opr-config-mst-outer"

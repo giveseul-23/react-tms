@@ -18,6 +18,7 @@ import {
   LayoutToggleButton,
   type LayoutType,
 } from "../LayoutToggleButton";
+import { OuterTabs, type OuterTab } from "../OuterTabs";
 import type { SearchProps } from "./types";
 
 export interface MasterDetailPageProps {
@@ -40,6 +41,12 @@ export interface MasterDetailPageProps {
   bottomHeight?: number;
   /** SearchFilters 와 그리드 사이에 들어갈 슬롯 (예: 페이지 외부 탭) */
   topSlot?: ReactNode;
+  /** 페이지 외부 탭 — 선언적으로 넘기면 자동으로 topSlot 위에 OuterTabs 가 렌더됨 */
+  outerTabs?: {
+    tabs: OuterTab[];
+    activeTab: string;
+    onChange: (key: string) => void;
+  };
 }
 
 export function MasterDetailPage({
@@ -55,6 +62,7 @@ export function MasterDetailPage({
   bottomOpen,
   bottomHeight,
   topSlot,
+  outerTabs,
 }: MasterDetailPageProps) {
   const layoutToggleNode = layoutToggle ? (
     <LayoutToggleButton
@@ -80,6 +88,15 @@ export function MasterDetailPage({
       bottomHeight={bottomHeight}
     >
       <div className="flex flex-col h-full min-h-0">
+        {outerTabs && (
+          <div className="shrink-0">
+            <OuterTabs
+              tabs={outerTabs.tabs}
+              activeTab={outerTabs.activeTab}
+              onChange={outerTabs.onChange}
+            />
+          </div>
+        )}
         {topSlot && <div className="shrink-0">{topSlot}</div>}
         <div className="flex-1 min-h-0">
           <SplitPane

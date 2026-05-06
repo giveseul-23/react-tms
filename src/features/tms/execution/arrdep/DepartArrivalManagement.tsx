@@ -22,7 +22,6 @@ export default function DepartArrivalManagement() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useDepartArrivalManagementController({
     model,
@@ -43,7 +42,6 @@ export default function DepartArrivalManagement() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CD,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

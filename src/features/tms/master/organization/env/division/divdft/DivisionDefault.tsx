@@ -13,6 +13,7 @@ import {
   MAIN_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
 } from "./DivisionDefaultColumns.tsx";
+
 export const MENU_CODE = "MENU_ORGANIZATION_ENV_DIV_DFT";
 
 export default function TenderReceiveDispatch() {
@@ -21,7 +22,6 @@ export default function TenderReceiveDispatch() {
 
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useDivisionDefaultController({
     model,
@@ -41,7 +41,6 @@ export default function TenderReceiveDispatch() {
         searchRef,
         filtersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
@@ -74,7 +73,7 @@ export default function TenderReceiveDispatch() {
           onPageSizeChange={model.setPageSize}
           onPageChange={(page) => {
             model.resetSubGrids();
-            searchRef.current?.(page, false);
+            searchRef.current?.(page);
           }}
           actions={ctrl.detailActions}
         />

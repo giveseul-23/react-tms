@@ -9,22 +9,13 @@
 //    1) DYNAMIC_QUERY / dsSearchCondition 에서 제외
 //    2) as 에 선언된 이름으로 top-level 리네임
 //    3) transform 으로 값 가공 (예: 날짜 하이픈 제거)
-//    → Controller 의 fetchList 에서 searchCondition.transformParams(params) 한 번만 호출하면 끝.
 //
-//  사용 예 (범위 YMD, JS buildOperatorArBillingHeaderParams 스타일):
-//    useSearchCondition({
-//      meta, excludeKeysRef, filtersRef,
-//      excludes: [
-//        {
-//          column: "PLN.AR_TO_DT",                              // YMD 범위라 자동 _FRM/_TO 처리
-//          as: { FROM: "AR_FROM_DT", TO: "AR_TO_DT" },          // top-level 이름
-//          transform: (v) => String(v).replace(/-/g, ""),       // 하이픈 제거
-//        },
-//      ],
-//    });
+//  화면 입장에서는 직접 이 훅을 호출할 필요 없음 — `MasterDetailPage` /
+//  `SearchFilters` 의 `searchProps.excludes` 에 선언만 넣으면 SearchFilters 가
+//  내부에서 이 훅을 호출하고 fetchFn 을 자동 wrap. (선언형 사용)
 //
-//  단순 제외 (BOOKING 같은 커스텀 필드):
-//    useSearchCondition({ meta, excludeKeysRef, filtersRef, excludes: ["BOOKING"] });
+//  화면이 이 훅을 직접 호출하는 케이스는 `getValueByLabel` / `getValueByColumn` /
+//  `setCompToParamExclude` 같은 lookup 메서드가 필요한 특수 경우뿐.
 
 import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import type { SearchMeta } from "@/features/search/search.meta.types";
@@ -43,13 +34,16 @@ export type ExcludeSpec = string | ExcludeRename;
 
 export type UseSearchConditionArgs = {
   meta: readonly SearchMeta[];
-  excludeKeysRef: MutableRefObject<Set<string>>;
+  /** 외부 ref. 생략 시 훅 내부에서 자체 생성하여 결과로 노출 */
+  excludeKeysRef?: MutableRefObject<Set<string>>;
   filtersRef?: MutableRefObject<Record<string, unknown>>;
   /** Mount 시 자동 등록. 문자열 or {column, as, transform} 형태 */
   excludes?: readonly ExcludeSpec[];
 };
 
 export type UseSearchConditionReturn = {
+  /** 제외 키 ref. 외부에서 받지 않은 경우 자체 생성된 ref 가 노출됨 */
+  excludeKeysRef: MutableRefObject<Set<string>>;
   setCompToParamExclude: (...dbColumns: string[]) => void;
   getValueByLabel: (label: string, fromOrTo?: "FROM" | "TO") => unknown;
   getValueByColumn: (dbColumn: string, fromOrTo?: "FROM" | "TO") => unknown;
@@ -63,12 +57,16 @@ export type UseSearchConditionReturn = {
 
 export function useSearchCondition({
   meta,
-  excludeKeysRef,
+  excludeKeysRef: externalRef,
   filtersRef,
   excludes,
 }: UseSearchConditionArgs): UseSearchConditionReturn {
   const metaRef = useRef(meta);
   metaRef.current = meta;
+
+  // 외부 ref 가 없으면 내부에서 자체 생성
+  const internalRef = useRef<Set<string>>(new Set());
+  const excludeKeysRef = externalRef ?? internalRef;
 
   // excludes 구조 정규화 (string → {column})
   const specs = useMemo<ExcludeRename[]>(
@@ -187,6 +185,7 @@ export function useSearchCondition({
   );
 
   return {
+    excludeKeysRef,
     setCompToParamExclude,
     getValueByLabel,
     getValueByColumn,

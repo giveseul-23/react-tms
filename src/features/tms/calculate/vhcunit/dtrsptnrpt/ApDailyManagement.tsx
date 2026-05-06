@@ -17,7 +17,6 @@ export default function ApDailyManagement() {
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
   const rawFiltersRef = useRef<Record<string, string>>({});
-  const excludeKeysRef = useRef<Set<string>>(new Set());
 
   const ctrl = useApDailyManagementController({
     model,
@@ -39,7 +38,6 @@ export default function ApDailyManagement() {
         filtersRef,
         rawFiltersRef,
         pageSize: model.pageSize,
-        excludeKeysRef,
         menuCode: MENU_CODE,
       }}
       grid={

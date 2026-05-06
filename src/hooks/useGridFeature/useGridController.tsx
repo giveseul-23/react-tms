@@ -2,7 +2,7 @@
 // config 와 model 을 받아 fetchList / handleSearch / cascade fetch /
 // 그리드별 액션(add/save) 을 자동 생성. DataGrid 에 spread 할 props 묶음(`bind`) 도 제공.
 
-import { useCallback, useMemo, MutableRefObject } from "react";
+import { useCallback, useMemo, useEffect, useRef, MutableRefObject } from "react";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import {
   makeAddAction,
@@ -205,6 +205,30 @@ export function useGridController({
     }
     return out;
   }, [config, model, handleApi, firstGridKey, searchRef]);
+
+  // ── resetOnChange: 외부 탭 등 watch key 가 바뀌면 모든 그리드 클리어 + 재조회 ──
+  const resetWatchKey = config.resetOnChange;
+  const resetWatchValue = resetWatchKey
+    ? (model as any)[resetWatchKey]
+    : undefined;
+  const isResetInit = useRef(true);
+  useEffect(() => {
+    if (!resetWatchKey) return;
+    if (isResetInit.current) {
+      isResetInit.current = false;
+      return;
+    }
+    if (!resetWatchValue) return;
+    for (const key of gridKeys) {
+      const gc = config.grids[key];
+      model.grids[key].setData(gc.type === "paginated" ? EMPTY_GRID : []);
+    }
+    for (const k of config.selections ?? []) {
+      model.selected[k]?.set(null);
+    }
+    setTimeout(() => searchRef.current?.(1), 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetWatchValue]);
 
   // ── DataGrid 에 spread 할 props 묶음 ─────────────────────────
   // 반환 타입에 actions/columnDefs/rowData 등 필수 props 포함시켜
