@@ -1,34 +1,16 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import { MAIN_COLUMN_DEFS } from "./ApMonthlyManagementColumns";
 
-export type GridData = {
-  rows: any[];
-  totalCount: number;
-  page: number;
-  limit: number;
-};
+export type GridKey = "main";
 
-const EMPTY_GRID: GridData = {
-  rows: [],
-  totalCount: 0,
-  page: 1,
-  limit: 500,
-};
+export function useApMonthlyManagementModel(menuCode: string) {
+  const base = useBaseModel<GridKey>(menuCode);
 
-export function useApMonthlyManagementModel() {
-  const [layout, setLayout] = useState<LayoutType>("side");
-  const [pageSize, setPageSize] = useState(500);
-  const [gridData, setGridData] = useState<GridData>(EMPTY_GRID);
-
-  // 동적 컬럼 (조회 시 CHG_CD 메타로 재생성)
+  // 동적 컬럼
   const [mainColumnDefs, setMainColumnDefs] =
     useState<any[]>(MAIN_COLUMN_DEFS);
-
-  const resetSubGrids = useCallback(() => {
-    // 단일 그리드 — 초기화 없음
-  }, []);
 
   const { stores } = useCommonStores({
     vehicleFinStatus: { sqlProp: "CODE", keyParam: "VEH_FI_STS" },
@@ -48,18 +30,7 @@ export function useApMonthlyManagementModel() {
     return map;
   }, [stores]);
 
-  return {
-    layout,
-    setLayout,
-    pageSize,
-    setPageSize,
-    gridData,
-    setGridData,
-    mainColumnDefs,
-    setMainColumnDefs,
-    resetSubGrids,
-    codeMap,
-  };
+  return { ...base, mainColumnDefs, setMainColumnDefs, codeMap };
 }
 
 export type ApMonthlyManagementModel = ReturnType<

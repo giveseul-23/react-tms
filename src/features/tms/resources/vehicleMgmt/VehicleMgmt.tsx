@@ -1,29 +1,26 @@
 // src/views/vehicleMgmt/VehicleMgmt.tsx
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
+import { useState, useEffect } from "react";
 import { GridFormPage } from "@/app/components/layout/presets/GridFormPage";
 import { FormSheetOverlay } from "@/app/components/layout/FormSheet";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 
-import { useVehicleMgmtModel } from "./VehicleMgmtModel.ts";
-import { useVehicleMgmtController } from "./VehicleMgmtController.tsx";
+import { useVehicleMgmtModel } from "./VehicleMgmtModel";
+import { useVehicleMgmtController } from "./VehicleMgmtController";
 import { FormBodyRenderer } from "@/app/components/common/FormBodyRenderer";
-import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns.tsx";
-export const MENU_CODE = "MENU_VEHICLE_MGMT";
+import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns";
 
-// ── 차량관리 폼 본문 (상세/신규 공통) ─────────────────────────────────
+export const MENU_CODE = "MENU_VEHICLE_MGMT";
 
 type VehicleFormBodyProps = {
   data: any;
-  setData: (updater: (prev: any) => any) => void; // 추가
+  setData: (updater: (prev: any) => any) => void;
   mode: "new" | "edit";
   onPopupSearch: (sqlId: string, codeField: string, nameField: string) => void;
-  codeMap: Record<string, Record<string, string>>; // 추가
+  codeMap: Record<string, Record<string, string>>;
 };
 
 export function VehicleFormBody({
@@ -48,28 +45,16 @@ export function VehicleFormBody({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// 메인 컴포넌트
-// ═══════════════════════════════════════════════════════════════════════
 export default function VehicleMgmt() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useVehicleMgmtModel();
+  const model = useVehicleMgmtModel(MENU_CODE);
+  const ctrl = useVehicleMgmtController({ model });
   const { openPopup, closePopup } = usePopup();
 
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useVehicleMgmtController({ model, searchRef, filtersRef });
-
-  // ── 번호 직접 입력 상태 ───────────────────────────────────────
   const [jumpInput, setJumpInput] = useState("");
   useEffect(() => {
     setJumpInput(String(model.detailIndex + 1));
   }, [model.detailIndex]);
 
-  if (loading) return <Skeleton className="h-24" />;
-
-  // ── 팝업 검색 공통 핸들러 ──────────────────────────────────────
   const handlePopupSearch = (
     targetData: any,
     setTargetData: (updater: (prev: any) => any) => void,
@@ -97,7 +82,6 @@ export default function VehicleMgmt() {
     });
   };
 
-  // ── 상세 패널 팝업 검색 ────────────────────────────────────────
   const detailPopupSearch = (
     sqlId: string,
     codeField: string,
@@ -111,7 +95,6 @@ export default function VehicleMgmt() {
       nameField,
     );
 
-  // ── 신규 폼 팝업 검색 ─────────────────────────────────────────
   const newPopupSearch = (
     sqlId: string,
     codeField: string,
@@ -125,7 +108,6 @@ export default function VehicleMgmt() {
       nameField,
     );
 
-  // ── 상세 패널 헤더 액션 (삭제) ─────────────────────────────────
   const detailHeaderActions = (
     <button
       onClick={ctrl.handleDeleteDetail}
@@ -135,7 +117,6 @@ export default function VehicleMgmt() {
     </button>
   );
 
-  // ── 상세 패널 푸터 (닫기 / 저장) ───────────────────────────────
   const detailFooter = (
     <>
       <button
@@ -154,7 +135,6 @@ export default function VehicleMgmt() {
     </>
   );
 
-  // ── 신규등록 Sheet 푸터 ───────────────────────────────────────
   const newFormFooter = (
     <>
       <button
@@ -176,29 +156,24 @@ export default function VehicleMgmt() {
   return (
     <>
       <GridFormPage
+        menuCode={MENU_CODE}
         searchProps={{
-          meta,
           moduleDefault: "TMS",
           fetchFn: ctrl.fetchVehicleList,
           onSearch: ctrl.handleSearch,
-          searchRef,
-          filtersRef,
+          searchRef: model.searchRef,
+          filtersRef: model.filtersRef,
           pageSize: model.pageSize,
           menuCode: MENU_CODE,
         }}
         grid={
           <DataGrid
-            layoutType="plain"
+            {...model.bind("main")}
             columnDefs={MAIN_COLUMN_DEFS}
-            rowData={model.gridData.rows}
-            totalCount={model.gridData.totalCount}
-            currentPage={model.gridData.page}
-            pageSize={model.pageSize}
-            onPageSizeChange={model.setPageSize}
-            onPageChange={(page) => searchRef.current?.(page)}
             actions={ctrl.mainActions}
             onRowClicked={ctrl.handleRowClicked}
             codeMap={model.codeMap}
+            audit={false}
           />
         }
         form={{
@@ -210,7 +185,7 @@ export default function VehicleMgmt() {
           onClose: model.closeDetail,
           nav: {
             current: model.detailIndex + 1,
-            total: model.gridData.totalCount,
+            total: model.grids.main.data.totalCount,
             onPrev: () => ctrl.handleNavigate(-1),
             onNext: () => ctrl.handleNavigate(1),
             onJump: (n) => ctrl.handleJumpTo(n),
@@ -232,7 +207,6 @@ export default function VehicleMgmt() {
         }}
       />
 
-      {/* ── 신규 등록 슬라이드 오버레이 ─────────────────────────── */}
       <FormSheetOverlay
         open={model.newSlideOpen}
         onOpenChange={model.setNewSlideOpen}

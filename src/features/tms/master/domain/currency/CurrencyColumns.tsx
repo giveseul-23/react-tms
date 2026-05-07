@@ -1,6 +1,6 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
+// 컬럼 끝의 standardAudit 은 DataGrid 가 audit prop(model.bind 자동) 으로 추가.
 
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -20,5 +20,4 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     codeKey: "currRdngRcd",
   },
   { type: "numeric", headerName: "LBL_DSPL_ORD", field: "DSPLY_SEQ" },
-  ...standardAudit(setGridData),
 ];

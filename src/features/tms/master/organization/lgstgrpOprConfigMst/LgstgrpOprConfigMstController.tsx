@@ -1,58 +1,265 @@
-// 화면 고유 Controller — useGridController 베이스 훅에 featureConfig 주입.
-// 화면 고유 액션(동기화 등)은 base.actions 에 합성해 추가 반환.
+// src/features/tms/master/organization/lgstgrpOprConfigMst/LgstgrpOprConfigMstController.tsx
+//
+// 센차: LgstGrpConfigMasterController.js 와 1:1 대응.
+// useBaseController 가 callAjax/saveGrid/resetGrids/searchSub/alert/confirm 제공.
+// 화면 고유 핸들러(onMainGridClick, onSub01GridClick, onAdd*, onSave*, syncConfig, onTabChange)만 정의.
 
-import { MutableRefObject, useMemo } from "react";
-import { useGridController } from "@/hooks/useGridFeature/useGridController";
-import { useApiHandler } from "@/hooks/useApiHandler";
-import { lgstgrpOprConfigApi } from "./LgstgrpOprConfigApi";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
 import {
-  lgstgrpFeatureConfig,
-  type LgstgrpOprConfigMstModel,
+  makeAddAction,
+  makeSaveAction,
+} from "@/app/components/grid/commonActions";
+import { lgstgrpOprConfigApi as api } from "./LgstgrpOprConfigApi";
+import type {
+  LgstgrpOprConfigMstModel,
+  GridKey,
 } from "./LgstgrpOprConfigMstModel";
-import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
-interface ControllerArgs {
+interface Args {
   model: LgstgrpOprConfigMstModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
 }
 
-export function useLgstgrpOprConfigMstController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerArgs) {
-  const { handleApi } = useApiHandler();
+export function useLgstgrpOprConfigMstController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
 
-  const base = useGridController({
-    config: lgstgrpFeatureConfig,
-    model,
-    searchRef,
-    filtersRef,
-  });
+  // ── 메인 그리드 fetch (센차: mainInfo store proxy) ──────────────
+  // SearchFilters 가 넘기는 params 에 activeType 합쳐서 전달
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) =>
+      api.getConfigList({
+        ...params,
+        LGST_GRP_CNFG_GRP_CD: model.activeType,
+      }),
+    [model.activeType],
+  );
 
-  // ── 화면 고유: 동기화 버튼 (config 그리드 액션에 합성) ────────
-  const configActions: ActionItem[] = useMemo(
+  // ── 메인 그리드 행 클릭 (센차: onMainGridClick) ────────────────
+  const onMainGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick(
+        "main",
+        row,
+        [
+          {
+            to: "sub01",
+            fetch: (r) => api.getConfigDetailList({ CNFG_CD: r.CNFG_CD }),
+          },
+          {
+            to: "sub03",
+            fetch: (r) => api.getConfigI18nList({ CNFG_CD: r.CNFG_CD }),
+          },
+        ],
+        { alsoReset: ["sub02"] },
+      ),
+    [base],
+  );
+
+  // ── 상세 그리드 행 클릭 (센차: onSub01GridClick) ───────────────
+  const onSub01GridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("sub01", row, [
+        {
+          to: "sub02",
+          fetch: (r) =>
+            api.getConfigDetailI18nList({
+              CNFG_CD: r.CNFG_CD,
+              CNFG_DTL_CD: r.CNFG_DTL_CD,
+            }),
+        },
+      ]),
+    [base],
+  );
+
+  // ── 메인 그리드 조회 콜백 (센차: onMainInfoCallback) ───────────
+  // 메인에 데이터 set + 첫 행 자동 선택 (cascade 는 onMainGridClick 위임)
+  const handleSearch = useCallback(
+    (data: any) => {
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
+    },
+    [model, onMainGridClick],
+  );
+
+  // ── 메인 행 추가 (센차: onAdd + onCheckMainGridAdd) ────────────
+  // 행 추가 시 모든 서브 그리드 reset
+  const onAddMain = useCallback(() => {
+    base.resetGrids(["sub01", "sub02", "sub03"]);
+    base.addRow("main", {
+      DATA_TP: "STRING",
+      DATA_CRE_TCD: "USER",
+      LGST_GRP_CNFG_GRP_CD: model.activeType,
+      CNFG_CD: "",
+      CNFG_NM: "",
+    });
+  }, [model.activeType, base]);
+
+  // ── 상세 행 추가 (센차: onAddDetail) — checkHeader 시리즈 검증 ──
+  const onAddSub01 = useCallback(() => {
+    const main = model.grids.main.selectedRef.current;
+    if (!base.requireParentRow(main, "물류운영그룹운영설정코드")) return;
+    base.resetGrids(["sub02"]);
+    base.addRow("sub01", {
+      CNFG_CD: main.CNFG_CD,
+      CNFG_DTL_CD: "",
+      CNFG_DTL_NM: "",
+    });
+  }, [model, base]);
+
+  // ── 메인-다국어 행 추가 (센차: onAddLang) ──────────────────────
+  const onAddSub03 = useCallback(() => {
+    const main = model.grids.main.selectedRef.current;
+    if (!base.requireParentRow(main, "물류운영그룹운영설정코드")) return;
+    base.addRow("sub03", {
+      CNFG_CD: main.CNFG_CD,
+      LANG_TP: "",
+      LANG_DESC: "",
+    });
+  }, [model, base]);
+
+  // ── 상세-다국어 행 추가 (센차: onAddDetailLang) ────────────────
+  const onAddSub02 = useCallback(() => {
+    const sub01 = model.grids.sub01.selectedRef.current;
+    if (!base.requireParentRow(sub01, "물류운영그룹운영설정상세코드")) return;
+    base.addRow("sub02", {
+      CNFG_CD: sub01.CNFG_CD,
+      CNFG_DTL_CD: sub01.CNFG_DTL_CD,
+      LANG_TP: "",
+      LANG_DESC: "",
+    });
+  }, [model, base]);
+
+  // ── 저장 전 검증 (센차: checkBeforeSaveSub01Grid) ──────────────
+  // sub01 에 DFT_YN === 'Y' 인 행이 1건 이상 있어야 저장 허용
+  const checkBeforeSaveSub01 = useCallback(() => {
+    const rows = model.grids.sub01.ref.current?.rows ?? [];
+    if (rows.some((r: any) => r.DFT_YN === "Y" || r.DFT_YN === true))
+      return true;
+    base.alert("기본값(Y) 인 상세코드가 1건 이상 있어야 합니다.");
+    return false;
+  }, [model, base]);
+
+  // ── 메인 저장 (센차: onSave) — 삭제행 있으면 confirm 후 저장 ───
+  const onSaveMain = useCallback(
+    () =>
+      base.saveGrid("main", api.saveConfig, {
+        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+      }),
+    [base],
+  );
+
+  // ── 상세 저장 (센차: onSub01InfoSaveCallback) ──────────────────
+  // 메인 재조회 대신 본인 cascade 만 재조회
+  const onSaveSub01 = useCallback(
+    () =>
+      base.saveGrid("sub01", api.saveConfigDetail, {
+        beforeSave: checkBeforeSaveSub01,
+        afterSave: {
+          cascadeFrom: "main",
+          fetch: (main) => api.getConfigDetailList({ CNFG_CD: main.CNFG_CD }),
+        },
+      }),
+    [base, checkBeforeSaveSub01],
+  );
+
+  // ── 상세-다국어 저장 (센차: onSub02InfoSaveCallback) ───────────
+  const onSaveSub02 = useCallback(
+    () =>
+      base.saveGrid("sub02", api.saveConfigDetailI18n, {
+        afterSave: {
+          cascadeFrom: "sub01",
+          fetch: (sub01) =>
+            api.getConfigDetailI18nList({
+              CNFG_CD: sub01.CNFG_CD,
+              CNFG_DTL_CD: sub01.CNFG_DTL_CD,
+            }),
+        },
+      }),
+    [base],
+  );
+
+  // ── 메인-다국어 저장 (센차: onSub03InfoSaveCallback) ───────────
+  const onSaveSub03 = useCallback(
+    () =>
+      base.saveGrid("sub03", api.saveConfigI18n, {
+        afterSave: {
+          cascadeFrom: "main",
+          fetch: (main) => api.getConfigI18nList({ CNFG_CD: main.CNFG_CD }),
+        },
+      }),
+    [base],
+  );
+
+  // ── 동기화 (센차: syncConfig) ──────────────────────────────────
+  const syncConfig = useCallback(() => {
+    base
+      .callAjax(
+        api.syncConfig({ LGST_GRP_CNFG_GRP_CD: model.activeType }),
+        "동기화되었습니다.",
+      )
+      .then(() => base.search());
+  }, [model.activeType, base]);
+
+  // ── 탭 변경 (센차: onTypeTabChange) — 클리어 + 재조회 ──────────
+  // activeType state 가 한 tick 뒤 반영되므로 setTimeout 으로 search 호출
+  const onTabChange = useCallback(
+    (key: string) => {
+      model.setActiveType(key);
+      base.resetGrids(["main", "sub01", "sub02", "sub03"]);
+      setTimeout(() => base.search(1), 0);
+    },
+    [model, base],
+  );
+
+  // ── 그리드별 actions 배열 (센차: ExGridEditor 의 saveUrl/saveCallback + view 의 toolbar 결합 자리) ──
+  // 추가/저장/사용자정의 버튼 추가는 모두 여기서. View 는 binding 만.
+  const mainActions = useMemo(
     () => [
+      makeAddAction({ onClick: onAddMain }),
+      makeSaveAction({ onClick: onSaveMain }),
       {
-        type: "button",
+        type: "button" as const,
         key: "LBL_SYNC",
         label: "LBL_SYNC",
-        onClick: () => {
-          handleApi(
-            lgstgrpOprConfigApi.syncConfig({}),
-            "동기화되었습니다.",
-          ).then(() => searchRef.current?.());
-        },
+        onClick: syncConfig,
       },
-      ...(base.actions.config ?? []),
     ],
-    [base.actions.config, handleApi, searchRef],
+    [onAddMain, onSaveMain, syncConfig],
+  );
+
+  const sub01Actions = useMemo(
+    () => [
+      makeAddAction({ onClick: onAddSub01 }),
+      makeSaveAction({ onClick: onSaveSub01 }),
+    ],
+    [onAddSub01, onSaveSub01],
+  );
+
+  const sub02Actions = useMemo(
+    () => [
+      makeAddAction({ onClick: onAddSub02 }),
+      makeSaveAction({ onClick: onSaveSub02 }),
+    ],
+    [onAddSub02, onSaveSub02],
+  );
+
+  const sub03Actions = useMemo(
+    () => [
+      makeAddAction({ onClick: onAddSub03 }),
+      makeSaveAction({ onClick: onSaveSub03 }),
+    ],
+    [onAddSub03, onSaveSub03],
   );
 
   return {
-    ...base,
-    /** config 그리드용 — 동기화 버튼 합성된 액션 (View 에서 bind override 로 주입) */
-    configActions,
+    fetchList,
+    handleSearch,
+    onMainGridClick,
+    onSub01GridClick,
+    onTabChange,
+    mainActions,
+    sub01Actions,
+    sub02Actions,
+    sub03Actions,
   };
 }

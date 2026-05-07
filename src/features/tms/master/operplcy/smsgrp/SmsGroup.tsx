@@ -1,42 +1,28 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useSmsGroupModel } from "./SmsGroupModel.ts";
-import { useSmsGroupController } from "./SmsGroupController.tsx";
-import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./SmsGroupColumns.tsx";
+import { useSmsGroupModel } from "./SmsGroupModel";
+import { useSmsGroupController } from "./SmsGroupController";
+import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./SmsGroupColumns";
 
 export const MENU_CODE = "MENU_VLTN_NTFCTN_CNFG";
 
-export default function TenderReceiveDispatch() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useSmsGroupModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useSmsGroupController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+export default function SmsGroup() {
+  const model = useSmsGroupModel(MENU_CODE);
+  const ctrl = useSmsGroupController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CODE}
       defaultSizes={[40, 60]}
       searchProps={{
-        meta,
-        fetchFn: ctrl.fetchSmsGroupList,
+        fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
@@ -48,13 +34,12 @@ export default function TenderReceiveDispatch() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="division-default-dispatch"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
-          rowData={model.gridData}
-          onRowClicked={ctrl.handleRowClicked}
+          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           autoSelectFirstRow
           rowKeys="SMS_GRP_CD"
@@ -62,18 +47,9 @@ export default function TenderReceiveDispatch() {
       }
       detail={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("detail")}
           columnDefs={DETAIL_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.subDetailRowData.rows}
-          totalCount={model.subDetailRowData.totalCount}
-          currentPage={model.subDetailRowData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page, false);
-          }}
           actions={ctrl.detailActions}
         />
       }

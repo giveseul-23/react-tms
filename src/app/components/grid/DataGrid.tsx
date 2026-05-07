@@ -37,6 +37,7 @@ import {
   wrapActions,
   withRowStatusTracking,
 } from "./gridCommon";
+import { standardAudit } from "./commonColumns";
 
 // (Note: Util.formatDttm 등 컬럼 변환 관련 유틸은 gridUtils/processColumn 으로 이동.)
 
@@ -223,6 +224,26 @@ type DataGridProps<TRow> = {
   rightPanelSize?: number;
   /** 오른쪽 패널(renderRightGrid) 최소 크기 — 기본 20 */
   rightPanelMinSize?: number;
+
+  // ─── Audit 컬럼 자동 추가 ────────────────────────────────────────────────
+  /**
+   * columnDefs 끝에 standardAudit 자동 spread.
+   *   true       — 모두 ON (delete/rowStatus/insertPerson/insertDate/updatePerson/updateTime)
+   *   false      — 자동 추가 안 함
+   *   undefined  — 자동 추가 안 함 (기존 화면 호환)
+   *   객체       — 부분 토글 (예: { updatePerson: false })
+   * model.bind() 가 자동으로 audit:true + setRowData 를 spread.
+   */
+  audit?: boolean | {
+    delete?: boolean;
+    rowStatus?: boolean;
+    insertPerson?: boolean;
+    insertDate?: boolean;
+    updatePerson?: boolean;
+    updateTime?: boolean;
+  };
+  /** audit delete 컬럼이 행 삭제 시 호출할 setter (model.bind() 가 자동 주입). */
+  setRowData?: (updater: any) => void;
 };
 
 export default function DataGrid<TRow>({
@@ -261,6 +282,8 @@ export default function DataGrid<TRow>({
   rightPanelMinSize = 20,
   autoSelectFirstRow,
   rowKeys,
+  audit,
+  setRowData,
 }: DataGridProps<TRow>) {
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
@@ -292,11 +315,17 @@ export default function DataGrid<TRow>({
   const totalPages = Math.ceil((totalCount ?? 0) / (pageSize ?? 20));
 
   const activeColumnDefs = useMemo(() => {
-    if (layoutType === "tab" && activeTab && presets) {
-      return presets[activeTab].columnDefs;
-    }
-    return columnDefs;
-  }, [layoutType, activeTab, presets, columnDefs]);
+    const base =
+      layoutType === "tab" && activeTab && presets
+        ? presets[activeTab].columnDefs
+        : columnDefs;
+
+    // audit === undefined / false → 자동 추가 안 함 (기존 화면 호환)
+    if (!audit) return base;
+
+    const auditOpts = typeof audit === "object" ? audit : undefined;
+    return [...base, ...(standardAudit(setRowData, auditOpts) as any[])];
+  }, [layoutType, activeTab, presets, columnDefs, audit, setRowData]);
 
   const activeRowData = useMemo(() => {
     // escape hatch: 외부 rowData 직접 주입

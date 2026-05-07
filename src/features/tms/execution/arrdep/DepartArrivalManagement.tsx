@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useDepartArrivalManagementModel } from "./DepartArrivalManagementModel";
 import { useDepartArrivalManagementController } from "./DepartArrivalManagementController";
@@ -14,33 +11,23 @@ import {
   STOPOVER_COLUMN_DEFS,
   ASSIGNED_ORDER_COLUMN_DEFS,
 } from "./DepartArrivalManagementColumns";
+
 export const MENU_CD = "MENU_EVENT_MANAGER";
 
 export default function DepartArrivalManagement() {
-  const { meta, loading } = useSearchMeta(MENU_CD);
-  const model = useDepartArrivalManagementModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useDepartArrivalManagementController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useDepartArrivalManagementModel(MENU_CD);
+  const ctrl = useDepartArrivalManagementController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CD}
       defaultSizes={[60, 40]}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CD,
       }}
@@ -52,22 +39,13 @@ export default function DepartArrivalManagement() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="depart-arrival-management"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
-          onRowClicked={ctrl.handleRowClicked}
+          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
         />
       }
@@ -89,8 +67,8 @@ export default function DepartArrivalManagement() {
             },
           }}
           rowData={{
-            STOPOVER: model.stopoverRowData,
-            ASSIGNED_ORDER: model.assignedOrderRowData,
+            STOPOVER: model.grids.stopover.rows,
+            ASSIGNED_ORDER: model.grids.assignedOrder.rows,
           }}
           codeMap={model.codeMap}
           actions={[]}

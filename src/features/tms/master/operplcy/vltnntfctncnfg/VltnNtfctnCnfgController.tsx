@@ -1,7 +1,6 @@
-// ──────────────────────────────────────────────────────────────────
-import { useCallback, MutableRefObject } from "react";
-import { vltnNtfctnCnfgApi } from "./VltnNtfctnCnfgApi";
-import { VltnNtfctnCnfgModel } from "./VltnNtfctnCnfgModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { vltnNtfctnCnfgApi as api } from "./VltnNtfctnCnfgApi";
 import { NTFC_TARGET_COLUMN_DEFS } from "./VltnNtfctnCnfgColumns";
 import {
   makeAddAction,
@@ -9,168 +8,140 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { VltnNtfctnCnfgModel, GridKey } from "./VltnNtfctnCnfgModel";
 
-type ControllerProps = {
+interface Args {
   model: VltnNtfctnCnfgModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useVltnNtfctnCnfgController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
-  // ── fetchDispatchList (센차: mainInfo store proxy url) ────────
-  const fetchDispatchList = useCallback(
-    (params: Record<string, unknown>) =>
-      vltnNtfctnCnfgApi.getVltnNtfctnCnfgList(params),
+export function useVltnNtfctnCnfgController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => api.getVltnNtfctnCnfgList(params),
     [],
   );
 
-  // ── handleSearch (센차: onMainInfoCallback + gridsReset) ──────
-  // 조회 완료 시 SearchFilters → DataGrid 데이터 전달 및 서브그리드 초기화
+  // detail 클릭 → channel + target 동시 fetch
+  const onDetailGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("detail", row, [
+        {
+          to: "channel",
+          fetch: (r) =>
+            api.getVltnNtfctnCnfgChannelList({
+              VLTN_NTFCTN_CNFG_ID: r.VLTN_NTFCTN_CNFG_ID,
+            }),
+        },
+        {
+          to: "target",
+          fetch: (r) =>
+            api.getVltnNtfctnCnfgTargetList({
+              VLTN_NTFCTN_CNFG_ID: r.VLTN_NTFCTN_CNFG_ID,
+            }),
+        },
+      ]),
+    [base],
+  );
+
+  // main 클릭 → detail fetch + channel/target 도 alsoReset
+  const onMainGridClick = useCallback(
+    (row: any) =>
+      base
+        .handleRowClick(
+          "main",
+          row,
+          [
+            {
+              to: "detail",
+              fetch: (r) =>
+                api.getVltnNtfctnCnfgDetailList({
+                  LGST_GRP_CD: r.LGST_GRP_CD,
+                }),
+            },
+          ],
+          { alsoReset: ["channel", "target"] },
+        ),
+    [base],
+  );
+
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
-      handleRowClicked(data.rows?.[0]);
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
-    [model],
+    [model.grids.main, onMainGridClick],
   );
 
-  const fetchDetail = useCallback((row: any) => {
-    const lgstGrpCd = row.LGST_GRP_CD;
-    if (!lgstGrpCd) return Promise.resolve([]);
-    return vltnNtfctnCnfgApi
-      .getVltnNtfctnCnfgDetailList({
-        LGST_GRP_CD: lgstGrpCd,
-      })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  const fetchNtfcChannelCnfgDetail = useCallback((row: any) => {
-    const configCd = row.VLTN_NTFCTN_CNFG_ID;
-    if (!configCd) return Promise.resolve([]);
-
-    return vltnNtfctnCnfgApi
-      .getVltnNtfctnCnfgChannelList({
-        VLTN_NTFCTN_CNFG_ID: configCd,
-      })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  const fetchNtfcTargetCnfgDetail = useCallback((row: any) => {
-    const configCd = row.VLTN_NTFCTN_CNFG_ID;
-    if (!configCd) return Promise.resolve([]);
-
-    return vltnNtfctnCnfgApi
-      .getVltnNtfctnCnfgTargetList({
-        VLTN_NTFCTN_CNFG_ID: configCd,
-      })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-
-      fetchDetail(row).then((rows: any) => {
-        (model.setSubDetailRowData(rows), handleSubRowClicked(rows[0]));
-      });
-    },
-    [model],
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BUTTON_COPY_CONTRACT",
+        label: "BUTTON_COPY_CONTRACT",
+        onClick: () => {},
+      },
+      makeSaveAction(),
+    ],
+    [],
   );
 
-  const handleSubRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-      model.setSubChannelRowData([]);
-      model.setSubTargetRowData([]);
-
-      Promise.all([
-        fetchNtfcChannelCnfgDetail(row),
-        fetchNtfcTargetCnfgDetail(row),
-      ])
-        .then(([channelRes, targetRes]: any[]) => {
-          model.setSubChannelRowData(channelRes);
-          model.setSubTargetRowData(targetRes);
-        })
-        .catch((err) => {
-          console.error("[Country] row click sub-fetch failed", err);
-        });
-
-      fetchDetail(row);
-    },
-    [model],
+  const detailActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_TEMPLATE_COPY",
+        label: "BTN_TEMPLATE_COPY",
+        onClick: () => {},
+      },
+      makeAddAction(),
+      makeSaveAction(),
+    ],
+    [],
   );
 
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BUTTON_COPY_CONTRACT",
-      label: "BUTTON_COPY_CONTRACT",
-      onClick: () => {},
-    },
-    makeSaveAction(),
-  ];
+  const channelActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_TEMPLATE_UPDATE",
+        label: "BTN_TEMPLATE_UPDATE",
+        onClick: () => {},
+      },
+      makeAddAction(),
+      makeSaveAction(),
+    ],
+    [],
+  );
 
-  const detailActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_TEMPLATE_COPY",
-      label: "BTN_TEMPLATE_COPY",
-      onClick: () => {},
-    },
-    makeAddAction(),
-    makeSaveAction(),
-  ];
-
-  const channelActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_TEMPLATE_UPDATE",
-      label: "BTN_TEMPLATE_UPDATE",
-      onClick: () => {},
-    },
-    makeAddAction(),
-    makeSaveAction(),
-  ];
-
-  const targetActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "LBL_USR_REGI",
-      label: "LBL_USR_REGI",
-      onClick: () => {},
-    },
-    makeAddAction(),
-    makeSaveAction(),
-    makeExcelGroupAction({
-      columns: NTFC_TARGET_COLUMN_DEFS,
-      menuName: "위반알림설정관리",
-      fetchFn: () =>
-        vltnNtfctnCnfgApi.getCountryList(menuCd, filtersRef.current),
-      rows: model.gridData.rows,
-    }),
-  ];
+  const targetActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "LBL_USR_REGI",
+        label: "LBL_USR_REGI",
+        onClick: () => {},
+      },
+      makeAddAction(),
+      makeSaveAction(),
+      makeExcelGroupAction({
+        columns: NTFC_TARGET_COLUMN_DEFS,
+        menuName: "위반알림설정관리",
+        fetchFn: () => api.getVltnNtfctnCnfgList(model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
+    [model],
+  );
 
   return {
-    fetchDispatchList,
+    fetchList,
     handleSearch,
-    handleRowClicked,
+    onMainGridClick,
+    onDetailGridClick,
+    mainActions,
     detailActions,
     channelActions,
     targetActions,
-    mainActions,
   };
 }

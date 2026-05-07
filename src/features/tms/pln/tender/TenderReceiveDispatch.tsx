@@ -1,48 +1,34 @@
 // src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useTenderReceiveDispatchModel } from "./TenderReceiveDispatchModel.ts";
-import { useTenderReceiveDispatchController } from "./TenderReceiveDispatchController.tsx";
+import { useTenderReceiveDispatchModel } from "./TenderReceiveDispatchModel";
+import { useTenderReceiveDispatchController } from "./TenderReceiveDispatchController";
 import {
   MAIN_COLUMN_DEFS,
   STOP_COLUMN_DEFS,
   SMS_COLUMN_DEFS,
   AP_SETL_COLUMN_DEFS,
-} from "./TenderReceiveDispatchColumns.tsx";
+} from "./TenderReceiveDispatchColumns";
 import { TrackPanel } from "@/app/components/track/TrackPanel";
 
 export const MENU_CD = "MENU_PLAN_TENDER_RECEIVE";
 
 export default function TenderReceiveDispatch() {
-  const { meta, loading } = useSearchMeta(MENU_CD);
-  const model = useTenderReceiveDispatchModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useTenderReceiveDispatchController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useTenderReceiveDispatchModel(MENU_CD);
+  const ctrl = useTenderReceiveDispatchController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CD}
       searchProps={{
-        meta,
         fetchFn: ctrl.fetchDispatchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         excludes: ["BOOKING"],
         menuCode: MENU_CD,
@@ -55,23 +41,15 @@ export default function TenderReceiveDispatch() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="tender-receive-dispatch"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS()}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
           actions={ctrl.mainActions}
-          onRowClicked={ctrl.handleRowClicked}
+          onRowClicked={ctrl.onMainGridClick}
           codeMap={model.codeMap}
+          audit={false}
         />
       }
       detail={
@@ -87,15 +65,15 @@ export default function TenderReceiveDispatch() {
             SMS_HIS: { columnDefs: SMS_COLUMN_DEFS() },
             AP_SETL: {
               gridRef: model.apSetlGridRef,
-              columnDefs: AP_SETL_COLUMN_DEFS(model.setSubApSetlRowData),
+              columnDefs: AP_SETL_COLUMN_DEFS(model.grids.apSetl.setData),
               onCellValueChanged: ctrl.handleApSetlCellChange,
               actions: ctrl.apSetlActions,
             },
           }}
           rowData={{
-            STOP: model.subStopRowData,
-            SMS_HIS: model.subSmsHisRowData,
-            AP_SETL: model.subApSetlRowData,
+            STOP: model.grids.stop.rows,
+            SMS_HIS: model.grids.sms.rows,
+            AP_SETL: model.grids.apSetl.rows,
           }}
           actions={[]}
           codeMap={model.codeMap}

@@ -1,120 +1,83 @@
-// ──────────────────────────────────────────────────────────────────
-import { useCallback, MutableRefObject } from "react";
-import { logisticGroupDefaultApi } from "./LogisticGroupDefaultApi";
-import { LogisticGroupDefaultModel } from "./LogisticGroupDefaultModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { logisticGroupDefaultApi as api } from "./LogisticGroupDefaultApi";
 import { CNFG_HEADER_COLUMN_DEFS } from "./LogisticGroupDefaultColumns";
 import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import type { LogisticGroupDefaultModel, GridKey } from "./LogisticGroupDefaultModel";
 
-type ControllerProps = {
+interface Args {
   model: LogisticGroupDefaultModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useLogisticGroupDefaultController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
-  // ── fetchDispatchList (센차: mainInfo store proxy url) ────────
-  const fetchDispatchList = useCallback(
-    (params: Record<string, unknown>) =>
-      logisticGroupDefaultApi.getLgstDefaultCnfgGrpList(params),
+export function useLogisticGroupDefaultController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => api.getLgstDefaultCnfgGrpList(params),
     [],
   );
 
-  // ── handleSearch (센차: onMainInfoCallback + gridsReset) ──────
-  // 조회 완료 시 SearchFilters → DataGrid 데이터 전달 및 서브그리드 초기화
+  // header 클릭 → subCnfg fetch (detail alsoReset)
+  const onHeaderGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick(
+        "header",
+        row,
+        [
+          {
+            to: "subCnfg",
+            fetch: (r) =>
+              api.getLgstDefaultCnfgList({
+                LGST_GRP_CNFG_GRP_CD: r.LGST_GRP_CNFG_GRP_CD,
+              }),
+          },
+        ],
+        { alsoReset: ["detail"] },
+      ),
+    [base],
+  );
+
+  // subCnfg 클릭 → detail fetch
+  const onSubCnfgGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("subCnfg", row, [
+        {
+          to: "detail",
+          fetch: (r) => api.getLgstDefaultDetailList({ CNFG_CD: r.CNFG_CD }),
+        },
+      ]),
+    [base],
+  );
+
   const handleSearch = useCallback(
     (data: any) => {
-      model.setcnfgGrpData(data);
-      model.resetSubGrids();
+      model.grids.header.setData(data);
+      onHeaderGridClick(data?.rows?.[0]);
     },
+    [model.grids.header, onHeaderGridClick],
+  );
+
+  const detailActions = useMemo(
+    () => [
+      makeSaveAction(),
+      makeExcelGroupAction({
+        columns: CNFG_HEADER_COLUMN_DEFS,
+        menuName: "운송사요청목록",
+        fetchFn: () => api.getLgstDefaultCnfgGrpList(model.filtersRef.current),
+        rows: model.grids.header.rows,
+      }),
+    ],
     [model],
   );
-
-  const fetchCnfgDetail = useCallback(
-    (row: any) => {
-      const configCd = row.LGST_GRP_CNFG_GRP_CD;
-      if (!configCd) return Promise.resolve([]);
-      return logisticGroupDefaultApi
-        .getLgstDefaultCnfgList({
-          LGST_GRP_CNFG_GRP_CD: configCd,
-        })
-        .then((res: any) => {
-          const rows = res.data.data?.dsOut ?? [];
-          model.setSubCnfgRowData({
-            rows,
-            totalCount: rows.length,
-            page: 1,
-            limit: 20,
-          });
-        })
-        .catch((err) => {
-          throw Error(err);
-        });
-    },
-    [model],
-  );
-
-  const fetchDetail = useCallback(
-    (row: any) => {
-      const configCd = row.CNFG_CD;
-      if (!configCd) return Promise.resolve([]);
-      return logisticGroupDefaultApi
-        .getLgstDefaultDetailList({
-          CNFG_CD: configCd,
-        })
-        .then((res: any) => {
-          const rows = res.data.data?.dsOut ?? [];
-          model.setSubDetailRowData({
-            rows,
-            totalCount: rows.length,
-            page: 1,
-            limit: 20,
-          });
-        })
-        .catch((err) => {
-          throw Error(err);
-        });
-    },
-    [model],
-  );
-
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.resetSubGrids();
-      fetchCnfgDetail(row);
-    },
-    [model, fetchCnfgDetail],
-  );
-
-  const handleSubRowClicked = useCallback(
-    (row: any) => {
-      fetchDetail(row);
-    },
-    [fetchDetail],
-  );
-
-  const detailActions = [
-    makeSaveAction(),
-    makeExcelGroupAction({
-      columns: CNFG_HEADER_COLUMN_DEFS,
-      menuName: "운송사요청목록",
-      fetchFn: () =>
-        logisticGroupDefaultApi.getLgstDefaultCnfgGrpList(filtersRef.current),
-      rows: model.cnfgGrpData.rows,
-    }),
-  ];
 
   return {
-    fetchDispatchList,
+    fetchList,
     handleSearch,
-    handleRowClicked,
-    handleSubRowClicked,
+    onHeaderGridClick,
+    onSubCnfgGridClick,
     detailActions,
   };
 }

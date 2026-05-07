@@ -1,36 +1,29 @@
-// src/views/inTrnstVehCtrl/InTrnstVehCtrlController.tsx
-import { useCallback, MutableRefObject } from "react";
-import { driveHistoryApi } from "./DriveHistoryApi";
-import { DriveHistoryModel } from "./DriveHistoryModel";
+// src/views/drvhstry/DriveHistoryController.tsx
+import { useCallback } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { driveHistoryApi as api } from "./DriveHistoryApi";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import type { StopMarker } from "@/app/components/map/TmapView";
-import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { DriveHistoryModel, GridKey } from "./DriveHistoryModel";
 
-type ControllerProps = {
+interface Args {
   model: DriveHistoryModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useDriveHistoryController({
-  model,
-  searchRef,
-}: ControllerProps) {
+export function useDriveHistoryController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
   const { openPopup, closePopup } = usePopup();
-  // ── fetch ───────────────────────────────────────────────────
-  const fetchInTrnstVehList = useCallback(
-    (params: Record<string, unknown>) =>
-      driveHistoryApi.getInTrnstVehList(params),
+
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => api.getInTrnstVehList(params),
     [],
   );
 
-  // ── 조회 완료 콜백 ──────────────────────────────────────────
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.setSelectedRow(null);
-      // 조회 직후 마커 영역에 맞게 지도 fit
+      model.grids.main.setData(data);
+      model.grids.main.setSelected(null);
       requestAnimationFrame(() => {
         model.mapRef.current?.fitMarkers();
       });
@@ -38,15 +31,12 @@ export function useDriveHistoryController({
     [model],
   );
 
-  // ── 행 클릭: 배차 실주행경로(trace) + 정차지(routes) 표시 ───
-  // legacy onMainGridClick: removeAll → showRealPath + showDispatchRoutes → zoomToExtentMap
   const handleRowClicked = useCallback(
     (row: any) => {
-      model.setSelectedRow(row);
+      model.grids.main.setSelected(row);
       const map = model.mapRef.current;
       if (!map) return;
 
-      // 기존 trace/stop 모두 초기화
       map.clearTrace();
       map.clearStopMarkers();
 
@@ -70,10 +60,9 @@ export function useDriveHistoryController({
       const extractRows = (res: any): any[] =>
         res?.data?.result ?? res?.data?.data?.dsOut ?? res?.data?.data ?? [];
 
-      // searchDispathTrace + getDlvryRoute 병렬 호출
       Promise.all([
-        driveHistoryApi.searchDispathTrace({ DSPCH_NO: dspchNo }),
-        driveHistoryApi.getDlvryRoute({ DSPCH_NO: dspchNo }),
+        api.searchDispathTrace({ DSPCH_NO: dspchNo }),
+        api.getDlvryRoute({ DSPCH_NO: dspchNo }),
       ])
         .then(([traceRes, routeRes]: any[]) => {
           if (traceRes?.data?.success === false) {
@@ -85,7 +74,6 @@ export function useDriveHistoryController({
             return;
           }
 
-          // trace polyline (drawTrace 는 폴리라인 + 중간 거점만, 출발/도착은 drawStopMarkers 에서)
           const traceRows = extractRows(traceRes);
           const tracePoints = traceRows.map((r: any) => ({
             lat: Number(r.LAT),
@@ -93,7 +81,6 @@ export function useDriveHistoryController({
           }));
           map.drawTrace(tracePoints);
 
-          // stop markers — 출발=S / 도착=E / 경유지=1,2,3,... / 라벨=LOC_NM
           const routeRows = extractRows(routeRes);
           const stops: StopMarker[] = routeRows.map((r: any, i: number) => {
             let kind: "start" | "end" | "via";
@@ -110,8 +97,6 @@ export function useDriveHistoryController({
             };
           });
           map.drawStopMarkers(stops);
-
-          // legacy zoomToExtentMap — trace + stops 모두 포함
           map.fitAll();
         })
         .catch((err: any) => {
@@ -125,8 +110,10 @@ export function useDriveHistoryController({
     [model, openPopup, closePopup],
   );
 
+  void base;
+
   return {
-    fetchInTrnstVehList,
+    fetchInTrnstVehList: fetchList,
     handleSearch,
     handleRowClicked,
   };

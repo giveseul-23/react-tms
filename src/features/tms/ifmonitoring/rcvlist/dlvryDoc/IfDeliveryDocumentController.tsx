@@ -1,79 +1,71 @@
-import { useCallback, MutableRefObject } from "react";
-import { ifDeliveryDocumentApi } from "./IfDeliveryDocumentApi";
-import { IfDeliveryDocumentModel } from "./IfDeliveryDocumentModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { ifDeliveryDocumentApi as api } from "./IfDeliveryDocumentApi";
 import { MAIN_COLUMN_DEFS } from "./IfDeliveryDocumentColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { IfDeliveryDocumentModel, GridKey } from "./IfDeliveryDocumentModel";
 
-type ControllerProps = {
+interface Args {
   model: IfDeliveryDocumentModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useIfDeliveryDocumentController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
+export function useIfDeliveryDocumentController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
     (params: Record<string, unknown>) =>
-      ifDeliveryDocumentApi.getList({ userTz: "Asia/Seoul", ...params }),
+      api.getList({ userTz: "Asia/Seoul", ...params }),
     [],
   );
 
-  const fetchDetail = useCallback((row: any) => {
-    if (!row) return Promise.resolve([]);
-    return ifDeliveryDocumentApi
-      .getDetailList({ IF_ID: row.IF_ID, ORD_NO: row.ORD_NO })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-      fetchDetail(row).then((rows: any) => model.setDetailRowData(rows));
-    },
-    [model, fetchDetail],
+  const onMainGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("main", row, [
+        {
+          to: "detail",
+          fetch: (r) => api.getDetailList({ IF_ID: r.IF_ID, ORD_NO: r.ORD_NO }),
+        },
+      ]),
+    [base],
   );
 
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
-      handleRowClicked(data.rows?.[0]);
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
-    [model, handleRowClicked],
+    [model.grids.main, onMainGridClick],
   );
 
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_REPRO",
-      label: "BTN_REPRO",
-      onClick: () => {
-        ifDeliveryDocumentApi
-          .reprocess(filtersRef.current)
-          .then(() => searchRef.current?.());
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_REPRO",
+        label: "BTN_REPRO",
+        onClick: () => {
+          api.reprocess(model.filtersRef.current).then(() =>
+            model.searchRef.current?.(),
+          );
+        },
       },
-    },
-    makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
-      menuName: "판매문서수신내역",
-      fetchFn: () => ifDeliveryDocumentApi.getList(filtersRef.current),
-      rows: model.gridData.rows,
-    }),
-  ];
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS,
+        menuName: "판매문서수신내역",
+        fetchFn: () => api.getList(model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
+    [model],
+  );
 
-  const detailActions: any[] = [];
+  const detailActions: any[] = useMemo(() => [], []);
 
   return {
     fetchList,
     handleSearch,
-    handleRowClicked,
+    onMainGridClick,
     mainActions,
     detailActions,
   };

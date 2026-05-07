@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useApSettlMgmtModel } from "./ApSettlMgmtModel";
 import { useApSettlMgmtController } from "./ApSettlMgmtController";
@@ -24,29 +21,19 @@ import {
 export const MENU_CODE = "MENU_AP_SETTL_MGMT";
 
 export default function ApSettlMgmt() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const model = useApSettlMgmtModel();
-  const ctrl = useApSettlMgmtController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useApSettlMgmtModel(MENU_CODE);
+  const ctrl = useApSettlMgmtController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CODE}
       defaultSizes={[45, 55]}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
@@ -58,13 +45,14 @@ export default function ApSettlMgmt() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="ap-settl-mgmt"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          {...ctrl.bind("config", MAIN_COLUMN_DEFS, {
-            actions: ctrl.mainActions,
-            codeMap: model.codeMap,
-          })}
+          {...model.bind("config")}
+          columnDefs={MAIN_COLUMN_DEFS}
+          codeMap={model.codeMap}
+          actions={ctrl.mainActions}
+          onRowClicked={ctrl.onMainGridClick}
         />
       }
       detail={

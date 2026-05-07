@@ -1,29 +1,25 @@
-// src/views/inTrnstVehCtrl/InTrnstVehCtrlController.tsx
-import { useCallback, MutableRefObject } from "react";
-import { dtgDailyVehHisControllerApi } from "./DtgDailyVehHisControllerApi";
-import { DtgDailyVehHisControllerModel } from "./DtgDailyVehHisControllerModel";
+// src/views/dtgdailyvehhis/DtgDailyVehHisControllerController.tsx
+import { useCallback } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { dtgDailyVehHisControllerApi as api } from "./DtgDailyVehHisControllerApi";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import type { StopMarker } from "@/app/components/map/TmapView";
+import type { DtgDailyVehHisControllerModel, GridKey } from "./DtgDailyVehHisControllerModel";
 
-type ControllerProps = {
+interface Args {
   model: DtgDailyVehHisControllerModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useDtgDailyVehHisControllerController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
+export function useDtgDailyVehHisControllerController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
   const { openPopup, closePopup } = usePopup();
-  // ── fetch ───────────────────────────────────────────────────
-  // useSearchExecute(paramMode:"RAW")가 SRCH_* 접두 rawFilters를 전달 →
-  // 서버가 기대하는 키로 리매핑 후 호출
-  const fetchInTrnstVehList = useCallback(
+
+  // useSearchExecute(paramMode:"RAW") 가 SRCH_* 접두 rawFilters 를 전달 →
+  // 서버 키로 리매핑 후 호출
+  const fetchList = useCallback(
     (params: Record<string, unknown>) =>
-      dtgDailyVehHisControllerApi.getInTrnstVehList({
+      api.getInTrnstVehList({
         SRCH_PSTN_DTTM_FROM: params["SRCH_PSTN_DTTM_FRM"],
         SRCH_PSTN_DTTM_TO: params["SRCH_PSTN_DTTM_TO"],
         SRCH_VEH_NO: params["SRCH_VEH_NO_NM"],
@@ -31,34 +27,32 @@ export function useDtgDailyVehHisControllerController({
     [],
   );
 
-  // ── 조회 완료 콜백 ──────────────────────────────────────────
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.setSelectedRow(null);
+      model.grids.main.setData(data);
+      model.grids.main.setSelected(null);
     },
     [model],
   );
 
-  // ── 행 클릭: 주행 이력 있으면 trace 그리기, 없으면 지도 clear ─
+  // 행 클릭: 주행 이력 있으면 trace, 없으면 지도 clear
   const handleRowClicked = useCallback(
     (row: any) => {
-      model.setSelectedRow(row);
+      model.grids.main.setSelected(row);
 
-      // legacy: DRIVING_HIS_YN === 'N' 이면 지도 초기화 후 return
       if (row?.DRIVING_HIS_YN === "N") {
         model.mapRef.current?.clearTrace();
         model.mapRef.current?.clearStopMarkers();
         return;
       }
 
-      const vehNo = filtersRef.current["SRCH_VEH_NO_NM"];
+      const vehNo = model.filtersRef.current["SRCH_VEH_NO_NM"];
       const params = {
         PSTN_DTTM: row?.HIS_DATE,
         VEH_NO: vehNo,
       };
 
-      dtgDailyVehHisControllerApi
+      api
         .searchDtgDailyHistory(params)
         .then((res: any) => {
           if (res?.data?.success === false) {
@@ -99,7 +93,6 @@ export function useDtgDailyVehHisControllerController({
           }));
           model.mapRef.current?.drawTrace(points);
 
-          // 주행이력의 첫 좌표 = 출발, 마지막 좌표 = 도착 마커
           const first = rows[0];
           const last = rows[rows.length - 1];
           const stops: StopMarker[] = [
@@ -141,11 +134,13 @@ export function useDtgDailyVehHisControllerController({
           });
         });
     },
-    [model, filtersRef, openPopup, closePopup],
+    [model, openPopup, closePopup],
   );
 
+  void base;
+
   return {
-    fetchInTrnstVehList,
+    fetchInTrnstVehList: fetchList,
     handleSearch,
     handleRowClicked,
   };

@@ -35,144 +35,140 @@
 - **경로 alias**: `@/` → `src/`
 - **백엔드 호출**: `@/app/http/client`의 `apiClient`(axios 래퍼) + `getSessionFields()`로 세션 자동 주입
 
-## 4. 표준 화면 구조 (Guide_Feature 패턴)
+## 4. 표준 화면 구조 (base hook 패턴)
 
-신규 화면을 만들 때는 `src/features/guide/Guide_Feature*.{ts,tsx}` 5종 세트를 그대로 복사해 변경한다. 기존 화면도 이 구조를 따르므로, 수정 시 동일한 역할 분리를 깨지 말 것.
+모든 화면은 **`src/app/feature/` 의 base hook 두 개** 를 기반으로 한다 — `useBaseModel` / `useBaseController`. 신규 화면은 `src/features/guide/Guide_Feature*.{ts,tsx}` 5종 세트를 복사해 변경. 기존 화면도 이 구조를 따른다.
 
 폴더당 5개 파일 — 각 파일의 책임:
 
 | 파일 | 역할 |
 |---|---|
-| `XxxFeature.tsx` (또는 `Xxx.tsx`) | View. JSX/레이아웃만. 비즈니스 로직 없음. |
-| `XxxController.tsx` | 조회/저장/액션 핸들러 정의(useCallback). API 호출은 여기서. |
-| `XxxModel.ts` | 화면 상태(useState/useRef) + 공통코드 codeMap. |
-| `XxxColumns.tsx` | ag-grid `columnDefs` 정의. `LBL_*` 다국어 키 사용. |
-| `XxxApi.ts` | `apiClient.post` 호출. `MENU_CD` + `withSession` 포함. |
+| `Xxx.tsx` (View) | JSX/레이아웃만. `useXxxModel` + `useXxxController` 호출, `MasterDetailPage` 등 preset 에 binding. |
+| `XxxController.tsx` | 화면 고유 핸들러 (`onMainGridClick`, `onAddXxx`, `onSaveXxx`, 화면 액션). `useBaseController` 헬퍼 사용. |
+| `XxxModel.ts` | `useBaseModel<GridKey>(menuCode)` 한 줄 + 화면 고유 state(codeMap, 외부탭 등). |
+| `XxxColumns.tsx` | ag-grid `columnDefs` 정의. 단순 `const` 배열. audit 은 DataGrid 자동. |
+| `XxxApi.ts` | `apiClient.post` 호출. `MENU_CODE` 는 View 에서 import. `withSession` 포함. |
+
+**참조 화면**: `src/features/tms/master/organization/lgstgrpOprConfigMst/` (4그리드 + cascade + 외부 탭 + 동기화 액션 풀세트).
 
 ### 4-1. View 레이어 규칙
 
-- 레이아웃은 `MasterDetailPage` / `SplitPane` (`@/app/components/layout/...`)로 구성
-- Master/Detail 그리드는 `DataGrid` (`@/app/components/grid/DataGrid`)
-- 조회 조건 영역은 `useSearchMeta(MENU_CODE)` 결과를 `MasterDetailPage.searchProps.meta`로 전달
-- 조회 trigger / 조회 조건은 ref로 보관:
-  ```ts
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
+- 레이아웃은 preset 사용: `MasterDetailPage` / `GridOnlyPage` / `GridFormPage` / `GridMapPage`
+- 모든 preset 은 **`menuCode` prop** 만 받으면 `useSearchMeta` 자동 호출 + loading skeleton 자동. View 에서 `useSearchMeta` / `Skeleton` import 안 함.
+- `searchRef` / `filtersRef` 는 **`useBaseModel` 이 자체 보유** → `model.searchRef` / `model.filtersRef`. View 에서 `useRef` 두 개 만들지 말 것.
+- DataGrid 는 `{...model.bind(gridKey)}` spread — `rowData` / `totalCount` / `currentPage` / `pageSize` / `onPageSizeChange` / `onPageChange` / `audit:true` / `setRowData` 자동.
+  ```tsx
+  <DataGrid
+    {...model.bind("main")}
+    columnDefs={MAIN_COLUMN_DEFS}
+    onRowClicked={ctrl.onMainGridClick}
+    actions={ctrl.mainActions}
+  />
   ```
-- 검색 payload 에서 제외할 키나 키 리네임이 필요하면 `searchProps.excludes`에 선언만 — `SearchFilters`가 내부에서 `useSearchCondition`을 호출하고 `fetchFn`을 자동 wrap. View 에서 `excludeKeysRef` 직접 만들거나 `useSearchCondition` 호출하지 말 것.
+- 검색 payload 에서 제외할 키나 리네임은 `searchProps.excludes` 에 선언만 — `SearchFilters` 가 자동 처리.
   ```ts
   searchProps={{
     ...,
-    excludes: ["BOOKING"],                                       // 단순 제외
-    // 또는 키 리네임 + 값 변환:
-    excludes: [
+    excludes: ["BOOKING"],                    // 단순 제외
+    excludes: [                               // 또는 리네임 + 값 변환
       { column: "PLN.AR_TO_DT",
         as: { FROM: "AR_FROM_DT", TO: "AR_TO_DT" },
         transform: (v) => String(v).replace(/-/g, "") },
     ],
   }}
   ```
-- 레이아웃 토글(`"side" | "vertical"`)과 `storageKey`(localStorage용 화면별 유일값)를 반드시 지정
+- 레이아웃 토글: `direction={model.layout === "side" ? "horizontal" : "vertical"}` + `layoutToggle={{ layout: model.layout, onToggle: ... }}` — model.layout 은 localStorage 자동 동기화.
+- `storageKey` 는 `model.storageKeys.outer` / `top` / `bottom` 로 binding (menuCode 기반 자동 생성).
 
-### 4-2. Controller 레이어 규칙
-
-- `fetchList` — `SearchFilters`가 넘기는 params를 그대로 API에 전달
-- `handleSearch` — 조회 성공 시 `model.setGridData` + `model.resetSubGrids` + 필요 시 첫 행 자동 선택
-- `handleRowClicked` — 메인 행 선택 시 상세 그리드 reload
-- 액션 버튼은 공통 팩토리 사용:
-  - `makeAddAction` / `makeSaveAction` / `makeExcelGroupAction` (개별)
-  - `makeCommonActions({ add, save, excel })` (3종 일괄)
-  - 위 모두 `@/app/components/grid/commonActions`에서 import
-- 그리드 추가/저장은 `useGridAdd` / `useGridSave` (`@/app/components/grid/gridCommon`) 훅 사용
-- `saveFn`은 `useGridSave`가 만든 payload 중 `dsSave`만 꺼내 API에 넘긴다:
-  ```ts
-  const saveFn = (payload: any) => featureApi.save({ dsSave: payload.dsSave });
-  ```
-
-### 4-3. Model 레이어 규칙
-
-- 공통 state: `layout`, `pageSize`, `gridData`, `subDetailRowData`, `selectedHeaderRow(+Ref)`, `codeMap`
-- `EMPTY_GRID = { rows: [], totalCount: 0, page: 1, limit: 20 }` 형태의 초기값 사용
-- 메인 행 선택은 **state + ref 동시 보관** 패턴 (`selectedHeaderRow` + `selectedHeaderRowRef`) — Controller의 onClick 핸들러에서 stale closure 방지용
-- 공통코드 lookup은 `useCommonStores`로 받아 `codeMap[storeKey][CODE] = NAME` 형태로 변환해서 `DataGrid`의 `codeMap` prop에 전달
-
-### 4-4. Columns 레이어 규칙
-
-- `headerName`은 `LBL_*` 다국어 키 (Lang.get 자동 적용됨)
-- `field`에 `DTTM` 포함 → DataGrid가 자동 날짜 포맷팅
-- `field`가 `_STS`로 끝나면 자동 중앙 정렬
-- `type: "numeric"` 또는 `dataType: "number"` → 우측 정렬
-- `headerName: "No"` → 자동 일련번호 + 고정 너비
-- 공통코드 → 라벨 치환은 컬럼에 `codeKey`만 지정 (cellRenderer는 DataGrid가 자동 주입)
-- audit 컬럼(삭제/상태/생성자/생성일/수정자/수정일)은 `standardAudit(setGridData)` 한 줄로 일괄 삽입, 부분 끄기는 `{ updatePerson: false }` 같은 override
-
-### 4-5. Api 레이어 규칙
-
-- 객체 형태로 export: `export const featureApi = { MENU_CD, getList, getDetailList, save, remove, ... }`
-- 모든 요청에 `MENU_CD` 포함 + `withSession()`으로 세션 필드 주입
-- 저장 API는 `dsSave` 패턴: body에 `{ dsSave }`, params에 세션/MENU_CD/그 외 키
-- 배열 페이로드일 때도 `withSession`이 각 원소에 세션 필드 자동 주입
-
-## 4-6. (권장) 선언적 framework — `useGridModel` / `useGridController`
-
-여러 그리드를 가진 화면(특히 Master-Detail-2x2 같은 4-그리드 화면)은 boilerplate를 줄이기 위해 **`src/hooks/useGridFeature/`** 의 framework 훅을 사용한다. **참조 화면**: `src/features/tms/master/organization/lgstgrpOprConfigMst/`.
-
-### 핵심 아이디어
-
-- **Model.ts**: `featureConfig` 객체를 선언하고 `useGridModel(config)` 한 줄 호출
-- **Controller.tsx**: `useGridController({ config, model, searchRef })` 호출 + 화면 고유 액션만 합성
-- **View.tsx**: 레이아웃 자유. `<DataGrid {...ctrl.bind("gridKey", COLS)} />` 로 표준 props 한 번에 spread
-
-### `featureConfig` 주요 필드
+### 4-2. Controller 레이어 규칙 — `useBaseController` 헬퍼
 
 ```ts
-{
-  api,                      // 화면 API 객체 (메서드명을 string 으로 참조)
-  selections: ["config"],   // state+ref 추적할 그리드 keys
-  defaultLayout: "side",    // 분할 방향 초기값. model.layout / model.setLayout 자동 노출 — View 에서 layoutToggle/direction 에 바로 연결 (기본 "side")
-  resetOnChange: "activeTab", // 외부 탭 등 watch key 가 바뀌면 모든 그리드 클리어 + 1페이지 재조회 (첫 마운트/빈 값 자동 스킵)
-  fetchListExtraParams: {   // 첫 fetch에 추가 param 주입 (model 참조)
-    LGST_GRP_CNFG_GRP_CD: (m) => m.activeTab,
-  },
-  extras: () => {           // 화면별 추가 state — Hook으로 호출됨
-    const [activeTab, setActiveTab] = useState("");
-    return { activeTab, setActiveTab };
-  },
-  grids: {
-    config:     { type: "paginated", api: { fetch: "getConfigList", save: "saveConfig" }, rowKey: "CNFG_CD", newRow: () => ({...}) },
-    detail:     { type: "paginated", api: {...}, fetchOnRowClickFrom: "config", paramMap: (row) => ({...}), newRow: (m) => ({...}) },
-    i18n:       { type: "array",     api: {...}, fetchOnRowClickFrom: "detail", subTitle: "LBL_..." },
-    detailI18n: { type: "array",     api: {...}, fetchOnRowClickFrom: "i18n" },
-  },
+const base = useBaseController<GridKey>({ model });
+```
+
+base 가 제공하는 헬퍼:
+
+| 헬퍼 | 용도 |
+|---|---|
+| `base.callAjax(promise, msg?)` | API Promise 한 번 감쌈 (성공/에러 토스트) |
+| `base.alert(msg)` / `base.confirm(msg, onYes)` | 다이얼로그 |
+| `base.search(page?)` | 메인 그리드 재조회 (`model.searchRef.current?.()`) |
+| `base.searchSub(gridKey, promise)` | 임의 그리드에 결과 set |
+| `base.resetGrids([keys])` | 지정 그리드들 비우기 |
+| `base.handleRowClick(gridKey, row, cascade?, opts?)` | selection set + cascade reset/fetch (`{ alsoReset }` 으로 손자 reset) |
+| `base.addRow(gridKey, newRow)` | 그리드 끝 push (EDIT_STS:"I" 자동) |
+| `base.requireParentRow(row, label)` | 부모 행 선택+저장 검증 + alert + boolean |
+| `base.saveGrid(gridKey, apiFn, opts?)` | dirty 추출 + dsSave + 후처리. opts: `beforeSave`, `confirmOnDelete`, `afterSave: "refresh"\|"none"\|함수\|{cascadeFrom, fetch}` |
+
+**fetchList** — `SearchFilters` 가 넘기는 params 를 API 에 전달 (외부 탭 조건 등 합칠 때만 추가).
+**handleSearch** — `model.grids.main.setData(data)` + 첫 행 자동 선택은 `onMainGridClick(data?.rows?.[0])` 호출 (cascade 정의 한 곳에 모음).
+
+**액션**:
+- 그리드별 actions 배열은 **Controller 가 책임** (`useMemo` 로 정의, View 는 `actions={ctrl.mainActions}` binding 만)
+- `makeAddAction` / `makeSaveAction` / `makeExcelGroupAction` / `makeCommonActions` (`@/app/components/grid/commonActions`)
+- 화면 고유 popup/trace 같은 액션은 Controller 에 useCallback 으로 정의 후 actions 배열에 포함
+
+### 4-3. Model 레이어 규칙 — `useBaseModel`
+
+```ts
+export type GridKey = "main" | "sub01" | "sub02" | "sub03";  // 화면별 그리드 이름 union
+
+export function useXxxModel(menuCode: string) {
+  const base = useBaseModel<GridKey>(menuCode);
+  // 화면 고유: codeMap, 외부 탭 등
+  return { ...base, codeMap, ... };
 }
 ```
 
-### framework가 자동으로 처리
+`useBaseModel` 이 자동으로 제공:
+- 그리드별 `data`/`rows`/`setData`/`ref` (lazy 등록 — Proxy 기반)
+- 그리드별 `selected`/`setSelected`/`selectedRef`
+- `searchRef` / `filtersRef`
+- `pageSize` / `setPageSize`
+- `layout` / `setLayout` (localStorage 자동 동기화)
+- `storageKeys: { outer, top, bottom, layout }`
+- `bind(gridKey)` — DataGrid spread props 묶음
 
-- 그리드별 state/ref 생성 (paginated → `GridData`, array → `any[]`)
-- selection state+ref (stale closure 방지)
-- `fetchList`(첫 그리드) + `handleSearch`(첫 그리드 set + cascade)
-- 행 클릭 cascade fetch (`fetchOnRowClickFrom` + `paramMap`)
-- 그리드별 추가/저장 액션 (`useGridAdd` / `useGridSave` 자동 적용)
-- DataGrid 표준 props 묶음: `ctrl.bind("gridKey", COLUMN_DEFS, overrides?)`
-- `layout`/`setLayout` (Master/Detail 분할 방향) — `MasterDetailPage` 의 `direction`/`layoutToggle` 에 바로 연결 가능
+화면 고유 추가:
+- 공통코드 lookup → `useCommonStores` + `useMemo` 로 `codeMap`
+- 외부 탭 → `useState` + `useEffect` 로 옵션 로딩
+- popup / form 패널 state → `useState`
 
-### 화면이 직접 짜는 것
+### 4-4. Columns 레이어 규칙
 
-- View JSX 레이아웃 (단일 / Master-Detail / 2x2 / 탭 / 트리 등 자유)
-- 화면 고유 액션 (예: 동기화 버튼) → Controller에서 `base.actions.config` 에 합성 후 별도 export
-- 외부 탭, 화면 고유 useEffect 등 → `extras()` 안에서 정의 (탭 state는 `extras`에 두고, View 에서 `MasterDetailPage`의 `outerTabs={{ tabs, activeTab, onChange }}` prop 으로 넘김 — 인라인 JSX 금지)
+- 단순 `const` 배열 — 함수 wrapper 안 만든다 (특수 케이스 제외).
+- `headerName`은 `LBL_*` 다국어 키 (Lang.get 자동)
+- `field` 에 `DTTM` 포함 → 자동 날짜 포맷
+- `field` 가 `_STS` 로 끝남 → 자동 중앙 정렬
+- `type: "numeric"` / `dataType: "number"` → 우측 정렬
+- `headerName: "No"` → 자동 일련번호 + 고정 너비
+- 공통코드 → 라벨: 컬럼에 `codeKey` 지정 (DataGrid 자동 cellRenderer)
+- **audit 컬럼**: `model.bind` 가 `audit:true` 자동 spread → DataGrid 가 컬럼 끝에 standardAudit 자동 추가. 컬럼 파일에서 `standardAudit` 직접 호출 안 함.
+- audit 부분 토글: View 에서 `audit={{ updatePerson: false }}` 명시
+- audit 자동 끄기: View 에서 `audit={false}` 명시 (audit 컬럼이 중간 위치 / 별도 처리 화면)
 
-### 순환 import 주의
+### 4-5. Api 레이어 규칙
 
-- `MENU_CODE` 는 **View** 에서 정의/export
-- Api 는 View 에서 import (함수 본문에서만 사용 — 안전)
-- Model/Controller 는 module-init 시점에 `MENU_CODE` 를 사용하지 않음 (`featureConfig` 객체에 안 넣음). framework 의 `FeatureConfig.menuCode` 는 optional.
+- `MENU_CODE` 는 **View** 에서 export, Api 가 import (순환 import 안 됨 — 함수 본문에서만 사용)
+- 객체 형태로 export: `export const featureApi = { getList, save, ... }`
+- 모든 요청에 `MENU_CD: MENU_CODE` 포함 + `withSession` 으로 세션 필드 주입
+- 저장 API 는 `dsSave` 패턴: body `{ dsSave }`, params 에 세션/MENU_CD/그 외 키
+- 배열 페이로드도 `withSession` 이 각 원소에 세션 필드 자동 주입
 
-### 언제 framework 안 쓰나
+### 4-6. 신규 화면 작성 흐름
 
-- 매우 특수한 화면 (popup 다수, 트리 + 드래그, 지도 위젯 등) — 기존 4-1~4-5 패턴 그대로
-- 그리드 1~2개에 단순 조회만 — framework 적용해도 큰 이득 없음
+1. `Guide_Feature*` 5종을 대상 폴더에 복사
+2. `Xxx.tsx` 의 `MENU_CODE` 교체, preset 의 `menuCode={MENU_CODE}` 그대로
+3. `XxxModel.ts` 의 `GridKey` 타입에 그리드 이름 union 정의
+4. `XxxController.tsx` 에 `onMainGridClick` / `onAddXxx` / `onSaveXxx` / `actions` 정의 — base 헬퍼만 사용
+5. `XxxColumns.tsx` 단순 배열로 컬럼 정의 (audit 자동)
+6. `XxxApi.ts` 의 URL / 페이로드만 교체
+
+화면 구조별 preset:
+- 단일 그리드 → `GridOnlyPage`
+- Master + Detail (또는 그리드 N개 cascade) → `MasterDetailPage`
+- 그리드 + 폼 패널 → `GridFormPage`
+- 그리드 + 지도 → `GridMapPage`
 
 ## 5. 기타 규칙
 

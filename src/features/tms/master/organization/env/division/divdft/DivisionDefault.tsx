@@ -1,45 +1,31 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useDivisionDefaultModel } from "./DivisionDefaultModel.ts";
-import { useDivisionDefaultController } from "./DivisionDefaultController.tsx";
+import { useDivisionDefaultModel } from "./DivisionDefaultModel";
+import { useDivisionDefaultController } from "./DivisionDefaultController";
 import {
   MAIN_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
-} from "./DivisionDefaultColumns.tsx";
+} from "./DivisionDefaultColumns";
 
 export const MENU_CODE = "MENU_ORGANIZATION_ENV_DIV_DFT";
 
-export default function TenderReceiveDispatch() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useDivisionDefaultModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useDivisionDefaultController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+export default function DivisionDefault() {
+  const model = useDivisionDefaultModel(MENU_CODE);
+  const ctrl = useDivisionDefaultController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CODE}
       defaultSizes={[10, 90]}
       searchProps={{
-        meta,
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}
@@ -50,17 +36,24 @@ export default function TenderReceiveDispatch() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="division-default-dispatch"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          {...ctrl.bind("main", MAIN_COLUMN_DEFS, {
-          })}
+          {...model.bind("main")}
+          columnDefs={MAIN_COLUMN_DEFS}
+          onRowClicked={ctrl.onMainGridClick}
+          rowKeys="CNFG_CD"
+          autoSelectFirstRow
+          actions={ctrl.mainActions}
+          audit={false}
         />
       }
       detail={
         <DataGrid
-          {...ctrl.bind("detail", DETAIL_COLUMN_DEFS, {
-          })}
+          {...model.bind("detail")}
+          columnDefs={DETAIL_COLUMN_DEFS}
+          rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
+          actions={ctrl.detailActions}
         />
       }
     />

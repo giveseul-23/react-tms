@@ -1,264 +1,162 @@
-// ────────────────────────────────────────────────────────────────
-// [가이드] Controller 템플릿
-//
-// 사용 방법
-// 1. 이 파일을 대상 폴더로 복사 후 파일명 교체 (예: FeatureController.tsx)
-// 2. 모델 타입 / API import / 함수명 교체
-// 3. mainActions / detailActions 는 makeCommonActions 또는 개별 팩토리로 구성
-//
-// 공통 패턴
-// - fetchXxxList: 조회 API 호출 (SearchFilters → fetchFn)
-// - handleSearch: 조회 완료 시 상태 업데이트 + 서브그리드 초기화
-// - handleRowClicked: 행 선택 시 상세/서브 그리드 재조회
-// - makeAddAction / makeSaveAction / makeExcelGroupAction:
-//   개별 버튼 팩토리 — onClick 커스터마이즈 필요할 때
-// - makeCommonActions: 추가/저장/엑셀 3종 세트 일괄 구성
-// ────────────────────────────────────────────────────────────────
-
-import { useCallback, MutableRefObject } from "react";
-import { shpmMgmtApi } from "./ShpmMgmtApi";
-import { ShpmMgmtModel } from "./ShpmMgmtModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { shpmMgmtApi as api } from "./ShpmMgmtApi";
 import { MAIN_COLUMN_DEFS } from "./ShpmMgmtColumns";
-import {
-  makeAddAction,
-  makeSaveAction,
-  makeExcelGroupAction,
-  makeCommonActions,
-} from "@/app/components/grid/commonActions";
-import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
+import { makeCommonActions } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { ShpmMgmtModel, GridKey } from "./ShpmMgmtModel";
 
-type ControllerProps = {
+interface Args {
   model: ShpmMgmtModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useShpmMgmtController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
-  // ── 조회 API (SearchFilters 가 넘겨주는 params 를 그대로 전달) ─
+export function useShpmMgmtController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => shpmMgmtApi.getList(params),
+    (params: Record<string, unknown>) => api.getList(params),
     [],
   );
 
-  // ── 조회 완료 콜백 (onSearch) ─────────────────────────────────
-  // SearchFilters 조회 성공 → gridData 업데이트 + 서브 그리드 리셋
+  // zone 행 클릭 → rate + zoneCond 동시 fetch
+  const onZoneRowClicked = useCallback(
+    (row: any) =>
+      base.handleRowClick("zone", row, [
+        {
+          to: "rate",
+          fetch: (r) => api.getRateList({ LANE_ID: r.LANE_ID }),
+        },
+        {
+          to: "zoneCond",
+          fetch: (r) => api.getZoneCondList({ LANE_ID: r.LANE_ID }),
+        },
+      ]),
+    [base],
+  );
+
+  // lgst 행 클릭 → zone fetch + 첫 행 cascade
+  const onLgstRowClicked = useCallback(
+    async (row: any) => {
+      model.grids.lgst.setSelected(row);
+      base.resetGrids(["zone", "rate", "zoneCond"]);
+      if (!row) return;
+      const zoneRows = await base.searchSub(
+        "zone",
+        api.getZoneList({
+          TRF_CD: row.TRF_CD,
+          LGST_GRP_CD: row.LGST_GRP_CD,
+          CHG_CD: row.CHG_CD,
+        }),
+      );
+      if (zoneRows[0]) onZoneRowClicked(zoneRows[0]);
+    },
+    [model, base, onZoneRowClicked],
+  );
+
+  // main 행 클릭 → lgst fetch + 첫 행 cascade
+  const onMainGridClick = useCallback(
+    async (row: any) => {
+      model.grids.main.setSelected(row);
+      base.resetGrids(["lgst", "zone", "rate", "zoneCond"]);
+      if (!row) return;
+      const lgstRows = await base.searchSub(
+        "lgst",
+        api.getLgstList({ TRF_CD: row.TRF_CD }),
+      );
+      if (lgstRows[0]) onLgstRowClicked(lgstRows[0]);
+    },
+    [model, base, onLgstRowClicked],
+  );
+
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
-      // 최초 행 자동 선택하고 상세까지 로딩하고 싶을 때
-      handleRowClicked(data.rows?.[0]);
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
-    [model],
+    [model.grids.main, onMainGridClick],
   );
 
-  // ── 상세 데이터 fetch ─────────────────────────────────────────
-  const fetchLgstDetail = useCallback((row: any) => {
-    const trfCd = row?.TRF_CD;
-    if (!trfCd) return Promise.resolve([]);
-    return shpmMgmtApi
-      .getLgstList({ TRF_CD: trfCd })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
+  const handleDetail01Add = useCallback(() => {
+    const main = model.grids.main.selectedRef.current;
+    if (!main) return;
+    base.addRow("lgst", { XXX_CD: main.XXX_CD });
+  }, [model, base]);
 
-  const fetchZoneDetail = useCallback((row: any) => {
-    const trfCd = row?.TRF_CD;
-    const lgstGrpCd = row?.LGST_GRP_CD;
-    const chgCd = row?.CHG_CD;
-    if (!trfCd && lgstGrpCd && chgCd) return Promise.resolve([]);
-    return shpmMgmtApi
-      .getZoneList({ TRF_CD: trfCd, LGST_GRP_CD: lgstGrpCd, CHG_CD: chgCd })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
+  const handleDetail01Save = useCallback(() => {
+    const rows = model.grids.lgst.ref.current?.rows ?? [];
+    const dirty = dirtyRows(rows);
+    if (dirty.length === 0) return;
+    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
+  }, [model]);
 
-  const fetchRateDetail = useCallback((row: any) => {
-    const laneId = row?.LANE_ID;
-    if (!laneId) return Promise.resolve([]);
-    return shpmMgmtApi
-      .getRateList({ LANE_ID: laneId })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
+  const handleDetail02Save = useCallback(() => {
+    const rows = model.grids.zone.ref.current?.rows ?? [];
+    const dirty = dirtyRows(rows);
+    if (dirty.length === 0) return;
+    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
+  }, [model]);
 
-  const fetchZoneCondDetail = useCallback((row: any) => {
-    const laneId = row?.LANE_ID;
-    if (!laneId) return Promise.resolve([]);
-    return shpmMgmtApi
-      .getZoneCondList({ LANE_ID: laneId })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  // ── 메인 행 클릭 → 상세 그리드 리로드 ─────────────────────────
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-
-      fetchLgstDetail(row).then((rows: any) => {
-        model.setSubLgstRowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: model.pageSize,
-        });
-        handleSubLeftRowClicked(rows?.[0]);
-      });
-    },
-    [model],
-  );
-
-  const handleSubLeftRowClicked = useCallback(
-    (row: any) => {
-      fetchZoneDetail(row).then((rows: any) => {
-        model.setSubZoneRowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: model.pageSize,
-        });
-        handleSubCenterRowClicked(rows?.[0]);
-      });
-    },
-    [model],
-  );
-
-  const handleSubCenterRowClicked = useCallback(
-    (row: any) => {
-      let dtlRow = row;
-      Promise.all([fetchRateDetail(dtlRow), fetchZoneCondDetail(dtlRow)])
-        .then(([rateRes, zoneCondRes]: any[]) => {
-          const rateRows = rateRes ?? [];
-          const zoneCondRows = zoneCondRes ?? [];
-          model.setSubRateRowData({
-            rows: rateRows,
-            totalCount: rateRows.length,
-            page: 1,
-            limit: model.pageSize,
-          });
-          model.setSubZoneCondRowData({
-            rows: zoneCondRows,
-            totalCount: zoneCondRows.length,
-            page: 1,
-            limit: model.pageSize,
-          });
-        })
-        .catch((e) => {
-          throw new Error(e);
-        });
-    },
-    [model],
-  );
-
-  // ── 메인 그리드 액션 ──────────────────────────────────────────
-  // 추가 + 저장 + 엑셀 일괄 세팅이 필요하면 makeCommonActions 사용
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "계약서복사",
-      label: "계약서복사",
-      onClick: () => {},
-    },
-    ...makeCommonActions({
-      add: true,
-      save: true,
-      excel: {
-        columns: MAIN_COLUMN_DEFS(),
-        menuName: "화면명",
-        fetchFn: () => shpmMgmtApi.getList(filtersRef.current),
-        rows: model.gridData.rows,
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "계약서복사",
+        label: "계약서복사",
+        onClick: () => {},
       },
-    }),
-  ];
-
-  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
-  const saveShpm = useCallback(
-    (payload: any) => shpmMgmtApi.save({ dsSave: payload.dsSave }),
-    [],
+      ...makeCommonActions({
+        add: true,
+        save: true,
+        excel: {
+          columns: MAIN_COLUMN_DEFS(),
+          menuName: "계약요금관리",
+          fetchFn: () => api.getList(model.filtersRef.current),
+          rows: model.grids.main.rows,
+        },
+      }),
+    ],
+    [model],
   );
 
-  // ── 그리드 액션 (onClick 커스터마이즈 예시) ──────────────
+  const detail01Actions = useMemo(
+    () => [
+      {
+        type: "button" as const,
+        key: "BTN_ADD",
+        label: "BTN_ADD",
+        onClick: handleDetail01Add,
+      },
+      {
+        type: "button" as const,
+        key: "BTN_SAVE",
+        label: "BTN_SAVE",
+        onClick: handleDetail01Save,
+      },
+    ],
+    [handleDetail01Add, handleDetail01Save],
+  );
 
-  // ── detail01: 추가/저장 (LanguagePack 패턴) ──────────────────
-  const handleDetail01Add = useGridAdd({
-    setRows: model.setSubLgstRowData,
-    newRow: () => ({
-      XXX_CD: model.selectedHeaderRowRef.current?.XXX_CD,
-    }),
-    position: "bottom",
-  });
-
-  const handleDetail01Save = useGridSave({
-    rows: model.subLgstRowData.rows,
-    setRows: model.setSubLgstRowData,
-    saveFn: saveShpm,
-    onSaved: () => searchRef.current?.(),
-  });
-
-  const detail01Actions = [
-    makeAddAction({ onClick: handleDetail01Add }),
-    makeSaveAction({ onClick: handleDetail01Save }),
-  ];
-
-  // ── detail02: 저장 (LanguagePack 패턴) ───────────────────────
-  const handleDetail02Save = useGridSave({
-    rows: model.subZoneRowData.rows,
-    setRows: model.setSubZoneRowData,
-    saveFn: saveShpm,
-    onSaved: () => searchRef.current?.(),
-  });
-
-  const detail02Actions = [
-    makeSaveAction({ onClick: handleDetail02Save }),
-  ];
+  const detail02Actions = useMemo(
+    () => [
+      {
+        type: "button" as const,
+        key: "BTN_SAVE",
+        label: "BTN_SAVE",
+        onClick: handleDetail02Save,
+      },
+    ],
+    [handleDetail02Save],
+  );
 
   return {
     fetchList,
     handleSearch,
-    handleRowClicked,
+    onMainGridClick,
+    onLgstRowClicked,
+    onZoneRowClicked,
     mainActions,
     detail01Actions,
     detail02Actions,
-    handleSubLeftRowClicked,
-    handleSubCenterRowClicked,
   };
 }
-
-// ────────────────────────────────────────────────────────────────
-// [참고] 공통 버튼 팩토리 API
-//
-// makeAddAction({ onClick?, label?, key?, disabled? })
-// makeSaveAction({ onClick?, label?, key?, disabled? })
-//   - onClick 생략 시 no-op (e: any) => {}
-//   - label / key 생략 시 "추가" / "저장"
-//
-// makeExcelGroupAction({ columns, menuName, fetchFn, rows, hideAll?, hideVisible? })
-//   - hideAll: true  → "조회된모든데이터다운로드" 버튼 숨김
-//   - hideVisible: true → "보이는데이터다운로드" 버튼 숨김
-//
-// makeCommonActions({ add?, save?, excel? })
-//   - add / save: true 또는 { onClick, ... } 객체
-//   - excel: ExcelGroupActionConfig 객체 (미지정 시 엑셀 그룹 제외)
-//
-// 기존 커스텀 버튼과 혼용 예시
-//   const mainActions = [
-//     { type: "button", key: "동기화", label: "동기화", onClick: ... },
-//     makeAddAction({ onClick: handleAdd }),
-//     makeSaveAction({ onClick: handleSave }),
-//     makeExcelGroupAction({ ... }),
-//   ];
-// ────────────────────────────────────────────────────────────────

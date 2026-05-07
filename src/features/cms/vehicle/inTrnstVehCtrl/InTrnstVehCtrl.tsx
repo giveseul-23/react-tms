@@ -1,40 +1,24 @@
 // src/views/inTrnstVehCtrl/InTrnstVehCtrl.tsx
-// ────────────────────────────────────────────────────────────────
-// 수송중 차량제어 (MENU_IN_TRNST_VEH_CTRL)
-//
-// 레이아웃:
-//   [SearchFilters]
-//   ┌──────────── 좌/우 분할 (PanelGroup horizontal, 드래그 리사이즈) ────────────┐
-//   │   좌: 차량 목록 DataGrid          │   우: TMAP 지도 + 차량 마커            │
-//   └──────────────────────────────────────────────────────────────────────────┘
-// ────────────────────────────────────────────────────────────────
 "use client";
 
-import { useRef, useMemo } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
+import { useMemo } from "react";
 import { GridMapPage } from "@/app/components/layout/presets/GridMapPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 import { TmapView, TmapMarker } from "@/app/components/map/TmapView";
 
 import { useInTrnstVehCtrlModel } from "./InTrnstVehCtrlModel";
 import { useInTrnstVehCtrlController } from "./InTrnstVehCtrlController";
 import { MAIN_COLUMN_DEFS } from "./InTrnstVehCtrlColumns";
+
 export const MENU_CODE = "MENU_IN_TRNST_VEH_CTRL";
 
 export default function InTrnstVehCtrl() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useInTrnstVehCtrlModel();
+  const model = useInTrnstVehCtrlModel(MENU_CODE);
+  const ctrl = useInTrnstVehCtrlController({ model });
 
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useInTrnstVehCtrlController({ model, searchRef, filtersRef });
-
-  // ── 그리드 행 → 지도 마커 변환 ──────────────────────────────
   const markers = useMemo<TmapMarker[]>(() => {
-    return (model.gridData.rows ?? [])
+    return (model.grids.main.rows ?? [])
       .map((row: any) => {
         const lat = Number(row.LAT);
         const lon = Number(row.LON);
@@ -50,27 +34,18 @@ export default function InTrnstVehCtrl() {
         } as TmapMarker;
       })
       .filter((m: TmapMarker | null): m is TmapMarker => m !== null);
-  }, [model.gridData.rows, ctrl]);
+  }, [model.grids.main.rows, ctrl]);
 
-  if (loading) return <Skeleton className="h-24" />;
-
-  // ── 좌측: 그리드 ────────────────────────────────────────────
   const gridPane = (
     <DataGrid
-      layoutType="plain"
+      {...model.bind("main")}
       columnDefs={MAIN_COLUMN_DEFS()}
-      rowData={model.gridData.rows}
-      totalCount={model.gridData.totalCount}
-      currentPage={model.gridData.page}
-      pageSize={model.pageSize}
-      onPageSizeChange={model.setPageSize}
-      onPageChange={(page) => searchRef.current?.(page)}
       actions={ctrl.mainActions}
       onRowClicked={ctrl.handleRowClicked}
+      audit={false}
     />
   );
 
-  // ── 우측: TMAP ──────────────────────────────────────────────
   const mapPane = (
     <div className="h-full w-full min-h-0 min-w-0 border border-gray-200 rounded-lg overflow-hidden bg-white">
       <TmapView ref={model.mapRef} markers={markers} />
@@ -79,13 +54,13 @@ export default function InTrnstVehCtrl() {
 
   return (
     <GridMapPage
+      menuCode={MENU_CODE}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchInTrnstVehList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
@@ -98,7 +73,7 @@ export default function InTrnstVehCtrl() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="in-trnst-veh-ctrl"
+      storageKey={model.storageKeys.outer}
       grid={gridPane}
       map={mapPane}
     />

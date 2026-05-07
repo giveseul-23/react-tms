@@ -1,58 +1,35 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
-import { useCurrencyModel } from "./CurrencyModel.ts";
+import { useCurrencyModel } from "./CurrencyModel";
 import { useCurrencyController } from "./CurrencyController";
 import { MAIN_COLUMN_DEFS } from "./CurrencyColumns";
+
 export const MENU_CD = "MENU_CURR_MGMT";
 
 export default function Currency() {
-  const { meta, loading } = useSearchMeta(MENU_CD);
-  const model = useCurrencyModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useCurrencyController({
-    menuCd: MENU_CD,
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useCurrencyModel(MENU_CD);
+  const ctrl = useCurrencyController({ model });
 
   return (
     <GridOnlyPage
+      menuCode={MENU_CD}
       searchProps={{
-        meta,
-        fetchFn: ctrl.fetchDispatchList,
+        fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         excludes: ["BOOKING"],
         menuCode: MENU_CD,
       }}
       grid={
         <DataGrid
-          layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS()}
+          {...model.bind("main")}
+          columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            searchRef.current?.(page);
-          }}
           actions={ctrl.mainActions}
-          onRowClicked={ctrl.handleRowClicked}
         />
       }
     />

@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useOperatorArBillingInquiryModel } from "./OperatorArBillingInquiryModel";
 import { useOperatorArBillingInquiryController } from "./OperatorArBillingInquiryController";
@@ -19,30 +16,19 @@ import {
 export const MENU_CD = "MENU_OPERATOR_BILLING_MANAGEMENT";
 
 export default function OperatorArBillingInquiry() {
-  const { meta, loading } = useSearchMeta(MENU_CD);
-  const model = useOperatorArBillingInquiryModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useOperatorArBillingInquiryController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useOperatorArBillingInquiryModel(MENU_CD);
+  const ctrl = useOperatorArBillingInquiryController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CD}
       defaultSizes={[55, 45]}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         excludes: [
           {
@@ -61,22 +47,13 @@ export default function OperatorArBillingInquiry() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="operator-ar-billing-inquiry"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
-          onRowClicked={ctrl.handleRowClicked}
+          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
         />
       }
@@ -103,9 +80,9 @@ export default function OperatorArBillingInquiry() {
             },
           }}
           rowData={{
-            BILLING_ITEM: model.billingItemRowData,
-            ORDER_INFO: model.orderInfoRowData,
-            ATTACHMENT: model.attachmentRowData,
+            BILLING_ITEM: model.grids.billingItem.rows,
+            ORDER_INFO: model.grids.orderInfo.rows,
+            ATTACHMENT: model.grids.attachment.rows,
           }}
           codeMap={model.codeMap}
           actions={[]}

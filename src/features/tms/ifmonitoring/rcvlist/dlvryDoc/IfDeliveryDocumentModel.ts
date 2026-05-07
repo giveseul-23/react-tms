@@ -1,39 +1,11 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useMemo } from "react";
+import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 
-export type GridData = {
-  rows: any[];
-  totalCount: number;
-  page: number;
-  limit: number;
-};
+export type GridKey = "main" | "detail";
 
-const EMPTY_GRID: GridData = {
-  rows: [],
-  totalCount: 0,
-  page: 1,
-  limit: 500,
-};
-
-export function useIfDeliveryDocumentModel() {
-  const [layout, setLayout] = useState<LayoutType>("vertical");
-  const [pageSize, setPageSize] = useState(500);
-
-  const [gridData, setGridData] = useState<GridData>(EMPTY_GRID);
-  const [detailRowData, setDetailRowData] = useState<any[]>([]);
-
-  const [selectedHeaderRow, setSelectedHeaderRow] = useState<any>(null);
-  const selectedHeaderRowRef = useRef<any>(null);
-  const setSelectedHeaderRowWithRef = useCallback((row: any) => {
-    setSelectedHeaderRow(row);
-    selectedHeaderRowRef.current = row;
-  }, []);
-
-  const resetSubGrids = useCallback(() => {
-    setSelectedHeaderRowWithRef(null);
-    setDetailRowData([]);
-  }, [setSelectedHeaderRowWithRef]);
+export function useIfDeliveryDocumentModel(menuCode: string) {
+  const base = useBaseModel<GridKey>(menuCode, { defaultLayout: "vertical" });
 
   const { stores } = useCommonStores({
     interfaceType: { sqlProp: "CODE", keyParam: "IF_TCD" },
@@ -59,21 +31,7 @@ export function useIfDeliveryDocumentModel() {
     return map;
   }, [stores]);
 
-  return {
-    layout,
-    setLayout,
-    pageSize,
-    setPageSize,
-    gridData,
-    setGridData,
-    detailRowData,
-    setDetailRowData,
-    selectedHeaderRow,
-    selectedHeaderRowRef,
-    setSelectedHeaderRow: setSelectedHeaderRowWithRef,
-    resetSubGrids,
-    codeMap,
-  };
+  return { ...base, codeMap };
 }
 
 export type IfDeliveryDocumentModel = ReturnType<

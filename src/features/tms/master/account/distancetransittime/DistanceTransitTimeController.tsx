@@ -1,6 +1,6 @@
-import { useCallback, MutableRefObject } from "react";
-import { distanceTransitTimeApi } from "./DistanceTransitTimeApi";
-import { DistanceTransitTimeModel } from "./DistanceTransitTimeModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { distanceTransitTimeApi as api } from "./DistanceTransitTimeApi";
 import { MAIN_COLUMN_DEFS } from "./DistanceTransitTimeColumns";
 import {
   makeCommonActions,
@@ -8,169 +8,156 @@ import {
 } from "@/app/components/grid/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { DistanceTransitTimeModel, GridKey } from "./DistanceTransitTimeModel";
 
-type ControllerProps = {
+interface Args {
   model: DistanceTransitTimeModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useDistanceTransitTimeController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
+export function useDistanceTransitTimeController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => distanceTransitTimeApi.getList(params),
+    (params: Record<string, unknown>) => api.getList(params),
     [],
   );
 
-  const fetchHistory = useCallback(
-    (row: any) => {
-      if (!row) return;
-      const params = {
-        DIV_CD: row.DIV_CD,
-        FRM_LOC_ID: row.FRM_LOC_ID,
-        TO_LOC_ID: row.TO_LOC_ID,
-      };
-      distanceTransitTimeApi
-        .getHistoryList(params)
-        .then((res: any) =>
-          model.setHistoryRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-    },
-    [model],
-  );
-
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-      fetchHistory(row);
-    },
-    [model, fetchHistory],
+  const onMainGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("main", row, [
+        {
+          to: "history",
+          fetch: (r) =>
+            api.getHistoryList({
+              DIV_CD: r.DIV_CD,
+              FRM_LOC_ID: r.FRM_LOC_ID,
+              TO_LOC_ID: r.TO_LOC_ID,
+            }),
+        },
+      ]),
+    [base],
   );
 
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
-    [model],
+    [model.grids.main, onMainGridClick],
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) => {
-      apiCall().then(() => searchRef.current?.());
-    },
-    [searchRef],
+    (apiCall: () => Promise<any>) =>
+      apiCall().then(() => model.searchRef.current?.()),
+    [model.searchRef],
   );
 
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_CALC_DTTO",
-      label: "BTN_CALC_DTTO",
-      onClick: () =>
-        doAction(() =>
-          distanceTransitTimeApi.calculateWithMoveDistance(filtersRef.current),
-        ),
-    },
-    {
-      type: "button",
-      key: "BTN_CALC_DTTO_NS",
-      label: "BTN_CALC_DTTO_NS",
-      onClick: () =>
-        doAction(() =>
-          distanceTransitTimeApi.calculateWithoutMoveDistance(
-            filtersRef.current,
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_CALC_DTTO",
+        label: "BTN_CALC_DTTO",
+        onClick: () =>
+          doAction(() => api.calculateWithMoveDistance(model.filtersRef.current)),
+      },
+      {
+        type: "button",
+        key: "BTN_CALC_DTTO_NS",
+        label: "BTN_CALC_DTTO_NS",
+        onClick: () =>
+          doAction(() =>
+            api.calculateWithoutMoveDistance(model.filtersRef.current),
           ),
-        ),
-    },
-    {
-      type: "button",
-      key: "BTN_APPLY_TMAP_DIST",
-      label: "BTN_APPLY_TMAP_DIST",
-      onClick: () =>
-        doAction(() =>
-          distanceTransitTimeApi.applyMoveDistance(filtersRef.current),
-        ),
-    },
-    {
-      type: "button",
-      key: "BTN_ROUTE_SEARCH_OPTION",
-      label: "BTN_ROUTE_SEARCH_OPTION",
-      onClick: () =>
-        doAction(() =>
-          distanceTransitTimeApi.changeRouteOption(filtersRef.current),
-        ),
-    },
-    ...makeCommonActions({
-      add: true,
-      save: {
+      },
+      {
+        type: "button",
+        key: "BTN_APPLY_TMAP_DIST",
+        label: "BTN_APPLY_TMAP_DIST",
+        onClick: () =>
+          doAction(() => api.applyMoveDistance(model.filtersRef.current)),
+      },
+      {
+        type: "button",
+        key: "BTN_ROUTE_SEARCH_OPTION",
+        label: "BTN_ROUTE_SEARCH_OPTION",
+        onClick: () =>
+          doAction(() => api.changeRouteOption(model.filtersRef.current)),
+      },
+      ...makeCommonActions({
+        add: true,
+        save: {
+          onClick: (e: any) => {
+            const saveRows = dirtyRows(e.data);
+            if (saveRows.length === 0) return;
+            api.save(saveRows).then(() => model.searchRef.current?.());
+          },
+        },
+        excel: {
+          columns: MAIN_COLUMN_DEFS,
+          menuName: "거리/이동시간관리",
+          fetchFn: () => api.getList(model.filtersRef.current),
+          rows: model.grids.main.rows,
+        },
+      }),
+    ],
+    [doAction, model],
+  );
+
+  const historyActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_CALC_DTTO",
+        label: "BTN_CALC_DTTO",
+        onClick: () =>
+          doAction(() => api.calculateWithMoveDistance(model.filtersRef.current)),
+      },
+      {
+        type: "button",
+        key: "BTN_CALC_DTTO_NS",
+        label: "BTN_CALC_DTTO_NS",
+        onClick: () =>
+          doAction(() =>
+            api.calculateWithoutMoveDistance(model.filtersRef.current),
+          ),
+      },
+      {
+        type: "button",
+        key: "BTN_ADD",
+        label: "BTN_ADD",
+        onClick: () => {},
+      },
+      {
+        type: "button",
+        key: "BTN_SAVE",
+        label: "BTN_SAVE",
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
-          distanceTransitTimeApi
-            .save(saveRows)
-            .then(() => searchRef.current?.());
+          api.saveHistory(saveRows).then(() => {
+            const main = model.grids.main.selectedRef.current;
+            if (main) {
+              base.searchSub(
+                "history",
+                api.getHistoryList({
+                  DIV_CD: main.DIV_CD,
+                  FRM_LOC_ID: main.FRM_LOC_ID,
+                  TO_LOC_ID: main.TO_LOC_ID,
+                }),
+              );
+            }
+          });
         },
       },
-      excel: {
-        columns: MAIN_COLUMN_DEFS,
-        menuName: "거리/이동시간관리",
-        fetchFn: () => distanceTransitTimeApi.getList(filtersRef.current),
-        rows: model.gridData.rows,
-      },
-    }),
-  ];
-
-  const historyActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_CALC_DTTO",
-      label: "BTN_CALC_DTTO",
-      onClick: () =>
-        doAction(() =>
-          distanceTransitTimeApi.calculateWithMoveDistance(filtersRef.current),
-        ),
-    },
-    {
-      type: "button",
-      key: "BTN_CALC_DTTO_NS",
-      label: "BTN_CALC_DTTO_NS",
-      onClick: () =>
-        doAction(() =>
-          distanceTransitTimeApi.calculateWithoutMoveDistance(
-            filtersRef.current,
-          ),
-        ),
-    },
-    {
-      type: "button",
-      key: "BTN_ADD",
-      label: "BTN_ADD",
-      onClick: () => {},
-    },
-    {
-      type: "button",
-      key: "BTN_SAVE",
-      label: "BTN_SAVE",
-      onClick: (e: any) => {
-        const saveRows = dirtyRows(e.data);
-        if (saveRows.length === 0) return;
-        distanceTransitTimeApi
-          .saveHistory(saveRows)
-          .then(() => fetchHistory(model.selectedHeaderRowRef.current));
-      },
-    },
-  ];
+    ],
+    [doAction, model, base],
+  );
 
   return {
     fetchList,
     handleSearch,
-    handleRowClicked,
+    onMainGridClick,
     mainActions,
     historyActions,
   };

@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useConfirmDispatchModel } from "./ConfirmDispatchModel";
 import { useConfirmDispatchController } from "./ConfirmDispatchController";
@@ -20,29 +17,19 @@ import {
 export const MENU_CODE = "MENU_ASSIGN_CONFIRM";
 
 export default function ConfirmDispatch() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const model = useConfirmDispatchModel();
-  const ctrl = useConfirmDispatchController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useConfirmDispatchModel(MENU_CODE);
+  const ctrl = useConfirmDispatchController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CODE}
       defaultSizes={[50, 50]}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
@@ -54,13 +41,15 @@ export default function ConfirmDispatch() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="confirm-dispatch"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          {...ctrl.bind("config", MAIN_COLUMN_DEFS, {
-            actions: ctrl.mainActions,
-            codeMap: model.codeMap,
-          })}
+          {...model.bind("config")}
+          columnDefs={MAIN_COLUMN_DEFS()}
+          codeMap={model.codeMap}
+          actions={ctrl.mainActions}
+          onRowClicked={ctrl.onMainGridClick}
+          audit={false}
         />
       }
       detail={
@@ -75,15 +64,15 @@ export default function ConfirmDispatch() {
             ORDER: {
               columnDefs: ORDER_COLUMN_DEFS(),
               actions: ctrl.orderActions,
-              onRowClicked: ctrl.handleRowClicked.order,
+              onRowClicked: ctrl.onOrderGridClick,
             },
             RECEIPT: {
               columnDefs: RECEIPT_COLUMN_DEFS(),
-              actions: ctrl.actions.receipt ?? [],
+              actions: [],
             },
             HISTORY: {
               columnDefs: RECEIPT_HISTORY_COLUMN_DEFS(),
-              actions: ctrl.actions.receiptHistory ?? [],
+              actions: [],
             },
           }}
           rowData={{
@@ -100,7 +89,7 @@ export default function ConfirmDispatch() {
                   layoutType="plain"
                   columnDefs={ORDER_ITEM_COLUMN_DEFS()}
                   rowData={model.grids.orderItem.rows}
-                  actions={ctrl.actions.orderItem ?? []}
+                  actions={[]}
                 />
               );
             }

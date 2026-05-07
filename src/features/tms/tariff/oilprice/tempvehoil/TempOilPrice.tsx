@@ -1,11 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useTempOilPriceModel } from "./TempOilPriceModel";
 import { useTempOilPriceController } from "./TempOilPriceController";
@@ -14,33 +12,22 @@ import {
   OIL_PRICE_COLUMN_DEFS,
   PERIOD_COLUMN_DEFS,
 } from "./TempOilPriceColumns";
+
 export const MENU_CODE = "MENU_TEMP_VEH_OIL_PRICE_MGMT";
 
 export default function TempOilPrice() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useTempOilPriceModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
+  const model = useTempOilPriceModel(MENU_CODE);
   const activeTabRef = useRef<string>("REGISTER");
-
-  const ctrl = useTempOilPriceController({
-    model,
-    searchRef,
-    filtersRef,
-    activeTabRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const ctrl = useTempOilPriceController({ model, activeTabRef });
 
   return (
     <GridOnlyPage
+      menuCode={MENU_CODE}
       searchProps={{
-        meta,
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
@@ -53,7 +40,7 @@ export default function TempOilPrice() {
           ]}
           onTabChange={(k) => {
             activeTabRef.current = k;
-            searchRef.current?.();
+            model.searchRef.current?.();
           }}
           presets={{
             REGISTER: {
@@ -64,19 +51,21 @@ export default function TempOilPrice() {
                   defaultSizes={[25, 75]}
                   minSizes={[15, 40]}
                   handleThickness="1.5"
-                  storageKey="tempoil-register-split"
+                  storageKey={model.storageKeys.bottom}
                 >
                   <DataGrid
                     layoutType="plain"
                     columnDefs={MASTER_COLUMN_DEFS}
-                    rowData={model.masterRowData.rows}
+                    rowData={model.grids.master.rows}
                     actions={ctrl.masterActions}
-                    onRowClicked={ctrl.handleMasterRowClicked}
+                    onRowClicked={ctrl.onMasterRowClicked}
                   />
                   <DataGrid
                     layoutType="plain"
-                    columnDefs={OIL_PRICE_COLUMN_DEFS(model.setOilPriceRowData)}
-                    rowData={model.oilPriceRowData.rows}
+                    columnDefs={OIL_PRICE_COLUMN_DEFS(
+                      model.grids.oilPrice.setData,
+                    )}
+                    rowData={model.grids.oilPrice.rows}
                     actions={ctrl.oilPriceActions}
                   />
                 </SplitPane>
@@ -88,13 +77,13 @@ export default function TempOilPrice() {
             },
           }}
           rowData={{
-            PERIOD: model.periodRowData.rows,
+            PERIOD: model.grids.period.rows,
           }}
-          totalCount={model.periodRowData.totalCount}
-          currentPage={model.periodRowData.page}
+          totalCount={model.grids.period.data.totalCount}
+          currentPage={model.grids.period.data.page}
           pageSize={model.pageSize}
           onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => searchRef.current?.(page)}
+          onPageChange={(page) => model.searchRef.current?.(page)}
           actions={[]}
         />
       }

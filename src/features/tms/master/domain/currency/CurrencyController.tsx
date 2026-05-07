@@ -1,42 +1,37 @@
-// ──────────────────────────────────────────────────────────────────
-
-// ──────────────────────────────────────────────────────────────────
-import { useCallback, MutableRefObject } from "react";
-import { currencyApi } from "@/features/tms/master/domain/currency/CurrencyApi.ts";
-import { CurrencyModel } from "./CurrencyModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
 import { makeSaveAction } from "@/app/components/grid/commonActions";
+import { currencyApi } from "./CurrencyApi";
+import { MENU_CD } from "./Currency";
+import type { CurrencyModel, GridKey } from "./CurrencyModel";
 
-type ControllerProps = {
-  menuCd: string;
+interface Args {
   model: CurrencyModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useCurrencyController({
-  menuCd,
-  model,
-  filtersRef,
-}: ControllerProps) {
-  // ── fetchDispatchList (센차: mainInfo store proxy url) ────────
-  const fetchDispatchList = useCallback(
+export function useCurrencyController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
+  const fetchList = useCallback(
     (params: Record<string, unknown>) =>
-      currencyApi.getCurrencyList(menuCd, { ...params }),
+      currencyApi.getCurrencyList(MENU_CD, { ...params }),
     [],
   );
 
-  // 조회 완료 시 SearchFilters → DataGrid 데이터 전달 및 서브그리드 초기화
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
+      model.grids.main.setData(data);
     },
-    [model],
+    [model.grids.main],
   );
 
-  const mainActions = [makeSaveAction()];
+  const mainActions = useMemo(() => [makeSaveAction()], []);
+
+  // base 사용은 향후 확장 대비 (현재 화면 고유 액션 없음)
+  void base;
 
   return {
-    fetchDispatchList,
+    fetchList,
     handleSearch,
     mainActions,
   };

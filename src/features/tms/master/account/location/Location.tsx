@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useLocationModel } from "./LocationModel";
 import { useLocationController } from "./LocationController";
@@ -24,32 +21,22 @@ import {
   ETC_COLUMN_DEFS,
   ORDER_TYPE_PLAN_ID_COLUMN_DEFS,
 } from "./LocationColumns";
+
 export const MENU_CD = "MENU_LOCATION_MANAGER";
 
 export default function Location() {
-  const { meta, loading } = useSearchMeta(MENU_CD);
-  const model = useLocationModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useLocationController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useLocationModel(MENU_CD);
+  const ctrl = useLocationController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CD}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CD,
       }}
@@ -61,23 +48,15 @@ export default function Location() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="location"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
-          onRowClicked={ctrl.handleRowClicked}
+          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          audit={false}
         />
       }
       detail={
@@ -148,18 +127,18 @@ export default function Location() {
             },
           }}
           rowData={{
-            ENTRY_RESTRICTION: model.entryRestrictionRowData,
-            ASSIGNED_VEHICLE: model.assignedVehicleRowData,
-            DATE_PROHIBITION: model.dateProhibitionRowData,
-            REGISTERED_ZONE: model.registeredZoneRowData,
-            HOLIDAY: model.holidayRowData,
-            PREFERRED_CARRIER: model.preferredCarrierRowData,
-            ARRIVAL_REQUEST_TIME: model.arrivalRequestTimeRowData,
-            SMS: model.smsRowData,
-            LOCATION_ROLE: model.locationRoleRowData,
-            LOC_SALES: model.locSalesRowData,
-            ETC: model.etcRowData,
-            ORDER_TYPE_PLAN_ID: model.orderTypePlanIdRowData,
+            ENTRY_RESTRICTION: model.grids.entryRestriction.rows,
+            ASSIGNED_VEHICLE: model.grids.assignedVehicle.rows,
+            DATE_PROHIBITION: model.grids.dateProhibition.rows,
+            REGISTERED_ZONE: model.grids.registeredZone.rows,
+            HOLIDAY: model.grids.holiday.rows,
+            PREFERRED_CARRIER: model.grids.preferredCarrier.rows,
+            ARRIVAL_REQUEST_TIME: model.grids.arrivalRequestTime.rows,
+            SMS: model.grids.sms.rows,
+            LOCATION_ROLE: model.grids.locationRole.rows,
+            LOC_SALES: model.grids.locSales.rows,
+            ETC: model.grids.etc.rows,
+            ORDER_TYPE_PLAN_ID: model.grids.orderTypePlanId.rows,
           }}
           codeMap={model.codeMap}
           actions={[]}

@@ -4,7 +4,8 @@
 // 사용 방법
 // 1. 이 파일을 대상 폴더로 복사 후 파일명 교체 (예: FeatureColumns.tsx)
 // 2. 각 컬럼 headerName(LBL_*) / field / cellRenderer 를 실제 스펙에 맞게 교체
-// 3. 필요한 audit 컬럼만 standardAudit override 로 켜고 끌 것
+// 3. audit 컬럼(삭제/상태/생성자/생성일/수정자/수정일) 은 DataGrid 가 자동 추가.
+//    부분 토글이 필요하면 View 의 DataGrid 에 audit prop 으로 명시.
 //
 // 공통 패턴
 // - headerName 은 LBL_* 다국어 키 사용 (Lang.get 자동 적용)
@@ -12,13 +13,10 @@
 // - field 가 "_STS" 로 끝나면 자동 중앙 정렬
 // - type: "numeric" / dataType: "number" → 우측 정렬
 // - "No" headerName 은 자동 일련번호 + 고정 너비
-// - standardAudit: 삭제/상태/생성자/생성일/수정자/수정일 7-필드 audit 일괄 삽입
 // ────────────────────────────────────────────────────────────────
 
-import { standardAudit } from "@/app/components/grid/commonColumns";
-
-// ── 메인 그리드 컬럼 — standardAudit 기본 (전부 ON) ─────────────
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+// ── 메인 그리드 컬럼 — audit 자동 (model.bind 가 audit:true spread) ─
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
     type: "text",
@@ -35,14 +33,12 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     headerName: "LBL_USE_Y/N",
     field: "USE_YN",
   },
-  // 전부 ON — delete / rowStatus / insertPerson / insertDate / updatePerson / updateTime
-  ...standardAudit(setGridData),
 ];
 
-// ── 상세 그리드 컬럼 — updatePerson 만 끄기 ─────────────────────
+// ── 상세 그리드 컬럼 ───────────────────────────────────────────────
 // 공통코드 → 라벨 치환은 컬럼에 codeKey 만 지정하고,
 // DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
-export const DETAIL_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_XXX_CODE", field: "XXX_CD" },
   {
@@ -64,52 +60,42 @@ export const DETAIL_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "QTY",
     type: "numeric",
   },
-  // updatePerson 만 끄기 — 나머지는 그대로 ON
-  ...standardAudit(setGridData, { updatePerson: false }),
 ];
 
-// ── 서브 상세 그리드 컬럼 — updatePerson + updateTime 둘 다 끄기 ─
-export const SUB_DETAIL_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+// ── 서브 상세 그리드 컬럼 ──────────────────────────────────────────
+export const SUB_DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_XXX_CODE", field: "XXX_CD" },
   { type: "text", headerName: "LBL_XXX_NAME", field: "XXX_NM" },
-  // 여러 audit 필드 동시 끄기
-  ...standardAudit(setGridData, { updatePerson: false, updateTime: false }),
 ];
 
 // ────────────────────────────────────────────────────────────────
-// [참고] standardAudit 사용 예시 — 두 번째 인자로 부분 override
+// [참고] audit 컬럼 토글 — View 의 DataGrid prop 으로 제어
 //
-// // 1) 전부 ON (가장 많이 쓰는 패턴)
-// ...standardAudit(setGridData),
+// // 1) 자동 (model.bind 사용 시 default — 모두 ON)
+// <DataGrid {...model.bind("main")} columnDefs={MAIN_COLUMN_DEFS} />
 //
-// // 2) 한 필드만 끄기
-// ...standardAudit(setGridData, { updatePerson: false }),
+// // 2) updatePerson 만 끄기
+// <DataGrid
+//   {...model.bind("main")}
+//   columnDefs={MAIN_COLUMN_DEFS}
+//   audit={{ updatePerson: false }}
+// />
 //
 // // 3) 여러 필드 끄기
-// ...standardAudit(setGridData, { updatePerson: false, updateTime: false }),
+// <DataGrid
+//   {...model.bind("main")}
+//   columnDefs={MAIN_COLUMN_DEFS}
+//   audit={{ updatePerson: false, updateTime: false }}
+// />
 //
-// // 4) 삭제 비활성
-// ...standardAudit(setGridData, { delete: false }),
+// // 4) audit 자체 끄기
+// <DataGrid {...model.bind("main")} columnDefs={MAIN_COLUMN_DEFS} audit={false} />
 //
-// // 5) 컬럼 width / fieldType 같은 개별 override
-// ...standardAudit(setGridData, {
-//   insertPersonOverrides: { width: 110 },
-//   insertDateOverrides: { width: 150 },
-// }),
-//
-// // 6) setter 가 { rows, totalCount, page, limit } 객체 형태든 행 배열이든
-// //    그대로 넘기면 됨. standardAudit 가 prev 모양을 보고 알아서 처리.
-//
-// // 7) 변형이 너무 많으면 raw API 그대로 사용 가능
-// import { makeAuditColumns } from "@/app/components/grid/commonColumns";
-// ...makeAuditColumns({
-//   delete: true,
-//   deleteSetRowData: setGridData,
-//   rowStatus: true,
-//   rowStatusOverrides: { width: 100 },
-//   insertPerson: true,
-// }),
+// [참고] width / fieldType 같은 개별 override 는 standardAudit 직접 호출 권장:
+//   import { standardAudit } from "@/app/components/grid/commonColumns";
+//   const cols = [...MAIN_COLUMN_DEFS, ...standardAudit(model.grids.main.setData, {
+//     insertPersonOverrides: { width: 110 },
+//   })];
+//   <DataGrid columnDefs={cols} audit={false} ... />   // 자동 추가 끄기
 // ────────────────────────────────────────────────────────────────

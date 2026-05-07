@@ -1,194 +1,145 @@
-import { useCallback, MutableRefObject } from "react";
-import { locationApi } from "./LocationApi";
-import { LocationModel } from "./LocationModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { locationApi as api } from "./LocationApi";
 import { MAIN_COLUMN_DEFS } from "./LocationColumns";
 import {
   makeCommonActions,
-  makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { LocationModel, GridKey } from "./LocationModel";
 
-type ControllerProps = {
+const masterParam = (row: any) => ({ LOC_ID: row?.LOC_ID });
+
+interface Args {
   model: LocationModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useLocationController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
+export function useLocationController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => locationApi.getList(params),
+    (params: Record<string, unknown>) => api.getList(params),
     [],
   );
 
-  const fetchSubTabs = useCallback(
-    (row: any) => {
-      if (!row) return;
-      const params = { LOC_ID: row.LOC_ID };
-
-      locationApi
-        .getEntryRestrictionList(params)
-        .then((res: any) =>
-          model.setEntryRestrictionRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getAssignedVehicleList(params)
-        .then((res: any) =>
-          model.setAssignedVehicleRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getDateProhibitionList(params)
-        .then((res: any) =>
-          model.setDateProhibitionRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getRegisteredZoneList(params)
-        .then((res: any) =>
-          model.setRegisteredZoneRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getHolidayList(params)
-        .then((res: any) =>
-          model.setHolidayRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getPreferredCarrierList(params)
-        .then((res: any) =>
-          model.setPreferredCarrierRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getArrivalRequestTimeList(params)
-        .then((res: any) =>
-          model.setArrivalRequestTimeRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getSmsList(params)
-        .then((res: any) =>
-          model.setSmsRowData(res.data.result ?? res.data.data?.dsOut ?? []),
-        );
-      locationApi
-        .getLocationRoleList(params)
-        .then((res: any) =>
-          model.setLocationRoleRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getLocSalesList(params)
-        .then((res: any) =>
-          model.setLocSalesRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      locationApi
-        .getEtcList(params)
-        .then((res: any) =>
-          model.setEtcRowData(res.data.result ?? res.data.data?.dsOut ?? []),
-        );
-      locationApi
-        .getOrderTypePlanIdList(params)
-        .then((res: any) =>
-          model.setOrderTypePlanIdRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-    },
-    [model],
-  );
-
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-      fetchSubTabs(row);
-    },
-    [model, fetchSubTabs],
+  // master 클릭 → 12개 sub 동시 fetch
+  const onMainGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("main", row, [
+        {
+          to: "entryRestriction",
+          fetch: (r) => api.getEntryRestrictionList(masterParam(r)),
+        },
+        {
+          to: "assignedVehicle",
+          fetch: (r) => api.getAssignedVehicleList(masterParam(r)),
+        },
+        {
+          to: "dateProhibition",
+          fetch: (r) => api.getDateProhibitionList(masterParam(r)),
+        },
+        {
+          to: "registeredZone",
+          fetch: (r) => api.getRegisteredZoneList(masterParam(r)),
+        },
+        { to: "holiday", fetch: (r) => api.getHolidayList(masterParam(r)) },
+        {
+          to: "preferredCarrier",
+          fetch: (r) => api.getPreferredCarrierList(masterParam(r)),
+        },
+        {
+          to: "arrivalRequestTime",
+          fetch: (r) => api.getArrivalRequestTimeList(masterParam(r)),
+        },
+        { to: "sms", fetch: (r) => api.getSmsList(masterParam(r)) },
+        {
+          to: "locationRole",
+          fetch: (r) => api.getLocationRoleList(masterParam(r)),
+        },
+        { to: "locSales", fetch: (r) => api.getLocSalesList(masterParam(r)) },
+        { to: "etc", fetch: (r) => api.getEtcList(masterParam(r)) },
+        {
+          to: "orderTypePlanId",
+          fetch: (r) => api.getOrderTypePlanIdList(masterParam(r)),
+        },
+      ]),
+    [base],
   );
 
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
-      handleRowClicked(data.rows?.[0]);
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
-    [model, handleRowClicked],
+    [model.grids.main, onMainGridClick],
   );
 
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_VIEW_BY_MAP",
-      label: "BTN_VIEW_BY_MAP",
-      onClick: () => {},
-    },
-    {
-      type: "button",
-      key: "BTN_EDIT_LATLON",
-      label: "BTN_EDIT_LATLON",
-      onClick: () => {},
-    },
-    {
-      type: "button",
-      key: "BTN_ADD_ASSIGNED_VEHICLE",
-      label: "BTN_ADD_ASSIGNED_VEHICLE",
-      onClick: () => {},
-    },
-    {
-      type: "button",
-      key: "BTN_ADD_ZONE",
-      label: "BTN_ADD_ZONE",
-      onClick: () => {},
-    },
-    ...makeCommonActions({
-      add: true,
-      save: {
-        onClick: (e: any) => {
-          const saveRows = dirtyRows(e.data);
-          if (saveRows.length === 0) return;
-          locationApi.save(saveRows).then(() => searchRef.current?.());
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_VIEW_BY_MAP",
+        label: "BTN_VIEW_BY_MAP",
+        onClick: () => {},
+      },
+      {
+        type: "button",
+        key: "BTN_EDIT_LATLON",
+        label: "BTN_EDIT_LATLON",
+        onClick: () => {},
+      },
+      {
+        type: "button",
+        key: "BTN_ADD_ASSIGNED_VEHICLE",
+        label: "BTN_ADD_ASSIGNED_VEHICLE",
+        onClick: () => {},
+      },
+      {
+        type: "button",
+        key: "BTN_ADD_ZONE",
+        label: "BTN_ADD_ZONE",
+        onClick: () => {},
+      },
+      ...makeCommonActions({
+        add: true,
+        save: {
+          onClick: (e: any) => {
+            const saveRows = dirtyRows(e.data);
+            if (saveRows.length === 0) return;
+            api.save(saveRows).then(() => model.searchRef.current?.());
+          },
         },
-      },
-      excel: {
-        columns: MAIN_COLUMN_DEFS,
-        menuName: "착지관리",
-        fetchFn: () => locationApi.getList(filtersRef.current),
-        rows: model.gridData.rows,
-      },
-    }),
-  ];
+        excel: {
+          columns: MAIN_COLUMN_DEFS,
+          menuName: "착지관리",
+          fetchFn: () => api.getList(model.filtersRef.current),
+          rows: model.grids.main.rows,
+        },
+      }),
+    ],
+    [model],
+  );
 
-  const subActions = makeCommonActions({
-    add: true,
-    save: true,
-    excel: {
-      columns: [],
-      menuName: "착지관리",
-      fetchFn: () => Promise.resolve({ data: { rows: [] } } as any),
-      rows: [],
-    },
-  });
+  const subActions = useMemo(
+    () =>
+      makeCommonActions({
+        add: true,
+        save: true,
+        excel: {
+          columns: [],
+          menuName: "착지관리",
+          fetchFn: () => Promise.resolve({ data: { rows: [] } } as any),
+          rows: [],
+        },
+      }),
+    [],
+  );
 
   return {
     fetchList,
     handleSearch,
-    handleRowClicked,
+    onMainGridClick,
     mainActions,
     subActions,
   };

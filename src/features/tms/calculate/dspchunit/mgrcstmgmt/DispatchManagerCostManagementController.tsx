@@ -1,150 +1,132 @@
-import { useCallback, MutableRefObject } from "react";
-import { dispatchManagerCostApi } from "./DispatchManagerCostManagementApi";
-import { DispatchManagerCostModel } from "./DispatchManagerCostManagementModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { dispatchManagerCostApi as api } from "./DispatchManagerCostManagementApi";
 import { MAIN_COLUMN_DEFS } from "./DispatchManagerCostManagementColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { DispatchManagerCostModel, GridKey } from "./DispatchManagerCostManagementModel";
 
-type ControllerProps = {
+const masterParam = (row: any) => ({
+  DSPCH_NO: row?.DSPCH_NO,
+  AP_ID: row?.AP_ID,
+  DEFAULT_TYPE: row?.DEFAULT_TYPE,
+});
+
+interface Args {
   model: DispatchManagerCostModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useDispatchManagerCostController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
+export function useDispatchManagerCostController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => dispatchManagerCostApi.getList(params),
+    (params: Record<string, unknown>) => api.getList(params),
     [],
   );
 
-  const fetchSubTabs = useCallback(
-    (row: any) => {
-      if (!row) return;
-      const params = {
-        DSPCH_NO: row.DSPCH_NO,
-        AP_ID: row.AP_ID,
-        DEFAULT_TYPE: row.DEFAULT_TYPE,
-      };
-      dispatchManagerCostApi
-        .getCostDetailList(params)
-        .then((res: any) =>
-          model.setCostDetailRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-      dispatchManagerCostApi
-        .getWaypointList(params)
-        .then((res: any) =>
-          model.setWaypointRowData(
-            res.data.result ?? res.data.data?.dsOut ?? [],
-          ),
-        );
-    },
-    [model],
-  );
-
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-      fetchSubTabs(row);
-    },
-    [model, fetchSubTabs],
+  const onMainGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("main", row, [
+        {
+          to: "costDetail",
+          fetch: (r) => api.getCostDetailList(masterParam(r)),
+        },
+        {
+          to: "waypoint",
+          fetch: (r) => api.getWaypointList(masterParam(r)),
+        },
+      ]),
+    [base],
   );
 
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
-      handleRowClicked(data.rows?.[0]);
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
-    [model, handleRowClicked],
+    [model.grids.main, onMainGridClick],
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) => {
-      apiCall().then(() => searchRef.current?.());
-    },
-    [searchRef],
+    (apiCall: () => Promise<any>) =>
+      apiCall().then(() => model.searchRef.current?.()),
+    [model.searchRef],
   );
 
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_RATE_OP_CONFIRM_CANCEL",
-      label: "BTN_RATE_OP_CONFIRM_CANCEL",
-      onClick: () =>
-        doAction(() =>
-          dispatchManagerCostApi.cancelOperatorConfirm(filtersRef.current),
-        ),
-    },
-    {
-      type: "button",
-      key: "BTN_RATE_MG_CONFIRM",
-      label: "BTN_RATE_MG_CONFIRM",
-      onClick: () =>
-        doAction(() =>
-          dispatchManagerCostApi.approveByManager(filtersRef.current),
-        ),
-    },
-    {
-      type: "button",
-      key: "BTN_RATE_MG_CONFIRM_CANCEL",
-      label: "BTN_RATE_MG_CONFIRM_CANCEL",
-      onClick: () =>
-        doAction(() =>
-          dispatchManagerCostApi.cancelManagerApprove(filtersRef.current),
-        ),
-    },
-    {
-      type: "button",
-      key: "BTN_RATE_CLOSE",
-      label: "BTN_RATE_CLOSE",
-      onClick: () =>
-        doAction(() => dispatchManagerCostApi.closeCost(filtersRef.current)),
-    },
-    {
-      type: "button",
-      key: "BTN_RATE_CLOSE_CANCEL",
-      label: "BTN_RATE_CLOSE_CANCEL",
-      onClick: () =>
-        doAction(() =>
-          dispatchManagerCostApi.cancelCostClose(filtersRef.current),
-        ),
-    },
-    makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
-      menuName: "배차단위정산승인/마감",
-      fetchFn: () => dispatchManagerCostApi.getList(filtersRef.current),
-      rows: model.gridData.rows,
-    }),
-  ];
+  const refetchSubTabs = useCallback(() => {
+    const row = model.grids.main.selectedRef.current;
+    if (row) onMainGridClick(row);
+  }, [model.grids.main, onMainGridClick]);
 
-  const costDetailActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_SAVE",
-      label: "BTN_SAVE",
-      onClick: (e: any) => {
-        const saveRows = dirtyRows(e.data);
-        if (saveRows.length === 0) return;
-        dispatchManagerCostApi
-          .saveCostDetail(saveRows)
-          .then(() => fetchSubTabs(model.selectedHeaderRowRef.current));
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_RATE_OP_CONFIRM_CANCEL",
+        label: "BTN_RATE_OP_CONFIRM_CANCEL",
+        onClick: () =>
+          doAction(() => api.cancelOperatorConfirm(model.filtersRef.current)),
       },
-    },
-  ];
+      {
+        type: "button",
+        key: "BTN_RATE_MG_CONFIRM",
+        label: "BTN_RATE_MG_CONFIRM",
+        onClick: () =>
+          doAction(() => api.approveByManager(model.filtersRef.current)),
+      },
+      {
+        type: "button",
+        key: "BTN_RATE_MG_CONFIRM_CANCEL",
+        label: "BTN_RATE_MG_CONFIRM_CANCEL",
+        onClick: () =>
+          doAction(() => api.cancelManagerApprove(model.filtersRef.current)),
+      },
+      {
+        type: "button",
+        key: "BTN_RATE_CLOSE",
+        label: "BTN_RATE_CLOSE",
+        onClick: () => doAction(() => api.closeCost(model.filtersRef.current)),
+      },
+      {
+        type: "button",
+        key: "BTN_RATE_CLOSE_CANCEL",
+        label: "BTN_RATE_CLOSE_CANCEL",
+        onClick: () =>
+          doAction(() => api.cancelCostClose(model.filtersRef.current)),
+      },
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS,
+        menuName: "배차단위정산승인/마감",
+        fetchFn: () => api.getList(model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
+    [doAction, model],
+  );
 
-  const waypointActions: any[] = [];
+  const costDetailActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_SAVE",
+        label: "BTN_SAVE",
+        onClick: (e: any) => {
+          const saveRows = dirtyRows(e.data);
+          if (saveRows.length === 0) return;
+          api.saveCostDetail(saveRows).then(() => refetchSubTabs());
+        },
+      },
+    ],
+    [refetchSubTabs],
+  );
+
+  const waypointActions: any[] = useMemo(() => [], []);
 
   return {
     fetchList,
     handleSearch,
-    handleRowClicked,
+    onMainGridClick,
     mainActions,
     costDetailActions,
     waypointActions,

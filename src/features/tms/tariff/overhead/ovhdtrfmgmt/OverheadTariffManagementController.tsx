@@ -1,203 +1,120 @@
-// ────────────────────────────────────────────────────────────────
-// [가이드] Controller 템플릿
-//
-// 사용 방법
-// 1. 이 파일을 대상 폴더로 복사 후 파일명 교체 (예: FeatureController.tsx)
-// 2. 모델 타입 / API import / 함수명 교체
-// 3. mainActions / detailActions 는 makeCommonActions 또는 개별 팩토리로 구성
-//
-// 공통 패턴
-// - fetchXxxList: 조회 API 호출 (SearchFilters → fetchFn)
-// - handleSearch: 조회 완료 시 상태 업데이트 + 서브그리드 초기화
-// - handleRowClicked: 행 선택 시 상세/서브 그리드 재조회
-// - makeAddAction / makeSaveAction / makeExcelGroupAction:
-//   개별 버튼 팩토리 — onClick 커스터마이즈 필요할 때
-// - makeCommonActions: 추가/저장/엑셀 3종 세트 일괄 구성
-// ────────────────────────────────────────────────────────────────
-
-import { useCallback, MutableRefObject } from "react";
-import { overheadTariffManagementApi } from "./OverheadTariffManagementApi";
-import { OverheadTariffManagementModel } from "./OverheadTariffManagementModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { overheadTariffManagementApi as api } from "./OverheadTariffManagementApi";
 import { MAIN_COLUMN_DEFS } from "./OverheadTariffManagementColumns";
-import {
-  makeAddAction,
-  makeSaveAction,
-  makeExcelGroupAction,
-  makeCommonActions,
-} from "@/app/components/grid/commonActions";
-import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
+import { makeCommonActions } from "@/app/components/grid/commonActions";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { OverheadTariffManagementModel, GridKey } from "./OverheadTariffManagementModel";
 
-type ControllerProps = {
+interface Args {
   model: OverheadTariffManagementModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useOverheadTariffManagementController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
-  // ── 조회 API (SearchFilters 가 넘겨주는 params 를 그대로 전달) ─
+export function useOverheadTariffManagementController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
-    (params: Record<string, unknown>) =>
-      overheadTariffManagementApi.getList(params),
+    (params: Record<string, unknown>) => api.getList(params),
     [],
   );
 
-  // ── 조회 완료 콜백 (onSearch) ─────────────────────────────────
-  // SearchFilters 조회 성공 → gridData 업데이트 + 서브 그리드 리셋
+  const onSubChgRowClicked = useCallback(
+    (row: any) =>
+      base.handleRowClick("subChg", row, [
+        {
+          to: "subChgDtl",
+          fetch: (r) =>
+            api.getSubChgDtlList({
+              TRF_CD: r.TRF_CD,
+              LGST_GRP_CD: r.LGST_GRP_CD,
+            }),
+        },
+      ]),
+    [base],
+  );
+
+  const onMainGridClick = useCallback(
+    async (row: any) => {
+      model.grids.main.setSelected(row);
+      base.resetGrids(["subChg", "subChgDtl"]);
+      if (!row) return;
+      const subRows = await base.searchSub(
+        "subChg",
+        api.getSubChgList({ TRF_CD: row.TRF_CD }),
+      );
+      if (subRows[0]) onSubChgRowClicked(subRows[0]);
+    },
+    [model, base, onSubChgRowClicked],
+  );
+
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
-      // 최초 행 자동 선택하고 상세까지 로딩하고 싶을 때
-      handleRowClicked(data.rows?.[0]);
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
-    [model],
+    [model.grids.main, onMainGridClick],
   );
 
-  // ── 상세trfCd 데이터 fetch ─────────────────────────────────────────
-  const fetchSubChg = useCallback((row: any) => {
-    const trfCd = row?.TRF_CD;
-    if (!trfCd) return Promise.resolve([]);
-    return overheadTariffManagementApi
-      .getSubChgList({ TRF_CD: trfCd })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
+  const handleDetailAdd = useCallback(() => {
+    const main = model.grids.main.selectedRef.current;
+    if (!main) return;
+    base.addRow("subChgDtl", { XXX_CD: main.XXX_CD });
+  }, [model, base]);
 
-  const fetchSubChgDetail = useCallback((row: any) => {
-    const trfCd = row?.TRF_CD;
-    const lgstGrpCd = row?.LGST_GRP_CD;
-    if (!(trfCd && lgstGrpCd)) return Promise.resolve([]);
-    return overheadTariffManagementApi
-      .getSubChgDtlList({ TRF_CD: trfCd, LGST_GRP_CD: lgstGrpCd })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
+  const handleDetailSave = useCallback(() => {
+    const rows = model.grids.subChgDtl.ref.current?.rows ?? [];
+    const dirty = dirtyRows(rows);
+    if (dirty.length === 0) return;
+    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
+  }, [model]);
 
-  // ── 메인 행 클릭 → 상세 그리드 리로드 ─────────────────────────
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-
-      fetchSubChg(row).then((rows: any) => {
-        model.setSubLeftDetailRowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: model.pageSize,
-        });
-
-        handleSubRowClicked(rows[0]);
-      });
-    },
-    [model],
-  );
-
-  const handleSubRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-
-      fetchSubChgDetail(row).then((rows: any) => {
-        model.setSubRightDetailRowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: model.pageSize,
-        });
-      });
-    },
-    [model],
-  );
-
-  // ── 메인 그리드 액션 ──────────────────────────────────────────
-  // 추가 + 저장 + 엑셀 일괄 세팅이 필요하면 makeCommonActions 사용
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "계약서복사",
-      label: "계약서복사",
-      onClick: () => {},
-    },
-    ...makeCommonActions({
-      add: true,
-      save: true,
-      excel: {
-        columns: MAIN_COLUMN_DEFS(),
-        menuName: "화면명",
-        fetchFn: () => overheadTariffManagementApi.getList(filtersRef.current),
-        rows: model.gridData.rows,
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "계약서복사",
+        label: "계약서복사",
+        onClick: () => {},
       },
-    }),
-  ];
-
-  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
-  const saveDetail = useCallback(
-    (payload: any) =>
-      overheadTariffManagementApi.save({ dsSave: payload.dsSave }),
-    [],
+      ...makeCommonActions({
+        add: true,
+        save: true,
+        excel: {
+          columns: MAIN_COLUMN_DEFS(),
+          menuName: "기타요금관리",
+          fetchFn: () => api.getList(model.filtersRef.current),
+          rows: model.grids.main.rows,
+        },
+      }),
+    ],
+    [model],
   );
 
-  // ── 상세 그리드 추가/저장 (LanguagePack 패턴) ─────────────────
-  const handleDetailAdd = useGridAdd({
-    setRows: model.setSubRightDetailRowData,
-    newRow: () => ({
-      XXX_CD: model.selectedHeaderRowRef.current?.XXX_CD,
-    }),
-    position: "bottom",
-  });
-
-  const handleDetailSave = useGridSave({
-    rows: model.subRightDetailRowData.rows,
-    setRows: model.setSubRightDetailRowData,
-    saveFn: saveDetail,
-    onSaved: () => searchRef.current?.(),
-  });
-
-  // ── 상세 그리드 액션 (onClick 커스터마이즈 예시) ──────────────
-  const detailActions = [
-    makeAddAction({ onClick: handleDetailAdd }),
-    makeSaveAction({ onClick: handleDetailSave }),
-  ];
+  const detailActions = useMemo(
+    () => [
+      {
+        type: "button" as const,
+        key: "BTN_ADD",
+        label: "BTN_ADD",
+        onClick: handleDetailAdd,
+      },
+      {
+        type: "button" as const,
+        key: "BTN_SAVE",
+        label: "BTN_SAVE",
+        onClick: handleDetailSave,
+      },
+    ],
+    [handleDetailAdd, handleDetailSave],
+  );
 
   return {
     fetchList,
     handleSearch,
-    handleRowClicked,
+    onMainGridClick,
+    onSubChgRowClicked,
     mainActions,
     detailActions,
-    handleSubRowClicked,
   };
 }
-
-// ────────────────────────────────────────────────────────────────
-// [참고] 공통 버튼 팩토리 API
-//
-// makeAddAction({ onClick?, label?, key?, disabled? })
-// makeSaveAction({ onClick?, label?, key?, disabled? })
-//   - onClick 생략 시 no-op (e: any) => {}
-//   - label / key 생략 시 "추가" / "저장"
-//
-// makeExcelGroupAction({ columns, menuName, fetchFn, rows, hideAll?, hideVisible? })
-//   - hideAll: true  → "조회된모든데이터다운로드" 버튼 숨김
-//   - hideVisible: true → "보이는데이터다운로드" 버튼 숨김
-//
-// makeCommonActions({ add?, save?, excel? })
-//   - add / save: true 또는 { onClick, ... } 객체
-//   - excel: ExcelGroupActionConfig 객체 (미지정 시 엑셀 그룹 제외)
-//
-// 기존 커스텀 버튼과 혼용 예시
-//   const mainActions = [
-//     { type: "button", key: "동기화", label: "동기화", onClick: ... },
-//     makeAddAction({ onClick: handleAdd }),
-//     makeSaveAction({ onClick: handleSave }),
-//     makeExcelGroupAction({ ... }),
-//   ];
-// ────────────────────────────────────────────────────────────────

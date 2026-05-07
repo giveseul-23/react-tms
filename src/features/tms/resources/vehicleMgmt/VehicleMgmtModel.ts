@@ -1,65 +1,38 @@
 // src/views/vehicleMgmt/VehicleMgmtModel.ts
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
 // 운영상태 컬러맵
 export const VEH_OP_STS_COLOR_MAP: Record<string, string> = {
-  "100": "bg-emerald-100 text-emerald-700", // 운영중
-  "200": "bg-amber-100 text-amber-700", // 휴차
-  "300": "bg-red-100 text-red-700", // 폐차
-};
-
-export type GridData = {
-  rows: any[];
-  totalCount: number;
-  page: number;
-  limit: number;
+  "100": "bg-emerald-100 text-emerald-700",
+  "200": "bg-amber-100 text-amber-700",
+  "300": "bg-red-100 text-red-700",
 };
 
 export type DetailMode = "view" | "edit" | "new";
 
-export function useVehicleMgmtModel() {
-  // ── 페이징 ───────────────────────────────────────────────────
-  const [pageSize, setPageSize] = useState(500);
+export type GridKey = "main";
 
-  // ── 메인 그리드 데이터 ───────────────────────────────────────
-  const [gridData, setGridData] = useState<GridData>({
-    rows: [],
-    totalCount: 0,
-    page: 1,
-    limit: 20,
-  });
-
-  // ── 선택 행 ──────────────────────────────────────────────────
-  const [selectedRow, setSelectedRow] = useState<any>(null);
-  const selectedRowRef = useRef<any>(null);
-
-  const setSelectedRowWithRef = useCallback((row: any) => {
-    setSelectedRow(row);
-    selectedRowRef.current = row;
-  }, []);
+export function useVehicleMgmtModel(menuCode: string) {
+  const base = useBaseModel<GridKey>(menuCode);
 
   // ── 상세 패널 ────────────────────────────────────────────────
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailMode, setDetailMode] = useState<DetailMode>("view");
   const [detailData, setDetailData] = useState<any>({});
-
-  // ── 상세 패널 네비게이션 인덱스 ──────────────────────────────
   const [detailIndex, setDetailIndex] = useState(-1);
-
-  // ── 네비게이션 로딩 ──────────────────────────────────────────
   const [navigating, setNavigating] = useState(false);
 
-  // ── 신규 등록 슬라이드 오버레이 ──────────────────────────────
+  // ── 신규 등록 슬라이드 ────────────────────────────────────────
   const [newSlideOpen, setNewSlideOpen] = useState(false);
   const [newFormData, setNewFormData] = useState<any>({});
 
-  // ── 상세 패널 닫기 ───────────────────────────────────────────
   const closeDetail = useCallback(() => {
     setDetailOpen(false);
-    setSelectedRowWithRef(null);
+    base.grids.main.setSelected(null);
     setDetailIndex(-1);
-  }, [setSelectedRowWithRef]);
+  }, [base.grids.main]);
 
   // ── 공통 코드 스토어 ─────────────────────────────────────────
   const { stores } = useCommonStores({
@@ -81,7 +54,6 @@ export function useVehicleMgmtModel() {
     vehDspchTp: { sqlProp: "CODE", keyParam: "VEH_DISPATCH_TP" },
   });
 
-  // 코드 → 명칭 변환맵
   const codeMap = useMemo(() => {
     const map: Record<string, Record<string, string>> = {};
     Object.entries(stores).forEach(([storeKey, items]) => {
@@ -94,17 +66,7 @@ export function useVehicleMgmtModel() {
   }, [stores]);
 
   return {
-    // paging
-    pageSize,
-    setPageSize,
-    // main grid
-    gridData,
-    setGridData,
-    // selected row
-    selectedRow,
-    setSelectedRow: setSelectedRowWithRef,
-    selectedRowRef,
-    // detail panel
+    ...base,
     detailOpen,
     setDetailOpen,
     detailMode,
@@ -116,12 +78,10 @@ export function useVehicleMgmtModel() {
     navigating,
     setNavigating,
     closeDetail,
-    // new slide
     newSlideOpen,
     setNewSlideOpen,
     newFormData,
     setNewFormData,
-    // code maps
     codeMap,
     stores,
   };

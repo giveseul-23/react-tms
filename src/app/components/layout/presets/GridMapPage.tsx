@@ -13,6 +13,8 @@ import type { SearchProps } from "./types";
 import type { LayoutType } from "../LayoutToggleButton";
 
 export interface GridMapPageProps {
+  /** menuCode 전달 시 SearchMeta 자동 로드 + loading skeleton 자동. */
+  menuCode?: string;
   searchProps: SearchProps;
   grid: ReactNode;
   map: ReactNode;
@@ -25,6 +27,7 @@ export interface GridMapPageProps {
 }
 
 export function GridMapPage({
+  menuCode,
   searchProps,
   grid,
   map,
@@ -36,6 +39,7 @@ export function GridMapPage({
 }: GridMapPageProps) {
   return (
     <MasterDetailPage
+      menuCode={menuCode}
       searchProps={searchProps}
       master={grid}
       detail={map}

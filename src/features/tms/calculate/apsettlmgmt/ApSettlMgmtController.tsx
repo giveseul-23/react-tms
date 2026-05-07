@@ -1,52 +1,98 @@
-// 화면 고유 Controller — useGridController 베이스 훅에 featureConfig 주입.
-// 화면 고유 액션(생성/취소/저장 등)은 base.actions 에 합성해 추가 반환.
+// src/features/tms/calculate/apsettlmgmt/ApSettlMgmtController.tsx
+//
+// useBaseController 가 callAjax/saveGrid/searchSub/handleRowClick/...등 제공.
+// master 행 클릭 시 8개 sub 그리드 동시 fetch (fan-out cascade).
 
-import { MutableRefObject, useMemo, useCallback } from "react";
-import { useGridController } from "@/hooks/useGridFeature/useGridController";
-import { apSettlMgmtApi } from "./ApSettlMgmtApi";
-import {
-  apSettlMgmtFeatureConfig,
-  type ApSettlMgmtModel,
-} from "./ApSettlMgmtModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { apSettlMgmtApi as api } from "./ApSettlMgmtApi";
 import { MAIN_COLUMN_DEFS } from "./ApSettlMgmtColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { ApSettlMgmtModel, GridKey } from "./ApSettlMgmtModel";
 
-interface ControllerArgs {
+const masterChildParamMap = (row: any) => ({
+  AP_SETL_ID: row?.AP_SETL_ID,
+  LGST_GRP_CD: row?.LGST_GRP_CD,
+});
+
+interface Args {
   model: ApSettlMgmtModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
 }
 
-export function useApSettlMgmtController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerArgs) {
-  const base = useGridController({
-    config: apSettlMgmtFeatureConfig,
-    model,
-    searchRef,
-    filtersRef,
-  });
+export function useApSettlMgmtController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
 
-  const doAction = useCallback(
-    (apiCall: () => Promise<any>) => {
-      apiCall().then(() => searchRef.current?.());
-    },
-    [searchRef],
+  // ── 메인 fetch ────────────────────────────────────────────────
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => api.getList(params),
+    [],
   );
 
-  // master(config) 자식 그리드만 재조회 (코스트센터 저장 후 등에 사용)
-  const refetchSubTabs = useCallback(() => {
-    const row = model.selected.config?.ref.current;
-    if (row) {
-      // base 의 cascade 가 row 클릭 시 발화되는 로직과 동일 — 단순히 master row 클릭 핸들러 호출
-      base.handleRowClicked.config(row);
-    }
-  }, [base.handleRowClicked, model.selected.config]);
+  // ── 메인 행 클릭 — 8개 sub 동시 fetch ──────────────────────────
+  const onMainGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("config", row, [
+        {
+          to: "summary",
+          fetch: (r) => api.getSummaryList(masterChildParamMap(r)),
+        },
+        {
+          to: "monthlyFare",
+          fetch: (r) => api.getMonthlyFareList(masterChildParamMap(r)),
+        },
+        {
+          to: "hireDispatchPay",
+          fetch: (r) => api.getHireDispatchPayList(masterChildParamMap(r)),
+        },
+        {
+          to: "freightPay",
+          fetch: (r) => api.getFreightPayList(masterChildParamMap(r)),
+        },
+        {
+          to: "indirectPay",
+          fetch: (r) => api.getIndirectPayList(masterChildParamMap(r)),
+        },
+        {
+          to: "costCenter",
+          fetch: (r) => api.getEachCostOrGlList(masterChildParamMap(r)),
+        },
+        {
+          to: "materialCost",
+          fetch: (r) => api.getEachItmCostList(masterChildParamMap(r)),
+        },
+        {
+          to: "evidence",
+          fetch: (r) => api.getDocFileList(masterChildParamMap(r)),
+        },
+      ]),
+    [base],
+  );
 
+  // ── 메인 조회 콜백 — 첫 행 자동 선택 + cascade ─────────────────
+  const handleSearch = useCallback(
+    (data: any) => {
+      model.grids.config.setData(data);
+      onMainGridClick(data?.rows?.[0]);
+    },
+    [model.grids.config, onMainGridClick],
+  );
+
+  // ── 액션 헬퍼: API 호출 후 메인 재조회 ────────────────────────
+  const doAction = useCallback(
+    (apiCall: () => Promise<any>) =>
+      apiCall().then(() => model.searchRef.current?.()),
+    [model.searchRef],
+  );
+
+  // ── master 자식 그리드만 재조회 (코스트센터 저장 후 등) ─────
+  const refetchSubTabs = useCallback(() => {
+    const row = model.grids.config.selectedRef.current;
+    if (row) onMainGridClick(row);
+  }, [model.grids.config, onMainGridClick]);
+
+  // ── master 그리드 액션 ────────────────────────────────────────
   const mainActions: ActionItem[] = useMemo(
     () => [
       {
@@ -54,14 +100,14 @@ export function useApSettlMgmtController({
         key: "BTN_AP_SETTLEMENT_CREATE",
         label: "BTN_AP_SETTLEMENT_CREATE",
         onClick: () =>
-          doAction(() => apSettlMgmtApi.createClose(filtersRef.current)),
+          doAction(() => api.createClose(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_AP_SETTLEMENT_DELETE",
         label: "BTN_AP_SETTLEMENT_DELETE",
         onClick: () =>
-          doAction(() => apSettlMgmtApi.cancelClose(filtersRef.current)),
+          doAction(() => api.cancelClose(model.filtersRef.current)),
       },
       {
         type: "dropdown",
@@ -88,7 +134,7 @@ export function useApSettlMgmtController({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
-          apSettlMgmtApi.save(saveRows).then(() => searchRef.current?.());
+          api.save(saveRows).then(() => model.searchRef.current?.());
         },
       },
       {
@@ -98,30 +144,32 @@ export function useApSettlMgmtController({
         onClick: () => {},
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
+        columns: MAIN_COLUMN_DEFS as any,
         menuName: "매입정산관리",
-        fetchFn: () => apSettlMgmtApi.getList(filtersRef.current),
+        fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.config.rows,
       }),
     ],
-    [filtersRef, searchRef, doAction, model.grids.config.rows],
+    [doAction, model],
   );
 
+  // ── 종합내역 탭 액션 ──────────────────────────────────────────
   const summaryActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
         columns: [],
         menuName: "종합내역",
         fetchFn: () =>
-          apSettlMgmtApi.getSummaryList({
-            CLOSE_ID: model.selected.config?.ref.current?.CLOSE_ID,
+          api.getSummaryList({
+            CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
           }),
         rows: model.grids.summary.rows,
       }),
     ],
-    [model.selected.config, model.grids.summary.rows],
+    [model],
   );
 
+  // ── 코스트센터 탭 액션 ────────────────────────────────────────
   const costCenterActions: ActionItem[] = useMemo(
     () => [
       {
@@ -129,11 +177,9 @@ export function useApSettlMgmtController({
         key: "BTN_COST_ACCOUNT_ADD",
         label: "BTN_COST_ACCOUNT_ADD",
         onClick: () => {
-          const row = model.selected.config?.ref.current;
+          const row = model.grids.config.selectedRef.current;
           if (!row) return;
-          doAction(() =>
-            apSettlMgmtApi.addCostCenter({ CLOSE_ID: row.CLOSE_ID }),
-          );
+          doAction(() => api.addCostCenter({ CLOSE_ID: row.CLOSE_ID }));
         },
       },
       {
@@ -143,39 +189,39 @@ export function useApSettlMgmtController({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
-          apSettlMgmtApi
-            .saveCostCenter(saveRows)
-            .then(() => refetchSubTabs());
+          api.saveCostCenter(saveRows).then(() => refetchSubTabs());
         },
       },
       makeExcelGroupAction({
         columns: [],
         menuName: "코스트센터/계정별내역",
         fetchFn: () =>
-          apSettlMgmtApi.getCostCenterList({
-            CLOSE_ID: model.selected.config?.ref.current?.CLOSE_ID,
+          api.getCostCenterList({
+            CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
           }),
         rows: model.grids.costCenter.rows,
       }),
     ],
-    [doAction, refetchSubTabs, model.selected.config, model.grids.costCenter.rows],
+    [doAction, refetchSubTabs, model],
   );
 
+  // ── 원재료비 탭 액션 ──────────────────────────────────────────
   const materialCostActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
         columns: [],
         menuName: "원재료비내역",
         fetchFn: () =>
-          apSettlMgmtApi.getMaterialCostList({
-            CLOSE_ID: model.selected.config?.ref.current?.CLOSE_ID,
+          api.getMaterialCostList({
+            CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
           }),
         rows: model.grids.materialCost.rows,
       }),
     ],
-    [model.selected.config, model.grids.materialCost.rows],
+    [model],
   );
 
+  // ── 증빙 탭 액션 ──────────────────────────────────────────────
   const evidenceActions: ActionItem[] = useMemo(
     () => [
       {
@@ -185,7 +231,7 @@ export function useApSettlMgmtController({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
-          apSettlMgmtApi.save(saveRows).then(() => searchRef.current?.());
+          api.save(saveRows).then(() => model.searchRef.current?.());
         },
       },
       {
@@ -195,11 +241,13 @@ export function useApSettlMgmtController({
         onClick: () => {},
       },
     ],
-    [searchRef],
+    [model],
   );
 
   return {
-    ...base,
+    fetchList,
+    handleSearch,
+    onMainGridClick,
     mainActions,
     summaryActions,
     costCenterActions,

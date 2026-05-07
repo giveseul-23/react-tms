@@ -1,8 +1,7 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
+// 컬럼 끝의 standardAudit 은 DataGrid 가 audit prop(model.bind 자동) 으로 추가.
+// CNFG_HEADER / CNFG_DETAIL 는 audit 없는 컬럼 — View 에서 audit={false} 명시.
 
-export const CNFG_HEADER_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const CNFG_HEADER_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_GRP_CD",
@@ -15,9 +14,7 @@ export const CNFG_HEADER_COLUMN_DEFS = (
   },
 ];
 
-export const CNFG_DETAIL_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const CNFG_DETAIL_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_CD",
@@ -30,7 +27,8 @@ export const CNFG_DETAIL_COLUMN_DEFS = (
   },
 ];
 
-export const DETAIL_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+// DETAIL 만 audit 컬럼 사용 — DataGrid 자동 추가 (model.bind 의 audit:true).
+export const DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_LGST_GRP_CNFG_CD", field: "CNFG_CD" },
   {
@@ -44,5 +42,4 @@ export const DETAIL_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "LGST_GRP_NM",
   },
   { type: "text", headerName: "LBL_SETTING_VAL", field: "CNFG_DTL_CD" },
-  ...standardAudit(setGridData),
 ];

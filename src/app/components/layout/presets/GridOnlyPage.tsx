@@ -10,20 +10,31 @@ import { PageShell } from "../PageShell";
 import { Pane } from "../Pane";
 import { SearchFilters } from "@/app/components/Search/SearchFilters";
 import { LayoutToggleButton } from "../LayoutToggleButton";
+import { useResolvedSearchMeta } from "@/app/feature/useResolvedSearchMeta";
 import type { SearchProps } from "./types";
 
 export interface GridOnlyPageProps {
+  /** menuCode 전달 시 SearchMeta 자동 로드 + loading skeleton 자동. */
+  menuCode?: string;
   searchProps: SearchProps;
   /** 메인 그리드 (또는 임의 콘텐츠) */
   grid: ReactNode;
 }
 
-export function GridOnlyPage({ searchProps, grid }: GridOnlyPageProps) {
+export function GridOnlyPage({
+  menuCode,
+  searchProps,
+  grid,
+}: GridOnlyPageProps) {
+  const { meta, gate } = useResolvedSearchMeta(menuCode, searchProps.meta);
+  if (gate) return <>{gate}</>;
+  const finalSearchProps: SearchProps = { ...searchProps, meta };
+
   return (
     <PageShell
       searchSlot={
         <SearchFilters
-          {...searchProps}
+          {...finalSearchProps}
           layoutToggle={
             <LayoutToggleButton
               layout="side"

@@ -19,9 +19,12 @@ import {
   FormSidePanel,
   type FormNavProps,
 } from "../FormSheet";
+import { useResolvedSearchMeta } from "@/app/feature/useResolvedSearchMeta";
 import type { SearchProps } from "./types";
 
 export interface GridFormPageProps {
+  /** menuCode 전달 시 SearchMeta 자동 로드 + loading skeleton 자동. */
+  menuCode?: string;
   searchProps: SearchProps;
   /** 메인 그리드 */
   grid: ReactNode;
@@ -43,12 +46,21 @@ export interface GridFormPageProps {
   };
 }
 
-export function GridFormPage({ searchProps, grid, form }: GridFormPageProps) {
+export function GridFormPage({
+  menuCode,
+  searchProps,
+  grid,
+  form,
+}: GridFormPageProps) {
+  const { meta, gate } = useResolvedSearchMeta(menuCode, searchProps.meta);
+  if (gate) return <>{gate}</>;
+  const finalSearchProps: SearchProps = { ...searchProps, meta };
+
   return (
     <PageShell
       searchSlot={
         <SearchFilters
-          {...searchProps}
+          {...finalSearchProps}
           layoutToggle={
             <LayoutToggleButton
               layout="side"

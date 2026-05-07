@@ -1,8 +1,7 @@
-import { useCallback, MutableRefObject } from "react";
-import { tempOilPriceApi } from "./TempOilPriceApi";
-import { TempOilPriceModel } from "./TempOilPriceModel";
+import { useCallback, useMemo, MutableRefObject } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { tempOilPriceApi as api } from "./TempOilPriceApi";
 import {
-  MASTER_COLUMN_DEFS,
   OIL_PRICE_COLUMN_DEFS,
   PERIOD_COLUMN_DEFS,
 } from "./TempOilPriceColumns";
@@ -12,138 +11,100 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
-import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
+import type { TempOilPriceModel, GridKey } from "./TempOilPriceModel";
 
-type ControllerProps = {
+interface Args {
   model: TempOilPriceModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
   activeTabRef: MutableRefObject<string>;
-};
+}
 
-export function useTempOilPriceController({
-  model,
-  searchRef,
-  filtersRef,
-  activeTabRef,
-}: ControllerProps) {
-  // ── 조회 API: 활성 탭 기준으로 분기 ───────────────────────────
+export function useTempOilPriceController({ model, activeTabRef }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
     (params: Record<string, unknown>) => {
       if (activeTabRef.current === "PERIOD") {
-        return tempOilPriceApi.getTempOilPriceByPeriod(params);
+        return api.getTempOilPriceByPeriod(params);
       }
-      return tempOilPriceApi.getList(params);
+      return api.getList(params);
     },
     [activeTabRef],
   );
 
-  // ── 조회 완료 콜백 ───────────────────────────────────────────
-  // 활성 탭에 해당하는 state 만 세팅
+  const onMasterRowClicked = useCallback(
+    (row: any) =>
+      base.handleRowClick("master", row, [
+        {
+          to: "oilPrice",
+          fetch: (r) => api.getTempOilPrice({ LGST_GRP_CD: r.LGST_GRP_CD }),
+        },
+      ]),
+    [base],
+  );
+
   const handleSearch = useCallback(
     (data: any) => {
-      const gridData = {
-        rows: data.rows ?? [],
-        totalCount: data.totalCount ?? data.rows?.length ?? 0,
-        page: data.page ?? 1,
-        limit: data.limit ?? model.pageSize,
-      };
-
       if (activeTabRef.current === "PERIOD") {
-        model.setPeriodRowData(gridData);
+        model.grids.period.setData(data);
         return;
       }
-
-      // 기본: 유가등록 탭
-      model.setMasterRowData(gridData);
-      model.resetSubGrids();
-      handleMasterRowClicked(data.rows?.[0]);
+      model.grids.master.setData(data);
+      onMasterRowClicked(data?.rows?.[0]);
     },
-    [model, activeTabRef],
+    [model, activeTabRef, onMasterRowClicked],
   );
 
-  // ── 탭 A 우측: 선택된 그룹의 유가 상세 fetch ──────────────────
-  const fetchOilPriceList = useCallback((row: any) => {
-    const lgstGrpCd = row?.LGST_GRP_CD;
-    if (!lgstGrpCd) return Promise.resolve([]);
-    return tempOilPriceApi
-      .getTempOilPrice({ LGST_GRP_CD: lgstGrpCd })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
+  const handleOilPriceAdd = useCallback(() => {
+    const main = model.grids.master.selectedRef.current;
+    if (!main) return;
+    base.addRow("oilPrice", {
+      LGST_GRP_CD: main.LGST_GRP_CD,
+      LGST_GRP_NM: main.LGST_GRP_NM,
+    });
+  }, [model, base]);
 
-  // ── 좌측 행 클릭 → 우측 재조회 ────────────────────────────────
-  const handleMasterRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
+  const handleOilPriceSave = useCallback(() => {
+    const rows = model.grids.oilPrice.ref.current?.rows ?? [];
+    const dirty = dirtyRows(rows);
+    if (dirty.length === 0) return;
+    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
+  }, [model]);
 
-      fetchOilPriceList(row).then((rows: any) => {
-        model.setOilPriceRowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: model.pageSize,
-        });
-      });
-    },
+  const oilPriceActions = useMemo(
+    () => [
+      makeAddAction({ onClick: handleOilPriceAdd }),
+      makeSaveAction({ onClick: handleOilPriceSave }),
+      makeExcelGroupAction({
+        columns: OIL_PRICE_COLUMN_DEFS,
+        menuName: "용차유가관리",
+        fetchFn: () => api.getTempOilPrice(model.filtersRef.current),
+        rows: model.grids.oilPrice.rows,
+      }),
+    ],
+    [handleOilPriceAdd, handleOilPriceSave, model],
+  );
+
+  const masterActions: any[] = useMemo(() => [], []);
+
+  const periodActions = useMemo(
+    () =>
+      makeCommonActions({
+        excel: {
+          columns: PERIOD_COLUMN_DEFS,
+          menuName: "용차유가 기간별조회",
+          fetchFn: () =>
+            api.getTempOilPriceByPeriod(model.filtersRef.current),
+          rows: model.grids.period.rows,
+        },
+      }),
     [model],
   );
-
-  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
-  const saveOilPrice = useCallback(
-    (payload: any) => tempOilPriceApi.save({ dsSave: payload.dsSave }),
-    [],
-  );
-
-  // ── 탭 A 우측 추가/저장 (LanguagePack 패턴) ───────────────────
-  const handleOilPriceAdd = useGridAdd({
-    setRows: model.setOilPriceRowData,
-    newRow: () => ({
-      LGST_GRP_CD: model.selectedHeaderRowRef.current?.LGST_GRP_CD,
-      LGST_GRP_NM: model.selectedHeaderRowRef.current?.LGST_GRP_NM,
-    }),
-    position: "bottom",
-  });
-
-  const handleOilPriceSave = useGridSave({
-    rows: model.oilPriceRowData.rows,
-    setRows: model.setOilPriceRowData,
-    saveFn: saveOilPrice,
-    onSaved: () => searchRef.current?.(),
-  });
-
-  // ── 탭 A 우측 액션: 추가 / 저장 / 엑셀 ────────────────────────
-  const oilPriceActions = [
-    makeAddAction({ onClick: handleOilPriceAdd }),
-    makeSaveAction({ onClick: handleOilPriceSave }),
-    makeExcelGroupAction({
-      columns: OIL_PRICE_COLUMN_DEFS,
-      menuName: "용차유가관리",
-      fetchFn: () => tempOilPriceApi.getTempOilPrice(filtersRef.current),
-      rows: model.oilPriceRowData.rows,
-    }),
-  ];
-
-  // ── 탭 A 좌측 액션: 없음 (단순 선택 목록) ─────────────────────
-  const masterActions: any[] = [];
-
-  // ── 탭 B 액션: 엑셀만 ─────────────────────────────────────────
-  const periodActions = makeCommonActions({
-    excel: {
-      columns: PERIOD_COLUMN_DEFS,
-      menuName: "용차유가 기간별조회",
-      fetchFn: () =>
-        tempOilPriceApi.getTempOilPriceByPeriod(filtersRef.current),
-      rows: model.periodRowData.rows,
-    },
-  });
 
   return {
     fetchList,
     handleSearch,
-    handleMasterRowClicked,
+    onMasterRowClicked,
     masterActions,
     oilPriceActions,
     periodActions,

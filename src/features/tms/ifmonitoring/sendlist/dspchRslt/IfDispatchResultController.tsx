@@ -1,58 +1,57 @@
-import { useCallback, MutableRefObject } from "react";
-import { ifDispatchResultApi } from "./IfDispatchResultApi";
-import { IfDispatchResultModel } from "./IfDispatchResultModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { ifDispatchResultApi as api } from "./IfDispatchResultApi";
 import { MAIN_COLUMN_DEFS } from "./IfDispatchResultColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { IfDispatchResultModel, GridKey } from "./IfDispatchResultModel";
 
-type ControllerProps = {
+interface Args {
   model: IfDispatchResultModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useIfDispatchResultController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
+export function useIfDispatchResultController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
     (params: Record<string, unknown>) =>
-      ifDispatchResultApi.getList({ userTz: "Asia/Seoul", ...params }),
+      api.getList({ userTz: "Asia/Seoul", ...params }),
     [],
   );
 
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
+      model.grids.main.setData(data);
     },
+    [model.grids.main],
+  );
+
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_REPRO",
+        label: "BTN_REPRO",
+        onClick: () =>
+          api
+            .reprocess(model.filtersRef.current)
+            .then(() => model.searchRef.current?.()),
+      },
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS,
+        menuName: "배차결과송신내역",
+        fetchFn: () => api.getList(model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
     [model],
   );
 
-  const handleRowClicked = useCallback(() => {}, []);
-
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_REPRO",
-      label: "BTN_REPRO",
-      onClick: () =>
-        ifDispatchResultApi
-          .reprocess(filtersRef.current)
-          .then(() => searchRef.current?.()),
-    },
-    makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
-      menuName: "배차결과송신내역",
-      fetchFn: () => ifDispatchResultApi.getList(filtersRef.current),
-      rows: model.gridData.rows,
-    }),
-  ];
+  void base;
 
   return {
     fetchList,
     handleSearch,
-    handleRowClicked,
     mainActions,
   };
 }

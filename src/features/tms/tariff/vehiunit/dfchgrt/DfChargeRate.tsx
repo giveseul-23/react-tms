@@ -1,31 +1,9 @@
 "use client";
 
-// ────────────────────────────────────────────────────────────────
-// [가이드] 신규 화면 템플릿
-//
-// 사용 방법
-// 1. 이 파일을 대상 폴더로 복사 후 파일명 / 컴포넌트명을 교체
-//    예) Guide_Feature.tsx → YourFeature.tsx
-// 2. MENU_CODE 상수값을 메뉴 코드로 교체
-// 3. import 경로를 실제 파일명에 맞게 수정
-// 4. Guide_FeatureColumns / Guide_FeatureController / Guide_FeatureModel
-//    3세트를 함께 교체할 것
-//
-// 포함하는 공통 패턴
-// - MasterDetailPage 기반 Master/Detail 레이아웃
-// - 레이아웃 토글 (side / vertical)
-// - SearchMeta 훅을 통한 조회 조건 자동 구성
-// - pageSize / currentPage / totalCount 연동 페이지네이션
-// - DataGrid 공통 props
-// ────────────────────────────────────────────────────────────────
-
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useDfChargeRateModel } from "./DfChargeRateModel";
 import { useDfChargeRateController } from "./DfChargeRateController";
@@ -37,34 +15,22 @@ import {
   RT_ITM_VEH_TP_COLUMN_DEFS,
   RT_ITM_VEH_COLUMN_DEFS,
 } from "./DfChargeRateColumns";
+
 export const MENU_CODE = "MENU_DF_RATE_MGMT";
 
-export default function Feature() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useDfChargeRateModel();
-
-  // ── 조회 trigger / 조회 조건 / 검색 영역에서 제외할 key ────────
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useDfChargeRateController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+export default function DfChargeRate() {
+  const model = useDfChargeRateModel(MENU_CODE);
+  const ctrl = useDfChargeRateController({ model });
 
   return (
     <MasterDetailPage
-      // 초기 Master/Detail 비율 (합=100)
+      menuCode={MENU_CODE}
       defaultSizes={[40, 60]}
       searchProps={{
-        meta,
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
@@ -76,23 +42,14 @@ export default function Feature() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      // localStorage 에 레이아웃/사이즈 저장용 고유 키 (화면별 유일값)
-      storageKey="guide-feature"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS(model.setGridData)}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
-          onRowClicked={ctrl.handleRowClicked}
+          {...model.bind("main")}
+          columnDefs={MAIN_COLUMN_DEFS(model.grids.main.setData)}
+          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          audit={false}
         />
       }
       detail={
@@ -101,7 +58,7 @@ export default function Feature() {
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
-          storageKey="guide-feature-sub"
+          storageKey={model.storageKeys.bottom}
         >
           <DataGrid
             layoutType="tab"
@@ -112,26 +69,26 @@ export default function Feature() {
             ]}
             presets={{
               RT_ITM: {
-                columnDefs: RT_ITM_COLUMN_DEFS([], model.setSubRtItemRowData),
+                columnDefs: RT_ITM_COLUMN_DEFS([], model.grids.rtItem.setData),
                 actions: ctrl.detailActions,
-                onRowClicked: ctrl.handleSubRowClicked,
+                onRowClicked: ctrl.onRtItemRowClicked,
               },
               RT_CARR: {
-                columnDefs: RT_CARR_COLUMN_DEFS([], model.setSubRtCarrRowData),
+                columnDefs: RT_CARR_COLUMN_DEFS([], model.grids.rtCarr.setData),
                 actions: ctrl.detailActions,
               },
               RT_VEH_TP: {
                 columnDefs: RT_VEH_TP_COLUMN_DEFS(
                   [],
-                  model.setSubRtVehTpRowData,
+                  model.grids.rtVehTp.setData,
                 ),
                 actions: ctrl.detailActions,
               },
             }}
             rowData={{
-              RT_ITM: model.subRtItemRowData,
-              RT_CARR: model.subRtCarrRowData,
-              RT_VEH_TP: model.subRtVehTpRowData,
+              RT_ITM: model.grids.rtItem.rows,
+              RT_CARR: model.grids.rtCarr.rows,
+              RT_VEH_TP: model.grids.rtVehTp.rows,
             }}
             actions={[]}
           />
@@ -145,21 +102,21 @@ export default function Feature() {
               RT_ITM_VEH_TP: {
                 columnDefs: RT_ITM_VEH_TP_COLUMN_DEFS(
                   [],
-                  model.setSubRtItemVehTpRowData,
+                  model.grids.rtItemVehTp.setData,
                 ),
                 actions: ctrl.detailActions,
               },
               RT_ITM_VEH: {
                 columnDefs: RT_ITM_VEH_COLUMN_DEFS(
                   [],
-                  model.setSubRtItemVehRowData,
+                  model.grids.rtItemVeh.setData,
                 ),
                 actions: ctrl.detailActions,
               },
             }}
             rowData={{
-              RT_ITM_VEH_TP: model.subRtItemVehTpRowData,
-              RT_ITM_VEH: model.subRtItemVehRowData,
+              RT_ITM_VEH_TP: model.grids.rtItemVehTp.rows,
+              RT_ITM_VEH: model.grids.rtItemVeh.rows,
             }}
             actions={[]}
           />
@@ -168,37 +125,3 @@ export default function Feature() {
     />
   );
 }
-
-// ────────────────────────────────────────────────────────────────
-// [참고] SplitPane 으로 detail 영역을 더 분할할 때의 예시
-//
-// import { SplitPane } from "@/app/components/layout/SplitPane";
-//
-// detail={
-//   <SplitPane
-//     direction="vertical"
-//     defaultSizes={[50, 50]}
-//     minSizes={[25, 25]}
-//     handleThickness="1.5"
-//     storageKey="guide-feature-sub"
-//   >
-//     <DataGrid ... />
-//     <DataGrid
-//       layoutType="tab"
-//       tabs={[
-//         { key: "TAB_A", label: "탭 A" },
-//         { key: "TAB_B", label: "탭 B" },
-//       ]}
-//       presets={{
-//         TAB_A: { columnDefs: TAB_A_COLUMN_DEFS, actions: ctrl.tabAActions },
-//         TAB_B: { columnDefs: TAB_B_COLUMN_DEFS, actions: ctrl.tabBActions },
-//       }}
-//       rowData={{
-//         TAB_A: model.tabARowData,
-//         TAB_B: model.tabBRowData,
-//       }}
-//       actions={[]}
-//     />
-//   </SplitPane>
-// }
-// ────────────────────────────────────────────────────────────────

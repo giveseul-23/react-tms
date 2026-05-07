@@ -1,11 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useDistanceTransitTimeModel } from "./DistanceTransitTimeModel";
 import { useDistanceTransitTimeController } from "./DistanceTransitTimeController";
@@ -13,33 +10,23 @@ import {
   MAIN_COLUMN_DEFS,
   HISTORY_COLUMN_DEFS,
 } from "./DistanceTransitTimeColumns";
+
 export const MENU_CD = "MENU_DTTO_MGMT";
 
 export default function DistanceTransitTime() {
-  const { meta, loading } = useSearchMeta(MENU_CD);
-  const model = useDistanceTransitTimeModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useDistanceTransitTimeController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useDistanceTransitTimeModel(MENU_CD);
+  const ctrl = useDistanceTransitTimeController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CD}
       defaultSizes={[55, 45]}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CD,
       }}
@@ -51,34 +38,26 @@ export default function DistanceTransitTime() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="distance-transit-time"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
-          onRowClicked={ctrl.handleRowClicked}
+          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           autoSelectFirstRow
           rowKeys={["DIV_CD", "FRM_LOC_ID", "TO_LOC_ID"]}
+          audit={false}
         />
       }
       detail={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("history")}
           columnDefs={HISTORY_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.historyRowData}
           actions={ctrl.historyActions}
+          audit={false}
         />
       }
     />

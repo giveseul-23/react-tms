@@ -1,4 +1,4 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+// 컬럼 끝의 audit 은 DataGrid 가 audit prop(model.bind 자동) 으로 추가.
 
 export const MAIN_COLUMN_DEFS = [
   {
@@ -16,14 +16,6 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_USE_Y/N",
     field: "USE_YN",
   },
-  ...makeAuditColumns({
-    delete: true,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];
 
 export const DETAIL_COLUMN_DEFS = [
@@ -38,12 +30,4 @@ export const DETAIL_COLUMN_DEFS = [
   },
   { type: "text", headerName: "LBL_RECEIVER_ID", field: "USR_ID" },
   { type: "text", headerName: "LBL_RECEIVER_NM", field: "USR_NM" },
-  ...makeAuditColumns({
-    delete: true,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];

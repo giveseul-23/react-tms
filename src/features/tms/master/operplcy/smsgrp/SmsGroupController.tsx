@@ -1,76 +1,50 @@
-// ──────────────────────────────────────────────────────────────────
-import { useCallback, MutableRefObject } from "react";
-import { smsGroupApi } from "./SmsGroupApi";
-import { SmsGroupModel } from "./SmsGroupModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
-  makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import { smsGroupApi as api } from "./SmsGroupApi";
+import type { SmsGroupModel, GridKey } from "./SmsGroupModel";
 
-type ControllerProps = {
+interface Args {
   model: SmsGroupModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useSmsGroupController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
-  const fetchSmsGroupList = useCallback(
-    (params: Record<string, unknown>) => smsGroupApi.getSmsGroupList(params),
+export function useSmsGroupController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => api.getSmsGroupList(params),
     [],
   );
 
-  // ── handleSearch (센차: onMainInfoCallback + gridsReset) ──────
-  // 조회 완료 시 SearchFilters → DataGrid 데이터 전달 및 서브그리드 초기화
+  const onMainGridClick = useCallback(
+    (row: any) =>
+      base.handleRowClick("main", row, [
+        {
+          to: "detail",
+          fetch: (r) => api.getSmsGroupDetailList({ SMS_GRP_CD: r.SMS_GRP_CD }),
+        },
+      ]),
+    [base],
+  );
+
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data.rows);
-      model.resetSubGrids();
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
-    [model],
+    [model.grids.main, onMainGridClick],
   );
 
-  const fetchDetail = useCallback((row: any) => {
-    const smsGrpCd = row.SMS_GRP_CD;
-    if (!smsGrpCd) return Promise.resolve([]);
-    return smsGroupApi
-      .getSmsGroupDetailList({
-        SMS_GRP_CD: smsGrpCd,
-      })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.setSelectedHeaderRow(row);
-
-      fetchDetail(row).then((rows: any) => {
-        model.setSubDetailRowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: 20,
-        });
-      });
-    },
-    [model],
-  );
-
-  const mainActions = [makeAddAction(), makeSaveAction()];
-
-  const detailActions = [makeAddAction(), makeSaveAction()];
+  const mainActions = useMemo(() => [makeAddAction(), makeSaveAction()], []);
+  const detailActions = useMemo(() => [makeAddAction(), makeSaveAction()], []);
 
   return {
-    fetchSmsGroupList,
+    fetchList,
     handleSearch,
-    handleRowClicked,
+    onMainGridClick,
     mainActions,
     detailActions,
   };

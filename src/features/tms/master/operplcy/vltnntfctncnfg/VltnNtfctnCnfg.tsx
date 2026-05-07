@@ -1,47 +1,34 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useVltnNtfctnCnfgModel } from "./VltnNtfctnCnfgModel.ts";
-import { useVltnNtfctnCnfgController } from "./VltnNtfctnCnfgController.tsx";
+import { useVltnNtfctnCnfgModel } from "./VltnNtfctnCnfgModel";
+import { useVltnNtfctnCnfgController } from "./VltnNtfctnCnfgController";
 import {
   MAIN_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
   NTFC_CHANNEL_COLUMN_DEFS,
   NTFC_TARGET_COLUMN_DEFS,
-} from "./VltnNtfctnCnfgColumns.tsx";
+} from "./VltnNtfctnCnfgColumns";
+
 export const MENU_CODE = "MENU_VLTN_NTFCTN_CNFG";
 
-export default function TenderReceiveDispatch() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useVltnNtfctnCnfgModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useVltnNtfctnCnfgController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+export default function VltnNtfctnCnfg() {
+  const model = useVltnNtfctnCnfgModel(MENU_CODE);
+  const ctrl = useVltnNtfctnCnfgController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CODE}
       defaultSizes={[20, 80]}
       searchProps={{
-        meta,
-        fetchFn: ctrl.fetchDispatchList,
+        fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
@@ -53,13 +40,12 @@ export default function TenderReceiveDispatch() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="division-default-dispatch"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
-          rowData={model.gridData.rows}
-          onRowClicked={ctrl.handleRowClicked}
+          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
         />
       }
@@ -69,15 +55,14 @@ export default function TenderReceiveDispatch() {
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
-          storageKey="country-sub"
+          storageKey={model.storageKeys.bottom}
         >
           <DataGrid
-            layoutType="plain"
+            {...model.bind("detail")}
             columnDefs={DETAIL_COLUMN_DEFS}
             codeMap={model.codeMap}
-            rowData={model.subDetailRowData}
             actions={ctrl.detailActions}
-            onRowClicked={ctrl.handleSubRowClicked}
+            onRowClicked={ctrl.onDetailGridClick}
           />
           <DataGrid
             layoutType="tab"
@@ -97,8 +82,8 @@ export default function TenderReceiveDispatch() {
               },
             }}
             rowData={{
-              CHANNEL: model.subChannelRowData,
-              TARGET: model.subTargetRowData,
+              CHANNEL: model.grids.channel.rows,
+              TARGET: model.grids.target.rows,
             }}
             actions={[]}
           />

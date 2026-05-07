@@ -1,54 +1,47 @@
 // src/views/vehicleMgmt/VehicleMgmtController.tsx
-import { useCallback, MutableRefObject } from "react";
-import { vehicleMgmtApi } from "@/features/tms/resources/vehicleMgmt/vehicleMgmtApi.ts";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { vehicleMgmtApi as api } from "./vehicleMgmtApi";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
-import { VehicleMgmtModel } from "./VehicleMgmtModel.ts";
-import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns.tsx";
+import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { VehicleMgmtModel, GridKey } from "./VehicleMgmtModel";
 
-type ControllerProps = {
+interface Args {
   model: VehicleMgmtModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useVehicleMgmtController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
+export function useVehicleMgmtController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
   const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
   const { guardHasData } = useGuard();
 
-  // ── fetchVehicleList (조회 API) ──────────────────────────────
-  const fetchVehicleList = useCallback(
-    (params: Record<string, unknown>) => vehicleMgmtApi.getVehicleList(params),
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => api.getVehicleList(params),
     [],
   );
 
-  // ── handleSearch (조회 결과 콜백) ────────────────────────────
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
+      model.grids.main.setData(data);
       model.closeDetail();
     },
     [model],
   );
 
-  // ── handleRowClicked (행 클릭 → 상세 패널 열기) ──────────────
   const handleRowClicked = useCallback(
     (row: any) => {
-      const localIdx = model.gridData.rows.findIndex(
+      const data = model.grids.main.data;
+      const localIdx = data.rows.findIndex(
         (r: any) => r.VEH_ID === row.VEH_ID,
       );
-      const globalIdx =
-        (model.gridData.page - 1) * model.gridData.limit + localIdx;
-      model.setSelectedRow(row);
+      const globalIdx = (data.page - 1) * data.limit + localIdx;
+      model.grids.main.setSelected(row);
       model.setDetailData({ ...row });
       model.setDetailMode("edit");
       model.setDetailIndex(globalIdx);
@@ -57,30 +50,27 @@ export function useVehicleMgmtController({
     [model],
   );
 
-  // ── handleNavigate (상세 패널 이전/다음 — 페이지 넘김 지원) ──
   const handleNavigate = useCallback(
     async (dir: number) => {
+      const data = model.grids.main.data;
       const nextGlobalIdx = model.detailIndex + dir;
-      if (nextGlobalIdx < 0 || nextGlobalIdx >= model.gridData.totalCount)
-        return;
+      if (nextGlobalIdx < 0 || nextGlobalIdx >= data.totalCount) return;
 
-      const pageSize = model.gridData.limit;
-      const currentPage = model.gridData.page;
+      const pageSize = data.limit;
+      const currentPage = data.page;
       const nextPage = Math.floor(nextGlobalIdx / pageSize) + 1;
       const localIdx = nextGlobalIdx % pageSize;
 
       if (nextPage === currentPage) {
-        // 같은 페이지 내 이동
-        const nextRow = model.gridData.rows[localIdx];
-        model.setSelectedRow(nextRow);
+        const nextRow = data.rows[localIdx];
+        model.grids.main.setSelected(nextRow);
         model.setDetailData({ ...nextRow });
         model.setDetailIndex(nextGlobalIdx);
       } else {
-        // 다른 페이지 → API 호출
         try {
           model.setNavigating(true);
-          const res: any = await vehicleMgmtApi.getVehicleList({
-            ...filtersRef.current,
+          const res: any = await api.getVehicleList({
+            ...model.filtersRef.current,
             page: nextPage,
             limit: pageSize,
           });
@@ -91,7 +81,7 @@ export function useVehicleMgmtController({
             [];
           const nextRow = rows[localIdx];
           if (nextRow) {
-            model.setSelectedRow(nextRow);
+            model.grids.main.setSelected(nextRow);
             model.setDetailData({ ...nextRow });
             model.setDetailIndex(nextGlobalIdx);
           }
@@ -100,31 +90,31 @@ export function useVehicleMgmtController({
         }
       }
     },
-    [model, filtersRef],
+    [model],
   );
 
-  // ── handleJumpTo (번호 직접 입력 → 해당 행 이동) ─────────────
   const handleJumpTo = useCallback(
     async (targetNum: number) => {
+      const data = model.grids.main.data;
       const globalIdx = targetNum - 1;
-      if (globalIdx < 0 || globalIdx >= model.gridData.totalCount) return;
+      if (globalIdx < 0 || globalIdx >= data.totalCount) return;
       if (globalIdx === model.detailIndex) return;
 
-      const pageSize = model.gridData.limit;
-      const currentPage = model.gridData.page;
+      const pageSize = data.limit;
+      const currentPage = data.page;
       const targetPage = Math.floor(globalIdx / pageSize) + 1;
       const localIdx = globalIdx % pageSize;
 
       if (targetPage === currentPage) {
-        const row = model.gridData.rows[localIdx];
-        model.setSelectedRow(row);
+        const row = data.rows[localIdx];
+        model.grids.main.setSelected(row);
         model.setDetailData({ ...row });
         model.setDetailIndex(globalIdx);
       } else {
         try {
           model.setNavigating(true);
-          const res: any = await vehicleMgmtApi.getVehicleList({
-            ...filtersRef.current,
+          const res: any = await api.getVehicleList({
+            ...model.filtersRef.current,
             page: targetPage,
             limit: pageSize,
           });
@@ -135,7 +125,7 @@ export function useVehicleMgmtController({
             [];
           const row = rows[localIdx];
           if (row) {
-            model.setSelectedRow(row);
+            model.grids.main.setSelected(row);
             model.setDetailData({ ...row });
             model.setDetailIndex(globalIdx);
           }
@@ -144,20 +134,17 @@ export function useVehicleMgmtController({
         }
       }
     },
-    [model, filtersRef],
+    [model],
   );
 
-  // ── handleSaveDetail (상세 패널 저장) ────────────────────────
   const handleSaveDetail = useCallback(() => {
     const data = model.detailData;
     if (!data.VEH_NO?.trim()) return;
-
-    handleApi(vehicleMgmtApi.updateVehicle(data), "저장되었습니다.").then(() =>
-      searchRef.current?.(),
+    handleApi(api.updateVehicle(data), "저장되었습니다.").then(() =>
+      model.searchRef.current?.(),
     );
-  }, [model, handleApi, searchRef]);
+  }, [model, handleApi]);
 
-  // ── handleDeleteDetail (상세 패널 삭제) ──────────────────────
   const handleDeleteDetail = useCallback(() => {
     const data = model.detailData;
     openPopup({
@@ -169,11 +156,11 @@ export function useVehicleMgmtController({
           onConfirm={() => {
             closePopup();
             handleApi(
-              vehicleMgmtApi.deleteVehicle({ VEH_CD: data.VEH_CD }),
+              api.deleteVehicle({ VEH_CD: data.VEH_CD }),
               "삭제되었습니다.",
             ).then(() => {
               model.closeDetail();
-              searchRef.current?.();
+              model.searchRef.current?.();
             });
           }}
           type="confirm"
@@ -181,9 +168,8 @@ export function useVehicleMgmtController({
       ),
       width: "lg",
     });
-  }, [model, handleApi, openPopup, closePopup, searchRef]);
+  }, [model, handleApi, openPopup, closePopup]);
 
-  // ── handleOpenNew (신규 등록 슬라이드 열기) ──────────────────
   const handleOpenNew = useCallback(() => {
     model.setNewFormData({
       VEH_NO: "",
@@ -212,74 +198,71 @@ export function useVehicleMgmtController({
     model.setNewSlideOpen(true);
   }, [model]);
 
-  // ── handleSaveNew (신규 등록 저장) ───────────────────────────
   const handleSaveNew = useCallback(() => {
     const data = model.newFormData;
     if (!data.VEH_NO?.trim()) return;
+    handleApi(api.insertVehicle(data), "등록되었습니다.").then(() => {
+      model.setNewSlideOpen(false);
+      model.searchRef.current?.();
+    });
+  }, [model, handleApi]);
 
-    handleApi(vehicleMgmtApi.insertVehicle(data), "등록되었습니다.").then(
-      () => {
-        model.setNewSlideOpen(false);
-        searchRef.current?.();
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "신규등록",
+        label: "+ 신규 등록",
+        variant: "primary",
+        onClick: () => handleOpenNew(),
       },
-    );
-  }, [model, handleApi, searchRef]);
+      {
+        type: "button",
+        key: "차량전송IF",
+        label: "차량전송(IF)",
+        onClick: (e: any) => {
+          if (!guardHasData(e.data)) return;
+          handleApi(api.sendVehicleIF(e.data), "차량전송(IF) 처리되었습니다.").then(() =>
+            model.searchRef.current?.(),
+          );
+        },
+      },
+      {
+        type: "button",
+        key: "연락처변경",
+        label: "연락처변경",
+        onClick: (e: any) => {
+          if (!guardHasData(e.data)) return;
+          handleApi(api.changeContact(e.data), "연락처 변경되었습니다.").then(() =>
+            model.searchRef.current?.(),
+          );
+        },
+      },
+      {
+        type: "button",
+        key: "차고지일괄변경",
+        label: "차고지일괄변경",
+        onClick: (e: any) => {
+          if (!guardHasData(e.data)) return;
+          handleApi(api.changeGarageBatch(e.data), "차고지 일괄변경되었습니다.").then(() =>
+            model.searchRef.current?.(),
+          );
+        },
+      },
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS,
+        menuName: "차량관리",
+        fetchFn: () => api.getVehicleList(model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
+    [handleOpenNew, handleApi, guardHasData, model],
+  );
 
-  // ── mainActions (메인 그리드 툴바) ───────────────────────────
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "신규등록",
-      label: "+ 신규 등록",
-      variant: "primary",
-      onClick: () => handleOpenNew(),
-    },
-    {
-      type: "button",
-      key: "차량전송IF",
-      label: "차량전송(IF)",
-      onClick: (e: any) => {
-        if (!guardHasData(e.data)) return;
-        handleApi(
-          vehicleMgmtApi.sendVehicleIF(e.data),
-          "차량전송(IF) 처리되었습니다.",
-        ).then(() => searchRef.current?.());
-      },
-    },
-    {
-      type: "button",
-      key: "연락처변경",
-      label: "연락처변경",
-      onClick: (e: any) => {
-        if (!guardHasData(e.data)) return;
-        handleApi(
-          vehicleMgmtApi.changeContact(e.data),
-          "연락처 변경되었습니다.",
-        ).then(() => searchRef.current?.());
-      },
-    },
-    {
-      type: "button",
-      key: "차고지일괄변경",
-      label: "차고지일괄변경",
-      onClick: (e: any) => {
-        if (!guardHasData(e.data)) return;
-        handleApi(
-          vehicleMgmtApi.changeGarageBatch(e.data),
-          "차고지 일괄변경되었습니다.",
-        ).then(() => searchRef.current?.());
-      },
-    },
-    makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
-      menuName: "차량관리",
-      fetchFn: () => vehicleMgmtApi.getVehicleList(filtersRef.current),
-      rows: model.gridData.rows,
-    }),
-  ];
+  void base;
 
   return {
-    fetchVehicleList,
+    fetchVehicleList: fetchList,
     handleSearch,
     handleRowClicked,
     handleNavigate,

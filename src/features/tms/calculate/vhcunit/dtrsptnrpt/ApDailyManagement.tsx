@@ -1,41 +1,29 @@
 "use client";
 
 import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useApDailyManagementModel } from "./ApDailyManagementModel";
 import { useApDailyManagementController } from "./ApDailyManagementController";
+
 export const MENU_CODE = "MENU_AP_DAILY_MGMT";
 
 export default function ApDailyManagement() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useApDailyManagementModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
+  const model = useApDailyManagementModel(MENU_CODE);
+  // rawFiltersRef 는 SRCH_* prefix raw 조건 — 동적 컬럼 fetch 에 사용 (model 외 별도)
   const rawFiltersRef = useRef<Record<string, string>>({});
-
-  const ctrl = useApDailyManagementController({
-    model,
-    searchRef,
-    filtersRef,
-    rawFiltersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const ctrl = useApDailyManagementController({ model, rawFiltersRef });
 
   return (
     <GridOnlyPage
+      menuCode={MENU_CODE}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         rawFiltersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
@@ -51,7 +39,7 @@ export default function ApDailyManagement() {
             DAILY: {
               columnDefs: model.mainColumnDefs,
               actions: ctrl.mainActions,
-              onRowClicked: ctrl.handleRowClicked,
+              onRowClicked: ctrl.onMainGridClick,
             },
             DETAIL: {
               columnDefs: model.detailColumnDefs,
@@ -59,18 +47,15 @@ export default function ApDailyManagement() {
             },
           }}
           rowData={{
-            DAILY: model.gridData.rows,
-            DETAIL: model.detailRowData.rows,
+            DAILY: model.grids.main.rows,
+            DETAIL: model.grids.detail.rows,
           }}
           codeMap={model.codeMap}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
+          totalCount={model.grids.main.data.totalCount}
+          currentPage={model.grids.main.data.page}
           pageSize={model.pageSize}
           onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
+          onPageChange={(page) => model.searchRef.current?.(page)}
           actions={[]}
         />
       }

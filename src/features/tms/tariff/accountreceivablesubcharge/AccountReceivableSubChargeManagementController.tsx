@@ -1,218 +1,108 @@
-// ────────────────────────────────────────────────────────────────
-// [가이드] Controller 템플릿
-//
-// 사용 방법
-// 1. 이 파일을 대상 폴더로 복사 후 파일명 교체 (예: FeatureController.tsx)
-// 2. 모델 타입 / API import / 함수명 교체
-// 3. mainActions / detailActions 는 makeCommonActions 또는 개별 팩토리로 구성
-//
-// 공통 패턴
-// - fetchXxxList: 조회 API 호출 (SearchFilters → fetchFn)
-// - handleSearch: 조회 완료 시 상태 업데이트 + 서브그리드 초기화
-// - handleRowClicked: 행 선택 시 상세/서브 그리드 재조회
-// - makeAddAction / makeSaveAction / makeExcelGroupAction:
-//   개별 버튼 팩토리 — onClick 커스터마이즈 필요할 때
-// - makeCommonActions: 추가/저장/엑셀 3종 세트 일괄 구성
-// ────────────────────────────────────────────────────────────────
-
-import { useCallback, MutableRefObject } from "react";
-import { accountReceivableSubChargeManagementApi } from "./AccountReceivableSubChargeManagementApi";
-import { AccountReceivableSubChargeManagementModel } from "./AccountReceivableSubChargeManagementModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { accountReceivableSubChargeManagementApi as api } from "./AccountReceivableSubChargeManagementApi";
 import { MAIN_COLUMN_DEFS } from "./AccountReceivableSubChargeManagementColumns";
-import {
-  makeAddAction,
-  makeSaveAction,
-  makeExcelGroupAction,
-  makeCommonActions,
-} from "@/app/components/grid/commonActions";
-import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
+import { makeCommonActions } from "@/app/components/grid/commonActions";
+import type { AccountReceivableSubChargeManagementModel, GridKey } from "./AccountReceivableSubChargeManagementModel";
 
-type ControllerProps = {
+interface Args {
   model: AccountReceivableSubChargeManagementModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useAccountReceivableSubChargeManagementController({
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
-  // ── 조회 API (SearchFilters 가 넘겨주는 params 를 그대로 전달) ─
+export function useAccountReceivableSubChargeManagementController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
   const fetchList = useCallback(
-    (params: Record<string, unknown>) =>
-      accountReceivableSubChargeManagementApi.getList(params),
+    (params: Record<string, unknown>) => api.getList(params),
     [],
   );
 
-  // ── 조회 완료 콜백 (onSearch) ─────────────────────────────────
-  // SearchFilters 조회 성공 → gridData 업데이트 + 서브 그리드 리셋
+  // detail01 클릭 → detail02 cascade
+  const onDetail01RowClicked = useCallback(
+    (row: any) =>
+      base.handleRowClick("detail01", row, [
+        {
+          to: "detail02",
+          fetch: (r) =>
+            api.getDetail02List({
+              AR_TRF_CD: r.AR_TRF_CD,
+              AR_CHG_CD: r.AR_CHG_CD,
+              AR_SUBCHG_CD: r.AR_SUBCHG_CD,
+              COST_CD: r.COST_CD,
+            }),
+        },
+      ]),
+    [base],
+  );
+
+  // main 클릭 → detail01 cascade + detail01 첫 행 → detail02
+  const onMainGridClick = useCallback(
+    async (row: any) => {
+      model.grids.main.setSelected(row);
+      base.resetGrids(["detail01", "detail02"]);
+      if (!row) return;
+      const detail01Rows = await base.searchSub(
+        "detail01",
+        api.getDetail01List({
+          AR_TRF_CD: row.AR_TRF_CD,
+          AR_CHG_CD: row.AR_CHG_CD,
+          AR_SUBCHG_CD: row.AR_SUBCHG_CD,
+        }),
+      );
+      if (detail01Rows[0]) onDetail01RowClicked(detail01Rows[0]);
+    },
+    [model, base, onDetail01RowClicked],
+  );
+
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.resetSubGrids();
-      // 최초 행 자동 선택하고 상세까지 로딩하고 싶을 때
-      handleRowClicked(data.rows?.[0]);
+      model.grids.main.setData(data);
+      onMainGridClick(data?.rows?.[0]);
     },
+    [model.grids.main, onMainGridClick],
+  );
+
+  const mainActions = useMemo(
+    () =>
+      makeCommonActions({
+        add: true,
+        save: true,
+        excel: {
+          columns: MAIN_COLUMN_DEFS(),
+          menuName: "운영자매출계약-부가요금관리",
+          fetchFn: () => api.getList(model.filtersRef.current),
+          rows: model.grids.main.rows,
+        },
+      }),
     [model],
   );
 
-  // ── 상세 데이터 fetch ─────────────────────────────────────────
-  const fetchDetail01 = useCallback((row: any) => {
-    const trfCd = row?.AR_TRF_CD;
-    const chgCd = row?.AR_CHG_CD;
-    const subChgCd = row?.AR_SUBCHG_CD;
-    if (!trfCd && chgCd && subChgCd) return Promise.resolve([]);
-    return accountReceivableSubChargeManagementApi
-      .getDetail01List({
-        AR_TRF_CD: trfCd,
-        AR_CHG_CD: chgCd,
-        AR_SUBCHG_CD: subChgCd,
-      })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  const fetchDetail02 = useCallback((row: any) => {
-    const trfCd = row?.AR_TRF_CD;
-    const chgCd = row?.AR_CHG_CD;
-    const subChgCd = row?.AR_SUBCHG_CD;
-    const costCd = row?.COST_CD;
-    if (!trfCd && chgCd && subChgCd) return Promise.resolve([]);
-    return accountReceivableSubChargeManagementApi
-      .getDetail02List({
-        AR_TRF_CD: trfCd,
-        AR_CHG_CD: chgCd,
-        AR_SUBCHG_CD: subChgCd,
-        COST_CD: costCd,
-      })
-      .then((res: any) => res.data.result ?? res.data.data?.dsOut ?? [])
-      .catch((err) => {
-        throw Error(err);
-      });
-  }, []);
-
-  // ── 메인 행 클릭 → 상세 그리드 리로드 ─────────────────────────
-  const handleRowClicked = useCallback(
-    (row: any) => {
-      model.resetSubGrids();
-      model.setSelectedHeaderRow(row);
-
-      fetchDetail01(row).then((rows: any) => {
-        (model.setSubDetail01RowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: model.pageSize,
-        }),
-          handleSub01RowClicked(rows[0]));
-      });
-    },
+  const detailActions = useMemo(
+    () =>
+      makeCommonActions({
+        add: true,
+        save: {
+          onClick: () =>
+            api
+              .save({ dsSave: model.grids.detail01.ref.current?.rows ?? [] })
+              .then(() => model.searchRef.current?.()),
+        },
+        excel: {
+          columns: MAIN_COLUMN_DEFS(),
+          menuName: "운영자매출계약-부가요금관리-상세",
+          fetchFn: () => api.getDetail01List(model.filtersRef.current),
+          rows: model.grids.detail01.rows,
+        },
+      }),
     [model],
   );
-
-  const handleSub01RowClicked = useCallback(
-    (row: any) => {
-      model.setSubDetail02RowData(model.EMPTY_GRID);
-      model.setSelectedSub01Row(row);
-
-      fetchDetail02(row).then((rows: any) => {
-        model.setSubDetail02RowData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: model.pageSize,
-        });
-      });
-    },
-    [model],
-  );
-
-  // saveFn — useGridSave 가 만든 payload({ dsSave, rows }) 중 dsSave 만 사용.
-  const saveDetail = useCallback(
-    (payload: any) =>
-      accountReceivableSubChargeManagementApi.save({ dsSave: payload.dsSave }),
-    [],
-  );
-
-  // ── 메인 그리드 액션 ──────────────────────────────────────────
-  // 추가 + 저장 + 엑셀 일괄 세팅이 필요하면 makeCommonActions 사용
-  const mainActions = makeCommonActions({
-    add: true,
-    save: true,
-    excel: {
-      columns: MAIN_COLUMN_DEFS(),
-      menuName: "화면명",
-      fetchFn: () =>
-        accountReceivableSubChargeManagementApi.getList(filtersRef.current),
-      rows: model.gridData.rows,
-    },
-  });
-
-  // ── 상세 그리드 추가/저장 (LanguagePack 패턴) ─────────────────
-  const handleDetailAdd = useGridAdd({
-    setRows: model.setSubDetail01RowData,
-    newRow: () => ({
-      XXX_CD: model.selectedHeaderRowRef.current?.XXX_CD,
-    }),
-    position: "bottom",
-  });
-
-  const handleDetailSave = useGridSave({
-    rows: model.subDetail01RowData.rows,
-    setRows: model.setSubDetail01RowData,
-    saveFn: saveDetail,
-    onSaved: () => searchRef.current?.(),
-  });
-
-  // ── 상세 그리드 액션 (onClick 커스터마이즈 예시) ──────────────
-  const detailActions = [
-    makeAddAction({ onClick: handleDetailAdd }),
-    makeSaveAction({ onClick: handleDetailSave }),
-    makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS(),
-      menuName: "화면명",
-      fetchFn: () =>
-        accountReceivableSubChargeManagementApi.getDetail01List(
-          filtersRef.current,
-        ),
-      rows: model.subDetail01RowData.rows,
-    }),
-  ];
 
   return {
     fetchList,
     handleSearch,
-    handleRowClicked,
-    handleSub01RowClicked,
+    onMainGridClick,
+    onDetail01RowClicked,
     mainActions,
     detailActions,
   };
 }
-
-// ────────────────────────────────────────────────────────────────
-// [참고] 공통 버튼 팩토리 API
-//
-// makeAddAction({ onClick?, label?, key?, disabled? })
-// makeSaveAction({ onClick?, label?, key?, disabled? })
-//   - onClick 생략 시 no-op (e: any) => {}
-//   - label / key 생략 시 "추가" / "저장"
-//
-// makeExcelGroupAction({ columns, menuName, fetchFn, rows, hideAll?, hideVisible? })
-//   - hideAll: true  → "조회된모든데이터다운로드" 버튼 숨김
-//   - hideVisible: true → "보이는데이터다운로드" 버튼 숨김
-//
-// makeCommonActions({ add?, save?, excel? })
-//   - add / save: true 또는 { onClick, ... } 객체
-//   - excel: ExcelGroupActionConfig 객체 (미지정 시 엑셀 그룹 제외)
-//
-// 기존 커스텀 버튼과 혼용 예시
-//   const mainActions = [
-//     { type: "button", key: "동기화", label: "동기화", onClick: ... },
-//     makeAddAction({ onClick: handleAdd }),
-//     makeSaveAction({ onClick: handleSave }),
-//     makeExcelGroupAction({ ... }),
-//   ];
-// ────────────────────────────────────────────────────────────────

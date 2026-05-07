@@ -1,12 +1,9 @@
 // src/features/tms/master/organization/lgstgrpOprConfigMst/LgstgrpOprConfigMst.tsx
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useLgstgrpOprConfigMstModel } from "./LgstgrpOprConfigMstModel";
 import { useLgstgrpOprConfigMstController } from "./LgstgrpOprConfigMstController";
@@ -15,56 +12,58 @@ import {
   CONFIG_DETAIL_COLUMN_DEFS,
   CONFIG_I18N_COLUMN_DEFS,
   CONFIG_DETAIL_I18N_COLUMN_DEFS,
-} from "./LgstgrpOprConfigMstColumns.tsx";
+} from "./LgstgrpOprConfigMstColumns";
 
 export const MENU_CODE = "MENU_LGSTGRP_OPR_CONFIG_MST";
 
 export default function LgstgrpOprConfigMst() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const model = useLgstgrpOprConfigMstModel();
-  const ctrl = useLgstgrpOprConfigMstController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useLgstgrpOprConfigMstModel(MENU_CODE);
+  const ctrl = useLgstgrpOprConfigMstController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CODE}
       searchProps={{
-        meta,
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
       }}
       outerTabs={{
         tabs: model.configTabs,
-        activeTab: model.activeTab,
-        onChange: model.setActiveTab,
+        activeTab: model.activeType,
+        onChange: ctrl.onTabChange,
       }}
       direction="vertical"
       defaultSizes={[55, 45]}
-      storageKey="lgstgrp-opr-config-mst-outer"
+      storageKey={model.storageKeys.outer}
       master={
         <SplitPane
           direction="horizontal"
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
-          storageKey="lgstgrp-opr-config-mst-top"
+          storageKey={model.storageKeys.top}
         >
+          {/* 메인 그리드 (top-left) */}
           <DataGrid
-            {...ctrl.bind("config", CONFIG_COLUMN_DEFS, {
-              actions: ctrl.configActions,
-            })}
+            {...model.bind("main")}
+            columnDefs={CONFIG_COLUMN_DEFS}
+            onRowClicked={ctrl.onMainGridClick}
+            rowKeys="CNFG_CD"
+            autoSelectFirstRow
+            actions={ctrl.mainActions}
           />
-          <DataGrid {...ctrl.bind("detail", CONFIG_DETAIL_COLUMN_DEFS)} />
+          {/* 상세 그리드 (top-right) */}
+          <DataGrid
+            {...model.bind("sub01")}
+            columnDefs={CONFIG_DETAIL_COLUMN_DEFS}
+            onRowClicked={ctrl.onSub01GridClick}
+            rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
+            autoSelectFirstRow
+            actions={ctrl.sub01Actions}
+          />
         </SplitPane>
       }
       detail={
@@ -73,11 +72,21 @@ export default function LgstgrpOprConfigMst() {
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
-          storageKey="lgstgrp-opr-config-mst-bottom"
+          storageKey={model.storageKeys.bottom}
         >
-          <DataGrid {...ctrl.bind("i18n", CONFIG_I18N_COLUMN_DEFS)} />
+          {/* 메인-다국어 (bottom-left) — 메인 행에 종속 */}
           <DataGrid
-            {...ctrl.bind("detailI18n", CONFIG_DETAIL_I18N_COLUMN_DEFS)}
+            {...model.bind("sub03")}
+            columnDefs={CONFIG_I18N_COLUMN_DEFS}
+            subTitle="LBL_CNFG_CD_LANG_SETTING"
+            actions={ctrl.sub03Actions}
+          />
+          {/* 상세-다국어 (bottom-right) — 상세 행에 종속 */}
+          <DataGrid
+            {...model.bind("sub02")}
+            columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS}
+            subTitle="LBL_CNFG_DTL_CD_LANG_SETTING"
+            actions={ctrl.sub02Actions}
           />
         </SplitPane>
       }

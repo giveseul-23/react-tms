@@ -1,7 +1,8 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
+// 컬럼 끝의 standardAudit 은 DataGrid 가 audit prop(model.bind 자동) 으로 추가.
+// 부분 토글이 필요한 그리드만 View 에서 `audit={{ updatePerson: false }}` 명시.
 
 // ── 플류운영그룹운영설정 (Top-left) ────────────────────────────────
-export const CONFIG_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const CONFIG_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -42,13 +43,10 @@ export const CONFIG_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     width: 100,
     fieldType: "text",
   },
-  ...standardAudit(setGridData),
 ];
 
 // ── 설정상세 (Top-right) ───────────────────────────────────────────
-export const CONFIG_DETAIL_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const CONFIG_DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -112,13 +110,10 @@ export const CONFIG_DETAIL_COLUMN_DEFS = (
     field: "CNFG_VAL5",
     editable: true,
   },
-  ...standardAudit(setGridData),
 ];
 
 // ── 설정코드다국어설정 (Bottom-left) ───────────────────────────────
-export const CONFIG_I18N_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const CONFIG_I18N_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -137,13 +132,10 @@ export const CONFIG_I18N_COLUMN_DEFS = (
     field: "LANG_DESC",
     editable: true,
   },
-  ...standardAudit(setGridData),
 ];
 
 // ── 설정상세코드다국어설정 (Bottom-right) ──────────────────────────
-export const CONFIG_DETAIL_I18N_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const CONFIG_DETAIL_I18N_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -167,5 +159,4 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = (
     field: "LANG_DESC",
     editable: true,
   },
-  ...standardAudit(setGridData),
 ];

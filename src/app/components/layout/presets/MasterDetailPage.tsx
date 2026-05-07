@@ -19,9 +19,13 @@ import {
   type LayoutType,
 } from "../LayoutToggleButton";
 import { OuterTabs, type OuterTab } from "../OuterTabs";
+import { useResolvedSearchMeta } from "@/app/feature/useResolvedSearchMeta";
 import type { SearchProps } from "./types";
 
 export interface MasterDetailPageProps {
+  /** menuCode 전달 시 SearchMeta 자동 로드 + loading skeleton 자동.
+   *  생략하면 searchProps.meta 를 그대로 사용 (기존 호환). */
+  menuCode?: string;
   searchProps: SearchProps;
   master: ReactNode;
   detail: ReactNode;
@@ -50,6 +54,7 @@ export interface MasterDetailPageProps {
 }
 
 export function MasterDetailPage({
+  menuCode,
   searchProps,
   master,
   detail,
@@ -64,6 +69,9 @@ export function MasterDetailPage({
   topSlot,
   outerTabs,
 }: MasterDetailPageProps) {
+  const { meta, gate } = useResolvedSearchMeta(menuCode, searchProps.meta);
+  if (gate) return <>{gate}</>;
+  const finalSearchProps: SearchProps = { ...searchProps, meta };
   const layoutToggleNode = layoutToggle ? (
     <LayoutToggleButton
       layout={layoutToggle.layout}
@@ -81,7 +89,7 @@ export function MasterDetailPage({
   return (
     <PageShell
       searchSlot={
-        <SearchFilters {...searchProps} layoutToggle={layoutToggleNode} />
+        <SearchFilters {...finalSearchProps} layoutToggle={layoutToggleNode} />
       }
       bottomSlot={bottomSlot}
       bottomOpen={bottomOpen}

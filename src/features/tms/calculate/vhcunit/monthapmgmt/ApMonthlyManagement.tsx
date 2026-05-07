@@ -1,58 +1,38 @@
 "use client";
 
 import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useApMonthlyManagementModel } from "./ApMonthlyManagementModel";
 import { useApMonthlyManagementController } from "./ApMonthlyManagementController";
+
 export const MENU_CODE = "MENU_AP_MONTHLY_MGMT";
 
 export default function ApMonthlyManagement() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useApMonthlyManagementModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
+  const model = useApMonthlyManagementModel(MENU_CODE);
   const rawFiltersRef = useRef<Record<string, string>>({});
-
-  const ctrl = useApMonthlyManagementController({
-    model,
-    searchRef,
-    filtersRef,
-    rawFiltersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const ctrl = useApMonthlyManagementController({ model, rawFiltersRef });
 
   return (
     <GridOnlyPage
+      menuCode={MENU_CODE}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         rawFiltersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
       grid={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={model.mainColumnDefs}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => searchRef.current?.(page)}
           actions={ctrl.mainActions}
-          onRowClicked={ctrl.handleRowClicked}
         />
       }
     />

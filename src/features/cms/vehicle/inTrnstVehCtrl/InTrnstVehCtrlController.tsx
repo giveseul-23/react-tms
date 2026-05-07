@@ -1,32 +1,26 @@
 // src/views/inTrnstVehCtrl/InTrnstVehCtrlController.tsx
-import { useCallback, MutableRefObject } from "react";
-import { inTrnstVehCtrlApi } from "@/features/cms/vehicle/inTrnstVehCtrl/InTrnstVehCtrlApi";
-import { InTrnstVehCtrlModel } from "./InTrnstVehCtrlModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import { inTrnstVehCtrlApi as api } from "./InTrnstVehCtrlApi";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { InTrnstVehCtrlModel, GridKey } from "./InTrnstVehCtrlModel";
 
-type ControllerProps = {
+interface Args {
   model: InTrnstVehCtrlModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
-};
+}
 
-export function useInTrnstVehCtrlController({
-  model,
-  searchRef,
-}: ControllerProps) {
-  // ── fetch ───────────────────────────────────────────────────
-  const fetchInTrnstVehList = useCallback(
-    (params: Record<string, unknown>) =>
-      inTrnstVehCtrlApi.getInTrnstVehList(params),
+export function useInTrnstVehCtrlController({ model }: Args) {
+  const base = useBaseController<GridKey>({ model });
+
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => api.getInTrnstVehList(params),
     [],
   );
 
-  // ── 조회 완료 콜백 ──────────────────────────────────────────
   const handleSearch = useCallback(
     (data: any) => {
-      model.setGridData(data);
-      model.setSelectedRow(null);
-      // 조회 직후 마커 영역에 맞게 지도 fit
+      model.grids.main.setData(data);
+      model.grids.main.setSelected(null);
       requestAnimationFrame(() => {
         model.mapRef.current?.fitMarkers();
       });
@@ -34,10 +28,10 @@ export function useInTrnstVehCtrlController({
     [model],
   );
 
-  // ── 행 클릭: 해당 차량 위치로 지도 이동 ─────────────────────
+  // 행 클릭: 해당 차량 위치로 지도 이동
   const handleRowClicked = useCallback(
     (row: any) => {
-      model.setSelectedRow(row);
+      model.grids.main.setSelected(row);
       const lat = Number(row?.LAT);
       const lon = Number(row?.LON);
       if (
@@ -52,17 +46,22 @@ export function useInTrnstVehCtrlController({
     [model],
   );
 
-  const mainActions: ActionItem[] = [
-    {
-      type: "button",
-      key: "BTN_SP_SIGNATURE_REFRESH",
-      label: "BTN_SP_SIGNATURE_REFRESH",
-      onClick: () => searchRef.current?.(),
-    },
-  ];
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_SP_SIGNATURE_REFRESH",
+        label: "BTN_SP_SIGNATURE_REFRESH",
+        onClick: () => model.searchRef.current?.(),
+      },
+    ],
+    [model],
+  );
+
+  void base;
 
   return {
-    fetchInTrnstVehList,
+    fetchInTrnstVehList: fetchList,
     handleSearch,
     handleRowClicked,
     mainActions,

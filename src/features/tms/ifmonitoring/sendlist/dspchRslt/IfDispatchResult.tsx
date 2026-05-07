@@ -1,57 +1,38 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
 import { useIfDispatchResultModel } from "./IfDispatchResultModel";
 import { useIfDispatchResultController } from "./IfDispatchResultController";
 import { MAIN_COLUMN_DEFS } from "./IfDispatchResultColumns";
+
 export const MENU_CODE = "MENU_IF_SEND_DSPCH_RSLT";
 
 export default function IfDispatchResult() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useIfDispatchResultModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useIfDispatchResultController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useIfDispatchResultModel(MENU_CODE);
+  const ctrl = useIfDispatchResultController({ model });
 
   return (
     <GridOnlyPage
+      menuCode={MENU_CODE}
       searchProps={{
-        meta,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
-        userTz: "Asia/Seoul", // [TEMP-userTz] 서버 userTz 적용 완료 시 제거
+        userTz: "Asia/Seoul",
         menuCode: MENU_CODE,
       }}
       grid={
         <DataGrid
-          layoutType="plain"
+          {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => searchRef.current?.(page)}
-          onRowClicked={ctrl.handleRowClicked}
           actions={ctrl.mainActions}
+          audit={false}
         />
       }
     />

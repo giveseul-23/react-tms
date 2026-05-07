@@ -1,27 +1,11 @@
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
+import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 
-export type GridData = {
-  rows: any[];
-  totalCount: number;
-  page: number;
-  limit: number;
-};
+export type GridKey = "main";
 
-const EMPTY_GRID: GridData = {
-  rows: [],
-  totalCount: 0,
-  page: 1,
-  limit: 500,
-};
-
-export function useIfDispatchResultModel() {
-  const [layout, setLayout] = useState<LayoutType>("side");
-  const [pageSize, setPageSize] = useState(500);
-  const [gridData, setGridData] = useState<GridData>(EMPTY_GRID);
-
-  const resetSubGrids = useCallback(() => {}, []);
+export function useIfDispatchResultModel(menuCode: string) {
+  const base = useBaseModel<GridKey>(menuCode);
 
   const { stores } = useCommonStores({
     interfaceType: { sqlProp: "CODE", keyParam: "IF_TCD" },
@@ -42,16 +26,7 @@ export function useIfDispatchResultModel() {
     return map;
   }, [stores]);
 
-  return {
-    layout,
-    setLayout,
-    pageSize,
-    setPageSize,
-    gridData,
-    setGridData,
-    resetSubGrids,
-    codeMap,
-  };
+  return { ...base, codeMap };
 }
 
 export type IfDispatchResultModel = ReturnType<typeof useIfDispatchResultModel>;

@@ -698,118 +698,156 @@
           </div>
         </div>
 
-        <!-- 패턴 G: 선언적 framework -->
+        <!-- 패턴 G: base hook 패턴 -->
         <div class="pattern-card">
           <div class="pattern-header">
-            <span class="tag tag-green">패턴 G ⭐ 권장</span>
-            <strong>선언적 framework — useGridModel / useGridController</strong>
-            <span class="pattern-example">예: LgstgrpOprConfigMst</span>
+            <span class="tag tag-green">패턴 G ⭐ 표준</span>
+            <strong>base hook 패턴 — useBaseModel / useBaseController</strong>
+            <span class="pattern-example">예: LgstgrpOprConfigMst (4그리드 + cascade + 외부 탭 + 동기화)</span>
           </div>
           <div class="pattern-body">
             <p>
-              여러 그리드(특히 Master-Detail-2x2 같은 4-그리드)에서 반복되는 boilerplate(state 선언 / fetch / save / cascade / add / save 액션)를
-              <code>src/hooks/useGridFeature/</code>의 framework 훅으로 흡수.
-              <strong>Model/Controller는 thin wrapper</strong>가 되고, 화면은 <strong>config 객체</strong>와
-              <strong>JSX 레이아웃</strong>만 작성하면 됩니다.
+              모든 화면은 <code>src/app/feature/</code> 의 <strong>base hook 두 개</strong> 를 기반으로 한다.
+              boilerplate(state / ref / fetch / cascade / add / save / actions)는 base hook 이 흡수,
+              화면은 <strong>화면 고유 핸들러</strong>(<code>onMainGridClick</code>, <code>onAddXxx</code>, <code>onSaveXxx</code>)와 <strong>JSX 레이아웃</strong>만 작성.
             </p>
-            <h4>구성 원칙</h4>
+            <h4>핵심 컨벤션</h4>
             <ul style="padding-left: 20px">
-              <li><strong>Model.ts</strong>: <code>featureConfig</code> 선언 + <code>useGridModel(config)</code> 한 줄 호출</li>
-              <li><strong>Controller.tsx</strong>: <code>useGridController({ config, model, searchRef })</code> 호출 + 화면 고유 액션 합성</li>
-              <li><strong>View.tsx</strong>: 레이아웃 자유. <code>&lt;DataGrid {...ctrl.bind("gridKey", COLS)} /&gt;</code> 로 표준 props spread</li>
-              <li><strong>MENU_CODE 위치</strong>: View가 source of truth. Api 는 View 에서 import. Model/Controller 는 module-init 시점에 MENU_CODE 사용 금지(순환 import TDZ 회피)</li>
+              <li><strong>Model.ts</strong>: <code>useBaseModel&lt;GridKey&gt;(menuCode)</code> 한 줄 + 화면 고유 state(<code>codeMap</code>, 외부 탭 등)</li>
+              <li><strong>Controller.tsx</strong>: <code>useBaseController&lt;GridKey&gt;({ model })</code> 호출 + 화면 고유 핸들러 / actions 정의</li>
+              <li><strong>View.tsx</strong>: <code>preset menuCode={MENU_CODE}</code> + <code>&lt;DataGrid {...model.bind("gridKey")} /&gt;</code> spread</li>
+              <li><strong>storageKey</strong>: menuCode 기반 자동 (<code>MENU_FOO_BAR</code> → <code>foo-bar-outer/top/bottom</code>)</li>
+              <li><strong>searchRef / filtersRef</strong>: <code>useBaseModel</code> 이 자체 보유. View 에서 <code>useRef</code> 안 만든다.</li>
+              <li><strong>useSearchMeta</strong>: preset 내부에서 자동. View 에서 호출 안 한다 (<code>menuCode</code> prop 만).</li>
             </ul>
 
             <div class="code-block">
-              <div class="code-header"><span>Model.ts (패턴 G)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
-              <pre><span class="k">import</span> { useEffect, useState } <span class="k">from</span> <span class="s">"react"</span>;
-<span class="k">import</span> { useGridModel } <span class="k">from</span> <span class="s">"@/hooks/useGridFeature/useGridModel"</span>;
-<span class="k">import type</span> { <span class="t">FeatureConfig</span> } <span class="k">from</span> <span class="s">"@/hooks/useGridFeature/types"</span>;
+              <div class="code-header"><span>Model.ts</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="k">import</span> { useMemo, useState, useEffect } <span class="k">from</span> <span class="s">"react"</span>;
+<span class="k">import</span> { useBaseModel } <span class="k">from</span> <span class="s">"@/app/feature/useBaseModel"</span>;
+<span class="k">import</span> { useCommonStores } <span class="k">from</span> <span class="s">"@/hooks/useCommonStores"</span>;
 <span class="k">import</span> { featureApi } <span class="k">from</span> <span class="s">"./FeatureApi"</span>;
 
-<span class="k">export const</span> featureConfig: <span class="t">FeatureConfig</span> = {
-  api: featureApi,
-  selections: [<span class="s">"config"</span>, <span class="s">"detail"</span>],
-  fetchListExtraParams: {
-    <span class="t">LGST_GRP_CNFG_GRP_CD</span>: (m) =&gt; m.activeTab,
-  },
-  extras: () =&gt; {
-    <span class="k">const</span> [activeTab, setActiveTab] = <span class="fn">useState</span>(<span class="s">""</span>);
-    <span class="fn">useEffect</span>(() =&gt; { <span class="c">// 외부 탭 자동 로딩 등 화면별 추가 state</span> }, []);
-    <span class="k">return</span> { activeTab, setActiveTab };
-  },
-  grids: {
-    config: {
-      type: <span class="s">"paginated"</span>,
-      api: { fetch: <span class="s">"getConfigList"</span>, save: <span class="s">"saveConfig"</span> },
-      rowKey: <span class="s">"CNFG_CD"</span>,
-      newRow: () =&gt; ({ <span class="t">CNFG_CD</span>: <span class="s">""</span>, <span class="t">CNFG_NM</span>: <span class="s">""</span> }),
-    },
-    detail: {
-      type: <span class="s">"paginated"</span>,
-      api: { fetch: <span class="s">"getConfigDetailList"</span>, save: <span class="s">"saveConfigDetail"</span> },
-      rowKey: [<span class="s">"CNFG_CD"</span>, <span class="s">"CNFG_DTL_CD"</span>],
-      fetchOnRowClickFrom: <span class="s">"config"</span>,
-      paramMap: (row) =&gt; ({ <span class="t">CNFG_CD</span>: row?.<span class="t">CNFG_CD</span> }),
-      newRow: (m) =&gt; ({ <span class="t">CNFG_CD</span>: m.selected.config?.ref.current?.<span class="t">CNFG_CD</span>, <span class="t">CNFG_DTL_CD</span>: <span class="s">""</span> }),
-    },
-    i18n: {
-      type: <span class="s">"array"</span>,
-      api: { fetch: <span class="s">"getConfigI18nList"</span>, save: <span class="s">"saveConfigI18n"</span> },
-      fetchOnRowClickFrom: <span class="s">"detail"</span>,
-      paramMap: (row) =&gt; ({ <span class="t">CNFG_CD</span>: row?.<span class="t">CNFG_CD</span>, <span class="t">CNFG_DTL_CD</span>: row?.<span class="t">CNFG_DTL_CD</span> }),
-      subTitle: <span class="s">"LBL_CNFG_CD_LANG_SETTING"</span>,
-    },
-  },
-};
+<span class="c">// 그리드 이름 union — 오타 시 컴파일 에러 (model.grids.man → 에러)</span>
+<span class="k">export type</span> <span class="t">GridKey</span> = <span class="s">"main"</span> | <span class="s">"sub01"</span> | <span class="s">"sub02"</span> | <span class="s">"sub03"</span>;
 
-<span class="k">export function</span> <span class="fn">useFeatureModel</span>() {
-  <span class="k">return</span> <span class="fn">useGridModel</span>(featureConfig);
+<span class="k">export function</span> <span class="fn">useFeatureModel</span>(menuCode: <span class="t">string</span>) {
+  <span class="k">const</span> base = <span class="fn">useBaseModel</span>&lt;<span class="t">GridKey</span>&gt;(menuCode);
+
+  <span class="c">// 외부 탭 (옵션) — 화면 고유 state</span>
+  <span class="k">const</span> [tabs, setTabs] = <span class="fn">useState</span>([]);
+  <span class="k">const</span> [activeTab, setActiveTab] = <span class="fn">useState</span>(<span class="s">""</span>);
+  <span class="fn">useEffect</span>(() =&gt; {
+    featureApi.<span class="fn">getTypeList</span>().<span class="fn">then</span>((res) =&gt; { <span class="c">/* tabs 세팅 */</span> });
+  }, []);
+
+  <span class="c">// 공통코드 lookup → codeMap</span>
+  <span class="k">const</span> { stores } = <span class="fn">useCommonStores</span>({ xxxTcd: { sqlProp: <span class="s">"CODE"</span>, keyParam: <span class="s">"XXX_TCD"</span> } });
+  <span class="k">const</span> codeMap = <span class="fn">useMemo</span>(() =&gt; { <span class="c">/* stores → codeMap 변환 */</span> }, [stores]);
+
+  <span class="k">return</span> { ...base, tabs, activeTab, setActiveTab, codeMap };
+}
+
+<span class="k">export type</span> <span class="t">FeatureModel</span> = <span class="t">ReturnType</span>&lt;<span class="k">typeof</span> useFeatureModel&gt;;</pre>
+            </div>
+
+            <div class="code-block">
+              <div class="code-header"><span>Controller.tsx</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="k">import</span> { useCallback, useMemo } <span class="k">from</span> <span class="s">"react"</span>;
+<span class="k">import</span> { useBaseController } <span class="k">from</span> <span class="s">"@/app/feature/useBaseController"</span>;
+<span class="k">import</span> { makeAddAction, makeSaveAction } <span class="k">from</span> <span class="s">"@/app/components/grid/commonActions"</span>;
+<span class="k">import</span> { featureApi <span class="k">as</span> api } <span class="k">from</span> <span class="s">"./FeatureApi"</span>;
+<span class="k">import type</span> { <span class="t">FeatureModel</span>, <span class="t">GridKey</span> } <span class="k">from</span> <span class="s">"./FeatureModel"</span>;
+
+<span class="k">export function</span> <span class="fn">useFeatureController</span>({ model }: { model: <span class="t">FeatureModel</span> }) {
+  <span class="k">const</span> base = <span class="fn">useBaseController</span>&lt;<span class="t">GridKey</span>&gt;({ model });
+
+  <span class="c">// 메인 fetch (외부 탭 조건 합치는 케이스)</span>
+  <span class="k">const</span> fetchList = <span class="fn">useCallback</span>((p) =&gt; api.<span class="fn">getList</span>({ ...p, <span class="t">TYPE</span>: model.activeTab }), [model.activeTab]);
+
+  <span class="c">// 메인 행 클릭 — sub01/sub03 cascade, sub02 alsoReset</span>
+  <span class="k">const</span> onMainGridClick = <span class="fn">useCallback</span>((row) =&gt;
+    base.<span class="fn">handleRowClick</span>(<span class="s">"main"</span>, row, [
+      { to: <span class="s">"sub01"</span>, fetch: (r) =&gt; api.<span class="fn">getDetailList</span>({ <span class="t">CNFG_CD</span>: r.<span class="t">CNFG_CD</span> }) },
+      { to: <span class="s">"sub03"</span>, fetch: (r) =&gt; api.<span class="fn">getI18nList</span>({ <span class="t">CNFG_CD</span>: r.<span class="t">CNFG_CD</span> }) },
+    ], { alsoReset: [<span class="s">"sub02"</span>] }), [base]);
+
+  <span class="c">// 메인 조회 콜백 — 첫 행 자동 cascade</span>
+  <span class="k">const</span> handleSearch = <span class="fn">useCallback</span>((data) =&gt; {
+    model.grids.main.<span class="fn">setData</span>(data);
+    <span class="fn">onMainGridClick</span>(data?.rows?.[<span class="t">0</span>]);
+  }, [model.grids.main, onMainGridClick]);
+
+  <span class="c">// 행 추가 — 부모 검증 + base.addRow 한 줄 (EDIT_STS:"I" 자동)</span>
+  <span class="k">const</span> onAddSub01 = <span class="fn">useCallback</span>(() =&gt; {
+    <span class="k">const</span> main = model.grids.main.selectedRef.current;
+    <span class="k">if</span> (!base.<span class="fn">requireParentRow</span>(main, <span class="s">"메인코드"</span>)) <span class="k">return</span>;
+    base.<span class="fn">addRow</span>(<span class="s">"sub01"</span>, { <span class="t">CNFG_CD</span>: main.<span class="t">CNFG_CD</span>, <span class="t">CNFG_DTL_CD</span>: <span class="s">""</span> });
+  }, [model, base]);
+
+  <span class="c">// 저장 — confirmOnDelete + cascadeFrom afterSave 한 줄</span>
+  <span class="k">const</span> onSaveMain = <span class="fn">useCallback</span>(() =&gt;
+    base.<span class="fn">saveGrid</span>(<span class="s">"main"</span>, api.<span class="fn">save</span>, {
+      confirmOnDelete: <span class="s">"삭제된 항목이 있습니다. 계속 진행하시겠습니까?"</span>,
+    }), [base]);
+
+  <span class="k">const</span> onSaveSub01 = <span class="fn">useCallback</span>(() =&gt;
+    base.<span class="fn">saveGrid</span>(<span class="s">"sub01"</span>, api.<span class="fn">saveDetail</span>, {
+      afterSave: { cascadeFrom: <span class="s">"main"</span>, fetch: (m) =&gt; api.<span class="fn">getDetailList</span>({ <span class="t">CNFG_CD</span>: m.<span class="t">CNFG_CD</span> }) },
+    }), [base]);
+
+  <span class="c">// 그리드별 actions — Controller 가 책임 (View 는 binding 만)</span>
+  <span class="k">const</span> mainActions = <span class="fn">useMemo</span>(() =&gt; [
+    <span class="fn">makeAddAction</span>({ onClick: onAddMain }),
+    <span class="fn">makeSaveAction</span>({ onClick: onSaveMain }),
+  ], [onAddMain, onSaveMain]);
+
+  <span class="k">return</span> { fetchList, handleSearch, onMainGridClick, mainActions, ... };
 }</pre>
             </div>
 
             <div class="code-block">
-              <div class="code-header"><span>Controller.tsx (패턴 G)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
-              <pre><span class="k">import</span> { useGridController } <span class="k">from</span> <span class="s">"@/hooks/useGridFeature/useGridController"</span>;
-<span class="k">import</span> { featureConfig } <span class="k">from</span> <span class="s">"./FeatureModel"</span>;
+              <div class="code-header"><span>View.tsx</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre><span class="k">"use client"</span>;
+<span class="k">import</span> { MasterDetailPage } <span class="k">from</span> <span class="s">"@/app/components/layout/presets/MasterDetailPage"</span>;
+<span class="k">import</span> { SplitPane } <span class="k">from</span> <span class="s">"@/app/components/layout/SplitPane"</span>;
+<span class="k">import</span> <span class="t">DataGrid</span> <span class="k">from</span> <span class="s">"@/app/components/grid/DataGrid"</span>;
 
-<span class="k">export function</span> <span class="fn">useFeatureController</span>({ model, searchRef, filtersRef }) {
-  <span class="k">const</span> base = <span class="fn">useGridController</span>({ config: featureConfig, model, searchRef, filtersRef });
-  <span class="c">// 화면 고유 액션이 있으면 base.actions 에 합성</span>
-  <span class="k">const</span> configActions = [
-    { type: <span class="s">"button"</span>, key: <span class="s">"LBL_SYNC"</span>, label: <span class="s">"LBL_SYNC"</span>, onClick: () =&gt; {...} },
-    ...(base.actions.config ?? []),
-  ];
-  <span class="k">return</span> { ...base, configActions };
-}</pre>
-            </div>
-
-            <div class="code-block">
-              <div class="code-header"><span>View.tsx (패턴 G)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
-              <pre><span class="k">export const</span> <span class="t">MENU_CODE</span> = <span class="s">"MENU_XXX"</span>;  <span class="c">// View 가 source of truth</span>
+<span class="k">export const</span> <span class="t">MENU_CODE</span> = <span class="s">"MENU_XXX"</span>;  <span class="c">// View 가 source of truth — Api 가 import</span>
 
 <span class="k">export default function</span> <span class="fn">Feature</span>() {
-  <span class="k">const</span> { meta, loading } = <span class="fn">useSearchMeta</span>(<span class="t">MENU_CODE</span>);
-  <span class="k">const</span> searchRef = <span class="fn">useRef</span>(<span class="k">null</span>);
-  <span class="k">const</span> filtersRef = <span class="fn">useRef</span>({});
-  <span class="k">const</span> model = <span class="fn">useFeatureModel</span>();
-  <span class="k">const</span> ctrl = <span class="fn">useFeatureController</span>({ model, searchRef, filtersRef });
-
-  <span class="k">if</span> (loading) <span class="k">return</span> &lt;<span class="t">Skeleton</span> /&gt;;
+  <span class="k">const</span> model = <span class="fn">useFeatureModel</span>(<span class="t">MENU_CODE</span>);
+  <span class="k">const</span> ctrl = <span class="fn">useFeatureController</span>({ model });
 
   <span class="k">return</span> (
     &lt;<span class="t">MasterDetailPage</span>
-      searchProps={{ meta, fetchFn: ctrl.fetchList, onSearch: ctrl.handleSearch, searchRef, filtersRef }}
-      direction=<span class="s">"vertical"</span> defaultSizes={[55, 45]}
+      menuCode={<span class="t">MENU_CODE</span>}                           <span class="c">{/* useSearchMeta + Skeleton 자동 */}</span>
+      searchProps={{
+        fetchFn: ctrl.fetchList,
+        onSearch: ctrl.handleSearch,
+        searchRef: model.searchRef,                <span class="c">{/* model 자체 보유 */}</span>
+        filtersRef: model.filtersRef,
+        pageSize: model.pageSize,
+        menuCode: <span class="t">MENU_CODE</span>,
+      }}
+      direction=<span class="s">"vertical"</span>
+      defaultSizes={[<span class="t">55</span>, <span class="t">45</span>]}
+      storageKey={model.storageKeys.outer}        <span class="c">{/* 자동 생성 */}</span>
       master={
-        &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span>&gt;
-          &lt;<span class="t">DataGrid</span> {...ctrl.<span class="fn">bind</span>(<span class="s">"config"</span>, <span class="t">CONFIG_COLS</span>, { actions: ctrl.configActions })} /&gt;
-          &lt;<span class="t">DataGrid</span> {...ctrl.<span class="fn">bind</span>(<span class="s">"detail"</span>, <span class="t">DETAIL_COLS</span>)} /&gt;
+        &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span> storageKey={model.storageKeys.top}&gt;
+          &lt;<span class="t">DataGrid</span>
+            {...model.<span class="fn">bind</span>(<span class="s">"main"</span>)}                  <span class="c">{/* rowData/total/page/pageSize/audit/setRowData 자동 */}</span>
+            columnDefs={<span class="t">CONFIG_COLUMN_DEFS</span>}
+            onRowClicked={ctrl.onMainGridClick}
+            actions={ctrl.mainActions}
+          /&gt;
+          &lt;<span class="t">DataGrid</span> {...model.<span class="fn">bind</span>(<span class="s">"sub01"</span>)} columnDefs={<span class="t">DETAIL_COLUMN_DEFS</span>} ... /&gt;
         &lt;/<span class="t">SplitPane</span>&gt;
       }
       detail={
-        &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span>&gt;
-          &lt;<span class="t">DataGrid</span> {...ctrl.<span class="fn">bind</span>(<span class="s">"i18n"</span>, <span class="t">I18N_COLS</span>)} /&gt;
+        &lt;<span class="t">SplitPane</span> direction=<span class="s">"horizontal"</span> storageKey={model.storageKeys.bottom}&gt;
+          &lt;<span class="t">DataGrid</span> {...model.<span class="fn">bind</span>(<span class="s">"sub03"</span>)} columnDefs={<span class="t">I18N_COLUMN_DEFS</span>} /&gt;
+          &lt;<span class="t">DataGrid</span> {...model.<span class="fn">bind</span>(<span class="s">"sub02"</span>)} columnDefs={<span class="t">DETAIL_I18N_COLUMN_DEFS</span>} /&gt;
         &lt;/<span class="t">SplitPane</span>&gt;
       }
     /&gt;
@@ -817,36 +855,42 @@
 }</pre>
             </div>
 
-            <h4>framework가 자동으로 처리하는 것</h4>
+            <h4>base 헬퍼 빠른 참조 (Controller 에서 호출)</h4>
             <ul style="padding-left: 20px">
-              <li>그리드별 state/ref (paginated → <code>GridData</code>, array → <code>any[]</code>)</li>
-              <li>selection state+ref (stale closure 방지)</li>
-              <li><code>fetchList</code> + <code>handleSearch</code> + 행 클릭 cascade fetch</li>
-              <li>그리드별 add/save 액션 (<code>useGridAdd</code> / <code>useGridSave</code> 자동 적용)</li>
-              <li>DataGrid 표준 props 묶음: <code>ctrl.bind(key, COLS, overrides?)</code></li>
+              <li><code>base.callAjax(promise, msg?)</code> — API Promise 한 번 감쌈 (성공/에러 토스트)</li>
+              <li><code>base.alert(msg)</code> / <code>base.confirm(msg, onYes)</code> — 다이얼로그</li>
+              <li><code>base.search(page?)</code> — 메인 그리드 재조회</li>
+              <li><code>base.searchSub(gridKey, promise)</code> — 임의 그리드에 결과 set</li>
+              <li><code>base.resetGrids([keys])</code> — 지정 그리드들 비우기</li>
+              <li><code>base.handleRowClick(gridKey, row, cascade?, opts?)</code> — selection set + cascade reset/fetch</li>
+              <li><code>base.addRow(gridKey, newRow)</code> — 그리드 끝 push (EDIT_STS:"I" 자동)</li>
+              <li><code>base.requireParentRow(row, label)</code> — 부모 행 선택+저장 검증 + alert + boolean</li>
+              <li><code>base.saveGrid(gridKey, apiFn, opts?)</code> — dirty 추출 + dsSave + 후처리. opts: <code>beforeSave</code>, <code>confirmOnDelete</code>, <code>afterSave: "refresh"|"none"|함수|{cascadeFrom, fetch}</code></li>
             </ul>
 
-            <h4>화면이 직접 짜는 것 (자유)</h4>
+            <h4>useBaseModel 자동 제공</h4>
             <ul style="padding-left: 20px">
-              <li>JSX 레이아웃 (단일 / Master-Detail / 2x2 / 탭 / 트리 등)</li>
-              <li>화면 고유 액션 (예: 동기화 버튼) — Controller에서 <code>base.actions[gridKey]</code>에 합성</li>
-              <li>외부 탭, 화면 고유 useEffect 등 — <code>extras()</code>에서 정의</li>
+              <li>그리드별 <code>data</code>/<code>rows</code>/<code>setData</code>/<code>ref</code> (lazy 등록 — Proxy 기반)</li>
+              <li>그리드별 <code>selected</code>/<code>setSelected</code>/<code>selectedRef</code></li>
+              <li><code>searchRef</code> / <code>filtersRef</code> (useRef 자체 생성)</li>
+              <li><code>pageSize</code> / <code>setPageSize</code></li>
+              <li><code>layout</code> / <code>setLayout</code> (localStorage 자동 동기화)</li>
+              <li><code>storageKeys: { outer, top, bottom, layout }</code> (menuCode → kebab-case prefix)</li>
+              <li><code>bind(gridKey)</code> — DataGrid spread 객체 (rowData, totalCount, currentPage, pageSize, onPageSizeChange, onPageChange, audit:true, setRowData)</li>
             </ul>
 
             <div class="warn">
               <span class="warn-icon">⚠️</span>
               <div>
                 <strong>순환 import 주의</strong>:
-                <code>MENU_CODE</code>는 View에서 정의하고, Api는 View에서 import. Model/Controller는 <strong>module-init 시점</strong>에 <code>MENU_CODE</code>를 쓰지 않도록 주의 (<code>featureConfig</code> 객체 안에 직접 박지 말 것).
-                framework의 <code>FeatureConfig.menuCode</code>는 optional이라 생략 가능.
+                <code>MENU_CODE</code>는 <strong>View 에서 export</strong>, Api 가 import. Controller/Model 도 필요 시 import 가능 (함수 본문에서만 사용 — module-init 시점 사용 X).
               </div>
             </div>
 
             <div class="tip">
               <span class="tip-icon">💡</span>
               <div>
-                <strong>언제 패턴 G를 안 쓰나</strong>:
-                매우 특수한 화면(popup 다수, 트리+드래그, 지도 위젯)이거나, 그리드 1~2개 단순 조회만 있을 때는 기존 4-1~4-5 패턴 그대로 가도 됩니다.
+                <strong>특수 케이스</strong>: popup 다수, 추적 패널, 폼 패널, 지도 위젯 같은 화면도 <strong>같은 패턴</strong> 사용 — 단순히 화면 고유 state(useState) 와 ref(useRef) 를 model 에 추가. 참조: <code>VehicleMgmt</code> (폼 패널), <code>TenderReceiveDispatch</code> (popup + 추적 패널), <code>DispatchPlan</code> (rawFiltersRef + popup).
               </div>
             </div>
           </div>

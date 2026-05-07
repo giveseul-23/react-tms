@@ -1,48 +1,33 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
-
 import { SplitPane } from "@/app/components/layout/SplitPane";
 
-import { useCountryModel } from "./CountryModel.ts";
+import { useCountryModel } from "./CountryModel";
 import { useCountryController } from "./CountryController";
 import {
   MAIN_COLUMN_DEFS,
   STATE_COLUMN_DEFS,
   CITY_COLUMN_DEFS,
   ZIP_COLUMN_DEFS,
-} from "./CountryColumns.tsx";
+} from "./CountryColumns";
+
 export const MENU_CD = "MENU_CNTR_MGMT";
 
 export default function Country() {
-  const { meta, loading } = useSearchMeta(MENU_CD);
-  const model = useCountryModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useCountryController({
-    menuCd: MENU_CD,
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+  const model = useCountryModel(MENU_CD);
+  const ctrl = useCountryController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CD}
       searchProps={{
-        meta,
-        fetchFn: ctrl.fetchDispatchList,
+        fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         excludes: ["BOOKING"],
         menuCode: MENU_CD,
@@ -55,75 +40,56 @@ export default function Country() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="country"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
-          layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS()}
+          {...model.bind("main")}
+          columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
           actions={ctrl.mainActions}
-          onRowClicked={ctrl.handleRowClicked}
+          onRowClicked={ctrl.onMainGridClick}
         />
       }
       detail={
-        <SplitPane
-          direction="horizontal"
-          defaultSizes={[50, 50]}
-          minSizes={[25, 25]}
-          handleThickness="1.5"
-          storageKey="country-sub"
-        >
-          <DataGrid
-            layoutType="tab"
-            tabs={[
-              { key: "STATE", label: "LBL_STATE" },
-              { key: "ZIP", label: "LBL_ZIP_CODE" },
-            ]}
-            presets={{
-              STATE: {
-                columnDefs: [],
-                render: () => (
-                  <SplitPane
-                    direction="horizontal"
-                    defaultSizes={[50, 50]}
-                    minSizes={[25, 25]}
-                    handleThickness="1.5"
-                    storageKey="tempoil-register-split"
-                  >
-                    <DataGrid
-                      layoutType="plain"
-                      columnDefs={STATE_COLUMN_DEFS()}
-                      rowData={model.subStateRowData}
-                      actions={ctrl.cityActions}
-                      onRowClicked={ctrl.handleSubRowClicked}
-                    />
-                    <DataGrid
-                      layoutType="plain"
-                      columnDefs={CITY_COLUMN_DEFS()}
-                      rowData={model.subCityRowData}
-                      actions={ctrl.cityActions}
-                      subTitle="LBL_CITY"
-                    />
-                  </SplitPane>
-                ),
-              },
-              ZIP: { columnDefs: ZIP_COLUMN_DEFS(), actions: ctrl.zipActions },
-            }}
-            rowData={{
-              ZIP: model.subZipRowData,
-            }}
-            actions={[]}
-          />
-        </SplitPane>
+        <DataGrid
+          layoutType="tab"
+          tabs={[
+            { key: "STATE", label: "LBL_STATE" },
+            { key: "ZIP", label: "LBL_ZIP_CODE" },
+          ]}
+          presets={{
+            STATE: {
+              columnDefs: [],
+              render: () => (
+                <SplitPane
+                  direction="horizontal"
+                  defaultSizes={[50, 50]}
+                  minSizes={[25, 25]}
+                  handleThickness="1.5"
+                  storageKey={model.storageKeys.bottom}
+                >
+                  <DataGrid
+                    {...model.bind("state")}
+                    columnDefs={STATE_COLUMN_DEFS}
+                    actions={ctrl.cityActions}
+                    onRowClicked={ctrl.onStateGridClick}
+                  />
+                  <DataGrid
+                    {...model.bind("city")}
+                    columnDefs={CITY_COLUMN_DEFS}
+                    actions={ctrl.cityActions}
+                    subTitle="LBL_CITY"
+                  />
+                </SplitPane>
+              ),
+            },
+            ZIP: { columnDefs: ZIP_COLUMN_DEFS, actions: ctrl.zipActions },
+          }}
+          rowData={{
+            ZIP: model.grids.zip.rows,
+          }}
+          actions={[]}
+        />
       }
     />
   );

@@ -1,46 +1,33 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 
-import { useLogisticGroupDefaultModel } from "./LogisticGroupDefaultModel.ts";
-import { useLogisticGroupDefaultController } from "./LogisticGroupDefaultController.tsx";
+import { useLogisticGroupDefaultModel } from "./LogisticGroupDefaultModel";
+import { useLogisticGroupDefaultController } from "./LogisticGroupDefaultController";
 import {
   CNFG_HEADER_COLUMN_DEFS,
   CNFG_DETAIL_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
-} from "./LogisticGroupDefaultColumns.tsx";
+} from "./LogisticGroupDefaultColumns";
+
 export const MENU_CODE = "MENU_ORGANIZATION_ENV_LGST_GRP_DFT";
 
-export default function TenderReceiveDispatch() {
-  const { meta, loading } = useSearchMeta(MENU_CODE);
-  const model = useLogisticGroupDefaultModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
-
-  const ctrl = useLogisticGroupDefaultController({
-    model,
-    searchRef,
-    filtersRef,
-  });
-
-  if (loading) return <Skeleton className="h-24" />;
+export default function LogisticGroupDefault() {
+  const model = useLogisticGroupDefaultModel(MENU_CODE);
+  const ctrl = useLogisticGroupDefaultController({ model });
 
   return (
     <MasterDetailPage
+      menuCode={MENU_CODE}
       defaultSizes={[40, 60]}
       searchProps={{
-        meta,
-        fetchFn: ctrl.fetchDispatchList,
+        fetchFn: ctrl.fetchList,
         onSearch: ctrl.handleSearch,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
@@ -52,46 +39,37 @@ export default function TenderReceiveDispatch() {
             prev === "side" ? "vertical" : "side",
           ),
       }}
-      storageKey="lgst-default-dispatch"
+      storageKey={model.storageKeys.outer}
       master={
         <SplitPane
           direction="horizontal"
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
-          storageKey="country-sub"
+          storageKey={model.storageKeys.top}
         >
           <DataGrid
-            layoutType="plain"
-            columnDefs={CNFG_HEADER_COLUMN_DEFS()}
-            rowData={model.cnfgGrpData.rows}
-            onRowClicked={ctrl.handleRowClicked}
+            {...model.bind("header")}
+            columnDefs={CNFG_HEADER_COLUMN_DEFS}
+            onRowClicked={ctrl.onHeaderGridClick}
             autoSelectFirstRow
             rowKeys="LGST_GRP_CNFG_GRP_CD"
+            audit={false}
           />
           <DataGrid
-            layoutType="plain"
-            columnDefs={CNFG_DETAIL_COLUMN_DEFS()}
-            rowData={model.subCnfgRowData.rows}
-            onRowClicked={ctrl.handleSubRowClicked}
+            {...model.bind("subCnfg")}
+            columnDefs={CNFG_DETAIL_COLUMN_DEFS}
+            onRowClicked={ctrl.onSubCnfgGridClick}
             autoSelectFirstRow
             rowKeys="CNFG_CD"
+            audit={false}
           />
         </SplitPane>
       }
       detail={
         <DataGrid
-          layoutType="plain"
-          columnDefs={DETAIL_COLUMN_DEFS()}
-          rowData={model.subDetailRowData.rows}
-          totalCount={model.subDetailRowData.totalCount}
-          currentPage={model.subDetailRowData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            model.resetSubGrids();
-            searchRef.current?.(page);
-          }}
+          {...model.bind("detail")}
+          columnDefs={DETAIL_COLUMN_DEFS}
           actions={ctrl.detailActions}
         />
       }
