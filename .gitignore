@@ -2,11 +2,13 @@
 node_modules/
 
 # Build output
-node_modules/
 dist/
 build/
 .out/
 .next/
+
+# Lint reports
+reports/
 
 # Env
 .env
