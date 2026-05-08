@@ -60,7 +60,7 @@ export function CommonPopup({
           ...extra,
         })
         .then((res: any) => {
-          let datas = res.data.data.dsOut;
+          const datas = res.data.data.dsOut;
           let filterDatas;
           if (filterCol !== "") {
             filterDatas = datas.filter((x) => x[filterCol] === filterValue);

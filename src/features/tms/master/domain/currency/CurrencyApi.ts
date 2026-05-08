@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./Currency";
 
 type commonResponse = {
   rows: [];
@@ -21,6 +22,22 @@ export const currencyApi = {
     return apiClient.post<commonResponse>(
       `/currencyService/search`,
       withSession({ MENU_CD: menuCd, ...payload }),
+    );
+  },
+
+  ////// SAVE
+  save(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
+    return apiClient.post<commonResponse>(
+      `/currencyService/save`,
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD,
+          ...rest,
+        },
+      },
     );
   },
 };

@@ -158,7 +158,8 @@ type DataGridProps<TRow> = {
   columnDefs?: (ColDef<TRow> | ColGroupDef<TRow>)[];
 
   layoutType?: "tab" | "plain";
-  actions: ActionItem[];
+  /** 그리드별 액션 버튼들. 비거나 생략하면 actions 바 자체 숨김. */
+  actions?: ActionItem[];
   subTitle?: string;
 
   pagination?: boolean;
@@ -254,7 +255,7 @@ export default function DataGrid<TRow>({
   layoutType = "tab",
   actions,
   subTitle,
-  pagination = false,
+  pagination = true,
   pageSize = 500,
   onRowSelected,
   renderRightGrid,
@@ -526,7 +527,7 @@ export default function DataGrid<TRow>({
       if (!colId) return null;
 
       const rowIndex = parseInt(row.getAttribute("row-index") ?? "-1", 10);
-      let colIndex = columnOrderRef.current.indexOf(colId);
+      const colIndex = columnOrderRef.current.indexOf(colId);
       if (rowIndex < 0 || colIndex < 0) return null;
       return { rowIndex, colIndex };
     }
@@ -975,7 +976,7 @@ export default function DataGrid<TRow>({
         )}
       </div>
 
-      {totalCount != null && (
+      {pagination && totalCount != null && (
         <div className="flex items-center gap-2 px-2 py-1 shrink-0 text-[11px] text-gray-600">
           <span className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded border border-gray-300 bg-gray-100 font-medium text-gray-700">
             {totalCount.toLocaleString()}

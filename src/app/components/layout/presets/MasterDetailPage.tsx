@@ -2,25 +2,25 @@
 //
 // SearchFilters + 마스터/디테일 분할 (그리드 2개).
 // 옵션:
-//   - layoutToggle: side ↔ vertical 토글 버튼 표시
+//   - defaultDirection: 초기 분할 방향 (기본 "horizontal"). 토글값은 localStorage 자동 동기화
+//   - layoutToggle: 토글 버튼 on/off (기본 true)
 //   - bottomSlot: 하단 슬라이드 패널 (TenderReceiveDispatch 추적 패널 등)
 //
 // DispatchPlan / TenderReceiveDispatch 용.
 
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import { PageShell } from "../PageShell";
 import { Pane } from "../Pane";
 import { SplitPane } from "../SplitPane";
 import { SearchFilters } from "@/app/components/Search/SearchFilters";
-import {
-  LayoutToggleButton,
-  type LayoutType,
-} from "../LayoutToggleButton";
+import { LayoutToggleButton } from "../LayoutToggleButton";
 import { OuterTabs, type OuterTab } from "../OuterTabs";
 import { useResolvedSearchMeta } from "@/app/feature/useResolvedSearchMeta";
 import type { SearchProps } from "./types";
+
+type Direction = "horizontal" | "vertical";
 
 export interface MasterDetailPageProps {
   /** menuCode 전달 시 SearchMeta 자동 로드 + loading skeleton 자동.
@@ -29,13 +29,13 @@ export interface MasterDetailPageProps {
   searchProps: SearchProps;
   master: ReactNode;
   detail: ReactNode;
-  /** "horizontal" | "vertical" */
-  direction: "horizontal" | "vertical";
+  /** 초기 분할 방향. 기본 "horizontal". 사용자 토글값은 localStorage 자동 저장. */
+  defaultDirection?: Direction;
   /** [master, detail] 비율 (default [50, 50]) */
   defaultSizes?: [number, number];
-  /** layout 토글 (옵션) */
-  layoutToggle?: { layout: LayoutType; onToggle: () => void };
-  /** 패널 비율 영속화 키 (옵션) */
+  /** 토글 버튼 표시 여부. 기본 true. */
+  layoutToggle?: boolean;
+  /** 패널 비율 영속화 키. 방향값도 `${storageKey}-direction` 으로 자동 저장. */
   storageKey?: string;
   /** 반응형 (옵션) */
   breakpoint?: { mobile?: "horizontal" | "vertical"; maxWidth?: number };
@@ -53,14 +53,34 @@ export interface MasterDetailPageProps {
   };
 }
 
+// ── localStorage 안전 접근 ────────────────────────────────────
+function readDirection(key: string): Direction | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const v = window.localStorage.getItem(key);
+    return v === "horizontal" || v === "vertical" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeDirection(key: string, value: Direction): void {
+  try {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(key, value);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function MasterDetailPage({
   menuCode,
   searchProps,
   master,
   detail,
-  direction,
+  defaultDirection = "horizontal",
   defaultSizes = [50, 50],
-  layoutToggle,
+  layoutToggle = true,
   storageKey,
   breakpoint,
   bottomSlot,
@@ -70,19 +90,27 @@ export function MasterDetailPage({
   outerTabs,
 }: MasterDetailPageProps) {
   const { meta, gate } = useResolvedSearchMeta(menuCode, searchProps.meta);
+
+  const directionKey = storageKey ? `${storageKey}-direction` : null;
+  const [direction, setDirection] = useState<Direction>(() => {
+    const saved = directionKey ? readDirection(directionKey) : null;
+    return saved ?? defaultDirection;
+  });
+  const onToggleDirection = useCallback(() => {
+    setDirection((prev) => {
+      const next: Direction = prev === "horizontal" ? "vertical" : "horizontal";
+      if (directionKey) writeDirection(directionKey, next);
+      return next;
+    });
+  }, [directionKey]);
+
   if (gate) return <>{gate}</>;
-  const finalSearchProps: SearchProps = { ...searchProps, meta };
-  const layoutToggleNode = layoutToggle ? (
+  const finalSearchProps: SearchProps = { menuCode, ...searchProps, meta };
+  const layoutToggleNode = (
     <LayoutToggleButton
-      layout={layoutToggle.layout}
-      onToggle={layoutToggle.onToggle}
-      visible={true}
-    />
-  ) : (
-    <LayoutToggleButton
-      layout="side"
-      onToggle={() => {}}
-      visible={false}
+      layout={direction === "horizontal" ? "side" : "vertical"}
+      onToggle={onToggleDirection}
+      visible={layoutToggle}
     />
   );
 

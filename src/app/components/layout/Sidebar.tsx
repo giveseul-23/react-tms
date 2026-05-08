@@ -219,7 +219,8 @@ export function Sidebar({
   const toggleSection = (code: string) => {
     setExpandedSections((prev) => {
       const next = new Set(prev);
-      next.has(code) ? next.delete(code) : next.add(code);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
   };
@@ -258,7 +259,8 @@ export function Sidebar({
   const toggleGroup = (code: string) => {
     setExpandedGroups((prev) => {
       const next = new Set(prev);
-      next.has(code) ? next.delete(code) : next.add(code);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
       return next;
     });
   };

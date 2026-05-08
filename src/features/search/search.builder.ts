@@ -12,7 +12,7 @@ export function buildSearchCondition(
   searchCon: SearchCondition,
   userTz?: string, // [TEMP-userTz] 서버 작업 완료 시 이 파라미터 제거
 ): string {
-  let { key, operator, dataType, value, sourceType } = searchCon;
+  const { key, operator, dataType, value, sourceType } = searchCon;
 
   if (sourceType === "POPUP" && key.endsWith("_NM")) return "";
   if (!value && operator !== "notUsed") return "";

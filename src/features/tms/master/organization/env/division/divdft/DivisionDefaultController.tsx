@@ -1,9 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import {
-  makeAddAction,
-  makeSaveAction,
-} from "@/app/components/grid/commonActions";
+import { makeSaveAction } from "@/app/components/grid/commonActions";
 import { divisionDefaultApi as api } from "./DivisionDefaultApi";
 import type { DivisionDefaultModel, GridKey } from "./DivisionDefaultModel";
 
@@ -42,22 +39,10 @@ export function useDivisionDefaultController({ model }: Args) {
     [model.grids.main, onMainGridClick],
   );
 
-  // ── Add ───────────────────────────────────────────────────────
-  const onAddDetail = useCallback(() => {
-    const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, "설정항목")) return;
-    base.addRow("detail", { CNFG_CD: main.CNFG_CD });
-  }, [model, base]);
-
   // ── Save ──────────────────────────────────────────────────────
-  const onSaveMain = useCallback(
-    () => base.saveGrid("main", api.saveDivisionDefaultList),
-    [base],
-  );
-
   const onSaveDetail = useCallback(
     () =>
-      base.saveGrid("detail", api.saveDivisionDefaultDetailList, {
+      base.saveGrid("detail", api.saveDetail, {
         afterSave: {
           cascadeFrom: "main",
           fetch: (main) =>
@@ -68,27 +53,16 @@ export function useDivisionDefaultController({ model }: Args) {
   );
 
   // ── 그리드별 actions ──────────────────────────────────────────
-  const mainActions = useMemo(
-    () => [
-      makeAddAction({ onClick: () => base.addRow("main", { CNFG_CD: "", CNFG_NM: "" }) }),
-      makeSaveAction({ onClick: onSaveMain }),
-    ],
-    [base, onSaveMain],
-  );
 
   const detailActions = useMemo(
-    () => [
-      makeAddAction({ onClick: onAddDetail }),
-      makeSaveAction({ onClick: onSaveDetail }),
-    ],
-    [onAddDetail, onSaveDetail],
+    () => [makeSaveAction({ onClick: onSaveDetail })],
+    [onSaveDetail],
   );
 
   return {
     fetchList,
     handleSearch,
     onMainGridClick,
-    mainActions,
     detailActions,
   };
 }

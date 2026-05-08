@@ -6,7 +6,7 @@
 //
 // 자식은 화면 고유 핸들러(onMainGridClick, onAddXxx, onSaveXxx 등)만 정의하면 됨.
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import {
   dirtyRows,
@@ -14,13 +14,27 @@ import {
 } from "@/app/components/grid/gridUtils/rowStatus";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
+import { makeSaveAction } from "@/app/components/grid/commonActions";
 import type { BaseModel, GridSlot } from "./useBaseModel";
 
 interface Args<K extends string> {
   model: BaseModel<K>;
+  /** 표준 fetchList / handleSearch / mainActions 자동 생성용. 화면 고유 cascade/추가액션은 자식 controller 가 추가/오버라이드. */
+  api?: {
+    search?: (params: Record<string, unknown>) => Promise<any>;
+    save?: (payload: { dsSave: any[] }) => Promise<any>;
+  };
+  searchOptions?: {
+    transformParams?: (params: Record<string, unknown>) => Record<string, unknown>;
+    onAfterSearch?: (data: any) => void;
+  };
 }
 
-export function useBaseController<K extends string>({ model }: Args<K>) {
+export function useBaseController<K extends string>({
+  model,
+  api,
+  searchOptions,
+}: Args<K>) {
   const searchRef = model.searchRef;
   const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
@@ -264,6 +278,33 @@ export function useBaseController<K extends string>({ model }: Args<K>) {
     [alertMsg],
   );
 
+  // ── 표준 fetchList / handleSearch / mainActions ────────────────
+  // api 옵션을 넘긴 controller 가 자동으로 사용. 자식은 cascade/추가액션만 override.
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => {
+      if (!api?.search) {
+        throw new Error("[useBaseController] api.search 미설정 — fetchList 호출 불가");
+      }
+      const transformed = searchOptions?.transformParams?.(params) ?? params;
+      return api.search(transformed);
+    },
+    [api, searchOptions],
+  );
+
+  const handleSearch = useCallback(
+    (data: any) => {
+      const main = (model.grids as Record<string, GridSlot>)["main"];
+      main?.setData(data);
+      searchOptions?.onAfterSearch?.(data);
+    },
+    [model.grids, searchOptions],
+  );
+
+  const mainActions = useMemo(() => {
+    if (!api?.save) return [];
+    return [makeSaveAction({ onClick: () => saveGrid("main" as K, api.save!) })];
+  }, [api, saveGrid]);
+
   return {
     callAjax,
     saveGrid,
@@ -275,6 +316,9 @@ export function useBaseController<K extends string>({ model }: Args<K>) {
     handleRowClick,
     alert: alertMsg,
     confirm: confirmMsg,
+    fetchList,
+    handleSearch,
+    mainActions,
   };
 }
 

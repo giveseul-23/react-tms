@@ -1,14 +1,15 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useDivisionDefaultModel } from "./DivisionDefaultModel";
 import { useDivisionDefaultController } from "./DivisionDefaultController";
 import {
   MAIN_COLUMN_DEFS,
+  MAIN_ROW_KEYS,
   DETAIL_COLUMN_DEFS,
+  DETAIL_ROW_KEYS,
 } from "./DivisionDefaultColumns";
 
 export const MENU_CODE = "MENU_ORGANIZATION_ENV_DIV_DFT";
@@ -28,32 +29,26 @@ export default function DivisionDefault() {
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
-      storageKey={model.storageKeys.outer}
+      defaultDirection="horizontal"
+      layoutToggle={true}
       master={
         <DataGrid
           {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
-          rowKeys="CNFG_CD"
+          rowKeys={MAIN_ROW_KEYS}
           autoSelectFirstRow
-          actions={ctrl.mainActions}
           audit={false}
+          pagination={false}
         />
       }
       detail={
         <DataGrid
           {...model.bind("detail")}
           columnDefs={DETAIL_COLUMN_DEFS}
-          rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
+          rowKeys={DETAIL_ROW_KEYS}
           actions={ctrl.detailActions}
+          codeMap={model.codeMap}
         />
       }
     />

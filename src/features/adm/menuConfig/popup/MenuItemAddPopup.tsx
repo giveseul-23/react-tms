@@ -227,12 +227,12 @@ export default function MenuItemAddPopup({
       <Field
         label="URL(컴포넌트 경로) *"
         error={errors.URL}
-        hint="예: vc.view.mdl.adm.menu.cnfg.Configurator"
+        hint="예: tms/folder/fileName"
       >
         <Input
           value={form.URL}
           onChange={set("URL")}
-          placeholder="vc.view.mdl.adm.xxx.yyy.ComponentName"
+          placeholder="tms/folder/fileName"
           className="h-8 text-sm font-mono text-xs"
         />
       </Field>

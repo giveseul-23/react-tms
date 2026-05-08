@@ -31,8 +31,6 @@ export function PageTabBar({
   onDragStartTab,
   onDragEndTab,
 }: PageTabBarProps) {
-  if (tabs.length === 0) return null;
-
   const dragIndexRef = useRef<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [contextMenu, setContextMenu] = useState<{
@@ -40,6 +38,8 @@ export function PageTabBar({
     y: number;
     menuCode: string;
   } | null>(null);
+
+  if (tabs.length === 0) return null;
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     dragIndexRef.current = index;

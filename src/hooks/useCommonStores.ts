@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { apiClient } from "@/app/http/client";
 import { commonApi } from "@/app/services/common/commonApi";
 import { getSessionFields } from "@/app/services/auth/auth";
 
+// sqlProp 외 임의 키들은 모두 body 에 그대로 spread.
+//   { sqlProp, keyParam: "..." }       → { keyParam: "...", ... } 로 전송
+//   { sqlProp, CNFG_CD: "..." }        → { CNFG_CD: "...", ... } 로 전송
+//   { sqlProp, CNFG_CD, AGRMT_NO }     → 여러 키 조합도 가능
 export type CommonStoreSpec =
-  | { sqlProp: string; keyParam?: string }
+  | ({ sqlProp: string } & Record<string, any>)
   | Array<Record<string, any>>;
 
 export function useCommonStores(params: Record<string, CommonStoreSpec>) {
@@ -29,7 +33,7 @@ export function useCommonStores(params: Record<string, CommonStoreSpec>) {
         // 이하 API 스펙 항목만 처리
         const apiParams = Object.fromEntries(
           Object.entries(params).filter(([, v]) => !Array.isArray(v)),
-        ) as Record<string, { sqlProp: string; keyParam?: string }>;
+        ) as Record<string, { sqlProp: string } & Record<string, any>>;
 
         // sqlProp에 '/'가 포함된 항목: 해당 경로로 개별 호출
         const customEntries = Object.entries(apiParams).filter(([, v]) =>
@@ -40,11 +44,12 @@ export function useCommonStores(params: Record<string, CommonStoreSpec>) {
           ([, v]) => !v.sqlProp.includes("/"),
         );
 
-        // 개별 호출
+        // 개별 호출 — sqlProp 외 spec 키는 그대로 body 로 spread
         const customPromises = customEntries.map(async ([key, value]) => {
-          const res = await apiClient.post(value.sqlProp, {
+          const { sqlProp, ...rest } = value;
+          const res = await apiClient.post(sqlProp, {
             ...sessionFields,
-            keyParam: value.keyParam ?? value.sqlProp,
+            ...rest,
           });
           mapped[key] = res?.data?.data?.dsOut ?? res?.data?.data ?? [];
         });
@@ -53,12 +58,16 @@ export function useCommonStores(params: Record<string, CommonStoreSpec>) {
         let batchPromise: Promise<void> | null = null;
         if (batchEntries.length > 0) {
           batchPromise = (async () => {
-            const req = batchEntries.map(([key, value]) => ({
-              key,
-              sqlProp: value.sqlProp,
-              keyParam: value.keyParam ?? value.sqlProp,
-              ...sessionFields,
-            }));
+            const req = batchEntries.map(([key, value]) => {
+              const { sqlProp, keyParam, ...rest } = value;
+              return {
+                key,
+                sqlProp,
+                keyParam: keyParam ?? sqlProp,
+                ...rest,
+                ...sessionFields,
+              };
+            });
             const res = await commonApi.fetchComboOptions(req);
             const result = res?.data?.data || {};
             if (result?.success) {
@@ -84,5 +93,17 @@ export function useCommonStores(params: Record<string, CommonStoreSpec>) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(params)]);
 
-  return { stores };
+  // ── codeMap 자동 생성 (CODE → NAME) ──────────────────────────
+  const codeMap = useMemo(() => {
+    const map: Record<string, Record<string, string>> = {};
+    Object.entries(stores).forEach(([storeKey, items]) => {
+      map[storeKey] = {};
+      (items ?? []).forEach((item: any) => {
+        map[storeKey][item.CODE] = item.NAME;
+      });
+    });
+    return map;
+  }, [stores]);
+
+  return { stores, codeMap };
 }

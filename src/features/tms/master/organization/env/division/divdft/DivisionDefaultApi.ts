@@ -37,4 +37,18 @@ export const divisionDefaultApi = {
       }),
     );
   },
+  saveDetail(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
+    return apiClient.post<commonResponse>(
+      `/divisionDefaultService/save`,
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CODE,
+          ...rest,
+        },
+      },
+    );
+  },
 };

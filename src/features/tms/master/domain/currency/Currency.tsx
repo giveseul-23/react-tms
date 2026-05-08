@@ -21,8 +21,6 @@ export default function Currency() {
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
-        excludes: ["BOOKING"],
-        menuCode: MENU_CD,
       }}
       grid={
         <DataGrid
@@ -30,6 +28,7 @@ export default function Currency() {
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
+          audit={{ delete: false }}
         />
       }
     />

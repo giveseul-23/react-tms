@@ -14,13 +14,12 @@
 // 이 템플릿이 보여주는 패턴
 // - useBaseModel(MENU_CODE) — storageKey + grid 슬롯 자동 셋업
 // - <DataGrid {...model.bind("xxx")} /> — DataGrid 표준 props spread
-// - layoutToggle 의 layout 값 localStorage 자동 동기화
+// - defaultDirection / layoutToggle 만 선언 — 토글값 / direction 매핑은 preset 내부 자동
 // - SearchFilters 의 searchRef / filtersRef 연동
 // - Master/Detail 1+1 기본 레이아웃 (확장 패턴은 하단 주석 참고)
 // ────────────────────────────────────────────────────────────────
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useFeatureModel } from "./Guide_FeatureModel";
@@ -51,15 +50,10 @@ export default function Feature() {
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
-      // layoutToggle — 사용자가 토글하면 model.layout 이 localStorage 와 자동 동기화
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
+      // 초기 분할 방향만 선언. 사용자 토글값은 localStorage 자동 동기화. (기본값 "horizontal")
+      defaultDirection="horizontal"
+      // 토글 버튼 on/off — 기본 true. 그리드 1개라 숨길 화면에서만 false 명시.
+      layoutToggle={true}
       // storageKey 들은 menuCode 에서 자동 생성됨 (model.storageKeys.*)
       storageKey={model.storageKeys.outer}
       master={

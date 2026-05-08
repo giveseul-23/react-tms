@@ -7,17 +7,23 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_CURRENCY_CODE",
     field: "CURR_CD",
   },
-  { type: "text", headerName: "LBL_CURRENCY_NAME", field: "CURR_NM" },
+  {
+    type: "text",
+    headerName: "LBL_CURRENCY_NAME",
+    field: "CURR_NM",
+    editable: true,
+  },
   {
     type: "numeric",
     headerName: "LBL_DECIMAL_PRECISION",
     field: "DECIMAL_PRECISION",
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_CURR_RDNG_RCD",
     field: "CURR_RDNG_RCD",
     codeKey: "currRdngRcd",
+    editable: true,
   },
   { type: "numeric", headerName: "LBL_DSPL_ORD", field: "DSPLY_SEQ" },
 ];
