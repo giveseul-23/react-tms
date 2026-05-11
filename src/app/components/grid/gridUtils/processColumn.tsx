@@ -29,10 +29,39 @@ export type ProcessOptions = {
   codeMap?: Record<string, Record<string, string>>;
   /** "No" 컬럼처럼 row 길이에 따른 width 가 필요한 경우 사용. (TreeGrid 는 미사용) */
   rowCountForNo?: number;
+  /** ComboCellEditor 가 commit 시 React state 의 rows 배열을 갱신하기 위해 사용.
+   *  ag-grid 의 cellEditor commit 흐름은 internal node.data 만 mutate 하고
+   *  React state 까지 도달 못 해 stale row 로 reset 되는 케이스가 있음 →
+   *  cellEditor 가 직접 setRowData 호출해 양쪽 동기화. */
+  setRowData?: (updater: any) => void;
 };
 
 const HEADER_PADDING = 32;
 const CELL_PADDING = 24;
+
+// ag-grid 가 모르는 우리 커스텀 colDef 키들 — 내부 processColumn 분기에서만
+// 활용하고 ag-grid 에 넘기기 전에 strip. 그대로 두면:
+//   1) "invalid colDef property" 경고 발생
+//   2) colDef.type 이 columnTypes 에 없으면 ag-grid 의 valueGetter 동작이
+//      일관되지 않아 cellRenderer 의 params.value 가 undefined 로 들어옴
+const CUSTOM_KEYS = new Set([
+  "type",
+  "align",
+  "codeKey",
+  "fieldType",
+  "decimalPlaces",
+  "disableMaxWidth",
+  "noLang",
+  "summable",
+]);
+
+function stripCustomKeys<T extends Record<string, any>>(col: T): T {
+  const out: Record<string, any> = {};
+  for (const k of Object.keys(col)) {
+    if (!CUSTOM_KEYS.has(k)) out[k] = col[k];
+  }
+  return out as T;
+}
 
 let _canvas: HTMLCanvasElement | null = null;
 function measureTextWidth(text: string): number {
@@ -50,16 +79,17 @@ const translate = (col: any): string =>
 function walkChildren(
   children: any[] | undefined,
   codeMap?: Record<string, Record<string, string>>,
+  setRowData?: (updater: any) => void,
 ): any[] | undefined {
   if (!Array.isArray(children)) return children;
   return children.map((child) => {
     const withRenderer = injectCodeRenderer(child, codeMap) as any;
-    const withEditor = injectComboEditor(withRenderer, codeMap) as any;
-    return {
+    const withEditor = injectComboEditor(withRenderer, codeMap, setRowData) as any;
+    return stripCustomKeys({
       ...withEditor,
       headerName: translate(withEditor),
-      children: walkChildren(withEditor.children, codeMap),
-    };
+      children: walkChildren(withEditor.children, codeMap, setRowData),
+    });
   });
 }
 
@@ -74,6 +104,15 @@ function injectCodeRenderer(
     ...col,
     cellRenderer: (params: any) => {
       const code = params.value;
+      // 빈값(빈 문자열 / null / undefined) 은 회색 "―" 로 표시.
+      // 실제 데이터는 그대로 두고 표시만 변경 — 저장 시 빈값 그대로 전송됨.
+      if (code === "" || code == null) {
+        return (
+          <span className="px-2 py-0.5 rounded-lg text-xs text-gray-400">
+            ―
+          </span>
+        );
+      }
       const label = codeMap?.[codeKey]?.[String(code)] ?? code;
       return <span className="px-2 py-0.5 rounded-lg text-xs">{label}</span>;
     },
@@ -89,6 +128,7 @@ function injectCodeRenderer(
 function injectComboEditor(
   col: AnyCol,
   codeMap?: Record<string, Record<string, string>>,
+  setRowData?: (updater: any) => void,
 ): AnyCol {
   const c = col as any;
   if (c.type !== "combo") return col;
@@ -100,21 +140,37 @@ function injectComboEditor(
     cellEditorParams: {
       ...(c.cellEditorParams ?? {}),
       codeMap: codeMap?.[codeKey] ?? {},
+      // cellEditor 가 commit 시 React state 의 rows 배열을 직접 갱신할 수 있도록
+      setRowData,
     },
     // popup 모드로 띄워야 dropdown 이 셀 경계 밖에서도 잘 보임
     cellEditorPopup: c.cellEditorPopup ?? true,
   } as AnyCol;
 }
 
-/** 한 컬럼 변환. 외부에서 잘 안 쓰이지만 export. */
+/** 외부 export — 우리 커스텀 키 (type, align, codeKey 등) 를 ag-grid 에
+ *  그대로 노출하지 않도록 strip 한 결과를 반환. 내부 분기에서는 type 등을
+ *  활용하지만 ag-grid 에는 표준 키만 전달. */
 export function processColumnDef(
+  col: AnyCol,
+  opts: ProcessOptions = {},
+): AnyCol {
+  return stripCustomKeys(processColumnDefRaw(col, opts));
+}
+
+/** 내부용 — type/align/codeKey 등 우리 커스텀 키를 활용한 변환 본체. */
+function processColumnDefRaw(
   col: AnyCol,
   opts: ProcessOptions = {},
 ): AnyCol {
   const codeMap = opts.codeMap;
 
   // codeKey → cellRenderer (라벨 표시) + type "combo" 면 cellEditor (dropdown) 주입
-  const prepared = injectComboEditor(injectCodeRenderer(col, codeMap), codeMap);
+  const prepared = injectComboEditor(
+    injectCodeRenderer(col, codeMap),
+    codeMap,
+    opts.setRowData,
+  );
 
   // "No" 컬럼 (DataGrid 전용 — rowCountForNo 가 없으면 일반 처리)
   if (
@@ -133,7 +189,7 @@ export function processColumnDef(
       width: noWidth,
       minWidth: noWidth,
       maxWidth: noWidth,
-      suppressMenu: true,
+      suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
       floatingFilter: false,
@@ -163,6 +219,7 @@ export function processColumnDef(
   const translatedChildren = walkChildren(
     (prepared as any).children,
     codeMap,
+    opts.setRowData,
   );
 
   if ((prepared as any).disableMaxWidth === true) {

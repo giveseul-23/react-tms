@@ -139,13 +139,15 @@ function calcOptimalWidths<TRow>(
 
 function applyColumnWidths(api: any, widthMap: Record<string, number>) {
   const cols = api.getColumns?.() ?? [];
+  const updates: Array<{ key: string; newWidth: number }> = [];
 
   for (const col of cols) {
     const colId = col.getColId?.();
     const matched = widthMap[colId];
     if (!colId || !matched) continue;
-    api.setColumnWidth(colId, matched);
+    updates.push({ key: colId, newWidth: matched });
   }
+  if (updates.length > 0) api.setColumnWidths?.(updates);
 }
 
 // ─── 컴포넌트 ───────────────────────────────────────────────────────────────────
@@ -425,10 +427,11 @@ export default function DataGrid<TRow>({
         processColumnDef(col, {
           codeMap: activeCodeMap,
           rowCountForNo: activeRowData.length,
+          setRowData,
         }),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeColumnDefs, activeCodeMap],
+    [activeColumnDefs, activeCodeMap, setRowData],
   );
 
   // ─── 오토사이징 핸들러 ────────────────────────────────────────────────────────

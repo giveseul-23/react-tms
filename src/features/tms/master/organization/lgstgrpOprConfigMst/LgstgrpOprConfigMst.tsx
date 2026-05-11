@@ -81,6 +81,7 @@ export default function LgstgrpOprConfigMst() {
             rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
             autoSelectFirstRow
             actions={ctrl.sub01Actions}
+            codeMap={model.codeMap}
           />
           {/* 상세-다국어 (bottom-right) — 상세 행에 종속 */}
           <DataGrid
@@ -88,6 +89,7 @@ export default function LgstgrpOprConfigMst() {
             columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS}
             subTitle="LBL_CNFG_DTL_CD_LANG_SETTING"
             actions={ctrl.sub02Actions}
+            codeMap={model.codeMap}
           />
         </SplitPane>
       }

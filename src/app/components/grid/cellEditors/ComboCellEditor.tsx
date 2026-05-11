@@ -45,11 +45,22 @@ export function ComboCellEditor(props: ComboCellEditorProps) {
 
   const pick = (v: string) => {
     valueRef.current = v;
-    setValue(v);
-    // ag-grid 의 정상 commit 흐름에 위임 — stopEditing() 호출하면
-    // useGridCellEditor 의 getValue 가 호출되어 valueRef.current 반환,
-    // ag-grid 가 자체 commit 처리 + onCellValueChanged 발화.
-    // (cancel=true 로 끄면 ag-grid editing state 가 stuck 되어 같은 셀 재편집 불가)
+    const field = (props.colDef?.field ?? props.column?.getColId?.()) as
+      | string
+      | undefined;
+    const targetRow = props.node?.data;
+    // ag-grid 의 cellEditor commit 흐름은 internal node.data 만 mutate 하고
+    // React state (model.grids[k].rows) 까지 도달 못 함 — 다음 render 시
+    // stale row 로 reset 되어 mutate 결과가 날아간다.
+    // → React state 의 rows 배열을 직접 갱신해 양쪽 동기화.
+    if (field && targetRow && typeof props.setRowData === "function") {
+      props.setRowData((prev: any) => ({
+        ...prev,
+        rows: (prev?.rows ?? []).map((r: any) =>
+          r === targetRow ? { ...r, [field]: v } : r,
+        ),
+      }));
+    }
     props.api?.stopEditing?.();
   };
 

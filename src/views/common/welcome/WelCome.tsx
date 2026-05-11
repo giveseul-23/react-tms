@@ -1,6 +1,7 @@
 // src/views/welcome/Welcome.tsx
 "use client";
 
+import React, { useEffect, useRef, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -136,14 +137,34 @@ function ChartCard({
   subtitle: string;
   children: React.ReactNode;
 }) {
+  // HomePage 가 비활성 탭을 display:none 으로 숨기는 패턴 + 첫 mount 시 layout
+  // 미완료 두 상황 모두에서 children(recharts ResponsiveContainer) 가 0x0 으로
+  // 측정되어 경고 발생 → ResizeObserver 로 부모가 양수 크기일 때만 차트 mount.
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const check = () => {
+      const rect = el.getBoundingClientRect();
+      setVisible(rect.width > 0 && rect.height > 0);
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   return (
-    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm flex flex-col min-h-0">
+    <div
+      ref={containerRef}
+      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm flex flex-col min-h-0"
+    >
       <div className="shrink-0 mb-2">
         <h2 className="text-sm font-semibold text-[rgb(var(--fg))]">{title}</h2>
         <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
       </div>
       {/* 차트 영역 — 남은 공간 전부 */}
-      <div className="flex-1 min-h-0">{children}</div>
+      <div className="flex-1 min-h-0">{visible ? children : null}</div>
     </div>
   );
 }
@@ -216,7 +237,7 @@ export default function Welcome() {
       <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-3">
         {/* ① 월별 운송 현황 */}
         <ChartCard title="월별 운송 현황" subtitle="연간 운송건수 및 완료 추이">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <AreaChart
               data={monthlyShipments}
               margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
@@ -271,7 +292,7 @@ export default function Welcome() {
           title="운송사별 처리 실적"
           subtitle="이번달 운송사별 처리건수"
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart
               data={carrierPerformance}
               margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
@@ -306,7 +327,7 @@ export default function Welcome() {
         >
           <div className="flex items-center h-full gap-4">
             <div className="flex-1 min-w-0 h-full">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <PieChart>
                   <Pie
                     data={statusDistribution}
@@ -361,7 +382,7 @@ export default function Welcome() {
           title="이번주 일별 처리 현황"
           subtitle="요청 대비 처리건수 비교"
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <LineChart
               data={weeklyTrend}
               margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
