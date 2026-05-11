@@ -13,7 +13,7 @@ import { lgstgrpOprConfigApi } from "./LgstgrpOprConfigApi";
 //   sub01 : 상세       (lgstgrpcnfgmastrsub01)
 //   sub02 : 상세-다국어 (lgstgrpcnfgmastrsub02)  ← sub01 행 클릭 시 fetch
 //   sub03 : 메인-다국어 (lgstgrpcnfgmastrsub03)  ← main 행 클릭 시 fetch
-export type GridKey = "main" | "sub01" | "sub02" | "sub03";
+export type GridKey = "main" | "detail" | "detailLang" | "mainLang";
 
 type ConfigTab = { key: string; label: string };
 

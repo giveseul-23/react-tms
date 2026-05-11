@@ -35,12 +35,12 @@ export default function LgstgrpOprConfigMst() {
         activeTab: model.activeType,
         onChange: ctrl.onTabChange,
       }}
-      direction="vertical"
+      direction="horizontal"
       defaultSizes={[55, 45]}
       storageKey={model.storageKeys.outer}
       master={
         <SplitPane
-          direction="horizontal"
+          direction="vertical"
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
@@ -55,35 +55,35 @@ export default function LgstgrpOprConfigMst() {
             autoSelectFirstRow
             actions={ctrl.mainActions}
           />
+          {/* 메인-다국어 (bottom-left) — 메인 행에 종속 */}
+          <DataGrid
+            {...model.bind("mainLang")}
+            columnDefs={CONFIG_I18N_COLUMN_DEFS}
+            subTitle="LBL_CNFG_CD_LANG_SETTING"
+            actions={ctrl.sub03Actions}
+          />
+        </SplitPane>
+      }
+      detail={
+        <SplitPane
+          direction="vertical"
+          defaultSizes={[50, 50]}
+          minSizes={[25, 25]}
+          handleThickness="1.5"
+          storageKey={model.storageKeys.bottom}
+        >
           {/* 상세 그리드 (top-right) */}
           <DataGrid
-            {...model.bind("sub01")}
+            {...model.bind("detail")}
             columnDefs={CONFIG_DETAIL_COLUMN_DEFS}
             onRowClicked={ctrl.onSub01GridClick}
             rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
             autoSelectFirstRow
             actions={ctrl.sub01Actions}
           />
-        </SplitPane>
-      }
-      detail={
-        <SplitPane
-          direction="horizontal"
-          defaultSizes={[50, 50]}
-          minSizes={[25, 25]}
-          handleThickness="1.5"
-          storageKey={model.storageKeys.bottom}
-        >
-          {/* 메인-다국어 (bottom-left) — 메인 행에 종속 */}
-          <DataGrid
-            {...model.bind("sub03")}
-            columnDefs={CONFIG_I18N_COLUMN_DEFS}
-            subTitle="LBL_CNFG_CD_LANG_SETTING"
-            actions={ctrl.sub03Actions}
-          />
           {/* 상세-다국어 (bottom-right) — 상세 행에 종속 */}
           <DataGrid
-            {...model.bind("sub02")}
+            {...model.bind("detailLang")}
             columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS}
             subTitle="LBL_CNFG_DTL_CD_LANG_SETTING"
             actions={ctrl.sub02Actions}

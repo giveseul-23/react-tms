@@ -42,15 +42,15 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
         row,
         [
           {
-            to: "sub01",
+            to: "detail",
             fetch: (r) => api.getConfigDetailList({ CNFG_CD: r.CNFG_CD }),
           },
           {
-            to: "sub03",
+            to: "mainLang",
             fetch: (r) => api.getConfigI18nList({ CNFG_CD: r.CNFG_CD }),
           },
         ],
-        { alsoReset: ["sub02"] },
+        { alsoReset: ["detailLang"] },
       ),
     [base],
   );
@@ -58,9 +58,9 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 상세 그리드 행 클릭 (센차: onSub01GridClick) ───────────────
   const onSub01GridClick = useCallback(
     (row: any) =>
-      base.handleRowClick("sub01", row, [
+      base.handleRowClick("detail", row, [
         {
-          to: "sub02",
+          to: "detailLang",
           fetch: (r) =>
             api.getConfigDetailI18nList({
               CNFG_CD: r.CNFG_CD,
@@ -84,7 +84,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 메인 행 추가 (센차: onAdd + onCheckMainGridAdd) ────────────
   // 행 추가 시 모든 서브 그리드 reset
   const onAddMain = useCallback(() => {
-    base.resetGrids(["sub01", "sub02", "sub03"]);
+    base.resetGrids(["mainLang", "detail", "detailLang"]);
     base.addRow("main", {
       DATA_TP: "STRING",
       DATA_CRE_TCD: "USER",
@@ -98,8 +98,8 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   const onAddSub01 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
     if (!base.requireParentRow(main, "물류운영그룹운영설정코드")) return;
-    base.resetGrids(["sub02"]);
-    base.addRow("sub01", {
+    base.resetGrids(["detailLang"]);
+    base.addRow("detail", {
       CNFG_CD: main.CNFG_CD,
       CNFG_DTL_CD: "",
       CNFG_DTL_NM: "",
@@ -110,7 +110,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   const onAddSub03 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
     if (!base.requireParentRow(main, "물류운영그룹운영설정코드")) return;
-    base.addRow("sub03", {
+    base.addRow("mainLang", {
       CNFG_CD: main.CNFG_CD,
       LANG_TP: "",
       LANG_DESC: "",
@@ -119,9 +119,9 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
 
   // ── 상세-다국어 행 추가 (센차: onAddDetailLang) ────────────────
   const onAddSub02 = useCallback(() => {
-    const sub01 = model.grids.sub01.selectedRef.current;
+    const sub01 = model.grids.detail.selectedRef.current;
     if (!base.requireParentRow(sub01, "물류운영그룹운영설정상세코드")) return;
-    base.addRow("sub02", {
+    base.addRow("detailLang", {
       CNFG_CD: sub01.CNFG_CD,
       CNFG_DTL_CD: sub01.CNFG_DTL_CD,
       LANG_TP: "",
@@ -132,7 +132,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 저장 전 검증 (센차: checkBeforeSaveSub01Grid) ──────────────
   // sub01 에 DFT_YN === 'Y' 인 행이 1건 이상 있어야 저장 허용
   const checkBeforeSaveSub01 = useCallback(() => {
-    const rows = model.grids.sub01.ref.current?.rows ?? [];
+    const rows = model.grids.detail.ref.current?.rows ?? [];
     if (rows.some((r: any) => r.DFT_YN === "Y" || r.DFT_YN === true))
       return true;
     base.alert("기본값(Y) 인 상세코드가 1건 이상 있어야 합니다.");
@@ -152,7 +152,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // 메인 재조회 대신 본인 cascade 만 재조회
   const onSaveSub01 = useCallback(
     () =>
-      base.saveGrid("sub01", api.saveConfigDetail, {
+      base.saveGrid("detail", api.saveConfigDetail, {
         beforeSave: checkBeforeSaveSub01,
         afterSave: {
           cascadeFrom: "main",
@@ -165,9 +165,9 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 상세-다국어 저장 (센차: onSub02InfoSaveCallback) ───────────
   const onSaveSub02 = useCallback(
     () =>
-      base.saveGrid("sub02", api.saveConfigDetailI18n, {
+      base.saveGrid("detailLang", api.saveConfigDetailI18n, {
         afterSave: {
-          cascadeFrom: "sub01",
+          cascadeFrom: "detail",
           fetch: (sub01) =>
             api.getConfigDetailI18nList({
               CNFG_CD: sub01.CNFG_CD,
@@ -181,7 +181,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 메인-다국어 저장 (센차: onSub03InfoSaveCallback) ───────────
   const onSaveSub03 = useCallback(
     () =>
-      base.saveGrid("sub03", api.saveConfigI18n, {
+      base.saveGrid("mainLang", api.saveConfigI18n, {
         afterSave: {
           cascadeFrom: "main",
           fetch: (main) => api.getConfigI18nList({ CNFG_CD: main.CNFG_CD }),
@@ -205,7 +205,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   const onTabChange = useCallback(
     (key: string) => {
       model.setActiveType(key);
-      base.resetGrids(["main", "sub01", "sub02", "sub03"]);
+      base.resetGrids(["main", "mainLang", "detail", "detailLang"]);
       setTimeout(() => base.search(1), 0);
     },
     [model, base],
