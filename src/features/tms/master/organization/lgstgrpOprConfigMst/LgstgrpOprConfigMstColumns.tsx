@@ -121,10 +121,11 @@ export const CONFIG_I18N_COLUMN_DEFS = [
     field: "CNFG_CD",
   },
   {
-    type: "text",
-    //언어유형
+    type: "combo",
     headerName: "LBL_LNG_PACK",
     field: "LANG_TP",
+    codeKey: "langTp",
+    editable: true,
   },
   {
     type: "text",
@@ -149,9 +150,11 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = [
     field: "CNFG_DTL_CD",
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_LNG_PACK",
     field: "LANG_TP",
+    codeKey: "langTp",
+    editable: true,
   },
   {
     type: "text",

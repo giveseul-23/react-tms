@@ -5,6 +5,7 @@
 // 화면 고유 state — 외부 탭 (configTabs / activeType) 만 추가.
 
 import { useEffect, useState } from "react";
+import { useCommonStores } from "@/hooks/useCommonStores";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { lgstgrpOprConfigApi } from "./LgstgrpOprConfigApi";
 
@@ -42,7 +43,11 @@ export function useLgstgrpOprConfigMstModel(menuCode: string) {
       );
   }, []);
 
-  return { ...base, configTabs, activeType, setActiveType };
+  const { codeMap } = useCommonStores({
+    langTp: { sqlProp: "CODE", keyParam: "LANG_TP" },
+  });
+
+  return { ...base, configTabs, activeType, setActiveType, codeMap };
 }
 
 export type LgstgrpOprConfigMstModel = ReturnType<

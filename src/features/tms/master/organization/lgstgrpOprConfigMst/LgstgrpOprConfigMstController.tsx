@@ -101,8 +101,6 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
     base.resetGrids(["detailLang"]);
     base.addRow("detail", {
       CNFG_CD: main.CNFG_CD,
-      CNFG_DTL_CD: "",
-      CNFG_DTL_NM: "",
     });
   }, [model, base]);
 
@@ -112,8 +110,6 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
     if (!base.requireParentRow(main, "물류운영그룹운영설정코드")) return;
     base.addRow("mainLang", {
       CNFG_CD: main.CNFG_CD,
-      LANG_TP: "",
-      LANG_DESC: "",
     });
   }, [model, base]);
 
@@ -124,8 +120,6 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
     base.addRow("detailLang", {
       CNFG_CD: sub01.CNFG_CD,
       CNFG_DTL_CD: sub01.CNFG_DTL_CD,
-      LANG_TP: "",
-      LANG_DESC: "",
     });
   }, [model, base]);
 

@@ -32,7 +32,7 @@ export type GridKey =
 export function useApSettlMgmtModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode, { defaultLayout: "vertical" });
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     apSetlDetailType: { sqlProp: "CODE", keyParam: "AP_SETL_DTL_TCD" },
     apSetlDescType: { sqlProp: "CODE", keyParam: "APPLD_VAL_TCD" },
     fiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
@@ -40,17 +40,6 @@ export function useApSettlMgmtModel(menuCode: string) {
     cstDistSts: { sqlProp: "CODE", keyParam: "CST_DIST_STS" },
     cstCntrCd: { sqlProp: "selectCstCntrCodeName" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return { ...base, codeMap };
 }

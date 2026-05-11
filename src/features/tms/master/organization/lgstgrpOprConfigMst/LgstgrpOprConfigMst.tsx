@@ -35,7 +35,7 @@ export default function LgstgrpOprConfigMst() {
         activeTab: model.activeType,
         onChange: ctrl.onTabChange,
       }}
-      direction="horizontal"
+      defaultDirection="horizontal"
       defaultSizes={[55, 45]}
       storageKey={model.storageKeys.outer}
       master={
@@ -61,6 +61,7 @@ export default function LgstgrpOprConfigMst() {
             columnDefs={CONFIG_I18N_COLUMN_DEFS}
             subTitle="LBL_CNFG_CD_LANG_SETTING"
             actions={ctrl.sub03Actions}
+            codeMap={model.codeMap}
           />
         </SplitPane>
       }
