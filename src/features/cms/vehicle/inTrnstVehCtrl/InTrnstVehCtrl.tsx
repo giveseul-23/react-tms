@@ -42,7 +42,14 @@ export default function InTrnstVehCtrl() {
       columnDefs={MAIN_COLUMN_DEFS()}
       actions={ctrl.mainActions}
       onRowClicked={ctrl.handleRowClicked}
-      audit={false}
+      audit={{
+        delete: false,
+        rowStatus: false,
+        insertPerson: false,
+        insertDate: false,
+        updatePerson: false,
+        updateTime: true,
+      }}
     />
   );
 

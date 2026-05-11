@@ -1,5 +1,5 @@
 // src/views/tender/TenderReceiveDispatchModel.ts
-import { useState, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import type { TrackType } from "@/app/components/track/trackColumns";
@@ -30,9 +30,6 @@ export function useTenderReceiveDispatchModel(menuCode: string) {
   const [trackType, setTrackType] = useState<TrackType | null>(null);
   const [trackDspchNos, setTrackDspchNos] = useState<string[]>([]);
 
-  // apSetl 그리드 ag-grid ref (stopEditing 등)
-  const apSetlGridRef = useRef<any>(null);
-
   const { stores } = useCommonStores({
     dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
     apFiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
@@ -57,7 +54,6 @@ export function useTenderReceiveDispatchModel(menuCode: string) {
     setTrackType,
     trackDspchNos,
     setTrackDspchNos,
-    apSetlGridRef,
     codeMap,
   };
 }

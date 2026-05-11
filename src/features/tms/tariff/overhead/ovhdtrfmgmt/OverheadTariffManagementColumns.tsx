@@ -15,10 +15,8 @@
 // - standardAudit: 삭제/상태/생성자/생성일/수정자/수정일 블록 일괄 삽입
 // ────────────────────────────────────────────────────────────────
 
-import { standardAudit } from "@/app/components/grid/commonColumns";
-
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = () => [
   { headerName: "No" }, // 자동 일련번호
   {
     type: "text",
@@ -66,15 +64,12 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "USE_YN",
   },
 
-  ...standardAudit(setGridData),
 ];
 
 // ── 상세 그리드 컬럼 ─────────────────────────────────────────
 // 공통코드 → 라벨 치환은 컬럼에 codeKey 만 지정하고,
 // DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
-export const DETAIL_LEFT_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const DETAIL_LEFT_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
   {
@@ -83,12 +78,9 @@ export const DETAIL_LEFT_COLUMN_DEFS = (
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
   },
-  ...standardAudit(setGridData),
 ];
 
-export const DETAIL_RIGHT_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const DETAIL_RIGHT_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
   {
@@ -111,7 +103,6 @@ export const DETAIL_RIGHT_COLUMN_DEFS = (
     headerName: "LBL_APPLIED_VAL",
     field: "APPLD_VAL",
   },
-  ...standardAudit(setGridData),
 ];
 
 // ────────────────────────────────────────────────────────────────

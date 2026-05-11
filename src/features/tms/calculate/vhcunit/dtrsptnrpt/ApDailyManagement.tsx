@@ -37,25 +37,29 @@ export default function ApDailyManagement() {
           ]}
           presets={{
             DAILY: {
-              columnDefs: model.mainColumnDefs,
-              actions: ctrl.mainActions,
-              onRowClicked: ctrl.onMainGridClick,
+              render: () => (
+                <DataGrid
+                  {...model.bind("main")}
+                  columnDefs={model.mainColumnDefs}
+                  codeMap={model.codeMap}
+                  actions={ctrl.mainActions}
+                  onRowClicked={ctrl.onMainGridClick}
+                  audit={false}
+                />
+              ),
             },
             DETAIL: {
-              columnDefs: model.detailColumnDefs,
-              actions: ctrl.detailActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("detail")}
+                  columnDefs={model.detailColumnDefs}
+                  codeMap={model.codeMap}
+                  actions={ctrl.detailActions}
+                  audit={false}
+                />
+              ),
             },
           }}
-          rowData={{
-            DAILY: model.grids.main.rows,
-            DETAIL: model.grids.detail.rows,
-          }}
-          codeMap={model.codeMap}
-          totalCount={model.grids.main.data.totalCount}
-          currentPage={model.grids.main.data.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => model.searchRef.current?.(page)}
           actions={[]}
         />
       }

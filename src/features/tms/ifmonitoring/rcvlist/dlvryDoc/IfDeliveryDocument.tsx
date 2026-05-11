@@ -55,11 +55,16 @@ export default function IfDeliveryDocument() {
           tabs={[{ key: "DETAIL", label: "LBL_DLVRY_DETAIL" }]}
           presets={{
             DETAIL: {
-              columnDefs: DETAIL_COLUMN_DEFS,
-              actions: ctrl.detailActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("detail")}
+                  columnDefs={DETAIL_COLUMN_DEFS}
+                  actions={ctrl.detailActions}
+                  audit={false}
+                />
+              ),
             },
           }}
-          rowData={{ DETAIL: model.grids.detail.rows }}
           actions={[]}
         />
       }

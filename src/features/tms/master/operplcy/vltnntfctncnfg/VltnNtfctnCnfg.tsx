@@ -70,20 +70,29 @@ export default function VltnNtfctnCnfg() {
               { key: "CHANNEL", label: "LBL_NTFCTN_CHNL" },
               { key: "TARGET", label: "LBL_NTFCTN_RCVR" },
             ]}
-            codeMap={model.codeMap}
             presets={{
               CHANNEL: {
-                columnDefs: NTFC_CHANNEL_COLUMN_DEFS,
-                actions: ctrl.channelActions,
+                render: () => (
+                  <DataGrid
+                    {...model.bind("channel")}
+                    columnDefs={NTFC_CHANNEL_COLUMN_DEFS}
+                    codeMap={model.codeMap}
+                    actions={ctrl.channelActions}
+                    audit={false}
+                  />
+                ),
               },
               TARGET: {
-                columnDefs: NTFC_TARGET_COLUMN_DEFS,
-                actions: ctrl.targetActions,
+                render: () => (
+                  <DataGrid
+                    {...model.bind("target")}
+                    columnDefs={NTFC_TARGET_COLUMN_DEFS}
+                    codeMap={model.codeMap}
+                    actions={ctrl.targetActions}
+                    audit={false}
+                  />
+                ),
               },
-            }}
-            rowData={{
-              CHANNEL: model.grids.channel.rows,
-              TARGET: model.grids.target.rows,
             }}
             actions={[]}
           />

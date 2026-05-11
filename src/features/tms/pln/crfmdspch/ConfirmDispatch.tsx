@@ -1,6 +1,7 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
+import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
@@ -49,7 +50,6 @@ export default function ConfirmDispatch() {
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
-          audit={false}
         />
       }
       detail={
@@ -62,39 +62,55 @@ export default function ConfirmDispatch() {
           ]}
           presets={{
             ORDER: {
-              columnDefs: ORDER_COLUMN_DEFS(),
-              actions: ctrl.orderActions,
-              onRowClicked: ctrl.onOrderGridClick,
+              render: () => (
+                <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
+                  <DataGrid
+                    {...model.bind("order")}
+                    columnDefs={ORDER_COLUMN_DEFS()}
+                    codeMap={model.codeMap}
+                    actions={ctrl.orderActions}
+                    onRowClicked={ctrl.onOrderGridClick}
+                    audit={false}
+                  />
+                  <DataGrid
+                    {...model.bind("orderItem")}
+                    columnDefs={ORDER_ITEM_COLUMN_DEFS()}
+                    actions={[]}
+                  />
+                </SplitPane>
+              ),
             },
             RECEIPT: {
-              columnDefs: RECEIPT_COLUMN_DEFS(),
-              actions: [],
+              render: () => (
+                <DataGrid
+                  {...model.bind("receipt")}
+                  columnDefs={RECEIPT_COLUMN_DEFS()}
+                  codeMap={model.codeMap}
+                  actions={[]}
+                  audit={false}
+                />
+              ),
             },
             HISTORY: {
-              columnDefs: RECEIPT_HISTORY_COLUMN_DEFS(),
-              actions: [],
+              render: () => (
+                <DataGrid
+                  {...model.bind("receiptHistory")}
+                  columnDefs={RECEIPT_HISTORY_COLUMN_DEFS()}
+                  codeMap={model.codeMap}
+                  actions={[]}
+                  audit={{
+                    delete: false,
+                    rowStatus: false,
+                    insertPerson: true,
+                    insertDate: true,
+                    updatePerson: false,
+                    updateTime: false,
+                  }}
+                />
+              ),
             },
           }}
-          rowData={{
-            ORDER: model.grids.order.rows,
-            RECEIPT: model.grids.receipt.rows,
-            HISTORY: model.grids.receiptHistory.rows,
-          }}
-          codeMap={model.codeMap}
           actions={[]}
-          renderRightGrid={(activeTabKey) => {
-            if (activeTabKey === "ORDER") {
-              return (
-                <DataGrid
-                  layoutType="plain"
-                  columnDefs={ORDER_ITEM_COLUMN_DEFS()}
-                  rowData={model.grids.orderItem.rows}
-                  actions={[]}
-                />
-              );
-            }
-            return null;
-          }}
         />
       }
     />

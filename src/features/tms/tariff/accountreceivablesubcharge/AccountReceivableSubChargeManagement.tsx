@@ -44,10 +44,15 @@ export default function AccountReceivableSubChargeManagement() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS(model.grids.main.setData)}
+          columnDefs={MAIN_COLUMN_DEFS()}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          audit={false}
+          audit={{
+            insertPerson: false,
+            insertDate: false,
+            updatePerson: false,
+            updateTime: false,
+          }}
         />
       }
       detail={
@@ -60,22 +65,28 @@ export default function AccountReceivableSubChargeManagement() {
         >
           <DataGrid
             {...model.bind("detail01")}
-            columnDefs={DETAIL01_COLUMN_DEFS(
-              model.codeMap,
-              model.grids.detail01.setData,
-            )}
+            columnDefs={DETAIL01_COLUMN_DEFS(model.codeMap)}
             actions={ctrl.detailActions}
             onRowClicked={ctrl.onDetail01RowClicked}
-            audit={false}
+            audit={{
+              rowStatus: false,
+              insertPerson: false,
+              insertDate: false,
+              updatePerson: false,
+              updateTime: false,
+            }}
           />
           <DataGrid
             {...model.bind("detail02")}
-            columnDefs={DETAIL02_COLUMN_DEFS(
-              model.codeMap,
-              model.grids.detail02.setData,
-            )}
+            columnDefs={DETAIL02_COLUMN_DEFS(model.codeMap)}
             actions={ctrl.detailActions}
-            audit={false}
+            audit={{
+              rowStatus: false,
+              insertPerson: false,
+              insertDate: false,
+              updatePerson: false,
+              updateTime: false,
+            }}
           />
         </SplitPane>
       }

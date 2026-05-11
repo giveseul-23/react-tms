@@ -1,4 +1,3 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 import { numberValueFormatter } from "@/app/components/grid/commonFormatters";
 
 // 메인 그리드
@@ -56,12 +55,6 @@ export const MAIN_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_POSTING_DT", field: "POSTING_DT" },
   { type: "text", headerName: "LBL_RES_CD", field: "RESPONSE_CODE" },
   { type: "text", headerName: "LBL_RES_MSG", field: "RESPONSE_MSG" },
-  ...makeAuditColumns({
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];
 
 // 종합내역 - 좌측 (요약)
@@ -74,7 +67,12 @@ export const SUMMARY_COLUMN_DEFS = [
     codeKey: "apSetlDetailType",
   },
   { type: "text", headerName: "LBL_APPLIED_VAL", field: "APPLD_VAL" },
-  { type: "text", headerName: "LBL_DESC", field: "APPLD_VAL_TCD", codeKey: "apSetlDescType" },
+  {
+    type: "text",
+    headerName: "LBL_DESC",
+    field: "APPLD_VAL_TCD",
+    codeKey: "apSetlDescType",
+  },
   {
     type: "text",
     headerName: "LBL_RATE",
@@ -130,12 +128,6 @@ export const FREIGHT_PAY_COLUMN_DEFS = [
     summable: true,
     valueFormatter: numberValueFormatter,
   },
-  ...makeAuditColumns({
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];
 
 // 종합내역 - 간접비지급내역
@@ -160,20 +152,35 @@ export const INDIRECT_PAY_COLUMN_DEFS = [
   },
   { type: "text", headerName: "LBL_APPLIED_VAL", field: "APPLD_VAL" },
   { type: "text", headerName: "LBL_REASON", field: "RSN_DESC" },
-  ...makeAuditColumns({
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];
 
 // 코스트센터/계정별내역
 export const COST_CENTER_COLUMN_DEFS = [
-  { type: "text", headerName: "LBL_OP_STATUS", field: "AP_FI_STS", codeKey: "fiSts" },
-  { type: "text", headerName: "LBL_CST_CNTR_CD", field: "CST_CNTR_CD", codeKey: "cstCntrCd" },
-  { type: "text", headerName: "LBL_GL_ACCOUNT_CD", field: "GL_LDGR_CD" },
-  { type: "text", headerName: "LBL_GL_ACCOUNT_NM", field: "GL_LDGR_NM" },
+  {
+    type: "text",
+    headerName: "LBL_OP_STATUS",
+    field: "AP_FI_STS",
+    codeKey: "fiSts",
+  },
+  {
+    type: "combo",
+    headerName: "LBL_CST_CNTR_CD",
+    field: "CST_CNTR_CD",
+    codeKey: "cstCntrCd",
+    editable: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_GL_ACCOUNT_CD",
+    field: "GL_LDGR_CD",
+    editable: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_GL_ACCOUNT_NM",
+    field: "GL_LDGR_NM",
+    editable: true,
+  },
   {
     type: "text",
     headerName: "LBL_PLANNED_AMOUNT",
@@ -181,6 +188,7 @@ export const COST_CENTER_COLUMN_DEFS = [
     aggFunc: "sum",
     summable: true,
     valueFormatter: numberValueFormatter,
+    editable: true,
   },
   {
     type: "text",
@@ -189,6 +197,7 @@ export const COST_CENTER_COLUMN_DEFS = [
     aggFunc: "sum",
     summable: true,
     valueFormatter: numberValueFormatter,
+    editable: true,
   },
   {
     type: "text",
@@ -207,18 +216,12 @@ export const COST_CENTER_COLUMN_DEFS = [
     valueFormatter: numberValueFormatter,
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_CREATION_TP",
     field: "CST_CNTR_GL_RC_TCD",
     codeKey: "costCenter",
+    editable: true,
   },
-  ...makeAuditColumns({
-    delete: true,
-    rowStatus: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];
 
 // 원재료비내역
@@ -239,12 +242,6 @@ export const MATERIAL_COST_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_QTY", field: "QTY" },
   { type: "text", headerName: "LBL_UOM", field: "QTY_UOM" },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
-  ...makeAuditColumns({
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];
 
 // 증빙문서
@@ -253,10 +250,9 @@ export const EVIDENCE_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_AP_SETL_ID", field: "AP_SETL_ID" },
   { type: "text", headerName: "LBL_FILE_ID", field: "FILE_ID" },
   { type: "text", headerName: "LBL_ORG_FILE_NM", field: "ORG_FILE_NM" },
-  { type: "text", headerName: "LBL_FILE_EXTENSION", field: "FILE_NM_EXTENSION" },
-  ...makeAuditColumns({
-    delete: true,
-    insertPerson: true,
-    insertDate: true,
-  }),
+  {
+    type: "text",
+    headerName: "LBL_FILE_EXTENSION",
+    field: "FILE_NM_EXTENSION",
+  },
 ];

@@ -1,7 +1,5 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
-
 // ── 메인 그리드: 배차 리스트 ─────────────────────────────────
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = () => [
   { headerName: "No" },
   {
     type: "date",
@@ -190,11 +188,10 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     type: "numeric",
   }, //연계배차순서
   { type: "text", headerName: "LBL_ROW_STATUS", field: "EDIT_STS" },
-  ...standardAudit(setGridData),
 ];
 
 // ── 경유처 탭 ────────────────────────────────────────────────
-export const STOP_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const STOP_COLUMN_DEFS = () => [
   { type: "text", headerName: "LBL_STOP_SEQUENCE", field: "STOP_SEQ" }, // 순번
   { type: "text", headerName: "LBL_LOCATION_CODE", field: "LOC_CD" }, // 착지코드
   { type: "text", headerName: "LBL_LOCATION_NAME", field: "LOC_NM" }, // 착지명
@@ -370,11 +367,10 @@ export const ALLOC_ORDER_SUB_COLUMN_DEFS = (
   { type: "text", headerName: "LBL_FEED_FCD", field: "ITEM_FCD" },
   { type: "text", headerName: "LBL_TEMPER_ZONE", field: "TEMP_TCD" },
   { type: "text", headerName: "LBL_PLN_INV_QTY_UOM", field: "PLN_INV_QTY_UOM" },
-  ...standardAudit(setGridData),
 ];
 
 // ── 미할당주문 탭 ────────────────────────────────────────────
-export const UNALLOC_ORDER_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const UNALLOC_ORDER_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" }, // 출발지명
   { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" }, // 도착지명
@@ -530,5 +526,4 @@ export const UNALLOC_ORDER_SUB_COLUMN_DEFS = (
   { type: "text", headerName: "LBL_FEED_FCD", field: "ITEM_FCD" },
   { type: "text", headerName: "LBL_TEMPER_ZONE", field: "TEMP_TCD" },
   { type: "text", headerName: "LBL_PLN_INV_QTY_UOM", field: "PLN_INV_QTY_UOM" },
-  ...standardAudit(setGridData),
 ];

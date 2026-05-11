@@ -60,18 +60,16 @@ export default function IndstrlAccdntCmpnstn() {
         >
           <DataGrid
             {...model.bind("rate")}
-            columnDefs={DETAIL01_COLUMN_DEFS(model.grids.rate.setData)}
+            columnDefs={DETAIL01_COLUMN_DEFS()}
             codeMap={model.codeMap}
             actions={ctrl.detailActions}
             onRowClicked={ctrl.onRateRowClicked}
-            audit={false}
           />
           <DataGrid
             {...model.bind("chg")}
-            columnDefs={DETAIL02_COLUMN_DEFS(model.grids.chg.setData)}
+            columnDefs={DETAIL02_COLUMN_DEFS()}
             codeMap={model.codeMap}
             actions={ctrl.detailActions}
-            audit={false}
           />
         </SplitPane>
       }

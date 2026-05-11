@@ -7,7 +7,8 @@ export type GridTab = {
 };
 
 export type GridPreset<TRow> = {
-  columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[];
+  /** render 가 있으면 미사용. 둘 중 하나만 명시하면 됨. */
+  columnDefs?: (ColDef<TRow> | ColGroupDef<TRow>)[];
   actions?: ActionItem[];
   onCellValueChanged?: (params: any) => void;
   onRowClicked?: (row: TRow) => void;

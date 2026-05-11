@@ -44,10 +44,9 @@ export default function Rate() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS(model.grids.main.setData)}
+          columnDefs={MAIN_COLUMN_DEFS()}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          audit={false}
         />
       }
       detail={
@@ -60,22 +59,14 @@ export default function Rate() {
         >
           <DataGrid
             {...model.bind("costInfo")}
-            columnDefs={DETAIL01_COLUMN_DEFS(
-              model.codeMap,
-              model.grids.costInfo.setData,
-            )}
+            columnDefs={DETAIL01_COLUMN_DEFS(model.codeMap)}
             actions={ctrl.detailActions}
             onRowClicked={ctrl.onCostInfoRowClicked}
-            audit={false}
           />
           <DataGrid
             {...model.bind("conditionInfo")}
-            columnDefs={DETAIL02_COLUMN_DEFS(
-              model.codeMap,
-              model.grids.conditionInfo.setData,
-            )}
+            columnDefs={DETAIL02_COLUMN_DEFS(model.codeMap)}
             actions={ctrl.detailActions}
-            audit={false}
           />
         </SplitPane>
       }

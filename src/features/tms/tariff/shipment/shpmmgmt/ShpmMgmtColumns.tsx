@@ -15,10 +15,8 @@
 // - standardAudit: 삭제/상태/생성자/생성일/수정자/수정일 블록 일괄 삽입
 // ────────────────────────────────────────────────────────────────
 
-import { standardAudit } from "@/app/components/grid/commonColumns";
-
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = () => [
   { headerName: "No" }, // 자동 일련번호
   {
     type: "text",
@@ -105,15 +103,12 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     headerName: "LBL_USE_YN",
     field: "USE_YN",
   },
-  ...standardAudit(setGridData),
 ];
 
 // ── 상세 그리드 컬럼 ─────────────────────────────────────────
 // 공통코드 → 라벨 치환은 컬럼에 codeKey 만 지정하고,
 // DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
-export const RIGHT_DETAIL_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const RIGHT_DETAIL_COLUMN_DEFS = () => [
   { type: "text", headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
   {
     type: "text",
@@ -140,12 +135,9 @@ export const RIGHT_DETAIL_COLUMN_DEFS = (
     headerName: "LBL_CLASS_NAME",
     field: "CLSS_NM",
   },
-  ...standardAudit(setGridData),
 ];
 
-export const CENTER_TOP_DETAIL_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const CENTER_TOP_DETAIL_COLUMN_DEFS = () => [
   { type: "text", headerName: "LBL_LANE_ID", field: "LANE_ID" },
   {
     type: "text",
@@ -167,12 +159,9 @@ export const CENTER_TOP_DETAIL_COLUMN_DEFS = (
     headerName: "LBL_TO_ZONE_NM",
     field: "TO_ZN_NM",
   },
-  ...standardAudit(setGridData),
 ];
 
-export const LEFT_DETAIL_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const LEFT_DETAIL_COLUMN_DEFS = () => [
   { type: "text", headerName: "LBL_RATE_ID", field: "RATE_ID" },
   {
     type: "text",
@@ -194,12 +183,9 @@ export const LEFT_DETAIL_COLUMN_DEFS = (
     headerName: "LBL_RNG_SPLT",
     field: "RNG_SPLT_YN",
   },
-  ...standardAudit(setGridData),
 ];
 
-export const CENTER_BOTTOM_DETAIL_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const CENTER_BOTTOM_DETAIL_COLUMN_DEFS = () => [
   { type: "text", headerName: "LBL_ORDER", field: "SEQ" },
   {
     type: "text",
@@ -231,7 +217,6 @@ export const CENTER_BOTTOM_DETAIL_COLUMN_DEFS = (
     headerName: "AND/OR",
     field: "LGC_OPR",
   },
-  ...standardAudit(setGridData),
 ];
 
 // ────────────────────────────────────────────────────────────────

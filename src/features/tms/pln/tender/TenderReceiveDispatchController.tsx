@@ -329,7 +329,6 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         key: "운송비저장",
         label: "BTN_SAVE",
         onClick: () => {
-          model.apSetlGridRef.current?.api?.stopEditing();
           const rows = model.grids.apSetl.ref.current?.rows ?? [];
           const saveRows = dirtyRows(rows);
           if (saveRows.length === 0) return;

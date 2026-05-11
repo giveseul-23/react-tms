@@ -58,19 +58,28 @@ export default function DepartArrivalManagement() {
           ]}
           presets={{
             STOPOVER: {
-              columnDefs: STOPOVER_COLUMN_DEFS,
-              actions: ctrl.stopoverActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("stopover")}
+                  columnDefs={STOPOVER_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.stopoverActions}
+                  audit={false}
+                />
+              ),
             },
             ASSIGNED_ORDER: {
-              columnDefs: ASSIGNED_ORDER_COLUMN_DEFS,
-              actions: ctrl.assignedOrderActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("assignedOrder")}
+                  columnDefs={ASSIGNED_ORDER_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.assignedOrderActions}
+                  audit={false}
+                />
+              ),
             },
           }}
-          rowData={{
-            STOPOVER: model.grids.stopover.rows,
-            ASSIGNED_ORDER: model.grids.assignedOrder.rows,
-          }}
-          codeMap={model.codeMap}
           actions={[]}
         />
       }

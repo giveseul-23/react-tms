@@ -1,6 +1,7 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
+import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
@@ -61,39 +62,49 @@ export default function DispatchOperatorCostManagement() {
           ]}
           presets={{
             COST: {
-              columnDefs: COST_DETAIL_COLUMN_DEFS,
-              actions: ctrl.costDetailActions,
-              onRowClicked: ctrl.onCostDetailRowClicked,
+              render: () => (
+                <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
+                  <DataGrid
+                    {...model.bind("costDetail")}
+                    columnDefs={COST_DETAIL_COLUMN_DEFS}
+                    codeMap={model.codeMap}
+                    actions={ctrl.costDetailActions}
+                    onRowClicked={ctrl.onCostDetailRowClicked}
+                    audit={false}
+                  />
+                  <DataGrid
+                    {...model.bind("costFunction")}
+                    columnDefs={COST_FUNCTION_COLUMN_DEFS}
+                    actions={[]}
+                    audit={false}
+                  />
+                </SplitPane>
+              ),
             },
             WAYPOINT: {
-              columnDefs: WAYPOINT_COLUMN_DEFS,
-              actions: ctrl.waypointActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("waypoint")}
+                  columnDefs={WAYPOINT_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.waypointActions}
+                  audit={false}
+                />
+              ),
             },
             EVIDENCE: {
-              columnDefs: EVIDENCE_COLUMN_DEFS,
-              actions: ctrl.evidenceActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("evidence")}
+                  columnDefs={EVIDENCE_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.evidenceActions}
+                  audit={false}
+                />
+              ),
             },
           }}
-          rowData={{
-            COST: model.grids.costDetail.rows,
-            WAYPOINT: model.grids.waypoint.rows,
-            EVIDENCE: model.grids.evidence.rows,
-          }}
-          codeMap={model.codeMap}
           actions={[]}
-          renderRightGrid={(activeTabKey) => {
-            if (activeTabKey === "COST") {
-              return (
-                <DataGrid
-                  layoutType="plain"
-                  columnDefs={COST_FUNCTION_COLUMN_DEFS}
-                  rowData={model.grids.costFunction.rows}
-                  actions={[]}
-                />
-              );
-            }
-            return null;
-          }}
         />
       }
     />

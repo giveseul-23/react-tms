@@ -92,10 +92,10 @@ export const apSettlMgmtApi = {
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
-  saveCostCenter(rows: any[]) {
+  saveCostCenter({ dsSave }: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/saveCostCenter`,
-      withSession(rows),
+      withSession(dsSave),
     );
   },
 
@@ -130,10 +130,10 @@ export const apSettlMgmtApi = {
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
-  save(rows: any[]) {
+  save({ dsSave }: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/apSettlMgmtService/save`,
-      withSession(rows),
+      withSession(dsSave),
     );
   },
   attachEvidence(payload: any) {

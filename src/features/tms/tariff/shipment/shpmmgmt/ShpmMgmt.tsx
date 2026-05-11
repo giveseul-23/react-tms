@@ -46,10 +46,9 @@ export default function ShpmMgmt() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS(model.grids.main.setData)}
+          columnDefs={MAIN_COLUMN_DEFS()}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          audit={false}
         />
       }
       detail={
@@ -62,11 +61,10 @@ export default function ShpmMgmt() {
         >
           <DataGrid
             {...model.bind("lgst")}
-            columnDefs={RIGHT_DETAIL_COLUMN_DEFS(model.grids.lgst.setData)}
+            columnDefs={RIGHT_DETAIL_COLUMN_DEFS()}
             codeMap={model.codeMap}
             actions={ctrl.detail01Actions}
             onRowClicked={ctrl.onLgstRowClicked}
-            audit={false}
           />
           <SplitPane
             direction="vertical"
@@ -77,13 +75,10 @@ export default function ShpmMgmt() {
           >
             <DataGrid
               {...model.bind("zone")}
-              columnDefs={CENTER_TOP_DETAIL_COLUMN_DEFS(
-                model.grids.zone.setData,
-              )}
+              columnDefs={CENTER_TOP_DETAIL_COLUMN_DEFS()}
               codeMap={model.codeMap}
               actions={ctrl.detail01Actions}
               onRowClicked={ctrl.onZoneRowClicked}
-              audit={false}
               gridOptions={{
                 defaultColDef: {
                   resizable: true,
@@ -95,12 +90,9 @@ export default function ShpmMgmt() {
             />
             <DataGrid
               {...model.bind("zoneCond")}
-              columnDefs={CENTER_BOTTOM_DETAIL_COLUMN_DEFS(
-                model.grids.zoneCond.setData,
-              )}
+              columnDefs={CENTER_BOTTOM_DETAIL_COLUMN_DEFS()}
               codeMap={model.codeMap}
               actions={ctrl.detail01Actions}
-              audit={false}
               gridOptions={{
                 defaultColDef: {
                   resizable: true,
@@ -113,10 +105,9 @@ export default function ShpmMgmt() {
           </SplitPane>
           <DataGrid
             {...model.bind("rate")}
-            columnDefs={LEFT_DETAIL_COLUMN_DEFS(model.grids.rate.setData)}
+            columnDefs={LEFT_DETAIL_COLUMN_DEFS()}
             codeMap={model.codeMap}
             actions={ctrl.detail02Actions}
-            audit={false}
           />
         </SplitPane>
       }

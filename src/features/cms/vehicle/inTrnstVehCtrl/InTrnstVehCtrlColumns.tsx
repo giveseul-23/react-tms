@@ -1,6 +1,4 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
-
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = () => [
   { headerName: "No" },
   { headerName: "LBL_CARRIER_NAME", field: "CARR_NM" },
   { headerName: "LBL_VEH_NO", field: "VEH_NO" },
@@ -10,12 +8,4 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "VEH_OP_TP" },
   { headerName: "LBL_LATITUDE", field: "LAT", type: "numeric" },
   { headerName: "LBL_LONGITUDE", field: "LON", type: "numeric" },
-  ...standardAudit(setGridData, {
-    delete: false,
-    rowStatus: false,
-    insertPerson: false,
-    insertDate: false,
-    updatePerson: false,
-    updateTime: true,
-  }),
 ];

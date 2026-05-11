@@ -7,8 +7,11 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { apSettlMgmtApi as api } from "./ApSettlMgmtApi";
 import { MAIN_COLUMN_DEFS } from "./ApSettlMgmtColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import {
+  makeAddAction,
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ApSettlMgmtModel, GridKey } from "./ApSettlMgmtModel";
 
@@ -79,18 +82,62 @@ export function useApSettlMgmtController({ model }: Args) {
     [model.grids.config, onMainGridClick],
   );
 
-  // ── 액션 헬퍼: API 호출 후 메인 재조회 ────────────────────────
-  const doAction = useCallback(
-    (apiCall: () => Promise<any>) =>
-      apiCall().then(() => model.searchRef.current?.()),
-    [model.searchRef],
-  );
-
   // ── master 자식 그리드만 재조회 (코스트센터 저장 후 등) ─────
   const refetchSubTabs = useCallback(() => {
     const row = model.grids.config.selectedRef.current;
     if (row) onMainGridClick(row);
   }, [model.grids.config, onMainGridClick]);
+
+  // ── 저장 핸들러 (표준 base.saveGrid — dirty 추출 + dsSave + 토스트 + 후처리 자동) ──
+  const onSaveMain = useCallback(
+    () => base.saveGrid("config", api.save),
+    [base],
+  );
+
+  const onSaveCostCenter = useCallback(
+    () =>
+      base.saveGrid("costCenter", api.saveCostCenter, {
+        afterSave: refetchSubTabs,
+      }),
+    [base, refetchSubTabs],
+  );
+
+  const onSaveEvidence = useCallback(
+    () => base.saveGrid("evidence", api.save),
+    [base],
+  );
+
+  // ── 정산 생성/취소 ────────────────────────────────────────────
+  const onCreateClose = useCallback(
+    () =>
+      base
+        .callAjax(
+          api.createClose(model.filtersRef.current),
+          "정산이 생성되었습니다.",
+        )
+        .then(() => base.search()),
+    [base, model.filtersRef],
+  );
+
+  const onCancelClose = useCallback(
+    () =>
+      base
+        .callAjax(
+          api.cancelClose(model.filtersRef.current),
+          "정산이 취소되었습니다.",
+        )
+        .then(() => base.search()),
+    [base, model.filtersRef],
+  );
+
+  // ── 코스트센터 추가 ──────────────────────────────────────────
+  const onAddCostCenter = useCallback(() => {
+    const row = model.grids.config.selectedRef.current;
+    if (!row) return;
+    base.addRow("costCenter", {
+      AP_FI_STS: row.AP_FI_STS,
+    });
+  }, [model.grids.config, base]);
 
   // ── master 그리드 액션 ────────────────────────────────────────
   const mainActions: ActionItem[] = useMemo(
@@ -99,15 +146,13 @@ export function useApSettlMgmtController({ model }: Args) {
         type: "button",
         key: "BTN_AP_SETTLEMENT_CREATE",
         label: "BTN_AP_SETTLEMENT_CREATE",
-        onClick: () =>
-          doAction(() => api.createClose(model.filtersRef.current)),
+        onClick: onCreateClose,
       },
       {
         type: "button",
         key: "BTN_AP_SETTLEMENT_DELETE",
         label: "BTN_AP_SETTLEMENT_DELETE",
-        onClick: () =>
-          doAction(() => api.cancelClose(model.filtersRef.current)),
+        onClick: onCancelClose,
       },
       {
         type: "dropdown",
@@ -127,16 +172,7 @@ export function useApSettlMgmtController({ model }: Args) {
         label: "BTN_MNG_CST_DIST",
         items: [],
       },
-      {
-        type: "button",
-        key: "BTB_SAVE",
-        label: "BTB_SAVE",
-        onClick: (e: any) => {
-          const saveRows = dirtyRows(e.data);
-          if (saveRows.length === 0) return;
-          api.save(saveRows).then(() => model.searchRef.current?.());
-        },
-      },
+      makeSaveAction({ onClick: onSaveMain }),
       {
         type: "button",
         key: "BTN_ATTACH_DOC",
@@ -150,7 +186,7 @@ export function useApSettlMgmtController({ model }: Args) {
         rows: model.grids.config.rows,
       }),
     ],
-    [doAction, model],
+    [onCreateClose, onCancelClose, onSaveMain, model],
   );
 
   // ── 종합내역 탭 액션 ──────────────────────────────────────────
@@ -172,37 +208,19 @@ export function useApSettlMgmtController({ model }: Args) {
   // ── 코스트센터 탭 액션 ────────────────────────────────────────
   const costCenterActions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button",
-        key: "BTN_COST_ACCOUNT_ADD",
-        label: "BTN_COST_ACCOUNT_ADD",
-        onClick: () => {
-          const row = model.grids.config.selectedRef.current;
-          if (!row) return;
-          doAction(() => api.addCostCenter({ CLOSE_ID: row.CLOSE_ID }));
-        },
-      },
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: (e: any) => {
-          const saveRows = dirtyRows(e.data);
-          if (saveRows.length === 0) return;
-          api.saveCostCenter(saveRows).then(() => refetchSubTabs());
-        },
-      },
+      makeAddAction({ onClick: onAddCostCenter }),
+      makeSaveAction({ onClick: onSaveCostCenter }),
       makeExcelGroupAction({
         columns: [],
         menuName: "코스트센터/계정별내역",
         fetchFn: () =>
-          api.getCostCenterList({
+          api.getEachCostOrGlList({
             CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
           }),
         rows: model.grids.costCenter.rows,
       }),
     ],
-    [doAction, refetchSubTabs, model],
+    [onAddCostCenter, onSaveCostCenter, model],
   );
 
   // ── 원재료비 탭 액션 ──────────────────────────────────────────
@@ -212,7 +230,7 @@ export function useApSettlMgmtController({ model }: Args) {
         columns: [],
         menuName: "원재료비내역",
         fetchFn: () =>
-          api.getMaterialCostList({
+          api.getEachItmCostList({
             CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
           }),
         rows: model.grids.materialCost.rows,
@@ -224,16 +242,7 @@ export function useApSettlMgmtController({ model }: Args) {
   // ── 증빙 탭 액션 ──────────────────────────────────────────────
   const evidenceActions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: (e: any) => {
-          const saveRows = dirtyRows(e.data);
-          if (saveRows.length === 0) return;
-          api.save(saveRows).then(() => model.searchRef.current?.());
-        },
-      },
+      makeSaveAction({ onClick: onSaveEvidence }),
       {
         type: "button",
         key: "LBL_FILE_DOWNLOAD",
@@ -241,7 +250,7 @@ export function useApSettlMgmtController({ model }: Args) {
         onClick: () => {},
       },
     ],
-    [model],
+    [onSaveEvidence],
   );
 
   return {

@@ -15,10 +15,8 @@
 // - standardAudit: 삭제/상태/생성자/생성일/수정자/수정일 블록 일괄 삽입
 // ────────────────────────────────────────────────────────────────
 
-import { standardAudit } from "@/app/components/grid/commonColumns";
-
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = () => [
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CODE",
@@ -104,18 +102,11 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     headerName: "LBL_USE_YN",
     field: "USE_YN",
   },
-  ...standardAudit(setGridData, {
-    insertPerson: false,
-    insertDate: false,
-    updatePerson: false,
-    updateTime: false,
-  }),
 ];
 
 // ── 상세 그리드 컬럼 (codeMap 주입 — 코드→라벨 치환용) ─────────
 export const DETAIL01_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
-  setGridData?: (updater: any) => void,
 ) => [
   { type: "text", headerName: "LBL_CALC_FORMULA_SEQ", field: "SEQ" },
   {
@@ -153,18 +144,10 @@ export const DETAIL01_COLUMN_DEFS = (
     headerName: "LBL_COST",
     field: "COST_AMT",
   },
-  ...standardAudit(setGridData, {
-    rowStatus: false,
-    insertPerson: false,
-    insertDate: false,
-    updatePerson: false,
-    updateTime: false,
-  }),
 ];
 
 export const DETAIL02_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
-  setGridData?: (updater: any) => void,
 ) => [
   { type: "text", headerName: "LBL_SEQ", field: "COND_SEQ" },
   {
@@ -197,13 +180,6 @@ export const DETAIL02_COLUMN_DEFS = (
     headerName: "LBL_AND_OR",
     field: "LGC_OPR",
   },
-  ...standardAudit(setGridData, {
-    rowStatus: false,
-    insertPerson: false,
-    insertDate: false,
-    updatePerson: false,
-    updateTime: false,
-  }),
 ];
 
 // ────────────────────────────────────────────────────────────────

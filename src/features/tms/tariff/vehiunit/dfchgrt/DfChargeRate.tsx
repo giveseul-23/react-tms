@@ -46,10 +46,9 @@ export default function DfChargeRate() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS(model.grids.main.setData)}
+          columnDefs={MAIN_COLUMN_DEFS()}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          audit={false}
         />
       }
       detail={
@@ -69,26 +68,36 @@ export default function DfChargeRate() {
             ]}
             presets={{
               RT_ITM: {
-                columnDefs: RT_ITM_COLUMN_DEFS([], model.grids.rtItem.setData),
-                actions: ctrl.detailActions,
-                onRowClicked: ctrl.onRtItemRowClicked,
+                render: () => (
+                  <DataGrid
+                    {...model.bind("rtItem")}
+                    columnDefs={RT_ITM_COLUMN_DEFS([])}
+                    actions={ctrl.detailActions}
+                    onRowClicked={ctrl.onRtItemRowClicked}
+                    audit={{ updatePerson: false, updateTime: false }}
+                  />
+                ),
               },
               RT_CARR: {
-                columnDefs: RT_CARR_COLUMN_DEFS([], model.grids.rtCarr.setData),
-                actions: ctrl.detailActions,
+                render: () => (
+                  <DataGrid
+                    {...model.bind("rtCarr")}
+                    columnDefs={RT_CARR_COLUMN_DEFS([])}
+                    actions={ctrl.detailActions}
+                    audit={{ updatePerson: false, updateTime: false }}
+                  />
+                ),
               },
               RT_VEH_TP: {
-                columnDefs: RT_VEH_TP_COLUMN_DEFS(
-                  [],
-                  model.grids.rtVehTp.setData,
+                render: () => (
+                  <DataGrid
+                    {...model.bind("rtVehTp")}
+                    columnDefs={RT_VEH_TP_COLUMN_DEFS([])}
+                    actions={ctrl.detailActions}
+                    audit={{ updatePerson: false, updateTime: false }}
+                  />
                 ),
-                actions: ctrl.detailActions,
               },
-            }}
-            rowData={{
-              RT_ITM: model.grids.rtItem.rows,
-              RT_CARR: model.grids.rtCarr.rows,
-              RT_VEH_TP: model.grids.rtVehTp.rows,
             }}
             actions={[]}
           />
@@ -100,23 +109,23 @@ export default function DfChargeRate() {
             ]}
             presets={{
               RT_ITM_VEH_TP: {
-                columnDefs: RT_ITM_VEH_TP_COLUMN_DEFS(
-                  [],
-                  model.grids.rtItemVehTp.setData,
+                render: () => (
+                  <DataGrid
+                    {...model.bind("rtItemVehTp")}
+                    columnDefs={RT_ITM_VEH_TP_COLUMN_DEFS([])}
+                    actions={ctrl.detailActions}
+                  />
                 ),
-                actions: ctrl.detailActions,
               },
               RT_ITM_VEH: {
-                columnDefs: RT_ITM_VEH_COLUMN_DEFS(
-                  [],
-                  model.grids.rtItemVeh.setData,
+                render: () => (
+                  <DataGrid
+                    {...model.bind("rtItemVeh")}
+                    columnDefs={RT_ITM_VEH_COLUMN_DEFS([])}
+                    actions={ctrl.detailActions}
+                  />
                 ),
-                actions: ctrl.detailActions,
               },
-            }}
-            rowData={{
-              RT_ITM_VEH_TP: model.grids.rtItemVehTp.rows,
-              RT_ITM_VEH: model.grids.rtItemVeh.rows,
             }}
             actions={[]}
           />

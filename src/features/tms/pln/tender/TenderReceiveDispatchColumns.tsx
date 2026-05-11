@@ -1,6 +1,5 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
 
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = () => [
   { headerName: "No" },
   {
     type: "text",
@@ -77,18 +76,10 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "DLYD_ETRNC_RSN_DESC",
   },
   { type: "text", headerName: "LBL_CHK_TON_TYPE", field: "CARR_CFM_VEH_TCD" },
-  ...standardAudit(setGridData, {
-    delete: false,
-    rowStatus: false,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: false,
-    updateTime: false,
-  }),
 ];
 
 // ── 경유처 서브그리드 컬럼 (센차: TenderReceiveDispatchSub01 columns) ──
-export const STOP_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const STOP_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
   { type: "numeric", headerName: "LBL_STOP_SEQUENCE", field: "STOP_SEQ" },
@@ -103,24 +94,16 @@ export const STOP_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
 ];
 
 // ── SMS 전송이력 서브그리드 컬럼 (센차: TenderReceiveDispatchSub04 columns) ──
-export const SMS_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const SMS_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_SMS_SEND_ID", field: "SMS_SEND_ID" },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
   { type: "text", headerName: "LBL_SEND_NO", field: "SEND_NO" },
-  ...standardAudit(setGridData, {
-    delete: false,
-    rowStatus: false,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: false,
-    updateTime: false,
-  }),
 ];
 
 // ── 운송비내역 서브그리드 컬럼 (센차: TenderReceiveDispatchCarrRate columns) ──
 // setRowData: 삭제 체크박스 클릭 시 행 제거용 (센차에는 없던 UX, React 방식 추가)
-export const AP_SETL_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const AP_SETL_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "text", headerName: "배차번호", field: "DSPCH_NO", hide: true },
   { type: "text", headerName: "항목코드", field: "CHG_CD", hide: true },
@@ -129,12 +112,4 @@ export const AP_SETL_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { type: "numeric", headerName: "LBL_CONFIRM_COST", field: "CFM_COST" },
   { type: "numeric", headerName: "LBL_CFM_DESC", field: "CFM_COST" },
   { type: "text", headerName: "비고", field: "RMK", hide: true },
-  ...standardAudit(setGridData, {
-    delete: false,
-    rowStatus: false,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: false,
-    updateTime: false,
-  }),
 ];

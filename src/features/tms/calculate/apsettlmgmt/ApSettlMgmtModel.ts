@@ -32,13 +32,20 @@ export type GridKey =
 export function useApSettlMgmtModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode, { defaultLayout: "vertical" });
 
+  const selectedCustCd = base.grids.config.selected?.CUST_CD;
+
   const { codeMap } = useCommonStores({
     apSetlDetailType: { sqlProp: "CODE", keyParam: "AP_SETL_DTL_TCD" },
     apSetlDescType: { sqlProp: "CODE", keyParam: "APPLD_VAL_TCD" },
     fiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
     costCenter: { sqlProp: "CODE", keyParam: "CST_CNTR_GL_RC_TCD" },
     cstDistSts: { sqlProp: "CODE", keyParam: "CST_DIST_STS" },
-    cstCntrCd: { sqlProp: "selectCstCntrCodeName" },
+    cstCntrCd: {
+      sqlProp: "selectCstCntrCodeName",
+      LANG_TP: "KR",
+      keyParam: selectedCustCd,
+      MENU_CD: menuCode,
+    },
   });
 
   return { ...base, codeMap };

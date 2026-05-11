@@ -44,10 +44,9 @@ export default function OverheadTariffManagement() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS(model.grids.main.setData)}
+          columnDefs={MAIN_COLUMN_DEFS()}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          audit={false}
         />
       }
       detail={
@@ -60,18 +59,16 @@ export default function OverheadTariffManagement() {
         >
           <DataGrid
             {...model.bind("subChg")}
-            columnDefs={DETAIL_LEFT_COLUMN_DEFS(model.grids.subChg.setData)}
+            columnDefs={DETAIL_LEFT_COLUMN_DEFS()}
             codeMap={model.codeMap}
             actions={ctrl.detailActions}
             onRowClicked={ctrl.onSubChgRowClicked}
-            audit={false}
           />
           <DataGrid
             {...model.bind("subChgDtl")}
-            columnDefs={DETAIL_RIGHT_COLUMN_DEFS(model.grids.subChgDtl.setData)}
+            columnDefs={DETAIL_RIGHT_COLUMN_DEFS()}
             codeMap={model.codeMap}
             actions={ctrl.detailActions}
-            audit={false}
           />
         </SplitPane>
       }

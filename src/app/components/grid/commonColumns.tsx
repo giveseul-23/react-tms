@@ -17,7 +17,7 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   filter: false,
   floatingFilter: false,
   cellRenderer: (params: any) => {
-    if (!params.data) return null;
+    if (!params.data || params.node?.rowPinned) return null;
     return (
       <div className="flex items-center justify-center h-full">
         <input
@@ -77,6 +77,7 @@ export const makeRowStatusColumn = (overrides: Record<string, any> = {}) => ({
   field: "EDIT_STS",
   width: 80,
   cellRenderer: (params: any) => {
+    if (params.node?.rowPinned) return null;
     const cfg = ROW_STATUS_LABEL_MAP[params.value];
     if (!cfg) return null;
     return (

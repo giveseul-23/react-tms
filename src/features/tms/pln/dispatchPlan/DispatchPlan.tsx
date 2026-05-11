@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
+import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
@@ -53,7 +54,6 @@ export default function DispatchPlan() {
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
-          audit={false}
         />
       }
       detail={
@@ -66,49 +66,56 @@ export default function DispatchPlan() {
           ]}
           presets={{
             STOP: {
-              columnDefs: STOP_COLUMN_DEFS(),
-              actions: ctrl.stopActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("stop")}
+                  columnDefs={STOP_COLUMN_DEFS()}
+                  codeMap={model.codeMap}
+                  actions={ctrl.stopActions}
+                  audit={false}
+                />
+              ),
             },
             ALLOC: {
-              columnDefs: ALLOC_ORDER_COLUMN_DEFS(),
-              actions: ctrl.allocOrderActions,
-              onRowClicked: ctrl.onAllocOrderRowClicked,
+              render: () => (
+                <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
+                  <DataGrid
+                    {...model.bind("allocOrder")}
+                    columnDefs={ALLOC_ORDER_COLUMN_DEFS()}
+                    codeMap={model.codeMap}
+                    actions={ctrl.allocOrderActions}
+                    onRowClicked={ctrl.onAllocOrderRowClicked}
+                    audit={false}
+                  />
+                  <DataGrid
+                    {...model.bind("allocSub")}
+                    columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS()}
+                    actions={ctrl.allocSubActions}
+                  />
+                </SplitPane>
+              ),
             },
             UNALLOC: {
-              columnDefs: UNALLOC_ORDER_COLUMN_DEFS(),
-              actions: ctrl.unallocOrderActions,
-              onRowClicked: ctrl.onUnallocOrderRowClicked,
+              render: () => (
+                <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
+                  <DataGrid
+                    {...model.bind("unallocOrder")}
+                    columnDefs={UNALLOC_ORDER_COLUMN_DEFS()}
+                    codeMap={model.codeMap}
+                    actions={ctrl.unallocOrderActions}
+                    onRowClicked={ctrl.onUnallocOrderRowClicked}
+                    audit={false}
+                  />
+                  <DataGrid
+                    {...model.bind("unallocSub")}
+                    columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS()}
+                    actions={ctrl.unallocSubActions}
+                  />
+                </SplitPane>
+              ),
             },
           }}
-          rowData={{
-            STOP: model.grids.stop.rows,
-            ALLOC: model.grids.allocOrder.rows,
-            UNALLOC: model.grids.unallocOrder.rows,
-          }}
           actions={[]}
-          renderRightGrid={(activeTabKey) => {
-            if (activeTabKey === "ALLOC") {
-              return (
-                <DataGrid
-                  layoutType="plain"
-                  columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS()}
-                  rowData={model.grids.allocSub.rows}
-                  actions={ctrl.allocSubActions}
-                />
-              );
-            }
-            if (activeTabKey === "UNALLOC") {
-              return (
-                <DataGrid
-                  layoutType="plain"
-                  columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS()}
-                  rowData={model.grids.unallocSub.rows}
-                  actions={ctrl.unallocSubActions}
-                />
-              );
-            }
-            return null;
-          }}
         />
       }
     />

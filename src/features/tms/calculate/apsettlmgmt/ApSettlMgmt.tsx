@@ -1,6 +1,7 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
+import { SplitPane } from "@/app/components/layout/SplitPane";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useApSettlMgmtModel } from "./ApSettlMgmtModel";
@@ -34,6 +35,7 @@ export default function ApSettlMgmt() {
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
+        menuCode: MENU_CODE,
       }}
       defaultDirection="vertical"
       storageKey={model.storageKeys.outer}
@@ -44,6 +46,7 @@ export default function ApSettlMgmt() {
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
+          audit={{ delete: false, rowStatus: false }}
         />
       }
       detail={
@@ -57,73 +60,106 @@ export default function ApSettlMgmt() {
           ]}
           presets={{
             SUMMARY: {
-              columnDefs: SUMMARY_COLUMN_DEFS,
-              actions: ctrl.summaryActions,
+              // SUMMARY 탭만 좌(요약 그리드) + 우(nested 4 sub-tab) 좌우 분할.
+              // outer DataGrid 의 renderRightGrid 와 preset.render 가 같이 동작 안 해서
+              // SplitPane 으로 직접 조립.
+              render: () => (
+                <SplitPane direction="horizontal" defaultSizes={[30, 70]}>
+                  <DataGrid
+                    {...model.bind("summary")}
+                    columnDefs={SUMMARY_COLUMN_DEFS}
+                    codeMap={model.codeMap}
+                    actions={ctrl.summaryActions}
+                    audit={{ delete: false, rowStatus: false }}
+                  />
+                  <DataGrid
+                    layoutType="tab"
+                    tabs={[
+                      { key: "MONTHLY_FARE", label: "LBL_FIXED_VEH_CHARGE" },
+                      { key: "HIRE_DISPATCH", label: "LBL_DSPCH_CHARGE" },
+                      { key: "FREIGHT", label: "LBL_ITM_QTY_RATE" },
+                      { key: "INDIRECT", label: "LBL_OVERHEAD_CHARGE" },
+                    ]}
+                    presets={{
+                      MONTHLY_FARE: {
+                        render: () => (
+                          <DataGrid
+                            {...model.bind("monthlyFare")}
+                            columnDefs={MONTHLY_FARE_COLUMN_DEFS}
+                            codeMap={model.codeMap}
+                            audit={{ delete: false, rowStatus: false }}
+                          />
+                        ),
+                      },
+                      HIRE_DISPATCH: {
+                        render: () => (
+                          <DataGrid
+                            {...model.bind("hireDispatchPay")}
+                            columnDefs={HIRE_DISPATCH_PAY_COLUMN_DEFS}
+                            codeMap={model.codeMap}
+                            audit={{ delete: false, rowStatus: false }}
+                          />
+                        ),
+                      },
+                      FREIGHT: {
+                        render: () => (
+                          <DataGrid
+                            {...model.bind("freightPay")}
+                            columnDefs={FREIGHT_PAY_COLUMN_DEFS}
+                            codeMap={model.codeMap}
+                            audit={{ delete: false, rowStatus: false }}
+                          />
+                        ),
+                      },
+                      INDIRECT: {
+                        render: () => (
+                          <DataGrid
+                            {...model.bind("indirectPay")}
+                            columnDefs={INDIRECT_PAY_COLUMN_DEFS}
+                            codeMap={model.codeMap}
+                            audit={{ delete: false, rowStatus: false }}
+                          />
+                        ),
+                      },
+                    }}
+                    actions={[]}
+                  />
+                </SplitPane>
+              ),
             },
             COST_CENTER: {
-              columnDefs: COST_CENTER_COLUMN_DEFS,
-              actions: ctrl.costCenterActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("costCenter")}
+                  columnDefs={COST_CENTER_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.costCenterActions}
+                />
+              ),
             },
             MATERIAL: {
-              columnDefs: MATERIAL_COST_COLUMN_DEFS,
-              actions: ctrl.materialCostActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("materialCost")}
+                  columnDefs={MATERIAL_COST_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.materialCostActions}
+                  audit={{ delete: false, rowStatus: false }}
+                />
+              ),
             },
             EVIDENCE: {
-              columnDefs: EVIDENCE_COLUMN_DEFS,
-              actions: ctrl.evidenceActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("evidence")}
+                  columnDefs={EVIDENCE_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.evidenceActions}
+                />
+              ),
             },
           }}
-          rowData={{
-            SUMMARY: model.grids.summary.rows,
-            COST_CENTER: model.grids.costCenter.rows,
-            MATERIAL: model.grids.materialCost.rows,
-            EVIDENCE: model.grids.evidence.rows,
-          }}
-          codeMap={model.codeMap}
           actions={[]}
-          mainPanelSize={30}
-          rightPanelSize={70}
-          renderRightGrid={(activeTabKey) => {
-            if (activeTabKey === "SUMMARY") {
-              return (
-                <DataGrid
-                  layoutType="tab"
-                  tabs={[
-                    { key: "MONTHLY_FARE", label: "LBL_FIXED_VEH_CHARGE" },
-                    { key: "HIRE_DISPATCH", label: "LBL_DSPCH_CHARGE" },
-                    { key: "FREIGHT", label: "LBL_ITM_QTY_RATE" },
-                    { key: "INDIRECT", label: "LBL_OVERHEAD_CHARGE" },
-                  ]}
-                  presets={{
-                    MONTHLY_FARE: {
-                      columnDefs: MONTHLY_FARE_COLUMN_DEFS,
-                      actions: [],
-                    },
-                    HIRE_DISPATCH: {
-                      columnDefs: HIRE_DISPATCH_PAY_COLUMN_DEFS,
-                      actions: [],
-                    },
-                    FREIGHT: {
-                      columnDefs: FREIGHT_PAY_COLUMN_DEFS,
-                      actions: [],
-                    },
-                    INDIRECT: {
-                      columnDefs: INDIRECT_PAY_COLUMN_DEFS,
-                      actions: [],
-                    },
-                  }}
-                  rowData={{
-                    MONTHLY_FARE: model.grids.monthlyFare.rows,
-                    HIRE_DISPATCH: model.grids.hireDispatchPay.rows,
-                    FREIGHT: model.grids.freightPay.rows,
-                    INDIRECT: model.grids.indirectPay.rows,
-                  }}
-                  actions={[]}
-                />
-              );
-            }
-            return null;
-          }}
         />
       }
     />

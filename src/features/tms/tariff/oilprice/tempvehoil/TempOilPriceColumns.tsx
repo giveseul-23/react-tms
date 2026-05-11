@@ -93,5 +93,4 @@ export const PERIOD_COLUMN_DEFS = [
     headerName: "LBL_AREA_DESCR",
     field: "AREA_DESCR",
   },
-  ...standardAudit(undefined, { delete: false, rowStatus: false }),
 ];

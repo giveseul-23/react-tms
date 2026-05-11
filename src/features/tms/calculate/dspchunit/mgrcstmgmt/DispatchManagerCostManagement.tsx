@@ -58,19 +58,28 @@ export default function DispatchManagerCostManagement() {
           ]}
           presets={{
             COST: {
-              columnDefs: COST_DETAIL_COLUMN_DEFS,
-              actions: ctrl.costDetailActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("costDetail")}
+                  columnDefs={COST_DETAIL_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.costDetailActions}
+                  audit={false}
+                />
+              ),
             },
             WAYPOINT: {
-              columnDefs: WAYPOINT_COLUMN_DEFS,
-              actions: ctrl.waypointActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("waypoint")}
+                  columnDefs={WAYPOINT_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.waypointActions}
+                  audit={false}
+                />
+              ),
             },
           }}
-          rowData={{
-            COST: model.grids.costDetail.rows,
-            WAYPOINT: model.grids.waypoint.rows,
-          }}
-          codeMap={model.codeMap}
           actions={[]}
         />
       }

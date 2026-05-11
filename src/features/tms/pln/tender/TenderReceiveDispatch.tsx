@@ -49,7 +49,14 @@ export default function TenderReceiveDispatch() {
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
           codeMap={model.codeMap}
-          audit={false}
+          audit={{
+            delete: false,
+            rowStatus: false,
+            insertPerson: true,
+            insertDate: true,
+            updatePerson: false,
+            updateTime: false,
+          }}
         />
       }
       detail={
@@ -61,22 +68,54 @@ export default function TenderReceiveDispatch() {
             { key: "AP_SETL", label: "LBL_TRANS_COST_HIS" },
           ]}
           presets={{
-            STOP: { columnDefs: STOP_COLUMN_DEFS() },
-            SMS_HIS: { columnDefs: SMS_COLUMN_DEFS() },
+            STOP: {
+              render: () => (
+                <DataGrid
+                  {...model.bind("stop")}
+                  columnDefs={STOP_COLUMN_DEFS()}
+                  codeMap={model.codeMap}
+                  audit={false}
+                />
+              ),
+            },
+            SMS_HIS: {
+              render: () => (
+                <DataGrid
+                  {...model.bind("sms")}
+                  columnDefs={SMS_COLUMN_DEFS()}
+                  codeMap={model.codeMap}
+                  audit={{
+                    delete: false,
+                    rowStatus: false,
+                    insertPerson: true,
+                    insertDate: true,
+                    updatePerson: false,
+                    updateTime: false,
+                  }}
+                />
+              ),
+            },
             AP_SETL: {
-              gridRef: model.apSetlGridRef,
-              columnDefs: AP_SETL_COLUMN_DEFS(model.grids.apSetl.setData),
-              onCellValueChanged: ctrl.handleApSetlCellChange,
-              actions: ctrl.apSetlActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("apSetl")}
+                  columnDefs={AP_SETL_COLUMN_DEFS()}
+                  codeMap={model.codeMap}
+                  onCellValueChanged={ctrl.handleApSetlCellChange}
+                  actions={ctrl.apSetlActions}
+                  audit={{
+                    delete: false,
+                    rowStatus: false,
+                    insertPerson: true,
+                    insertDate: true,
+                    updatePerson: false,
+                    updateTime: false,
+                  }}
+                />
+              ),
             },
           }}
-          rowData={{
-            STOP: model.grids.stop.rows,
-            SMS_HIS: model.grids.sms.rows,
-            AP_SETL: model.grids.apSetl.rows,
-          }}
           actions={[]}
-          codeMap={model.codeMap}
         />
       }
       bottomSlot={

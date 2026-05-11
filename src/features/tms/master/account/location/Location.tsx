@@ -67,69 +67,126 @@ export default function Location() {
           ]}
           presets={{
             ENTRY_RESTRICTION: {
-              columnDefs: ENTRY_RESTRICTION_COLUMN_DEFS,
-              actions: ctrl.subActions.entryRestriction,
+              render: () => (
+                <DataGrid
+                  {...model.bind("entryRestriction")}
+                  columnDefs={ENTRY_RESTRICTION_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.entryRestriction}
+                />
+              ),
             },
             ASSIGNED_VEHICLE: {
-              columnDefs: ASSIGNED_VEHICLE_COLUMN_DEFS,
-              actions: ctrl.subActions.assignedVehicle,
+              render: () => (
+                <DataGrid
+                  {...model.bind("assignedVehicle")}
+                  columnDefs={ASSIGNED_VEHICLE_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.assignedVehicle}
+                />
+              ),
             },
             DATE_PROHIBITION: {
-              columnDefs: EXCLD_VEH_COLUMN_DEFS,
-              actions: ctrl.subActions.dateProhibition,
+              render: () => (
+                <DataGrid
+                  {...model.bind("dateProhibition")}
+                  columnDefs={EXCLD_VEH_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.dateProhibition}
+                />
+              ),
             },
             REGISTERED_ZONE: {
-              columnDefs: REGISTERED_ZONE_COLUMN_DEFS,
-              actions: ctrl.subActions.registeredZone,
+              render: () => (
+                <DataGrid
+                  {...model.bind("registeredZone")}
+                  columnDefs={REGISTERED_ZONE_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.registeredZone}
+                />
+              ),
             },
             HOLIDAY: {
-              columnDefs: HOLIDAY_COLUMN_DEFS,
-              actions: ctrl.subActions.holiday,
+              render: () => (
+                <DataGrid
+                  {...model.bind("holiday")}
+                  columnDefs={HOLIDAY_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.holiday}
+                />
+              ),
             },
             PREFERRED_CARRIER: {
-              columnDefs: PREFERRED_CARRIER_COLUMN_DEFS,
-              actions: ctrl.subActions.preferredCarrier,
+              render: () => (
+                <DataGrid
+                  {...model.bind("preferredCarrier")}
+                  columnDefs={PREFERRED_CARRIER_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.preferredCarrier}
+                />
+              ),
             },
             ARRIVAL_REQUEST_TIME: {
-              columnDefs: ARRIVAL_REQUEST_TIME_COLUMN_DEFS,
-              actions: ctrl.subActions.arrivalRequestTime,
+              render: () => (
+                <DataGrid
+                  {...model.bind("arrivalRequestTime")}
+                  columnDefs={ARRIVAL_REQUEST_TIME_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.arrivalRequestTime}
+                />
+              ),
             },
             SMS: {
-              columnDefs: SMS_COLUMN_DEFS,
-              actions: ctrl.subActions.sms,
+              render: () => (
+                <DataGrid
+                  {...model.bind("sms")}
+                  columnDefs={SMS_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.sms}
+                />
+              ),
             },
             LOCATION_ROLE: {
-              columnDefs: LOCATION_ROLE_COLUMN_DEFS,
-              actions: ctrl.subActions.locationRole,
+              render: () => (
+                <DataGrid
+                  {...model.bind("locationRole")}
+                  columnDefs={LOCATION_ROLE_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.locationRole}
+                />
+              ),
             },
             LOC_SALES: {
-              columnDefs: LOC_SALES_COLUMN_DEFS,
-              actions: ctrl.subActions.locSales,
+              render: () => (
+                <DataGrid
+                  {...model.bind("locSales")}
+                  columnDefs={LOC_SALES_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.locSales}
+                />
+              ),
             },
             ETC: {
-              columnDefs: ETC_COLUMN_DEFS,
-              actions: ctrl.subActions.etc,
+              render: () => (
+                <DataGrid
+                  {...model.bind("etc")}
+                  columnDefs={ETC_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.etc}
+                />
+              ),
             },
             ORDER_TYPE_PLAN_ID: {
-              columnDefs: ORDER_TYPE_PLAN_ID_COLUMN_DEFS,
-              actions: ctrl.subActions.orderTypePlanId,
+              render: () => (
+                <DataGrid
+                  {...model.bind("orderTypePlanId")}
+                  columnDefs={ORDER_TYPE_PLAN_ID_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.subActions.orderTypePlanId}
+                />
+              ),
             },
           }}
-          rowData={{
-            ENTRY_RESTRICTION: model.grids.entryRestriction.rows,
-            ASSIGNED_VEHICLE: model.grids.assignedVehicle.rows,
-            DATE_PROHIBITION: model.grids.dateProhibition.rows,
-            REGISTERED_ZONE: model.grids.registeredZone.rows,
-            HOLIDAY: model.grids.holiday.rows,
-            PREFERRED_CARRIER: model.grids.preferredCarrier.rows,
-            ARRIVAL_REQUEST_TIME: model.grids.arrivalRequestTime.rows,
-            SMS: model.grids.sms.rows,
-            LOCATION_ROLE: model.grids.locationRole.rows,
-            LOC_SALES: model.grids.locSales.rows,
-            ETC: model.grids.etc.rows,
-            ORDER_TYPE_PLAN_ID: model.grids.orderTypePlanId.rows,
-          }}
-          codeMap={model.codeMap}
           actions={[]}
         />
       }

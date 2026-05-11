@@ -59,7 +59,6 @@ export default function Country() {
           ]}
           presets={{
             STATE: {
-              columnDefs: [],
               render: () => (
                 <SplitPane
                   direction="horizontal"
@@ -83,10 +82,16 @@ export default function Country() {
                 </SplitPane>
               ),
             },
-            ZIP: { columnDefs: ZIP_COLUMN_DEFS, actions: ctrl.zipActions },
-          }}
-          rowData={{
-            ZIP: model.grids.zip.rows,
+            ZIP: {
+              render: () => (
+                <DataGrid
+                  {...model.bind("zip")}
+                  columnDefs={ZIP_COLUMN_DEFS}
+                  actions={ctrl.zipActions}
+                  audit={false}
+                />
+              ),
+            },
           }}
           actions={[]}
         />

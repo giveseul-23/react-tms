@@ -15,10 +15,8 @@
 // - standardAudit: 삭제/상태/생성자/생성일/수정자/수정일 블록 일괄 삽입
 // ────────────────────────────────────────────────────────────────
 
-import { standardAudit } from "@/app/components/grid/commonColumns";
-
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = () => [
   { headerName: "No" }, // 자동 일련번호
   {
     type: "text",
@@ -76,14 +74,12 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "DIV_NM",
   },
 
-  ...standardAudit(setGridData),
 ];
 
 // ── 상세 그리드 컬럼 (codeMap 주입 — 코드→라벨 치환용) ─────────
 //bottom - left
 export const RT_ITM_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
-  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
@@ -97,12 +93,10 @@ export const RT_ITM_COLUMN_DEFS = (
     headerName: "LBL_ORDER_BY",
     field: "DISP_SEQ",
   },
-  ...standardAudit(setGridData, { updatePerson: false, updateTime: false }),
 ];
 
 export const RT_CARR_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
-  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_CARRIER_CODE", field: "CARR_CD" },
@@ -116,12 +110,10 @@ export const RT_CARR_COLUMN_DEFS = (
     headerName: "LBL_FROM_DTTM",
     field: "FRM_DTTM",
   },
-  ...standardAudit(setGridData, { updatePerson: false, updateTime: false }),
 ];
 
 export const RT_VEH_TP_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
-  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
@@ -130,13 +122,11 @@ export const RT_VEH_TP_COLUMN_DEFS = (
     headerName: "LBL_VEHICLE_TYPE_NAME",
     field: "VEH_TP_NM",
   },
-  ...standardAudit(setGridData, { updatePerson: false, updateTime: false }),
 ];
 
 //bottom - right
 export const RT_ITM_VEH_TP_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
-  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
@@ -190,12 +180,10 @@ export const RT_ITM_VEH_TP_COLUMN_DEFS = (
     headerName: "LBL_PARAM_DESC3",
     field: "PARAM3_DESC",
   },
-  ...standardAudit(setGridData),
 ];
 
 export const RT_ITM_VEH_COLUMN_DEFS = (
   codeMap: Record<string, Record<string, string>>,
-  setGridData?: (updater: any) => void,
 ) => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM" },
@@ -259,7 +247,6 @@ export const RT_ITM_VEH_COLUMN_DEFS = (
     headerName: "LBL_PARAM_DESC3",
     field: "PARAM3_DESC",
   },
-  ...standardAudit(setGridData),
 ];
 
 // ────────────────────────────────────────────────────────────────

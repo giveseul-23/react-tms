@@ -44,7 +44,6 @@ export default function TempOilPrice() {
           }}
           presets={{
             REGISTER: {
-              columnDefs: [],
               render: () => (
                 <SplitPane
                   direction="horizontal"
@@ -72,18 +71,16 @@ export default function TempOilPrice() {
               ),
             },
             PERIOD: {
-              columnDefs: PERIOD_COLUMN_DEFS,
-              actions: ctrl.periodActions,
+              render: () => (
+                <DataGrid
+                  {...model.bind("period")}
+                  columnDefs={PERIOD_COLUMN_DEFS}
+                  actions={ctrl.periodActions}
+                  audit={{ delete: false, rowStatus: false }}
+                />
+              ),
             },
           }}
-          rowData={{
-            PERIOD: model.grids.period.rows,
-          }}
-          totalCount={model.grids.period.data.totalCount}
-          currentPage={model.grids.period.data.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => model.searchRef.current?.(page)}
           actions={[]}
         />
       }

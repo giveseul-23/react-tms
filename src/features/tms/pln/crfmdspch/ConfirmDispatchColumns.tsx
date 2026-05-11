@@ -1,7 +1,5 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
-
 // 메인 그리드
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_LDNG_STAT", field: "SIGNAL" },
   {
@@ -142,7 +140,6 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   { type: "text", headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM" },
   { type: "text", headerName: "LBL_DRIVER_CODE", field: "DRVR_ID" },
   { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM" },
-  ...standardAudit(setGridData),
   { type: "numeric", headerName: "TNDR_REQ_ID", field: "TNDR_REQ_ID" },
   { type: "text", headerName: "TNDR_REQ_USR_ID", field: "TNDR_REQ_USR_ID" },
   { type: "text", headerName: "TNDR_REQ_DTTM", field: "TNDR_REQ_DTTM" },
@@ -154,7 +151,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
 ];
 
 // 주문정보 - 좌측
-export const ORDER_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const ORDER_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_LDNG_STAT", field: "SIGNAL" },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
@@ -275,11 +272,10 @@ export const ORDER_ITEM_COLUMN_DEFS = (
     headerName: "LBL_CONFIRMED_FLEX_QTY5",
     field: "CFM_FLEX_QTY5",
   },
-  ...standardAudit(setGridData),
 ];
 
 // 인수증
-export const RECEIPT_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const RECEIPT_COLUMN_DEFS = () => [
   { headerName: "No" },
   { type: "numeric", headerName: "LBL_POD_ID", field: "POD_ID" },
   { type: "numeric", headerName: "LBL_REISSUE_CNT", field: "REISSUE_CNT" },
@@ -317,12 +313,4 @@ export const RECEIPT_HISTORY_COLUMN_DEFS = (
     field: "POD_LOG_EVNT_CD",
     codeKey: "podLogEvntCd",
   },
-  ...standardAudit(setGridData, {
-    delete: false,
-    rowStatus: false,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: false,
-    updateTime: false,
-  }),
 ];

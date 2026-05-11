@@ -321,7 +321,7 @@ export default function DataGrid<TRow>({
   const activeColumnDefs = useMemo(() => {
     const base =
       layoutType === "tab" && activeTab && presets
-        ? presets[activeTab].columnDefs
+        ? presets[activeTab].columnDefs ?? []
         : columnDefs;
 
     // audit === undefined / false → 자동 추가 안 함 (기존 화면 호환)
@@ -763,12 +763,22 @@ export default function DataGrid<TRow>({
     const onKeyDown = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.key !== "c") return;
       const tag = (document.activeElement as HTMLElement)?.tagName;
+      // ── DEBUG ─ 복사 안 될 때 어디서 막히는지 확인용 임시 로그
+      console.log("[Copy]", {
+        activeTag: tag,
+        cellCount: selectedCellsRef.current.size,
+        active: document.activeElement,
+      });
       if (tag === "INPUT" || tag === "TEXTAREA") return;
       if (selectedCellsRef.current.size === 0) return;
       e.preventDefault();
       e.stopPropagation();
       const tsv = tsvFromSelection();
-      if (tsv) navigator.clipboard.writeText(tsv).catch(() => {});
+      if (!tsv) return;
+      navigator.clipboard.writeText(tsv).then(
+        () => console.log("[Copy] success", tsv.length, "chars"),
+        (err) => console.warn("[Copy] writeText failed", err),
+      );
     };
 
     const onDocumentMouseDown = (e: MouseEvent) => {
