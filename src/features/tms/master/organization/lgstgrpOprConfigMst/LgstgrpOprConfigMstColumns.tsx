@@ -63,7 +63,7 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     editable: true,
   },
   {
-    type: "text",
+    type: "check",
     //기본값
     headerName: "LBL_DFT_VAL_NM",
     field: "DFT_YN",
@@ -78,6 +78,7 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
         />
       </div>
     ),
+    editable: true,
   },
   {
     type: "text",

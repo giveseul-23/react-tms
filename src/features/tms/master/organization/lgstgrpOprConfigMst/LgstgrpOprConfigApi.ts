@@ -35,7 +35,7 @@ export const lgstgrpOprConfigApi = {
   saveConfig(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/saveConfig",
+      "/lgstGrpConfigMasterService/save",
       { dsSave },
       {
         params: {
@@ -49,7 +49,7 @@ export const lgstgrpOprConfigApi = {
 
   syncConfig(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/syncConfig",
+      "/lgstGrpConfigMasterService/syncConfig",
       withSession(payload),
     );
   },
@@ -65,7 +65,7 @@ export const lgstgrpOprConfigApi = {
   saveConfigDetail(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/saveConfigDetail",
+      "/lgstGrpConfigMasterService/saveDetail",
       { dsSave },
       {
         params: {
@@ -88,7 +88,7 @@ export const lgstgrpOprConfigApi = {
   saveConfigI18n(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/saveConfigI18n",
+      "/lgstGrpConfigMasterService/saveLang",
       { dsSave },
       {
         params: {
@@ -111,7 +111,7 @@ export const lgstgrpOprConfigApi = {
   saveConfigDetailI18n(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/lgstGrpOprConfigService/saveConfigDetailI18n",
+      "/lgstGrpConfigMasterService/saveDetailLang",
       { dsSave },
       {
         params: {

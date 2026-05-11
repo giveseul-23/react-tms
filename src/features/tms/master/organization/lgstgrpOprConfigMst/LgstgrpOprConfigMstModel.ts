@@ -11,9 +11,9 @@ import { lgstgrpOprConfigApi } from "./LgstgrpOprConfigApi";
 
 // 그리드 키 — 센차 grid reference 와 동일
 //   main  : 메인 그리드 (lgstgrpcnfgmastrmain)
-//   sub01 : 상세       (lgstgrpcnfgmastrsub01)
-//   sub02 : 상세-다국어 (lgstgrpcnfgmastrsub02)  ← sub01 행 클릭 시 fetch
-//   sub03 : 메인-다국어 (lgstgrpcnfgmastrsub03)  ← main 행 클릭 시 fetch
+//   mainLang : 메인-다국어 (mainLang)  ← main 행 클릭 시 fetch
+//   detail : 상세       (detail)
+//   detailLang : 상세-다국어 (detailLang)  ← sub01 행 클릭 시 fetch
 export type GridKey = "main" | "detail" | "detailLang" | "mainLang";
 
 type ConfigTab = { key: string; label: string };

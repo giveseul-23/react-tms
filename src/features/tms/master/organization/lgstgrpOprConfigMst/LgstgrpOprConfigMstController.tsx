@@ -89,8 +89,6 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
       DATA_TP: "STRING",
       DATA_CRE_TCD: "USER",
       LGST_GRP_CNFG_GRP_CD: model.activeType,
-      CNFG_CD: "",
-      CNFG_NM: "",
     });
   }, [model.activeType, base]);
 
