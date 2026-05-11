@@ -193,12 +193,17 @@ export function useBaseModel<K extends string = string>(
 
   // ── grids: Proxy 로 lazy 슬롯 제공 ──────────────────────────
   // 첫 접근 시 EMPTY_GRID 반환, set 시점에 state 에 등록.
+  // 슬롯 객체는 키별로 캐시 — Proxy.get 호출마다 같은 reference 를 반환해
+  // 소비자의 useMemo / 의존성 비교가 불필요하게 무효화되지 않도록 한다.
   const grids = useMemo(() => {
+    const slotCache: Record<string, GridSlot> = {};
     const handler: ProxyHandler<Record<string, GridSlot>> = {
       get(_target, prop) {
         if (typeof prop !== "string") return undefined;
         const k = prop;
-        return {
+        if (slotCache[k]) return slotCache[k];
+
+        const slot: GridSlot = {
           get data() {
             return allDataRef.current[k] ?? EMPTY_GRID;
           },
@@ -220,7 +225,9 @@ export function useBaseModel<K extends string = string>(
               return allSelRef.current[k] ?? null;
             },
           },
-        } satisfies GridSlot;
+        };
+        slotCache[k] = slot;
+        return slot;
       },
     };
     return new Proxy({} as Record<string, GridSlot>, handler) as Record<

@@ -228,6 +228,12 @@ export function useBaseController<K extends string>({
       opts?: { alsoReset?: K[] },
     ) => {
       const slot = (model.grids as Record<string, GridSlot>)[gridKey as string];
+      // 같은 row 재클릭이면 selection/reset/cascade 모두 skip.
+      // 더블클릭으로 cellEditor 가 열릴 때 ag-grid 가 발화하는 두 번째 click 으로
+      // cascade fetch 가 재트리거 → sub setData → 부모 re-render →
+      // cellEditor mount 가 차단되는 문제 회피.
+      if (row != null && slot.selectedRef.current === row) return;
+
       slot.setSelected(row);
 
       const resetKeys: K[] = [

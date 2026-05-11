@@ -135,10 +135,87 @@ export const locationApi = {
     );
   },
 
-  save(rows: any[]) {
+  // ── 메인 저장 ────────────────────────────────────────────────
+  // base.saveGrid 가 호출하는 시그니처: ({ dsSave }) => Promise
+  save(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/save`,
-      withSession(rows),
+      withSession(payload.dsSave),
+    );
+  },
+
+  // ── sub 12개 저장 — TODO: 실제 endpoint 로 교체 필요 ─────────
+  // 임시 URL: /locationService/saveXxx 패턴.
+  saveEntryRestriction(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveVehTypeInfo`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveAssignedVehicle(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveAssignVeh`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveDateProhibition(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveDateProhibition`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveRegisteredZone(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveZoneRegist`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveHoliday(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveClosedDay`,
+      withSession(payload.dsSave),
+    );
+  },
+  savePreferredCarrier(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/savePreferedCarr`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveArrivalRequestTime(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveDeliveryTimeWindow`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveSms(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveSms`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveLocationRole(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveLocRoleTp`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveLocSales(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveLocSales`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveEtc(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveLocEtc`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveOrderTypePlanId(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveLocOrdPln`,
+      withSession(payload.dsSave),
     );
   },
 };

@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
@@ -18,9 +17,9 @@ export type GridKey =
   | "orderTypePlanId";
 
 export function useLocationModel(menuCode: string) {
-  const base = useBaseModel<GridKey>(menuCode, { defaultLayout: "vertical" });
+  const base = useBaseModel<GridKey>(menuCode);
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     locTp: { sqlProp: "CODE", keyParam: "LOC_TP" },
     timeUnit: { sqlProp: "CODE", keyParam: "VAR_LD_UNL_TIME_UNIT" },
     shipToTpList: { sqlProp: "CODE", keyParam: "SHIPTO_TCD" },
@@ -33,17 +32,6 @@ export function useLocationModel(menuCode: string) {
     locRoleTp: { sqlProp: "CODE", keyParam: "HARIM_ROLE_TYPE" },
     locPrimeTp: { sqlProp: "CODE", keyParam: "LOC_PRIME_TP" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return { ...base, codeMap };
 }

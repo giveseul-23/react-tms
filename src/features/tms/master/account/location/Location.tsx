@@ -1,7 +1,6 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useLocationModel } from "./LocationModel";
@@ -38,17 +37,8 @@ export default function Location() {
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
-        menuCode: MENU_CD,
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
-      storageKey={model.storageKeys.outer}
+      defaultDirection="vertical"
       master={
         <DataGrid
           {...model.bind("main")}
@@ -56,7 +46,6 @@ export default function Location() {
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          audit={false}
         />
       }
       detail={
@@ -79,51 +68,51 @@ export default function Location() {
           presets={{
             ENTRY_RESTRICTION: {
               columnDefs: ENTRY_RESTRICTION_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.entryRestriction,
             },
             ASSIGNED_VEHICLE: {
               columnDefs: ASSIGNED_VEHICLE_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.assignedVehicle,
             },
             DATE_PROHIBITION: {
               columnDefs: EXCLD_VEH_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.dateProhibition,
             },
             REGISTERED_ZONE: {
               columnDefs: REGISTERED_ZONE_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.registeredZone,
             },
             HOLIDAY: {
               columnDefs: HOLIDAY_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.holiday,
             },
             PREFERRED_CARRIER: {
               columnDefs: PREFERRED_CARRIER_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.preferredCarrier,
             },
             ARRIVAL_REQUEST_TIME: {
               columnDefs: ARRIVAL_REQUEST_TIME_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.arrivalRequestTime,
             },
             SMS: {
               columnDefs: SMS_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.sms,
             },
             LOCATION_ROLE: {
               columnDefs: LOCATION_ROLE_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.locationRole,
             },
             LOC_SALES: {
               columnDefs: LOC_SALES_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.locSales,
             },
             ETC: {
               columnDefs: ETC_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.etc,
             },
             ORDER_TYPE_PLAN_ID: {
               columnDefs: ORDER_TYPE_PLAN_ID_COLUMN_DEFS,
-              actions: ctrl.subActions,
+              actions: ctrl.subActions.orderTypePlanId,
             },
           }}
           rowData={{

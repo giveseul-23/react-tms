@@ -46,14 +46,11 @@ export function ComboCellEditor(props: ComboCellEditorProps) {
   const pick = (v: string) => {
     valueRef.current = v;
     setValue(v);
-    // AG Grid 의 stopEditing → getValue 흐름이 popup 모드에서 가끔 누락되므로
-    // node.setDataValue 로 직접 commit (onCellValueChanged 자동 발화 → EDIT_STS = "U")
-    const field = props.colDef?.field ?? props.column?.getColDef?.().field;
-    if (field && props.node?.setDataValue) {
-      props.node.setDataValue(field, v);
-    }
-    // 편집 종료 (이미 commit 됐으므로 cancel=true 로 getValue 호출 회피)
-    props.api?.stopEditing?.(true);
+    // ag-grid 의 정상 commit 흐름에 위임 — stopEditing() 호출하면
+    // useGridCellEditor 의 getValue 가 호출되어 valueRef.current 반환,
+    // ag-grid 가 자체 commit 처리 + onCellValueChanged 발화.
+    // (cancel=true 로 끄면 ag-grid editing state 가 stuck 되어 같은 셀 재편집 불가)
+    props.api?.stopEditing?.();
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -80,7 +77,6 @@ export function ComboCellEditor(props: ComboCellEditorProps) {
       }
     }
   };
-
   return (
     <div
       ref={containerRef}
@@ -100,11 +96,7 @@ export function ComboCellEditor(props: ComboCellEditorProps) {
       }}
     >
       {/* 빈값 옵션 — 사용자가 명시적으로 클리어할 수 있도록 */}
-      <Option
-        label="―"
-        selected={value === ""}
-        onClick={() => pick("")}
-      />
+      <Option label="―" selected={value === ""} onClick={() => pick("")} />
       {codes.map((code) => (
         <Option
           key={code}

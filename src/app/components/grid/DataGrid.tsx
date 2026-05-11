@@ -306,6 +306,7 @@ export default function DataGrid<TRow>({
   const internalGridRef = useRef<any>(null);
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRef = useRef<TRow | null>(null);
+  const prevRowCountRef = useRef(0);
   const selectedCellsRef = useRef<Set<string>>(new Set());
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<{ rowIndex: number; colIndex: number } | null>(
@@ -326,7 +327,12 @@ export default function DataGrid<TRow>({
 
     const auditOpts = typeof audit === "object" ? audit : undefined;
     return [...base, ...(standardAudit(setRowData, auditOpts) as any[])];
-  }, [layoutType, activeTab, presets, columnDefs, audit, setRowData]);
+    // setRowData 는 model.bind() Proxy 가 매번 새 함수 reference 를 반환 →
+    // deps 에 두면 finalColumnDefs 가 매 render 마다 재생성되어 ag-grid 가
+    // columnEverythingChanged 를 폭주시키고 cellEditor mount 를 차단함.
+    // 함수 자체의 호출 결과는 동일하므로 deps 에서 제외 (stale closure 무해).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layoutType, activeTab, presets, columnDefs, audit]);
 
   const activeRowData = useMemo(() => {
     // escape hatch: 외부 rowData 직접 주입
@@ -421,7 +427,8 @@ export default function DataGrid<TRow>({
           rowCountForNo: activeRowData.length,
         }),
       ),
-    [activeColumnDefs, activeCodeMap, activeRowData.length],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeColumnDefs, activeCodeMap],
   );
 
   // ─── 오토사이징 핸들러 ────────────────────────────────────────────────────────
@@ -510,6 +517,26 @@ export default function DataGrid<TRow>({
       }
     });
   }, [activeRowData, autoSelectFirstRow, rowKeys, activeOnRowClicked]);
+
+  // ─── 행 추가 시 자동 스크롤 + 포커스 (EDIT_STS:"I" 인 새 마지막 행) ─────
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api || api.isDestroyed?.()) return;
+
+    const currCount = activeRowData?.length ?? 0;
+    const prevCount = prevRowCountRef.current;
+    prevRowCountRef.current = currCount;
+
+    if (currCount <= prevCount || currCount === 0) return;
+    const lastRow = activeRowData[currCount - 1] as any;
+    if (lastRow?.EDIT_STS !== "I") return;
+
+    requestAnimationFrame(() => {
+      if (api.isDestroyed?.()) return;
+      const lastIndex = currCount - 1;
+      api.ensureIndexVisible(lastIndex, "bottom");
+    });
+  }, [activeRowData]);
 
   // ─── 드래그 범위 선택 + Ctrl+C 복사 ──────────────────────────────────────────
   useEffect(() => {
@@ -787,33 +814,51 @@ export default function DataGrid<TRow>({
       ? renderRightGrid(activeTab)
       : null;
 
-  const commonGridProps = {
-    columnDefs: finalColumnDefs,
-    pinnedBottomRowData: summaryRow,
-    defaultColDef: {
+  // ag-grid 에 흘러가는 prop 의 reference 를 안정화 — 부모 re-render 시에도
+  // ag-grid 가 내부 상태(cellEditor 등) 를 reset 하지 않도록 한다.
+  const defaultColDef = useMemo(
+    () => ({
       resizable: true,
       sortable: true,
       minWidth: MIN_COL_WIDTH,
       filter: true,
       floatingFilter: true,
-    },
-    headerHeight: 28,
-    rowHeight: 22,
-    onGridReady: handleGridReady,
-    onFirstDataRendered: handleFirstDataRendered,
-
-    // ─── Tree Data props ───────────────────────────────────────────────────
-    ...(treeData && {
-      treeData: true,
-      getDataPath,
-      autoGroupColumnDef,
-      groupDefaultExpanded,
     }),
+    [],
+  );
 
-    onRowSelected: (e: any) => {
+  const rowSelection = useMemo(
+    () =>
+      rowSelectionProp === "single"
+        ? { mode: "singleRow" as const, enableClickSelection: true }
+        : { mode: "multiRow" as const, enableClickSelection: false },
+    [rowSelectionProp],
+  );
+
+  const selectionColumnDef = useMemo(
+    () => ({
+      headerClass: "ag-selection-header-center",
+      width: 30,
+      minWidth: 30,
+      maxWidth: 30,
+    }),
+    [],
+  );
+
+  const handleRowSelected = useCallback(
+    (e: any) => {
       if (!e.api) return;
       const rows = e.api.getSelectedRows();
-      setSelectedRows(rows);
+      // 같은 selection 이면 state 변경 skip — re-render 시 cellEditor 영향 회피
+      setSelectedRows((prev) => {
+        if (
+          prev.length === rows.length &&
+          prev.every((r: any, i: number) => r === rows[i])
+        ) {
+          return prev;
+        }
+        return rows;
+      });
       if (e.node.isSelected() && e.data) {
         prevSelectedRef.current = e.data;
         onRowSelected?.(e.data);
@@ -825,8 +870,11 @@ export default function DataGrid<TRow>({
         }, 0);
       }
     },
-    onCellClicked: (_e: any) => {},
-    onRowClicked: (e: any) => {
+    [onRowSelected],
+  );
+
+  const handleRowClicked = useCallback(
+    (e: any) => {
       const target = e.event?.target as HTMLElement;
       if (
         target?.closest(".ag-selection-checkbox") ||
@@ -840,28 +888,70 @@ export default function DataGrid<TRow>({
       prevSelectedRef.current = e.data;
       activeOnRowClicked?.(e.data);
     },
-    onRowDoubleClicked: (e: any) => {
+    [activeOnRowClicked],
+  );
+
+  const handleRowDoubleClicked = useCallback(
+    (e: any) => {
       if (!e.data) return;
       onRowDoubleClicked?.(e.data);
     },
-    onCellValueChanged: withRowStatusTracking(activeOnCellValueChanged),
-    rowSelection:
-      rowSelectionProp === "single"
-        ? { mode: "singleRow" as const, enableClickSelection: true }
-        : {
-            mode: "multiRow" as const,
-            enableClickSelection: false,
-          },
-    selectionColumnDef: {
-      headerClass: "ag-selection-header-center",
-      width: 30,
-      minWidth: 30,
-      maxWidth: 30,
-    },
+    [onRowDoubleClicked],
+  );
 
-    // ─── Escape Hatch: 외부 gridOptions 오버라이드 (최종 우선순위) ──────────
-    ...gridOptions,
-  };
+  const handleCellValueChanged = useMemo(
+    () => withRowStatusTracking(activeOnCellValueChanged),
+    [activeOnCellValueChanged],
+  );
+
+  const treeProps = useMemo(
+    () =>
+      treeData
+        ? {
+            treeData: true as const,
+            getDataPath,
+            autoGroupColumnDef,
+            groupDefaultExpanded,
+          }
+        : null,
+    [treeData, getDataPath, autoGroupColumnDef, groupDefaultExpanded],
+  );
+
+  const commonGridProps = useMemo(
+    () => ({
+      columnDefs: finalColumnDefs,
+      pinnedBottomRowData: summaryRow,
+      defaultColDef,
+      headerHeight: 28,
+      rowHeight: 22,
+      onGridReady: handleGridReady,
+      onFirstDataRendered: handleFirstDataRendered,
+      ...(treeProps ?? {}),
+      onRowSelected: handleRowSelected,
+      onRowClicked: handleRowClicked,
+      onRowDoubleClicked: handleRowDoubleClicked,
+      onCellValueChanged: handleCellValueChanged,
+      rowSelection,
+      selectionColumnDef,
+      // ─── Escape Hatch: 외부 gridOptions 오버라이드 (최종 우선순위) ──────────
+      ...gridOptions,
+    }),
+    [
+      finalColumnDefs,
+      summaryRow,
+      defaultColDef,
+      handleGridReady,
+      handleFirstDataRendered,
+      treeProps,
+      handleRowSelected,
+      handleRowClicked,
+      handleRowDoubleClicked,
+      handleCellValueChanged,
+      rowSelection,
+      selectionColumnDef,
+      gridOptions,
+    ],
+  );
 
   const gridStyle = {
     ["--ag-font-size" as any]: "11px",
