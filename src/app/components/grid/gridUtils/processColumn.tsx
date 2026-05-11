@@ -22,6 +22,7 @@ import type { ColDef, ColGroupDef } from "ag-grid-community";
 import { Lang } from "@/app/services/common/Lang";
 import { Util } from "@/app/services/common/Util";
 import { ComboCellEditor } from "@/app/components/grid/cellEditors/ComboCellEditor";
+import { commitRowChange } from "./rowStatus";
 
 type AnyCol = ColDef<any> | ColGroupDef<any>;
 
@@ -53,6 +54,7 @@ const CUSTOM_KEYS = new Set([
   "disableMaxWidth",
   "noLang",
   "summable",
+  "defaultYn",
 ]);
 
 function stripCustomKeys<T extends Record<string, any>>(col: T): T {
@@ -85,10 +87,11 @@ function walkChildren(
   return children.map((child) => {
     const withRenderer = injectCodeRenderer(child, codeMap) as any;
     const withEditor = injectComboEditor(withRenderer, codeMap, setRowData) as any;
+    const withCheck = injectCheckRenderer(withEditor, setRowData) as any;
     return stripCustomKeys({
-      ...withEditor,
-      headerName: translate(withEditor),
-      children: walkChildren(withEditor.children, codeMap, setRowData),
+      ...withCheck,
+      headerName: translate(withCheck),
+      children: walkChildren(withCheck.children, codeMap, setRowData),
     });
   });
 }
@@ -115,6 +118,43 @@ function injectCodeRenderer(
       }
       const label = codeMap?.[codeKey]?.[String(code)] ?? code;
       return <span className="px-2 py-0.5 rounded-lg text-xs">{label}</span>;
+    },
+  } as AnyCol;
+}
+
+/**
+ * type "check" 컬럼에 체크박스 cellRenderer 자동 주입.
+ *   - 표시: row[field] === "Y" → checked, 아니면 unchecked
+ *   - 클릭: "Y" ↔ "N" 토글 → commitRowChange 로 React state 갱신 + EDIT_STS 마킹
+ *   - 이미 cellRenderer 가 정의돼 있으면 유지
+ *   - 신규 행의 default 값 자동 주입은 DataGrid 가 column.defaultYn 으로 처리
+ */
+function injectCheckRenderer(
+  col: AnyCol,
+  setRowData?: (updater: any) => void,
+): AnyCol {
+  const c = col as any;
+  if (c.type !== "check") return col;
+  if (c.cellRenderer) return col;
+  const field = (c.field ?? c.colId) as string | undefined;
+  if (!field) return col;
+  return {
+    ...col,
+    cellRenderer: (params: any) => {
+      const checked = params.value === "Y";
+      return (
+        <div className="flex items-center justify-center h-full">
+          <input
+            type="checkbox"
+            className="ag-input-field-input ag-checkbox-input"
+            checked={checked}
+            onChange={() => {
+              const next = checked ? "N" : "Y";
+              commitRowChange(setRowData, params.node?.data, field, next);
+            }}
+          />
+        </div>
+      );
     },
   } as AnyCol;
 }
@@ -166,9 +206,13 @@ function processColumnDefRaw(
   const codeMap = opts.codeMap;
 
   // codeKey → cellRenderer (라벨 표시) + type "combo" 면 cellEditor (dropdown) 주입
-  const prepared = injectComboEditor(
-    injectCodeRenderer(col, codeMap),
-    codeMap,
+  // + type "check" 면 체크박스 cellRenderer 주입
+  const prepared = injectCheckRenderer(
+    injectComboEditor(
+      injectCodeRenderer(col, codeMap),
+      codeMap,
+      opts.setRowData,
+    ),
     opts.setRowData,
   );
 

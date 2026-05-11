@@ -541,6 +541,39 @@ export default function DataGrid<TRow>({
     });
   }, [activeRowData]);
 
+  // ─── 신규 행 (EDIT_STS:"I") 에 컬럼 default 자동 적용 ───────────────
+  // type:"check" 컬럼의 defaultYn (없으면 "N") 을 신규 행의 해당 field 가
+  // 비어있을 때 자동으로 채움. 사용자가 토글 안 해도 저장 시 default 포함.
+  // 이미 default 가 박힌 행은 setRowData 가 same prev 반환 → re-render 없음 (무한루프 가드).
+  useEffect(() => {
+    if (!setRowData) return;
+    const defaults: Record<string, string> = {};
+    for (const col of activeColumnDefs as any[]) {
+      if (col?.type === "check" && col?.field) {
+        defaults[col.field] = col.defaultYn ?? "N";
+      }
+    }
+    if (Object.keys(defaults).length === 0) return;
+
+    setRowData((prev: any) => {
+      if (!prev?.rows) return prev;
+      let changed = false;
+      const newRows = prev.rows.map((r: any) => {
+        if (r.EDIT_STS !== "I") return r;
+        const updates: Record<string, any> = {};
+        for (const [f, v] of Object.entries(defaults)) {
+          if (r[f] === undefined || r[f] === null || r[f] === "") {
+            updates[f] = v;
+          }
+        }
+        if (Object.keys(updates).length === 0) return r;
+        changed = true;
+        return { ...r, ...updates };
+      });
+      return changed ? { ...prev, rows: newRows } : prev;
+    });
+  }, [activeRowData, activeColumnDefs, setRowData]);
+
   // ─── 드래그 범위 선택 + Ctrl+C 복사 ──────────────────────────────────────────
   useEffect(() => {
     const container = gridContainerRef.current;

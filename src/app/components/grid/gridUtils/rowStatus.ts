@@ -75,3 +75,34 @@ export function isInserted(row: any): boolean {
 export function isDeleted(row: any): boolean {
   return row?.EDIT_STS === ROW_STATUS.DELETE;
 }
+
+/** row mutate 후 EDIT_STS 결정 — 신규 "I" / 삭제 "D" 는 유지, 그 외 "U". */
+function nextEditSts(row: any): string {
+  if (row?.EDIT_STS === ROW_STATUS.INSERT) return ROW_STATUS.INSERT;
+  if (row?.EDIT_STS === ROW_STATUS.DELETE) return ROW_STATUS.DELETE;
+  return ROW_STATUS.UPDATE;
+}
+
+/**
+ * cellEditor / cellRenderer 가 값 변경 시 호출 — React state 의 rows 배열에서
+ * targetRow 의 field 값을 갱신하고 EDIT_STS 자동 마킹.
+ *
+ * ag-grid 의 onCellValueChanged 흐름에 의존하지 않고 React state 를 source of
+ * truth 로 두기 위한 단일 진입점. 콤보/체크박스 등 모든 셀 commit 에서 공통 사용.
+ */
+export function commitRowChange(
+  setRowData: ((updater: any) => void) | undefined,
+  targetRow: any,
+  field: string,
+  value: any,
+): void {
+  if (!setRowData || !targetRow || !field) return;
+  setRowData((prev: any) => ({
+    ...prev,
+    rows: (prev?.rows ?? []).map((r: any) =>
+      r === targetRow
+        ? { ...r, [field]: value, EDIT_STS: nextEditSts(r) }
+        : r,
+    ),
+  }));
+}

@@ -14,6 +14,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useGridCellEditor } from "ag-grid-react";
+import { commitRowChange } from "@/app/components/grid/gridUtils/rowStatus";
 
 export type ComboCellEditorProps = {
   /** AG Grid 가 주입하는 현재 셀 값. */
@@ -48,18 +49,11 @@ export function ComboCellEditor(props: ComboCellEditorProps) {
     const field = (props.colDef?.field ?? props.column?.getColId?.()) as
       | string
       | undefined;
-    const targetRow = props.node?.data;
-    // ag-grid 의 cellEditor commit 흐름은 internal node.data 만 mutate 하고
-    // React state (model.grids[k].rows) 까지 도달 못 함 — 다음 render 시
-    // stale row 로 reset 되어 mutate 결과가 날아간다.
-    // → React state 의 rows 배열을 직접 갱신해 양쪽 동기화.
-    if (field && targetRow && typeof props.setRowData === "function") {
-      props.setRowData((prev: any) => ({
-        ...prev,
-        rows: (prev?.rows ?? []).map((r: any) =>
-          r === targetRow ? { ...r, [field]: v } : r,
-        ),
-      }));
+    // commitRowChange — React state 의 row 갱신 + EDIT_STS 자동 마킹.
+    // ag-grid 의 onCellValueChanged 흐름에 의존하지 않고 React state 를
+    // source of truth 로 사용.
+    if (field) {
+      commitRowChange(props.setRowData, props.node?.data, field, v);
     }
     props.api?.stopEditing?.();
   };

@@ -67,18 +67,8 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     //기본값
     headerName: "LBL_DFT_VAL_NM",
     field: "DFT_YN",
-    width: 70,
-    cellRenderer: (params: any) => (
-      <div className="flex items-center justify-center h-full">
-        <input
-          type="checkbox"
-          className="ag-input-field-input ag-checkbox-input"
-          checked={params.value === "Y"}
-          readOnly
-        />
-      </div>
-    ),
     editable: true,
+    width: 70,
   },
   {
     type: "text",
