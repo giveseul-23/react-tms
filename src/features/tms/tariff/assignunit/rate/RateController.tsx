@@ -3,6 +3,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { rateApi as api } from "./RateApi";
 import { MAIN_COLUMN_DEFS } from "./RateColumns";
 import { makeCommonActions } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { RateModel, GridKey } from "./RateModel";
 
 interface Args {
@@ -60,7 +61,7 @@ export function useRateController({ model }: Args) {
     [model.grids.main, onMainGridClick],
   );
 
-  const mainActions = useMemo(
+  const mainActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
@@ -75,7 +76,7 @@ export function useRateController({ model }: Args) {
     [model],
   );
 
-  const detailActions = useMemo(
+  const detailActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
@@ -83,7 +84,7 @@ export function useRateController({ model }: Args) {
           onClick: () =>
             api
               .save({ dsSave: model.grids.costInfo.ref.current?.rows ?? [] })
-              .then(() => model.searchRef.current?.()),
+              .then(() => base.search()),
         },
         excel: {
           columns: MAIN_COLUMN_DEFS(),
@@ -92,7 +93,7 @@ export function useRateController({ model }: Args) {
           rows: model.grids.costInfo.rows,
         },
       }),
-    [model],
+    [model, base],
   );
 
   return {

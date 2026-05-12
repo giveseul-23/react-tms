@@ -82,9 +82,9 @@ export function useConfirmDispatchController({ model }: Args) {
 
   // ── 액션 헬퍼: API 호출 후 메인 재조회 ────────────────────────
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) =>
-      apiCall().then(() => model.searchRef.current?.()),
-    [model.searchRef],
+    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+      base.callAjax(apiCall(), msg).then(() => base.search()),
+    [base],
   );
 
   // ── master(config) 액션 ───────────────────────────────────────
@@ -94,7 +94,11 @@ export function useConfirmDispatchController({ model }: Args) {
         type: "button",
         key: "BTN_SP_START_WORK",
         label: "BTN_SP_START_WORK",
-        onClick: () => doAction(() => api.startArrival(model.filtersRef.current)),
+        onClick: () =>
+          doAction(
+            () => api.startArrival(model.filtersRef.current),
+            "출도착이 시작되었습니다.",
+          ),
       },
       {
         type: "dropdown",
@@ -113,14 +117,20 @@ export function useConfirmDispatchController({ model }: Args) {
         key: "BTN_DISPATCH_CONFIRM",
         label: "BTN_DISPATCH_CONFIRM",
         onClick: () =>
-          doAction(() => api.confirmDispatch(model.filtersRef.current)),
+          doAction(
+            () => api.confirmDispatch(model.filtersRef.current),
+            "배차가 확정되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_DISPATCH_CONFIRM_CANCEL",
         label: "BTN_DISPATCH_CONFIRM_CANCEL",
         onClick: () =>
-          doAction(() => api.cancelConfirmDispatch(model.filtersRef.current)),
+          doAction(
+            () => api.cancelConfirmDispatch(model.filtersRef.current),
+            "배차 확정이 취소되었습니다.",
+          ),
       },
       {
         type: "dropdown",
@@ -151,7 +161,11 @@ export function useConfirmDispatchController({ model }: Args) {
         type: "button",
         key: "LBL_INPT_PRFR",
         label: "LBL_INPT_PRFR",
-        onClick: () => doAction(() => api.inputActual(model.filtersRef.current)),
+        onClick: () =>
+          doAction(
+            () => api.inputActual(model.filtersRef.current),
+            "실적이 입력되었습니다.",
+          ),
       },
     ],
     [doAction, model],

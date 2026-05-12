@@ -39,6 +39,7 @@ export default function Location() {
         pageSize: model.pageSize,
       }}
       defaultDirection="vertical"
+      storageKey={model.storageKeys.outer}
       master={
         <DataGrid
           {...model.bind("main")}

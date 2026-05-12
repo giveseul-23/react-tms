@@ -164,7 +164,6 @@ export default function VehicleMgmt() {
           searchRef: model.searchRef,
           filtersRef: model.filtersRef,
           pageSize: model.pageSize,
-          menuCode: MENU_CODE,
         }}
         grid={
           <DataGrid

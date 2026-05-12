@@ -12,6 +12,7 @@ import {
   makeCommonActions,
 } from "@/app/components/grid/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { TempOilPriceModel, GridKey } from "./TempOilPriceModel";
 
 interface Args {
@@ -68,10 +69,10 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
     const rows = model.grids.oilPrice.ref.current?.rows ?? [];
     const dirty = dirtyRows(rows);
     if (dirty.length === 0) return;
-    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
-  }, [model]);
+    api.save({ dsSave: dirty }).then(() => base.search());
+  }, [model, base]);
 
-  const oilPriceActions = useMemo(
+  const oilPriceActions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: handleOilPriceAdd }),
       makeSaveAction({ onClick: handleOilPriceSave }),
@@ -85,9 +86,9 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
     [handleOilPriceAdd, handleOilPriceSave, model],
   );
 
-  const masterActions: any[] = useMemo(() => [], []);
+  const masterActions: ActionItem[] = useMemo(() => [], []);
 
-  const periodActions = useMemo(
+  const periodActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         excel: {

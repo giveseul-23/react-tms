@@ -24,10 +24,7 @@ import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useFeatureModel } from "./Guide_FeatureModel";
 import { useFeatureController } from "./Guide_FeatureController";
-import {
-  MAIN_COLUMN_DEFS,
-  DETAIL_COLUMN_DEFS,
-} from "./Guide_FeatureColumns";
+import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./Guide_FeatureColumns";
 
 // TODO: 실제 메뉴 코드로 교체
 export const MENU_CODE = "MENU_XXX";
@@ -48,7 +45,6 @@ export default function Feature() {
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
-        menuCode: MENU_CODE,
       }}
       // 초기 분할 방향만 선언. 사용자 토글값은 localStorage 자동 동기화. (기본값 "horizontal")
       defaultDirection="horizontal"
@@ -78,6 +74,16 @@ export default function Feature() {
     />
   );
 }
+
+// ────────────────────────────────────────────────────────────────
+// 복잡도별 참조 화면 (CLAUDE.md §4 표 참조)
+//   입문형      → src/features/tms/master/domain/currency/                       (GridOnlyPage 단일 그리드)
+//   기본형      → src/features/tms/master/organization/env/division/divdft/      (이 템플릿 형태)
+//   다중 sub    → src/features/tms/master/account/location/                      (메인 → 12개 sub fan-out)
+//   동적 컬럼   → src/features/tms/calculate/vhcunit/dtrsptnrpt/                 (조회 시 컬럼 runtime 생성)
+//   중첩 탭     → src/features/tms/calculate/apsettlmgmt/                        (탭 + SplitPane + 트리거 액션)
+//   풀세트     → src/features/tms/master/organization/lgstgrpOprConfigMst/      (외부 탭 + 4그리드 + 동기화)
+// ────────────────────────────────────────────────────────────────
 
 // ────────────────────────────────────────────────────────────────
 // [참고 1] detail 영역을 SplitPane 으로 분할 (3그리드)
@@ -141,4 +147,26 @@ export default function Feature() {
 //     }}
 //     actions={[]}
 //   />
+//
+// [참고 5] 동적 컬럼 — 조회 시 메타 fetch → 컬럼 runtime 생성 (ApDailyManagement 패턴)
+//
+//   Model:
+//     const [mainColumnDefs, setMainColumnDefs] = useState<any[]>(DAILY_MAIN_COLUMN_DEFS);
+//     return { ...base, mainColumnDefs, setMainColumnDefs };
+//
+//   Controller (fetchList 안에서 메타 fetch + setState):
+//     const chgCacheRef = useRef<{ key: string; list: any[] }>({ key: "", list: [] });
+//     const fetchList = useCallback(async (params) => {
+//       const cacheKey = `${divCd}|${lgstGrpCd}`;
+//       if (chgCacheRef.current.key !== cacheKey) {
+//         const chgRes = await api.getUsedChgCd({ DIV_CD, LGST_GRP_CD });
+//         const chgList = chgRes?.data?.result ?? [];
+//         chgCacheRef.current = { key: cacheKey, list: chgList };
+//         model.setMainColumnDefs(buildDailyColumns(HEAD, TAIL, chgList));
+//       }
+//       return api.getList({ dynamicColumns: chgCacheRef.current.list, ...params });
+//     }, [model]);
+//
+//   View:
+//     <DataGrid {...model.bind("main")} columnDefs={model.mainColumnDefs} ... />
 // ────────────────────────────────────────────────────────────────

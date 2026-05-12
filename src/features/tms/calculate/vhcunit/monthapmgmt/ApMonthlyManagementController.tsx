@@ -73,9 +73,9 @@ export function useApMonthlyManagementController({
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) =>
-      apiCall().then(() => model.searchRef.current?.()),
-    [model.searchRef],
+    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+      base.callAjax(apiCall(), msg).then(() => base.search()),
+    [base],
   );
 
   const mainActions: ActionItem[] = useMemo(
@@ -85,14 +85,20 @@ export function useApMonthlyManagementController({
         key: "BTN_CREATE_MONTHLY_AP",
         label: "BTN_CREATE_MONTHLY_AP",
         onClick: () =>
-          doAction(() => api.createMonthlyResult(model.filtersRef.current)),
+          doAction(
+            () => api.createMonthlyResult(model.filtersRef.current),
+            "월 실적이 생성되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_CANCEL_MONTHLY_AP",
         label: "BTN_CANCEL_MONTHLY_AP",
         onClick: () =>
-          doAction(() => api.cancelMonthlyResult(model.filtersRef.current)),
+          doAction(
+            () => api.cancelMonthlyResult(model.filtersRef.current),
+            "월 실적이 취소되었습니다.",
+          ),
       },
       {
         type: "dropdown",
@@ -107,21 +113,28 @@ export function useApMonthlyManagementController({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
-          api.save(saveRows).then(() => model.searchRef.current?.());
+          api.save(saveRows).then(() => base.search());
         },
       },
       {
         type: "button",
         key: "BTN_AP_SETTLEMENT_CONFIRM",
         label: "BTN_AP_SETTLEMENT_CONFIRM",
-        onClick: () => doAction(() => api.confirm(model.filtersRef.current)),
+        onClick: () =>
+          doAction(
+            () => api.confirm(model.filtersRef.current),
+            "지급 확정되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_AP_SETTLEMENT_CONFIRM_CANCEL",
         label: "BTN_AP_SETTLEMENT_CONFIRM_CANCEL",
         onClick: () =>
-          doAction(() => api.cancelConfirm(model.filtersRef.current)),
+          doAction(
+            () => api.cancelConfirm(model.filtersRef.current),
+            "지급 확정이 취소되었습니다.",
+          ),
       },
       makeExcelGroupAction({
         columns: model.mainColumnDefs,
@@ -130,10 +143,8 @@ export function useApMonthlyManagementController({
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, model],
+    [doAction, model, base],
   );
-
-  void base;
 
   return {
     fetchList,

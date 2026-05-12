@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import {
@@ -19,7 +19,7 @@ export function useApDailyManagementModel(menuCode: string) {
     DAILY_DETAIL_COLUMN_DEFS,
   );
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     workTp: { sqlProp: "CODE", keyParam: "WORK_DAY_TP" },
     workTpExe: { sqlProp: "CODE", keyParam: "EXEC_WORK_DAY_TP" },
     fiStsList: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
@@ -28,17 +28,6 @@ export function useApDailyManagementModel(menuCode: string) {
     calTcd: { sqlProp: "CODE", keyParam: "CAL_TCD" },
     dlySetlSts: { sqlProp: "CODE", keyParam: "DLY_SETL_STS" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return {
     ...base,

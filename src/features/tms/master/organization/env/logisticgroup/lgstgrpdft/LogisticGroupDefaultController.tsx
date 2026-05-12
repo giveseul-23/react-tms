@@ -6,6 +6,7 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { LogisticGroupDefaultModel, GridKey } from "./LogisticGroupDefaultModel";
 
 interface Args {
@@ -60,7 +61,7 @@ export function useLogisticGroupDefaultController({ model }: Args) {
     [model.grids.header, onHeaderGridClick],
   );
 
-  const detailActions = useMemo(
+  const detailActions: ActionItem[] = useMemo(
     () => [
       makeSaveAction(),
       makeExcelGroupAction({

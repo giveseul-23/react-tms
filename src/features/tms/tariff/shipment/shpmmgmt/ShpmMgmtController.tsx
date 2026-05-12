@@ -87,15 +87,15 @@ export function useShpmMgmtController({ model }: Args) {
     const rows = model.grids.lgst.ref.current?.rows ?? [];
     const dirty = dirtyRows(rows);
     if (dirty.length === 0) return;
-    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
-  }, [model]);
+    api.save({ dsSave: dirty }).then(() => base.search());
+  }, [model, base]);
 
   const handleDetail02Save = useCallback(() => {
     const rows = model.grids.zone.ref.current?.rows ?? [];
     const dirty = dirtyRows(rows);
     if (dirty.length === 0) return;
-    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
-  }, [model]);
+    api.save({ dsSave: dirty }).then(() => base.search());
+  }, [model, base]);
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -119,7 +119,7 @@ export function useShpmMgmtController({ model }: Args) {
     [model],
   );
 
-  const detail01Actions = useMemo(
+  const detail01Actions: ActionItem[] = useMemo(
     () => [
       {
         type: "button" as const,
@@ -137,7 +137,7 @@ export function useShpmMgmtController({ model }: Args) {
     [handleDetail01Add, handleDetail01Save],
   );
 
-  const detail02Actions = useMemo(
+  const detail02Actions: ActionItem[] = useMemo(
     () => [
       {
         type: "button" as const,

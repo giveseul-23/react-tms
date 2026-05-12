@@ -66,8 +66,8 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
     const rows = model.grids.rate.ref.current?.rows ?? [];
     const dirty = dirtyRows(rows);
     if (dirty.length === 0) return;
-    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
-  }, [model]);
+    api.save({ dsSave: dirty }).then(() => base.search());
+  }, [model, base]);
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -87,7 +87,7 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
     [],
   );
 
-  const detailActions = useMemo(
+  const detailActions: ActionItem[] = useMemo(
     () => [
       {
         type: "button" as const,

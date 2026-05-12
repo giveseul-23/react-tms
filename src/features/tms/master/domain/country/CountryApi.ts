@@ -44,11 +44,4 @@ export const countryApi = {
       withSession({ MENU_CD: menuCd, ...payload }),
     );
   },
-
-  getTempList(menuCd: string, payload: any) {
-    return apiClient.post<commonResponse>(
-      "/countryService/searchCityInfoList",
-      withSession({ MENU_CD: menuCd, ...payload }),
-    );
-  },
 };

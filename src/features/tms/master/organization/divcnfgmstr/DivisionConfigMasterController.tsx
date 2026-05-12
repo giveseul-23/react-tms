@@ -9,6 +9,7 @@ import {
   makeAddAction,
   makeSaveAction,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { divisionConfigMasterApi as api } from "./DivisionConfigMasterApi";
 import type {
   DivisionConfigMasterModel,
@@ -173,7 +174,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
   );
 
   // ── 그리드별 actions ──────────────────────────────────────────
-  const mainActions = useMemo(
+  const mainActions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
@@ -187,7 +188,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
     [onAddMain, onSaveMain, syncConfig],
   );
 
-  const sub01Actions = useMemo(
+  const sub01Actions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddSub01 }),
       makeSaveAction({ onClick: onSaveSub01 }),
@@ -195,7 +196,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
     [onAddSub01, onSaveSub01],
   );
 
-  const sub02Actions = useMemo(
+  const sub02Actions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddSub02 }),
       makeSaveAction({ onClick: onSaveSub02 }),
@@ -203,7 +204,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
     [onAddSub02, onSaveSub02],
   );
 
-  const sub03Actions = useMemo(
+  const sub03Actions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddSub03 }),
       makeSaveAction({ onClick: onSaveSub03 }),

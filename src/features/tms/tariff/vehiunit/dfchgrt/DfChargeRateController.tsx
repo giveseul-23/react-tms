@@ -4,6 +4,7 @@ import { dfChargeRateApi as api } from "./DfChargeRateApi";
 import { MAIN_COLUMN_DEFS } from "./DfChargeRateColumns";
 import { makeCommonActions } from "@/app/components/grid/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DfChargeRateModel, GridKey } from "./DfChargeRateModel";
 
 interface Args {
@@ -70,10 +71,10 @@ export function useDfChargeRateController({ model }: Args) {
     const rows = model.grids.rtItem.ref.current?.rows ?? [];
     const dirty = dirtyRows(rows);
     if (dirty.length === 0) return;
-    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
-  }, [model]);
+    api.save({ dsSave: dirty }).then(() => base.search());
+  }, [model, base]);
 
-  const mainActions = useMemo(
+  const mainActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
@@ -88,7 +89,7 @@ export function useDfChargeRateController({ model }: Args) {
     [model],
   );
 
-  const detailActions = useMemo(
+  const detailActions: ActionItem[] = useMemo(
     () => [
       {
         type: "button" as const,

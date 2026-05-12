@@ -2,7 +2,6 @@
 import { useCallback, useMemo, MutableRefObject } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchPlanApi as api } from "./dispatchPlanApi";
-import { useApiHandler } from "@/hooks/useApiHandler";
 import { useGuard } from "@/hooks/useGuard";
 import { MAIN_COLUMN_DEFS } from "./DispatchPlanColumns";
 import {
@@ -20,7 +19,6 @@ interface Args {
 
 export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
   const base = useBaseController<GridKey>({ model });
-  const { handleApi } = useApiHandler();
   const { guardHasData } = useGuard();
 
   const fetchList = useCallback(
@@ -115,10 +113,8 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
     const rows = model.grids.main.ref.current?.rows ?? [];
     const dirty = dirtyRows(rows);
     if (dirty.length === 0) return;
-    api.saveDispatchPlan({ dsSave: dirty }).then(() =>
-      model.searchRef.current?.(),
-    );
-  }, [model]);
+    api.saveDispatchPlan({ dsSave: dirty }).then(() => base.search());
+  }, [model, base]);
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -177,8 +173,8 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
             label: "BTN_CONFIRM",
             onClick: (e: any) => {
               if (!guardHasData(e.data)) return;
-              handleApi(api.confirmPlan(e.data), "확정되었습니다.").then(() =>
-                model.searchRef.current?.(),
+              base.callAjax(api.confirmPlan(e.data), "확정되었습니다.").then(
+                () => base.search(),
               );
             },
           },
@@ -192,7 +188,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [handleSave, handleApi, guardHasData, model],
+    [handleSave, base, guardHasData, model],
   );
 
   const stopActions: ActionItem[] = useMemo(
@@ -204,7 +200,10 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          handleApi(api.predictEta({ DSPCH_NO: row.DSPCH_NO }), "ETA 예측 완료");
+          base.callAjax(
+            api.predictEta({ DSPCH_NO: row.DSPCH_NO }),
+            "ETA 예측 완료",
+          );
         },
       },
       {
@@ -214,7 +213,10 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          handleApi(api.calcEta({ DSPCH_NO: row.DSPCH_NO }), "ETA 계산 완료");
+          base.callAjax(
+            api.calcEta({ DSPCH_NO: row.DSPCH_NO }),
+            "ETA 계산 완료",
+          );
         },
       },
       { type: "button", key: "BTN_SPLIT_STOP", label: "BTN_SPLIT_STOP", onClick: () => {} },
@@ -227,7 +229,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          handleApi(
+          base.callAjax(
             api.saveStopOrder({
               DSPCH_NO: row.DSPCH_NO,
               stops: model.grids.stop.rows,
@@ -237,7 +239,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         },
       },
     ],
-    [handleApi, model],
+    [base, model],
   );
 
   const allocOrderActions: ActionItem[] = useMemo(

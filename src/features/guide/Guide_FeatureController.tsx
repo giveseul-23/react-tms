@@ -31,6 +31,7 @@ import {
   MAIN_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
 } from "./Guide_FeatureColumns";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { FeatureModel, GridKey } from "./Guide_FeatureModel";
 
 interface ControllerArgs {
@@ -117,7 +118,8 @@ export function useFeatureController({ model }: ControllerArgs) {
 
   // ── 그리드별 actions 배열 ─────────────────────────────────────
   // 추가/저장/사용자정의 버튼 결정은 모두 여기서. View 는 binding 만.
-  const mainActions = useMemo(
+  // ActionItem[] 타입 명시 — 화면 고유 버튼 추가 시 type 추론 도움.
+  const mainActions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
@@ -131,7 +133,7 @@ export function useFeatureController({ model }: ControllerArgs) {
     [onAddMain, onSaveMain, model],
   );
 
-  const detailActions = useMemo(
+  const detailActions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddDetail }),
       makeSaveAction({ onClick: onSaveDetail }),

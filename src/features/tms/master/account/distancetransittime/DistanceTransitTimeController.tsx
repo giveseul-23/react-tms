@@ -47,9 +47,8 @@ export function useDistanceTransitTimeController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) =>
-      apiCall().then(() => model.searchRef.current?.()),
-    [model.searchRef],
+    (apiCall: () => Promise<any>) => apiCall().then(() => base.search()),
+    [base],
   );
 
   const mainActions: ActionItem[] = useMemo(
@@ -90,7 +89,7 @@ export function useDistanceTransitTimeController({ model }: Args) {
           onClick: (e: any) => {
             const saveRows = dirtyRows(e.data);
             if (saveRows.length === 0) return;
-            api.save(saveRows).then(() => model.searchRef.current?.());
+            api.save(saveRows).then(() => base.search());
           },
         },
         excel: {
@@ -101,7 +100,7 @@ export function useDistanceTransitTimeController({ model }: Args) {
         },
       }),
     ],
-    [doAction, model],
+    [doAction, model, base],
   );
 
   const historyActions: ActionItem[] = useMemo(

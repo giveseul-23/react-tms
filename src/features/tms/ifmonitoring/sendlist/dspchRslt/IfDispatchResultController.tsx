@@ -33,9 +33,9 @@ export function useIfDispatchResultController({ model }: Args) {
         key: "BTN_REPRO",
         label: "BTN_REPRO",
         onClick: () =>
-          api
-            .reprocess(model.filtersRef.current)
-            .then(() => model.searchRef.current?.()),
+          base
+            .callAjax(api.reprocess(model.filtersRef.current), "재처리되었습니다.")
+            .then(() => base.search()),
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
@@ -44,10 +44,8 @@ export function useIfDispatchResultController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [model],
+    [model, base],
   );
-
-  void base;
 
   return {
     fetchList,

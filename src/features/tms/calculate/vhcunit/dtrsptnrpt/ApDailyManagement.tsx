@@ -26,7 +26,6 @@ export default function ApDailyManagement() {
         filtersRef: model.filtersRef,
         rawFiltersRef,
         pageSize: model.pageSize,
-        menuCode: MENU_CODE,
       }}
       grid={
         <DataGrid

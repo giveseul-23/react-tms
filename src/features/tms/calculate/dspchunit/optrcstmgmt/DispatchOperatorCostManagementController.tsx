@@ -75,9 +75,9 @@ export function useDispatchOperatorCostController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) =>
-      apiCall().then(() => model.searchRef.current?.()),
-    [model.searchRef],
+    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+      base.callAjax(apiCall(), msg).then(() => base.search()),
+    [base],
   );
 
   const refetchSubTabs = useCallback(() => {
@@ -92,29 +92,39 @@ export function useDispatchOperatorCostController({ model }: Args) {
         key: "BTN_RATESHOP",
         label: "BTN_RATESHOP",
         onClick: () =>
-          doAction(() => api.changeContract(model.filtersRef.current)),
+          doAction(
+            () => api.changeContract(model.filtersRef.current),
+            "계약이 변경되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_RATING",
         label: "BTN_RATING",
         onClick: () =>
-          doAction(() => api.calculateCost(model.filtersRef.current)),
+          doAction(
+            () => api.calculateCost(model.filtersRef.current),
+            "비용이 계산되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_ADJ_DISIT",
         label: "BTN_ADJ_DISIT",
         onClick: () =>
-          doAction(() => api.adjustBulkDistance(model.filtersRef.current)),
+          doAction(
+            () => api.adjustBulkDistance(model.filtersRef.current),
+            "거리가 조정되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_RECALC_DISTANCE",
         label: "BTN_RECALC_DISTANCE",
         onClick: () =>
-          doAction(() =>
-            api.recalculateMoveDistance(model.filtersRef.current),
+          doAction(
+            () => api.recalculateMoveDistance(model.filtersRef.current),
+            "이동거리가 재계산되었습니다.",
           ),
       },
       {
@@ -134,7 +144,10 @@ export function useDispatchOperatorCostController({ model }: Args) {
         key: "BTN_DELETE_AP",
         label: "BTN_DELETE_AP",
         onClick: () =>
-          doAction(() => api.deleteSettlement(model.filtersRef.current)),
+          doAction(
+            () => api.deleteSettlement(model.filtersRef.current),
+            "정산이 삭제되었습니다.",
+          ),
       },
       {
         type: "button",
@@ -143,7 +156,7 @@ export function useDispatchOperatorCostController({ model }: Args) {
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
-          api.save(saveRows).then(() => model.searchRef.current?.());
+          api.save(saveRows).then(() => base.search());
         },
       },
       {
@@ -151,7 +164,10 @@ export function useDispatchOperatorCostController({ model }: Args) {
         key: "BTN_AP_SETTLEMENT_CREATE",
         label: "BTN_AP_SETTLEMENT_CREATE",
         onClick: () =>
-          doAction(() => api.createClose(model.filtersRef.current)),
+          doAction(
+            () => api.createClose(model.filtersRef.current),
+            "정산이 생성되었습니다.",
+          ),
       },
       {
         type: "dropdown",
@@ -172,7 +188,7 @@ export function useDispatchOperatorCostController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, model],
+    [doAction, model, base],
   );
 
   const costDetailActions: ActionItem[] = useMemo(
@@ -184,7 +200,7 @@ export function useDispatchOperatorCostController({ model }: Args) {
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
-          api.save(saveRows).then(() => model.searchRef.current?.());
+          api.save(saveRows).then(() => base.search());
         },
       },
       {
@@ -194,7 +210,7 @@ export function useDispatchOperatorCostController({ model }: Args) {
         onClick: () => {},
       },
     ],
-    [model],
+    [base],
   );
 
   const waypointActions: ActionItem[] = useMemo(
@@ -206,7 +222,10 @@ export function useDispatchOperatorCostController({ model }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          doAction(() => api.addSettlementRoute({ DSPCH_NO: row.DSPCH_NO }));
+          doAction(
+            () => api.addSettlementRoute({ DSPCH_NO: row.DSPCH_NO }),
+            "정산경로가 추가되었습니다.",
+          );
         },
       },
       {
@@ -216,7 +235,10 @@ export function useDispatchOperatorCostController({ model }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          doAction(() => api.restoreRoute({ DSPCH_NO: row.DSPCH_NO }));
+          doAction(
+            () => api.restoreRoute({ DSPCH_NO: row.DSPCH_NO }),
+            "정산경로가 복원되었습니다.",
+          );
         },
       },
       {

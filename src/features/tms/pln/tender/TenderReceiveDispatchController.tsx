@@ -2,7 +2,6 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { tenderApi as api } from "./tenderApi";
-import { useApiHandler } from "@/hooks/useApiHandler";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch } from "@/views/common/common";
@@ -28,7 +27,6 @@ interface Args {
 
 export function useTenderReceiveDispatchController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
-  const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
   const { guardHasData } = useGuard();
 
@@ -99,7 +97,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         label: "BTN_TENDER_ACCEPT",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          handleApi(api.onTenderAccepted(e.data), "저장되었습니다.");
+          base.callAjax(api.onTenderAccepted(e.data), "저장되었습니다.");
         },
       },
       {
@@ -114,12 +112,14 @@ export function useTenderReceiveDispatchController({ model }: Args) {
               <TenderRejectPopup
                 onConfirm={(ie: any) => {
                   closePopup();
-                  handleApi(
-                    api.onTenderRejected(
-                      e.data.map((row: any) => ({ ...row, ...ie.data })),
-                    ),
-                    "저장되었습니다.",
-                  ).then(() => model.searchRef.current?.());
+                  base
+                    .callAjax(
+                      api.onTenderRejected(
+                        e.data.map((row: any) => ({ ...row, ...ie.data })),
+                      ),
+                      "저장되었습니다.",
+                    )
+                    .then(() => base.search());
                 }}
                 onClose={closePopup}
               />
@@ -146,12 +146,14 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                     initialValues={{ LGST_GRP_CD: e.data[0].LGST_GRP_CD }}
                     onApply={(ie: any) => {
                       closePopup();
-                      handleApi(
-                        api.onChangeRegVeh(
-                          e.data.map((row: any) => ({ ...row, ...ie })),
-                        ),
-                        "저장되었습니다.",
-                      ).then(() => model.searchRef.current?.());
+                      base
+                        .callAjax(
+                          api.onChangeRegVeh(
+                            e.data.map((row: any) => ({ ...row, ...ie })),
+                          ),
+                          "저장되었습니다.",
+                        )
+                        .then(() => base.search());
                     }}
                     onClose={closePopup}
                   />
@@ -176,10 +178,12 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                     }}
                     onConfirm={(ie: any) => {
                       closePopup();
-                      handleApi(
-                        api.onChangeTempVeh({ ...e.data[0], ...ie }),
-                        "저장되었습니다.",
-                      ).then(() => model.searchRef.current?.());
+                      base
+                        .callAjax(
+                          api.onChangeTempVeh({ ...e.data[0], ...ie }),
+                          "저장되었습니다.",
+                        )
+                        .then(() => base.search());
                     }}
                     onClose={closePopup}
                   />
@@ -200,12 +204,14 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                   <VehicleAssignPopup
                     onApply={(ie: any) => {
                       closePopup();
-                      handleApi(
-                        api.onVehicleChange(
-                          e.data.map((row: any) => ({ ...row, ...ie })),
-                        ),
-                        "저장되었습니다.",
-                      ).then(() => model.searchRef.current?.());
+                      base
+                        .callAjax(
+                          api.onVehicleChange(
+                            e.data.map((row: any) => ({ ...row, ...ie })),
+                          ),
+                          "저장되었습니다.",
+                        )
+                        .then(() => base.search());
                     }}
                     onClose={closePopup}
                   />
@@ -221,7 +227,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         key: "BTN_VEHICLE_CANCEL",
         label: "BTN_VEHICLE_CANCEL",
         onClick: (e: any) =>
-          handleApi(api.onVehicleCancel(e.data), "저장되었습니다."),
+          base.callAjax(api.onVehicleCancel(e.data), "저장되었습니다."),
       },
       {
         type: "button",
@@ -235,10 +241,12 @@ export function useTenderReceiveDispatchController({ model }: Args) {
               <AppInstallSmsPopup
                 onConfirm={(ie: any) => {
                   closePopup();
-                  handleApi(
-                    api.sendSMSForAppInstall({ ...e.data, ...ie.data }),
-                    "저장되었습니다..",
-                  ).then(() => model.searchRef.current?.());
+                  base
+                    .callAjax(
+                      api.sendSMSForAppInstall({ ...e.data, ...ie.data }),
+                      "저장되었습니다..",
+                    )
+                    .then(() => base.search());
                 }}
                 onClose={closePopup}
               />
@@ -270,7 +278,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
             key: "운송비업로드",
             label: "운송비업로드",
             onClick: () => {
-              handleApi(
+              base.callAjax(
                 api.gridExcelUpload(model.filtersRef.current),
                 "업로드가 완료되었습니다.",
               );
@@ -285,7 +293,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [handleApi, openPopup, closePopup, guardHasData, model],
+    [base, openPopup, closePopup, guardHasData, model],
   );
 
   const apSetlActions: ActionItem[] = useMemo(
@@ -333,8 +341,9 @@ export function useTenderReceiveDispatchController({ model }: Args) {
           const saveRows = dirtyRows(rows);
           if (saveRows.length === 0) return;
 
-          handleApi(api.updateCarrierRate(saveRows), "저장되었습니다.").then(
-            () => {
+          base
+            .callAjax(api.updateCarrierRate(saveRows), "저장되었습니다.")
+            .then(() => {
               const main = model.grids.main.selectedRef.current;
               if (main) {
                 base.searchSub(
@@ -342,12 +351,11 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                   api.getDispatchApSetlList({ DSPCH_NO: main.DSPCH_NO }),
                 );
               }
-            },
-          );
+            });
         },
       },
     ],
-    [model, base, handleApi, openPopup, closePopup, guardHasData],
+    [model, base, openPopup, closePopup, guardHasData],
   );
 
   return {

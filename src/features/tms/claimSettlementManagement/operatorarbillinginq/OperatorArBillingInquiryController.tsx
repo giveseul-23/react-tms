@@ -52,9 +52,9 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) =>
-      apiCall().then(() => model.searchRef.current?.()),
-    [model.searchRef],
+    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+      base.callAjax(apiCall(), msg).then(() => base.search()),
+    [base],
   );
 
   const refetchSubTabs = useCallback(() => {
@@ -70,14 +70,20 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         key: "BTN_RATESHOP",
         label: "BTN_RATESHOP",
         onClick: () =>
-          doAction(() => api.changeContract(model.filtersRef.current)),
+          doAction(
+            () => api.changeContract(model.filtersRef.current),
+            "계약이 변경되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "LBL_AR_SALES_CALC",
         label: "LBL_AR_SALES_CALC",
         onClick: () =>
-          doAction(() => api.recalculateSales(model.filtersRef.current)),
+          doAction(
+            () => api.recalculateSales(model.filtersRef.current),
+            "매출이 재계산되었습니다.",
+          ),
       },
       {
         type: "dropdown",
@@ -88,7 +94,10 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
             key: "BTN_DLY_SETL",
             label: "BTN_DLY_SETL",
             onClick: () =>
-              doAction(() => api.dailyClose(model.filtersRef.current)),
+              doAction(
+                () => api.dailyClose(model.filtersRef.current),
+                "일마감되었습니다.",
+              ),
           },
         ],
       },
@@ -101,7 +110,10 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
             key: "LBL_AR_SALES_CONFIRM",
             label: "LBL_AR_SALES_CONFIRM",
             onClick: () =>
-              doAction(() => api.confirmSales(model.filtersRef.current)),
+              doAction(
+                () => api.confirmSales(model.filtersRef.current),
+                "매출이 확정되었습니다.",
+              ),
           },
         ],
       },
@@ -110,7 +122,10 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         key: "LBL_AR_DELETE_SETTLEMENT_INFO",
         label: "LBL_AR_DELETE_SETTLEMENT_INFO",
         onClick: () =>
-          doAction(() => api.cancelSettlementDoc(model.filtersRef.current)),
+          doAction(
+            () => api.cancelSettlementDoc(model.filtersRef.current),
+            "정산정보가 삭제되었습니다.",
+          ),
       },
       {
         type: "dropdown",
@@ -141,11 +156,13 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         key: "LBL_AR_CALC_RESULT_TRACE",
         label: "LBL_AR_CALC_RESULT_TRACE",
         onClick: () =>
-          doAction(() =>
-            api.traceCalculation({
-              SETL_DOC_NO:
-                model.grids.main.selectedRef.current?.SETL_DOC_NO,
-            }),
+          doAction(
+            () =>
+              api.traceCalculation({
+                SETL_DOC_NO:
+                  model.grids.main.selectedRef.current?.SETL_DOC_NO,
+              }),
+            "계산결과가 추적되었습니다.",
           ),
       },
       {
@@ -168,8 +185,8 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
     [doAction, refetchSubTabs, model],
   );
 
-  const orderInfoActions: any[] = useMemo(() => [], []);
-  const attachmentActions: any[] = useMemo(() => [], []);
+  const orderInfoActions: ActionItem[] = useMemo(() => [], []);
+  const attachmentActions: ActionItem[] = useMemo(() => [], []);
 
   return {
     fetchList,

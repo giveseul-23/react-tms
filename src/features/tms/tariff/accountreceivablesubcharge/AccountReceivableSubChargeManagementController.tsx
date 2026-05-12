@@ -3,6 +3,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { accountReceivableSubChargeManagementApi as api } from "./AccountReceivableSubChargeManagementApi";
 import { MAIN_COLUMN_DEFS } from "./AccountReceivableSubChargeManagementColumns";
 import { makeCommonActions } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { AccountReceivableSubChargeManagementModel, GridKey } from "./AccountReceivableSubChargeManagementModel";
 
 interface Args {
@@ -62,7 +63,7 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
     [model.grids.main, onMainGridClick],
   );
 
-  const mainActions = useMemo(
+  const mainActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
@@ -77,7 +78,7 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
     [model],
   );
 
-  const detailActions = useMemo(
+  const detailActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
@@ -85,7 +86,7 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
           onClick: () =>
             api
               .save({ dsSave: model.grids.detail01.ref.current?.rows ?? [] })
-              .then(() => model.searchRef.current?.()),
+              .then(() => base.search()),
         },
         excel: {
           columns: MAIN_COLUMN_DEFS(),
@@ -94,7 +95,7 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
           rows: model.grids.detail01.rows,
         },
       }),
-    [model],
+    [model, base],
   );
 
   return {

@@ -49,9 +49,9 @@ export function useDispatchManagerCostController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) =>
-      apiCall().then(() => model.searchRef.current?.()),
-    [model.searchRef],
+    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+      base.callAjax(apiCall(), msg).then(() => base.search()),
+    [base],
   );
 
   const refetchSubTabs = useCallback(() => {
@@ -66,34 +66,50 @@ export function useDispatchManagerCostController({ model }: Args) {
         key: "BTN_RATE_OP_CONFIRM_CANCEL",
         label: "BTN_RATE_OP_CONFIRM_CANCEL",
         onClick: () =>
-          doAction(() => api.cancelOperatorConfirm(model.filtersRef.current)),
+          doAction(
+            () => api.cancelOperatorConfirm(model.filtersRef.current),
+            "운영자 확정이 취소되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_RATE_MG_CONFIRM",
         label: "BTN_RATE_MG_CONFIRM",
         onClick: () =>
-          doAction(() => api.approveByManager(model.filtersRef.current)),
+          doAction(
+            () => api.approveByManager(model.filtersRef.current),
+            "관리자 승인되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_RATE_MG_CONFIRM_CANCEL",
         label: "BTN_RATE_MG_CONFIRM_CANCEL",
         onClick: () =>
-          doAction(() => api.cancelManagerApprove(model.filtersRef.current)),
+          doAction(
+            () => api.cancelManagerApprove(model.filtersRef.current),
+            "관리자 승인이 취소되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_RATE_CLOSE",
         label: "BTN_RATE_CLOSE",
-        onClick: () => doAction(() => api.closeCost(model.filtersRef.current)),
+        onClick: () =>
+          doAction(
+            () => api.closeCost(model.filtersRef.current),
+            "비용이 마감되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_RATE_CLOSE_CANCEL",
         label: "BTN_RATE_CLOSE_CANCEL",
         onClick: () =>
-          doAction(() => api.cancelCostClose(model.filtersRef.current)),
+          doAction(
+            () => api.cancelCostClose(model.filtersRef.current),
+            "비용 마감이 취소되었습니다.",
+          ),
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
@@ -121,7 +137,7 @@ export function useDispatchManagerCostController({ model }: Args) {
     [refetchSubTabs],
   );
 
-  const waypointActions: any[] = useMemo(() => [], []);
+  const waypointActions: ActionItem[] = useMemo(() => [], []);
 
   return {
     fetchList,

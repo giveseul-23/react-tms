@@ -45,9 +45,9 @@ export function useIfDeliveryDocumentController({ model }: Args) {
         key: "BTN_REPRO",
         label: "BTN_REPRO",
         onClick: () => {
-          api.reprocess(model.filtersRef.current).then(() =>
-            model.searchRef.current?.(),
-          );
+          base
+            .callAjax(api.reprocess(model.filtersRef.current), "재처리되었습니다.")
+            .then(() => base.search());
         },
       },
       makeExcelGroupAction({
@@ -57,10 +57,10 @@ export function useIfDeliveryDocumentController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [model],
+    [model, base],
   );
 
-  const detailActions: any[] = useMemo(() => [], []);
+  const detailActions: ActionItem[] = useMemo(() => [], []);
 
   return {
     fetchList,

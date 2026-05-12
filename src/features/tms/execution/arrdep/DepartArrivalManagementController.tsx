@@ -43,9 +43,9 @@ export function useDepartArrivalManagementController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>) =>
-      apiCall().then(() => model.searchRef.current?.()),
-    [model.searchRef],
+    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+      base.callAjax(apiCall(), msg).then(() => base.search()),
+    [base],
   );
 
   const refetchSubTabs = useCallback(() => {
@@ -59,41 +59,60 @@ export function useDepartArrivalManagementController({ model }: Args) {
         type: "button",
         key: "BTN_SHOW_POD",
         label: "BTN_SHOW_POD",
-        onClick: () => doAction(() => api.inquireReceipt(model.filtersRef.current)),
+        onClick: () =>
+          doAction(
+            () => api.inquireReceipt(model.filtersRef.current),
+            "수령증을 조회했습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_DRIVE_HISTORY",
         label: "BTN_DRIVE_HISTORY",
-        onClick: () => doAction(() => api.controlRoute(model.filtersRef.current)),
+        onClick: () =>
+          doAction(
+            () => api.controlRoute(model.filtersRef.current),
+            "운행이력을 조회했습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_SP_START_WORK",
         label: "BTN_SP_START_WORK",
-        onClick: () => doAction(() => api.startLoading(model.filtersRef.current)),
+        onClick: () =>
+          doAction(
+            () => api.startLoading(model.filtersRef.current),
+            "상차를 시작했습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_START_TRANSPORTATION",
         label: "BTN_START_TRANSPORTATION",
         onClick: () =>
-          doAction(() => api.startTransport(model.filtersRef.current)),
+          doAction(
+            () => api.startTransport(model.filtersRef.current),
+            "운송을 시작했습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_RETURN_TO_CONFIRM",
         label: "BTN_RETURN_TO_CONFIRM",
         onClick: () =>
-          doAction(() => api.cancelTransport(model.filtersRef.current)),
+          doAction(
+            () => api.cancelTransport(model.filtersRef.current),
+            "운송이 취소되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_DLVRY_CONFIRM/OFF_CANCEL",
         label: "BTN_DLVRY_CONFIRM/OFF_CANCEL",
         onClick: () =>
-          doAction(() =>
-            api.cancelDeliveryComplete(model.filtersRef.current),
+          doAction(
+            () => api.cancelDeliveryComplete(model.filtersRef.current),
+            "배송 확정이 취소되었습니다.",
           ),
       },
       {
@@ -101,14 +120,20 @@ export function useDepartArrivalManagementController({ model }: Args) {
         key: "LBL_DRV_OFF",
         label: "LBL_DRV_OFF",
         onClick: () =>
-          doAction(() => api.completeTransport(model.filtersRef.current)),
+          doAction(
+            () => api.completeTransport(model.filtersRef.current),
+            "운송이 완료되었습니다.",
+          ),
       },
       {
         type: "button",
         key: "BTN_RE_SET",
         label: "BTN_RE_SET",
         onClick: () =>
-          doAction(() => api.resetDispatch(model.filtersRef.current)),
+          doAction(
+            () => api.resetDispatch(model.filtersRef.current),
+            "배차가 초기화되었습니다.",
+          ),
       },
       {
         type: "button",
@@ -117,7 +142,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
-          api.save(saveRows).then(() => model.searchRef.current?.());
+          api.save(saveRows).then(() => base.search());
         },
       },
       makeExcelGroupAction({
@@ -127,7 +152,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, model],
+    [doAction, model, base],
   );
 
   const stopoverActions: ActionItem[] = useMemo(
@@ -155,14 +180,17 @@ export function useDepartArrivalManagementController({ model }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          doAction(() => api.confirmPBoxRecovery({ DSPCH_NO: row.DSPCH_NO }));
+          doAction(
+            () => api.confirmPBoxRecovery({ DSPCH_NO: row.DSPCH_NO }),
+            "P-BOX 회수가 확정되었습니다.",
+          );
         },
       },
     ],
     [doAction, refetchSubTabs, model],
   );
 
-  const assignedOrderActions: any[] = useMemo(() => [], []);
+  const assignedOrderActions: ActionItem[] = useMemo(() => [], []);
 
   return {
     fetchList,

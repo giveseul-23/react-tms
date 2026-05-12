@@ -2,10 +2,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { vehicleMgmtApi as api } from "./vehicleMgmtApi";
-import { useApiHandler } from "@/hooks/useApiHandler";
-import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
-import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -17,8 +14,6 @@ interface Args {
 
 export function useVehicleMgmtController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
-  const { handleApi } = useApiHandler();
-  const { openPopup, closePopup } = usePopup();
   const { guardHasData } = useGuard();
 
   const fetchList = useCallback(
@@ -140,35 +135,22 @@ export function useVehicleMgmtController({ model }: Args) {
   const handleSaveDetail = useCallback(() => {
     const data = model.detailData;
     if (!data.VEH_NO?.trim()) return;
-    handleApi(api.updateVehicle(data), "저장되었습니다.").then(() =>
-      model.searchRef.current?.(),
+    base.callAjax(api.updateVehicle(data), "저장되었습니다.").then(() =>
+      base.search(),
     );
-  }, [model, handleApi]);
+  }, [model, base]);
 
   const handleDeleteDetail = useCallback(() => {
     const data = model.detailData;
-    openPopup({
-      content: (
-        <ConfirmModal
-          title="확인"
-          description={`"${data.VEH_NO}" 차량을 삭제하시겠습니까?`}
-          onClose={closePopup}
-          onConfirm={() => {
-            closePopup();
-            handleApi(
-              api.deleteVehicle({ VEH_CD: data.VEH_CD }),
-              "삭제되었습니다.",
-            ).then(() => {
-              model.closeDetail();
-              model.searchRef.current?.();
-            });
-          }}
-          type="confirm"
-        />
-      ),
-      width: "lg",
+    base.confirm(`"${data.VEH_NO}" 차량을 삭제하시겠습니까?`, () => {
+      base
+        .callAjax(api.deleteVehicle({ VEH_CD: data.VEH_CD }), "삭제되었습니다.")
+        .then(() => {
+          model.closeDetail();
+          base.search();
+        });
     });
-  }, [model, handleApi, openPopup, closePopup]);
+  }, [model, base]);
 
   const handleOpenNew = useCallback(() => {
     model.setNewFormData({
@@ -201,11 +183,11 @@ export function useVehicleMgmtController({ model }: Args) {
   const handleSaveNew = useCallback(() => {
     const data = model.newFormData;
     if (!data.VEH_NO?.trim()) return;
-    handleApi(api.insertVehicle(data), "등록되었습니다.").then(() => {
+    base.callAjax(api.insertVehicle(data), "등록되었습니다.").then(() => {
       model.setNewSlideOpen(false);
-      model.searchRef.current?.();
+      base.search();
     });
-  }, [model, handleApi]);
+  }, [model, base]);
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -222,8 +204,8 @@ export function useVehicleMgmtController({ model }: Args) {
         label: "차량전송(IF)",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          handleApi(api.sendVehicleIF(e.data), "차량전송(IF) 처리되었습니다.").then(() =>
-            model.searchRef.current?.(),
+          base.callAjax(api.sendVehicleIF(e.data), "차량전송(IF) 처리되었습니다.").then(() =>
+            base.search(),
           );
         },
       },
@@ -233,8 +215,8 @@ export function useVehicleMgmtController({ model }: Args) {
         label: "연락처변경",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          handleApi(api.changeContact(e.data), "연락처 변경되었습니다.").then(() =>
-            model.searchRef.current?.(),
+          base.callAjax(api.changeContact(e.data), "연락처 변경되었습니다.").then(() =>
+            base.search(),
           );
         },
       },
@@ -244,8 +226,8 @@ export function useVehicleMgmtController({ model }: Args) {
         label: "차고지일괄변경",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          handleApi(api.changeGarageBatch(e.data), "차고지 일괄변경되었습니다.").then(() =>
-            model.searchRef.current?.(),
+          base.callAjax(api.changeGarageBatch(e.data), "차고지 일괄변경되었습니다.").then(() =>
+            base.search(),
           );
         },
       },
@@ -256,10 +238,8 @@ export function useVehicleMgmtController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [handleOpenNew, handleApi, guardHasData, model],
+    [handleOpenNew, base, guardHasData, model],
   );
-
-  void base;
 
   return {
     fetchVehicleList: fetchList,

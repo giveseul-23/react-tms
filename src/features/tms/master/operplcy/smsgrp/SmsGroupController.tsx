@@ -4,6 +4,7 @@ import {
   makeAddAction,
   makeSaveAction,
 } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { smsGroupApi as api } from "./SmsGroupApi";
 import type { SmsGroupModel, GridKey } from "./SmsGroupModel";
 
@@ -38,8 +39,14 @@ export function useSmsGroupController({ model }: Args) {
     [model.grids.main, onMainGridClick],
   );
 
-  const mainActions = useMemo(() => [makeAddAction(), makeSaveAction()], []);
-  const detailActions = useMemo(() => [makeAddAction(), makeSaveAction()], []);
+  const mainActions: ActionItem[] = useMemo(
+    () => [makeAddAction(), makeSaveAction()],
+    [],
+  );
+  const detailActions: ActionItem[] = useMemo(
+    () => [makeAddAction(), makeSaveAction()],
+    [],
+  );
 
   return {
     fetchList,

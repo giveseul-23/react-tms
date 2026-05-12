@@ -66,8 +66,8 @@ export function useOverheadTariffManagementController({ model }: Args) {
     const rows = model.grids.subChgDtl.ref.current?.rows ?? [];
     const dirty = dirtyRows(rows);
     if (dirty.length === 0) return;
-    api.save({ dsSave: dirty }).then(() => model.searchRef.current?.());
-  }, [model]);
+    api.save({ dsSave: dirty }).then(() => base.search());
+  }, [model, base]);
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -91,7 +91,7 @@ export function useOverheadTariffManagementController({ model }: Args) {
     [model],
   );
 
-  const detailActions = useMemo(
+  const detailActions: ActionItem[] = useMemo(
     () => [
       {
         type: "button" as const,

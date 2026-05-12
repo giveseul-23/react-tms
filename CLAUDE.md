@@ -49,7 +49,16 @@
 | `XxxColumns.tsx` | ag-grid `columnDefs` 정의. 단순 `const` 배열. audit 은 DataGrid 자동. |
 | `XxxApi.ts` | `apiClient.post` 호출. `MENU_CODE` 는 View 에서 import. `withSession` 포함. |
 
-**참조 화면**: `src/features/tms/master/organization/lgstgrpOprConfigMst/` (4그리드 + cascade + 외부 탭 + 동기화 액션 풀세트).
+**참조 화면 — 복잡도별** (신규 화면 작성 시 가장 가까운 화면을 골라 참고):
+
+| 복잡도 | 화면 | 위치 | 특성 |
+|---|---|---|---|
+| 입문형 | `Currency` | `src/features/tms/master/domain/currency/` | GridOnlyPage, 단일 그리드, 가장 단순. |
+| 기본형 | `DivisionDefault` | `src/features/tms/master/organization/env/division/divdft/` | MasterDetailPage, 2그리드 cascade. |
+| 중급형 (다중 sub) | `Location` | `src/features/tms/master/account/location/` | 메인 1행 → 12개 sub 동시 cascade, 내부 탭. |
+| 중급형 (동적 컬럼) | `ApDailyManagement` | `src/features/tms/calculate/vhcunit/dtrsptnrpt/` | 조회 시 메타 fetch → 컬럼 runtime 재생성. |
+| 고급형 (중첩 탭/트리거) | `ApSettlMgmt` | `src/features/tms/calculate/apsettlmgmt/` | 중첩 탭 + SplitPane + 트리거 액션(`base.callAjax`). |
+| 고급형 (풀세트) | `LgstgrpOprConfigMst` | `src/features/tms/master/organization/lgstgrpOprConfigMst/` | 외부 탭 + 4그리드 + 다국어 + 동기화 + 사전검증(`beforeSave`). |
 
 ### 4-1. View 레이어 규칙
 

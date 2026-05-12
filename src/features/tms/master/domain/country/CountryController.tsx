@@ -3,6 +3,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { countryApi as api } from "./CountryApi";
 import { MAIN_COLUMN_DEFS } from "./CountryColumns";
 import { makeCommonActions } from "@/app/components/grid/commonActions";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { MENU_CD } from "./Country";
 import type { CountryModel, GridKey } from "./CountryModel";
 
@@ -62,7 +63,7 @@ export function useCountryController({ model }: Args) {
     [model.grids.main, onMainGridClick],
   );
 
-  const mainActions = useMemo(
+  const mainActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
@@ -77,7 +78,7 @@ export function useCountryController({ model }: Args) {
     [model],
   );
 
-  const stateActions = useMemo(
+  const stateActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
@@ -92,7 +93,7 @@ export function useCountryController({ model }: Args) {
     [model],
   );
 
-  const zipActions = useMemo(
+  const zipActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
@@ -107,7 +108,7 @@ export function useCountryController({ model }: Args) {
     [model],
   );
 
-  const cityActions = useMemo(
+  const cityActions: ActionItem[] = useMemo(
     () =>
       makeCommonActions({
         add: true,
