@@ -123,8 +123,18 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         key: "BTN_DISPATCH_CREATE_DELETE",
         label: "BTN_DISPATCH_CREATE_DELETE",
         items: [
-          { type: "button", key: "BTN_DISPATCH_CREATE", label: "BTN_DISPATCH_CREATE", onClick: () => {} },
-          { type: "button", key: "BTN_DISPATCH_CANCEL", label: "BTN_DISPATCH_CANCEL", onClick: () => {} },
+          {
+            type: "button",
+            key: "BTN_DISPATCH_CREATE",
+            label: "BTN_DISPATCH_CREATE",
+            onClick: () => {},
+          },
+          {
+            type: "button",
+            key: "BTN_DISPATCH_CANCEL",
+            label: "BTN_DISPATCH_CANCEL",
+            onClick: () => {},
+          },
         ],
       },
       {
@@ -141,8 +151,18 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         key: "BTN_VEHICLE_CHANGE",
         label: "BTN_VEHICLE_CHANGE",
         items: [
-          { type: "button", key: "BTN_CHANGE_REG_DED_VEH", label: "BTN_CHANGE_REG_DED_VEH", onClick: () => {} },
-          { type: "button", key: "LBL_CONTRACTED_VEHICLE", label: "LBL_CONTRACTED_VEHICLE", onClick: () => {} },
+          {
+            type: "button",
+            key: "BTN_CHANGE_REG_DED_VEH",
+            label: "BTN_CHANGE_REG_DED_VEH",
+            onClick: () => {},
+          },
+          {
+            type: "button",
+            key: "LBL_CONTRACTED_VEHICLE",
+            label: "LBL_CONTRACTED_VEHICLE",
+            onClick: () => {},
+          },
         ],
       },
       {
@@ -150,8 +170,18 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         key: "BTN_MEMO",
         label: "BTN_MEMO",
         items: [
-          { type: "button", key: "메모작성", label: "메모작성", onClick: () => {} },
-          { type: "button", key: "메모삭제", label: "메모삭제", onClick: () => {} },
+          {
+            type: "button",
+            key: "메모작성",
+            label: "메모작성",
+            onClick: () => {},
+          },
+          {
+            type: "button",
+            key: "메모삭제",
+            label: "메모삭제",
+            onClick: () => {},
+          },
         ],
       },
       {
@@ -159,7 +189,12 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         key: "BTN_INFO_SHOW",
         label: "BTN_INFO_SHOW",
         items: [
-          { type: "button", key: "운행정보", label: "운행정보", onClick: () => {} },
+          {
+            type: "button",
+            key: "운행정보",
+            label: "운행정보",
+            onClick: () => {},
+          },
         ],
       },
       {
@@ -173,9 +208,9 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
             label: "BTN_CONFIRM",
             onClick: (e: any) => {
               if (!guardHasData(e.data)) return;
-              base.callAjax(api.confirmPlan(e.data), "확정되었습니다.").then(
-                () => base.search(),
-              );
+              base
+                .callAjax(api.confirmPlan(e.data), "확정되었습니다.")
+                .then(() => base.search());
             },
           },
         ],
@@ -219,9 +254,24 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
           );
         },
       },
-      { type: "button", key: "BTN_SPLIT_STOP", label: "BTN_SPLIT_STOP", onClick: () => {} },
-      { type: "button", key: "BTN_ADJUST_STOP_SEQ_PLUS", label: "BTN_ADJUST_STOP_SEQ_PLUS", onClick: () => {} },
-      { type: "button", key: "BTN_ADJUST_STOP_SEQ_MINUS", label: "BTN_ADJUST_STOP_SEQ_MINUS", onClick: () => {} },
+      {
+        type: "button",
+        key: "BTN_SPLIT_STOP",
+        label: "BTN_SPLIT_STOP",
+        onClick: () => {},
+      },
+      {
+        type: "button",
+        key: "BTN_ADJUST_STOP_SEQ_PLUS",
+        label: "BTN_ADJUST_STOP_SEQ_PLUS",
+        onClick: () => {},
+      },
+      {
+        type: "button",
+        key: "BTN_ADJUST_STOP_SEQ_MINUS",
+        label: "BTN_ADJUST_STOP_SEQ_MINUS",
+        onClick: () => {},
+      },
       {
         type: "button",
         key: "순서저장",
@@ -258,23 +308,48 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         disabled: model.unallocSearching,
         onClick: handleUnallocOrderSearch,
       },
-      { type: "button", key: "BTN_ASSIGN_SHIPMENT", label: "BTN_ASSIGN_SHIPMENT", onClick: () => {} },
+      {
+        type: "button",
+        key: "BTN_ASSIGN_SHIPMENT",
+        label: "BTN_ASSIGN_SHIPMENT",
+        onClick: () => {},
+      },
     ],
     [model.unallocSearching, handleUnallocOrderSearch],
   );
 
   const allocSubActions: ActionItem[] = useMemo(
     () => [
-      { type: "button", key: "BTN_ITEM_LINE_SPLIT", label: "BTN_ITEM_LINE_SPLIT", onClick: () => {} },
-      { type: "button", key: "BTN_ITEM_QTY_SPLIT", label: "BTN_ITEM_QTY_SPLIT", onClick: () => {} },
+      {
+        type: "button",
+        key: "BTN_ITEM_LINE_SPLIT",
+        label: "BTN_ITEM_LINE_SPLIT",
+        onClick: () => {},
+      },
+      {
+        type: "button",
+        key: "BTN_ITEM_QTY_SPLIT",
+        label: "BTN_ITEM_QTY_SPLIT",
+        onClick: () => {},
+      },
     ],
     [],
   );
 
   const unallocSubActions: ActionItem[] = useMemo(
     () => [
-      { type: "button", key: "BTN_ITEM_LINE_SPLIT", label: "BTN_ITEM_LINE_SPLIT", onClick: () => {} },
-      { type: "button", key: "BTN_ITEM_QTY_SPLIT", label: "BTN_ITEM_QTY_SPLIT", onClick: () => {} },
+      {
+        type: "button",
+        key: "BTN_ITEM_LINE_SPLIT",
+        label: "BTN_ITEM_LINE_SPLIT",
+        onClick: () => {},
+      },
+      {
+        type: "button",
+        key: "BTN_ITEM_QTY_SPLIT",
+        label: "BTN_ITEM_QTY_SPLIT",
+        onClick: () => {},
+      },
     ],
     [],
   );

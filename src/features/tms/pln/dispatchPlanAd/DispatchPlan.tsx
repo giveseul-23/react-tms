@@ -17,7 +17,7 @@ import {
   UNALLOC_ORDER_SUB_COLUMN_DEFS,
 } from "./DispatchPlanColumns";
 
-export const MENU_CODE = "MENU_DISPATCH_PLAN";
+export const MENU_CODE = "MENU_DISPATCH_PLAN_AD";
 
 export default function DispatchPlan() {
   const model = useDispatchPlanModel(MENU_CODE);
