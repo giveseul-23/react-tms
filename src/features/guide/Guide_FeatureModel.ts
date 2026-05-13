@@ -14,7 +14,6 @@
 // - layout 토글값은 localStorage 자동 동기화
 // ────────────────────────────────────────────────────────────────
 
-import { useMemo } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
@@ -29,21 +28,10 @@ export function useFeatureModel(menuCode: string) {
 
   // ── 공통 코드 lookup (Cell Renderer 의 codeKey 매핑용) ─────────
   // codeMap.xxxTcd["10"] === "라벨"
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     xxxTcd: { sqlProp: "CODE", keyParam: "XXX_TCD" },
     yyyTcd: { sqlProp: "CODE", keyParam: "YYY_TCD" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return { ...base, codeMap };
 }

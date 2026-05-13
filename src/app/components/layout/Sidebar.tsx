@@ -22,7 +22,7 @@ import {
   clearTokens,
 } from "@/app/services/auth/auth";
 
-import logo from "@/assets/gs_logo.png";
+import logo from "@/assets/mobyus_shortcut_logo.png";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -316,7 +316,7 @@ export function Sidebar({
                   />
                 </div>
                 <span className="font-semibold text-lg whitespace-nowrap">
-                  GS Caltex TMS
+                  Mobyus TMS
                 </span>
               </div>
               <button

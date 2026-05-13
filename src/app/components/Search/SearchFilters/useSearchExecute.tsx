@@ -89,7 +89,6 @@ export function useSearchExecute({
   searchRef,
   menuCode,
   paramMode = "DS_SEARCH_CONDITION",
-  userTz, // [TEMP-userTz] 서버 완료 시 제거
 }: UseSearchExecuteParams) {
   const { openPopup, closePopup } = usePopup();
   const [searching, setSearching] = useState(false);
@@ -184,7 +183,7 @@ export function useSearchExecute({
 
         const dbKey = resolveDbColumn(v.key);
         if (dbKey === null) return; // POPUP _NM 제외
-        conditions.push(buildSearchCondition({ ...v, key: dbKey }, userTz)); // [TEMP-userTz] 서버 완료 시 2번째 인자 제거
+        conditions.push(buildSearchCondition({ ...v, key: dbKey })); // [TEMP-userTz] 서버 완료 시 2번째 인자 제거
       });
 
       // DYNAMIC_QUERY는 항상 "1=1"로 시작 (buildSearchCondition은 " AND ..."를 반환)
@@ -388,7 +387,6 @@ export function useSearchExecute({
       paramMode,
       openPopup,
       closePopup,
-      userTz, // [TEMP-userTz] 서버 완료 시 제거
     ],
   );
 

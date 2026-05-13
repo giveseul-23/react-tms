@@ -88,7 +88,6 @@ export function SearchFilters({
   moduleDefaultSearchParams,
   paramMode,
   menuCode,
-  userTz, // [TEMP-userTz] 서버 완료 시 제거
 }: SearchFiltersProps) {
   const [open, setOpen] = useState(true);
 
@@ -123,6 +122,7 @@ export function SearchFilters({
     filtersRef,
     excludes,
   });
+
   const wrappedFetchFn = useMemo(
     () =>
       excludes && excludes.length > 0
@@ -146,7 +146,6 @@ export function SearchFilters({
     searchRef,
     menuCode,
     paramMode,
-    userTz, // [TEMP-userTz] 서버 완료 시 제거
   });
 
   return (

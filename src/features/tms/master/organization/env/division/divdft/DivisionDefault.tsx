@@ -5,12 +5,7 @@ import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useDivisionDefaultModel } from "./DivisionDefaultModel";
 import { useDivisionDefaultController } from "./DivisionDefaultController";
-import {
-  MAIN_COLUMN_DEFS,
-  MAIN_ROW_KEYS,
-  DETAIL_COLUMN_DEFS,
-  DETAIL_ROW_KEYS,
-} from "./DivisionDefaultColumns";
+import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./DivisionDefaultColumns";
 
 export const MENU_CODE = "MENU_ORGANIZATION_ENV_DIV_DFT";
 
@@ -36,7 +31,7 @@ export default function DivisionDefault() {
           {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
-          rowKeys={MAIN_ROW_KEYS}
+          rowKeys={"CNFG_CD"}
           autoSelectFirstRow
           audit={false}
           pagination={false}
@@ -46,7 +41,7 @@ export default function DivisionDefault() {
         <DataGrid
           {...model.bind("detail")}
           columnDefs={DETAIL_COLUMN_DEFS}
-          rowKeys={DETAIL_ROW_KEYS}
+          rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
           actions={ctrl.detailActions}
           codeMap={model.codeMap}
         />
