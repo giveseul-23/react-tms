@@ -48,6 +48,9 @@ export interface GridSlot {
   selected: any;
   setSelected: (row: any) => void;
   selectedRef: { readonly current: any };
+  /** setData 가 객체로 직접 set 될 때마다 +1. 함수형 updater 호출(편집/내부 mutation)은 변경 없음.
+   *  DataGrid 가 이 값 변화 시에만 autoSize 재실행 → 셀 편집 시 가로 스크롤 유지. */
+  autoSizeKey: number;
 }
 
 export interface StorageKeys {
@@ -71,6 +74,12 @@ export interface BoundGridProps {
   audit: true;
   /** audit delete 컬럼이 사용할 setter — DataGrid 내부에서 자동 사용. */
   setRowData: (updater: SetStateAction<GridData>) => void;
+  /** 객체 set (조회 결과 도착 등) 시점에만 +1 — DataGrid 가 autoSize 재실행 트리거. */
+  autoSizeKey: number;
+  /** ag-grid 의 사용자 액션 selection 변경을 model.selectedRef 로 동기화. */
+  onSelectionChanged: (row: any | null) => void;
+  /** controller 가 setSelected(row) 로 박은 행을 ag-grid 시각 선택으로 자동 반영. */
+  selectedRow: any;
 }
 
 export type BaseModel<K extends string = string> = {
@@ -97,6 +106,26 @@ interface BaseModelOptions {
 //   "MENU_LGSTGRP_OPR_CONFIG_MST" → "lgstgrp-opr-config-mst"
 function menuCodeToPrefix(menuCode: string): string {
   return menuCode.replace(/^MENU_/i, "").toLowerCase().replace(/_/g, "-");
+}
+
+// ── row 안정 id (__rid__) 자동 부여 ────────────────────────────
+// ag-grid 의 getRowId 가 사용. row 가 cell 편집으로 새 객체 reference 가 되어도
+// __rid__ 가 같으면 ag-grid 가 같은 row 로 인식 → 부분 redraw → 스크롤 위치 보존.
+// payload 에는 toDsSave 가 strip 해서 보내지 않음.
+let _ridCounter = 0;
+function newRid(): string {
+  _ridCounter += 1;
+  return `r${_ridCounter}`;
+}
+function ensureRid(data: GridData): GridData {
+  if (!data?.rows?.length) return data;
+  let touched = false;
+  const rows = data.rows.map((r: any) => {
+    if (r && r.__rid__) return r;
+    touched = true;
+    return { ...r, __rid__: newRid() };
+  });
+  return touched ? { ...data, rows } : data;
 }
 
 // ── localStorage 안전 접근 ────────────────────────────────────
@@ -173,16 +202,26 @@ export function useBaseModel<K extends string = string>(
   const allSelRef = useRef(allSel);
   allSelRef.current = allSel;
 
+  // ── autoSizeKey: 객체로 직접 set 될 때만 증가 ─────────────────
+  // 함수형 updater 호출(commitRowChange, addRow 등 내부 mutation)은 제외 → DataGrid 의
+  // autoSize useEffect 가 그 변경에는 발화하지 않아 셀 편집 시 가로 스크롤이 유지된다.
+  const [allAutoSizeKey, setAllAutoSizeKey] = useState<Record<string, number>>({});
+  const allAutoSizeKeyRef = useRef(allAutoSizeKey);
+  allAutoSizeKeyRef.current = allAutoSizeKey;
+
   const setSlotData = useCallback(
     (key: string, updater: SetStateAction<GridData>) => {
       setAllData((prev) => {
         const slot = prev[key] ?? EMPTY_GRID;
-        const next =
+        const raw =
           typeof updater === "function"
             ? (updater as (s: GridData) => GridData)(slot)
             : updater;
-        return { ...prev, [key]: next };
+        return { ...prev, [key]: ensureRid(raw) };
       });
+      if (typeof updater !== "function") {
+        setAllAutoSizeKey((prev) => ({ ...prev, [key]: (prev[key] ?? 0) + 1 }));
+      }
     },
     [],
   );
@@ -225,6 +264,9 @@ export function useBaseModel<K extends string = string>(
               return allSelRef.current[k] ?? null;
             },
           },
+          get autoSizeKey() {
+            return allAutoSizeKeyRef.current[k] ?? 0;
+          },
         };
         slotCache[k] = slot;
         return slot;
@@ -259,6 +301,9 @@ export function useBaseModel<K extends string = string>(
         rowSelection: "single",
         audit: true,
         setRowData: slot.setData,
+        autoSizeKey: slot.autoSizeKey,
+        onSelectionChanged: slot.setSelected,
+        selectedRow: slot.selected,
       };
     },
     [grids, pageSize, setPageSize, onPageChange],

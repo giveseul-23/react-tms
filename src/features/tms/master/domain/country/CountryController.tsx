@@ -45,16 +45,9 @@ export function useCountryController({ model }: Args) {
   );
 
   // main 클릭 → state, zip 동시 fetch + state 첫 행으로 city 자동 cascade
-  // 단, 메인에 작업 중인(I/U/D) 행이 있으면 cascade 안 함 — 편집 내용 보존
+  // guardDirty: 메인에 작업 중인(I/U/D) 행이 있으면 cascade 안 함 — 편집 내용 보존
   const onMainGridClick = useCallback(
-    async (row: any) => {
-      const mainRows = model.grids.main.ref.current?.rows ?? [];
-      const hasDirty = mainRows.some(
-        (r: any) =>
-          r.EDIT_STS === "I" || r.EDIT_STS === "U" || r.EDIT_STS === "D",
-      );
-      if (hasDirty) return;
-
+    (row: any) =>
       base.handleRowClick(
         "main",
         row,
@@ -70,10 +63,10 @@ export function useCountryController({ model }: Args) {
         ],
         {
           alsoReset: ["city"],
+          guardDirty: true,
         },
-      );
-    },
-    [base, model],
+      ),
+    [base],
   );
 
   const handleSearch = useCallback(

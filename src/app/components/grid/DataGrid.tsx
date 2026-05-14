@@ -181,8 +181,17 @@ type DataGridProps<TRow> = {
   rowSelection?: string;
   /** false 명시 시 selection column(체크박스/헤더체크박스) 숨김. 미지정 시 기존 동작 유지. */
   headerCheckbox?: boolean;
+  /** 변할 때만 autoSize 재실행. model.bind() 가 자동 spread — 객체 set(조회 결과 도착)에만 +1,
+   *  함수형 updater(셀 편집/행 추가)는 변경 없음 → 셀 편집 시 가로 스크롤 유지. */
+  autoSizeKey?: number;
 
   onCellValueChanged?: (params: any) => void;
+  /** ag-grid 의 selection 이 사용자 액션으로 변경될 때 호출 — model 측 selectedRef 동기화용.
+   *  rowDataChanged/api/gridInitializing 등 자동 이벤트는 발화 안 함. */
+  onSelectionChanged?: (row: any | null) => void;
+  /** controller 가 setSelected(row) 로 박은 행을 ag-grid 시각 선택으로 자동 반영.
+   *  model.bind() 가 자동 spread — view 에서 따로 줄 필요 없음. */
+  selectedRow?: any;
 
   totalCount?: number;
   currentPage?: number;
@@ -268,7 +277,10 @@ export default function DataGrid<TRow>({
   onRowDoubleClicked,
   rowSelection: rowSelectionProp,
   headerCheckbox,
+  autoSizeKey,
   onCellValueChanged,
+  onSelectionChanged,
+  selectedRow,
   totalCount,
   currentPage,
   onPageChange,
@@ -489,7 +501,28 @@ export default function DataGrid<TRow>({
       if (api.isDestroyed?.()) return;
       runAutoSize(api, finalColumnDefs, activeRowData);
     });
-  }, [activeTab, activeRowData, finalColumnDefs, runAutoSize, disableAutoSize]);
+    // activeRowData 대신 autoSizeKey 를 dep 으로 사용 — 객체 set(조회) 에만 +1 되므로
+    // 셀 편집/행 추가 같은 함수형 setter 호출에는 autoSize 가 재발화하지 않는다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, autoSizeKey, finalColumnDefs, runAutoSize, disableAutoSize]);
+
+  // ─── controller 가 박은 selectedRow 를 ag-grid 시각 선택으로 자동 반영 ─
+  // model.bind() 가 selectedRow 를 spread → controller 의 setSelected(row) 결과가
+  // ag-grid 의 row hi-light 까지 도달. ag-grid api 호출이 발화하는 onSelectionChanged
+  // 는 source="api" 라 handleSelectionChanged 가 무시 — 무한 루프 없음.
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api || api.isDestroyed?.()) return;
+    if (selectedRow == null) {
+      if (api.getSelectedRows().length > 0) api.deselectAll();
+      return;
+    }
+    const id = selectedRow.__rid__;
+    if (!id) return;
+    const node = api.getRowNode(id);
+    if (!node) return;
+    if (!node.isSelected()) node.setSelected(true, true);
+  }, [selectedRow, activeRowData]);
 
   // ─── 자동 첫행 선택 (이전 선택을 rowKeys 로 보존, 없으면 첫 표시 행) ─────
   useEffect(() => {
@@ -963,6 +996,32 @@ export default function DataGrid<TRow>({
     [activeOnCellValueChanged],
   );
 
+  // 사용자 액션에 의한 selection 변경만 외부로 전파.
+  // rowDataChanged/api/gridInitializing/selectableChanged 등 자동 이벤트는 무시 —
+  // 검색 결과 도착 시 handleSearch 가 명시적으로 박은 selectedRef 를 덮어쓰지 않도록.
+  const USER_SELECTION_SOURCES = useMemo(
+    () =>
+      new Set([
+        "rowClicked",
+        "checkboxSelected",
+        "spaceKey",
+        "keyboardSelection",
+        "uiSelectAll",
+        "uiSelectAllCurrentPage",
+        "uiSelectAllFiltered",
+      ]),
+    [],
+  );
+  const handleSelectionChanged = useCallback(
+    (e: any) => {
+      if (!onSelectionChanged) return;
+      if (!USER_SELECTION_SOURCES.has(e.source)) return;
+      const rows = e.api.getSelectedRows();
+      onSelectionChanged(rows.length === 0 ? null : rows[0]);
+    },
+    [onSelectionChanged, USER_SELECTION_SOURCES],
+  );
+
   const treeProps = useMemo(
     () =>
       treeData
@@ -985,8 +1044,11 @@ export default function DataGrid<TRow>({
       rowHeight: 22,
       onGridReady: handleGridReady,
       onFirstDataRendered: handleFirstDataRendered,
+      // tree 모드는 getDataPath 가 row id 를 결정 — 충돌 방지로 getRowId 안 줌.
+      ...(treeData ? {} : { getRowId: (p: any) => p.data?.__rid__ }),
       ...(treeProps ?? {}),
       onRowSelected: handleRowSelected,
+      onSelectionChanged: handleSelectionChanged,
       onRowClicked: handleRowClicked,
       onRowDoubleClicked: handleRowDoubleClicked,
       onCellValueChanged: handleCellValueChanged,
@@ -1003,12 +1065,14 @@ export default function DataGrid<TRow>({
       handleFirstDataRendered,
       treeProps,
       handleRowSelected,
+      handleSelectionChanged,
       handleRowClicked,
       handleRowDoubleClicked,
       handleCellValueChanged,
       rowSelection,
       selectionColumnDef,
       gridOptions,
+      treeData,
     ],
   );
 

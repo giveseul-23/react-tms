@@ -59,7 +59,8 @@ export function toDsSave<T = any>(
   for (const row of rows ?? []) {
     const sts = (row as any)?.EDIT_STS;
     if (sts === ROW_STATUS.INSERT || sts === ROW_STATUS.UPDATE || sts === ROW_STATUS.DELETE) {
-      const { EDIT_STS, ...rest } = row as any;
+      // __rid__ 는 useBaseModel 이 ag-grid getRowId 용으로 부여한 클라이언트 전용 id — 서버 전송 제외
+      const { EDIT_STS, __rid__, ...rest } = row as any;
       out.push({ ...rest, rowStatus: sts });
     }
   }

@@ -216,18 +216,29 @@ export function useBaseController<K extends string>({
 
   // 센차: onMainGridClick / onSubXxGridClick 공통 — selection + cascade reset/fetch.
   //
-  // gridKey   : 클릭된 그리드 자기 자신
-  // row       : 클릭된 행 (null/undefined 면 reset 만 하고 종료)
-  // cascade   : 직계 자식들 — reset 후 row 가 있을 때 fetch
-  // alsoReset : cascade 외 reset 만 할 그리드 (손자 등)
+  // gridKey    : 클릭된 그리드 자기 자신
+  // row        : 클릭된 행 (null/undefined 면 reset 만 하고 종료)
+  // cascade    : 직계 자식들 — reset 후 row 가 있을 때 fetch
+  // alsoReset  : cascade 외 reset 만 할 그리드 (손자 등)
+  // guardDirty : 클릭된 그리드에 I/U/D 행이 있으면 selection/reset/cascade 모두 skip — 편집 내용 보존
   const handleRowClick = useCallback(
     (
       gridKey: K,
       row: any,
       cascade?: Array<{ to: K; fetch: (row: any) => Promise<any> }>,
-      opts?: { alsoReset?: K[] },
+      opts?: { alsoReset?: K[]; guardDirty?: boolean },
     ) => {
       const slot = (model.grids as Record<string, GridSlot>)[gridKey as string];
+
+      if (opts?.guardDirty) {
+        const rows = slot.ref.current?.rows ?? [];
+        const hasDirty = rows.some(
+          (r: any) =>
+            r.EDIT_STS === "I" || r.EDIT_STS === "U" || r.EDIT_STS === "D",
+        );
+        if (hasDirty) return;
+      }
+
       // 같은 row 재클릭이면 selection/reset/cascade 모두 skip.
       // 더블클릭으로 cellEditor 가 열릴 때 ag-grid 가 발화하는 두 번째 click 으로
       // cascade fetch 가 재트리거 → sub setData → 부모 re-render →

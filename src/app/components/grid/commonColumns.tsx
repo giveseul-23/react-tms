@@ -27,9 +27,15 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
           onChange={(e) => {
             if (e.target.checked) {
               if (isInserted(params.data)) {
-                // INSERT 행은 서버에 안 보냈으니 그냥 제거
+                // INSERT 행은 서버에 안 보냈으니 그냥 제거.
+                // getRowId 활성 환경에서는 ag-grid 의 params.data 와 React state 의 row 가
+                // 다른 reference 일 수 있어 __rid__ 비교 우선, 없으면 reference fallback.
                 setRowData?.((prev: any) =>
-                  prev.filter((row: any) => row !== params.data),
+                  prev.filter((r: any) =>
+                    r.__rid__ && params.data.__rid__
+                      ? r.__rid__ !== params.data.__rid__
+                      : r !== params.data,
+                  ),
                 );
               } else {
                 // 기존 행은 EDIT_STS = "D" 로 마킹 (배열엔 남김)
