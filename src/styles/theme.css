@@ -240,11 +240,11 @@
   --grid-header-bg: var(--primary-soft);
 }
 
-/* ── WINE #72312F ── */
+/* ── WINE #76174A ── */
 [data-theme="WINE"] {
-  --primary: 114 49 47; /* #72312F         */
-  --primary-hover: 96 41 39; /* #72312F × 85%   */
-  --primary-soft: rgba(114, 49, 47, 0.12);
+  --primary: 118 23 74; /* #76174A        */
+  --primary-hover: 100 20 63; /* #76174A × 85%   */
+  --primary-soft: rgba(118, 23, 74, 0.12);
   --grid-header-bg: var(--primary-soft);
 }
 
@@ -449,7 +449,9 @@
 /* ── 셀 범위 드래그 선택 배경(applyHighlight) ──
    .ag-row-selected 의 !important 회색을 이기기 위해 specificity 를 높임 */
 .ag-theme-quartz.ag-theme-bridge .ag-row .ag-cell.cell-range-bg,
-.ag-theme-quartz.ag-theme-bridge .ag-row.ag-row-selected .ag-cell.cell-range-bg {
+.ag-theme-quartz.ag-theme-bridge
+  .ag-row.ag-row-selected
+  .ag-cell.cell-range-bg {
   background-color: rgb(var(--primary) / 0.15) !important;
 }
 
@@ -464,7 +466,9 @@
 .ag-theme-bridge .ag-header-group-cell.ag-header-center {
   justify-content: center !important;
 }
-.ag-theme-bridge .ag-header-group-cell.ag-header-center .ag-header-group-cell-label {
+.ag-theme-bridge
+  .ag-header-group-cell.ag-header-center
+  .ag-header-group-cell-label {
   justify-content: center !important;
   text-align: center !important;
   flex: 1 1 auto;
