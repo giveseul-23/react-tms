@@ -179,6 +179,8 @@ type DataGridProps<TRow> = {
 
   disableAutoSize?: boolean;
   rowSelection?: string;
+  /** false 명시 시 selection column(체크박스/헤더체크박스) 숨김. 미지정 시 기존 동작 유지. */
+  headerCheckbox?: boolean;
 
   onCellValueChanged?: (params: any) => void;
 
@@ -265,6 +267,7 @@ export default function DataGrid<TRow>({
   onRowClicked,
   onRowDoubleClicked,
   rowSelection: rowSelectionProp,
+  headerCheckbox,
   onCellValueChanged,
   totalCount,
   currentPage,
@@ -874,11 +877,21 @@ export default function DataGrid<TRow>({
   );
 
   const rowSelection = useMemo(
-    () =>
-      rowSelectionProp === "single"
-        ? { mode: "singleRow" as const, enableClickSelection: true }
-        : { mode: "multiRow" as const, enableClickSelection: false },
-    [rowSelectionProp],
+    () => {
+      const hide = headerCheckbox === false;
+      return rowSelectionProp === "single"
+        ? {
+            mode: "singleRow" as const,
+            enableClickSelection: true,
+            ...(hide && { checkboxes: false, headerCheckbox: false }),
+          }
+        : {
+            mode: "multiRow" as const,
+            enableClickSelection: false,
+            ...(hide && { checkboxes: false, headerCheckbox: false }),
+          };
+    },
+    [rowSelectionProp, headerCheckbox],
   );
 
   const selectionColumnDef = useMemo(
