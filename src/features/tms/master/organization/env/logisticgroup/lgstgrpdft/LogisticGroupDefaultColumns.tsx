@@ -1,11 +1,13 @@
 // 컬럼 끝의 standardAudit 은 DataGrid 가 audit prop(model.bind 자동) 으로 추가.
 // CNFG_HEADER / CNFG_DETAIL 는 audit 없는 컬럼 — View 에서 audit={false} 명시.
 
+// 키 컬럼에 isPrimaryKey:true — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
 export const CNFG_HEADER_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_GRP_CD",
     field: "LGST_GRP_CNFG_GRP_CD",
+    isPrimaryKey: true,
   },
   {
     type: "text",
@@ -19,6 +21,7 @@ export const CNFG_DETAIL_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_CD",
     field: "CNFG_CD",
+    isPrimaryKey: true,
   },
   {
     type: "text",

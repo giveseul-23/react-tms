@@ -7,6 +7,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_COUNTRY_CODE",
     field: "CTRY_CD",
     editable: true,
+    isPrimaryKey: true,
   },
   {
     type: "text",
@@ -57,12 +58,18 @@ export const MAIN_COLUMN_DEFS = [
 
 export const STATE_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_COUNTRY_CODE", field: "CTRY_CD" },
+  {
+    type: "text",
+    headerName: "LBL_COUNTRY_CODE",
+    field: "CTRY_CD",
+    isPrimaryKey: true,
+  },
   {
     type: "text",
     headerName: "LBL_STATE_CODE",
     field: "STT_CD",
     editable: true,
+    isPrimaryKey: true,
   },
   {
     type: "text",

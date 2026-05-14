@@ -1,7 +1,9 @@
 // 컬럼 끝의 standardAudit 은 DataGrid 가 audit prop(model.bind 자동) 으로 추가.
-// rowKeys 도 컬럼 정의와 함께 export — View 에선 단순 import 후 prop binding.
+// 키 컬럼에 isPrimaryKey:true — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
+// CNFG_CD 는 화면 표시 X — hidden 컬럼으로 메타만 유지.
 
 export const MAIN_COLUMN_DEFS = [
+  { field: "CNFG_CD", hide: true, isPrimaryKey: true },
   { headerName: "No" },
   {
     type: "text",

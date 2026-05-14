@@ -46,8 +46,6 @@ export default function DistanceTransitTime() {
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          autoSelectFirstRow
-          rowKeys={["DIV_CD", "FRM_LOC_ID", "TO_LOC_ID"]}
           audit={false}
         />
       }

@@ -45,7 +45,7 @@ export function useCountryController({ model }: Args) {
   );
 
   // main 클릭 → state, zip 동시 fetch + state 첫 행으로 city 자동 cascade
-  // guardDirty: 메인에 작업 중인(I/U/D) 행이 있으면 cascade 안 함 — 편집 내용 보존
+  // (dirty 보호는 handleRowClick default — 메인에 I/U/D 행 있으면 selection/cascade skip)
   const onMainGridClick = useCallback(
     (row: any) =>
       base.handleRowClick(
@@ -61,20 +61,18 @@ export function useCountryController({ model }: Args) {
             fetch: (r) => api.getZipList({ CTRY_CD: r.CTRY_CD }),
           },
         ],
-        {
-          alsoReset: ["city"],
-          guardDirty: true,
-        },
+        { alsoReset: ["city"] },
       ),
     [base],
   );
 
+  // setData 만 — 첫 행 자동선택 + cascade 는 DataGrid 의 autoSelectFirstRow 가 처리.
+  // 저장/refresh 후 옛 선택 PK 가 새 rows 에 있으면 그 행 자동 재선택 (PK 매칭).
   const handleSearch = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
-      onMainGridClick(data?.rows?.[0]);
     },
-    [model.grids.main, onMainGridClick],
+    [model.grids.main],
   );
 
   //action 정의

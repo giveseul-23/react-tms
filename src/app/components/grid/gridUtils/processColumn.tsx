@@ -55,6 +55,7 @@ const CUSTOM_KEYS = new Set([
   "noLang",
   "summable",
   "defaultYn",
+  "isPrimaryKey",
 ]);
 
 function stripCustomKeys<T extends Record<string, any>>(col: T): T {

@@ -52,16 +52,12 @@ export default function LogisticGroupDefault() {
             {...model.bind("header")}
             columnDefs={CNFG_HEADER_COLUMN_DEFS}
             onRowClicked={ctrl.onHeaderGridClick}
-            autoSelectFirstRow
-            rowKeys="LGST_GRP_CNFG_GRP_CD"
             audit={false}
           />
           <DataGrid
             {...model.bind("subCnfg")}
             columnDefs={CNFG_DETAIL_COLUMN_DEFS}
             onRowClicked={ctrl.onSubCnfgGridClick}
-            autoSelectFirstRow
-            rowKeys="CNFG_CD"
             audit={false}
           />
         </SplitPane>

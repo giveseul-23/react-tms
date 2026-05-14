@@ -51,8 +51,6 @@ export default function LgstgrpOprConfigMst() {
             {...model.bind("main")}
             columnDefs={CONFIG_COLUMN_DEFS}
             onRowClicked={ctrl.onMainGridClick}
-            rowKeys="CNFG_CD"
-            autoSelectFirstRow
             actions={ctrl.mainActions}
           />
           {/* 메인-다국어 (bottom-left) — 메인 행에 종속 */}
@@ -78,8 +76,6 @@ export default function LgstgrpOprConfigMst() {
             {...model.bind("detail")}
             columnDefs={CONFIG_DETAIL_COLUMN_DEFS}
             onRowClicked={ctrl.onSub01GridClick}
-            rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
-            autoSelectFirstRow
             actions={ctrl.sub01Actions}
             codeMap={model.codeMap}
           />

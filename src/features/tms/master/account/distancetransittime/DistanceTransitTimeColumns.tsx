@@ -1,9 +1,13 @@
 import { makeAuditColumns } from "@/app/components/grid/commonColumns";
 import { numberValueFormatter } from "@/app/components/grid/commonFormatters";
 
+// 키 컬럼에 isPrimaryKey:true — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
+// FRM_LOC_ID / TO_LOC_ID 는 화면 표시 X — hidden 으로 메타만 유지.
 export const MAIN_COLUMN_DEFS = [
+  { field: "FRM_LOC_ID", hide: true, isPrimaryKey: true },
+  { field: "TO_LOC_ID", hide: true, isPrimaryKey: true },
   { headerName: "No" },
-  { type: "text", headerName: "LBL_DIVISION_CODE", field: "DIV_CD" },
+  { type: "text", headerName: "LBL_DIVISION_CODE", field: "DIV_CD", isPrimaryKey: true },
   { type: "text", headerName: "LBL_DIVISION_NAME", field: "DIV_NM" },
   { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" },

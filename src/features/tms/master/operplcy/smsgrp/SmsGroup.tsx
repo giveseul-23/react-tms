@@ -41,8 +41,6 @@ export default function SmsGroup() {
           columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          autoSelectFirstRow
-          rowKeys="SMS_GRP_CD"
         />
       }
       detail={

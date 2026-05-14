@@ -15,7 +15,7 @@ import {
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { makeSaveAction } from "@/app/components/grid/commonActions";
-import type { BaseModel, GridSlot } from "./useBaseModel";
+import { newRid, type BaseModel, type GridSlot } from "./useBaseModel";
 
 interface Args<K extends string> {
   model: BaseModel<K>;
@@ -220,24 +220,24 @@ export function useBaseController<K extends string>({
   // row        : 클릭된 행 (null/undefined 면 reset 만 하고 종료)
   // cascade    : 직계 자식들 — reset 후 row 가 있을 때 fetch
   // alsoReset  : cascade 외 reset 만 할 그리드 (손자 등)
-  // guardDirty : 클릭된 그리드에 I/U/D 행이 있으면 selection/reset/cascade 모두 skip — 편집 내용 보존
+  //
+  // dirty 보호는 default: 클릭된 그리드에 I/U/D 행이 있으면 selection/reset/cascade 모두 skip
+  // — 사용자가 편집 중인 데이터를 다른 행 클릭으로 잃어버리지 않도록.
   const handleRowClick = useCallback(
     (
       gridKey: K,
       row: any,
       cascade?: Array<{ to: K; fetch: (row: any) => Promise<any> }>,
-      opts?: { alsoReset?: K[]; guardDirty?: boolean },
+      opts?: { alsoReset?: K[] },
     ) => {
       const slot = (model.grids as Record<string, GridSlot>)[gridKey as string];
 
-      if (opts?.guardDirty) {
-        const rows = slot.ref.current?.rows ?? [];
-        const hasDirty = rows.some(
-          (r: any) =>
-            r.EDIT_STS === "I" || r.EDIT_STS === "U" || r.EDIT_STS === "D",
-        );
-        if (hasDirty) return;
-      }
+      const rows = slot.ref.current?.rows ?? [];
+      const hasDirty = rows.some(
+        (r: any) =>
+          r.EDIT_STS === "I" || r.EDIT_STS === "U" || r.EDIT_STS === "D",
+      );
+      if (hasDirty) return;
 
       // 같은 row 재클릭이면 selection/reset/cascade 모두 skip.
       // 더블클릭으로 cellEditor 가 열릴 때 ag-grid 가 발화하는 두 번째 click 으로
@@ -263,13 +263,24 @@ export function useBaseController<K extends string>({
   );
 
   // 센차: ExGridEditor.addRow — 그리드 끝에 신규 행 push (EDIT_STS: "I" 자동)
+  // __rid__ 미리 부여 → setData 의 ensureRid 가 새 객체로 spread 하지 않고 그대로 사용.
+  // setSelected 도 같은 reference → 셀 편집 시 selected sync 가 __rid__ 매칭으로 PK 갱신 추적.
+  // 저장 후 autoSelectFirstRow 의 PK 매칭으로 추가한 행이 자동 재선택됨.
   const addRow = useCallback(
     (gridKey: K, newRow: Record<string, any>) => {
       const slot = (model.grids as Record<string, GridSlot>)[gridKey as string];
+      const rowWithSts = { ...newRow, EDIT_STS: "I", __rid__: newRid() };
       slot.setData((prev) => ({
         ...prev,
-        rows: [...(prev?.rows ?? []), { ...newRow, EDIT_STS: "I" }],
+        rows: [...(prev?.rows ?? []), rowWithSts],
       }));
+      slot.setSelected(rowWithSts);
+      // TEMP DEBUG
+      console.log(`[addRow] grid=${gridKey} rid=${rowWithSts.__rid__} CTRY_CD=${rowWithSts.CTRY_CD}`);
+      setTimeout(() => {
+        const cur = slot.selectedRef.current;
+        console.log(`[addRow:after-tick] grid=${gridKey} selectedRid=${cur?.__rid__ ?? "NULL"} CTRY_CD=${cur?.CTRY_CD ?? "NULL"}`);
+      }, 0);
     },
     [model.grids],
   );

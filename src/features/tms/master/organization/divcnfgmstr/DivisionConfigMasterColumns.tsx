@@ -1,6 +1,7 @@
 // 컬럼 끝의 standardAudit 은 DataGrid 가 audit prop(model.bind 자동) 으로 추가.
 
 // ── 메인 (Top-left) ────────────────────────────────────────────
+// 키 컬럼에 isPrimaryKey:true — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
 export const CONFIG_COLUMN_DEFS = [
   { headerName: "No" },
   {
@@ -15,6 +16,7 @@ export const CONFIG_COLUMN_DEFS = [
     headerName: "LBL_DIV_CNFG_CD",
     field: "CNFG_CD",
     fieldType: "text",
+    isPrimaryKey: true,
   },
   {
     type: "text",
@@ -29,13 +31,16 @@ export const CONFIG_COLUMN_DEFS = [
 ];
 
 // ── 상세 (Top-right) ───────────────────────────────────────────
+// 부모 키 CNFG_CD 는 화면 표시 X — hidden 컬럼으로 isPrimaryKey 메타만 유지.
 export const CONFIG_DETAIL_COLUMN_DEFS = [
+  { field: "CNFG_CD", hide: true, isPrimaryKey: true },
   { headerName: "No" },
   {
     type: "text",
     headerName: "LBL_DIV_CNFG_DTL_CD",
     field: "CNFG_DTL_CD",
     editable: true,
+    isPrimaryKey: true,
   },
   {
     type: "text",

@@ -16,12 +16,14 @@
 // ────────────────────────────────────────────────────────────────
 
 // ── 메인 그리드 컬럼 — audit 자동 (model.bind 가 audit:true spread) ─
+// 키 컬럼에 isPrimaryKey:true 표시 — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
     type: "text",
     headerName: "LBL_XXX_CODE",
     field: "XXX_CD",
+    isPrimaryKey: true,
   },
   {
     type: "text",

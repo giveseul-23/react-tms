@@ -18,6 +18,7 @@
 import {
   useState,
   useRef,
+  useEffect,
   useCallback,
   useMemo,
   type Dispatch,
@@ -113,7 +114,7 @@ function menuCodeToPrefix(menuCode: string): string {
 // __rid__ 가 같으면 ag-grid 가 같은 row 로 인식 → 부분 redraw → 스크롤 위치 보존.
 // payload 에는 toDsSave 가 strip 해서 보내지 않음.
 let _ridCounter = 0;
-function newRid(): string {
+export function newRid(): string {
   _ridCounter += 1;
   return `r${_ridCounter}`;
 }
@@ -211,17 +212,22 @@ export function useBaseModel<K extends string = string>(
 
   const setSlotData = useCallback(
     (key: string, updater: SetStateAction<GridData>) => {
+      if (typeof updater !== "function") {
+        // 객체 직접 set (조회 결과 도착, resetGrids 등) — ref 도 동기 업데이트.
+        // handleSearch → setData → 즉시 onMainGridClick 흐름에서
+        // dirty 체크가 새 데이터를 보도록 보장.
+        const withRid = ensureRid(updater);
+        allDataRef.current = { ...allDataRef.current, [key]: withRid };
+        setAllData((prev) => ({ ...prev, [key]: withRid }));
+        setAllAutoSizeKey((prev) => ({ ...prev, [key]: (prev[key] ?? 0) + 1 }));
+        return;
+      }
+      // 함수형 updater (셀 편집, addRow 등) — 기존대로 prev 기반 합성
       setAllData((prev) => {
         const slot = prev[key] ?? EMPTY_GRID;
-        const raw =
-          typeof updater === "function"
-            ? (updater as (s: GridData) => GridData)(slot)
-            : updater;
+        const raw = (updater as (s: GridData) => GridData)(slot);
         return { ...prev, [key]: ensureRid(raw) };
       });
-      if (typeof updater !== "function") {
-        setAllAutoSizeKey((prev) => ({ ...prev, [key]: (prev[key] ?? 0) + 1 }));
-      }
     },
     [],
   );
@@ -229,6 +235,38 @@ export function useBaseModel<K extends string = string>(
   const setSlotSelected = useCallback((key: string, row: any) => {
     setAllSel((prev) => ({ ...prev, [key]: row }));
   }, []);
+
+  // ── selected reference auto-sync ─────────────────────────────
+  // 셀 편집 등으로 rows 의 row 객체가 새 reference 로 교체되면, allSel 의 해당 항목도
+  // 같은 __rid__ 의 새 row 로 swap. selected.CNFG_CD 등 PK 값이 항상 최신을 가리켜
+  // 저장 후 autoSelectFirstRow 의 PK 매칭이 정상 동작하도록.
+  useEffect(() => {
+    setAllSel((prev) => {
+      let changed = false;
+      const next: Record<string, any> = {};
+      for (const k of Object.keys(prev)) {
+        const sel = prev[k];
+        if (!sel?.__rid__) {
+          next[k] = sel;
+          continue;
+        }
+        const rows = allData[k]?.rows ?? [];
+        const newRow = rows.find((r: any) => r.__rid__ === sel.__rid__);
+        if (newRow && newRow !== sel) {
+          next[k] = newRow;
+          changed = true;
+        } else {
+          next[k] = sel;
+        }
+      }
+      // TEMP DEBUG
+      const mainRowsCount = (allData as any).main?.rows?.length ?? 0;
+      const prevMainRid = (prev as any).main?.__rid__ ?? "NULL";
+      const nextMainRid = changed ? ((next as any).main?.__rid__ ?? "NULL") : prevMainRid;
+      console.log(`[sync] mainRows=${mainRowsCount} prevSel=${prevMainRid} nextSel=${nextMainRid} changed=${changed}`);
+      return changed ? next : prev;
+    });
+  }, [allData]);
 
   // ── grids: Proxy 로 lazy 슬롯 제공 ──────────────────────────
   // 첫 접근 시 EMPTY_GRID 반환, set 시점에 state 에 등록.

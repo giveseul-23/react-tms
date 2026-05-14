@@ -169,9 +169,11 @@ type DataGridProps<TRow> = {
   onRowSelected?: (row: TRow | null) => void;
   onRowClicked?: (row: TRow) => void;
   onRowDoubleClicked?: (row: TRow) => void;
-  /** rowData 갱신 시 자동으로 행을 선택해 onRowClicked 를 발화. 이전 선택이 있으면 rowKeys 로 매칭, 없으면 첫 표시 행. */
+  /** rowData 갱신 시 자동으로 행을 선택해 onRowClicked 를 발화.
+   *  미지정 + onRowClicked 있음 + columnDefs 에 isPrimaryKey 컬럼 1개 이상 → 자동 true. */
   autoSelectFirstRow?: boolean;
-  /** autoSelectFirstRow 의 이전 선택 매칭에 사용할 키 컬럼(들). 미지정 시 항상 첫 표시 행. */
+  /** autoSelectFirstRow 의 이전 선택 매칭에 사용할 키 컬럼(들).
+   *  미지정 시 columnDefs 의 isPrimaryKey:true 컬럼들의 field 를 자동 사용. */
   rowKeys?: string | string[];
   renderRightGrid?: (activeTabKey: string) => React.ReactNode;
   /** 탭 전환 시 콜백 — 외부에서 activeTab 을 추적할 때 사용 */
@@ -323,6 +325,10 @@ export default function DataGrid<TRow>({
   const internalGridRef = useRef<any>(null);
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRef = useRef<TRow | null>(null);
+  // selectedRow 의 최신값을 ref 로 추적 — autoSelectFirstRow 가 셀 편집으로 갱신된
+  // selected 객체의 PK 를 보고 매칭하도록 (model 의 selected sync 와 짝).
+  const selectedRowRef = useRef<TRow | null>(null);
+  selectedRowRef.current = (selectedRow ?? null) as TRow | null;
   const prevRowCountRef = useRef(0);
   const selectedCellsRef = useRef<Set<string>>(new Set());
   const isDraggingRef = useRef(false);
@@ -415,6 +421,25 @@ export default function DataGrid<TRow>({
     }
     return onRowClicked;
   }, [layoutType, activeTab, presets, onRowClicked]);
+
+  // ─── rowKeys / autoSelectFirstRow 자동 결정 ────────────────────────
+  // rowKeys 명시값 우선 → 없으면 columnDefs 에 isPrimaryKey:true 인 컬럼들의 field 자동 추출.
+  // autoSelectFirstRow 명시값 우선 → 없으면 (onRowClicked && rowKeys 1개 이상) 일 때 자동 true.
+  const effectiveRowKeys = useMemo<string[]>(() => {
+    if (rowKeys !== undefined) {
+      return Array.isArray(rowKeys) ? rowKeys : [rowKeys];
+    }
+    const keys: string[] = [];
+    for (const c of activeColumnDefs as any[]) {
+      if (c?.isPrimaryKey && c.field) keys.push(c.field);
+    }
+    return keys;
+  }, [rowKeys, activeColumnDefs]);
+
+  const effectiveAutoSelect = useMemo<boolean>(() => {
+    if (autoSelectFirstRow !== undefined) return autoSelectFirstRow;
+    return !!activeOnRowClicked && effectiveRowKeys.length > 0;
+  }, [autoSelectFirstRow, activeOnRowClicked, effectiveRowKeys]);
 
   const activeGridRef = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {
@@ -517,16 +542,25 @@ export default function DataGrid<TRow>({
       if (api.getSelectedRows().length > 0) api.deselectAll();
       return;
     }
-    const id = selectedRow.__rid__;
+    const id = (selectedRow as any).__rid__;
     if (!id) return;
-    const node = api.getRowNode(id);
-    if (!node) return;
-    if (!node.isSelected()) node.setSelected(true, true);
+    // rowData 변경과 selection 변경이 같은 batch 에 들어오면 ag-grid 의 새 row node 가
+    // 아직 mount 되지 않은 시점일 수 있어 getRowNode 가 null. 한 frame 지연 후 시도.
+    requestAnimationFrame(() => {
+      if (api.isDestroyed?.()) return;
+      const node = api.getRowNode(id);
+      if (!node) return;
+      if (!node.isSelected()) node.setSelected(true, true);
+      // selected 된 row 가 viewport 밖이면 스크롤. 이미 보이면 no-op.
+      api.ensureNodeVisible(node, "middle");
+    });
   }, [selectedRow, activeRowData]);
 
   // ─── 자동 첫행 선택 (이전 선택을 rowKeys 로 보존, 없으면 첫 표시 행) ─────
   useEffect(() => {
-    if (!autoSelectFirstRow) return;
+    // TEMP DEBUG
+    console.log(`[autoSel:fire] effectiveAutoSelect=${effectiveAutoSelect} keys=${JSON.stringify(effectiveRowKeys)} rowsLen=${activeRowData?.length ?? 0}`);
+    if (!effectiveAutoSelect) return;
     const api = gridApiRef.current;
     if (!api || api.isDestroyed?.()) return;
     if (!activeRowData?.length) return;
@@ -534,28 +568,37 @@ export default function DataGrid<TRow>({
     requestAnimationFrame(() => {
       if (api.isDestroyed?.()) return;
 
-      const keys = Array.isArray(rowKeys)
-        ? rowKeys
-        : rowKeys
-          ? [rowKeys]
-          : [];
-      const prev = prevSelectedRef.current as any;
+      const keys = effectiveRowKeys;
+      // selected (state 기반, model auto-sync 로 최신) 를 우선, 없으면 prevSelectedRef.
+      // 추가 → 셀에 PK 입력 → 저장 → 재조회 흐름에서 selected 가 최신 PK 를 가리킴.
+      const prev = (selectedRowRef.current ?? prevSelectedRef.current) as any;
+
+      // TEMP DEBUG
+      const prevPkVals = prev ? keys.map(k => prev[k]).join(",") : "NULL";
+      console.log(`[autoSel:run] prev=${prev ? "EXISTS" : "NULL"} prevPK=${prevPkVals}`);
+
+      // PK 매칭만 시도. 매칭 실패 시 아무 동작 안 함 — 첫 행 fallback 은 명시적 자동선택을
+      // 안 한 화면(예: handleSearch 에서 onMainGridClick 호출 안 함)의 의도를 존중.
+      if (!prev || !keys.length) {
+        console.log(`[autoSel:bail] no prev or no keys`);
+        return;
+      }
 
       let target: any = null;
-      if (prev && keys.length) {
-        api.forEachNode((n: any) => {
-          if (target || !n.data) return;
-          if (keys.every((k) => n.data[k] === prev[k])) target = n;
-        });
-      }
-      if (!target) target = api.getDisplayedRowAtIndex(0);
+      api.forEachNode((n: any) => {
+        if (target || !n.data) return;
+        if (keys.every((k) => n.data[k] === prev[k])) target = n;
+      });
+
+      // TEMP DEBUG
+      console.log(`[autoSel:match] target=${target ? "FOUND" : "NULL"} alreadySelected=${target?.isSelected()}`);
 
       if (target && !target.isSelected()) {
         target.setSelected(true);
         activeOnRowClicked?.(target.data);
       }
     });
-  }, [activeRowData, autoSelectFirstRow, rowKeys, activeOnRowClicked]);
+  }, [activeRowData, effectiveAutoSelect, effectiveRowKeys, activeOnRowClicked]);
 
   // ─── 행 추가 시 자동 스크롤 + 포커스 (EDIT_STS:"I" 인 새 마지막 행) ─────
   useEffect(() => {

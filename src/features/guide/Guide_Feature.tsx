@@ -58,8 +58,6 @@ export default function Feature() {
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
-          rowKeys="XXX_CD"
-          autoSelectFirstRow
           actions={ctrl.mainActions}
         />
       }

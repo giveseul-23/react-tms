@@ -2,6 +2,7 @@
 // 부분 토글이 필요한 그리드만 View 에서 `audit={{ updatePerson: false }}` 명시.
 
 // ── 플류운영그룹운영설정 (Top-left) ────────────────────────────────
+// 키 컬럼에 isPrimaryKey:true — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
 export const CONFIG_COLUMN_DEFS = [
   { headerName: "No" },
   {
@@ -18,6 +19,7 @@ export const CONFIG_COLUMN_DEFS = [
     field: "CNFG_CD",
     editable: true,
     fieldType: "text",
+    isPrimaryKey: true,
   },
   {
     type: "text",
@@ -46,7 +48,9 @@ export const CONFIG_COLUMN_DEFS = [
 ];
 
 // ── 설정상세 (Top-right) ───────────────────────────────────────────
+// 부모 키 CNFG_CD 는 화면 표시 X — hidden 컬럼으로 isPrimaryKey 메타만 유지.
 export const CONFIG_DETAIL_COLUMN_DEFS = [
+  { field: "CNFG_CD", hide: true, isPrimaryKey: true },
   { headerName: "No" },
   {
     type: "text",
@@ -54,6 +58,7 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     headerName: "LBL_LGST_GRP_CNFG_DTL_CD",
     field: "CNFG_DTL_CD",
     editable: true,
+    isPrimaryKey: true,
   },
   {
     type: "text",

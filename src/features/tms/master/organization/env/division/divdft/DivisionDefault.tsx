@@ -31,8 +31,6 @@ export default function DivisionDefault() {
           {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
-          rowKeys={"CNFG_CD"}
-          autoSelectFirstRow
           audit={false}
           pagination={false}
         />
@@ -41,7 +39,6 @@ export default function DivisionDefault() {
         <DataGrid
           {...model.bind("detail")}
           columnDefs={DETAIL_COLUMN_DEFS}
-          rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
           actions={ctrl.detailActions}
           codeMap={model.codeMap}
         />

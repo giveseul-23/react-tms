@@ -46,8 +46,6 @@ export default function DivisionConfigMaster() {
             {...model.bind("main")}
             columnDefs={CONFIG_COLUMN_DEFS}
             onRowClicked={ctrl.onMainGridClick}
-            rowKeys="CNFG_CD"
-            autoSelectFirstRow
             actions={ctrl.mainActions}
           />
           {/* 상세 그리드 (top-right) */}
@@ -55,8 +53,6 @@ export default function DivisionConfigMaster() {
             {...model.bind("sub01")}
             columnDefs={CONFIG_DETAIL_COLUMN_DEFS}
             onRowClicked={ctrl.onSub01GridClick}
-            rowKeys={["CNFG_CD", "CNFG_DTL_CD"]}
-            autoSelectFirstRow
             actions={ctrl.sub01Actions}
           />
         </SplitPane>
