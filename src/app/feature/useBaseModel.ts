@@ -259,11 +259,6 @@ export function useBaseModel<K extends string = string>(
           next[k] = sel;
         }
       }
-      // TEMP DEBUG
-      const mainRowsCount = (allData as any).main?.rows?.length ?? 0;
-      const prevMainRid = (prev as any).main?.__rid__ ?? "NULL";
-      const nextMainRid = changed ? ((next as any).main?.__rid__ ?? "NULL") : prevMainRid;
-      console.log(`[sync] mainRows=${mainRowsCount} prevSel=${prevMainRid} nextSel=${nextMainRid} changed=${changed}`);
       return changed ? next : prev;
     });
   }, [allData]);

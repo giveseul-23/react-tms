@@ -558,8 +558,6 @@ export default function DataGrid<TRow>({
 
   // ─── 자동 첫행 선택 (이전 선택을 rowKeys 로 보존, 없으면 첫 표시 행) ─────
   useEffect(() => {
-    // TEMP DEBUG
-    console.log(`[autoSel:fire] effectiveAutoSelect=${effectiveAutoSelect} keys=${JSON.stringify(effectiveRowKeys)} rowsLen=${activeRowData?.length ?? 0}`);
     if (!effectiveAutoSelect) return;
     const api = gridApiRef.current;
     if (!api || api.isDestroyed?.()) return;
@@ -573,14 +571,9 @@ export default function DataGrid<TRow>({
       // 추가 → 셀에 PK 입력 → 저장 → 재조회 흐름에서 selected 가 최신 PK 를 가리킴.
       const prev = (selectedRowRef.current ?? prevSelectedRef.current) as any;
 
-      // TEMP DEBUG
-      const prevPkVals = prev ? keys.map(k => prev[k]).join(",") : "NULL";
-      console.log(`[autoSel:run] prev=${prev ? "EXISTS" : "NULL"} prevPK=${prevPkVals}`);
-
       // PK 매칭만 시도. 매칭 실패 시 아무 동작 안 함 — 첫 행 fallback 은 명시적 자동선택을
       // 안 한 화면(예: handleSearch 에서 onMainGridClick 호출 안 함)의 의도를 존중.
       if (!prev || !keys.length) {
-        console.log(`[autoSel:bail] no prev or no keys`);
         return;
       }
 
@@ -589,9 +582,6 @@ export default function DataGrid<TRow>({
         if (target || !n.data) return;
         if (keys.every((k) => n.data[k] === prev[k])) target = n;
       });
-
-      // TEMP DEBUG
-      console.log(`[autoSel:match] target=${target ? "FOUND" : "NULL"} alreadySelected=${target?.isSelected()}`);
 
       if (target && !target.isSelected()) {
         target.setSelected(true);
@@ -842,12 +832,6 @@ export default function DataGrid<TRow>({
     const onKeyDown = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.key !== "c") return;
       const tag = (document.activeElement as HTMLElement)?.tagName;
-      // ── DEBUG ─ 복사 안 될 때 어디서 막히는지 확인용 임시 로그
-      console.log("[Copy]", {
-        activeTag: tag,
-        cellCount: selectedCellsRef.current.size,
-        active: document.activeElement,
-      });
       if (tag === "INPUT" || tag === "TEXTAREA") return;
       if (selectedCellsRef.current.size === 0) return;
       e.preventDefault();
@@ -855,7 +839,7 @@ export default function DataGrid<TRow>({
       const tsv = tsvFromSelection();
       if (!tsv) return;
       navigator.clipboard.writeText(tsv).then(
-        () => console.log("[Copy] success", tsv.length, "chars"),
+        () => {},
         (err) => console.warn("[Copy] writeText failed", err),
       );
     };
