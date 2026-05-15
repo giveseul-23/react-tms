@@ -27,7 +27,7 @@ import { useTemperatureRangeManagementController } from "./TemperatureRangeManag
 import { MAIN_COLUMN_DEFS } from "./TemperatureRangeManagementColumns.tsx";
 
 // TODO: 실제 메뉴 코드로 교체
-export const MENU_CODE = "MENU_CARGO_MGMT";
+export const MENU_CODE = "MENU_TEMPERATURE_RANGE_MANAGEMENT";
 
 export default function Feature() {
   // useBaseModel 이 searchRef / filtersRef / storageKeys / pageSize 자동 셋업.
