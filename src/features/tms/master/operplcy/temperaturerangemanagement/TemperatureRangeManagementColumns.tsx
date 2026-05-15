@@ -22,7 +22,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_TMPR_RNG_CD",
     field: "TMPR_RNG_CD",
-    editable: true,
+    editable: (params: any) => params.data?.EDIT_STS === "I",
   },
   {
     type: "text",
