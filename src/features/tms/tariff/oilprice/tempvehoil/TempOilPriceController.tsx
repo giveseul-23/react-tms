@@ -44,7 +44,7 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       if (activeTabRef.current === "PERIOD") {
         model.grids.period.setData(data);
@@ -104,7 +104,7 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMasterRowClicked,
     masterActions,
     oilPriceActions,

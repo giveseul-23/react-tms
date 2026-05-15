@@ -42,7 +42,7 @@ export function useLanguagePackController({
   );
 
   // 조회 완료 시 그리드 데이터 반영
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.setGridData(data);
     },
@@ -106,7 +106,7 @@ export function useLanguagePackController({
 
   return {
     fetchLanguagePackList,
-    handleSearch,
+    onSearchCallback,
     mainActions,
   };
 }

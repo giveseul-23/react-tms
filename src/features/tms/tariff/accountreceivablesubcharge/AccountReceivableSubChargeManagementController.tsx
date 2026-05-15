@@ -55,7 +55,7 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
     [model, base, onDetail01RowClicked],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -100,7 +100,7 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onDetail01RowClicked,
     mainActions,

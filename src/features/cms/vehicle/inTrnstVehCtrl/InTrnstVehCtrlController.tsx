@@ -17,7 +17,7 @@ export function useInTrnstVehCtrlController({ model }: Args) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       model.grids.main.setSelected(null);
@@ -62,7 +62,7 @@ export function useInTrnstVehCtrlController({ model }: Args) {
 
   return {
     fetchInTrnstVehList: fetchList,
-    handleSearch,
+    onSearchCallback,
     handleRowClicked,
     mainActions,
   };

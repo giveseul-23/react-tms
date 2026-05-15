@@ -43,7 +43,7 @@ export function useMenuConfigController({
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (result: any) => {
       const list = result?.rows ?? [];
       if (!Array.isArray(list.data)) {
@@ -274,7 +274,7 @@ export function useMenuConfigController({
 
   return {
     fetchMenuConfigList,
-    handleSearch,
+    onSearchCallback,
     handleSave,
     handleRowClicked,
     mainActions,

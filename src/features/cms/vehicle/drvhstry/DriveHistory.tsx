@@ -58,7 +58,7 @@ export default function DriveHistory() {
       searchProps={{
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchInTrnstVehList,
-        onSearch: ctrl.handleSearch,
+        onSearch: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

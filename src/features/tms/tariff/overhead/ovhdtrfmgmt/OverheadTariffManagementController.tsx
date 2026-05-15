@@ -48,7 +48,7 @@ export function useOverheadTariffManagementController({ model }: Args) {
     [model, base, onSubChgRowClicked],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -111,7 +111,7 @@ export function useOverheadTariffManagementController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onSubChgRowClicked,
     mainActions,

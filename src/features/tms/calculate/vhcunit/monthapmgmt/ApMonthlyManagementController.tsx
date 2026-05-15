@@ -65,7 +65,7 @@ export function useApMonthlyManagementController({
     [rawFiltersRef, model],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
     },
@@ -148,7 +148,7 @@ export function useApMonthlyManagementController({
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     mainActions,
   };
 }

@@ -572,7 +572,7 @@ export default function DataGrid<TRow>({
       const prev = (selectedRowRef.current ?? prevSelectedRef.current) as any;
 
       // PK 매칭만 시도. 매칭 실패 시 아무 동작 안 함 — 첫 행 fallback 은 명시적 자동선택을
-      // 안 한 화면(예: handleSearch 에서 onMainGridClick 호출 안 함)의 의도를 존중.
+      // 안 한 화면(예: onSearchCallback 에서 onMainGridClick 호출 안 함)의 의도를 존중.
       if (!prev || !keys.length) {
         return;
       }
@@ -1025,7 +1025,7 @@ export default function DataGrid<TRow>({
 
   // 사용자 액션에 의한 selection 변경만 외부로 전파.
   // rowDataChanged/api/gridInitializing/selectableChanged 등 자동 이벤트는 무시 —
-  // 검색 결과 도착 시 handleSearch 가 명시적으로 박은 selectedRef 를 덮어쓰지 않도록.
+  // 검색 결과 도착 시 onSearchCallback 이 명시적으로 박은 selectedRef 를 덮어쓰지 않도록.
   const USER_SELECTION_SOURCES = useMemo(
     () =>
       new Set([

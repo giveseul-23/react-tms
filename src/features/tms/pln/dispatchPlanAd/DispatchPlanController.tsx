@@ -47,7 +47,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -356,7 +356,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
 
   return {
     fetchDispatchPlanList: fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onAllocOrderRowClicked,
     onUnallocOrderRowClicked,

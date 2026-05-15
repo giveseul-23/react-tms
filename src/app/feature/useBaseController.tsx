@@ -19,7 +19,7 @@ import { newRid, type BaseModel, type GridSlot } from "./useBaseModel";
 
 interface Args<K extends string> {
   model: BaseModel<K>;
-  /** 표준 fetchList / handleSearch / mainActions 자동 생성용. 화면 고유 cascade/추가액션은 자식 controller 가 추가/오버라이드. */
+  /** 표준 fetchList / onSearchCallback / mainActions 자동 생성용. 화면 고유 cascade/추가액션은 자식 controller 가 추가/오버라이드. */
   api?: {
     search?: (params: Record<string, unknown>) => Promise<any>;
     save?: (payload: { dsSave: any[] }) => Promise<any>;
@@ -300,7 +300,7 @@ export function useBaseController<K extends string>({
     [alertMsg],
   );
 
-  // ── 표준 fetchList / handleSearch / mainActions ────────────────
+  // ── 표준 fetchList / onSearchCallback / mainActions ────────────────
   // api 옵션을 넘긴 controller 가 자동으로 사용. 자식은 cascade/추가액션만 override.
   const fetchList = useCallback(
     (params: Record<string, unknown>) => {
@@ -313,7 +313,7 @@ export function useBaseController<K extends string>({
     [api, searchOptions],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       const main = (model.grids as Record<string, GridSlot>)["main"];
       main?.setData(data);
@@ -339,7 +339,7 @@ export function useBaseController<K extends string>({
     alert: alertMsg,
     confirm: confirmMsg,
     fetchList,
-    handleSearch,
+    onSearchCallback,
     mainActions,
   };
 }

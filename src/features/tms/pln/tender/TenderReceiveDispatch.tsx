@@ -26,7 +26,7 @@ export default function TenderReceiveDispatch() {
       menuCode={MENU_CD}
       searchProps={{
         fetchFn: ctrl.fetchDispatchList,
-        onSearch: ctrl.handleSearch,
+        onSearch: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

@@ -21,7 +21,7 @@ export function useVehicleMgmtController({ model }: Args) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       model.closeDetail();
@@ -243,7 +243,7 @@ export function useVehicleMgmtController({ model }: Args) {
 
   return {
     fetchVehicleList: fetchList,
-    handleSearch,
+    onSearchCallback,
     handleRowClicked,
     handleNavigate,
     handleJumpTo,

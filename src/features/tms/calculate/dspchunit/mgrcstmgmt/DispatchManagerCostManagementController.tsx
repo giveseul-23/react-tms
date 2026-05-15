@@ -40,7 +40,7 @@ export function useDispatchManagerCostController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -141,7 +141,7 @@ export function useDispatchManagerCostController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     mainActions,
     costDetailActions,

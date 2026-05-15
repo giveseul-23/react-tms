@@ -69,7 +69,7 @@ export function useShpmMgmtController({ model }: Args) {
     [model, base, onLgstRowClicked],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -151,7 +151,7 @@ export function useShpmMgmtController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onLgstRowClicked,
     onZoneRowClicked,

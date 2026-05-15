@@ -31,7 +31,7 @@ export function useSmsGroupController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -50,7 +50,7 @@ export function useSmsGroupController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     mainActions,
     detailActions,

@@ -53,7 +53,7 @@ export function useLogisticGroupDefaultController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.header.setData(data);
       onHeaderGridClick(data?.rows?.[0]);
@@ -76,7 +76,7 @@ export function useLogisticGroupDefaultController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onHeaderGridClick,
     onSubCnfgGridClick,
     detailActions,

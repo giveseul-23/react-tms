@@ -105,7 +105,7 @@ export default function MenuConfig() {
       searchProps={{
         meta,
         fetchFn: ctrl.fetchMenuConfigList,
-        onSearch: ctrl.handleSearch,
+        onSearch: ctrl.onSearchCallback,
         filtersRef,
         treeGridRef,
         computeTotalCount: (rows) => {

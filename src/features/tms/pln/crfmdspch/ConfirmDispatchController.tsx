@@ -72,7 +72,7 @@ export function useConfirmDispatchController({ model }: Args) {
   );
 
   // ── 메인 조회 콜백 — 첫 행 자동 선택 + cascade ─────────────────
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.config.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -173,7 +173,7 @@ export function useConfirmDispatchController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onOrderGridClick,
     mainActions,

@@ -65,7 +65,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -136,7 +136,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onDetailGridClick,
     mainActions,

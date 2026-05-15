@@ -23,7 +23,7 @@ export function useTripCountController({ model }: ControllerArgs) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
     },
@@ -65,7 +65,7 @@ export function useTripCountController({ model }: ControllerArgs) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     mainActions,
   };
 }

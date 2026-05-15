@@ -45,7 +45,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -360,7 +360,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
 
   return {
     fetchDispatchList: fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     handleApSetlCellChange,
     mainActions,

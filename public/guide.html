@@ -429,7 +429,7 @@
 │       │                                                                    │
 │       ├─ &lt;<span class="t">SearchFilters</span>                                                       │
 │       │     fetchFn={<span class="t">ctrl</span>.fetchList}                <span class="c">// ← Controller</span>          │
-│       │     onSearch={<span class="t">ctrl</span>.handleSearch}             <span class="c">// ← Controller</span>          │
+│       │     onSearch={<span class="t">ctrl</span>.onSearchCallback}             <span class="c">// ← Controller</span>          │
 │       │     searchRef={<span class="t">model</span>.searchRef}              <span class="c">// ← Model (ref 다리)</span>     │
 │       │     filtersRef={<span class="t">model</span>.filtersRef}            <span class="c">// ← Model</span>                │
 │       │     pageSize={<span class="t">model</span>.pageSize}                <span class="c">// ← Model</span>                │
@@ -486,7 +486,7 @@
                              │ 응답
                              ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ onSearch(data) = <span class="t">ctrl</span>.handleSearch(data)                          │
+│ onSearch(data) = <span class="t">ctrl</span>.onSearchCallback(data)                          │
 │   ├─ <span class="t">model</span>.grids.main.<span class="fn">setData</span>(data)        <span class="c">// 그리드 데이터 set</span>     │
 │   └─ <span class="t">ctrl</span>.<span class="fn">onMainGridClick</span>(data.rows[0])     <span class="c">// 첫 행 자동 선택</span>      │
 │         └─ base.<span class="fn">handleRowClick</span>("main", row, cascade)              │
@@ -505,10 +505,10 @@
         <div class="warn">
           <span class="warn-icon">⚠️</span>
           <div>
-            <strong>handleSearch 가 두 개</strong>로 보일 수 있는데 서로 다른 함수입니다.
+            <strong>검색 콜백이 두 단계</strong>로 나뉘는데 서로 다른 함수입니다.
             <ul style="margin: 6px 0 0 18px; padding: 0">
               <li><code>SearchFilters</code> 내부의 <code>handleSearch(page)</code> — <strong>실행자</strong> (fetch 수행)</li>
-              <li><code>Controller</code> 의 <code>ctrl.handleSearch(data)</code> — <strong>수신자</strong> (결과 받아서 grid에 set)</li>
+              <li><code>Controller</code> 의 <code>ctrl.onSearchCallback(data)</code> — <strong>수신자</strong> (결과 받아서 grid에 set)</li>
             </ul>
             전자가 끝나면 후자가 <code>onSearch</code> 콜백으로 호출되는 직렬 연결입니다.
           </div>
@@ -819,7 +819,7 @@
   }, [base]);
 
   <span class="c">// 주의: base 자체는 return 에 안 넣음 (Controller 의 로컬 변수)</span>
-  <span class="k">return</span> { fetchList, handleSearch, mainActions, ... };
+  <span class="k">return</span> { fetchList, onSearchCallback, mainActions, ... };
 }</pre>
         </div>
 
@@ -1195,7 +1195,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
       menuCode={<span class="t">MENU_CODE</span>}
       searchProps={{
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.handleSearch,
+        onSearch: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
@@ -1239,7 +1239,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
   defaultSizes={[<span class="t">40</span>, <span class="t">60</span>]}
   searchProps={{
     fetchFn: ctrl.fetchList,
-    onSearch: ctrl.handleSearch,
+    onSearch: ctrl.onSearchCallback,
     searchRef: model.searchRef,
     filtersRef: model.filtersRef,
     pageSize: model.pageSize,
@@ -1281,7 +1281,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
 );
 
 <span class="c">// 메인 조회 콜백 — 첫 행 자동 선택 + cascade</span>
-<span class="k">const</span> handleSearch = <span class="fn">useCallback</span>(
+<span class="k">const</span> onSearchCallback = <span class="fn">useCallback</span>(
   (data) =&gt; {
     model.grids.main.<span class="fn">setData</span>(data);
     <span class="fn">onMainGridClick</span>(data?.rows?.[<span class="t">0</span>]);
@@ -1755,7 +1755,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
 
   <span class="k">return</span> (
     &lt;<span class="t">MasterDetailPage</span>
-      searchProps={{ meta, fetchFn: ctrl.fetchList, onSearch: ctrl.handleSearch,
+      searchProps={{ meta, fetchFn: ctrl.fetchList, onSearch: ctrl.onSearchCallback,
                      searchRef, filtersRef, pageSize: model.pageSize,
                      excludes: [<span class="s">"BOOKING"</span>],   <span class="c">// 검색 payload 에서 제외할 키 (선택)</span>
                      menuCode: <span class="t">MENU_CD</span> }}
@@ -1773,7 +1773,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
         <h3>Controller — <code>{화면}Controller.tsx</code></h3>
         <ul style="padding-left: 20px">
           <li><code>fetchList(params)</code> — SearchFilters가 넘기는 params를 그대로 API에 전달</li>
-          <li><code>handleSearch(data)</code> — 조회 성공 시 <code>setGridData</code> + <code>resetSubGrids</code> + 첫 행 자동 선택</li>
+          <li><code>onSearchCallback(data)</code> — 조회 성공 시 <code>setGridData</code> + <code>resetSubGrids</code> + 첫 행 자동 선택</li>
           <li><code>handleRowClicked(row)</code> — 메인 행 선택 시 상세 그리드 reload</li>
           <li>액션 버튼은 공통 팩토리 사용 (<a href="#actions">→ 액션 팩토리</a>)</li>
           <li>그리드 추가/저장은 <code>useGridAdd</code> / <code>useGridSave</code> 훅</li>
@@ -2194,7 +2194,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
               <tr data-search="addrow 신규 행 edit_sts i"><td>base.addRow(gridKey, newRow)</td><td>그리드 끝에 신규 행 push. <code>EDIT_STS: "I"</code> 자동 주입.</td></tr>
               <tr data-search="requireparentrow 부모 검증"><td>base.requireParentRow(row, label)</td><td>부모 행 선택 + 저장 여부 검증. 미선택/신규(I) 인 경우 alert + false 반환.</td></tr>
               <tr data-search="savegrid dsSave dirty beforesave aftersave cascadefrom confirmondelete"><td>base.saveGrid(gridKey, apiFn, opts?)</td><td>dirty 추출 + <code>dsSave</code> + 후처리. opts: <code>beforeSave</code>(false 시 중단) / <code>confirmOnDelete</code>(삭제 행 confirm) / <code>afterSave: "refresh"|"none"|함수|{cascadeFrom, fetch}</code>.</td></tr>
-              <tr data-search="api 자동 fetchlist mainactions"><td>api / searchOptions (선택)</td><td>전달 시 표준 <code>fetchList</code> / <code>handleSearch</code> / <code>mainActions</code> 자동 생성. 자식 controller 가 cascade/추가 액션만 override.</td></tr>
+              <tr data-search="api 자동 fetchlist mainactions"><td>api / searchOptions (선택)</td><td>전달 시 표준 <code>fetchList</code> / <code>onSearchCallback</code> / <code>mainActions</code> 자동 생성. 자식 controller 가 cascade/추가 액션만 override.</td></tr>
             </tbody>
           </table>
           <div class="ref-empty-msg">검색 결과 없음</div>
@@ -2349,12 +2349,12 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
 
         <div class="ref-section">
           <h3>useGridController({ config, model, searchRef, filtersRef? }) <span class="tag tag-green">framework</span></h3>
-          <div class="ref-summary">선언적 그리드 컨트롤러 — fetch / handleSearch / cascade fetch / 그리드별 add/save 액션 자동. <code>bind</code>로 DataGrid props 묶음 제공.</div>
+          <div class="ref-summary">선언적 그리드 컨트롤러 — fetch / onSearchCallback / cascade fetch / 그리드별 add/save 액션 자동. <code>bind</code>로 DataGrid props 묶음 제공.</div>
           <table>
             <thead><tr><th style="width: 200px">반환</th><th>설명</th></tr></thead>
             <tbody>
               <tr data-search="fetchlist 첫 그리드 조회 usegridcontroller"><td>fetchList(params)</td><td>SearchFilters → 첫 그리드 API 호출. <code>config.fetchListExtraParams</code> 의 추가 param 자동 주입</td></tr>
-              <tr data-search="handlesearch 조회 콜백 usegridcontroller"><td>handleSearch(data)</td><td>첫 그리드 setData + 후속 그리드 cascade fetch</td></tr>
+              <tr data-search="onsearchcallback 조회 콜백 usegridcontroller"><td>onSearchCallback(data)</td><td>첫 그리드 setData + 후속 그리드 cascade fetch</td></tr>
               <tr data-search="handlerowclicked 행 클릭 usegridcontroller"><td>handleRowClicked[key]</td><td>그리드별 행 클릭 핸들러 — selection set + cascade fetch</td></tr>
               <tr data-search="actions 액션 그리드별 usegridcontroller"><td>actions[key]</td><td>그리드별 자동 생성된 액션 (add/save/extra)</td></tr>
               <tr data-search="bind grid props spread usegridcontroller"><td>bind(key, columnDefs, overrides?)</td><td>DataGrid 표준 props 묶음 — layoutType/columnDefs/rowData/actions/페이징/onRowClicked/rowKeys/subTitle 등. <code>overrides</code>로 일부 prop 교체 가능 (예: 화면 고유 actions 합성)</td></tr>

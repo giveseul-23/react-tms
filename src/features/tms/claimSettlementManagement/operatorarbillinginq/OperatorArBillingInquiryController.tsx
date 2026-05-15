@@ -43,7 +43,7 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -190,7 +190,7 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     mainActions,
     billingItemActions,

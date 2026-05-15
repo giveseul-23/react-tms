@@ -110,7 +110,7 @@ base 가 제공하는 헬퍼:
 | `base.saveGrid(gridKey, apiFn, opts?)` | dirty 추출 + dsSave + 후처리. opts: `beforeSave`, `confirmOnDelete`, `afterSave: "refresh"\|"none"\|함수\|{cascadeFrom, fetch}` |
 
 **fetchList** — `SearchFilters` 가 넘기는 params 를 API 에 전달 (외부 탭 조건 등 합칠 때만 추가).
-**handleSearch** — `model.grids.main.setData(data)` + 첫 행 자동 선택은 `onMainGridClick(data?.rows?.[0])` 호출 (cascade 정의 한 곳에 모음).
+**onSearchCallback** — `model.grids.main.setData(data)` + 첫 행 자동 선택은 `onMainGridClick(data?.rows?.[0])` 호출 (cascade 정의 한 곳에 모음).
 
 **액션**:
 - 그리드별 actions 배열은 **Controller 가 책임** (`useMemo` 로 정의, View 는 `actions={ctrl.mainActions}` binding 만)

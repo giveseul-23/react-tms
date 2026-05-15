@@ -17,7 +17,7 @@ export default function UserPlan() {
       menuCode={MENU_CD}
       searchProps={{
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.handleSearch,
+        onSearch: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

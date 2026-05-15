@@ -19,7 +19,7 @@ export function useIfDispatchResultController({ model }: Args) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
     },
@@ -49,7 +49,7 @@ export function useIfDispatchResultController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     mainActions,
   };
 }

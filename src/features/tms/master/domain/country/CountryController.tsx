@@ -68,7 +68,7 @@ export function useCountryController({ model }: Args) {
 
   // setData 만 — 첫 행 자동선택 + cascade 는 DataGrid 의 autoSelectFirstRow 가 처리.
   // 저장/refresh 후 옛 선택 PK 가 새 rows 에 있으면 그 행 자동 재선택 (PK 매칭).
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
     },
@@ -213,7 +213,7 @@ export function useCountryController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onStateGridClick,
     mainActions,

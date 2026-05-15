@@ -53,7 +53,7 @@ export function useDfChargeRateController({ model }: Args) {
     [model, base, onRtItemRowClicked],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -109,7 +109,7 @@ export function useDfChargeRateController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onRtItemRowClicked,
     mainActions,

@@ -66,7 +66,7 @@ export function useDispatchOperatorCostController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -291,7 +291,7 @@ export function useDispatchOperatorCostController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onCostDetailRowClicked,
     mainActions,

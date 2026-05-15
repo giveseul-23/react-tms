@@ -95,7 +95,7 @@ export function useApDailyManagementController({
     [base, rawFiltersRef],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -209,7 +209,7 @@ export function useApDailyManagementController({
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     mainActions,
     detailActions,

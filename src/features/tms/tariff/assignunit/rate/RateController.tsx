@@ -53,7 +53,7 @@ export function useRateController({ model }: Args) {
     [model, base, onCostInfoRowClicked],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -98,7 +98,7 @@ export function useRateController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onCostInfoRowClicked,
     mainActions,

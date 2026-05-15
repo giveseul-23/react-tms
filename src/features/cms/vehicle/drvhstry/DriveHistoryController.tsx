@@ -20,7 +20,7 @@ export function useDriveHistoryController({ model }: Args) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       model.grids.main.setSelected(null);
@@ -114,7 +114,7 @@ export function useDriveHistoryController({ model }: Args) {
 
   return {
     fetchInTrnstVehList: fetchList,
-    handleSearch,
+    onSearchCallback,
     handleRowClicked,
   };
 }
