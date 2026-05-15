@@ -22,31 +22,31 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_TMPR_RNG_CD",
     field: "TMPR_RNG_CD",
-    editable: (params: any) => params.data?.EDIT_STS === "I",
+    insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_TMPR_RNG_NM",
     field: "TMPR_RNG_NM",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_TMPR_FRM_VAL",
     field: "TMPR_FRM_VAL",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_TMPR_TO_VAL",
     field: "TMPR_TO_VAL",
-    editable: true,
+    editable: true, insertable: true,
   },  
   {
     type: "text",
     headerName: "LBL_USE_YN",
     field: "USE_YN",
-    editable: true,
+    editable: true, insertable: true,
   }  ,
 ];
 

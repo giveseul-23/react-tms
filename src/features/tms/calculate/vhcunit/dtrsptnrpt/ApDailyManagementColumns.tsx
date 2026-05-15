@@ -67,7 +67,7 @@ export const DAILY_MAIN_HEAD = [
     width: 90,
     pinned: "left",
     cellStyle: CENTER,
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
@@ -103,7 +103,7 @@ export const DAILY_MAIN_HEAD = [
     field: "PAY_CARR_NM",
     width: 120,
     pinned: "left",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
@@ -272,7 +272,7 @@ export const DAILY_MAIN_HEAD = [
     width: 90,
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
@@ -350,7 +350,7 @@ export const DAILY_DETAIL_HEAD = [
     field: "PAY_CARR_NM",
     width: 120,
     pinned: "left",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",

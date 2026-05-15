@@ -167,19 +167,19 @@ export const COST_CENTER_COLUMN_DEFS = [
     headerName: "LBL_CST_CNTR_CD",
     field: "CST_CNTR_CD",
     codeKey: "cstCntrCd",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_GL_ACCOUNT_CD",
     field: "GL_LDGR_CD",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_GL_ACCOUNT_NM",
     field: "GL_LDGR_NM",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
@@ -188,7 +188,7 @@ export const COST_CENTER_COLUMN_DEFS = [
     aggFunc: "sum",
     summable: true,
     valueFormatter: numberValueFormatter,
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
@@ -197,7 +197,7 @@ export const COST_CENTER_COLUMN_DEFS = [
     aggFunc: "sum",
     summable: true,
     valueFormatter: numberValueFormatter,
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
@@ -220,7 +220,7 @@ export const COST_CENTER_COLUMN_DEFS = [
     headerName: "LBL_CREATION_TP",
     field: "CST_CNTR_GL_RC_TCD",
     codeKey: "costCenter",
-    editable: true,
+    editable: true, insertable: true,
   },
 ];
 

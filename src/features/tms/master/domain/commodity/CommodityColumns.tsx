@@ -15,6 +15,6 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_COMMODITY_NAME",
     field: "CMDT_NM",
     width: 150,
-    editable: true,
+    editable: true, insertable: true,
   },
 ];

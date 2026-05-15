@@ -58,7 +58,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_INV_SYS_ID",
     field: "INV_SYS_ID",
     codeKey: "invSysList",
-    editable: true,
+    editable: true, insertable: true,
   },{
     // 우편번호
     type: "text",

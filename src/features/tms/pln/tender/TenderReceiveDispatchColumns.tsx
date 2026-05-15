@@ -45,7 +45,7 @@ export const MAIN_COLUMN_DEFS = () => [
     headerName: "LBL_REG_RATE",
     field: "RATE",
     type: "numeric",
-    editable: true,
+    editable: true, insertable: true,
     valueSetter: (params: any) => {
       params.data.RATE = params.newValue;
       return true;

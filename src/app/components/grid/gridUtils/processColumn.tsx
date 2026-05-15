@@ -56,6 +56,7 @@ const CUSTOM_KEYS = new Set([
   "summable",
   "defaultYn",
   "isPrimaryKey",
+  "insertable",
 ]);
 
 function stripCustomKeys<T extends Record<string, any>>(col: T): T {
@@ -89,10 +90,11 @@ function walkChildren(
     const withRenderer = injectCodeRenderer(child, codeMap) as any;
     const withEditor = injectComboEditor(withRenderer, codeMap, setRowData) as any;
     const withCheck = injectCheckRenderer(withEditor, setRowData) as any;
+    const withPolicy = applyEditPolicy(withCheck) as any;
     return stripCustomKeys({
-      ...withCheck,
-      headerName: translate(withCheck),
-      children: walkChildren(withCheck.children, codeMap, setRowData),
+      ...withPolicy,
+      headerName: translate(withPolicy),
+      children: walkChildren(withPolicy.children, codeMap, setRowData),
     });
   });
 }
@@ -199,6 +201,23 @@ export function processColumnDef(
   return stripCustomKeys(processColumnDefRaw(col, opts));
 }
 
+/** insertable / editable 을 EDIT_STS 기반 editable 함수로 변환.
+ *   - insertable + editable → 항상 편집 가능
+ *   - insertable 만        → 추가 상태(EDIT_STS:"I") 행에서만 편집
+ *   - editable 만          → 수정 상태(EDIT_STS:"I" 아닌 행) 에서만 편집
+ *   - 둘 다 없음/false     → 변경 안 함 (편집 불가) */
+function applyEditPolicy(col: AnyCol): AnyCol {
+  const c = col as any;
+  const ins = c.insertable === true;
+  const edt = c.editable === true;
+  if (!ins && !edt) return col;
+  let editableFn: any;
+  if (ins && edt) editableFn = true;
+  else if (ins) editableFn = (p: any) => p.data?.EDIT_STS === "I";
+  else editableFn = (p: any) => p.data?.EDIT_STS !== "I";
+  return { ...c, editable: editableFn } as AnyCol;
+}
+
 /** 내부용 — type/align/codeKey 등 우리 커스텀 키를 활용한 변환 본체. */
 function processColumnDefRaw(
   col: AnyCol,
@@ -208,13 +227,15 @@ function processColumnDefRaw(
 
   // codeKey → cellRenderer (라벨 표시) + type "combo" 면 cellEditor (dropdown) 주입
   // + type "check" 면 체크박스 cellRenderer 주입
-  const prepared = injectCheckRenderer(
-    injectComboEditor(
-      injectCodeRenderer(col, codeMap),
-      codeMap,
+  const prepared = applyEditPolicy(
+    injectCheckRenderer(
+      injectComboEditor(
+        injectCodeRenderer(col, codeMap),
+        codeMap,
+        opts.setRowData,
+      ),
       opts.setRowData,
     ),
-    opts.setRowData,
   );
 
   // "No" 컬럼 (DataGrid 전용 — rowCountForNo 가 없으면 일반 처리)

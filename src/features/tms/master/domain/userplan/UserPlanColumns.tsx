@@ -11,7 +11,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_AUTHORIZED_USER_NAME",
     field: "USR_NM",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",

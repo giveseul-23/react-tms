@@ -11,7 +11,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_CURRENCY_NAME",
     field: "CURR_NM",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "numeric",
@@ -23,7 +23,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_CURR_RDNG_RCD",
     field: "CURR_RDNG_RCD",
     codeKey: "currRdngRcd",
-    editable: true,
+    editable: true, insertable: true,
   },
   { type: "numeric", headerName: "LBL_DSPL_ORD", field: "DSPLY_SEQ" },
 ];
