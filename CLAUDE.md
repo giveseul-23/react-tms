@@ -152,6 +152,13 @@ export function useXxxModel(menuCode: string) {
 - `type: "numeric"` / `dataType: "number"` → 우측 정렬
 - `headerName: "No"` → 자동 일련번호 + 고정 너비
 - 공통코드 → 라벨: 컬럼에 `codeKey` 지정 (DataGrid 자동 cellRenderer)
+- **편집 가능 여부** (EDIT_STS 기반 자동 변환):
+  - `insertable: true` → 추가 상태(`EDIT_STS:"I"`) 행에서만 편집 가능
+  - `editable: true` → 수정 상태(`EDIT_STS:"I"` 아닌 행)에서만 편집 가능
+  - `insertable: true, editable: true` 둘 다 → 항상 편집 가능
+  - 둘 다 미지정/`false` → 편집 불가
+  - `editable: <함수|변수>` 는 그대로 ag-grid 에 전달 (커스텀 분기 그대로 유지)
+- **PK 컬럼**: `isPrimaryKey: true` 표시 → DataGrid 가 `rowKeys`/`autoSelectFirstRow` 자동 활성화 (View 에서 prop 명시 불필요). 보통 `isPrimaryKey: true` + `insertable: true` 조합 (추가 시 입력 / 수정 시 잠금).
 - **audit 컬럼**: `model.bind` 가 `audit:true` 자동 spread → DataGrid 가 컬럼 끝에 standardAudit 자동 추가. 컬럼 파일에서 `standardAudit` 직접 호출 안 함.
 - audit 부분 토글: View 에서 `audit={{ updatePerson: false }}` 명시
 - audit 자동 끄기: View 에서 `audit={false}` 명시 (audit 컬럼이 중간 위치 / 별도 처리 화면)
