@@ -17,14 +17,14 @@ const withSession = (payload: any = {}) => {
 };
 
 export const commodityApi = {
-  getCommodityList(menuCd: string, payload: any) {
+  getCommodityList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/commodityService/search",
-      withSession({ MENU_CD: menuCd, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
-  save(payload: any) {
+  saveCommodityList(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
       "/commodityService/save",

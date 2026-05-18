@@ -198,6 +198,12 @@ function resolveOptions(
   return [];
 }
 
+function sanitizeComboOptions(
+  options: { CODE: string; NAME: string }[],
+): { CODE: string; NAME: string }[] {
+  return options.filter((opt) => String(opt?.CODE ?? "").trim() !== "");
+}
+
 export function useSearchMeta(menuCode: string) {
   const [meta, setMeta] = useState<SearchMeta[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,7 +278,7 @@ export function useSearchMeta(menuCode: string) {
             options = [{ CODE: "ALL", NAME: "모두" }, ...options];
           }
 
-          return { ...m, options };
+          return { ...m, options: sanitizeComboOptions(options) };
         });
 
         if (!cancelled) setMeta(resolved);
@@ -355,7 +361,7 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
             options = [{ CODE: "ALL", NAME: "모두" }, ...options];
           }
 
-          return { ...m, options };
+          return { ...m, options: sanitizeComboOptions(options) };
         });
 
         if (!cancelled) setMeta(resolved);
