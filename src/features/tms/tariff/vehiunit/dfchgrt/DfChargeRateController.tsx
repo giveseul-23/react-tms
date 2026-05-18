@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dfChargeRateApi as api } from "./DfChargeRateApi";
 import { MAIN_COLUMN_DEFS } from "./DfChargeRateColumns";
-import { makeCommonActions } from "@/app/components/grid/commonActions";
+import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DfChargeRateModel, GridKey } from "./DfChargeRateModel";

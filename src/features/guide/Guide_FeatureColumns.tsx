@@ -23,7 +23,7 @@
 // ────────────────────────────────────────────────────────────────
 
 // ── 메인 그리드 컬럼 — audit 자동 (model.bind 가 audit:true spread) ─
-// 키 컬럼에 isPrimaryKey:true 표시 — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
+// 키 컬럼에 isPrimaryKey:true 표시 — DataGrid 가 첫행 자동선택을 자동 활성화.
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
@@ -107,7 +107,7 @@ export const SUB_DETAIL_COLUMN_DEFS = [
 // <DataGrid {...model.bind("main")} columnDefs={MAIN_COLUMN_DEFS} audit={false} />
 //
 // [참고] width / fieldType 같은 개별 override 는 standardAudit 직접 호출 권장:
-//   import { standardAudit } from "@/app/components/grid/commonColumns";
+//   import { standardAudit } from "@/app/components/grid/columns/commonColumns";
 //   const cols = [...MAIN_COLUMN_DEFS, ...standardAudit(model.grids.main.setData, {
 //     insertPersonOverrides: { width: 110 },
 //   })];

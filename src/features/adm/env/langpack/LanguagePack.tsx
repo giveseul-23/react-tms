@@ -32,7 +32,7 @@ export default function LanguagePack() {
       searchProps={{
         meta,
         fetchFn: ctrl.fetchLanguagePackList,
-        onSearch: ctrl.onSearchCallback,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef,
         filtersRef,
         pageSize: model.pageSize,

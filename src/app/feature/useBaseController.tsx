@@ -14,7 +14,7 @@ import {
 } from "@/app/components/grid/gridUtils/rowStatus";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
-import { makeSaveAction } from "@/app/components/grid/commonActions";
+import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
 import { newRid, type BaseModel, type GridSlot } from "./useBaseModel";
 
 interface Args<K extends string> {
@@ -265,7 +265,7 @@ export function useBaseController<K extends string>({
   // 센차: ExGridEditor.addRow — 그리드 끝에 신규 행 push (EDIT_STS: "I" 자동)
   // __rid__ 미리 부여 → setData 의 ensureRid 가 새 객체로 spread 하지 않고 그대로 사용.
   // setSelected 도 같은 reference → 셀 편집 시 selected sync 가 __rid__ 매칭으로 PK 갱신 추적.
-  // 저장 후 autoSelectFirstRow 의 PK 매칭으로 추가한 행이 자동 재선택됨.
+  // 저장 후 첫행 자동선택의 PK 매칭으로 추가한 행이 자동 재선택됨.
   const addRow = useCallback(
     (gridKey: K, newRow: Record<string, any>) => {
       const slot = (model.grids as Record<string, GridSlot>)[gridKey as string];

@@ -1,4 +1,4 @@
-import { numberValueFormatter } from "@/app/components/grid/commonFormatters";
+import { numberValueFormatter } from "@/app/components/grid/columns/commonFormatters";
 
 // 메인 그리드
 export const MAIN_COLUMN_DEFS = [

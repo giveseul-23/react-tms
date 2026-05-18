@@ -31,7 +31,7 @@ export default function ApSettlMgmt() {
       searchProps={{
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.onSearchCallback,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
@@ -60,9 +60,7 @@ export default function ApSettlMgmt() {
           ]}
           presets={{
             SUMMARY: {
-              // SUMMARY 탭만 좌(요약 그리드) + 우(nested 4 sub-tab) 좌우 분할.
-              // outer DataGrid 의 renderRightGrid 와 preset.render 가 같이 동작 안 해서
-              // SplitPane 으로 직접 조립.
+              // SUMMARY 탭만 좌(요약 그리드) + 우(nested 4 sub-tab) 좌우 분할 — SplitPane 으로 조립.
               render: () => (
                 <SplitPane direction="horizontal" defaultSizes={[30, 70]}>
                   <DataGrid

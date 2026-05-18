@@ -18,7 +18,7 @@
 //   )}
 
 import React from "react";
-import type { TreeCellContext } from "./TreeGrid";
+import type { TreeCellContext } from "./index";
 
 type Props = {
   id: string;

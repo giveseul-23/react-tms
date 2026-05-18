@@ -30,7 +30,7 @@ export default function DispatchPlan() {
       searchProps={{
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchDispatchPlanList,
-        onSearch: ctrl.onSearchCallback,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         rawFiltersRef,

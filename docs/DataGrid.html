@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DataGrid 컴포넌트 가이드</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-soft: #1e293b;
+    --panel: #ffffff;
+    --panel-alt: #f8fafc;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --code-bg: #0f172a;
+    --code-text: #e2e8f0;
+    --code-key: #93c5fd;
+    --code-str: #fcd34d;
+    --code-cmt: #94a3b8;
+    --tag-blue: #2563eb;
+    --tag-green: #16a34a;
+    --tag-orange: #ea580c;
+    --tag-purple: #9333ea;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", Roboto, sans-serif;
+    background: var(--panel-alt);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 14.5px;
+  }
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: #f8fafc;
+    padding: 48px 32px 56px;
+    border-bottom: 4px solid #2563eb;
+  }
+  header .wrap { max-width: 980px; margin: 0 auto; }
+  header h1 { margin: 0 0 12px; font-size: 32px; letter-spacing: -0.5px; }
+  header p { margin: 0; color: #cbd5e1; font-size: 15px; }
+  header .meta { margin-top: 16px; font-size: 13px; color: #94a3b8; }
+
+  main { max-width: 980px; margin: 0 auto; padding: 32px; }
+
+  nav.toc {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 22px; margin-bottom: 32px;
+  }
+  nav.toc h2 {
+    margin: 0 0 10px; font-size: 14px; color: var(--muted);
+    font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  nav.toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 32px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px 32px; margin-bottom: 24px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+  section h2 {
+    margin: 0 0 16px; font-size: 22px; color: #0f172a;
+    border-left: 4px solid var(--accent); padding-left: 12px;
+  }
+  section h3 { margin: 26px 0 10px; font-size: 17px; color: #1e293b; }
+  section h4 { margin: 18px 0 8px; font-size: 15px; color: #334155; }
+  p { margin: 8px 0; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+
+  code.inline {
+    background: #f1f5f9; color: #be123c;
+    padding: 2px 6px; border-radius: 4px;
+    font-size: 13px; font-family: "Fira Code", Consolas, Menlo, monospace;
+  }
+
+  pre.code {
+    background: var(--code-bg); color: var(--code-text);
+    padding: 18px 20px; border-radius: 8px;
+    overflow-x: auto; font-size: 13px; line-height: 1.6;
+    font-family: "Fira Code", Consolas, Menlo, monospace;
+    margin: 12px 0 16px;
+  }
+  pre.code .k { color: var(--code-key); }
+  pre.code .s { color: var(--code-str); }
+  pre.code .c { color: var(--code-cmt); font-style: italic; }
+  pre.code .t { color: #f9a8d4; }
+
+  pre.tree {
+    background: #f8fafc; color: #1e293b;
+    padding: 16px 20px; border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow-x: auto; font-size: 13px; line-height: 1.55;
+    font-family: "Fira Code", Consolas, Menlo, monospace;
+    margin: 12px 0 16px;
+  }
+  pre.tree .cmt { color: #64748b; font-style: italic; }
+
+  pre.flow {
+    background: #0f172a; color: #e2e8f0;
+    padding: 18px 20px; border-radius: 8px;
+    overflow-x: auto; font-size: 12.5px; line-height: 1.7;
+    font-family: "Fira Code", Consolas, Menlo, monospace;
+    margin: 12px 0 16px;
+  }
+  pre.flow .hl { color: #fcd34d; }
+  pre.flow .arr { color: #94a3b8; }
+
+  table {
+    width: 100%; border-collapse: collapse;
+    margin: 12px 0 20px; font-size: 13.5px;
+  }
+  table th, table td {
+    border: 1px solid var(--border);
+    padding: 10px 12px; text-align: left; vertical-align: top;
+  }
+  table th { background: #f1f5f9; font-weight: 600; color: #1e293b; }
+  table td code {
+    background: #f1f5f9; color: #be123c;
+    padding: 1px 5px; border-radius: 3px;
+    font-size: 12.5px; font-family: "Fira Code", Consolas, Menlo, monospace;
+  }
+  table tr:nth-child(even) td { background: #fafafa; }
+
+  .tag {
+    display: inline-block; font-size: 11px;
+    padding: 2px 8px; border-radius: 999px;
+    color: #fff; font-weight: 600;
+    letter-spacing: 0.3px; margin-right: 4px;
+  }
+  .tag.blue { background: var(--tag-blue); }
+  .tag.green { background: var(--tag-green); }
+  .tag.orange { background: var(--tag-orange); }
+  .tag.purple { background: var(--tag-purple); }
+
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 12px 16px; border-radius: 6px;
+    margin: 14px 0; font-size: 13.5px;
+  }
+  .callout.warn { border-left-color: #ea580c; background: #fff7ed; }
+  .callout.tip  { border-left-color: #16a34a; background: #f0fdf4; }
+
+  .card {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; margin: 12px 0;
+    background: #fbfdff;
+  }
+  .card h4 {
+    margin: 0 0 8px; font-size: 14.5px; color: #1e293b;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card h4 .file {
+    font-family: "Fira Code", Consolas, Menlo, monospace;
+    background: #0f172a; color: #fbbf24;
+    padding: 2px 8px; border-radius: 4px; font-size: 12.5px;
+  }
+  .card dl { margin: 0; }
+  .card dt {
+    font-weight: 600; color: #475569;
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.4px; margin-top: 6px;
+  }
+  .card dd { margin: 2px 0 0; padding-left: 0; font-size: 13.5px; }
+
+  footer {
+    text-align: center; color: var(--muted);
+    font-size: 12.5px; padding: 24px 0 40px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>DataGrid 컴포넌트 가이드</h1>
+      <p>react-tms-carr-ts-pr 프로젝트의 표준 그리드 컴포넌트 사용법 정리</p>
+      <div class="meta">경로: <code style="color:#fbbf24">src/app/components/grid/DataGrid/</code></div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="toc">
+      <h2>목차</h2>
+      <ol>
+        <li><a href="#overview">개요</a></li>
+        <li><a href="#basic">기본 사용법 (model.bind)</a></li>
+        <li><a href="#columns">Columns 규칙</a></li>
+        <li><a href="#audit">Audit 컬럼 자동 추가</a></li>
+        <li><a href="#props">주요 Props 표</a></li>
+        <li><a href="#layout">레이아웃 (plain / tab / render 자유조립)</a></li>
+        <li><a href="#tree">Tree Data</a></li>
+        <li><a href="#pagination">페이지네이션</a></li>
+        <li><a href="#selection">선택 / Cascade</a></li>
+        <li><a href="#example">전체 예제</a></li>
+        <li><a href="#internals">내부 구조 (파일 분리 &amp; Hook)</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1. 개요 -->
+    <section id="overview">
+      <h2>1. 개요</h2>
+      <p>
+        <code class="inline">DataGrid</code> 는 ag-grid-community 위에 우리 프로젝트 컨벤션을 입혀 둔 표준 그리드 컴포넌트입니다.
+        대부분의 화면은 <strong>useBaseModel 의 <code class="inline">model.bind(gridKey)</code></strong> 와 함께 사용하며,
+        그리드별 <code class="inline">rowData</code> / <code class="inline">selected</code> / 페이지 / setter 가 자동으로 spread 됩니다.
+      </p>
+      <ul>
+        <li>한 화면에서 <strong>여러 개의 그리드</strong>(main / sub01 / sub02 …)를 selection 기반 cascade 로 묶을 수 있도록 설계되어 있습니다.</li>
+        <li>공통 동작 (audit 컬럼 자동, EDIT_STS 기반 편집 잠금, 공통코드 → 라벨 자동 치환, autoSize, 페이지네이션) 이 내장됩니다.</li>
+        <li>View 레이어에서는 <strong>JSX/레이아웃만</strong> 작성하고, 핸들러는 Controller, 상태는 Model 로 위임합니다.</li>
+      </ul>
+      <div class="callout tip">
+        <strong>TIP.</strong> 신규 화면은 <code class="inline">src/features/guide/Guide_Feature*</code> 5종 세트를 복사하면 모든 권장 패턴이 이미 반영되어 있습니다.
+      </div>
+    </section>
+
+    <!-- 2. 기본 사용법 -->
+    <section id="basic">
+      <h2>2. 기본 사용법 — <code class="inline">{...model.bind("main")}</code></h2>
+      <p>
+        View 에서 DataGrid 를 쓸 때, 일반 prop 을 일일이 잇지 않고 <strong>model.bind() 의 결과를 spread</strong> 합니다.
+        다음 prop 들이 자동으로 채워집니다.
+      </p>
+      <ul>
+        <li><code class="inline">rowData</code> · <code class="inline">setRowData</code></li>
+        <li><code class="inline">totalCount</code> · <code class="inline">currentPage</code> · <code class="inline">pageSize</code></li>
+        <li><code class="inline">onPageChange</code> · <code class="inline">onPageSizeChange</code></li>
+        <li><code class="inline">selectedRow</code> (controller 가 setSelected 로 박은 행을 시각 반영)</li>
+        <li><code class="inline">onSelectionChanged</code> (사용자 클릭으로 변경된 selection 을 model 에 동기화)</li>
+        <li><code class="inline">audit: true</code> (auto-audit 컬럼)</li>
+      </ul>
+
+      <pre class="code"><span class="c">// View — 가장 기본형</span>
+&lt;<span class="t">DataGrid</span>
+  {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"main"</span>)}
+  <span class="k">columnDefs</span>={MAIN_COLUMN_DEFS}
+  <span class="k">onRowClicked</span>={ctrl.onMainGridClick}
+  <span class="k">actions</span>={ctrl.mainActions}
+/&gt;</pre>
+
+      <div class="callout warn">
+        <strong>주의.</strong> View 에서 <code class="inline">useRef</code> 로 <code class="inline">searchRef</code> / <code class="inline">filtersRef</code> 를 별도로 만들지 마세요.
+        <code class="inline">useBaseModel</code> 이 이미 들고 있으므로 <code class="inline">model.searchRef</code> / <code class="inline">model.filtersRef</code> 를 사용해야 합니다.
+      </div>
+    </section>
+
+    <!-- 3. Columns -->
+    <section id="columns">
+      <h2>3. Columns 규칙</h2>
+      <p>
+        <code class="inline">XxxColumns.tsx</code> 는 단순 <code class="inline">const</code> 배열로 정의합니다. 다음 컨벤션이 자동으로 처리됩니다.
+      </p>
+
+      <h3>3-1. 자동 변환 룰</h3>
+      <table>
+        <thead>
+          <tr><th>조건</th><th>자동 동작</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>headerName: "LBL_*"</code></td><td>다국어 키로 인식 — <code>Lang.get</code> 자동 적용</td></tr>
+          <tr><td><code>field</code> 가 <code>DTTM</code> 포함</td><td>자동 날짜 포맷</td></tr>
+          <tr><td><code>field</code> 가 <code>_STS</code> 로 끝남</td><td>자동 중앙 정렬</td></tr>
+          <tr><td><code>type: "numeric"</code> 또는 <code>dataType: "number"</code></td><td>자동 우측 정렬</td></tr>
+          <tr><td><code>headerName: "No"</code></td><td>자동 일련번호 + 고정 너비</td></tr>
+          <tr><td><code>codeKey: "xxxTcd"</code></td><td><code>codeMap[xxxTcd][value]</code> 로 라벨 자동 치환 (cellRenderer 자동 주입)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>3-2. 편집 가능 여부 — EDIT_STS 기반 자동 변환</h3>
+      <p>
+        ag-grid 의 <code class="inline">editable</code> 을 직접 쓰지 않고, <strong>insertable / editable</strong> 키워드로 의도를 선언합니다.
+        실제 ag-grid 의 editable 은 EDIT_STS 와 조합되어 자동 산출됩니다.
+      </p>
+      <table>
+        <thead>
+          <tr><th>선언</th><th>의미</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>insertable: true</code></td><td>추가 상태 행 (<code>EDIT_STS === "I"</code>) 에서만 편집 가능</td></tr>
+          <tr><td><code>editable: true</code></td><td>수정 상태 행 (<code>EDIT_STS !== "I"</code>) 에서만 편집 가능</td></tr>
+          <tr><td><code>insertable: true, editable: true</code></td><td>항상 편집 가능</td></tr>
+          <tr><td>둘 다 미지정 / false</td><td>편집 불가</td></tr>
+          <tr><td><code>editable: (params) =&gt; ...</code></td><td>함수형은 ag-grid 에 그대로 위임</td></tr>
+        </tbody>
+      </table>
+
+      <h3>3-3. PK 컬럼</h3>
+      <ul>
+        <li><code class="inline">isPrimaryKey: true</code> 표시 → DataGrid 가 <strong>첫행 자동선택</strong>을 자동 활성화 (View 에서 별도 prop 명시 불필요). 키 컬럼은 자동으로 PK 매칭에 사용됨.</li>
+        <li>보통 <strong><code class="inline">isPrimaryKey: true</code> + <code class="inline">insertable: true</code></strong> 조합으로 사용 — 추가 시 입력, 수정 시 잠금.</li>
+      </ul>
+
+      <h3>3-4. Columns 정의 예시</h3>
+      <pre class="code"><span class="k">export const</span> MAIN_COLUMN_DEFS<span class="k">: ColDef[]</span> = [
+  { <span class="k">headerName</span>: <span class="s">"No"</span> },                                  <span class="c">// 자동 일련번호</span>
+  { <span class="k">headerName</span>: <span class="s">"LBL_VEHICLE_NO"</span>, <span class="k">field</span>: <span class="s">"VEH_NO"</span>,
+    <span class="k">isPrimaryKey</span>: <span class="k">true</span>, <span class="k">insertable</span>: <span class="k">true</span> },           <span class="c">// PK + 추가 입력</span>
+  { <span class="k">headerName</span>: <span class="s">"LBL_VEHICLE_TYPE"</span>, <span class="k">field</span>: <span class="s">"VEH_TCD"</span>,
+    <span class="k">codeKey</span>: <span class="s">"vehTcd"</span>, <span class="k">editable</span>: <span class="k">true</span> },          <span class="c">// 코드→라벨 + 수정</span>
+  { <span class="k">headerName</span>: <span class="s">"LBL_AMT"</span>, <span class="k">field</span>: <span class="s">"AMT"</span>,
+    <span class="k">type</span>: <span class="s">"numeric"</span>, <span class="k">editable</span>: <span class="k">true</span> },                <span class="c">// 우측정렬</span>
+  { <span class="k">headerName</span>: <span class="s">"LBL_REG_DTTM"</span>, <span class="k">field</span>: <span class="s">"REG_DTTM"</span> },     <span class="c">// 날짜 자동포맷</span>
+];</pre>
+    </section>
+
+    <!-- 4. Audit -->
+    <section id="audit">
+      <h2>4. Audit 컬럼 자동 추가</h2>
+      <p>
+        등록자/등록일/수정자/수정일/행상태/삭제 같은 표준 audit 컬럼은 컬럼 배열에 직접 넣지 않습니다.
+        <code class="inline">model.bind()</code> 가 자동으로 <code class="inline">audit: true</code> 를 spread 하면 DataGrid 가 컬럼 끝에 자동 추가합니다.
+      </p>
+      <table>
+        <thead>
+          <tr><th>audit 값</th><th>동작</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>true</code> (또는 미지정 + bind)</td><td>standardAudit 모두 ON</td></tr>
+          <tr><td><code>false</code></td><td>자동 추가 안 함 (audit 컬럼을 직접 중간 위치에 둘 때)</td></tr>
+          <tr><td><code>{ updatePerson: false, ... }</code></td><td>부분 토글</td></tr>
+        </tbody>
+      </table>
+
+      <pre class="code"><span class="c">// audit 컬럼 일부만 끄기</span>
+&lt;<span class="t">DataGrid</span>
+  {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"main"</span>)}
+  <span class="k">audit</span>={{ <span class="k">updatePerson</span>: <span class="k">false</span> }}
+  <span class="k">columnDefs</span>={MAIN_COLUMN_DEFS}
+/&gt;
+
+<span class="c">// 완전히 끄기</span>
+&lt;<span class="t">DataGrid</span>
+  {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"sub01"</span>)}
+  <span class="k">audit</span>={<span class="k">false</span>}
+  <span class="k">columnDefs</span>={SUB_COLUMN_DEFS}
+/&gt;</pre>
+    </section>
+
+    <!-- 5. Props -->
+    <section id="props">
+      <h2>5. 주요 Props 표</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:200px">Prop</th>
+            <th style="width:170px">Type</th>
+            <th>설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>rowData</code></td>
+            <td><code>TRow[]</code> | <code>Record&lt;string, TRow[]&gt;</code></td>
+            <td>탭일 경우 키별 객체 가능. 일반적으로는 <code>model.bind</code> 가 자동 주입.</td>
+          </tr>
+          <tr>
+            <td><code>columnDefs</code></td>
+            <td><code>ColDef[]</code></td>
+            <td>컬럼 정의 배열. <span class="tag blue">필수</span></td>
+          </tr>
+          <tr>
+            <td><code>actions</code></td>
+            <td><code>ActionItem[]</code></td>
+            <td>그리드 상단 액션 버튼. 비거나 생략 시 actions 바 자체 숨김.</td>
+          </tr>
+          <tr>
+            <td><code>subTitle</code></td>
+            <td><code>string (LBL_*)</code></td>
+            <td>actions 바 좌측의 그리드 제목 (다국어 키).</td>
+          </tr>
+          <tr>
+            <td><code>audit</code></td>
+            <td><code>boolean</code> | <code>객체</code></td>
+            <td>standardAudit 자동 추가 토글. <code>model.bind</code> 가 자동 true.</td>
+          </tr>
+          <tr>
+            <td><code>codeMap</code></td>
+            <td><code>Record&lt;string, Record&lt;string, string&gt;&gt;</code></td>
+            <td>컬럼의 <code>codeKey</code> 를 라벨로 치환할 때 lookup 으로 사용.</td>
+          </tr>
+          <tr>
+            <td><code>onRowClicked</code></td>
+            <td><code>(row) =&gt; void</code></td>
+            <td>행 클릭. Controller 의 <code>onMainGridClick</code> 등에서 cascade 처리.</td>
+          </tr>
+          <tr>
+            <td><code>onRowDoubleClicked</code></td>
+            <td><code>(row) =&gt; void</code></td>
+            <td>더블클릭 (popup 띄울 때 등).</td>
+          </tr>
+          <tr>
+            <td><code>onSelectionChanged</code></td>
+            <td><code>(row | null) =&gt; void</code></td>
+            <td>사용자 선택 변경 시. <code>model.bind</code> 가 자동 주입.</td>
+          </tr>
+          <tr>
+            <td><code>selectedRow</code></td>
+            <td><code>TRow</code></td>
+            <td>controller 가 박은 selection 을 시각 반영. <code>model.bind</code> 자동.</td>
+          </tr>
+          <tr>
+            <td><code>pagination</code></td>
+            <td><code>boolean</code> (기본 true)</td>
+            <td>페이지네이션 바 표시 여부.</td>
+          </tr>
+          <tr>
+            <td><code>totalCount / currentPage / pageSize</code></td>
+            <td><code>number</code></td>
+            <td>페이지 상태. <code>model.bind</code> 자동.</td>
+          </tr>
+          <tr>
+            <td><code>onPageChange / onPageSizeChange</code></td>
+            <td><code>(n) =&gt; void</code></td>
+            <td>페이지 변경 핸들러. <code>model.bind</code> 자동.</td>
+          </tr>
+          <tr>
+            <td><code>tabs / presets</code></td>
+            <td><code>GridTab[]</code> / <code>Record&lt;key, GridPreset&gt;</code></td>
+            <td>하나의 DataGrid 안에서 탭별 컬럼/액션/렌더를 다르게. 보통 <code>render: () =&gt; ...</code> 패턴으로 자유 조립.</td>
+          </tr>
+          <tr>
+            <td><code>onTabChange</code></td>
+            <td><code>(key) =&gt; void</code></td>
+            <td>탭 전환 콜백.</td>
+          </tr>
+          <tr>
+            <td><code>treeData / getDataPath / autoGroupColumnDef / groupDefaultExpanded</code></td>
+            <td>각각</td>
+            <td>Tree Data 모드. 7번 섹션 참고.</td>
+          </tr>
+          <tr>
+            <td><code>headerCheckbox</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code> 명시 시 selection column(체크박스/헤더체크박스) 숨김.</td>
+          </tr>
+          <tr>
+            <td><code>rowSelection</code></td>
+            <td><code>"single"</code> | <code>"multiple"</code></td>
+            <td>선택 모드.</td>
+          </tr>
+          <tr>
+            <td><code>onCellValueChanged</code></td>
+            <td><code>(params) =&gt; void</code></td>
+            <td>셀 편집 후 콜백.</td>
+          </tr>
+          <tr>
+            <td><code>onTrack</code></td>
+            <td><code>(rows) =&gt; ReactNode</code></td>
+            <td>"이력 추적" 패널을 토글하는 액션 자동 추가.</td>
+          </tr>
+          <tr>
+            <td><code>overrideRowData</code></td>
+            <td><code>TRow[]</code></td>
+            <td>탭/프리셋 계산을 무시하고 직접 rowData 주입 (flat-tree 등 특수용).</td>
+          </tr>
+          <tr>
+            <td><code>gridOptions</code></td>
+            <td><code>Record&lt;string, any&gt;</code></td>
+            <td>commonGridProps 보다 나중에 spread — ag-grid 옵션 오버라이드.</td>
+          </tr>
+          <tr>
+            <td><code>disableAutoSize</code></td>
+            <td><code>boolean</code></td>
+            <td>autoSize 비활성.</td>
+          </tr>
+          <tr>
+            <td><code>autoSizeKey</code></td>
+            <td><code>number</code></td>
+            <td>변할 때만 autoSize 재실행. <code>model.bind</code> 가 조회 결과 도착에만 +1.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 6. Layout -->
+    <section id="layout">
+      <h2>6. 레이아웃 — plain / tab / render 자유 조립</h2>
+
+      <h3>6-1. plain (단일 그리드)</h3>
+      <pre class="code">&lt;<span class="t">DataGrid</span>
+  {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"main"</span>)}
+  <span class="k">layoutType</span>={<span class="s">"plain"</span>}
+  <span class="k">columnDefs</span>={MAIN_COLUMN_DEFS}
+  <span class="k">actions</span>={ctrl.mainActions}
+/&gt;</pre>
+
+      <h3>6-2. tab — <code class="inline">presets[key].render</code> 패턴 (권장)</h3>
+      <p>
+        탭마다 단순히 컬럼/액션만 바꾸는 경우라도 <strong>실무에선 <code class="inline">render: () =&gt; (...)</code> 로 통일</strong>해 사용합니다.
+        그래야 6-3 의 자유 조립과 자연스럽게 이어집니다.
+      </p>
+      <pre class="code">&lt;<span class="t">DataGrid</span>
+  <span class="k">layoutType</span>={<span class="s">"tab"</span>}
+  <span class="k">tabs</span>={[
+    { <span class="k">key</span>: <span class="s">"AP"</span>, <span class="k">label</span>: <span class="s">"LBL_AP"</span> },
+    { <span class="k">key</span>: <span class="s">"AR"</span>, <span class="k">label</span>: <span class="s">"LBL_AR"</span> },
+  ]}
+  <span class="k">presets</span>={{
+    <span class="k">AP</span>: {
+      <span class="k">render</span>: () =&gt; (
+        &lt;<span class="t">DataGrid</span>
+          {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"ap"</span>)}
+          <span class="k">columnDefs</span>={AP_COLS}
+          <span class="k">actions</span>={ctrl.apActions}
+        /&gt;
+      ),
+    },
+    <span class="k">AR</span>: {
+      <span class="k">render</span>: () =&gt; (
+        &lt;<span class="t">DataGrid</span>
+          {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"ar"</span>)}
+          <span class="k">columnDefs</span>={AR_COLS}
+          <span class="k">actions</span>={ctrl.arActions}
+        /&gt;
+      ),
+    },
+  }}
+  <span class="k">onTabChange</span>={ctrl.onTabChange}
+  <span class="k">actions</span>={[]}
+/&gt;</pre>
+
+      <h3>6-3. tab + render 자유 조립 (SplitPane / 중첩 DataGrid / 중첩 탭)</h3>
+      <p>
+        <code class="inline">render</code> 안에서는 무엇이든 자유롭게 조립할 수 있습니다.
+        <code class="inline">SplitPane</code> 으로 좌/우 패널을 만들고, 우측에 또 다른 탭형 DataGrid 를 중첩할 수도 있습니다.
+        <code class="inline">ApSettlMgmt</code> 가 이 패턴의 대표 사례입니다.
+      </p>
+      <pre class="code"><span class="c">// SUMMARY 탭만 좌(요약 그리드) + 우(중첩 4 sub-tab) 좌우 분할</span>
+&lt;<span class="t">DataGrid</span>
+  <span class="k">layoutType</span>={<span class="s">"tab"</span>}
+  <span class="k">tabs</span>={[
+    { <span class="k">key</span>: <span class="s">"SUMMARY"</span>, <span class="k">label</span>: <span class="s">"LBL_SUMMARY_LIST"</span> },
+    { <span class="k">key</span>: <span class="s">"COST_CENTER"</span>, <span class="k">label</span>: <span class="s">"LBL_EACH_COST_ACCOUNT"</span> },
+  ]}
+  <span class="k">presets</span>={{
+    <span class="k">SUMMARY</span>: {
+      <span class="k">render</span>: () =&gt; (
+        &lt;<span class="t">SplitPane</span> <span class="k">direction</span>={<span class="s">"horizontal"</span>} <span class="k">defaultSizes</span>={[30, 70]}&gt;
+          &lt;<span class="t">DataGrid</span>
+            {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"summary"</span>)}
+            <span class="k">columnDefs</span>={SUMMARY_COLS}
+            <span class="k">actions</span>={ctrl.summaryActions}
+          /&gt;
+          &lt;<span class="t">DataGrid</span>
+            <span class="k">layoutType</span>={<span class="s">"tab"</span>}
+            <span class="k">tabs</span>={[
+              { <span class="k">key</span>: <span class="s">"MONTHLY_FARE"</span>, <span class="k">label</span>: <span class="s">"LBL_FIXED_VEH_CHARGE"</span> },
+              { <span class="k">key</span>: <span class="s">"FREIGHT"</span>,      <span class="k">label</span>: <span class="s">"LBL_ITM_QTY_RATE"</span> },
+            ]}
+            <span class="k">presets</span>={{
+              <span class="k">MONTHLY_FARE</span>: {
+                <span class="k">render</span>: () =&gt; (
+                  &lt;<span class="t">DataGrid</span> {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"monthlyFare"</span>)} <span class="k">columnDefs</span>={MONTHLY_FARE_COLS} /&gt;
+                ),
+              },
+              <span class="k">FREIGHT</span>: {
+                <span class="k">render</span>: () =&gt; (
+                  &lt;<span class="t">DataGrid</span> {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"freightPay"</span>)} <span class="k">columnDefs</span>={FREIGHT_COLS} /&gt;
+                ),
+              },
+            }}
+            <span class="k">actions</span>={[]}
+          /&gt;
+        &lt;/<span class="t">SplitPane</span>&gt;
+      ),
+    },
+    <span class="k">COST_CENTER</span>: {
+      <span class="k">render</span>: () =&gt; (
+        &lt;<span class="t">DataGrid</span>
+          {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"costCenter"</span>)}
+          <span class="k">columnDefs</span>={COST_CENTER_COLS}
+          <span class="k">actions</span>={ctrl.costCenterActions}
+        /&gt;
+      ),
+    },
+  }}
+  <span class="k">actions</span>={[]}
+/&gt;</pre>
+
+      <div class="callout tip">
+        <strong>왜 render 패턴인가.</strong>
+        탭 단위로 컴포넌트 트리 자체를 결정할 수 있어서 — <code class="inline">SplitPane</code>, 중첩 탭, 폼 패널 같은 복합 레이아웃을
+        외부 분기 없이 한 곳에 응집해 표현할 수 있습니다.
+      </div>
+    </section>
+
+    <!-- 7. Tree -->
+    <section id="tree">
+      <h2>7. Tree Data</h2>
+      <p>
+        계층 데이터는 <code class="inline">treeData</code> 모드를 사용합니다. 각 행에서 트리 경로를 만들어 주는 <code class="inline">getDataPath</code> 가 필수.
+      </p>
+      <pre class="code">&lt;<span class="t">DataGrid</span>
+  {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"main"</span>)}
+  <span class="k">treeData</span>
+  <span class="k">getDataPath</span>={(<span class="k">row</span>) =&gt; row.PATH.<span class="k">split</span>(<span class="s">"/"</span>)}
+  <span class="k">groupDefaultExpanded</span>={<span class="k">-1</span>}     <span class="c">// -1: 전체 펼침, 0: 전체 접힘, N: N 레벨까지</span>
+  <span class="k">autoGroupColumnDef</span>={{
+    <span class="k">headerName</span>: <span class="s">"LBL_NAME"</span>,
+    <span class="k">cellRendererParams</span>: { <span class="k">suppressCount</span>: <span class="k">true</span> },
+  }}
+  <span class="k">columnDefs</span>={TREE_COLUMN_DEFS}
+/&gt;</pre>
+      <p>
+        별도로 <code class="inline">TreeGrid</code> 컴포넌트 (<code class="inline">src/app/components/grid/TreeGrid/</code>) 도 있어 메뉴/조직 같이 전형적인 트리 화면에서 사용할 수 있습니다.
+      </p>
+    </section>
+
+    <!-- 8. Pagination -->
+    <section id="pagination">
+      <h2>8. 페이지네이션</h2>
+      <p>
+        페이지네이션은 <code class="inline">pagination=true</code>(기본) + <code class="inline">totalCount</code> 가 있을 때만 표시됩니다.
+        <code class="inline">model.bind</code> 가 <code class="inline">totalCount</code> / <code class="inline">currentPage</code> / <code class="inline">pageSize</code> / <code class="inline">onPageChange</code> / <code class="inline">onPageSizeChange</code> 를 자동으로 묶어주므로,
+        View 에서는 별도로 신경 쓸 필요가 없습니다.
+      </p>
+      <ul>
+        <li>기본 <code class="inline">pageSize</code> 는 500.</li>
+        <li>onPageChange 시 <code class="inline">base.search(page)</code> 를 호출하면 메인 조회가 다시 돕니다.</li>
+        <li>페이지네이션을 끄려면 <code class="inline">pagination={`false`}</code>.</li>
+      </ul>
+    </section>
+
+    <!-- 9. Selection / Cascade -->
+    <section id="selection">
+      <h2>9. 선택 / Cascade</h2>
+      <p>
+        Master → Detail 같은 cascade 흐름은 Controller 에서 <code class="inline">base.handleRowClick</code> 헬퍼로 표현합니다.
+      </p>
+      <pre class="code"><span class="c">// Controller</span>
+<span class="k">const</span> onMainGridClick = (<span class="k">row</span>: MainRow) =&gt; {
+  base.<span class="k">handleRowClick</span>(<span class="s">"main"</span>, row, {
+    <span class="c">// row 가 바뀌면 sub01 을 비우고 새로 fetch</span>
+    <span class="k">sub01</span>: { <span class="k">fetch</span>: () =&gt; api.<span class="k">getSub01</span>({ <span class="k">VEH_NO</span>: row.VEH_NO }) },
+  });
+};
+
+<span class="c">// View — onRowClicked 만 잇기만 하면 됨</span>
+&lt;<span class="t">DataGrid</span>
+  {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"main"</span>)}
+  <span class="k">columnDefs</span>={MAIN_COLUMN_DEFS}
+  <span class="k">onRowClicked</span>={ctrl.onMainGridClick}
+/&gt;</pre>
+      <ul>
+        <li><strong>selection 시각 동기화</strong>: <code class="inline">selectedRow</code> 는 controller 가 <code class="inline">setSelected</code> 로 박은 행을 시각으로 반영. (자동 spread)</li>
+        <li><strong>첫행 자동선택</strong>: columnDefs 안에 <code class="inline">isPrimaryKey: true</code> 가 1개 이상 있고 <code class="inline">onRowClicked</code> 가 있으면 자동 활성화. rowData 갱신 시 이전 선택을 PK 로 매칭해 복구하고, 매칭 실패 시 아무 동작도 하지 않습니다.</li>
+      </ul>
+    </section>
+
+    <!-- 10. Example -->
+    <section id="example">
+      <h2>10. 전체 예제 (요약)</h2>
+      <p>Guide_Feature 패턴을 따른 가장 표준적인 화면 한 묶음의 핵심만 압축한 예시입니다.</p>
+
+      <h4>Xxx.tsx (View)</h4>
+      <pre class="code"><span class="k">export const</span> MENU_CODE = <span class="s">"XXX001"</span>;
+
+<span class="k">export default function</span> <span class="t">Xxx</span>() {
+  <span class="k">const</span> model = <span class="k">useXxxModel</span>(MENU_CODE);
+  <span class="k">const</span> ctrl  = <span class="k">useXxxController</span>(model);
+
+  <span class="k">return</span> (
+    &lt;<span class="t">MasterDetailPage</span>
+      <span class="k">menuCode</span>={MENU_CODE}
+      <span class="k">searchProps</span>={{ <span class="c">/* meta 기반 자동 */</span> }}
+      <span class="k">direction</span>={model.layout === <span class="s">"side"</span> ? <span class="s">"horizontal"</span> : <span class="s">"vertical"</span>}
+      <span class="k">layoutToggle</span>={{ <span class="k">layout</span>: model.layout, <span class="k">onToggle</span>: model.setLayout }}
+      <span class="k">storageKey</span>={model.storageKeys.outer}
+      <span class="k">top</span>={
+        &lt;<span class="t">DataGrid</span>
+          {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"main"</span>)}
+          <span class="k">columnDefs</span>={MAIN_COLUMN_DEFS}
+          <span class="k">onRowClicked</span>={ctrl.onMainGridClick}
+          <span class="k">actions</span>={ctrl.mainActions}
+        /&gt;
+      }
+      <span class="k">bottom</span>={
+        &lt;<span class="t">DataGrid</span>
+          {<span class="k">...</span>model.<span class="k">bind</span>(<span class="s">"sub01"</span>)}
+          <span class="k">columnDefs</span>={SUB01_COLUMN_DEFS}
+          <span class="k">actions</span>={ctrl.sub01Actions}
+        /&gt;
+      }
+    /&gt;
+  );
+}</pre>
+
+      <h4>XxxController.tsx (핸들러)</h4>
+      <pre class="code"><span class="k">const</span> base = <span class="k">useBaseController</span>&lt;GridKey&gt;({ model });
+
+<span class="k">const</span> onMainGridClick = (<span class="k">row</span>: MainRow) =&gt; {
+  base.<span class="k">handleRowClick</span>(<span class="s">"main"</span>, row, {
+    <span class="k">sub01</span>: { <span class="k">fetch</span>: () =&gt; api.<span class="k">getSub01</span>({ <span class="k">VEH_NO</span>: row.VEH_NO }) },
+  });
+};
+
+<span class="k">const</span> mainActions = <span class="k">useMemo</span>(() =&gt; <span class="k">makeCommonActions</span>({
+  <span class="k">add</span>:  () =&gt; base.<span class="k">addRow</span>(<span class="s">"main"</span>, EMPTY_MAIN),
+  <span class="k">save</span>: () =&gt; base.<span class="k">saveGrid</span>(<span class="s">"main"</span>, api.save, { <span class="k">afterSave</span>: <span class="s">"refresh"</span> }),
+}), [base]);</pre>
+
+      <h4>XxxColumns.tsx</h4>
+      <pre class="code"><span class="k">export const</span> MAIN_COLUMN_DEFS<span class="k">: ColDef[]</span> = [
+  { <span class="k">headerName</span>: <span class="s">"No"</span> },
+  { <span class="k">headerName</span>: <span class="s">"LBL_VEHICLE_NO"</span>, <span class="k">field</span>: <span class="s">"VEH_NO"</span>,
+    <span class="k">isPrimaryKey</span>: <span class="k">true</span>, <span class="k">insertable</span>: <span class="k">true</span> },
+  { <span class="k">headerName</span>: <span class="s">"LBL_VEHICLE_TYPE"</span>, <span class="k">field</span>: <span class="s">"VEH_TCD"</span>,
+    <span class="k">codeKey</span>: <span class="s">"vehTcd"</span>, <span class="k">editable</span>: <span class="k">true</span> },
+];</pre>
+
+      <div class="callout">
+        Audit 컬럼 / 페이지네이션 / selection sync / autoSize / 코드 라벨 / EDIT_STS 기반 편집 가능 여부 — 모두 별도 코드 없이 자동입니다.
+      </div>
+    </section>
+
+    <!-- 11. Internals -->
+    <section id="internals">
+      <h2>11. 내부 구조 — 파일 분리 &amp; Hook</h2>
+      <p>
+        <code class="inline">DataGrid</code> 는 본체(<code class="inline">index.tsx</code>)에서 props 분배·레이아웃·JSX 만 책임지고,
+        실제 로직은 책임 단위로 hook 과 유틸 파일로 잘라 두었습니다.
+        본체는 hook 들이 도출한 값을 조립해 <code class="inline">&lt;AgGridReact /&gt;</code> 에 넘기는 오케스트레이터 역할만 합니다.
+      </p>
+
+      <h3>11-1. 폴더 트리</h3>
+<pre class="tree">DataGrid/
+├─ index.tsx                  <span class="cmt"># 본체 (오케스트레이터)</span>
+├─ types.ts                   <span class="cmt"># GridTab, GridPreset 타입</span>
+├─ autosize.ts                <span class="cmt"># canvas 텍스트 측정 유틸 (순수 함수)</span>
+├─ Pagination.tsx             <span class="cmt"># 하단 페이지네이션 UI</span>
+├─ GridTabs.tsx               <span class="cmt"># 상단 탭 UI</span>
+├─ TrackPanel.tsx             <span class="cmt"># 하단 추적 결과 expand 패널</span>
+├─ useActivePreset.ts         <span class="cmt"># tab/preset 활성화 분기 + audit + 컬럼 변환</span>
+├─ useAutoSize.ts             <span class="cmt"># 컬럼 너비 자동 계산 트리거</span>
+├─ useRowLifecycle.ts         <span class="cmt"># selection / rowData effect 묶음 (4가지)</span>
+├─ useGridHandlers.ts         <span class="cmt"># ag-grid 이벤트 → 외부 콜백 라우팅</span>
+├─ useGridProps.ts            <span class="cmt"># AgGridReact 에 spread 할 prop 메모</span>
+└─ useCellRangeSelection.ts   <span class="cmt"># 셀 드래그 범위 선택 + Ctrl+C TSV</span></pre>
+
+      <h3>11-2. 데이터 흐름</h3>
+      <p>
+        본체 <code class="inline">index.tsx</code> 는 단순히 다음 체인을 조립합니다. 각 hook 은 위 단계의 결과를 입력으로 받아 자신의 출력을 만듭니다.
+      </p>
+<pre class="flow">props (rowData, columnDefs, audit, codeMap, tabs, presets, ...)
+  <span class="arr">│</span>
+  <span class="arr">▼</span>
+<span class="hl">useActivePreset</span>   ── tab 활성 시 presets[activeTab] 우선 / audit spread / processColumnDef
+  <span class="arr">│</span>          → activeColumnDefs · activeRowData · summaryRow · activeActions
+  <span class="arr">│</span>          → activeOnRowClicked · activeOnCellValueChanged · activeRender
+  <span class="arr">│</span>          → effectiveRowKeys · effectiveAutoSelect · finalColumnDefs
+  <span class="arr">▼</span>
+<span class="hl">useAutoSize</span>       ── onGridReady · onFirstDataRendered · autoSizeKey effect
+<span class="hl">useRowLifecycle</span>   ── 4 effects (선택 sync · PK 복원 · 신규행 스크롤 · check default)
+<span class="hl">useGridHandlers</span>   ── handleRowClicked · handleRowSelected · handleSelectionChanged ...
+  <span class="arr">│</span>
+  <span class="arr">▼</span>
+<span class="hl">useGridProps</span>      ── commonGridProps (ref 안정화: cellEditor 생존)
+  <span class="arr">│</span>
+  <span class="arr">▼</span>
+&lt;AgGridReact {...commonGridProps} rowData={activeRowData} /&gt;
+
+<span class="hl">useCellRangeSelection</span>   ── 컨테이너 ref 에 직접 listener 부착 (병렬)</pre>
+
+      <h3>11-3. 파일별 책임</h3>
+
+      <div class="card">
+        <h4><span class="file">index.tsx</span> 본체 — 오케스트레이터</h4>
+        <dl>
+          <dt>역할</dt>
+          <dd>Props 받기 / 내부 ref·state 보유 / hook 체인 호출 / 결과로 JSX 조립. <strong>비즈니스 로직은 거의 없음.</strong></dd>
+          <dt>핵심 입력</dt><dd>외부에서 받은 모든 DataGrid props</dd>
+          <dt>핵심 출력</dt><dd><code>&lt;AgGridReact /&gt;</code> + GridTabs + GridActionsBar + Pagination + TrackPanel 렌더</dd>
+          <dt>왜 분리</dt><dd>본체가 layout/JSX 만 책임지면 hook 단위로 단위 테스트·교체가 쉬워짐</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">useActivePreset.ts</span> — tab/preset 분기 + 컬럼 변환의 중심</h4>
+        <dl>
+          <dt>역할</dt>
+          <dd>
+            tab 모드일 때 <code>presets[activeTab]</code> 의 값을 우선 적용해
+            <code>active*</code> 시리즈를 메모이즈. 추가로 <strong>audit 컬럼 자동 spread</strong>,
+            <strong><code>processColumnDef</code> 변환</strong>(Lang/align/type/DTTM/numeric/_STS/codeKey/insertable/editable/isPrimaryKey),
+            <strong>summable 합계 row 생성</strong>, <strong><code>isPrimaryKey</code> → <code>effectiveRowKeys</code> 자동 추출</strong>까지 처리.
+          </dd>
+          <dt>핵심 입력</dt><dd>layoutType, activeTab, presets, columnDefs, rowData, audit, codeMap, setRowData, onRowClicked</dd>
+          <dt>핵심 출력</dt><dd>activeColumnDefs · activeRowData · summaryRow · activeActions · activeOnRowClicked · activeOnCellValueChanged · activeCodeMap · activeRender · effectiveRowKeys · effectiveAutoSelect · finalColumnDefs</dd>
+          <dt>왜 분리</dt><dd>DataGrid 의 분기 복잡도 중 가장 큰 부분 — "탭/프리셋이 있냐 없냐" 가 모든 active* 값을 흔드는데, 이걸 한곳에 모아 두면 다른 hook 들은 active* 만 받아 단순하게 동작할 수 있음</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">useAutoSize.ts</span> — 컬럼 너비 자동 계산</h4>
+        <dl>
+          <dt>역할</dt>
+          <dd>onGridReady / onFirstDataRendered 시점에 <code>autosize.ts</code> 의 측정 유틸로 모든 컬럼의 최적 너비를 계산해 ag-grid api 에 적용. 이후로는 <code>autoSizeKey</code> 가 변할 때만 재실행.</dd>
+          <dt>핵심 입력</dt><dd>disableAutoSize, finalColumnDefs, activeRowData, activeTab, <strong>autoSizeKey</strong>, gridApiRef, columnOrderRef</dd>
+          <dt>핵심 출력</dt><dd>handleGridReady · handleFirstDataRendered (콜백)</dd>
+          <dt>왜 분리</dt><dd>
+            dep 으로 <code>activeRowData</code> 가 아니라 <strong><code>autoSizeKey</code></strong> 를 사용 — model.bind 가 객체 set(조회 결과 도착) 에만 +1 해 주므로, 셀 편집/행 추가 같은 함수형 setter 호출에는 autoSize 가 재발화하지 않아 <strong>편집 중 가로 스크롤이 유지</strong>됨. 이 미묘한 dep 룰을 hook 안에 가둬 둠.
+          </dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">useRowLifecycle.ts</span> — rowData/selection effect 4종</h4>
+        <dl>
+          <dt>역할</dt>
+          <dd>
+            ① controller 가 <code>setSelected</code> 로 박은 <code>selectedRow</code> 를 ag-grid 시각 선택으로 반영<br>
+            ② <code>effectiveAutoSelect</code> 일 때 PK 매칭으로 이전 선택을 복원<br>
+            ③ 신규 행(<code>EDIT_STS:"I"</code>) 이 추가될 때 마지막 행으로 자동 스크롤<br>
+            ④ <code>type:"check"</code> 컬럼의 <code>defaultYn</code> 을 신규 행에 자동 채움
+          </dd>
+          <dt>핵심 입력</dt><dd>gridApiRef, selectedRow, activeRowData, activeColumnDefs, effectiveAutoSelect, effectiveRowKeys, activeOnRowClicked, setRowData</dd>
+          <dt>핵심 출력</dt><dd>없음 (effect 만 등록)</dd>
+          <dt>왜 분리</dt><dd>"외부 상태 변화 → ag-grid 측을 따라가게 만든다" 라는 반응형 동기화 로직만 묶어 둠. ag-grid api 호출 → onSelectionChanged 무한루프 가드 같은 함정도 여기에서 한 번에 처리</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">useGridHandlers.ts</span> — ag-grid 이벤트 → 외부 콜백 라우팅</h4>
+        <dl>
+          <dt>역할</dt>
+          <dd>
+            ag-grid 의 onRowSelected / onRowClicked / onRowDoubleClicked / onCellValueChanged / onSelectionChanged 를
+            wrapping 해서 <strong>useCallback 안정 reference</strong> 로 외부 콜백에 라우팅. 셀 편집은
+            <code>withRowStatusTracking</code> 으로 <strong>EDIT_STS 자동 갱신</strong>까지 처리.
+          </dd>
+          <dt>핵심 입력</dt><dd>setSelectedRows, prevSelectedRef, onRowSelected, activeOnRowClicked, onRowDoubleClicked, activeOnCellValueChanged, onSelectionChanged</dd>
+          <dt>핵심 출력</dt><dd>handleRowSelected · handleRowClicked · handleRowDoubleClicked · handleCellValueChanged · handleSelectionChanged</dd>
+          <dt>왜 분리</dt><dd>
+            <code>onSelectionChanged</code> 가 ag-grid 의 자동 이벤트(rowDataChanged, api, gridInitializing 등)에도 발화하는데, 이걸 외부로 전파하면 onSearchCallback 이 박은 selectedRef 가 덮어써짐. <strong>USER_SELECTION_SOURCES</strong> 필터로 사용자 액션만 통과시키는 규칙을 한곳에 응집
+          </dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">useGridProps.ts</span> — commonGridProps 메모 (reference 안정화)</h4>
+        <dl>
+          <dt>역할</dt>
+          <dd>
+            AgGridReact 에 spread 할 prop 묶음(<code>commonGridProps</code>)을 메모. defaultColDef, rowSelection 모드, selectionColumnDef, treeProps, gridOptions escape hatch 를 조립.
+          </dd>
+          <dt>핵심 입력</dt><dd>finalColumnDefs, summaryRow, 모든 handle* 콜백, rowSelectionProp, headerCheckbox, treeData/getDataPath/autoGroupColumnDef/groupDefaultExpanded, gridOptions</dd>
+          <dt>핵심 출력</dt><dd>commonGridProps (객체)</dd>
+          <dt>왜 분리</dt><dd>
+            <strong>이 객체의 reference 가 매 render 마다 바뀌면 ag-grid 가 내부 cellEditor 를 reset</strong>한다.
+            그래서 deps 관리에 가장 예민한 부분이라 다른 로직과 섞이지 않도록 단독 hook 으로 빼 둠
+          </dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">useCellRangeSelection.ts</span> — 셀 드래그 범위 + Ctrl+C TSV</h4>
+        <dl>
+          <dt>역할</dt>
+          <dd>
+            컨테이너에 mousedown/mouseover/mouseup, keydown(Ctrl+C) 리스너를 부착해 ag-grid community 에서 빠진
+            <strong>셀 드래그 범위 선택</strong>과 <strong>TSV 클립보드 복사</strong>를 직접 구현.
+            <code>MutationObserver</code> 로 ag-grid 가 cell DOM 을 재렌더할 때마다 highlight 를 재적용.
+          </dd>
+          <dt>핵심 입력</dt><dd>containerRef, gridApiRef</dd>
+          <dt>핵심 출력</dt><dd>columnOrderRef (다른 hook 들이 cell 좌표 계산에 사용)</dd>
+          <dt>왜 분리</dt><dd>다른 hook 들과 의존이 없고(병렬), 순수하게 DOM 이벤트를 다루는 큰 덩어리라 분리해 두면 본체가 깔끔</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">autosize.ts</span> — 측정 유틸 (순수 함수)</h4>
+        <dl>
+          <dt>역할</dt><dd>canvas 텍스트 폭 측정 (<code>measureTextWidth</code>), 컬럼별 최적 너비 계산 (<code>calcOptimalWidths</code>), ag-grid 적용 (<code>applyColumnWidths</code>).</dd>
+          <dt>왜 분리</dt><dd>React 무관한 순수 유틸이라 hook 과 섞이면 가독성이 떨어지기 때문</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">Pagination.tsx · GridTabs.tsx · TrackPanel.tsx</span> — 부속 UI</h4>
+        <dl>
+          <dt>역할</dt>
+          <dd>
+            <strong>Pagination</strong>: 하단 페이지 바 (이동/페이지당 행수) ·
+            <strong>GridTabs</strong>: 상단 탭 헤더 ·
+            <strong>TrackPanel</strong>: 하단 추적 결과 expand 패널 (max-height 트랜지션).
+          </dd>
+          <dt>왜 분리</dt><dd>독립 UI 단위 — 각자 자체 state 만 가짐. 본체는 layout 슬롯만 채움</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h4><span class="file">types.ts</span></h4>
+        <dl>
+          <dt>역할</dt><dd><code>GridTab</code>, <code>GridPreset&lt;TRow&gt;</code> 타입 정의 export.</dd>
+          <dt>왜 분리</dt><dd>본체와 hook 양쪽에서 import — 순환 import 방지</dd>
+        </dl>
+      </div>
+
+      <h3>11-4. 왜 이런 분해인가</h3>
+      <ul>
+        <li><strong>본체는 props 분배만 한다.</strong> 모든 결정은 hook 안에서 끝나므로, 본체 JSX 를 읽으면 "어떤 hook 이 무엇을 결정하는지" 만 보면 됩니다.</li>
+        <li><strong>reference 안정성이 cellEditor 생존에 결정적.</strong> ag-grid 는 prop reference 가 바뀌면 내부 상태를 reset 합니다. 그래서 <code class="inline">useGridProps</code> 가 단독 hook 으로 떨어져 있고, <code class="inline">useActivePreset</code> 안에서도 <code class="inline">setRowData</code> 를 일부 deps 에서 일부러 제외(Proxy 가 매번 새 ref 반환)하는 식의 미묘한 처리가 들어 있습니다.</li>
+        <li><strong>"active* 도출" 이 가장 복잡.</strong> tab/preset 활성화 분기는 columnDefs/rowData/actions/handler/render 등 거의 모든 것을 흔듭니다. 가장 위에서 한 번 결정하고, 아래 hook 들은 그 결과를 단순 소비합니다.</li>
+        <li><strong>effect 와 callback 을 섞지 않음.</strong> <code class="inline">useRowLifecycle</code> 은 effect 전용, <code class="inline">useGridHandlers</code> 는 useCallback 전용. 한 hook 안에 둘이 섞이면 dep 추적이 어려워져 무한 루프/리셋 버그가 생기기 쉬움.</li>
+      </ul>
+    </section>
+
+    <footer>
+      react-tms-carr-ts-pr — DataGrid 가이드 문서
+    </footer>
+  </main>
+</body>
+</html>

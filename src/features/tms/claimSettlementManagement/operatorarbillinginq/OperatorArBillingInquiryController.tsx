@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { operatorArBillingInquiryApi as api } from "./OperatorArBillingInquiryApi";
 import { MAIN_COLUMN_DEFS } from "./OperatorArBillingInquiryColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {

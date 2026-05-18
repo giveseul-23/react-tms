@@ -9,7 +9,7 @@ import {
   makeExcelGroupAction,
   makeTrackGroupAction,
   makeHistoryAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows, isInserted } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";

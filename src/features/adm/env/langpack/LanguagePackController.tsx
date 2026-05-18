@@ -5,7 +5,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";

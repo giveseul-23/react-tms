@@ -9,7 +9,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { lgstgrpOprConfigApi as api } from "./LgstgrpOprConfigApi";
 import type {
   LgstgrpOprConfigMstModel,

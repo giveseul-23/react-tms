@@ -7,7 +7,6 @@ import { useMaterialModel } from "./MaterialModel";
 import { useMaterialController } from "./MaterialController";
 import {
   MAIN_COLUMN_DEFS,
-  MAIN_ROW_KEYS,
   SUB01_COLUMN_DEFS,
   SUB02_COLUMN_DEFS,
 } from "./MaterialColumns";
@@ -27,7 +26,7 @@ export default function Material() {
         moduleDefault: "TMS",
         menuCode: MENU_CD,
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.handleSearch,
+        onSearchCallback: ctrl.handleSearch,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
@@ -41,8 +40,6 @@ export default function Material() {
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
-          rowKeys={MAIN_ROW_KEYS}
-          autoSelectFirstRow
           actions={ctrl.mainActions}
         />
       }

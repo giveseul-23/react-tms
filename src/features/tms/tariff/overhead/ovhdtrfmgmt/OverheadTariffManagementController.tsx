@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { overheadTariffManagementApi as api } from "./OverheadTariffManagementApi";
 import { MAIN_COLUMN_DEFS } from "./OverheadTariffManagementColumns";
-import { makeCommonActions } from "@/app/components/grid/commonActions";
+import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { OverheadTariffManagementModel, GridKey } from "./OverheadTariffManagementModel";

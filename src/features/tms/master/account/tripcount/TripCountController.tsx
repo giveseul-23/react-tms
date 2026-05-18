@@ -4,7 +4,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { tripCountApi as api } from "./TripCountApi";
 import { MAIN_COLUMN_DEFS } from "./TripCountColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";

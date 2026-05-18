@@ -2,7 +2,7 @@
 // 부분 토글이 필요한 그리드만 View 에서 `audit={{ updatePerson: false }}` 명시.
 
 // ── 플류운영그룹운영설정 (Top-left) ────────────────────────────────
-// 키 컬럼에 isPrimaryKey:true — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
+// 키 컬럼에 isPrimaryKey:true — DataGrid 가 첫행 자동선택을 자동 활성화.
 export const CONFIG_COLUMN_DEFS = [
   { headerName: "No" },
   {

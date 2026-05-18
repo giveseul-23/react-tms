@@ -19,7 +19,7 @@ export default function DivisionDefault() {
       defaultSizes={[10, 90]}
       searchProps={{
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.onSearchCallback,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

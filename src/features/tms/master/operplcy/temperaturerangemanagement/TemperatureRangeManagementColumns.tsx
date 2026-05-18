@@ -76,7 +76,7 @@ export const MAIN_COLUMN_DEFS = [
 // <DataGrid {...model.bind("main")} columnDefs={MAIN_COLUMN_DEFS} audit={false} />
 //
 // [참고] width / fieldType 같은 개별 override 는 standardAudit 직접 호출 권장:
-//   import { standardAudit } from "@/app/components/grid/commonColumns";
+//   import { standardAudit } from "@/app/components/grid/columns/commonColumns";
 //   const cols = [...MAIN_COLUMN_DEFS, ...standardAudit(model.grids.main.setData, {
 //     insertPersonOverrides: { width: 110 },
 //   })];

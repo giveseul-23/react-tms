@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { ifDeliveryDocumentApi as api } from "./IfDeliveryDocumentApi";
 import { MAIN_COLUMN_DEFS } from "./IfDeliveryDocumentColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { IfDeliveryDocumentModel, GridKey } from "./IfDeliveryDocumentModel";
 

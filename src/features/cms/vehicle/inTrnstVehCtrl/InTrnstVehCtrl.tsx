@@ -65,7 +65,7 @@ export default function InTrnstVehCtrl() {
       searchProps={{
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchInTrnstVehList,
-        onSearch: ctrl.onSearchCallback,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

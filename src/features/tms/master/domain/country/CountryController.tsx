@@ -3,7 +3,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { countryApi as api } from "./CountryApi";
 import {
@@ -66,7 +66,7 @@ export function useCountryController({ model }: Args) {
     [base],
   );
 
-  // setData 만 — 첫 행 자동선택 + cascade 는 DataGrid 의 autoSelectFirstRow 가 처리.
+  // setData 만 — 첫 행 자동선택 + cascade 는 DataGrid 의 첫행 자동선택이 처리.
   // 저장/refresh 후 옛 선택 PK 가 새 rows 에 있으면 그 행 자동 재선택 (PK 매칭).
   const onSearchCallback = useCallback(
     (data: any) => {

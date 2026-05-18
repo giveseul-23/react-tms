@@ -1,4 +1,4 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/columns/commonColumns";
 
 // ── 탭 A 좌측: 물류운영그룹 목록 ───────────────────────────────
 export const MASTER_COLUMN_DEFS = [

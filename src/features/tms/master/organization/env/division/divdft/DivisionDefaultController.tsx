@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import { makeSaveAction } from "@/app/components/grid/commonActions";
+import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
 import { divisionDefaultApi as api } from "./DivisionDefaultApi";
 import type { DivisionDefaultModel, GridKey } from "./DivisionDefaultModel";
 

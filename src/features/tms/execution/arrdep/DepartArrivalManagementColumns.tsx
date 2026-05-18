@@ -1,5 +1,5 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
-import { numberValueFormatter } from "@/app/components/grid/commonFormatters";
+import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
+import { numberValueFormatter } from "@/app/components/grid/columns/commonFormatters";
 
 // 메인 배차 그리드 (DepartArrivalManagementMainGrid)
 export const MAIN_COLUMN_DEFS = [

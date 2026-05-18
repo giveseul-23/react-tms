@@ -7,7 +7,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { confirmDispatchApi as api } from "./ConfirmDispatchApi";
 import { MAIN_COLUMN_DEFS } from "./ConfirmDispatchColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ConfirmDispatchModel, GridKey } from "./ConfirmDispatchModel";
 

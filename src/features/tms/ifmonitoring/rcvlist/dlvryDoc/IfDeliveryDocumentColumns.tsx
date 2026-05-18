@@ -1,4 +1,4 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
 
 // 메인 그리드
 export const MAIN_COLUMN_DEFS = [

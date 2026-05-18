@@ -25,7 +25,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { temperatureRangeManagementApi as api } from "./TemperatureRangeManagementApi.ts";
 import {
   MAIN_COLUMN_DEFS,

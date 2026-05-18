@@ -10,7 +10,7 @@ import TreeGrid, {
   type TreeGridHandle,
   type TreeCellContext,
 } from "@/app/components/grid/TreeGrid";
-import TreeNameCell from "@/app/components/grid/TreeNameCell";
+import TreeNameCell from "@/app/components/grid/TreeGrid/TreeNameCell";
 
 import { useMenuConfigModel } from "./MenuConfigModel";
 import { useMenuConfigController } from "./MenuConfigController";
@@ -105,7 +105,7 @@ export default function MenuConfig() {
       searchProps={{
         meta,
         fetchFn: ctrl.fetchMenuConfigList,
-        onSearch: ctrl.onSearchCallback,
+        onSearchCallback: ctrl.onSearchCallback,
         filtersRef,
         treeGridRef,
         computeTotalCount: (rows) => {

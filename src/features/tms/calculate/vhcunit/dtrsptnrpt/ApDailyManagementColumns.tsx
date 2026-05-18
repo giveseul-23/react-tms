@@ -1,11 +1,11 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
 import {
   CENTER,
   RIGHT,
   numberValueFormatter,
   negativeRedCenterCellStyle,
   negativeRedRightCellStyle,
-} from "@/app/components/grid/commonFormatters";
+} from "@/app/components/grid/columns/commonFormatters";
 
 // TODO: 근무계획/실적 배경색 — workTp / workTpExe 코드 매핑 확정 후 활성화
 //   ExtJS 원본:

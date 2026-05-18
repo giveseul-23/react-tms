@@ -1,4 +1,4 @@
-import { standardAudit } from "@/app/components/grid/commonColumns";
+import { standardAudit } from "@/app/components/grid/columns/commonColumns";
 
 export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
   {
