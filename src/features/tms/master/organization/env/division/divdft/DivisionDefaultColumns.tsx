@@ -21,6 +21,6 @@ export const DETAIL_COLUMN_DEFS = [
     headerName: "LBL_SETTING_VAL",
     field: "CNFG_DTL_CD",
     codeKey: "cnfgDtlTcd",
-    editable: true,
+    editable: true, insertable: true,
   },
 ];

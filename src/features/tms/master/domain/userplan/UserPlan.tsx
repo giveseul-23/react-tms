@@ -2,15 +2,15 @@
 
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useCommodityModel } from "@/features/tms/master/domain/commodity/CommodityModel";
-import { useCommodityController } from "@/features/tms/master/domain/commodity/CommodityController";
-import { MAIN_COLUMN_DEFS } from "@/features/tms/master/domain/commodity/CommodityColumns";
+import { useUserPlanModel } from "./UserPlanModel";
+import { useUserPlanController } from "./UserPlanControllers";
+import { MAIN_COLUMN_DEFS } from "./UserPlanColumns";
 
-export const MENU_CD = "MENU_CMDT_MGMT";
+export const MENU_CD = "MENU_USER_PLAN_MGMT";
 
-export default function Commodity() {
-  const model = useCommodityModel(MENU_CD);
-  const ctrl = useCommodityController({ model });
+export default function UserPlan() {
+  const model = useUserPlanModel(MENU_CD);
+  const ctrl = useUserPlanController({ model });
 
   return (
     <GridOnlyPage
@@ -26,7 +26,9 @@ export default function Commodity() {
         <DataGrid
           {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
+          codeMap={model.codeMap}
           actions={ctrl.mainActions}
+          audit={{ delete: false }}
         />
       }
     />

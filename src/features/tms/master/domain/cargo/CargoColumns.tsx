@@ -23,19 +23,19 @@ export const MAIN_COLUMN_DEFS = [
       type: "text",
       headerName: "LBL_CNTR_CD",
       field: "CNTR_CD",
-      editable: true,
+      editable: true, insertable: true,
       isPrimaryKey: true,
   },
   {
     type: "text",
     headerName: "LBL_CNTR_NM",
     field: "CNTR_NM",
-      editable: true,
+      editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_REMARK",
     field: "RMK",
-      editable: true,
+      editable: true, insertable: true,
   },
 ];

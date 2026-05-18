@@ -13,6 +13,13 @@
 // - field 가 "_STS" 로 끝나면 자동 중앙 정렬
 // - type: "numeric" / dataType: "number" → 우측 정렬
 // - "No" headerName 은 자동 일련번호 + 고정 너비
+//
+// 편집 가능 여부 (EDIT_STS 기반 자동 변환)
+// - insertable: true              → 추가 상태(EDIT_STS:"I") 행에서만 편집
+// - editable: true                → 수정 상태(EDIT_STS:"I" 아닌 행)에서만 편집
+// - insertable: true, editable: true → 항상 편집 가능
+// - 둘 다 미지정/false            → 편집 불가
+// → PK 컬럼은 보통 isPrimaryKey:true + insertable:true (추가 시 입력 / 수정 시 잠금)
 // ────────────────────────────────────────────────────────────────
 
 // ── 메인 그리드 컬럼 — audit 자동 (model.bind 가 audit:true spread) ─
@@ -24,16 +31,21 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_XXX_CODE",
     field: "XXX_CD",
     isPrimaryKey: true,
+    insertable: true, // PK — 추가에서만 입력, 수정 시 잠김
   },
   {
     type: "text",
     headerName: "LBL_XXX_NAME",
     field: "XXX_NM",
+    insertable: true,
+    editable: true, // 일반 컬럼 — 추가/수정 모두 편집 가능
   },
   {
     type: "text",
     headerName: "LBL_USE_Y/N",
     field: "USE_YN",
+    insertable: true,
+    editable: true,
   },
 ];
 

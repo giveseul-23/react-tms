@@ -17,7 +17,7 @@ export const CONFIG_COLUMN_DEFS = [
     //물류운영그룹운영설정코드
     headerName: "LBL_LGST_GRP_CNFG_CD",
     field: "CNFG_CD",
-    editable: true,
+    editable: true, insertable: true,
     fieldType: "text",
     isPrimaryKey: true,
   },
@@ -26,7 +26,7 @@ export const CONFIG_COLUMN_DEFS = [
     //물류운영그룹운영설정명
     headerName: "LBL_LGST_GRP_CNFG_NM",
     field: "CNFG_NM",
-    editable: true,
+    editable: true, insertable: true,
     fieldType: "text",
   },
   {
@@ -57,7 +57,7 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     //물류운영설정상세코드
     headerName: "LBL_LGST_GRP_CNFG_DTL_CD",
     field: "CNFG_DTL_CD",
-    editable: true,
+    editable: true, insertable: true,
     isPrimaryKey: true,
   },
   {
@@ -65,14 +65,14 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     //물류운영그룹운영설정상세명
     headerName: "LBL_LGST_GRP_CNFG_DTL_NM",
     field: "CNFG_DTL_NM",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "check",
     //기본값
     headerName: "LBL_DFT_VAL_NM",
     field: "DFT_YN",
-    editable: true,
+    editable: true, insertable: true,
     width: 70,
   },
   {
@@ -80,31 +80,31 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     //속성
     headerName: "LBL_CMMN_CD_CNFG_VAL1",
     field: "CNFG_VAL1",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL2",
     field: "CNFG_VAL2",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL3",
     field: "CNFG_VAL3",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL4",
     field: "CNFG_VAL4",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL5",
     field: "CNFG_VAL5",
-    editable: true,
+    editable: true, insertable: true,
   },
 ];
 
@@ -121,13 +121,13 @@ export const CONFIG_I18N_COLUMN_DEFS = [
     headerName: "LBL_LNG_PACK",
     field: "LANG_TP",
     codeKey: "langTp",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_NM",
     field: "LANG_DESC",
-    editable: true,
+    editable: true, insertable: true,
   },
 ];
 
@@ -150,12 +150,12 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = [
     headerName: "LBL_LNG_PACK",
     field: "LANG_TP",
     codeKey: "langTp",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_DTL_NM",
     field: "LANG_DESC",
-    editable: true,
+    editable: true, insertable: true,
   },
 ];

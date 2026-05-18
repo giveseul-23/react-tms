@@ -1,8 +1,8 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
-import { MENU_CD } from "@/features/tms/master/domain/commodity/Commodity";
+import { MENU_CD } from "./UserPlan";
 
-type CommonResponse = {
+type commonResponse = {
   rows: [];
 };
 
@@ -16,18 +16,20 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
-export const commodityApi = {
-  getCommodityList(payload: any) {
-    return apiClient.post<CommonResponse>(
-      "/commodityService/search",
-      withSession({ MENU_CD: MENU_CD, ...payload }),
+export const userPlanApi = {
+  ////// SEARCH
+  getUserPlanList(menuCd: string, payload: any) {
+    return apiClient.post<commonResponse>(
+      `/userplanService/search`,
+      withSession({ MENU_CD: menuCd, ...payload }),
     );
   },
 
-  saveCommodityList(payload: any) {
+  ////// SAVE
+  save(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
-    return apiClient.post<CommonResponse>(
-      "/commodityService/save",
+    return apiClient.post<commonResponse>(
+      `/userplanService/save`,
       { dsSave },
       {
         params: {

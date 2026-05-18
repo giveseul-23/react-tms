@@ -275,12 +275,6 @@ export function useBaseController<K extends string>({
         rows: [...(prev?.rows ?? []), rowWithSts],
       }));
       slot.setSelected(rowWithSts);
-      // TEMP DEBUG
-      console.log(`[addRow] grid=${gridKey} rid=${rowWithSts.__rid__} CTRY_CD=${rowWithSts.CTRY_CD}`);
-      setTimeout(() => {
-        const cur = slot.selectedRef.current;
-        console.log(`[addRow:after-tick] grid=${gridKey} selectedRid=${cur?.__rid__ ?? "NULL"} CTRY_CD=${cur?.CTRY_CD ?? "NULL"}`);
-      }, 0);
     },
     [model.grids],
   );

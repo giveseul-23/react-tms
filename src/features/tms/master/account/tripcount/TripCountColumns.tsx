@@ -10,7 +10,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_DEPARTURE_CODE",
     field: "FRM_LOC_CD",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
@@ -27,7 +27,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_DESTINATION_CODE",
     field: "TO_LOC_CD",
-    editable: true,
+    editable: true, insertable: true,
   },
   {
     type: "text",
@@ -38,6 +38,6 @@ export const MAIN_COLUMN_DEFS = [
     type: "numeric",
     headerName: "LBL_TRIP_COUNT",
     field: "TRIP_CNT",
-    editable: true,
+    editable: true, insertable: true,
   },
 ];
