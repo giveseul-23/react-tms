@@ -8,7 +8,9 @@ export const MAIN_COLUMN_DEFS = [
     field: "CMDT_CD",
     width: 150,
     align: "center",
-    editable: false,
+    editable: true,
+    insertable: true,
+    isPrimaryKey: true,
   },
   {
     type: "text",
