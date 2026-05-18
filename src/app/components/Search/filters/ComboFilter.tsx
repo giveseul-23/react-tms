@@ -35,29 +35,17 @@ export function ComboFilter({
   required,
   ...props
 }: ComboFilterProps) {
-  const safeOptions = (options ?? []).filter(
-    (opt) => String(opt?.CODE ?? "").trim() !== "",
-  );
-
-  const resolvedValue =
-    value && safeOptions.some((opt) => opt.CODE === value)
-      ? value
-      : (safeOptions[0]?.CODE ?? "");
+  const safeOptions = options ?? [];
 
   useEffect(() => {
-    if (safeOptions.length === 0) return;
-    if (!value || !safeOptions.some((opt) => opt.CODE === value)) {
+    if (!value && safeOptions.length > 0) {
       onChange(safeOptions[0].CODE);
     }
   }, [safeOptions, value, onChange]);
 
   return (
     <div className={cn(className ? "w-full min-w-0" : className)}>
-      <Select
-        value={resolvedValue || undefined}
-        onValueChange={onChange}
-        disabled={safeOptions.length === 0}
-      >
+      <Select value={value} onValueChange={onChange}>
         <SelectTrigger
           id={selectId}
           className={cn(
@@ -69,12 +57,8 @@ export function ComboFilter({
         </SelectTrigger>
 
         <SelectContent>
-          {safeOptions.map((opt, index) => (
-            <SelectItem
-              key={`${opt.CODE}-${index}`}
-              value={opt.CODE}
-              className="text-xs"
-            >
+          {safeOptions.map((opt) => (
+            <SelectItem key={opt.CODE} value={opt.CODE} className="text-xs">
               {opt.NAME}
             </SelectItem>
           ))}
