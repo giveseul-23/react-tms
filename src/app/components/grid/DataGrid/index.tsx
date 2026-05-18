@@ -18,7 +18,6 @@ import { useRowLifecycle } from "./useRowLifecycle";
 import { useGridHandlers } from "./useGridHandlers";
 import { useGridProps } from "./useGridProps";
 import { Pagination } from "./Pagination";
-import { TrackPanel } from "./TrackPanel";
 
 // (Note: Util.formatDttm 등 컬럼 변환 관련 유틸은 gridUtils/processColumn 으로 이동.)
 
@@ -68,8 +67,6 @@ type DataGridProps<TRow> = {
   pageSize?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
-
-  onTrack?: (rows: any[]) => React.ReactNode;
 
   // ─── Tree Data 지원 ───────────────────────────────────────────────────────
   treeData?: boolean;
@@ -146,7 +143,6 @@ export default function DataGrid<TRow>({
   currentPage,
   onPageChange,
   onPageSizeChange,
-  onTrack,
   treeData,
   getDataPath,
   autoGroupColumnDef,
@@ -162,9 +158,6 @@ export default function DataGrid<TRow>({
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
   );
-  const [trackContent, setTrackContent] = useState<React.ReactNode>(null);
-  const [trackOpen, setTrackOpen] = useState(false);
-
   const internalGridRef = useRef<any>(null);
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRef = useRef<TRow | null>(null);
@@ -233,22 +226,6 @@ export default function DataGrid<TRow>({
     [activeActions, selectedRows],
   );
 
-  const wrappedActionsWithTrack = useMemo(() => {
-    if (!onTrack) return wrappedActions;
-    const trackAction: ActionItem = {
-      type: "button",
-      key: "__track__",
-      label: "LBL_AR_TRACE",
-      onClick: () => {
-        const content = onTrack(selectedRows);
-        setTrackContent(content);
-        setTrackOpen(true);
-      },
-      disabled: selectedRows.length === 0,
-    };
-    return [trackAction, ...wrappedActions];
-  }, [onTrack, wrappedActions, selectedRows]);
-
   const handlers = useGridHandlers<TRow>({
     setSelectedRows,
     prevSelectedRef,
@@ -309,7 +286,7 @@ export default function DataGrid<TRow>({
 
       <div className="relative z-1 shrink-0 min-w-0 w-full">
         <GridActionsBar
-          actions={wrappedActionsWithTrack}
+          actions={wrappedActions}
           subTitle={subTitle && Lang.get(subTitle)}
         />
       </div>
@@ -339,12 +316,6 @@ export default function DataGrid<TRow>({
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
         />
-      )}
-
-      {onTrack && (
-        <TrackPanel open={trackOpen} onClose={() => setTrackOpen(false)}>
-          {trackContent}
-        </TrackPanel>
       )}
     </div>
   );

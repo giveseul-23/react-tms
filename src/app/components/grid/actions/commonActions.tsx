@@ -8,7 +8,13 @@
 // 주의: 각 액션 객체의 type/key/label 구조 및 onClick 시그니처는
 // 기존 Controller 코드와 byte-for-byte 동일하게 유지한다.
 
+import { useCallback, useMemo, useState } from "react";
 import { downExcelSearch, downExcelSearched } from "@/views/common/common";
+import { TrackPanel } from "@/app/components/track/TrackPanel";
+import {
+  TRACK_KEY_FIELD_MAP,
+  type TrackType,
+} from "@/app/components/track/trackColumns";
 
 // ────────────────────────────────────────────────────────────────
 // Types
@@ -67,61 +73,129 @@ export const makeSaveAction = (config: SaveActionConfig = {}) => ({
 // ────────────────────────────────────────────────────────────────
 
 export type TrackGroupActionConfig = {
-  onBuy?: (e?: any) => void;       // 매입
-  onSell?: (e?: any) => void;      // 매출
-  onDispatch?: (e?: any) => void;  // 배차
-  onOrder?: (e?: any) => void;     // 주문
-  onStop?: (e?: any) => void;      // 경유지
-  onPod?: (e?: any) => void;       // 인수증
+  // 추적 핸들러 — type 받아 (e) => void 반환. 다건 조회 지원 (e.data 가 배열).
+  // 보통 useTrackPanel().openTrack 을 그대로 넘김.
+  onTrack: (type: TrackType) => (e?: any) => void;
+  // 표시 여부 (미지정 = true). false 명시한 항목만 그룹에서 제외.
+  buy?: boolean;
+  sell?: boolean;
+  dispatch?: boolean;
+  order?: boolean;
+  stop?: boolean;
+  pod?: boolean;
+  // 기타
   label?: string;
   key?: string;
   disabled?: boolean;
 };
 
-export const makeTrackGroupAction = (config: TrackGroupActionConfig = {}) => ({
+export const makeTrackGroupAction = (config: TrackGroupActionConfig) => ({
   type: "group" as const,
   key: config.key ?? "추적",
   label: config.label ?? "추적",
   items: [
-    {
+    config.buy !== false && {
       type: "button" as const,
       key: "매입",
       label: "매입",
-      onClick: config.onBuy ?? (() => {}),
+      onClick: config.onTrack("BUY"),
     },
-    {
+    config.sell !== false && {
       type: "button" as const,
       key: "매출",
       label: "매출",
-      onClick: config.onSell ?? (() => {}),
+      onClick: config.onTrack("SELL"),
     },
-    {
+    config.dispatch !== false && {
       type: "button" as const,
       key: "배차",
       label: "배차",
-      onClick: config.onDispatch ?? (() => {}),
+      onClick: config.onTrack("DSPCH"),
     },
-    {
+    config.order !== false && {
       type: "button" as const,
       key: "주문",
       label: "주문",
-      onClick: config.onOrder ?? (() => {}),
+      onClick: config.onTrack("ORD"),
     },
-    {
+    config.stop !== false && {
       type: "button" as const,
       key: "경유지",
       label: "경유지",
-      onClick: config.onStop ?? (() => {}),
+      onClick: config.onTrack("STOP"),
     },
-    {
+    config.pod !== false && {
       type: "button" as const,
       key: "인수증",
       label: "인수증",
-      onClick: config.onPod ?? (() => {}),
+      onClick: config.onTrack("POD"),
     },
-  ],
+  ].filter(Boolean),
   ...(config.disabled !== undefined && { disabled: config.disabled }),
 });
+
+// 추적 그룹 액션 + 패널을 한꺼번에 관리하는 통합 훅.
+// 화면은 true/false 옵션만 명시 — 핸들러/state/panel/keyField 모두 자동.
+//   const track = useTrackGroupAction();
+//   const track = useTrackGroupAction({ pod: false });   // 인수증만 숨김
+//
+//   Controller: mainActions 에 track.action 변수 참조
+//   View:       bottomSlot={track.panel} / bottomOpen={track.open}
+export type TrackGroupActionVisibility = {
+  buy?: boolean;
+  sell?: boolean;
+  dispatch?: boolean;
+  order?: boolean;
+  stop?: boolean;
+  pod?: boolean;
+  label?: string;
+  key?: string;
+  disabled?: boolean;
+};
+
+export function useTrackGroupAction(
+  visibility: TrackGroupActionVisibility = {},
+) {
+  const [open, setOpen] = useState(false);
+  const [trackType, setTrackType] = useState<TrackType | null>(null);
+  const [keys, setKeys] = useState<string[]>([]);
+
+  const close = useCallback(() => setOpen(false), []);
+
+  // 다건 조회: e.data 가 배열 — 모든 행에서 keyField 값을 추출해 배열로 전달.
+  const openTrack = useCallback(
+    (type: TrackType) => (e?: any) => {
+      if (!e?.data?.length) return;
+      const keyField = TRACK_KEY_FIELD_MAP[type];
+      const extracted = e.data
+        .map((r: any) => r[keyField])
+        .filter(Boolean) as string[];
+      setTrackType(type);
+      setKeys(extracted);
+      setOpen(true);
+    },
+    [],
+  );
+
+  const action = useMemo(
+    () => makeTrackGroupAction({ onTrack: openTrack, ...visibility }),
+    [openTrack, visibility],
+  );
+
+  const panel = useMemo(
+    () => (
+      <TrackPanel
+        open={open}
+        onClose={close}
+        trackType={trackType}
+        dspchNos={keys}
+      />
+    ),
+    [open, close, trackType, keys],
+  );
+
+  return { action, panel, open, close };
+}
 
 export type HistoryActionConfig = {
   onClick?: (e?: any) => void;

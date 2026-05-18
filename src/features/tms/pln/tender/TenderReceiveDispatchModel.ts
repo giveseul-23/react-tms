@@ -1,8 +1,7 @@
 // src/views/tender/TenderReceiveDispatchModel.ts
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
-import type { TrackType } from "@/app/components/track/trackColumns";
 
 export const DISPATCH_STATUS_COLOR_MAP: Record<string, string> = {
   "2030": "bg-purple-100 text-purple-700",
@@ -25,11 +24,6 @@ export type GridKey = "main" | "stop" | "sms" | "apSetl";
 export function useTenderReceiveDispatchModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  // 추적 패널
-  const [trackOpen, setTrackOpen] = useState(false);
-  const [trackType, setTrackType] = useState<TrackType | null>(null);
-  const [trackDspchNos, setTrackDspchNos] = useState<string[]>([]);
-
   const { stores } = useCommonStores({
     dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
     apFiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
@@ -48,12 +42,6 @@ export function useTenderReceiveDispatchModel(menuCode: string) {
 
   return {
     ...base,
-    trackOpen,
-    setTrackOpen,
-    trackType,
-    setTrackType,
-    trackDspchNos,
-    setTrackDspchNos,
     codeMap,
   };
 }
