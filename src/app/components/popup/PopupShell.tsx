@@ -5,6 +5,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { PopupWidth } from "./popup.types";
+import { Lang } from "@/app/services/common/Lang";
 
 interface PopupShellProps {
   open: boolean;
@@ -147,7 +148,7 @@ export function PopupShell({
           className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-slate-700 cursor-grab active:cursor-grabbing select-none"
         >
           <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-            {title ?? ""}
+            {Lang.get(title) ?? ""}
           </span>
           <button
             onClick={() => onOpenChange(false)}

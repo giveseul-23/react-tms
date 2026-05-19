@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
+import { useState } from "react";
 import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
-import { useSearchMetaCode } from "@/hooks/useSearchMeta";
+import { useCommonStores } from "@/hooks/useCommonStores";
 
 type RejectReasonContentProps = {
   onConfirm: (data: { reasonCode: string; detail: string }) => void;
@@ -17,23 +16,9 @@ export default function RejectReasonContent({
   const [reasonCode, setReasonCode] = useState("");
   const [detail, setDetail] = useState("");
 
-  const searchConfig = useMemo(
-    () => [
-      {
-        key: "TNDR_RJT_RSN_CD",
-        type: "COMBO",
-        sqlProp: "CODE",
-        keyParam: "TNDR_RJT_RSN_CD",
-      },
-    ],
-    [],
-  );
-
-  const { meta, loading } = useSearchMetaCode(searchConfig);
-
-  if (loading) {
-    return <Skeleton className="h-24" />;
-  }
+  const { stores } = useCommonStores({
+    reasonOptions: { sqlProp: "CODE", keyParam: "TNDR_RJT_RSN_CD" },
+  });
 
   return (
     <div className="w-full max-w-xl mx-auto">
@@ -49,20 +34,17 @@ export default function RejectReasonContent({
             value={reasonCode}
             onChange={setReasonCode}
             placeholder="선택하세요"
-            options={meta[0].options.map((r) => ({
-              CODE: r.CODE,
-              NAME: r.NAME,
-            }))}
+            options={stores.reasonOptions ?? []}
             className="w-full"
             inputClassName="
-    !h-11
-    rounded-lg
-    border border-gray-300
-    px-3
-    text-sm
-    focus:ring-2
-    focus:ring-blue-400
-  "
+            !h-11
+            rounded-lg
+            border border-gray-300
+            px-3
+            text-sm
+            focus:ring-2
+            focus:ring-blue-400
+          "
           />
         </div>
 
