@@ -6,6 +6,8 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch } from "@/views/common/common";
 import {
+  makeAddAction,
+  makeSaveAction,
   makeExcelGroupAction,
   makeHistoryAction,
   useTrackGroupAction,
@@ -19,7 +21,10 @@ import AppInstallSmsPopup from "@/features/tms/pln/tender/popup/AppInstallSmsPop
 import VehicleChangePopup from "@/features/tms/pln/tender/popup/VehicleChangePopup";
 import VehicleAssignPopup from "@/features/tms/pln/tender/popup/VehicleAssignPopup";
 import { MAIN_COLUMN_DEFS } from "./TenderReceiveDispatchColumns";
-import type { TenderReceiveDispatchModel, GridKey } from "./TenderReceiveDispatchModel";
+import type {
+  TenderReceiveDispatchModel,
+  GridKey,
+} from "./TenderReceiveDispatchModel";
 
 interface Args {
   model: TenderReceiveDispatchModel;
@@ -39,9 +44,18 @@ export function useTenderReceiveDispatchController({ model }: Args) {
   const onMainGridClick = useCallback(
     (row: any) =>
       base.handleRowClick("main", row, [
-        { to: "stop", fetch: (r) => api.getDispatchStopList({ DSPCH_NO: r.DSPCH_NO }) },
-        { to: "sms", fetch: (r) => api.getDispatchSmsHisList({ DSPCH_NO: r.DSPCH_NO }) },
-        { to: "apSetl", fetch: (r) => api.getDispatchApSetlList({ DSPCH_NO: r.DSPCH_NO }) },
+        {
+          to: "stop",
+          fetch: (r) => api.getDispatchStopList({ DSPCH_NO: r.DSPCH_NO }),
+        },
+        {
+          to: "sms",
+          fetch: (r) => api.getDispatchSmsHisList({ DSPCH_NO: r.DSPCH_NO }),
+        },
+        {
+          to: "apSetl",
+          fetch: (r) => api.getDispatchApSetlList({ DSPCH_NO: r.DSPCH_NO }),
+        },
       ]),
     [base],
   );
@@ -82,7 +96,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         label: "BTN_TENDER_ACCEPT",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          base.callAjax(api.onTenderAccepted(e.data), "저장되었습니다.");
+          base.callAjax(api.onTenderAccepted(e.data));
         },
       },
       {
@@ -102,7 +116,6 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                       api.onTenderRejected(
                         e.data.map((row: any) => ({ ...row, ...ie.data })),
                       ),
-                      "저장되었습니다.",
                     )
                     .then(() => base.search());
                 }}
@@ -125,7 +138,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
             onClick: (e: any) => {
               if (!guardHasData(e.data)) return;
               openPopup({
-                title: "차량변경",
+                title: "BTN_CHANGE_REG_DED_VEH",
                 content: (
                   <VehicleChangePopup
                     initialValues={{ LGST_GRP_CD: e.data[0].LGST_GRP_CD }}
@@ -134,9 +147,12 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                       base
                         .callAjax(
                           api.onChangeRegVeh(
-                            e.data.map((row: any) => ({ ...row, ...ie })),
+                            e.data.map((row: any) => ({
+                              ...row,
+                              ...ie,
+                              CHGVEH_MEMO: "운송사협력사 요청건",
+                            })),
                           ),
-                          "저장되었습니다.",
                         )
                         .then(() => base.search());
                     }}
@@ -164,10 +180,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                     onConfirm={(ie: any) => {
                       closePopup();
                       base
-                        .callAjax(
-                          api.onChangeTempVeh({ ...e.data[0], ...ie }),
-                          "저장되었습니다.",
-                        )
+                        .callAjax(api.onChangeTempVeh({ ...e.data[0], ...ie }))
                         .then(() => base.search());
                     }}
                     onClose={closePopup}
@@ -192,9 +205,12 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                       base
                         .callAjax(
                           api.onVehicleChange(
-                            e.data.map((row: any) => ({ ...row, ...ie })),
+                            e.data.map((row: any) => ({
+                              ...row,
+                              ...ie,
+                              CHGVEH_MEMO: "운송협력사 요청",
+                            })),
                           ),
-                          "저장되었습니다.",
                         )
                         .then(() => base.search());
                     }}
@@ -211,8 +227,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         type: "button",
         key: "BTN_VEHICLE_CANCEL",
         label: "BTN_VEHICLE_CANCEL",
-        onClick: (e: any) =>
-          base.callAjax(api.onVehicleCancel(e.data), "저장되었습니다."),
+        onClick: (e: any) => base.callAjax(api.onVehicleCancel(e.data)),
       },
       {
         type: "button",
@@ -221,7 +236,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
           openPopup({
-            title: "전화번호입력",
+            title: "BTN_SEND_SMS_FOR_INSTALL",
             content: (
               <AppInstallSmsPopup
                 onConfirm={(ie: any) => {
@@ -229,7 +244,6 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                   base
                     .callAjax(
                       api.sendSMSForAppInstall({ ...e.data, ...ie.data }),
-                      "저장되었습니다..",
                     )
                     .then(() => base.search());
                 }}
@@ -283,15 +297,13 @@ export function useTenderReceiveDispatchController({ model }: Args) {
 
   const apSetlActions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button",
-        key: "운송비추가",
-        label: "BTN_ADD",
+      makeAddAction({
+        key: "BTN_AP_SETL_ADD",
         onClick: () => {
           const main = model.grids.main.selectedRef.current;
           if (!guardHasData(main)) return;
           openPopup({
-            title: "항목코드",
+            title: "LBL_OPER_TCD",
             content: (
               <CommonPopup
                 fetchFn={(params: any) => api.getBookingChgCodeName(params)}
@@ -316,29 +328,25 @@ export function useTenderReceiveDispatchController({ model }: Args) {
             width: "2xl",
           });
         },
-      },
-      {
-        type: "button",
-        key: "운송비저장",
-        label: "BTN_SAVE",
+      }),
+      makeSaveAction({
+        key: "BTN_AP_SETL_SAVE",
         onClick: () => {
           const rows = model.grids.apSetl.ref.current?.rows ?? [];
           const saveRows = dirtyRows(rows);
           if (saveRows.length === 0) return;
 
-          base
-            .callAjax(api.updateCarrierRate(saveRows), "저장되었습니다.")
-            .then(() => {
-              const main = model.grids.main.selectedRef.current;
-              if (main) {
-                base.searchSub(
-                  "apSetl",
-                  api.getDispatchApSetlList({ DSPCH_NO: main.DSPCH_NO }),
-                );
-              }
-            });
+          base.callAjax(api.updateCarrierRate(saveRows)).then(() => {
+            const main = model.grids.main.selectedRef.current;
+            if (main) {
+              base.searchSub(
+                "apSetl",
+                api.getDispatchApSetlList({ DSPCH_NO: main.DSPCH_NO }),
+              );
+            }
+          });
         },
-      },
+      }),
     ],
     [model, base, openPopup, closePopup, guardHasData],
   );

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
 import { useCommonStores } from "@/hooks/useCommonStores";
+import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
+import { Field } from "@/app/components/popup/Field";
 
 type RejectReasonContentProps = {
   onConfirm: (data: { reasonCode: string; detail: string }) => void;
@@ -21,68 +22,31 @@ export default function RejectReasonContent({
   });
 
   return (
-    <div className="w-full max-w-xl mx-auto">
-      {/* 입력 영역 */}
-      <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100 dark:bg-slate-800">
-        {/* 이유 선택 */}
-        <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2 dark:[color-scheme:dark] dark:text-white">
-            운송요청 거절이유
-          </label>
+    <FormPopupLayout
+      cardClassName="space-y-4"
+      isValid={!!reasonCode}
+      onCancel={onClose}
+      onConfirm={() => onConfirm({ reasonCode, detail })}
+    >
+      <Field
+        layout="vertical"
+        type="combo"
+        label="운송요청 거절이유"
+        value={reasonCode}
+        onChange={setReasonCode}
+        options={stores.reasonOptions ?? []}
+        placeholder="선택하세요"
+      />
 
-          <ComboFilter
-            value={reasonCode}
-            onChange={setReasonCode}
-            placeholder="선택하세요"
-            options={stores.reasonOptions ?? []}
-            className="w-full"
-            inputClassName="
-            !h-11
-            rounded-lg
-            border border-gray-300
-            px-3
-            text-sm
-            focus:ring-2
-            focus:ring-blue-400
-          "
-          />
-        </div>
-
-        {/* 상세 내용 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2 dark:[color-scheme:dark] dark:text-white">
-            운송요청 거절이유 상세내용
-          </label>
-
-          <textarea
-            value={detail}
-            onChange={(e) => setDetail(e.target.value)}
-            rows={5}
-            className="w-full rounded-lg border border-gray-300 p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="상세 내용을 입력하세요"
-          />
-        </div>
-      </div>
-
-      {/* 버튼 영역 */}
-      <div className="flex gap-3 mt-6">
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex-1 h-11 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
-        >
-          취소
-        </button>
-
-        <button
-          type="button"
-          disabled={!reasonCode}
-          onClick={() => onConfirm({ reasonCode, detail })}
-          className="flex-1 h-11 rounded-lg bg-[rgb(var(--primary))] text-white font-medium hover:bg-[rgb(var(--primary-hover))] disabled:opacity-40 transition"
-        >
-          확인
-        </button>
-      </div>
-    </div>
+      <Field
+        layout="vertical"
+        type="textarea"
+        label="운송요청 거절이유 상세내용"
+        rows={5}
+        value={detail}
+        onChange={setDetail}
+        placeholder="상세 내용을 입력하세요"
+      />
+    </FormPopupLayout>
   );
 }

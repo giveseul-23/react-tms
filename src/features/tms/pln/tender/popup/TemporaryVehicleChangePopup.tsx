@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
+import { Field } from "@/app/components/popup/Field";
 
 type TemporaryVehicleChangeContentProps = {
   defaultVehicleType?: string;
@@ -19,105 +21,68 @@ export default function TemporaryVehicleChangePopup({
   onClose,
   initialValues = {},
 }: TemporaryVehicleChangeContentProps) {
-  const [vehicleType, setVehicleType] = useState(initialValues.VEH_TP_CD ?? "");
-  const [carrierName, setCarrierName] = useState(initialValues.CARR_NM ?? "");
+  const [vehicleType] = useState(initialValues.VEH_TP_CD ?? "");
+  const [carrierName] = useState(initialValues.CARR_NM ?? "");
   const [vehicleNo, setVehicleNo] = useState("");
   const [driverName, setDriverName] = useState("");
   const [driverPhone, setDriverPhone] = useState("");
 
-  const isValid = vehicleNo && driverName && driverPhone;
+  const isValid = !!(vehicleNo && driverName && driverPhone);
 
   return (
-    <div className="w-full max-w-xl mx-auto">
-      {/* 카드 */}
-      <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4 dark:bg-slate-800">
-        {/* 차량유형명 */}
-        <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
-            차량유형명
-          </label>
-          <input
-            value={vehicleType}
-            disabled
-            className="col-span-2 h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm dark:text-slate-900"
-          />
-        </div>
+    <FormPopupLayout
+      cardClassName="space-y-4"
+      confirmLabel="저장"
+      isValid={isValid}
+      onCancel={onClose}
+      onConfirm={() =>
+        onConfirm({
+          VEH_NO: vehicleNo,
+          DRVR_NM: driverName,
+          MBL_PHN_NO: driverPhone,
+        })
+      }
+    >
+      <Field
+        layout="horizontal"
+        type="text"
+        disabled
+        label="차량유형명"
+        value={vehicleType}
+      />
 
-        {/* 운송협력사명 */}
-        <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
-            운송협력사명
-          </label>
-          <input
-            value={carrierName}
-            disabled
-            className="col-span-2 h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm dark:text-slate-900"
-          />
-        </div>
+      <Field
+        layout="horizontal"
+        type="text"
+        disabled
+        label="운송협력사명"
+        value={carrierName}
+      />
 
-        {/* 차량번호 */}
-        <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
-            차량번호
-          </label>
-          <input
-            value={vehicleNo}
-            onChange={(e) => setVehicleNo(e.target.value)}
-            className="col-span-2 h-10 rounded-lg border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+      <Field
+        layout="horizontal"
+        type="text"
+        label="차량번호"
+        value={vehicleNo}
+        onChange={setVehicleNo}
+      />
 
-        {/* 운전자명 */}
-        <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
-            운전자명
-          </label>
-          <input
-            value={driverName}
-            onChange={(e) => setDriverName(e.target.value)}
-            className="col-span-2 h-10 rounded-lg border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+      <Field
+        layout="horizontal"
+        type="text"
+        label="운전자명"
+        value={driverName}
+        onChange={setDriverName}
+      />
 
-        {/* 운전자전화번호 */}
-        <div className="grid grid-cols-3 items-center gap-3">
-          <label className="text-sm font-medium text-gray-700 dark:text-slate-100">
-            운전자전화번호
-          </label>
-          <input
-            value={driverPhone}
-            onChange={(e) => setDriverPhone(e.target.value)}
-            placeholder='"-" 를 빼고 작성하세요.'
-            className="col-span-2 h-10 rounded-lg border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-      </div>
-
-      {/* 버튼 */}
-      <div className="flex gap-3 mt-6">
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex-1 h-11 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
-        >
-          취소
-        </button>
-
-        <button
-          type="button"
-          disabled={!isValid}
-          onClick={() =>
-            onConfirm({
-              VEH_NO: vehicleNo,
-              DRVR_NM: driverName,
-              MBL_PHN_NO: driverPhone,
-            })
-          }
-          className="flex-1 h-11 rounded-lg text-white font-medium disabled:opacity-40 transition hover:bg-[rgb(var(--primary-hover))] bg-[rgb(var(--primary))]"
-        >
-          저장
-        </button>
-      </div>
-    </div>
+      <Field
+        layout="horizontal"
+        type="text"
+        label="운전자전화번호"
+        value={driverPhone}
+        onChange={setDriverPhone}
+        placeholder='"-" 를 빼고 작성하세요.'
+      />
+    </FormPopupLayout>
   );
 }

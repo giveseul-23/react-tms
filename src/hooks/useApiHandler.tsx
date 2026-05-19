@@ -1,5 +1,6 @@
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
+import { Lang } from "@/app/services/common/Lang";
 
 export function useApiHandler() {
   const { openPopup, closePopup } = usePopup();
@@ -10,12 +11,12 @@ export function useApiHandler() {
   ) => {
     const showError = (description: string) => {
       openPopup({
+        title: "LBL_ERROR",
         content: (
           <ConfirmModal
-            title="에러"
+            title={Lang.get("LBL_ERROR")}
             description={description}
             onClose={closePopup}
-            onConfirm={closePopup}
             type={"error"}
           />
         ),
@@ -44,7 +45,6 @@ export function useApiHandler() {
             title="확인"
             description={successMessage}
             onClose={closePopup}
-            onConfirm={closePopup}
             type={"confirm"}
           />
         ),

@@ -8,14 +8,12 @@
 
 import { useCallback, useMemo } from "react";
 import { useApiHandler } from "@/hooks/useApiHandler";
-import {
-  dirtyRows,
-  toDsSave,
-} from "@/app/components/grid/gridUtils/rowStatus";
+import { dirtyRows, toDsSave } from "@/app/components/grid/gridUtils/rowStatus";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
 import { newRid, type BaseModel, type GridSlot } from "./useBaseModel";
+import { Lang } from "../services/common/Lang";
 
 interface Args<K extends string> {
   model: BaseModel<K>;
@@ -25,7 +23,9 @@ interface Args<K extends string> {
     save?: (payload: { dsSave: any[] }) => Promise<any>;
   };
   searchOptions?: {
-    transformParams?: (params: Record<string, unknown>) => Record<string, unknown>;
+    transformParams?: (
+      params: Record<string, unknown>,
+    ) => Record<string, unknown>;
     onAfterSearch?: (data: any) => void;
   };
 }
@@ -41,8 +41,8 @@ export function useBaseController<K extends string>({
 
   // 센차: me.callAjax — API Promise 한 번 감쌈 (성공/에러 토스트)
   const callAjax = useCallback(
-    <T,>(apiCall: Promise<T>, successMsg = "처리되었습니다.") =>
-      handleApi(apiCall, successMsg),
+    <T,>(apiCall: Promise<T>, successMsg = "MSG_SAVE_CMPLT") =>
+      handleApi(apiCall, Lang.get(successMsg)),
     [handleApi],
   );
 
@@ -171,7 +171,11 @@ export function useBaseController<K extends string>({
           // no-op
         } else if (typeof after === "function") {
           after();
-        } else if (after && typeof after === "object" && "cascadeFrom" in after) {
+        } else if (
+          after &&
+          typeof after === "object" &&
+          "cascadeFrom" in after
+        ) {
           const parentSlot = (model.grids as Record<string, GridSlot>)[
             after.cascadeFrom as string
           ];
@@ -305,7 +309,9 @@ export function useBaseController<K extends string>({
   const fetchList = useCallback(
     (params: Record<string, unknown>) => {
       if (!api?.search) {
-        throw new Error("[useBaseController] api.search 미설정 — fetchList 호출 불가");
+        throw new Error(
+          "[useBaseController] api.search 미설정 — fetchList 호출 불가",
+        );
       }
       const transformed = searchOptions?.transformParams?.(params) ?? params;
       return api.search(transformed);
@@ -324,7 +330,9 @@ export function useBaseController<K extends string>({
 
   const mainActions = useMemo(() => {
     if (!api?.save) return [];
-    return [makeSaveAction({ onClick: () => saveGrid("main" as K, api.save!) })];
+    return [
+      makeSaveAction({ onClick: () => saveGrid("main" as K, api.save!) }),
+    ];
   }, [api, saveGrid]);
 
   return {
