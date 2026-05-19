@@ -4,7 +4,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { preferredCarrierApi as api } from "./PreferredCarrierApi";
 import { MAIN_COLUMN_DEFS } from "./PreferredCarrierColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
