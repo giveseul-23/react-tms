@@ -56,3 +56,14 @@ export const TRACK_TITLE_MAP: Record<TrackType, string> = {
   STOP: "경유지",
   POD: "인수증",
 };
+
+// 추적 type 별로 그리드 행에서 추출할 컬럼 필드.
+// TODO: 실제 type 별 keyField 로 교체 (현재 모두 DSPCH_NO placeholder).
+export const TRACK_KEY_FIELD_MAP: Record<TrackType, string> = {
+  BUY: "DSPCH_NO",
+  SELL: "DSPCH_NO",
+  DSPCH: "DSPCH_NO",
+  ORD: "DSPCH_NO",
+  STOP: "DSPCH_NO",
+  POD: "DSPCH_NO",
+};

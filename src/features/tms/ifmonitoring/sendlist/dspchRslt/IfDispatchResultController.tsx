@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { ifDispatchResultApi as api } from "./IfDispatchResultApi";
 import { MAIN_COLUMN_DEFS } from "./IfDispatchResultColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { IfDispatchResultModel, GridKey } from "./IfDispatchResultModel";
 
@@ -19,7 +19,7 @@ export function useIfDispatchResultController({ model }: Args) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
     },
@@ -49,7 +49,7 @@ export function useIfDispatchResultController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     mainActions,
   };
 }

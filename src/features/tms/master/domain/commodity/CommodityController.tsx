@@ -3,7 +3,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { commodityApi as api } from "@/features/tms/master/domain/commodity/CommodityApi";
 import { MAIN_COLUMN_DEFS } from "@/features/tms/master/domain/commodity/CommodityColumns";

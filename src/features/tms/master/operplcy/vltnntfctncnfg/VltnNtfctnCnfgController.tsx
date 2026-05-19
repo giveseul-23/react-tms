@@ -6,7 +6,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { VltnNtfctnCnfgModel, GridKey } from "./VltnNtfctnCnfgModel";
 
@@ -65,7 +65,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -136,7 +136,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onDetailGridClick,
     mainActions,

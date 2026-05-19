@@ -5,7 +5,7 @@ import { CNFG_HEADER_COLUMN_DEFS } from "./LogisticGroupDefaultColumns";
 import {
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { LogisticGroupDefaultModel, GridKey } from "./LogisticGroupDefaultModel";
 
@@ -53,7 +53,7 @@ export function useLogisticGroupDefaultController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.header.setData(data);
       onHeaderGridClick(data?.rows?.[0]);
@@ -76,7 +76,7 @@ export function useLogisticGroupDefaultController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onHeaderGridClick,
     onSubCnfgGridClick,
     detailActions,

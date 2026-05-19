@@ -14,7 +14,7 @@
 // 받으므로 신규 dsSave 패턴/레거시 rows 패턴 양쪽 컨트롤러에서 모두 사용 가능.
 
 import { useCallback } from "react";
-import { dirtyRows, toDsSave } from "./gridCommon";
+import { dirtyRows, toDsSave } from "../gridCommon";
 import { useApiHandler } from "@/hooks/useApiHandler";
 
 /**

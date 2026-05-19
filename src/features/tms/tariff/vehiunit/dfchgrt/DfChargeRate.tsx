@@ -28,7 +28,7 @@ export default function DfChargeRate() {
       defaultSizes={[40, 60]}
       searchProps={{
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.handleSearch,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

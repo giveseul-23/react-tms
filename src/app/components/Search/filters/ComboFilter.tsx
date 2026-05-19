@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -15,27 +15,22 @@ type ComboFilterProps = {
   value: string;
   onChange: (value: string) => void;
 
-  label?: string;
   selectId?: string;
   placeholder?: string;
   inputClassName?: string;
   options?: { CODE: string; NAME: string }[];
-  required?: boolean;
 };
 
 export function ComboFilter({
   value,
   onChange,
   options,
-  label = "콤보",
   selectId = "category",
   placeholder = "선택",
   className,
   inputClassName,
-  required,
-  ...props
 }: ComboFilterProps) {
-  const safeOptions = options ?? [];
+  const safeOptions = useMemo(() => options ?? [], [options]);
 
   useEffect(() => {
     if (!value && safeOptions.length > 0) {

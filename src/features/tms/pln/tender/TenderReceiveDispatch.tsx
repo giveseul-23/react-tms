@@ -13,7 +13,6 @@ import {
   SMS_COLUMN_DEFS,
   AP_SETL_COLUMN_DEFS,
 } from "./TenderReceiveDispatchColumns";
-import { TrackPanel } from "@/app/components/track/TrackPanel";
 
 export const MENU_CD = "MENU_PLAN_TENDER_RECEIVE";
 
@@ -26,21 +25,14 @@ export default function TenderReceiveDispatch() {
       menuCode={MENU_CD}
       searchProps={{
         fetchFn: ctrl.fetchDispatchList,
-        onSearch: ctrl.handleSearch,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         excludes: ["BOOKING"],
         menuCode: MENU_CD,
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
+      defaultDirection="horizontal"
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
@@ -118,15 +110,8 @@ export default function TenderReceiveDispatch() {
           actions={[]}
         />
       }
-      bottomSlot={
-        <TrackPanel
-          open={model.trackOpen}
-          onClose={() => model.setTrackOpen(false)}
-          dspchNos={model.trackDspchNos}
-          trackType={model.trackType}
-        />
-      }
-      bottomOpen={model.trackOpen}
+      bottomSlot={ctrl.track.panel}
+      bottomOpen={ctrl.track.open}
       bottomHeight={280}
     />
   );

@@ -9,7 +9,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { lgstgrpOprConfigApi as api } from "./LgstgrpOprConfigApi";
 import type {
   LgstgrpOprConfigMstModel,
@@ -73,7 +73,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
 
   // ── 메인 그리드 조회 콜백 (센차: onMainInfoCallback) ───────────
   // 메인에 데이터 set + 첫 행 자동 선택 (cascade 는 onMainGridClick 위임)
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -245,7 +245,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onSub01GridClick,
     onTabChange,

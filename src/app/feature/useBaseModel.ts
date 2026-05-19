@@ -214,7 +214,7 @@ export function useBaseModel<K extends string = string>(
     (key: string, updater: SetStateAction<GridData>) => {
       if (typeof updater !== "function") {
         // 객체 직접 set (조회 결과 도착, resetGrids 등) — ref 도 동기 업데이트.
-        // handleSearch → setData → 즉시 onMainGridClick 흐름에서
+        // onSearchCallback → setData → 즉시 onMainGridClick 흐름에서
         // dirty 체크가 새 데이터를 보도록 보장.
         const withRid = ensureRid(updater);
         allDataRef.current = { ...allDataRef.current, [key]: withRid };
@@ -239,7 +239,7 @@ export function useBaseModel<K extends string = string>(
   // ── selected reference auto-sync ─────────────────────────────
   // 셀 편집 등으로 rows 의 row 객체가 새 reference 로 교체되면, allSel 의 해당 항목도
   // 같은 __rid__ 의 새 row 로 swap. selected.CNFG_CD 등 PK 값이 항상 최신을 가리켜
-  // 저장 후 autoSelectFirstRow 의 PK 매칭이 정상 동작하도록.
+  // 저장 후 첫행 자동선택의 PK 매칭이 정상 동작하도록.
   useEffect(() => {
     setAllSel((prev) => {
       let changed = false;

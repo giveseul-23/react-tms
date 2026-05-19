@@ -7,7 +7,7 @@
 //
 // 주의: className / DOM 구조 / onChange 동작은 기존 코드와 byte-for-byte 동일하게 유지.
 
-import { ROW_STATUS, isInserted, markDelete } from "./gridCommon";
+import { ROW_STATUS, isInserted, markDelete } from "../gridCommon";
 
 export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   type: "text",

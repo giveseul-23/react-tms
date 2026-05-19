@@ -1,11 +1,11 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
 import {
   CENTER,
   RIGHT,
   numberValueFormatter,
   negativeRedCenterCellStyle,
   negativeRedRightCellStyle,
-} from "@/app/components/grid/commonFormatters";
+} from "@/app/components/grid/columns/commonFormatters";
 
 // ─────────────────────────────────────────────────────────────
 // 월실적 (메인) — HEAD (ExtJS createMainHeaderColumns 대응)

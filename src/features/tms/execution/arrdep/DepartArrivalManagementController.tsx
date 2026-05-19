@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { departArrivalManagementApi as api } from "./DepartArrivalManagementApi";
 import { MAIN_COLUMN_DEFS } from "./DepartArrivalManagementColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DepartArrivalManagementModel, GridKey } from "./DepartArrivalManagementModel";
@@ -34,7 +34,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -194,7 +194,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     mainActions,
     stopoverActions,

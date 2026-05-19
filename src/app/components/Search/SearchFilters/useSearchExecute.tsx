@@ -4,7 +4,7 @@
 //   - 필수 항목 누락 체크
 //   - DYNAMIC_QUERY 빌드
 //   - rawFiltersRef 빌드 (날짜는 '-' 제거)
-//   - fetchFn 호출 → onSearch 콜백
+//   - fetchFn 호출 → onSearchCallback 콜백
 //   - pageSize 변경 시 자동 재조회
 //   - searchRef에 핸들러 노출
 
@@ -58,7 +58,7 @@ interface UseSearchExecuteParams {
   meta: readonly SearchMeta[];
   searchState: SearchState;
   fetchFn: (params: Record<string, unknown>) => Promise<any>;
-  onSearch: (data: SearchResult) => void;
+  onSearchCallback: (data: SearchResult) => void;
   pageSize: number;
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
   rawFiltersRef?: React.MutableRefObject<Record<string, string>>;
@@ -80,7 +80,7 @@ export function useSearchExecute({
   meta,
   searchState,
   fetchFn,
-  onSearch,
+  onSearchCallback,
   pageSize,
   filtersRef,
   rawFiltersRef,
@@ -356,7 +356,7 @@ export function useSearchExecute({
               ? Number(rows[0].TOTALCOUNT)
               : rows.length;
 
-          onSearch({
+          onSearchCallback({
             rows,
             totalCount,
             page: targetPage,
@@ -378,7 +378,7 @@ export function useSearchExecute({
       meta,
       searchState,
       fetchFn,
-      onSearch,
+      onSearchCallback,
       filtersRef,
       rawFiltersRef,
       excludeKeysRef,

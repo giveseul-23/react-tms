@@ -25,7 +25,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { featureApi as api } from "./CargoApi.ts";
 import {
   MAIN_COLUMN_DEFS,
@@ -63,8 +63,8 @@ export function useFeatureController({ model }: ControllerArgs) {
   // );
 
   // ── 메인 조회 콜백 (onSearch) — 첫 행 자동 선택 + cascade ──────
-  // 메인 cascade 정의는 onMainGridClick 한 곳만 — handleSearch 가 그걸 재사용.
-  const handleSearch = useCallback(
+  // 메인 cascade 정의는 onMainGridClick 한 곳만 — onSearchCallback 가 그걸 재사용.
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       // onMainGridClick(data?.rows?.[0]);
@@ -124,7 +124,7 @@ export function useFeatureController({ model }: ControllerArgs) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     // onMainGridClick,
     mainActions,
   };

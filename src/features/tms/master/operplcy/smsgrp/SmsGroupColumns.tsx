@@ -1,6 +1,6 @@
 // 컬럼 끝의 audit 은 DataGrid 가 audit prop(model.bind 자동) 으로 추가.
 
-// 키 컬럼에 isPrimaryKey:true — DataGrid 가 rowKeys/autoSelectFirstRow 자동 활성화.
+// 키 컬럼에 isPrimaryKey:true — DataGrid 가 첫행 자동선택을 자동 활성화.
 export const MAIN_COLUMN_DEFS = [
   {
     type: "text",

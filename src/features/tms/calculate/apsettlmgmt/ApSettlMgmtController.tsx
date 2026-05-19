@@ -11,7 +11,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ApSettlMgmtModel, GridKey } from "./ApSettlMgmtModel";
 
@@ -74,7 +74,7 @@ export function useApSettlMgmtController({ model }: Args) {
   );
 
   // ── 메인 조회 콜백 — 첫 행 자동 선택 + cascade ─────────────────
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.config.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -255,7 +255,7 @@ export function useApSettlMgmtController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     mainActions,
     summaryActions,

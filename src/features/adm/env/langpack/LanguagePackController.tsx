@@ -5,7 +5,7 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
@@ -42,7 +42,7 @@ export function useLanguagePackController({
   );
 
   // 조회 완료 시 그리드 데이터 반영
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.setGridData(data);
     },
@@ -106,7 +106,7 @@ export function useLanguagePackController({
 
   return {
     fetchLanguagePackList,
-    handleSearch,
+    onSearchCallback,
     mainActions,
   };
 }

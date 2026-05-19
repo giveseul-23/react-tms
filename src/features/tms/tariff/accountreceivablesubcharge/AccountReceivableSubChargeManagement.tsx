@@ -26,7 +26,7 @@ export default function AccountReceivableSubChargeManagement() {
       defaultSizes={[50, 60]}
       searchProps={{
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.handleSearch,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

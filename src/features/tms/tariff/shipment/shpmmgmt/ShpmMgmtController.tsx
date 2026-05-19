@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { shpmMgmtApi as api } from "./ShpmMgmtApi";
 import { MAIN_COLUMN_DEFS } from "./ShpmMgmtColumns";
-import { makeCommonActions } from "@/app/components/grid/commonActions";
+import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ShpmMgmtModel, GridKey } from "./ShpmMgmtModel";
@@ -69,7 +69,7 @@ export function useShpmMgmtController({ model }: Args) {
     [model, base, onLgstRowClicked],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -151,7 +151,7 @@ export function useShpmMgmtController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onLgstRowClicked,
     onZoneRowClicked,

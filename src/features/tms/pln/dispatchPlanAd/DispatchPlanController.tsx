@@ -7,7 +7,7 @@ import { MAIN_COLUMN_DEFS } from "./DispatchPlanColumns";
 import {
   makeSaveAction,
   makeExcelGroupAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DispatchPlanModel, GridKey } from "./DispatchPlanModel";
@@ -47,7 +47,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -356,7 +356,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
 
   return {
     fetchDispatchPlanList: fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onAllocOrderRowClicked,
     onUnallocOrderRowClicked,

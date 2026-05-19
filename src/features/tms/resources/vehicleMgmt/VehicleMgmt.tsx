@@ -160,7 +160,7 @@ export default function VehicleMgmt() {
         searchProps={{
           moduleDefault: "TMS",
           fetchFn: ctrl.fetchVehicleList,
-          onSearch: ctrl.handleSearch,
+          onSearchCallback: ctrl.onSearchCallback,
           searchRef: model.searchRef,
           filtersRef: model.filtersRef,
           pageSize: model.pageSize,

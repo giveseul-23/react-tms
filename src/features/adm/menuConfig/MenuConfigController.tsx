@@ -15,7 +15,7 @@ import MenuItemAddPopup, {
 } from "./popup/MenuItemAddPopup";
 import type { MenuRow } from "./MenuConfig";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
-import { makeSaveAction } from "@/app/components/grid/commonActions";
+import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
 import { useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 
@@ -43,7 +43,7 @@ export function useMenuConfigController({
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (result: any) => {
       const list = result?.rows ?? [];
       if (!Array.isArray(list.data)) {
@@ -274,7 +274,7 @@ export function useMenuConfigController({
 
   return {
     fetchMenuConfigList,
-    handleSearch,
+    onSearchCallback,
     handleSave,
     handleRowClicked,
     mainActions,

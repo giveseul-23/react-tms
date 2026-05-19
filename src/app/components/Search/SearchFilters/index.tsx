@@ -41,7 +41,7 @@ export type { SearchResult, ParamMode };
 
 interface SearchFiltersProps {
   meta: readonly SearchMeta[];
-  onSearch: (data: SearchResult) => void;
+  onSearchCallback: (data: SearchResult) => void;
   treeGridRef?: React.MutableRefObject<TreeGridHandle>;
   searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
@@ -73,7 +73,7 @@ interface SearchFiltersProps {
 
 export function SearchFilters({
   meta,
-  onSearch,
+  onSearchCallback,
   searchRef,
   filtersRef,
   rawFiltersRef,
@@ -137,7 +137,7 @@ export function SearchFilters({
     meta,
     searchState,
     fetchFn: wrappedFetchFn,
-    onSearch,
+    onSearchCallback,
     pageSize,
     filtersRef,
     rawFiltersRef,

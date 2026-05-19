@@ -40,7 +40,7 @@ export default function Feature() {
       menuCode={MENU_CODE}
       searchProps={{
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.handleSearch,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
@@ -51,8 +51,6 @@ export default function Feature() {
           columnDefs={MAIN_COLUMN_DEFS}
           //codeMap={model.codeMap}
           // onRowClicked={ctrl.onMainGridClick}
-          rowKeys="CNTR_CD"
-          autoSelectFirstRow
           actions={ctrl.mainActions}
         />
       }

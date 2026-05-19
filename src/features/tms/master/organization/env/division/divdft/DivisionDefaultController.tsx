@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import { makeSaveAction } from "@/app/components/grid/commonActions";
+import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
 import { divisionDefaultApi as api } from "./DivisionDefaultApi";
 import type { DivisionDefaultModel, GridKey } from "./DivisionDefaultModel";
 
@@ -31,7 +31,7 @@ export function useDivisionDefaultController({ model }: Args) {
   );
 
   // ── 메인 조회 콜백 — 첫 행 자동 선택 + cascade ─────────────────
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -61,7 +61,7 @@ export function useDivisionDefaultController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     detailActions,
   };

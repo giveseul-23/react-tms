@@ -1,4 +1,4 @@
-import { makeAuditColumns } from "@/app/components/grid/commonColumns";
+import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
 
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },

@@ -7,9 +7,9 @@ import { useGuard } from "@/hooks/useGuard";
 import { downExcelSearch } from "@/views/common/common";
 import {
   makeExcelGroupAction,
-  makeTrackGroupAction,
   makeHistoryAction,
-} from "@/app/components/grid/commonActions";
+  useTrackGroupAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows, isInserted } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
@@ -29,6 +29,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { openPopup, closePopup } = usePopup();
   const { guardHasData } = useGuard();
+  const track = useTrackGroupAction();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getDispatchList(params),
@@ -45,7 +46,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -71,25 +72,9 @@ export function useTenderReceiveDispatchController({ model }: Args) {
     [model.grids.apSetl],
   );
 
-  const openTrack =
-    (type: "BUY" | "SELL" | "DSPCH" | "ORD" | "STOP" | "POD") => (e?: any) => {
-      if (!e?.data?.length) return;
-      const dspchNos = e.data.map((r: any) => r.DSPCH_NO).filter(Boolean);
-      model.setTrackType(type);
-      model.setTrackDspchNos(dspchNos);
-      model.setTrackOpen(true);
-    };
-
   const mainActions: ActionItem[] = useMemo(
     () => [
-      makeTrackGroupAction({
-        onBuy: openTrack("BUY"),
-        onSell: openTrack("SELL"),
-        onDispatch: openTrack("DSPCH"),
-        onOrder: openTrack("ORD"),
-        onStop: openTrack("STOP"),
-        onPod: openTrack("POD"),
-      }),
+      track.action,
       makeHistoryAction(),
       {
         type: "button",
@@ -293,7 +278,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [base, openPopup, closePopup, guardHasData, model],
+    [base, openPopup, closePopup, guardHasData, model, track.action],
   );
 
   const apSetlActions: ActionItem[] = useMemo(
@@ -360,10 +345,11 @@ export function useTenderReceiveDispatchController({ model }: Args) {
 
   return {
     fetchDispatchList: fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     handleApSetlCellChange,
     mainActions,
     apSetlActions,
+    track,
   };
 }

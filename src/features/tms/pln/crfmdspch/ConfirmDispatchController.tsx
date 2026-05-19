@@ -7,7 +7,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { confirmDispatchApi as api } from "./ConfirmDispatchApi";
 import { MAIN_COLUMN_DEFS } from "./ConfirmDispatchColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ConfirmDispatchModel, GridKey } from "./ConfirmDispatchModel";
 
@@ -72,7 +72,7 @@ export function useConfirmDispatchController({ model }: Args) {
   );
 
   // ── 메인 조회 콜백 — 첫 행 자동 선택 + cascade ─────────────────
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.config.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -173,7 +173,7 @@ export function useConfirmDispatchController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onOrderGridClick,
     mainActions,

@@ -4,7 +4,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { vehicleMgmtApi as api } from "./vehicleMgmtApi";
 import { useGuard } from "@/hooks/useGuard";
 import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { VehicleMgmtModel, GridKey } from "./VehicleMgmtModel";
 
@@ -21,7 +21,7 @@ export function useVehicleMgmtController({ model }: Args) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       model.closeDetail();
@@ -243,7 +243,7 @@ export function useVehicleMgmtController({ model }: Args) {
 
   return {
     fetchVehicleList: fetchList,
-    handleSearch,
+    onSearchCallback,
     handleRowClicked,
     handleNavigate,
     handleJumpTo,

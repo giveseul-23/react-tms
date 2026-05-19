@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { rateApi as api } from "./RateApi";
 import { MAIN_COLUMN_DEFS } from "./RateColumns";
-import { makeCommonActions } from "@/app/components/grid/commonActions";
+import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { RateModel, GridKey } from "./RateModel";
 
@@ -53,7 +53,7 @@ export function useRateController({ model }: Args) {
     [model, base, onCostInfoRowClicked],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -98,7 +98,7 @@ export function useRateController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onCostInfoRowClicked,
     mainActions,

@@ -24,7 +24,7 @@ export default function IfDeliveryDocument() {
       searchProps={{
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.handleSearch,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

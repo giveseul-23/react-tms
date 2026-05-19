@@ -6,4 +6,4 @@ export * from "./gridUtils/rowStatus";
 export * from "./gridUtils/processColumn";
 export * from "./gridUtils/wrapActions";
 export * from "./gridUtils/cellChangeHandler";
-export * from "./useGridActions";
+export * from "./actions/useGridActions";

@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchManagerCostApi as api } from "./DispatchManagerCostManagementApi";
 import { MAIN_COLUMN_DEFS } from "./DispatchManagerCostManagementColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DispatchManagerCostModel, GridKey } from "./DispatchManagerCostManagementModel";
@@ -40,7 +40,7 @@ export function useDispatchManagerCostController({ model }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -141,7 +141,7 @@ export function useDispatchManagerCostController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     mainActions,
     costDetailActions,

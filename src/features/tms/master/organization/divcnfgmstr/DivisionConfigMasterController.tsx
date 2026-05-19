@@ -8,7 +8,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { divisionConfigMasterApi as api } from "./DivisionConfigMasterApi";
 import type {
@@ -68,7 +68,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
   );
 
   // ── 메인 조회 콜백 — 첫 행 자동 선택 + cascade ─────────────────
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
       onMainGridClick(data?.rows?.[0]);
@@ -214,7 +214,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMainGridClick,
     onSub01GridClick,
     mainActions,

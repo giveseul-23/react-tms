@@ -10,7 +10,7 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
   makeCommonActions,
-} from "@/app/components/grid/commonActions";
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { TempOilPriceModel, GridKey } from "./TempOilPriceModel";
@@ -44,7 +44,7 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
     [base],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       if (activeTabRef.current === "PERIOD") {
         model.grids.period.setData(data);
@@ -104,7 +104,7 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     onMasterRowClicked,
     masterActions,
     oilPriceActions,

@@ -1,5 +1,3 @@
-export const MAIN_ROW_KEYS = ["ITEM_CD", "SALES_ORG_CD"] as const;
-
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
@@ -7,6 +5,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_ITEM_CD",
     field: "ITEM_CD",
     editable: false,
+    isPrimaryKey: true,
   },
   {
     type: "text",
@@ -244,6 +243,7 @@ export const SUB01_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_SALES_ORG",
     field: "SALES_ORG_CD",
+    isPrimaryKey: true,
     editable: false,
   },
   {
