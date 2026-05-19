@@ -18,7 +18,7 @@ export default function PreferredCarrier() {
       menuCode={MENU_CODE}
       searchProps={{
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.handleSearch,
+        onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,

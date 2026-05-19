@@ -25,7 +25,7 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
     },
@@ -37,7 +37,7 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
   const onAddMain = useCallback(() => {
     base.addRow("main", {});
   }, [base]);
-  
+
   // ── 메인 저장 — 삭제행 있으면 confirm 후 저장 ─────────────────
   // confirmOnDelete 옵션 한 줄로 처리. 후처리는 기본값 "refresh"(메인 재조회).
   const onSaveMain = useCallback(
@@ -68,7 +68,7 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
 
   return {
     fetchList,
-    handleSearch,
-    mainActions
+    onSearchCallback,
+    mainActions,
   };
 }
