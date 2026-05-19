@@ -60,7 +60,7 @@ export const tenderApi = {
 
   getBookingChgCodeName(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/getBookingChgCodeName",
+      "/tmsCommonService/searchBookingChgCodeName",
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -71,7 +71,7 @@ export const tenderApi = {
   /////// ACTION
   updateCarrierRate(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/updateCarrierRate",
+      "/tenderReceiveDispatchService/updateCarrierRate",
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -81,14 +81,14 @@ export const tenderApi = {
 
   onTenderAccepted(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/onTenderAccepted",
+      "/tenderReceiveDispatchService/onTenderAccepted",
       withSession(payload),
     );
   },
 
   onTenderRejected(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/onTenderRejected",
+      "/tenderReceiveDispatchService/onTenderRejected",
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -98,7 +98,7 @@ export const tenderApi = {
 
   onChangeRegVeh(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/onChangeRegVeh",
+      "/dispatchPlanService/saveChangeVehicle",
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -108,7 +108,7 @@ export const tenderApi = {
 
   onChangeTempVeh(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/onChangeTempVeh",
+      "/dispatchPlanVehService/saveDspchSpotVeh",
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -118,7 +118,7 @@ export const tenderApi = {
 
   onVehicleChange(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/onVehicleChange",
+      "/tenderReceiveDispatchService/onVehicleChangeAndTenderAccepted",
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -128,7 +128,7 @@ export const tenderApi = {
 
   onVehicleCancel(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/onVehicleCancel",
+      "/tenderReceiveDispatchService/onTenderCanceled",
       withSession({
         MENU_CD: MENU_CD,
         ...payload,
@@ -138,7 +138,7 @@ export const tenderApi = {
 
   sendSMSForAppInstall(payload: any) {
     return apiClient.post<commonResponse>(
-      "/openapina/carrier/sendSMSForAppInstall",
+      "/tenderReceiveDispatchService/sendSmsPop",
       withSession({
         MENU_CD: MENU_CD,
         ...payload,

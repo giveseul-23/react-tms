@@ -96,7 +96,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         label: "BTN_TENDER_ACCEPT",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          base.callAjax(api.onTenderAccepted(e.data));
+          base.callAjax(api.onTenderAccepted({ dsSave: e.data }));
         },
       },
       {
@@ -113,9 +113,12 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                   closePopup();
                   base
                     .callAjax(
-                      api.onTenderRejected(
-                        e.data.map((row: any) => ({ ...row, ...ie.data })),
-                      ),
+                      api.onTenderRejected({
+                        dsSave: e.data.map((row: any) => ({
+                          ...row,
+                          ...ie.data,
+                        })),
+                      }),
                     )
                     .then(() => base.search());
                 }}
@@ -146,13 +149,13 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                       closePopup();
                       base
                         .callAjax(
-                          api.onChangeRegVeh(
-                            e.data.map((row: any) => ({
+                          api.onChangeRegVeh({
+                            dsSave: e.data.map((row: any) => ({
                               ...row,
                               ...ie,
                               CHGVEH_MEMO: "운송사협력사 요청건",
                             })),
-                          ),
+                          }),
                         )
                         .then(() => base.search());
                     }}
@@ -204,13 +207,13 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                       closePopup();
                       base
                         .callAjax(
-                          api.onVehicleChange(
-                            e.data.map((row: any) => ({
+                          api.onVehicleChange({
+                            dsSave: e.data.map((row: any) => ({
                               ...row,
                               ...ie,
                               CHGVEH_MEMO: "운송협력사 요청",
                             })),
-                          ),
+                          }),
                         )
                         .then(() => base.search());
                     }}
@@ -227,7 +230,8 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         type: "button",
         key: "BTN_VEHICLE_CANCEL",
         label: "BTN_VEHICLE_CANCEL",
-        onClick: (e: any) => base.callAjax(api.onVehicleCancel(e.data)),
+        onClick: (e: any) =>
+          base.callAjax(api.onVehicleCancel({ dsSave: e.data })),
       },
       {
         type: "button",
@@ -243,7 +247,9 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                   closePopup();
                   base
                     .callAjax(
-                      api.sendSMSForAppInstall({ ...e.data, ...ie.data }),
+                      api.sendSMSForAppInstall({
+                        dsSave: { ...e.data, ...ie.data },
+                      }),
                     )
                     .then(() => base.search());
                 }}
