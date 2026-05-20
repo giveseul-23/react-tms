@@ -26,6 +26,8 @@ import type {
   GridKey,
 } from "./TenderReceiveDispatchModel";
 
+import { MENU_CD } from "./TenderReceiveDispatch";
+
 interface Args {
   model: TenderReceiveDispatchModel;
 }
@@ -145,7 +147,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                 content: (
                   <VehicleChangePopup
                     initialValues={{ LGST_GRP_CD: e.data[0].LGST_GRP_CD }}
-                    onApply={(ie: any) => {
+                    onConfirm={(ie: any) => {
                       closePopup();
                       base
                         .callAjax(
@@ -203,7 +205,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                 title: "BTN_REG_TEMP_VEH",
                 content: (
                   <VehicleAssignPopup
-                    onApply={(ie: any) => {
+                    onConfirm={(ie: any) => {
                       closePopup();
                       base
                         .callAjax(

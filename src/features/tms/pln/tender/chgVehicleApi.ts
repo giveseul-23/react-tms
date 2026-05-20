@@ -23,14 +23,14 @@ export const chgVehicleApi = {
   ////// SEARCH
   getDedTruckList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/openapina/carrier/getDedTruckList`,
+      `/dispatchPlanService/searchDispatchChangeVehiclePop`,
       withSession(payload),
     );
   },
 
   getConTruckList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/openapina/carrier/getConTruckList`,
+      `/tenderReceiveDispatchService/searchVehicleChgPop`,
       withSession(payload),
     );
   },

@@ -2,7 +2,6 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useTenderReceiveDispatchModel } from "./TenderReceiveDispatchModel";
@@ -30,7 +29,6 @@ export default function TenderReceiveDispatch() {
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
         excludes: ["BOOKING"],
-        menuCode: MENU_CD,
       }}
       defaultDirection="horizontal"
       storageKey={model.storageKeys.outer}

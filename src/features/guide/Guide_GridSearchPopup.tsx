@@ -15,8 +15,8 @@
 // - GridSearchPopupLayout 한 줄로 조회바 + 선택배지 + 그리드 + 버튼 골격 다 해결
 // - fields 배열: text/combo 혼용 (콤보는 useCommonStores 로 옵션 로드)
 // - columnDefs 의 sendField: payload key 매핑 (RETURN_* 등)
-// - 팝업은 dumb: onApply 그대로 전달. 도메인 메모/플래그(CHGVEH_MEMO 등)는
-//   호출측 Controller 의 onApply 콜백에서 머지 (액션 책임)
+// - 팝업은 dumb: onConfirm 그대로 전달. 도메인 메모/플래그(CHGVEH_MEMO 등)는
+//   호출측 Controller 의 onConfirm 콜백에서 머지 (액션 책임)
 // ────────────────────────────────────────────────────────────────
 
 import { useEffect, useState } from "react";
@@ -30,7 +30,7 @@ import {
 // import { myFeatureApi } from "@/features/tms/<domain>/myFeatureApi";
 
 type GuideGridSearchPopupProps = {
-  onApply: (payload: Record<string, any>) => void;
+  onConfirm: (payload: Record<string, any>) => void;
   onClose: () => void;
   initialValues?: Record<string, any>;
 };
@@ -39,7 +39,7 @@ type GuideGridSearchPopupProps = {
 const OPER_TYPE = "100";
 
 export default function GuideGridSearchPopup({
-  onApply,
+  onConfirm,
   onClose,
   initialValues = {},
 }: GuideGridSearchPopupProps) {
@@ -156,8 +156,8 @@ export default function GuideGridSearchPopup({
       // 선택 배지에 표시할 3개 필드 (row 의 키)
       selectedBadgeFields={["VEH_NO", "DRVR_NM", "VEH_TP_NM"]}
       onSearch={onSearch}
-      // 팝업은 dumb — 도메인 메모/플래그는 Controller 의 onApply 콜백에서 머지
-      onApply={onApply}
+      // 팝업은 dumb — 도메인 메모/플래그는 Controller 의 onConfirm 콜백에서 머지
+      onConfirm={onConfirm}
       onClose={onClose}
     />
   );
@@ -175,7 +175,7 @@ export default function GuideGridSearchPopup({
 //     content: (
 //       <MyGridSearchPopup
 //         initialValues={{ VEH_NO: row.VEH_NO }}
-//         onApply={(ie) => {
+//         onConfirm={(ie) => {
 //           closePopup();
 //           base
 //             .callAjax(
@@ -214,6 +214,6 @@ export default function GuideGridSearchPopup({
 //   - 초기 조회 안 함: useEffect 제거, 사용자가 조회 버튼 누를 때만 fetchData 호출
 //   - 그리드 높이 다름: gridHeight={350} 등으로 조정
 //   - 선택 배지 라벨 변경: selectedLabel="선택됨 ✓" 추가
-//   - 도메인별 메모/플래그 키 추가: 팝업은 단순 onApply 전달, Controller 의
-//     onApply 콜백에서 payload 머지 (위 [참고] 의 CHGVEH_MEMO 예시 참고)
+//   - 도메인별 메모/플래그 키 추가: 팝업은 단순 onConfirm 전달, Controller 의
+//     onConfirm 콜백에서 payload 머지 (위 [참고] 의 CHGVEH_MEMO 예시 참고)
 // ────────────────────────────────────────────────────────────────

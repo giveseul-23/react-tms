@@ -27,10 +27,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { featureApi as api } from "./Guide_FeatureApi";
-import {
-  MAIN_COLUMN_DEFS,
-  DETAIL_COLUMN_DEFS,
-} from "./Guide_FeatureColumns";
+import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./Guide_FeatureColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { FeatureModel, GridKey } from "./Guide_FeatureModel";
 

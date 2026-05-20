@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, X, Check, Truck, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
@@ -20,11 +20,10 @@ type GridSearchPopupLayoutProps = {
   columnDefs: any[];
   rows: any[];
   gridHeight: number;
-  pageSize?: number;
   selectedBadgeFields: [string, string, string];
   selectedLabel?: string;
   onSearch: () => void;
-  onApply: (payload: Record<string, any>) => void;
+  onConfirm: (payload: Record<string, any>) => void;
   onClose: () => void;
 };
 
@@ -33,16 +32,25 @@ export function GridSearchPopupLayout({
   columnDefs,
   rows,
   gridHeight,
-  pageSize = 20,
   selectedBadgeFields,
   selectedLabel = "선택됨",
   onSearch,
-  onApply,
+  onConfirm,
   onClose,
 }: GridSearchPopupLayoutProps) {
   const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  // columnDefs 의 sendField 매핑 — 도메인 메모 같은 추가 키는 호출측 onApply 에서 wrapping
+  // 호출측에서 배열 아닌 값을 setRows 한 경우 방어
+  const safeRows = Array.isArray(rows) ? rows : [];
+
+  // rows ref 가 바뀔 때마다 DataGrid 재마운트 — ag-grid 가 stale row 누적하는 문제 회피
+  useEffect(() => {
+    setReloadKey((k) => k + 1);
+    setSelectedRow(null);
+  }, [rows]);
+
+  // columnDefs 의 sendField 매핑 — 도메인 메모 같은 추가 키는 호출측 onConfirm 에서 wrapping
   const buildPayload = (row: any) => {
     return columnDefs.reduce(
       (acc, col) => {
@@ -132,15 +140,14 @@ export function GridSearchPopupLayout({
         </div>
       )}
 
-      {/* Grid */}
+      {/* Grid — 재조회 시 ag-grid 가 row 누적/잔존하는 문제 회피용 key */}
       <div className="shrink-0" style={{ height: gridHeight }}>
         <DataGrid
+          key={reloadKey}
           layoutType="plain"
           actions={[]}
           columnDefs={columnDefs}
-          rowData={rows}
-          pagination
-          pageSize={pageSize}
+          rowData={safeRows}
           rowSelection="single"
           onRowSelected={(row: any) => setSelectedRow(row)}
           disableAutoSize
@@ -161,7 +168,7 @@ export function GridSearchPopupLayout({
         <Button
           size="sm"
           disabled={!selectedRow}
-          onClick={() => onApply(buildPayload(selectedRow))}
+          onClick={() => onConfirm(buildPayload(selectedRow))}
           className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 gap-1.5"
         >
           <Check className="w-3 h-3" />
