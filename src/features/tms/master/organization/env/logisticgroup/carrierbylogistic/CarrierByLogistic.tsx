@@ -22,6 +22,7 @@ export default function CarrierByLogistic() {
     <MasterDetailPage
       menuCode={MENU_CODE}
       searchProps={{
+        moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
