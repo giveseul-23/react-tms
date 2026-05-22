@@ -1,8 +1,12 @@
 import { useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { usePopup } from "@/app/components/popup/PopupContext";
-import { makeAddAction } from "@/app/components/grid/actions/commonActions";
+import {
+  makeAddAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import { MAIN_COLUMN_DEFS } from "./WorkdaysColumns";
 import { WorkdaysApi } from "./WorkdaysApi";
 import { MENU_CD } from "./Workdays";
 import type { WorkdaysModel, GridKey } from "./WorkdaysModel";
@@ -66,8 +70,14 @@ export function useWorkdaysController({ model }: Args) {
     () => [
       makeAddAction({ onClick: handleOpenHolidayPopup }),
       ...base.mainActions,
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS,
+        menuName: "MENU_WORKINGDAY_MANAGEMENT",
+        fetchFn: () => WorkdaysApi.getWorkdaysList(MENU_CD, model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
     ],
-    [handleOpenHolidayPopup, base.mainActions],
+    [handleOpenHolidayPopup, base.mainActions, model],
   );
 
   return {
