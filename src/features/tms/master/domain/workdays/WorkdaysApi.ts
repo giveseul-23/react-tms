@@ -40,4 +40,20 @@ export const WorkdaysApi = {
       },
     );
   },
+
+  ////// POPUP SAVE
+  saveWorkdays(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
+    return apiClient.post<commonResponse>(
+      `/workdaysService/saveWorkdays`,
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD,
+          ...rest,
+        },
+      },
+    );
+  },
 };
