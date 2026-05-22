@@ -248,7 +248,7 @@ export function useMenuConfigController({
         {
           type: "button",
           key: "조회된모든데이터다운로드",
-          label: "조회된모든데이터다운로드",
+          label: "BTN_EXCEL_DOWN_ALL",
           onClick: () => {
             downExcelSearch({
               columns: MAIN_COLUMN_DEFS(),
@@ -260,7 +260,7 @@ export function useMenuConfigController({
         {
           type: "button",
           key: "보이는데이터다운로드",
-          label: "보이는데이터다운로드",
+          label: "BTN_EXCEL_DOWN_GRID",
           onClick: () => {
             downExcelSearched({
               columns: MAIN_COLUMN_DEFS(),

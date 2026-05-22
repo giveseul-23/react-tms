@@ -219,7 +219,7 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
     items.push({
       type: "button" as const,
       key: "조회된모든데이터다운로드",
-      label: "조회된모든데이터다운로드",
+      label: "BTN_EXCEL_DOWN_ALL",
       onClick: () => {
         downExcelSearch({
           columns: config.columns,
@@ -234,7 +234,7 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
     items.push({
       type: "button" as const,
       key: "보이는데이터다운로드",
-      label: "보이는데이터다운로드",
+      label: "BTN_EXCEL_DOWN_GRID",
       onClick: () => {
         downExcelSearched({
           columns: config.columns,
