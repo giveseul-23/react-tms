@@ -1,10 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
+import { useMemo } from "react";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useSearchMeta } from "@/hooks/useSearchMeta";
 import { useLanguagePackModel } from "./LanguagePackModel";
 import { useLanguagePackController } from "./LanguagePackController";
 import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
@@ -12,45 +10,34 @@ import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
 export const MENU_CD = "MENU_LANG_PACK";
 
 export default function LanguagePack() {
-  const { meta, loading } = useSearchMeta(MENU_CD);
-  const model = useLanguagePackModel();
-
-  const searchRef = useRef<((page?: number) => void) | null>(null);
-  const filtersRef = useRef<Record<string, unknown>>({});
+  const model = useLanguagePackModel(MENU_CD);
+  const columnDefs = useMemo(
+    () => MAIN_COLUMN_DEFS(model.grids.main.setData),
+    [model.grids.main.setData],
+  );
 
   const ctrl = useLanguagePackController({
     menuCd: MENU_CD,
     model,
-    searchRef,
-    filtersRef,
   });
-
-  if (loading) return <Skeleton className="h-24" />;
 
   return (
     <GridOnlyPage
+      menuCode={MENU_CD}
       searchProps={{
-        meta,
         fetchFn: ctrl.fetchLanguagePackList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef,
-        filtersRef,
+        searchRef: model.searchRef,
+        filtersRef: model.filtersRef,
         pageSize: model.pageSize,
-        menuCode: MENU_CD,
       }}
       grid={
         <DataGrid
+          {...model.bind("main")}
           layoutType="plain"
-          columnDefs={MAIN_COLUMN_DEFS(model.setGridData)}
+          columnDefs={columnDefs}
           codeMap={model.codeMap}
-          rowData={model.gridData.rows}
-          totalCount={model.gridData.totalCount}
-          currentPage={model.gridData.page}
-          pageSize={model.pageSize}
-          onPageSizeChange={model.setPageSize}
-          onPageChange={(page) => {
-            searchRef.current?.(page);
-          }}
+          headerCheckbox={false}
           actions={ctrl.mainActions}
         />
       }
