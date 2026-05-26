@@ -3,29 +3,32 @@
 import { useMemo } from "react";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useApplicationModel } from "./ApplicationModel";
-import { useApplicationController } from "./ApplicationController";
-import { MAIN_COLUMN_DEFS } from "./ApplicationColumns";
+import { useMobileAppVersionControlModel } from "./MobileAppVersionControlModel";
+import { useMobileAppVersionControlController } from "./MobileAppVersionControlController";
+import { MAIN_COLUMN_DEFS } from "./MobileAppVersionControlColumns";
 
 export const MENU_CD = "MENU_APPL";
 
-export default function Application() {
-  const model = useApplicationModel(MENU_CD);
-  const columnDefs = useMemo(
-    () => MAIN_COLUMN_DEFS(model.grids.main.setData),
-    [model.grids.main.setData],
-  );
-
-  const ctrl = useApplicationController({
+export default function MobileAppVersionControl() {
+  const model = useMobileAppVersionControlModel(MENU_CD);
+  const ctrl = useMobileAppVersionControlController({
     menuCd: MENU_CD,
     model,
   });
+  const columnDefs = useMemo(
+    () =>
+      MAIN_COLUMN_DEFS(
+        model.grids.main.setData,
+        ctrl.handleOpenUploadPopup,
+      ),
+    [ctrl.handleOpenUploadPopup, model.grids.main.setData],
+  );
 
   return (
     <GridOnlyPage
       menuCode={MENU_CD}
       searchProps={{
-        fetchFn: ctrl.fetchApplicationList,
+        fetchFn: ctrl.fetchMobileAppVersionControlList,
         onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,

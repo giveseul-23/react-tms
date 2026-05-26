@@ -4,11 +4,11 @@ import { useCommonStores } from "@/hooks/useCommonStores";
 
 export type GridKey = "main";
 
-export function useApplicationModel(menuCode: string) {
+export function useMobileAppVersionControlModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode, { pageSize: 500 });
 
   const { stores } = useCommonStores({
-    useYn: { sqlProp: "CODE", keyParam: "USE_YN" },
+    pltfrmTp: { module: "TMS", sqlProp: "CODE", keyParam: "PLTFRM_TP" },
   });
 
   const codeMap = useMemo(() => {
@@ -29,4 +29,6 @@ export function useApplicationModel(menuCode: string) {
   };
 }
 
-export type ApplicationModel = ReturnType<typeof useApplicationModel>;
+export type MobileAppVersionControlModel = ReturnType<
+  typeof useMobileAppVersionControlModel
+>;

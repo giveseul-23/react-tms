@@ -1,87 +1,72 @@
-import { useCallback, type MutableRefObject } from "react";
-import { newRid } from "@/app/feature/useBaseModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
-import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { applicationApi } from "./ApplicationApi";
 import { MAIN_COLUMN_DEFS } from "./ApplicationColumns";
-import type { ApplicationModel } from "./ApplicationModel";
+import type { ApplicationModel, GridKey } from "./ApplicationModel";
 
 type ControllerProps = {
   menuCd: string;
   model: ApplicationModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
 };
 
 export function useApplicationController({
   menuCd,
   model,
-  searchRef,
-  filtersRef,
 }: ControllerProps) {
-  const fetchApplicationList = useCallback(
-    (params: Record<string, unknown>) =>
-      applicationApi.getApplicationList(menuCd, { ...params }),
-    [menuCd],
-  );
-
-  const saveApplication = useCallback(
-    (payload: any) =>
-      applicationApi.saveApplication({
-        dsSave: payload.dsSave,
-        MENU_CD: menuCd,
-      }),
-    [menuCd],
-  );
-
-  const onSearchCallback = useCallback(
-    (data: any) => {
-      const rows = Array.isArray(data?.rows)
-        ? data.rows.map((row: any) =>
-            row?.__rid__ ? row : { ...row, __rid__: newRid() },
-          )
-        : [];
-
-      model.setGridData({
-        ...data,
-        rows,
-      });
+  const base = useBaseController<GridKey>({
+    model,
+    api: {
+      search: (params) => applicationApi.getApplicationList(menuCd, { ...params }),
+      save: (payload) =>
+        applicationApi.saveApplication({
+          dsSave: payload.dsSave,
+          MENU_CD: menuCd,
+        }),
     },
-    [model],
+  });
+
+  const handleAdd = useCallback(() => {
+    base.addRow("main", {
+      APPL_CD: "",
+      APPL_NM: "",
+      USE_YN: "Y",
+    });
+  }, [base]);
+
+  const handleSave = useCallback(
+    () =>
+      base.saveGrid("main", (payload) =>
+        applicationApi.saveApplication({
+          dsSave: payload.dsSave,
+          MENU_CD: menuCd,
+        }),
+      ),
+    [base, menuCd],
   );
 
-  const handleAdd = useGridAdd({
-    setRows: model.setGridData,
-    newRow: { __rid__: newRid(), APPL_CD: "", APPL_NM: "", USE_YN: "Y" },
-    position: "top",
-  });
-
-  const handleSave = useGridSave({
-    rows: model.gridData.rows,
-    setRows: model.setGridData,
-    saveFn: saveApplication,
-    onSaved: () => searchRef.current?.(),
-  });
-
-  const mainActions: ActionItem[] = [
-    makeAddAction({ onClick: handleAdd }),
-    makeSaveAction({ onClick: handleSave }),
-    makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS(),
-      menuName: "MENU_APPLICATION",
-      fetchFn: () => applicationApi.getApplicationList(menuCd, filtersRef.current),
-      rows: model.gridData.rows,
-    }),
-  ];
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      makeAddAction({ onClick: handleAdd }),
+      makeSaveAction({ onClick: handleSave }),
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS(),
+        menuName: menuCd,
+        fetchFn: () => applicationApi.getApplicationList(menuCd, model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
+    [handleAdd, handleSave, menuCd, model.filtersRef, model.grids.main.rows],
+  );
 
   return {
-    fetchApplicationList,
-    onSearchCallback,
+    fetchApplicationList: base.fetchList,
+    onSearchCallback: base.onSearchCallback,
     mainActions,
   };
 }
