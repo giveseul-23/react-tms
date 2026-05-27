@@ -95,12 +95,12 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
   );
 
   const getSearchDateRange = useCallback(() => {
-    const filters = (model.filtersRef.current ?? {}) as Record<string, unknown>;
+    const srchObj = model.rawFiltersRef.current ?? {};
     return {
-      SDATE: toYmdText(filters["DTL.WRK_DAY_FRM"]),
-      EDATE: toYmdText(filters["DTL.WRK_DAY_TO"]),
+      SDATE: toYmdText(srchObj.SRCH_DTL_WRK_DAY_FRM),
+      EDATE: toYmdText(srchObj.SRCH_DTL_WRK_DAY_TO),
     };
-  }, [model.filtersRef]);
+  }, [model.rawFiltersRef]);
 
   const setSearchParam = useCallback(() => {
     const { SDATE, EDATE } = getSearchDateRange();
