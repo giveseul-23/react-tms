@@ -30,10 +30,27 @@ export function markUpdate(row: any): void {
   row.EDIT_STS = ROW_STATUS.UPDATE;
 }
 
-/** 삭제 마킹 — 무조건 "D" 로 덮어씀. */
+/** 삭제 마킹 — 직전 상태("" / "U") 를 보조필드에 기억한 뒤 "D" 로 덮어씀.
+ *  (unmarkDelete 로 해제 시 직전 상태로 복원하기 위함) */
 export function markDelete(row: any): void {
   if (!row) return;
+  if (row.EDIT_STS !== ROW_STATUS.DELETE) {
+    // spread/JSON 에 안 잡히도록 non-enumerable — 서버 전송(toDsSave/dirtyRows)에 새지 않음.
+    Object.defineProperty(row, "_prevSts", {
+      value: row.EDIT_STS ?? "",
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    });
+  }
   row.EDIT_STS = ROW_STATUS.DELETE;
+}
+
+/** 삭제 마킹 해제 — markDelete 가 기억한 직전 상태로 복원 (없으면 무상태 ""). */
+export function unmarkDelete(row: any): void {
+  if (!row || row.EDIT_STS !== ROW_STATUS.DELETE) return;
+  row.EDIT_STS = row._prevSts ?? "";
+  delete row._prevSts;
 }
 
 /** 변경 여부 — EDIT_STS 가 truthy 면 변경된 행. */

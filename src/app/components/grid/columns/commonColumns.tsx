@@ -7,7 +7,64 @@
 //
 // 주의: className / DOM 구조 / onChange 동작은 기존 코드와 byte-for-byte 동일하게 유지.
 
-import { ROW_STATUS, isInserted, markDelete } from "../gridCommon";
+import { ROW_STATUS, isInserted, markDelete, unmarkDelete } from "../gridCommon";
+
+// 삭제 컬럼 헤더 — 체크박스 없이 "삭제" 라벨만 표시.
+// 정렬 기능이 없는 컬럼이라, 헤더 클릭 시 전체 행 삭제를 토글한다.
+//   전체가 삭제상태가 아니면 → 기존행 EDIT_STS="D" 마킹 / 신규(INSERT)행 제거(셀과 동일)
+//   이미 전체 삭제상태면     → EDIT_STS="D" 행 전부 "U" 로 복귀
+function DeleteHeader(props: any) {
+  const api = props?.api;
+  const setRowData: ((updater: any) => void) | undefined = props?.setRowData;
+
+  const onClick = () => {
+    if (!api) return;
+    let total = 0;
+    let deleted = 0;
+    api.forEachNode((node: any) => {
+      if (!node.data || node.rowPinned) return;
+      total += 1;
+      if (node.data.EDIT_STS === ROW_STATUS.DELETE) deleted += 1;
+    });
+    const allDeleted = total > 0 && deleted === total;
+
+    if (!allDeleted) {
+      const toRemove: any[] = [];
+      api.forEachNode((node: any) => {
+        if (!node.data || node.rowPinned) return;
+        if (isInserted(node.data)) toRemove.push(node.data);
+        else markDelete(node.data);
+      });
+      if (toRemove.length && setRowData) {
+        setRowData((prev: any) =>
+          prev.filter(
+            (r: any) =>
+              !toRemove.some((d) =>
+                r.__rid__ && d.__rid__ ? r.__rid__ === d.__rid__ : r === d,
+              ),
+          ),
+        );
+      }
+    } else {
+      api.forEachNode((node: any) => {
+        if (node.data?.EDIT_STS === ROW_STATUS.DELETE) {
+          unmarkDelete(node.data);
+        }
+      });
+    }
+    api.refreshCells({ force: true });
+  };
+
+  return (
+    <div
+      className="flex items-center justify-center h-full w-full cursor-pointer select-none"
+      onClick={onClick}
+      title="클릭 시 전체 삭제 선택/해제"
+    >
+      <span className="leading-none">{props.displayName}</span>
+    </div>
+  );
+}
 
 export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   type: "text",
@@ -16,6 +73,9 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   width: 60,
   filter: false,
   floatingFilter: false,
+  sortable: false,
+  headerComponent: DeleteHeader,
+  headerComponentParams: { setRowData },
   cellRenderer: (params: any) => {
     if (!params.data || params.node?.rowPinned) return null;
     return (
@@ -46,9 +106,9 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
                 });
               }
             } else {
-              // 체크 해제 → DELETE 마킹 취소 (UPDATE 로 강등)
+              // 체크 해제 → DELETE 마킹 취소 (직전 상태로 복원)
               if (params.data.EDIT_STS === ROW_STATUS.DELETE) {
-                params.data.EDIT_STS = ROW_STATUS.UPDATE;
+                unmarkDelete(params.data);
                 params.api?.refreshCells({
                   rowNodes: [params.node],
                   force: true,
