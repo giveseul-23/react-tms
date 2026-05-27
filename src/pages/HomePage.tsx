@@ -42,6 +42,7 @@ export default function HomePage() {
     menuLabelMap,
     menuUrlMap,
     loading: menuLoading,
+    refetch: refetchMenu,
   } = useDynamicMenu();
 
   const mergedLabelMap = useMemo(
@@ -176,6 +177,7 @@ export default function HomePage() {
         activeMenuCode={activeMenuCode}
         onToggle={() => setSidebarOpen((o) => !o)}
         onSelectMenu={handleSelectMenu}
+        onRefresh={refetchMenu}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
