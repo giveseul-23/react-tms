@@ -55,7 +55,7 @@ export const commonApi = {
   fetchSearchCondition(menuCode: string, sesLang: string, userId: string) {
     return apiClient.post<{
       data: { dsSearchCondition: ServerSearchConditionRow[] };
-    }>("/openapina/carrier/getSerchConditionAndUserAuth", {
+    }>("/appService/getSerchConditionAndUserAuth", {
       menuCode,
       sesLang,
       userId,

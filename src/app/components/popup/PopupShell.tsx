@@ -45,6 +45,21 @@ export function PopupShell({
   const offset = useRef({ x: 0, y: 0 });
   const dialogRef = useRef<HTMLDivElement>(null);
 
+  // 팝업 열기 직전(= render 시점, 내용 autofocus 전) 포커스 요소 캡처 → 닫힐 때 복원.
+  // 조회조건 팝업 선택 후 그 필드로 포커스가 돌아가 Enter 조회가 이어지도록.
+  const [opener] = useState<HTMLElement | null>(() =>
+    typeof document !== "undefined"
+      ? (document.activeElement as HTMLElement | null)
+      : null,
+  );
+  useEffect(() => {
+    return () => {
+      if (opener && document.contains(opener)) {
+        requestAnimationFrame(() => opener.focus?.());
+      }
+    };
+  }, [opener]);
+
   useEffect(() => {
     if (open) setPos(null);
   }, [open]);

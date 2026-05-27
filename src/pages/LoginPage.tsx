@@ -152,7 +152,16 @@ export default function AuthPage() {
                   {"\n"}Sign in to continue.
                 </p>
 
-                <form onSubmit={onSubmit} className="mt-10 space-y-6">
+                <form
+                  onSubmit={onSubmit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                      e.preventDefault();
+                      e.currentTarget.requestSubmit();
+                    }
+                  }}
+                  className="mt-10 space-y-6"
+                >
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-slate-500">
                       ID

@@ -179,6 +179,13 @@ export function SearchFilters({
 
         <CollapsibleContent>
           <CardContent
+            onKeyDownCapture={(e) => {
+              if (e.key !== "Enter" || e.nativeEvent.isComposing || searching)
+                return;
+              e.preventDefault();
+              e.stopPropagation(); // 필드 자체 Enter 동작(팝업 코드조회/콤보 열기) 억제하고 조회만 실행
+              handleSearch(1);
+            }}
             className="
             p-2
             text-[12px]
