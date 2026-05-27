@@ -5,6 +5,7 @@ import { Search, SlidersHorizontal, Check, X } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { commonApi } from "@/app/services/common/commonApi";
 import DataGrid from "@/app/components/grid/DataGrid";
+import { Row } from "react-day-picker";
 
 /* =======================
  * Component
@@ -242,7 +243,9 @@ export function CommonPopup({
                 }
               : undefined
           }
-          onRowDoubleClicked={() => onApply(selectedRows)}
+          onRowDoubleClicked={() =>
+            onApply(isMultiple ? selectedRows : selectedRows[0])
+          }
           disableAutoSize={true}
         />
       </div>
