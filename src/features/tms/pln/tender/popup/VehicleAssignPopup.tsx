@@ -52,7 +52,7 @@ export default function VehicleAssignPopup({
       .getConTruckList({
         VEH_OP_TP: vehicleOperType,
         ...extraParams,
-        MENU_CD: MENU_CD
+        MENU_CD: MENU_CD,
       })
       .then((res: any) => {
         if (res?.data?.success === false) {
@@ -193,6 +193,7 @@ export default function VehicleAssignPopup({
       rows={rows}
       gridHeight={350}
       selectedBadgeFields={["VEH_NO", "DRVR_NM", "VEH_TP_NM"]}
+      rowSelection="single"
       onSearch={onSearch}
       onConfirm={onConfirm}
       onClose={onClose}

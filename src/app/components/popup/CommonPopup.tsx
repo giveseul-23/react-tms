@@ -19,11 +19,14 @@ export function CommonPopup({
   extraParams,
   initialCode = "",
   initialName = "",
+  rowSelection = "single",
 }: {
   sqlId?: string;
   fetchFn?: (params?: any) => Promise<any>;
   onApply: (row: any) => void;
   onClose: () => void;
+  /** 그리드 선택 모드 — 기본 "single". "multiple" 이면 배지에 다건 표시 + onApply 에 행 배열 전달. */
+  rowSelection?: "single" | "multiple";
   /** 결과 필터 컬럼 — 비우면 필터 미적용 */
   filterCol?: string;
   /** 결과 필터 값 — filterCol 과 함께 사용 */
@@ -35,10 +38,11 @@ export function CommonPopup({
   /** popup 진입 시 미리 채울 코드명 검색어 */
   initialName?: string;
 }) {
+  const isMultiple = rowSelection === "multiple";
   const [rows, setRows] = useState<any[]>([]);
   const [code, setCode] = useState(initialCode);
   const [name, setName] = useState(initialName);
-  const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
   useEffect(() => {
     handleSearch({
@@ -79,7 +83,11 @@ export function CommonPopup({
         .then((res: any) => {
           // 응답 데이터를 { CODE, NAME } 형식으로 변환
           const result =
-            res.data.result ?? res.data.rows ?? res.data.data ?? [];
+            res.data.data.dsOut ??
+            res.data.result ??
+            res.data.rows ??
+            res.data.data ??
+            [];
           setRows(result);
         })
         .catch(console.error);
@@ -177,16 +185,33 @@ export function CommonPopup({
       </div>
 
       {/* 선택 상태 표시 */}
-      {selectedRow ? (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
-          <Check className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
-          <span className="font-semibold">{selectedRow.CODE}</span>
-          <span className="text-blue-300">|</span>
-          <span>{selectedRow.NAME}</span>
-          <span className="ml-auto text-[10px] text-blue-400 font-medium">
-            선택됨
-          </span>
-        </div>
+      {selectedRows.length > 0 ? (
+        isMultiple ? (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700 min-w-0">
+            <Check className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
+            <span
+              className="truncate min-w-0"
+              title={selectedRows
+                .map((r) => r.CODE + " | " + r.NAME)
+                .join(", ")}
+            >
+              {selectedRows.map((r) => r.CODE + " | " + r.NAME).join(", ")}
+            </span>
+            <span className="ml-auto flex-shrink-0 text-[10px] text-blue-400 font-medium">
+              {selectedRows.length}건 선택됨
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
+            <Check className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
+            <span className="font-semibold">{selectedRows[0].CODE}</span>
+            <span className="text-blue-300">|</span>
+            <span>{selectedRows[0].NAME}</span>
+            <span className="ml-auto text-[10px] text-blue-400 font-medium">
+              선택됨
+            </span>
+          </div>
+        )
       ) : (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-dashed border-slate-200 text-[11px] text-slate-400">
           <Search className="w-3.5 h-3.5 flex-shrink-0" />
@@ -203,11 +228,22 @@ export function CommonPopup({
           rowData={rows}
           pagination
           pageSize={20}
-          rowSelection="single"
-          onRowSelected={(row: any) => setSelectedRow(row)}
-          onRowDoubleClicked={(row: any) => onApply(row)}
+          rowSelection={rowSelection}
+          onRowSelected={
+            isMultiple
+              ? undefined
+              : (row: any) => setSelectedRows(row ? [row] : [])
+          }
+          gridOptions={
+            isMultiple
+              ? {
+                  onSelectionChanged: (e: any) =>
+                    setSelectedRows(e.api.getSelectedRows()),
+                }
+              : undefined
+          }
+          onRowDoubleClicked={() => onApply(selectedRows)}
           disableAutoSize={true}
-          gridOptions={{ getRowId: (p: any) => String(p.data?.CODE) }}
         />
       </div>
 
@@ -224,8 +260,8 @@ export function CommonPopup({
         </Button>
         <Button
           size="sm"
-          disabled={!selectedRow}
-          onClick={() => onApply(selectedRow)}
+          disabled={selectedRows.length === 0}
+          onClick={() => onApply(isMultiple ? selectedRows : selectedRows[0])}
           className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 gap-1.5"
         >
           <Check className="w-3 h-3" />

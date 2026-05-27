@@ -205,6 +205,7 @@ export default function VehicleChangePopup({
       columnDefs={columnDefs}
       rows={rows}
       gridHeight={400}
+      rowSelection="single"
       selectedBadgeFields={["VEH_NO", "CARR_NM", "DRVR_NM"]}
       selectedLabel="선택됨 ✓"
       onSearch={onSearch}

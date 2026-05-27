@@ -255,6 +255,19 @@ export default function DataGrid<TRow>({
     gridOptions,
   });
 
+  // ── __rid__ 보장 ──────────────────────────────────────────────
+  // getRowId 가 항상 p.data.__rid__ 를 쓰므로(useGridProps), 모든 행에 __rid__ 가 있어야
+  // ag-grid 의 행 식별/선택/부분 redraw 가 정상 동작한다.
+  // useBaseModel 데이터는 이미 ensureRid 로 __rid__ 보유 → 같은 참조 그대로 반환(no-op).
+  // rowData 를 직접 주입하는 그리드(팝업/피커 등)는 여기서 index 기반 id 를 부여.
+  const rowDataWithRid = useMemo(
+    () =>
+      (activeRowData ?? []).map((r: any, i: number) =>
+        r && r.__rid__ != null ? r : { ...r, __rid__: `__r${i}` },
+      ),
+    [activeRowData],
+  );
+
   const gridStyle = {
     ["--ag-font-size" as any]: "11px",
     ["--ag-header-font-size" as any]: "11px",
@@ -302,7 +315,7 @@ export default function DataGrid<TRow>({
             <AgGridReact<TRow>
               ref={internalGridRef}
               {...commonGridProps}
-              rowData={activeRowData}
+              rowData={rowDataWithRid}
             />
           </div>
         )}

@@ -6,9 +6,15 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { logisticGroupPlanId as api } from "./LogisticGroupPlanIdApi";
-import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./LogisticGroupPlanIdColumns";
+import {
+  MAIN_COLUMN_DEFS,
+  DETAIL_COLUMN_DEFS,
+} from "./LogisticGroupPlanIdColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { LogisticGroupPlanIdModel, GridKey } from "./LogisticGroupPlanIdModel";
+import type {
+  LogisticGroupPlanIdModel,
+  GridKey,
+} from "./LogisticGroupPlanIdModel";
 import { Lang } from "@/app/services/common/Lang";
 
 interface ControllerArgs {
@@ -20,13 +26,14 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
-  const fetchList = useCallback(
-    (params: Record<string, unknown>) => api.getList({
-      DIV_CD: params.DIV_CD,
-      LGST_GRP_CD: params.LGST_GRP_CD,
-    }),
-    [],
-  );
+  const fetchList = useCallback(() => {
+    const srchObj = model.rawFiltersRef.current;
+
+    return api.getList({
+      DIV_CD: srchObj.SRCH_DIV_CD,
+      LGST_GRP_CD: srchObj.SRCH_LGST_GRP_CD,
+    });
+  }, [model.rawFiltersRef]);
 
   // ── 메인 행 클릭 — selection + 자식(detail) cascade reset/fetch ─
   // handleRowClick 한 줄로 selection set / reset / fetch 모두 처리.
@@ -51,7 +58,6 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
     [model.grids.main, onMainGridClick],
   );
 
-
   // ── 상세 행 추가 — 부모(메인) 행 검증 ─────────────────────────
   // requireParentRow 가 미선택/미저장 시 alert + false 반환.
   const onAddDetail = useCallback(() => {
@@ -61,7 +67,6 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
       LGST_GRP_CD: main.LGST_GRP_CD,
     });
   }, [model, base]);
-
 
   // ── 상세 저장 — 부모 행 기반 cascade 재조회 ────────────────────
   // afterSave: { cascadeFrom, fetch } 객체 형태 — 저장 후 자기 자신만 재조회.
@@ -79,16 +84,18 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
   // ── 그리드별 actions 배열 ─────────────────────────────────────
   // 추가/저장/사용자정의 버튼 결정은 모두 여기서. View 는 binding 만.
   // ActionItem[] 타입 명시 — 화면 고유 버튼 추가 시 type 추론 도움.
- const detailActions: ActionItem[] = useMemo(
+  const detailActions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddDetail }),
       makeSaveAction({
         onClick: () => {
           // delStatus가 없고, DFT_YN이 'Y'인 로우가 하나라도 있는지 확인
-          const hasDefault = model.grids.detail.rows.some(r => !r.delStatus && r.DFT_YN === 'Y');
+          const hasDefault = model.grids.detail.rows.some(
+            (r) => !r.delStatus && r.DFT_YN === "Y",
+          );
 
           if (!hasDefault) {
-            throw new Error(Lang.get('MSG_NO_DEFAULT_AREA'));
+            throw new Error(Lang.get("MSG_NO_DEFAULT_AREA"));
           }
 
           onSaveDetail();

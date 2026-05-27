@@ -314,19 +314,20 @@ export function useTenderReceiveDispatchController({ model }: Args) {
             title: "LBL_OPER_TCD",
             content: (
               <CommonPopup
+                rowSelection="multiple"
                 fetchFn={(params: any) => api.getBookingChgCodeName(params)}
-                onApply={(row: any) => {
+                onApply={(callbackRows: any) => {
                   closePopup();
                   model.grids.apSetl.setData((prev) => ({
                     ...prev,
                     rows: [
                       ...prev.rows,
-                      {
+                      ...callbackRows.map((element: any) => ({
                         EDIT_STS: "I",
                         DSPCH_NO: main.DSPCH_NO,
-                        CHG_CD: row.CODE,
-                        CHG_NM: row.NAME,
-                      },
+                        CHG_CD: element.CODE,
+                        CHG_NM: element.NAME,
+                      })),
                     ],
                   }));
                 }}

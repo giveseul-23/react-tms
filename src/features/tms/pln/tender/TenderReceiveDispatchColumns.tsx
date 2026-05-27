@@ -1,4 +1,3 @@
-
 export const MAIN_COLUMN_DEFS = () => [
   { headerName: "No" },
   {
@@ -45,7 +44,8 @@ export const MAIN_COLUMN_DEFS = () => [
     headerName: "LBL_REG_RATE",
     field: "RATE",
     type: "numeric",
-    editable: true, insertable: true,
+    editable: true,
+    insertable: true,
     valueSetter: (params: any) => {
       params.data.RATE = params.newValue;
       return true;
@@ -108,8 +108,26 @@ export const AP_SETL_COLUMN_DEFS = () => [
   { type: "text", headerName: "배차번호", field: "DSPCH_NO", hide: true },
   { type: "text", headerName: "항목코드", field: "CHG_CD", hide: true },
   { type: "text", headerName: "LBL_AP_CTG", field: "CHG_NM" },
-  { type: "numeric", headerName: "LBL_REG_RATE", field: "RATE" },
-  { type: "numeric", headerName: "LBL_CONFIRM_COST", field: "CFM_COST" },
-  { type: "numeric", headerName: "LBL_CFM_DESC", field: "CFM_COST" },
+  {
+    type: "numeric",
+    headerName: "LBL_REG_RATE",
+    field: "RATE",
+    insertable: true,
+    editable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_CONFIRM_COST",
+    field: "CFM_COST",
+    insertable: true,
+    editable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_CFM_DESC",
+    field: "CFM_DESC",
+    insertable: true,
+    editable: true,
+  },
   { type: "text", headerName: "비고", field: "RMK", hide: true },
 ];

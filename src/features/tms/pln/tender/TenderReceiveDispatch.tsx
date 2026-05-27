@@ -93,14 +93,6 @@ export default function TenderReceiveDispatch() {
                   codeMap={model.codeMap}
                   onCellValueChanged={ctrl.handleApSetlCellChange}
                   actions={ctrl.apSetlActions}
-                  audit={{
-                    delete: false,
-                    rowStatus: false,
-                    insertPerson: true,
-                    insertDate: true,
-                    updatePerson: false,
-                    updateTime: false,
-                  }}
                 />
               ),
             },

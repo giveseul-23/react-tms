@@ -22,8 +22,11 @@ type GridSearchPopupLayoutProps = {
   gridHeight: number;
   selectedBadgeFields: [string, string, string];
   selectedLabel?: string;
+  /** 그리드 선택 모드 — 자식 팝업에서 지정. 기본 "single".
+   *  "multiple" 이면 배지에 선택 다건을 표시하고 onConfirm 에 payload 배열을 전달. */
+  rowSelection?: "single" | "multiple";
   onSearch: () => void;
-  onConfirm: (payload: Record<string, any>) => void;
+  onConfirm: (payload: Record<string, any> | Record<string, any>[]) => void;
   onClose: () => void;
 };
 
@@ -34,20 +37,19 @@ export function GridSearchPopupLayout({
   gridHeight,
   selectedBadgeFields,
   selectedLabel = "선택됨",
+  rowSelection = "single",
   onSearch,
   onConfirm,
   onClose,
 }: GridSearchPopupLayoutProps) {
-  const [selectedRow, setSelectedRow] = useState<any>(null);
+  const isMultiple = rowSelection === "multiple";
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
-
-  // 호출측에서 배열 아닌 값을 setRows 한 경우 방어
-  const safeRows = Array.isArray(rows) ? rows : [];
 
   // rows ref 가 바뀔 때마다 DataGrid 재마운트 — ag-grid 가 stale row 누적하는 문제 회피
   useEffect(() => {
     setReloadKey((k) => k + 1);
-    setSelectedRow(null);
+    setSelectedRows([]);
   }, [rows]);
 
   // columnDefs 의 sendField 매핑 — 도메인 메모 같은 추가 키는 호출측 onConfirm 에서 wrapping
@@ -121,18 +123,35 @@ export function GridSearchPopupLayout({
       </div>
 
       {/* 선택 상태 표시 */}
-      {selectedRow ? (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
-          <Truck className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
-          <span className="font-semibold">{selectedRow[f0]}</span>
-          <span className="text-blue-300">|</span>
-          <span>{selectedRow[f1]}</span>
-          <span className="text-blue-300">|</span>
-          <span>{selectedRow[f2]}</span>
-          <span className="ml-auto text-[10px] text-blue-400 font-medium">
-            {selectedLabel}
-          </span>
-        </div>
+      {selectedRows.length > 0 ? (
+        isMultiple ? (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700 min-w-0">
+            <Truck className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
+            <span
+              className="truncate min-w-0"
+              title={selectedRows.map((r) => r[f0]).join(", ")}
+            >
+              {selectedRows
+                .map((r) => r[f0] + " | " + r[f1] + " | " + r[f2])
+                .join(", ")}
+            </span>
+            <span className="ml-auto flex-shrink-0 text-[10px] text-blue-400 font-medium">
+              {selectedRows.length}건 {selectedLabel}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
+            <Truck className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
+            <span className="font-semibold">{selectedRows[0][f0]}</span>
+            <span className="text-blue-300">|</span>
+            <span>{selectedRows[0][f1]}</span>
+            <span className="text-blue-300">|</span>
+            <span>{selectedRows[0][f2]}</span>
+            <span className="ml-auto text-[10px] text-blue-400 font-medium">
+              {selectedLabel}
+            </span>
+          </div>
+        )
       ) : (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-dashed border-slate-200 text-[11px] text-slate-400">
           <Truck className="w-3.5 h-3.5 flex-shrink-0" />
@@ -147,9 +166,21 @@ export function GridSearchPopupLayout({
           layoutType="plain"
           actions={[]}
           columnDefs={columnDefs}
-          rowData={safeRows}
-          rowSelection="single"
-          onRowSelected={(row: any) => setSelectedRow(row)}
+          rowData={rows}
+          rowSelection={rowSelection}
+          onRowSelected={
+            isMultiple
+              ? undefined
+              : (row: any) => setSelectedRows(row ? [row] : [])
+          }
+          gridOptions={
+            isMultiple
+              ? {
+                  onSelectionChanged: (e: any) =>
+                    setSelectedRows(e.api.getSelectedRows()),
+                }
+              : undefined
+          }
           disableAutoSize
         />
       </div>
@@ -167,8 +198,14 @@ export function GridSearchPopupLayout({
         </Button>
         <Button
           size="sm"
-          disabled={!selectedRow}
-          onClick={() => onConfirm(buildPayload(selectedRow))}
+          disabled={selectedRows.length === 0}
+          onClick={() =>
+            onConfirm(
+              isMultiple
+                ? selectedRows.map(buildPayload)
+                : buildPayload(selectedRows[0]),
+            )
+          }
           className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 gap-1.5"
         >
           <Check className="w-3 h-3" />

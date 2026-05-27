@@ -104,14 +104,18 @@ export function useUserGroupController({ model }: Args) {
       content: (
         <CommonPopup
           sqlId="SELECT_APPLICATION_CODE_NAME"
-          onApply={(row: any) => {
+          rowSelection="multiple"
+          onApply={(callbackRows: any) => {
             closePopup();
-            if (!row) return;
-            base.addRow("sub01", {
-              USR_GRP_CD: main.USR_GRP_CD,
-              APPL_CD: row.CODE,
-              APPL_NM: row.NAME,
-            });
+            if (!callbackRows) return;
+            base.addRow(
+              "sub01",
+              callbackRows.map((element: any) => ({
+                USR_GRP_CD: main.USR_GRP_CD,
+                APPL_CD: element.CODE,
+                APPL_NM: element.NAME,
+              })),
+            );
           }}
           onClose={closePopup}
         />

@@ -3,7 +3,10 @@ import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useLogisticGroupPlanIdModel } from "./LogisticGroupPlanIdModel";
 import { useLogisticGroupPlanIdController } from "./LogisticGroupPlanIdController";
-import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./LogisticGroupPlanIdColumns";
+import {
+  MAIN_COLUMN_DEFS,
+  DETAIL_COLUMN_DEFS,
+} from "./LogisticGroupPlanIdColumns";
 
 export const MENU_CODE = "MENU_LGST_GRP_PLN_ID";
 
@@ -19,10 +22,8 @@ export default function LogisticGroupPlanId() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        excludes: ["DIV_CD" , "LGST_GRP_CD"],// 기간 검색은 단일 필드로 통합
+        excludes: ["DIV_CD", "LGST_GRP_CD"],
+        ...model.bindSearch(),
       }}
       defaultDirection="horizontal"
       layoutToggle={true}

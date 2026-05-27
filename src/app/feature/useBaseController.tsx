@@ -271,14 +271,21 @@ export function useBaseController<K extends string>({
   // setSelected 도 같은 reference → 셀 편집 시 selected sync 가 __rid__ 매칭으로 PK 갱신 추적.
   // 저장 후 첫행 자동선택의 PK 매칭으로 추가한 행이 자동 재선택됨.
   const addRow = useCallback(
-    (gridKey: K, newRow: Record<string, any>) => {
+    (gridKey: K, newRow: Record<string, any> | Record<string, any>[]) => {
       const slot = (model.grids as Record<string, GridSlot>)[gridKey as string];
-      const rowWithSts = { ...newRow, EDIT_STS: "I", __rid__: newRid() };
+      const list = Array.isArray(newRow) ? newRow : [newRow];
+      const rowsWithSts = list.map((r) => ({
+        ...r,
+        EDIT_STS: "I",
+        __rid__: newRid(),
+      }));
       slot.setData((prev) => ({
         ...prev,
-        rows: [...(prev?.rows ?? []), rowWithSts],
+        rows: [...(prev?.rows ?? []), ...rowsWithSts],
       }));
-      slot.setSelected(rowWithSts);
+      if (rowsWithSts.length) {
+        slot.setSelected(rowsWithSts[rowsWithSts.length - 1]);
+      }
     },
     [model.grids],
   );
