@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 
@@ -11,9 +10,7 @@ export const MENU_CODE = "MENU_AP_DAILY_MGMT";
 
 export default function ApDailyManagement() {
   const model = useApDailyManagementModel(MENU_CODE);
-  // rawFiltersRef 는 SRCH_* prefix raw 조건 — 동적 컬럼 fetch 에 사용 (model 외 별도)
-  const rawFiltersRef = useRef<Record<string, string>>({});
-  const ctrl = useApDailyManagementController({ model, rawFiltersRef });
+  const ctrl = useApDailyManagementController({ model });
 
   return (
     <GridOnlyPage
@@ -22,10 +19,7 @@ export default function ApDailyManagement() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        rawFiltersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid

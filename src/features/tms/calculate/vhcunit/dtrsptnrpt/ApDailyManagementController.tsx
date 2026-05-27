@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo, MutableRefObject } from "react";
+import { useCallback, useRef, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { apDailyManagementApi as api } from "./ApDailyManagementApi";
 import {
@@ -15,13 +15,9 @@ import type { ApDailyManagementModel, GridKey } from "./ApDailyManagementModel";
 
 interface Args {
   model: ApDailyManagementModel;
-  rawFiltersRef: MutableRefObject<Record<string, string>>;
 }
 
-export function useApDailyManagementController({
-  model,
-  rawFiltersRef,
-}: Args) {
+export function useApDailyManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
 
   // dynamicColumns 캐시 — DIV_CD + LGST_GRP_CD 조합이 바뀔 때만 재조회
@@ -32,7 +28,7 @@ export function useApDailyManagementController({
 
   const fetchList = useCallback(
     async (params: Record<string, unknown>) => {
-      const srchObj = rawFiltersRef.current;
+      const srchObj = model.rawFiltersRef.current;
       const divCd = srchObj.SRCH_AP_DIV_CD ?? "";
       const lgstGrpCd = srchObj.SRCH_AP_LGST_GRP_CD ?? "";
       const cacheKey = `${divCd}|${lgstGrpCd}`;
@@ -72,7 +68,7 @@ export function useApDailyManagementController({
         ...params,
       });
     },
-    [rawFiltersRef, model],
+    [model],
   );
 
   const onMainGridClick = useCallback(
@@ -81,7 +77,7 @@ export function useApDailyManagementController({
         {
           to: "detail",
           fetch: () => {
-            const srchObj = rawFiltersRef.current;
+            const srchObj = model.rawFiltersRef.current;
             return api.getDetailList({
               dynamicColumns: chgCacheRef.current.list,
               DIV_CD: srchObj.SRCH_AP_DIV_CD,
@@ -92,7 +88,7 @@ export function useApDailyManagementController({
           },
         },
       ]),
-    [base, rawFiltersRef],
+    [base, model],
   );
 
   const onSearchCallback = useCallback(

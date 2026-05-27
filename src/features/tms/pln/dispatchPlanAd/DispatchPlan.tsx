@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
@@ -21,8 +20,7 @@ export const MENU_CODE = "MENU_DISPATCH_PLAN_AD";
 
 export default function DispatchPlan() {
   const model = useDispatchPlanModel(MENU_CODE);
-  const rawFiltersRef = useRef<Record<string, string>>({});
-  const ctrl = useDispatchPlanController({ model, rawFiltersRef });
+  const ctrl = useDispatchPlanController({ model });
 
   return (
     <MasterDetailPage
@@ -31,10 +29,7 @@ export default function DispatchPlan() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchDispatchPlanList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        rawFiltersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
         menuCode: MENU_CODE,
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

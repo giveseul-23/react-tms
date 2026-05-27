@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 
@@ -11,8 +10,7 @@ export const MENU_CODE = "MENU_AP_MONTHLY_MGMT";
 
 export default function ApMonthlyManagement() {
   const model = useApMonthlyManagementModel(MENU_CODE);
-  const rawFiltersRef = useRef<Record<string, string>>({});
-  const ctrl = useApMonthlyManagementController({ model, rawFiltersRef });
+  const ctrl = useApMonthlyManagementController({ model });
 
   return (
     <GridOnlyPage
@@ -21,10 +19,7 @@ export default function ApMonthlyManagement() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        rawFiltersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
         menuCode: MENU_CODE,
       }}
       grid={

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo, MutableRefObject } from "react";
+import { useCallback, useRef, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { apMonthlyManagementApi as api } from "./ApMonthlyManagementApi";
 import {
@@ -13,13 +13,9 @@ import type { ApMonthlyManagementModel, GridKey } from "./ApMonthlyManagementMod
 
 interface Args {
   model: ApMonthlyManagementModel;
-  rawFiltersRef: MutableRefObject<Record<string, string>>;
 }
 
-export function useApMonthlyManagementController({
-  model,
-  rawFiltersRef,
-}: Args) {
+export function useApMonthlyManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
 
   // dynamicColumns 캐시
@@ -30,7 +26,7 @@ export function useApMonthlyManagementController({
 
   const fetchList = useCallback(
     async (params: Record<string, unknown>) => {
-      const srchObj = rawFiltersRef.current;
+      const srchObj = model.rawFiltersRef.current;
       const divCd = srchObj.SRCH_AP_DIV_CD ?? "";
       const lgstGrpCd = srchObj.SRCH_AP_LGST_GRP_CD ?? "";
       const endDate = srchObj.SRCH_TO_DTTM ?? "";
@@ -62,7 +58,7 @@ export function useApMonthlyManagementController({
         ...params,
       });
     },
-    [rawFiltersRef, model],
+    [model],
   );
 
   const onSearchCallback = useCallback(

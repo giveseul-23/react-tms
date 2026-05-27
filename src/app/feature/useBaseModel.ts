@@ -8,7 +8,7 @@
 //   - storageKey prefix 는 menuCode 에서 자동 변환 (MENU_FOO_BAR → foo-bar)
 //   - storageKeys 는 outer/top/bottom/layout 4종 자동 제공
 //   - layout 토글값은 localStorage 동기화 자동
-//   - searchRef / filtersRef 도 자체 생성 + 노출 (View 의 useRef 두 개 불필요)
+//   - searchRef / filtersRef / rawFiltersRef 도 자체 생성 + 노출 (View 의 useRef 불필요)
 //   - bind() 가 onPageChange 자동 spread (searchRef 트리거)
 //
 // 타입 안전성을 위해 generic K 로 그리드 이름 유니언을 명시 권장:
@@ -83,6 +83,15 @@ export interface BoundGridProps {
   selectedRow: any;
 }
 
+/** SearchFilters(searchProps)에 spread 용 묶음 — model 이 소유한 검색 ref/pageSize.
+ *  `searchProps={{ fetchFn, onSearchCallback, ...model.bindSearch() }}` */
+export interface BoundSearchProps {
+  searchRef: MutableRefObject<((page?: number) => void) | null>;
+  filtersRef: MutableRefObject<Record<string, unknown>>;
+  rawFiltersRef: MutableRefObject<Record<string, string>>;
+  pageSize: number;
+}
+
 export type BaseModel<K extends string = string> = {
   grids: Record<K, GridSlot>;
   pageSize: number;
@@ -94,8 +103,12 @@ export type BaseModel<K extends string = string> = {
   searchRef: MutableRefObject<((page?: number) => void) | null>;
   /** SearchFilters 의 마지막 검색 조건 — 엑셀 다운 등 재사용 */
   filtersRef: MutableRefObject<Record<string, unknown>>;
+  /** SearchFilters 가 채우는 SRCH_* 접두 raw 검색 조건 — 팝업/동적 컬럼 fetch 등에서 재사용 */
+  rawFiltersRef: MutableRefObject<Record<string, string>>;
   /** DataGrid 에 spread 용 — `<DataGrid {...model.bind("main")} ... />` */
   bind: (gridKey: K) => BoundGridProps;
+  /** SearchFilters(searchProps)에 spread 용 — searchRef/filtersRef/rawFiltersRef/pageSize 묶음. */
+  bindSearch: () => BoundSearchProps;
 };
 
 interface BaseModelOptions {
@@ -160,6 +173,7 @@ export function useBaseModel<K extends string = string>(
   // 외부(View/Controller)는 이 ref 를 통해 검색 트리거 / 마지막 조건 read.
   const searchRef = useRef<((page?: number) => void) | null>(null);
   const filtersRef = useRef<Record<string, unknown>>({});
+  const rawFiltersRef = useRef<Record<string, string>>({});
 
   // ── storageKeys 자동 생성 ────────────────────────────────────
   const storageKeys = useMemo<StorageKeys>(() => {
@@ -342,6 +356,18 @@ export function useBaseModel<K extends string = string>(
     [grids, pageSize, setPageSize, onPageChange],
   );
 
+  // searchProps spread 용 — model 소유 검색 ref/pageSize 를 한 번에.
+  // ref 3종은 stable(useRef) → pageSize 만 의존.
+  const bindSearch = useCallback(
+    (): BoundSearchProps => ({
+      searchRef,
+      filtersRef,
+      rawFiltersRef,
+      pageSize,
+    }),
+    [pageSize],
+  );
+
   return {
     grids,
     pageSize,
@@ -351,6 +377,8 @@ export function useBaseModel<K extends string = string>(
     storageKeys,
     searchRef,
     filtersRef,
+    rawFiltersRef,
     bind,
+    bindSearch,
   };
 }
