@@ -1,4 +1,5 @@
-export const LOGISTIC_COLUMN_DEFS = [{ 
+
+export const LOGISTIC_COLUMN_DEFS  = (setGridData?: (updater: any) => void) => [{
     headerName: "No" 
   },{
     type: "text",
@@ -23,7 +24,8 @@ export const LOGISTIC_CARRIER_INFO_COLUMN_DEFS = [{
     sqlProp: "selectCarrList",
     nameField: "LBL_CARRIER_NAME",
     nameValue: "CARR_NM",
-    isPrimaryKey: true,
+    editable: true, 
+    insertable: true,
  }, {
     type: "text",
     headerName: "LBL_CARRIER_NAME",
@@ -34,17 +36,23 @@ export const LOGISTIC_CARRIER_INFO_COLUMN_DEFS = [{
     type: "numeric",
     headerName: "LBL_DSPCH_AP_FROM_DAY_ADJ",
     field: "DSPCH_AP_FRM_DAY_ADJ",
-    cellStyle: { textAlign: "right" }
+    cellStyle: { textAlign: "right" },
+    editable: true,
+    insertable: true
  }, {
     type: "numeric",
     headerName: "LBL_DSPCH_AP_TO_DAY_ADJ",
     field: "DSPCH_AP_TO_DAY_ADJ",
+    editable: true, 
+    insertable: true,
     cellStyle: { textAlign: "right" }
  }, {
     type: "text",
     headerName: "LBL_USE_YN",
     field: "USE_YN",
     width: 70,
+    editable: true, 
+    insertable: true,
     cellRenderer: (params: any) => (
       <div className="flex items-center justify-center h-full">
         <input
@@ -72,11 +80,15 @@ export const LOGISTIC_CARRIER_DETAIL_INFO_COLUMN_DEFS = [{
     field: "EMAIL_ADDR",
     fieldType: "text",
     required: true,
+    editable: true, 
+    insertable: true,
   }, {
     type: "text",
     headerName: "LBL_EMAIL_RCVR_NM",
     field: "EMAIL_RCVR_NM",
     fieldType: "text",
     required: true,
+    editable: true, 
+    insertable: true,
   }
 ];

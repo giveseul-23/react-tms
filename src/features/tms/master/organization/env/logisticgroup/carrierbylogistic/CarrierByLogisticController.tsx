@@ -1,27 +1,38 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, MutableRefObject} from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
+import { carrierByLogisticApi as api } from "./CarrierByLogisticApi";
 import {
-  makeAddAction,
-  makeSaveAction,
-  makeExcelGroupAction
+    makeAddAction,
+    makeSaveAction,
+    makeExcelGroupAction
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import { carrierByLogisticApi as api } from "./CarrierByLogisticApi";
-import type {
-  CarrierByLogisticModel,
-  GridKey,
-} from "./CarrierByLogisticModel";
+import type { CarrierByLogisticModel, GridKey } from "./CarrierByLogisticModel";
 
 interface Args {
   model: CarrierByLogisticModel;
+  rawFiltersRef: MutableRefObject<Record<string, string>>;
 }
 
-export function useCarrierByLogisticController({ model }: Args) {
+export function useCarrierByLogisticController({
+  model,
+  rawFiltersRef,
+}: Args) {
   const base = useBaseController<GridKey>({ model });
 
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => api.getLogisticCarrierInfoList(params),
-    [],
+    async (params: Record<string, unknown>) => {
+      const srchObj = rawFiltersRef.current;
+      const divCd = srchObj["SRCH_DIV_CD"];
+      const lgstGrpCd = srchObj["SRCH_LGST_GRP_CD"];
+
+      return api.getLogisticsList({
+        DIV_CD: divCd,
+        LGST_GRP_CD: lgstGrpCd,
+        ...params,
+      });
+    },
+    [rawFiltersRef, model],
   );
 
   const onMainGridClick = useCallback(
@@ -70,6 +81,10 @@ export function useCarrierByLogisticController({ model }: Args) {
     base.addRow("sub01", {
       DIV_CD: main.DIV_CD,
       LGST_GRP_CD: main.LGST_GRP_CD,
+      CARR_CD: "",
+      DSPCH_AP_FRM_DAY_ADJ: 0,
+      DSPCH_AP_TO_DAY_ADJ: 0,
+      USE_YN: "Y"
     });
   }, [model, base]);
 
@@ -126,6 +141,17 @@ export function useCarrierByLogisticController({ model }: Args) {
     [onAddSub02, onSaveSub02],
   );
 
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      makeExcelGroupAction({
+        columns: model.mainColumnDefs,
+        menuName: "운송협력사",
+        fetchFn: () => api.getLogisticsList(model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
+    [],
+  );
 
   return {
     fetchList,
@@ -133,6 +159,7 @@ export function useCarrierByLogisticController({ model }: Args) {
     onMainGridClick,
     onSub01GridClick,
     sub01Actions,
-    sub02Actions
+    sub02Actions,
+    mainActions
   };
 }

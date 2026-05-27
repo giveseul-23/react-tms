@@ -16,19 +16,18 @@ const withSession = (payload: any = {}) => {
 
 // 물류운영그룹
 export const carrierByLogisticApi = {
-  getLogisticsList() {
+  getLogisticsList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/logisticGroupCarrierService/search",
-      withSession({ MENU_CD: MENU_CODE }),
+      withSession({ MENU_CD: MENU_CODE, DIV_CD: payload.DIV_CD, LGST_GRP_CD: payload.LGST_GRP_CD }),
     );
   },
 
 
-  // 물류운영그룹 운송사 정보
   getLogisticCarrierInfoList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/logisticGroupCarrierService/searchLgstCarr",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      withSession({ MENU_CD: MENU_CODE, DIV_CD: payload.DIV_CD, LGST_GRP_CD: payload.LGST_GRP_CD }),
     );
   },
 
