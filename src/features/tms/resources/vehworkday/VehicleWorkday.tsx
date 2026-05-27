@@ -19,9 +19,7 @@ export default function VehicleWorkday() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
         menuCode: MENU_CODE,
         excludes: [
           {

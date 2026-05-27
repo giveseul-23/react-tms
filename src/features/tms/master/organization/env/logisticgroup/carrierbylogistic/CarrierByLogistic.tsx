@@ -11,12 +11,19 @@ import {
   LOGISTIC_CARRIER_INFO_COLUMN_DEFS,
   LOGISTIC_CARRIER_DETAIL_INFO_COLUMN_DEFS,
 } from "./CarrierByLogisticColumns";
+import { useRef } from "react";
+import { useMemo } from "react";
 
 export const MENU_CODE = "MENU_LGST_GRP_CARR";
 
 export default function CarrierByLogistic() {
   const model = useCarrierByLogisticModel(MENU_CODE);
-  const ctrl = useCarrierByLogisticController({ model });
+  const rawFiltersRef = useRef<Record<string, string>>({});
+  const ctrl = useCarrierByLogisticController({ model, rawFiltersRef });
+  const columnDefs = useMemo(
+    () => LOGISTIC_COLUMN_DEFS(model.grids.main.setData),
+    [model.grids.main.setData],
+  );
 
   return (
     <MasterDetailPage
@@ -27,6 +34,7 @@ export default function CarrierByLogistic() {
         onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
+        rawFiltersRef,
         pageSize: model.pageSize,
       }}
       defaultSizes={[55, 45]}
@@ -42,8 +50,10 @@ export default function CarrierByLogistic() {
           {/* 메인 그리드 (top-left) */}
           <DataGrid
             {...model.bind("main")}
-            columnDefs={LOGISTIC_COLUMN_DEFS}
+            columnDefs= {columnDefs}
             onRowClicked={ctrl.onMainGridClick}
+            actions={ctrl.mainActions}
+            audit={{ delete: false , rowStatus: false}}
           />
           {/* 상세 그리드 (top-right) */}
           <DataGrid
@@ -62,11 +72,9 @@ export default function CarrierByLogistic() {
           handleThickness="1.5"
           storageKey={model.storageKeys.bottom}
         >
-          {/* detail-i18n (bottom-left) — 상세 행에 종속 */}
           <DataGrid
             {...model.bind("sub02")}
             columnDefs={LOGISTIC_CARRIER_DETAIL_INFO_COLUMN_DEFS}
-            subTitle="LBL_CNFG_CD_LANG_SETTING"
             actions={ctrl.sub02Actions}
           />
         </SplitPane>
