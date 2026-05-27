@@ -76,6 +76,35 @@ interface UseSearchExecuteParams {
   userTz?: string;
 }
 
+// SRCH_* 접두 raw 필터 맵 — 클라이언트 내부용(팝업/동적 컬럼 등). 값 있는 필드만 포함.
+// 네이밍: DSPCH.DIV_CD → SRCH_DSPCH_DIV_CD (dot → _, SRCH_ 접두), 날짜는 '-' 제거.
+function buildRawFilters(
+  meta: readonly SearchMeta[],
+  searchState: SearchState,
+): Record<string, string> {
+  const dateKeys = new Set<string>();
+  meta.forEach((m) => {
+    if (m.type === "YMD" || m.type === "YMDT") {
+      if (m.mode === "N") {
+        dateKeys.add(m.key);
+      } else {
+        dateKeys.add(`${m.key}_FRM`);
+        dateKeys.add(`${m.key}_TO`);
+      }
+    }
+  });
+
+  const rawFilters: Record<string, string> = {};
+  Object.values(searchState).forEach((v) => {
+    if (v.value == null || v.value === "" || v.value === "ALL") return;
+    const val = dateKeys.has(v.key)
+      ? String(v.value).replace(/-/g, "")
+      : String(v.value);
+    rawFilters[`SRCH_${v.key.replace(/\./g, "_")}`] = val;
+  });
+  return rawFilters;
+}
+
 export function useSearchExecute({
   meta,
   searchState,
@@ -205,7 +234,7 @@ export function useSearchExecute({
         }
       });
 
-      const rawFilters: Record<string, string> = {};
+      const rawFilters = buildRawFilters(meta, searchState);
       // DBCOLUMN 키 맵 — 서버 payload top-level 주입용 (POPUP 치환 적용)
       const dbColumnFilters: Record<string, string> = {};
       Object.values(searchState).forEach((v) => {
@@ -214,9 +243,6 @@ export function useSearchExecute({
         const val = dateKeys.has(v.key)
           ? String(v.value).replace(/-/g, "")
           : String(v.value);
-
-        // 클라이언트용: state 키 그대로(SRCH_ 접두)
-        rawFilters[`SRCH_${v.key.replace(/\./g, "_")}`] = val;
 
         // 서버용: POPUP 은 meta.key(DBCOLUMN) 로 치환, _NM 은 제외
         const dbKey = resolveDbColumn(v.key);
@@ -405,6 +431,12 @@ export function useSearchExecute({
   useEffect(() => {
     if (searchRef) searchRef.current = handleSearch;
   }, [searchRef, handleSearch]);
+
+  // 조회조건 구성 중에도 rawFiltersRef 실시간 동기화 — 조회 버튼 전/모듈기본값 로드 후에도
+  // 팝업·액션이 현재 조회조건 값을 바로 사용할 수 있도록.
+  useEffect(() => {
+    if (rawFiltersRef) rawFiltersRef.current = buildRawFilters(meta, searchState);
+  }, [meta, searchState, rawFiltersRef]);
 
   return { searching, handleSearch };
 }

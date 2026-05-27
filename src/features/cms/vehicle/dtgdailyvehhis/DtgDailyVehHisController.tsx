@@ -67,9 +67,7 @@ export default function DtgDailyVehHisController() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchInTrnstVehList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
         paramMode: "RAW",
       }}
       direction={model.layout === "side" ? "horizontal" : "vertical"}

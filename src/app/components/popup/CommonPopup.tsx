@@ -164,6 +164,7 @@ export function CommonPopup({
           onRowSelected={(row: any) => setSelectedRow(row)}
           onRowDoubleClicked={(row: any) => onApply(row)}
           disableAutoSize={true}
+          gridOptions={{ getRowId: (p: any) => String(p.data?.CODE) }}
         />
       </div>
 

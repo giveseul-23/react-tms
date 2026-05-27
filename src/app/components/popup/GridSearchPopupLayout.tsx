@@ -70,10 +70,10 @@ export function GridSearchPopupLayout({
     <div className="flex flex-col gap-3 w-full h-full">
       {/* 조회 조건 */}
       <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="flex items-center justify-between px-3 py-2 bg-[rgb(var(--primary))]">
+        <div className="flex items-center justify-between px-3 py-2 bg-[var(--grid-header-bg)]">
           <div className="flex items-center gap-1.5 leading-none">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-white/80 flex-shrink-0" />
-            <span className="text-[12px] font-semibold text-white tracking-widest uppercase leading-none">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-color/80 flex-shrink-0" />
+            <span className="text-[12px] font-semibold text-color tracking-widest uppercase leading-none">
               조회조건
             </span>
           </div>
@@ -81,7 +81,7 @@ export function GridSearchPopupLayout({
             variant="ghost"
             size="xs"
             onClick={onSearch}
-            className="h-6 px-3 rounded-full bg-white/15 hover:bg-white border border-white/30 text-white hover:text-[rgb(var(--primary))] text-[12px] font-semibold transition-all flex items-center gap-1"
+            className="h-6 px-3 rounded-full bg-white/15 hover:bg-white border border-white/30 text-color hover:text-[rgb(var(--primary))] text-[12px] font-semibold transition-all flex items-center gap-1"
             style={{ lineHeight: 1 }}
           >
             <Search className="w-3 h-3 flex-shrink-0" />

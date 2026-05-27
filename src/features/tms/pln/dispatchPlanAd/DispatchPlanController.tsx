@@ -1,5 +1,5 @@
 // src/views/dispatchPlan/DispatchPlanController.tsx
-import { useCallback, useMemo, MutableRefObject } from "react";
+import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchPlanApi as api } from "./dispatchPlanApi";
 import { useGuard } from "@/hooks/useGuard";
@@ -14,10 +14,9 @@ import type { DispatchPlanModel, GridKey } from "./DispatchPlanModel";
 
 interface Args {
   model: DispatchPlanModel;
-  rawFiltersRef: MutableRefObject<Record<string, string>>;
 }
 
-export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
+export function useDispatchPlanController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { guardHasData } = useGuard();
 
@@ -85,7 +84,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
 
   // 미할당 탭 조회 (조회조건 개별 값 기반)
   const handleUnallocOrderSearch = useCallback(() => {
-    const srchObj = rawFiltersRef.current;
+    const srchObj = model.rawFiltersRef.current;
     model.setUnallocSearching(true);
     api
       .getUnallocOrderList({
@@ -107,7 +106,7 @@ export function useDispatchPlanController({ model, rawFiltersRef }: Args) {
         console.error("[DispatchPlan] unalloc search failed", err),
       )
       .finally(() => model.setUnallocSearching(false));
-  }, [model, rawFiltersRef]);
+  }, [model]);
 
   const handleSave = useCallback(() => {
     const rows = model.grids.main.ref.current?.rows ?? [];

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import {
@@ -27,9 +27,15 @@ export function useWorkdaysController({ model }: Args) {
 
   const { openPopup, closePopup } = usePopup();
 
-  const handleOpenHolidayPopup = () => {
-    const lgstGrpCd = "MV01";
-    const lgstGrpNm = "MV_백암센터";
+  const handleOpenHolidayPopup = useCallback(() => {
+    const srchObj = model.rawFiltersRef.current;
+    const lgstGrpCd = srchObj.SRCH_A_LGST_GRP_CD ?? "";
+    const lgstGrpNm = srchObj.SRCH_A_LGST_GRP_NM ?? "";
+
+    if (!lgstGrpCd) {
+      base.alert("물류그룹을 선택해주세요.");
+      return;
+    }
 
     openPopup({
       title: "BTN_CREATE_WORKINGDATE",
@@ -53,7 +59,10 @@ export function useWorkdaysController({ model }: Args) {
             console.log("requestPayload", requestPayload);
 
             base
-              .callAjax(WorkdaysApi.saveWorkdays(requestPayload), "MSG_SAVE_CMPLT")
+              .callAjax(
+                WorkdaysApi.saveWorkdays(requestPayload),
+                "MSG_SAVE_CMPLT",
+              )
               .then(() => {
                 closePopup();
                 base.search();
@@ -64,7 +73,7 @@ export function useWorkdaysController({ model }: Args) {
       ),
       width: "2xl",
     });
-  };
+  }, [base, closePopup, openPopup, model]);
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -73,7 +82,8 @@ export function useWorkdaysController({ model }: Args) {
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
         menuName: "MENU_WORKINGDAY_MANAGEMENT",
-        fetchFn: () => WorkdaysApi.getWorkdaysList(MENU_CD, model.filtersRef.current),
+        fetchFn: () =>
+          WorkdaysApi.getWorkdaysList(MENU_CD, model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],

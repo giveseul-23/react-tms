@@ -46,7 +46,7 @@ export function useDtgDailyVehHisControllerController({ model }: Args) {
         return;
       }
 
-      const vehNo = model.filtersRef.current["SRCH_VEH_NO_NM"];
+      const vehNo = model.rawFiltersRef.current["SRCH_VEH_NO_NM"];
       const params = {
         PSTN_DTTM: row?.HIS_DATE,
         VEH_NO: vehNo,

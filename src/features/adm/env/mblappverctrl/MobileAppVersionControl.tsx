@@ -40,6 +40,7 @@ export default function MobileAppVersionControl() {
           layoutType="plain"
           columnDefs={columnDefs}
           codeMap={model.codeMap}
+          audit={false}
           actions={ctrl.mainActions}
         />
       }
