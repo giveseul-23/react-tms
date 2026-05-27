@@ -10,6 +10,7 @@ import {
   X,
   Plus,
   Minus,
+  RefreshCw,
 } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +31,8 @@ interface SidebarProps {
   onToggle: () => void;
   onSelectMenu: (menuCode: string) => void;
   sections?: MenuSection[];
+  /** 메뉴 새로고침 — "전체" 컨트롤의 리프레시 버튼 클릭 시 호출 */
+  onRefresh?: () => void;
 }
 
 // ── 유틸 ──────────────────────────────────────────────────────────────────────
@@ -163,6 +166,7 @@ export function Sidebar({
   onToggle,
   onSelectMenu,
   sections: sectionsProp,
+  onRefresh,
 }: SidebarProps) {
   const sections: MenuSection[] = sectionsProp ?? [];
 
@@ -378,6 +382,13 @@ export function Sidebar({
                   className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
                 >
                   <Minus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={onRefresh}
+                  title="메뉴 새로고침"
+                  className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>

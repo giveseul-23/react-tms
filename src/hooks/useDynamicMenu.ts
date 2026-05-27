@@ -1,5 +1,5 @@
 // src/hooks/useDynamicMenu.ts
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Settings2,
   Truck,
@@ -51,7 +51,9 @@ function getIcon(applCode: string) {
 }
 
 // 서버 node → MenuNode 재귀 변환
+// 메뉴조회(사이드바)에서는 USE_YN="Y" 인 메뉴/폴더만 노출 — 구성 화면(MenuConfig)은 미적용.
 function toMenuNode(node: any): MenuNode | null {
+  if (node.USE_YN !== "Y") return null;
   if (node.LEAFYN === "Y") {
     return {
       type: "item",
@@ -119,7 +121,8 @@ export function useDynamicMenu() {
   const [sections, setSections] = useState<MenuSection[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const refetch = useCallback(() => {
+    setLoading(true);
     const { userId } = getSessionFields();
     menuApi
       .getMenuConfigList({ userId, DYNAMIC_QUERY: "1=1" })
@@ -135,6 +138,10 @@ export function useDynamicMenu() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
   const menuLabelMap: Record<string, string> = Object.fromEntries(
     sections.flatMap((s) => s.items.map((i) => [i.menuCode, i.label])),
   );
@@ -147,5 +154,5 @@ export function useDynamicMenu() {
     ),
   );
 
-  return { sections, menuLabelMap, menuUrlMap, loading };
+  return { sections, menuLabelMap, menuUrlMap, loading, refetch };
 }
