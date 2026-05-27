@@ -4,12 +4,11 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import {
   makeAddAction,
   makeSaveAction,
-  makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { MobileAppVersionControlApi } from "./MobileAppVersionControlApi";
 import { MAIN_COLUMN_DEFS } from "./MobileAppVersionControlColumns";
-import MobileAppInstallerUploadPopup from "./MobileAppInstallerUploadPopup";
+import MobileAppInstallerUploadPopup from "./popup/MobileAppInstallerUploadPopup";
 import type {
   MobileAppVersionControlModel,
   GridKey,
@@ -110,18 +109,8 @@ export function useMobileAppVersionControlController({
     () => [
       makeAddAction({ onClick: handleAdd }),
       makeSaveAction({ onClick: handleSave }),
-      makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS(),
-        menuName: menuCd,
-        fetchFn: () =>
-          MobileAppVersionControlApi.getMobileAppVersionControlList(
-            menuCd,
-            model.filtersRef.current,
-          ),
-        rows: model.grids.main.rows,
-      }),
     ],
-    [handleAdd, handleSave, menuCd, model.filtersRef, model.grids.main.rows],
+    [handleAdd, handleSave],
   );
 
   return {
