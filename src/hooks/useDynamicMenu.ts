@@ -51,7 +51,9 @@ function getIcon(applCode: string) {
 }
 
 // 서버 node → MenuNode 재귀 변환
+// 메뉴조회(사이드바)에서는 USE_YN="Y" 인 메뉴/폴더만 노출 — 구성 화면(MenuConfig)은 미적용.
 function toMenuNode(node: any): MenuNode | null {
+  if (node.USE_YN !== "Y") return null;
   if (node.LEAFYN === "Y") {
     return {
       type: "item",

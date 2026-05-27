@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Search } from "lucide-react";
+import { Search, SlidersHorizontal, Check, X } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
 import { commonApi } from "@/app/services/common/commonApi";
 import DataGrid from "@/app/components/grid/DataGrid";
 
@@ -103,60 +102,104 @@ export function CommonPopup({
     }
   };
 
-  return (
-    <div className="flex flex-col gap-3 w-full h-full overflow-hidden">
-      {/* ================= Search Area ================= */}
-      <div className="shrink-0 grid grid-cols-[60px_1fr_60px_1fr_auto] gap-2 items-center">
-        <span className="text-sm font-medium">코드</span>
-        <Input
-          value={code}
-          placeholder="CODE"
-          onChange={(e: any) => setCode(e.target.value)}
-          onKeyDown={onSearchKeyDown}
-        />
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "No",
+        width: 60,
+      },
+      {
+        headerName: "LBL_CODE",
+        field: "CODE",
+        width: 120,
+        cellStyle: { textAlign: "center" },
+      },
+      {
+        headerName: "LBL_CODE_NM",
+        field: "NAME",
+        flex: 1,
+        minWidth: 300,
+        disableMaxWidth: true,
+      },
+    ],
+    [],
+  );
 
-        <span className="text-sm font-medium">코드명</span>
-        <Input
-          value={name}
-          placeholder="NAME"
-          onChange={(e: any) => setName(e.target.value)}
-          onKeyDown={onSearchKeyDown}
-        />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={(e: any) => onSearch()}
-          className="btn-primary btn-primary:hover"
-        >
-          <Search className="w-4 h-4 mr-1" />
-          조회
-        </Button>
+  return (
+    <div className="flex flex-col gap-3 w-full h-full">
+      {/* 조회 조건 */}
+      <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div className="flex items-center justify-between px-3 py-2 bg-[var(--grid-header-bg)]">
+          <div className="flex items-center gap-1.5 leading-none">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-color/80 flex-shrink-0" />
+            <span className="text-[12px] font-semibold text-color tracking-widest uppercase leading-none">
+              조회조건
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={onSearch}
+            className="h-6 px-3 rounded-full bg-white/15 hover:bg-white border border-white/30 text-color hover:text-[rgb(var(--primary))] text-[12px] font-semibold transition-all flex items-center gap-1"
+            style={{ lineHeight: 1 }}
+          >
+            <Search className="w-3 h-3 flex-shrink-0" />
+            <span className="leading-none">조회</span>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 divide-x divide-y divide-slate-100">
+          <div className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group">
+            <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
+              코드
+            </label>
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              onKeyDown={onSearchKeyDown}
+              placeholder="CODE"
+              className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full"
+            />
+          </div>
+          <div className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group">
+            <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
+              코드명
+            </label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={onSearchKeyDown}
+              placeholder="NAME"
+              className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full"
+            />
+          </div>
+        </div>
       </div>
 
+      {/* 선택 상태 표시 */}
+      {selectedRow ? (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
+          <Check className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
+          <span className="font-semibold">{selectedRow.CODE}</span>
+          <span className="text-blue-300">|</span>
+          <span>{selectedRow.NAME}</span>
+          <span className="ml-auto text-[10px] text-blue-400 font-medium">
+            선택됨
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-dashed border-slate-200 text-[11px] text-slate-400">
+          <Search className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>그리드에서 선택하세요</span>
+        </div>
+      )}
+
       {/* ================= Grid ================= */}
-      <div style={{ height: "400px" }}>
+      <div className="shrink-0" style={{ height: 400 }}>
         <DataGrid
           layoutType="plain"
           actions={[]}
-          columnDefs={[
-            {
-              headerName: "No",
-              width: 60,
-            },
-            {
-              headerName: "LBL_CODE",
-              field: "CODE",
-              width: 120,
-              cellStyle: { textAlign: "center" },
-            },
-            {
-              headerName: "LBL_CODE_NM",
-              field: "NAME",
-              flex: 1,
-              minWidth: 300,
-              disableMaxWidth: true,
-            },
-          ]}
+          columnDefs={columnDefs}
           rowData={rows}
           pagination
           pageSize={20}
@@ -169,16 +212,24 @@ export function CommonPopup({
       </div>
 
       {/* 버튼 영역 */}
-      <div className="shrink-0 flex justify-end gap-2 pt-3 border-t">
+      <div className="flex justify-end gap-2 pt-2.5 border-t border-slate-100">
         <Button
           size="sm"
           variant="outline"
-          onClick={() => onApply(selectedRow)}
+          onClick={onClose}
+          className="h-7 px-4 text-xs border-slate-200 text-slate-500 hover:bg-slate-50 gap-1.5"
         >
-          적용
-        </Button>
-        <Button size="sm" variant="outline" onClick={onClose}>
+          <X className="w-3 h-3" />
           취소
+        </Button>
+        <Button
+          size="sm"
+          disabled={!selectedRow}
+          onClick={() => onApply(selectedRow)}
+          className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 gap-1.5"
+        >
+          <Check className="w-3 h-3" />
+          적용
         </Button>
       </div>
     </div>
