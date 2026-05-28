@@ -87,6 +87,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: false,
     insertable: false,
     width: 80,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "numeric",
@@ -95,6 +96,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: false,
     insertable: false,
     width: 90,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -104,6 +106,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "Y",
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "text",
@@ -136,6 +139,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "datetime",
@@ -144,6 +148,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "combo",
@@ -153,6 +158,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 110,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "numeric",
@@ -161,6 +167,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 90,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "numeric",
@@ -169,6 +176,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 90,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "numeric",
@@ -177,6 +185,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: false,
     insertable: false,
     width: 90,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "text",
@@ -185,6 +194,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "text",
@@ -193,6 +203,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "text",
@@ -201,6 +212,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "text",
@@ -209,6 +221,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "text",
@@ -217,6 +230,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 80,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -226,6 +240,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "N",
     width: 90,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "numeric",
@@ -234,6 +249,7 @@ export const SUB01_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 90,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -243,6 +259,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "N",
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -252,6 +269,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "N",
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -261,6 +279,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "N",
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -270,6 +289,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "N",
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -279,6 +299,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "N",
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -288,6 +309,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "N",
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "check",
@@ -297,6 +319,7 @@ export const SUB01_COLUMN_DEFS = [
     insertable: true,
     defaultYn: "N",
     width: 70,
+    cellStyle: { textAlign: "center" },
   },
   {
     type: "numeric",
