@@ -61,7 +61,29 @@ export const Lang = {
   },
 
   /** 언어팩에서 코드값으로 번역 텍스트 반환 */
-  get(key: string): string {
-    return Lang.data[key] ?? key + "***";
+  // get(key: string): string {
+  //   return Lang.data[key] ?? key + "***";
+  // },
+
+  /** * 언어팩에서 코드값으로 번역 텍스트 반환
+   * @param key 번역 키
+   * @param args 플레이스홀더 치환에 사용할 값들 (문자열 또는 배열)
+   */
+  get(key: string, ...args: string[]): string {
+    const template = Lang.data[key];
+    
+    // 키가 존재하지 않을 때 처리
+    if (!template) {
+      return key + "***";
+    }
+
+    // 두 번째 인자들이 들어왔다면 {0}, {1} 등의 패턴을 치환
+    if (args.length > 0) {
+      return template.replace(/{(\d+)}/g, (match, index) => {
+        return args[index] !== undefined ? args[index] : match;
+      });
+    }
+
+    return template;
   },
 };
