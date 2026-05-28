@@ -118,7 +118,7 @@ export function commitRowChange(
   setRowData((prev: any) => ({
     ...prev,
     rows: (prev?.rows ?? []).map((r: any) =>
-      r === targetRow
+      r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__)
         ? { ...r, [field]: value, EDIT_STS: nextEditSts(r) }
         : r,
     ),

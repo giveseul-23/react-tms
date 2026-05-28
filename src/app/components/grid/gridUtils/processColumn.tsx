@@ -1,4 +1,5 @@
-// src/app/components/grid/gridUtils/processColumn.tsx
+﻿// src/app/components/grid/gridUtils/processColumn.tsx
+// Shared column transformation helpers for DataGrid and TreeGrid.
 //
 // 컬럼 정의(ColDef) 변환 로직 — DataGrid 와 TreeGrid 모두 동일하게 사용.
 //
@@ -22,18 +23,19 @@ import type { ColDef, ColGroupDef } from "ag-grid-community";
 import { Lang } from "@/app/services/common/Lang";
 import { Util } from "@/app/services/common/Util";
 import { ComboCellEditor } from "@/app/components/grid/cellEditors/ComboCellEditor";
+import { PasswordCellEditor } from "@/app/components/grid/cellEditors/PasswordCellEditor";
 import { commitRowChange } from "./rowStatus";
 
 type AnyCol = ColDef<any> | ColGroupDef<any>;
 
 export type ProcessOptions = {
   codeMap?: Record<string, Record<string, string>>;
-  /** "No" 컬럼처럼 row 길이에 따른 width 가 필요한 경우 사용. (TreeGrid 는 미사용) */
+ /** "No" 컬럼처럼 row 길이에 따른 width 가 필요한 경우 사용. (TreeGrid 는 미사용) */  
   rowCountForNo?: number;
   /** ComboCellEditor 가 commit 시 React state 의 rows 배열을 갱신하기 위해 사용.
    *  ag-grid 의 cellEditor commit 흐름은 internal node.data 만 mutate 하고
    *  React state 까지 도달 못 해 stale row 로 reset 되는 케이스가 있음 →
-   *  cellEditor 가 직접 setRowData 호출해 양쪽 동기화. */
+   *  cellEditor 가 직접 setRowData 호출해 양쪽 동기화. */  
   setRowData?: (updater: any) => void;
 };
 
@@ -57,6 +59,7 @@ const CUSTOM_KEYS = new Set([
   "defaultYn",
   "isPrimaryKey",
   "insertable",
+  "inputType",
 ]);
 
 function stripCustomKeys<T extends Record<string, any>>(col: T): T {
@@ -67,11 +70,11 @@ function stripCustomKeys<T extends Record<string, any>>(col: T): T {
   return out as T;
 }
 
-let _canvas: HTMLCanvasElement | null = null;
+let canvasRef: HTMLCanvasElement | null = null;
 function measureTextWidth(text: string): number {
   if (typeof document === "undefined") return text.length * 7;
-  if (!_canvas) _canvas = document.createElement("canvas");
-  const ctx = _canvas.getContext("2d");
+  if (!canvasRef) canvasRef = document.createElement("canvas");
+  const ctx = canvasRef.getContext("2d");
   if (!ctx) return text.length * 7;
   ctx.font = "11px Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
   return ctx.measureText(text).width;
@@ -88,7 +91,11 @@ function walkChildren(
   if (!Array.isArray(children)) return children;
   return children.map((child) => {
     const withRenderer = injectCodeRenderer(child, codeMap) as any;
-    const withEditor = injectComboEditor(withRenderer, codeMap, setRowData) as any;
+    const withEditor = injectComboEditor(
+      withRenderer,
+      codeMap,
+      setRowData,
+    ) as any;
     const withCheck = injectCheckRenderer(withEditor, setRowData) as any;
     const withPolicy = applyEditPolicy(withCheck) as any;
     return stripCustomKeys({
@@ -111,11 +118,11 @@ function injectCodeRenderer(
     cellRenderer: (params: any) => {
       const code = params.value;
       // 빈값(빈 문자열 / null / undefined) 은 회색 "―" 로 표시.
-      // 실제 데이터는 그대로 두고 표시만 변경 — 저장 시 빈값 그대로 전송됨.
+      // 실제 데이터는 그대로 두고 표시만 변경 — 저장 시 빈값 그대로 전송됨.      
       if (code === "" || code == null) {
         return (
           <span className="px-2 py-0.5 rounded-lg text-xs text-gray-400">
-            ―
+            -
           </span>
         );
       }
@@ -124,6 +131,7 @@ function injectCodeRenderer(
     },
   } as AnyCol;
 }
+
 
 /**
  * type "check" 컬럼에 체크박스 cellRenderer 자동 주입.
@@ -183,13 +191,37 @@ function injectComboEditor(
     cellEditorParams: {
       ...(c.cellEditorParams ?? {}),
       codeMap: codeMap?.[codeKey] ?? {},
-      // cellEditor 가 commit 시 React state 의 rows 배열을 직접 갱신할 수 있도록
       setRowData,
     },
-    // popup 모드로 띄워야 dropdown 이 셀 경계 밖에서도 잘 보임
     cellEditorPopup: c.cellEditorPopup ?? true,
   } as AnyCol;
 }
+
+function injectPasswordEditor(
+  col: AnyCol,
+  setRowData?: (updater: any) => void,
+): AnyCol {
+  const c = col as any;
+  if (c.inputType !== "password") return col;
+
+  return {
+    ...col,
+    ...(c.cellEditor ? {} : { cellEditor: PasswordCellEditor }),
+    cellEditorParams: {
+      ...(c.cellEditorParams ?? {}),
+      setRowData,
+    },
+    ...(c.cellRenderer
+      ? {}
+      : {
+          cellRenderer: (params: any) => {
+            const value = String(params.value ?? "");
+            return value ? "●●●●●●" : "";
+          },
+        }),
+  } as AnyCol;
+}
+
 
 /** 외부 export — 우리 커스텀 키 (type, align, codeKey 등) 를 ag-grid 에
  *  그대로 노출하지 않도록 strip 한 결과를 반환. 내부 분기에서는 type 등을
@@ -218,7 +250,6 @@ function applyEditPolicy(col: AnyCol): AnyCol {
   return { ...c, editable: editableFn } as AnyCol;
 }
 
-/** 내부용 — type/align/codeKey 등 우리 커스텀 키를 활용한 변환 본체. */
 function processColumnDefRaw(
   col: AnyCol,
   opts: ProcessOptions = {},
@@ -226,12 +257,15 @@ function processColumnDefRaw(
   const codeMap = opts.codeMap;
 
   // codeKey → cellRenderer (라벨 표시) + type "combo" 면 cellEditor (dropdown) 주입
-  // + type "check" 면 체크박스 cellRenderer 주입
+  // + type "check" 면 체크박스 cellRenderer 주입  
   const prepared = applyEditPolicy(
-    injectCheckRenderer(
-      injectComboEditor(
-        injectCodeRenderer(col, codeMap),
-        codeMap,
+    injectPasswordEditor(
+      injectCheckRenderer(
+        injectComboEditor(
+          injectCodeRenderer(col, codeMap),
+          codeMap,
+          opts.setRowData,
+        ),
         opts.setRowData,
       ),
       opts.setRowData,
@@ -264,7 +298,7 @@ function processColumnDefRaw(
       headerClass: "ag-header-center",
       valueGetter: (params: any) =>
         params.node?.rowPinned === "bottom"
-          ? "합계"
+          ? "Total"
           : (params.node?.rowIndex ?? 0) + 1,
     } as AnyCol;
   }
