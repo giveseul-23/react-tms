@@ -32,9 +32,7 @@ export function useVehicleMgmtController({ model }: Args) {
   const handleRowClicked = useCallback(
     (row: any) => {
       const data = model.grids.main.data;
-      const localIdx = data.rows.findIndex(
-        (r: any) => r.VEH_ID === row.VEH_ID,
-      );
+      const localIdx = data.rows.findIndex((r: any) => r.VEH_ID === row.VEH_ID);
       const globalIdx = (data.page - 1) * data.limit + localIdx;
       model.grids.main.setSelected(row);
       model.setDetailData({ ...row });
@@ -135,9 +133,9 @@ export function useVehicleMgmtController({ model }: Args) {
   const handleSaveDetail = useCallback(() => {
     const data = model.detailData;
     if (!data.VEH_NO?.trim()) return;
-    base.callAjax(api.updateVehicle(data), "저장되었습니다.").then(() =>
-      base.search(),
-    );
+    base
+      .callAjax(api.updateVehicle(data), "MSG_SAVE_CMPLT")
+      .then(() => base.search());
   }, [model, base]);
 
   const handleDeleteDetail = useCallback(() => {
@@ -204,9 +202,9 @@ export function useVehicleMgmtController({ model }: Args) {
         label: "차량전송(IF)",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          base.callAjax(api.sendVehicleIF(e.data), "차량전송(IF) 처리되었습니다.").then(() =>
-            base.search(),
-          );
+          base
+            .callAjax(api.sendVehicleIF(e.data), "차량전송(IF) 처리되었습니다.")
+            .then(() => base.search());
         },
       },
       {
@@ -215,9 +213,9 @@ export function useVehicleMgmtController({ model }: Args) {
         label: "연락처변경",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          base.callAjax(api.changeContact(e.data), "연락처 변경되었습니다.").then(() =>
-            base.search(),
-          );
+          base
+            .callAjax(api.changeContact(e.data), "연락처 변경되었습니다.")
+            .then(() => base.search());
         },
       },
       {
@@ -226,9 +224,12 @@ export function useVehicleMgmtController({ model }: Args) {
         label: "차고지일괄변경",
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
-          base.callAjax(api.changeGarageBatch(e.data), "차고지 일괄변경되었습니다.").then(() =>
-            base.search(),
-          );
+          base
+            .callAjax(
+              api.changeGarageBatch(e.data),
+              "차고지 일괄변경되었습니다.",
+            )
+            .then(() => base.search());
         },
       },
       makeExcelGroupAction({

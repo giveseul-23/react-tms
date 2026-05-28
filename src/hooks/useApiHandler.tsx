@@ -7,7 +7,7 @@ export function useApiHandler() {
 
   const handleApi = async (
     apiPromise: Promise<any>,
-    successMessage = "저장되었습니다.",
+    successMessage = "MSG_SAVE_CMPLT",
   ) => {
     const showError = (description: string) => {
       openPopup({
@@ -45,7 +45,7 @@ export function useApiHandler() {
         content: (
           <ConfirmModal
             title="확인"
-            description={successMessage}
+            description={Lang.get(successMessage)}
             onClose={closePopup}
             type={"confirm"}
           />

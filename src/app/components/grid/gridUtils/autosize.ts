@@ -21,6 +21,8 @@ export function measureTextWidth(text: string): number {
 export const CELL_PADDING = 24;
 export const HEADER_PADDING = 32;
 export const MIN_COL_WIDTH = 80;
+/** 셀 텍스트가 매우 길어도 컬럼이 무제한 늘어나지 않도록 상한. 초과분은 셀 안에서 잘림/줄바꿈. */
+export const MAX_COL_WIDTH = 400;
 
 /** cellRenderer 가 반환한 React element 에서 텍스트만 추출 */
 export function extractTextFromElement(element: any): string {
@@ -90,7 +92,10 @@ export function calcOptimalWidths<TRow>(
       if (w > maxDataWidth) maxDataWidth = w;
     }
 
-    widthMap[key] = Math.max(headerWidth, maxDataWidth, MIN_COL_WIDTH);
+    widthMap[key] = Math.min(
+      Math.max(headerWidth, maxDataWidth, MIN_COL_WIDTH),
+      MAX_COL_WIDTH,
+    );
   }
 
   return widthMap;

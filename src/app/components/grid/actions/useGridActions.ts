@@ -86,7 +86,7 @@ export function useGridSave<T = any>({
   rows,
   setRows,
   saveFn,
-  successMessage = "저장되었습니다.",
+  successMessage = "MSG_SAVE_CMPLT",
   onSaved,
   onEmpty,
 }: UseGridSaveOptions<T>) {

@@ -15,14 +15,11 @@ type ControllerProps = {
   model: LanguagePackModel;
 };
 
-export function useLanguagePackController({
-  menuCd,
-  model,
-}: ControllerProps) {
+export function useLanguagePackController({ menuCd, model }: ControllerProps) {
   const base = useBaseController<GridKey>({
     model,
     api: {
-      search: (params) => langPackApi.getLangPackList(menuCd, { ...params }),
+      search: (params) => langPackApi.getLangPackList(params),
       save: (payload) =>
         langPackApi.saveLangPack({
           dsSave: payload.dsSave,
@@ -45,26 +42,22 @@ export function useLanguagePackController({
     const sources = selected ? [selected] : model.grids.main.rows;
     if (sources.length === 0) return;
 
-    model.grids.main.setData((prev) => ({
-      ...prev,
-      rows: [
-        ...sources.map((row: any) => ({
-          ...row,
-          MSG_CD: row.MSG_CD ?? "",
-          LANG_TP: row.LANG_TP ?? "",
-          MSG_DESC: row.MSG_DESC ?? "",
-          APPL_CD: row.APPL_CD ?? "",
-          CRE_USR_ID: "",
-          CRE_DTTM: "",
-          UPD_USR_ID: "",
-          UPD_DTTM: "",
-          EDIT_STS: "I",
-        })),
-        ...prev.rows,
-      ],
-      totalCount: prev.totalCount + sources.length,
-    }));
-  }, [model.grids.main]);
+    // base.addRow 가 EDIT_STS:"I" + __rid__ 자동 부여 + 끝에 push + 마지막 행 자동선택까지 처리.
+    base.addRow(
+      "main",
+      sources.map((row: any) => ({
+        ...row,
+        MSG_CD: row.MSG_CD ?? "",
+        LANG_TP: row.LANG_TP ?? "",
+        MSG_DESC: row.MSG_DESC ?? "",
+        APPL_CD: row.APPL_CD ?? "",
+        CRE_USR_ID: "",
+        CRE_DTTM: "",
+        UPD_USR_ID: "",
+        UPD_DTTM: "",
+      })),
+    );
+  }, [base, model.grids.main]);
 
   const handleSave = useCallback(
     () =>
@@ -88,13 +81,20 @@ export function useLanguagePackController({
       makeAddAction({ onClick: handleAdd }),
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS(),
+        columns: MAIN_COLUMN_DEFS,
         menuName: menuCd,
-        fetchFn: () => langPackApi.getLangPackList(menuCd, model.filtersRef.current),
+        fetchFn: () => langPackApi.getLangPackList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [handleAdd, handleCopy, handleSave, menuCd, model.filtersRef, model.grids.main.rows],
+    [
+      handleAdd,
+      handleCopy,
+      handleSave,
+      menuCd,
+      model.filtersRef,
+      model.grids.main.rows,
+    ],
   );
 
   return {

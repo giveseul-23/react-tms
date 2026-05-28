@@ -283,7 +283,7 @@ export function useDispatchPlanController({ model }: Args) {
               DSPCH_NO: row.DSPCH_NO,
               stops: model.grids.stop.rows,
             }),
-            "저장되었습니다.",
+            "MSG_SAVE_CMPLT",
           );
         },
       },

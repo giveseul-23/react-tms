@@ -193,7 +193,7 @@ export function useBaseController<K extends string>({
       const doSave = async () => {
         await callAjax(
           apiFn({ dsSave: toDsSave(dirty) }),
-          opts?.successMsg ?? "저장되었습니다.",
+          opts?.successMsg ?? "MSG_SAVE_CMPLT",
         );
         const after = opts?.afterSave ?? "refresh";
         if (after === "refresh") {

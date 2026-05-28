@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./LanguagePack";
 
 type commonResponse = {
   rows: [];
@@ -17,10 +18,10 @@ const withSession = (payload: any = {}) => {
 
 export const langPackApi = {
   ////// SEARCH
-  getLangPackList(menuCd: string, payload: any) {
+  getLangPackList(payload: any) {
     return apiClient.post<commonResponse>(
       `/languagePackService/search`,
-      withSession({ MENU_CD: menuCd, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
@@ -31,12 +32,14 @@ export const langPackApi = {
    */
   saveLangPack(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
+
     return apiClient.post(
       `/languagePackService/save`,
       { dsSave },
       {
         params: {
           ...getSessionFields(),
+          MENU_CD,
           ...rest,
         },
       },
