@@ -104,6 +104,7 @@ type TreeGridProps<TRow extends TreeRow> = {
   onRowSelected?: (row: TRow | null) => void;
   /** 셀 값 변경 콜백. 공통단에서 EDIT_STS = "U" 자동 마킹 후 호출됨. */
   onCellValueChanged?: (params: any) => void;
+  headerCheckbox?: boolean;
 };
 
 // ─── 트리 유틸 (컴포넌트 내부) ───────────────────────────────────────────────
@@ -198,6 +199,7 @@ function TreeGridInner<TRow extends TreeRow>(
     onRowClicked,
     onRowSelected,
     onCellValueChanged,
+    headerCheckbox = true,
   }: TreeGridProps<TRow>,
   ref: React.Ref<TreeGridHandle>,
 ) {
@@ -612,7 +614,13 @@ function TreeGridInner<TRow extends TreeRow>(
             suppressMovableColumns
             suppressHorizontalScroll
             // ── 행 선택 처리 ──────────────────────────────────────────────
-            rowSelection={{ mode: "multiRow", enableClickSelection: false }}
+            rowSelection={{
+              mode: "multiRow",
+              enableClickSelection: headerCheckbox ? false : true,
+              ...(headerCheckbox
+                ? {}
+                : { checkboxes: false, headerCheckbox: false }),
+            }}
             onRowSelected={(e: any) => {
               if (!e.api) return;
               const rows = e.api.getSelectedRows() as TRow[];
