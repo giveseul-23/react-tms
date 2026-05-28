@@ -130,7 +130,7 @@ export const SUB01_COLUMN_DEFS = [
     hide: true,
   },
   {
-    type: "date",
+    type: "datetime",
     headerName: "LBL_TRGR_STRT_DTTM",
     field: "TRGR_STRT_DTTM",
     editable: true,
@@ -138,7 +138,7 @@ export const SUB01_COLUMN_DEFS = [
     width: 150,
   },
   {
-    type: "date",
+    type: "datetime",
     headerName: "LBL_TRGR_END_DTTM",
     field: "TRGR_END_DTTM",
     editable: true,

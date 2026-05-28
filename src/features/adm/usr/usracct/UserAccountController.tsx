@@ -261,6 +261,8 @@ export function useUserAccountController({ model, activeTabRef }: Args) {
       MAX_TAB_CNT: 20,
       LCL_CD: "KR",
       SSO_YN: "N",
+      CUST_CD: "COMMON",
+      CUST_GRP_CD: "COMMON"
     });
   }, [base, model]);
 

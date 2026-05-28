@@ -152,15 +152,6 @@ export const MAIN_COLUMN_DEFS = (setRowData?: (updater: any) => void) => [
     hide: true,
   },
   {
-    type: "combo",
-    headerName: "LBL_USR_THEME",
-    field: "USR_THEME",
-    width: 110,
-    codeKey: "themeList",
-    editable: true,
-    insertable: true,
-  },
-  {
     type: "numeric",
     headerName: "LBL_PWD_ERR_CNT",
     field: "PW_ERR_CNT",
