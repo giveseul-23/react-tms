@@ -58,24 +58,4 @@ export const vehicleWorkdayApi = {
       },
     );
   },
-
-  gridExcelUpload(payload: any) {
-    return apiClient.post<CommonResponse>(
-      "/openapina/carrier/gridExcelUpload",
-      withSession({
-        MENU_CD: MENU_CODE,
-        ...payload,
-      }),
-    );
-  },
-
-  downloadExcelTemplate() {
-    return apiClient.get(`/uploaderService/downloadTemplate`, {
-      params: {
-        MENU_CD: MENU_CODE,
-        GRID_ID: "MAIN_GRID_VEH_WORKDAY_MGMT",
-      },
-      responseType: "blob",
-    });
-  },
 };
