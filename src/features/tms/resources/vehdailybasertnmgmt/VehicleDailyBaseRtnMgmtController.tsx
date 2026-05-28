@@ -8,14 +8,19 @@ import {
 import { vehicleDailyBaseRtnMgmtApi as api } from "./VehicleDailyBaseRtnMgmtApi";
 import { MAIN_COLUMN_DEFS } from "./VehicleDailyBaseRtnMgmtColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { VehicleDailyBaseRtnMgmtModel, GridKey } from "./VehicleDailyBaseRtnMgmtModel";
+import type {
+  VehicleDailyBaseRtnMgmtModel,
+  GridKey,
+} from "./VehicleDailyBaseRtnMgmtModel";
 import { Lang } from "@/app/services/common/Lang";
 
 interface ControllerArgs {
   model: VehicleDailyBaseRtnMgmtModel;
 }
 
-export function useVehicleDailyBaseRtnMgmtController({ model }: ControllerArgs) {
+export function useVehicleDailyBaseRtnMgmtController({
+  model,
+}: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
@@ -34,13 +39,12 @@ export function useVehicleDailyBaseRtnMgmtController({ model }: ControllerArgs) 
 
   // ── 메인 행 추가 ─────────────────────────────────────────────
   // base.addRow 가 EDIT_STS: "I" 자동 주입 + push.
-  
 
   const onAddMain = useCallback(() => {
     base.addRow("main", {
-      BASE_RTN_CNT: 3
+      BASE_RTN_CNT: 3,
     });
-  }, [base, model]);
+  }, [base]);
 
   const parseDate = (value: string | Date) => {
     if (value instanceof Date) return value;
@@ -67,7 +71,7 @@ export function useVehicleDailyBaseRtnMgmtController({ model }: ControllerArgs) 
       });
 
       if (invalidRow) {
-        throw new Error(Lang.get('MSG_DATE_SEQ_CHK'));
+        throw new Error(Lang.get("MSG_DATE_SEQ_CHK"));
       }
 
       return api.save(p);
@@ -94,7 +98,6 @@ export function useVehicleDailyBaseRtnMgmtController({ model }: ControllerArgs) 
     ],
     [onAddMain, onSaveMain, model],
   );
-
 
   return {
     fetchList,

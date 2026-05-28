@@ -103,6 +103,9 @@ type Props = {
   withTime?: boolean;
   className?: string;
   placeholder?: string;
+  /** true 면 트리거를 캘린더 아이콘 단일 버튼으로 표시 (값 텍스트 숨김).
+   *  그리드 셀처럼 값 텍스트를 외부에서 렌더하고 클릭 버튼만 노출할 때 사용. */
+  iconOnly?: boolean;
 };
 
 // value → { date, time } 분해
@@ -138,6 +141,7 @@ export function DatePickerPopover({
   withTime = false,
   className,
   placeholder,
+  iconOnly = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [draftDate, setDraftDate] = useState<Date | undefined>(undefined);
@@ -189,26 +193,32 @@ export function DatePickerPopover({
           type="button"
           id={id}
           className={cn(
-            "relative h-7 w-full pl-2 pr-6 text-left text-[11px] leading-none tracking-tight",
-            "border border-input rounded-md bg-input-background",
-            "flex items-center min-w-0",
-            "hover:bg-accent/40 transition-colors",
+            iconOnly
+              ? "h-5 w-5 p-0 flex items-center justify-center rounded text-muted-foreground hover:text-[rgb(var(--primary))] transition-colors"
+              : "relative h-7 w-full pl-2 pr-6 text-left text-[11px] leading-none tracking-tight border border-input rounded-md bg-input-background flex items-center min-w-0 hover:bg-accent/40 transition-colors",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
             className,
           )}
+          aria-label={iconOnly ? "날짜 선택" : undefined}
         >
-          <span
-            className={cn(
-              "truncate",
-              !display && "text-muted-foreground font-normal",
-            )}
-          >
-            {display || placeholderText}
-          </span>
-          <CalendarIcon
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none"
-            strokeWidth={1.75}
-          />
+          {iconOnly ? (
+            <CalendarIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
+          ) : (
+            <>
+              <span
+                className={cn(
+                  "truncate",
+                  !display && "text-muted-foreground font-normal",
+                )}
+              >
+                {display || placeholderText}
+              </span>
+              <CalendarIcon
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none"
+                strokeWidth={1.75}
+              />
+            </>
+          )}
         </button>
       </PopoverTrigger>
 

@@ -1,3 +1,5 @@
+import VehicleAssignPopup from "./popup/VehicleAssignPopup";
+
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
@@ -6,16 +8,35 @@ export const MAIN_COLUMN_DEFS = [
     field: "BASE_RTN_CNT_ID",
   },
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_VEH_NO",
     field: "VEH_NO",
+    popupTitle: "BTN_SELECT_VEH",
+    sqlId: "CODE",
+    renderPopup: ({ row, commit, close }) => (
+      <VehicleAssignPopup
+        initialValues={row}
+        onConfirm={(picked) => {
+          commit({
+            VEH_ID: picked.VEH_ID,
+            VEH_NO: picked.VEH_NO,
+            VEH_TP_CD: picked.VEH_TP_CD,
+            DRVR_ID: picked.DRVR_ID,
+            DRVR_NM: picked.DRVR_NM,
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
     required: true,
     insertable: true,
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_VEHICLE_TYPE",
-    field: "VEH_TP_NM"
+    field: "VEH_TP_CD",
+    codeKey: "vehTp",
   },
   {
     type: "text",
@@ -45,5 +66,5 @@ export const MAIN_COLUMN_DEFS = [
     required: true,
     insertable: true,
     editable: true,
-  }
-]
+  },
+];

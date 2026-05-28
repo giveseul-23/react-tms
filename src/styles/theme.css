@@ -462,6 +462,13 @@
 .ag-header-right .ag-header-cell-label {
   justify-content: flex-end;
 }
+/* required:true 컬럼 — 헤더 텍스트 옆에 빨간 * 표시 */
+.ag-header-required .ag-header-cell-text::after {
+  content: " *";
+  color: #ef4444; /* red-500 */
+  font-weight: 600;
+  margin-left: 2px;
+}
 /* 그룹 헤더(ColGroupDef) 라벨 중앙정렬 — 기본 테마보다 우선 */
 .ag-theme-bridge .ag-header-group-cell.ag-header-center {
   justify-content: center !important;

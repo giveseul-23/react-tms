@@ -33,6 +33,8 @@ export function useActivePreset<TRow>({
   codeMap,
   audit,
   setRowData,
+  openPopup,
+  closePopup,
 }: {
   layoutType: "tab" | "plain";
   activeTab: string | null;
@@ -46,6 +48,8 @@ export function useActivePreset<TRow>({
   codeMap?: Record<string, Record<string, string>>;
   audit?: AuditOpts;
   setRowData?: (updater: any) => void;
+  openPopup?: (payload: any) => void;
+  closePopup?: () => void;
 }) {
   const activeColumnDefs = useMemo(() => {
     const base =
@@ -166,10 +170,12 @@ export function useActivePreset<TRow>({
           codeMap: activeCodeMap,
           rowCountForNo: activeRowData.length,
           setRowData,
+          openPopup,
+          closePopup,
         }),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeColumnDefs, activeCodeMap, setRowData],
+    [activeColumnDefs, activeCodeMap, setRowData, openPopup, closePopup],
   );
 
   return {

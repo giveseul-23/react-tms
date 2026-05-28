@@ -52,6 +52,9 @@ export interface GridSlot {
   /** setData 가 객체로 직접 set 될 때마다 +1. 함수형 updater 호출(편집/내부 mutation)은 변경 없음.
    *  DataGrid 가 이 값 변화 시에만 autoSize 재실행 → 셀 편집 시 가로 스크롤 유지. */
   autoSizeKey: number;
+  /** DataGrid 가 onColumnDefsReady 콜백으로 등록한 마지막 columnDefs.
+   *  saveGrid 의 required 검증이 이 ref 를 읽어 컬럼 메타에 접근한다. */
+  columnDefsRef: { readonly current: any[] };
 }
 
 export interface StorageKeys {
@@ -81,6 +84,8 @@ export interface BoundGridProps {
   onSelectionChanged: (row: any | null) => void;
   /** controller 가 setSelected(row) 로 박은 행을 ag-grid 시각 선택으로 자동 반영. */
   selectedRow: any;
+  /** DataGrid 가 마운트/columnDefs 변경 시 호출 — slot.columnDefsRef 채움. */
+  onColumnDefsReady: (cols: any[]) => void;
 }
 
 /** SearchFilters(searchProps)에 spread 용 묶음 — model 이 소유한 검색 ref/pageSize.
@@ -224,6 +229,10 @@ export function useBaseModel<K extends string = string>(
   const allAutoSizeKeyRef = useRef(allAutoSizeKey);
   allAutoSizeKeyRef.current = allAutoSizeKey;
 
+  // columnDefs 는 state 가 아닌 ref — DataGrid 가 마운트/변경 시 register.
+  // saveGrid 등에서 required 등 컬럼 메타를 읽기 위한 escape hatch.
+  const allColumnDefsRef = useRef<Record<string, any[]>>({});
+
   const setSlotData = useCallback(
     (key: string, updater: SetStateAction<GridData>) => {
       if (typeof updater !== "function") {
@@ -314,6 +323,11 @@ export function useBaseModel<K extends string = string>(
           get autoSizeKey() {
             return allAutoSizeKeyRef.current[k] ?? 0;
           },
+          columnDefsRef: {
+            get current() {
+              return allColumnDefsRef.current[k] ?? [];
+            },
+          },
         };
         slotCache[k] = slot;
         return slot;
@@ -351,6 +365,9 @@ export function useBaseModel<K extends string = string>(
         autoSizeKey: slot.autoSizeKey,
         onSelectionChanged: slot.setSelected,
         selectedRow: slot.selected,
+        onColumnDefsReady: (cols: any[]) => {
+          allColumnDefsRef.current[gridKey as string] = cols;
+        },
       };
     },
     [grids, pageSize, setPageSize, onPageChange],

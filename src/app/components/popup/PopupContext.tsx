@@ -9,6 +9,8 @@ type PopupState = {
   title?: string;
   content: React.ReactNode | null;
   width?: PopupWidth;
+  /** PopupShell 헤더의 기본 라벨 결정 — title 없을 때 "에러"/"확정"/"알림" 등으로 표시. */
+  type?: string;
 };
 
 type OpenPopupPayload = Omit<PopupState, "open">;
@@ -24,9 +26,12 @@ export function PopupProvider({ children }: { children: React.ReactNode }) {
   // 팝업 스택으로 변경 → 중첩 팝업 지원
   const [stack, setStack] = useState<PopupState[]>([]);
 
-  const openPopup = useCallback(({ title, content, width }: OpenPopupPayload) => {
-    setStack((prev) => [...prev, { open: true, title, content, width }]);
-  }, []);
+  const openPopup = useCallback(
+    ({ title, content, width, type }: OpenPopupPayload) => {
+      setStack((prev) => [...prev, { open: true, title, content, width, type }]);
+    },
+    [],
+  );
 
   const closePopup = useCallback(() => {
     setStack((prev) => prev.slice(0, -1));
@@ -53,6 +58,7 @@ export function PopupProvider({ children }: { children: React.ReactNode }) {
             onOpenChange={(v) => !v && closePopup()}
             title={p.title}
             width={p.width}
+            type={p.type}
           >
             {p.content}
           </PopupShell>

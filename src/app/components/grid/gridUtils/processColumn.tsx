@@ -18,25 +18,42 @@
 //   - disableMaxWidth:true → maxWidth null
 
 import React from "react";
+import { Search } from "lucide-react";
 import type { ColDef, ColGroupDef } from "ag-grid-community";
 
 import { Lang } from "@/app/services/common/Lang";
 import { Util } from "@/app/services/common/Util";
 import { ComboCellEditor } from "@/app/components/grid/cellEditors/ComboCellEditor";
 import { PasswordCellEditor } from "@/app/components/grid/cellEditors/PasswordCellEditor";
-import { commitRowChange } from "./rowStatus";
+import { DatePickerPopover } from "@/app/components/Search/filters/DatePickerPopover";
+import { commitRowChange, commitRowChanges } from "./rowStatus";
+
+// CommonPopup 은 내부에서 DataGrid 를 렌더 → 정적 import 시 순환참조.
+// lazy 로 끊고, 팝업 셀이 실제로 열릴 때만 로드한다.
+const CommonPopup = React.lazy(() =>
+  import("@/app/components/popup/CommonPopup").then((m) => ({
+    default: m.CommonPopup,
+  })),
+);
 
 type AnyCol = ColDef<any> | ColGroupDef<any>;
 
 export type ProcessOptions = {
   codeMap?: Record<string, Record<string, string>>;
- /** "No" 컬럼처럼 row 길이에 따른 width 가 필요한 경우 사용. (TreeGrid 는 미사용) */  
+  /** "No" 컬럼처럼 row 길이에 따른 width 가 필요한 경우 사용. (TreeGrid 는 미사용) */
   rowCountForNo?: number;
   /** ComboCellEditor 가 commit 시 React state 의 rows 배열을 갱신하기 위해 사용.
    *  ag-grid 의 cellEditor commit 흐름은 internal node.data 만 mutate 하고
    *  React state 까지 도달 못 해 stale row 로 reset 되는 케이스가 있음 →
-   *  cellEditor 가 직접 setRowData 호출해 양쪽 동기화. */  
+   *  cellEditor 가 직접 setRowData 호출해 양쪽 동기화. */
   setRowData?: (updater: any) => void;
+  /** type "popup"/"popuser" 셀이 팝업을 띄울 때 사용 — DataGrid 가 usePopup() 으로 주입. */
+  openPopup?: (payload: {
+    title?: string;
+    content: React.ReactNode;
+    width?: any;
+  }) => void;
+  closePopup?: () => void;
 };
 
 const HEADER_PADDING = 32;
@@ -60,6 +77,16 @@ const CUSTOM_KEYS = new Set([
   "isPrimaryKey",
   "insertable",
   "inputType",
+  "required",
+  // popup / popuser 컬럼 전용
+  "sqlId",
+  "fetchFn",
+  "nameField",
+  "popupTitle",
+  "popupWidth",
+  "renderPopup",
+  "keyParam",
+  "extraParams",
 ]);
 
 function stripCustomKeys<T extends Record<string, any>>(col: T): T {
@@ -85,10 +112,10 @@ const translate = (col: any): string =>
 
 function walkChildren(
   children: any[] | undefined,
-  codeMap?: Record<string, Record<string, string>>,
-  setRowData?: (updater: any) => void,
+  opts: ProcessOptions,
 ): any[] | undefined {
   if (!Array.isArray(children)) return children;
+  const { codeMap, setRowData } = opts;
   return children.map((child) => {
     const withRenderer = injectCodeRenderer(child, codeMap) as any;
     const withEditor = injectComboEditor(
@@ -96,12 +123,19 @@ function walkChildren(
       codeMap,
       setRowData,
     ) as any;
-    const withCheck = injectCheckRenderer(withEditor, setRowData) as any;
-    const withPolicy = applyEditPolicy(withCheck) as any;
+    const withPassword = injectPasswordEditor(withEditor, setRowData) as any;
+    const withCheck = injectCheckRenderer(withPassword, setRowData) as any;
+    const withPopup = injectPopupCell(withCheck, opts) as any;
+    const withDate = injectDateCell(withPopup, opts) as any;
+    const withPolicy = applyEditPolicy(withDate) as any;
+    const withRequired =
+      (child as any).required === true
+        ? mergeHeaderClass(withPolicy, "ag-header-required")
+        : withPolicy;
     return stripCustomKeys({
-      ...withPolicy,
-      headerName: translate(withPolicy),
-      children: walkChildren(withPolicy.children, codeMap, setRowData),
+      ...withRequired,
+      headerName: translate(withRequired),
+      children: walkChildren(withRequired.children, opts),
     });
   });
 }
@@ -118,7 +152,7 @@ function injectCodeRenderer(
     cellRenderer: (params: any) => {
       const code = params.value;
       // 빈값(빈 문자열 / null / undefined) 은 회색 "―" 로 표시.
-      // 실제 데이터는 그대로 두고 표시만 변경 — 저장 시 빈값 그대로 전송됨.      
+      // 실제 데이터는 그대로 두고 표시만 변경 — 저장 시 빈값 그대로 전송됨.
       if (code === "" || code == null) {
         return (
           <span className="px-2 py-0.5 rounded-lg text-xs text-gray-400">
@@ -131,7 +165,6 @@ function injectCodeRenderer(
     },
   } as AnyCol;
 }
-
 
 /**
  * type "check" 컬럼에 체크박스 cellRenderer 자동 주입.
@@ -216,21 +249,203 @@ function injectPasswordEditor(
       : {
           cellRenderer: (params: any) => {
             const value = String(params.value ?? "");
-            return value ? "●●●●●●" : "";
+            return "*".repeat(Math.min(value.length, 6));
           },
         }),
   } as AnyCol;
 }
 
+/**
+ * type "popup" / "popuser" 컬럼에 셀 렌더러(값 + 돋보기) 자동 주입.
+ *   - 표시: codeKey 있으면 라벨, 없으면 원값.
+ *   - 돋보기 클릭:
+ *       popup   → CommonPopup(sqlId/fetchFn) 오픈. 선택 시 field=CODE, nameField=NAME write-back.
+ *       popuser → 컬럼의 renderPopup({ row, commit, close }) 결과를 openPopup content 로 띄움.
+ *   - 이미 cellRenderer 가 있으면 유지.
+ */
+function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
+  const c = col as any;
+  if (c.type !== "popup" && c.type !== "popuser") return col;
+  if (c.cellRenderer) return col;
+  const field = (c.field ?? c.colId) as string | undefined;
+  if (!field) return col;
+
+  const codeKey = c.codeKey as string | undefined;
+  const isUser = c.type === "popuser";
+
+  return {
+    ...col,
+    cellRenderer: (params: any) => {
+      if (!params.data || params.node?.rowPinned) return null;
+      const { openPopup, closePopup, setRowData, codeMap } = opts;
+      const raw = params.value;
+      const display =
+        raw === "" || raw == null
+          ? ""
+          : codeKey
+            ? (codeMap?.[codeKey]?.[String(raw)] ?? raw)
+            : raw;
+
+      const row = params.node?.data;
+      const close = () => closePopup?.();
+
+      const onOpen = () => {
+        if (!openPopup) return;
+        if (isUser) {
+          const content = c.renderPopup?.({
+            row,
+            commit: (patch: Record<string, any>) =>
+              commitRowChanges(setRowData, row, patch),
+            close,
+          });
+          if (content) {
+            openPopup({
+              title: c.popupTitle ?? c.headerName,
+              width: c.popupWidth ?? "2xl",
+              content,
+            });
+          }
+        } else {
+          openPopup({
+            title: c.popupTitle ?? c.headerName,
+            width: c.popupWidth ?? "2xl",
+            content: (
+              <React.Suspense fallback={null}>
+                <CommonPopup
+                  sqlId={c.sqlId}
+                  fetchFn={c.fetchFn}
+                  extraParams={{
+                    ...(c.keyParam ? { keyParam: c.keyParam } : {}),
+                    ...(c.extraParams ?? {}),
+                  }}
+                  onApply={(picked: any) => {
+                    const patch: Record<string, any> = { [field]: picked.CODE };
+                    if (c.nameField) patch[c.nameField] = picked.NAME;
+                    commitRowChanges(setRowData, row, patch);
+                    close();
+                  }}
+                  onClose={close}
+                />
+              </React.Suspense>
+            ),
+          });
+        }
+      };
+
+      return (
+        <div className="flex items-center gap-1 h-full w-full">
+          <span className="flex-1 truncate">{display}</span>
+          <button
+            type="button"
+            onClick={onOpen}
+            className="shrink-0 p-0.5 text-slate-400 hover:text-[rgb(var(--primary))]"
+            aria-label="검색"
+          >
+            <Search className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      );
+    },
+  } as AnyCol;
+}
 
 /** 외부 export — 우리 커스텀 키 (type, align, codeKey 등) 를 ag-grid 에
  *  그대로 노출하지 않도록 strip 한 결과를 반환. 내부 분기에서는 type 등을
- *  활용하지만 ag-grid 에는 표준 키만 전달. */
+ *  활용하지만 ag-grid 에는 표준 키만 전달. required:true 컬럼은 headerClass
+ *  에 "ag-header-required" 가 자동 추가되어 헤더 텍스트 우측에 빨간 * 가 표시됨. */
 export function processColumnDef(
   col: AnyCol,
   opts: ProcessOptions = {},
 ): AnyCol {
-  return stripCustomKeys(processColumnDefRaw(col, opts));
+  const required = (col as any).required === true;
+  const raw = processColumnDefRaw(col, opts);
+  const withRequired = required
+    ? mergeHeaderClass(raw, "ag-header-required")
+    : raw;
+  return stripCustomKeys(withRequired);
+}
+
+/** headerClass 에 클래스 한 개를 안전하게 머지. 기존이 string 이면 공백으로 합치고,
+ *  배열이면 push, 함수이면 손대지 않는다(ag-grid 가 함수를 호출해 결과를 사용). */
+function mergeHeaderClass(col: AnyCol, cls: string): AnyCol {
+  const existing = (col as any).headerClass;
+  let merged: any;
+  if (!existing) merged = cls;
+  else if (typeof existing === "string") merged = `${existing} ${cls}`;
+  else if (Array.isArray(existing)) merged = [...existing, cls];
+  else merged = existing;
+  return { ...col, headerClass: merged } as AnyCol;
+}
+
+// ── 날짜 셀 picker: 표시값/저장값 포맷 변환 헬퍼 ──────────────────
+//   화면의 저장 포맷은 검색 필터 컨벤션과 동일 (compact: 대시/콜론/T 제거).
+//   DatePickerPopover 는 "YYYY-MM-DD" 또는 "YYYY-MM-DDTHH:MM:SS" 만 받음.
+function pickerInputFromRaw(value: any, withTime: boolean): string {
+  if (value == null || value === "") return "";
+  const s = String(value).replace(/[\s\-:/T]/g, "");
+  if (s.length < 8) return "";
+  const d = `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+  if (!withTime) return d;
+  const t = s.slice(8, 14).padEnd(6, "0");
+  return `${d}T${t.slice(0, 2)}:${t.slice(2, 4)}:${t.slice(4, 6)}`;
+}
+
+function pickerOutputToCompact(v: string): string {
+  return v.replace(/[\s\-:T]/g, "");
+}
+
+/** type "date" / "datetime" + (insertable|editable) 컬럼에 picker cellRenderer 주입.
+ *   - 셀 안에 DatePickerPopover (border-less) → 클릭 시 조회조건과 동일한 데이트피커.
+ *   - withTime = (type === "datetime") 으로 시간 입력 토글.
+ *   - 편집 가능 row 판단 (insertable/editable + EDIT_STS) → 안 되면 plain 텍스트.
+ *   - ag-grid 의 default cellEditor 와 충돌 막기 위해 insertable/editable 을
+ *     strip 해서 반환 → applyEditPolicy 가 editable:true 함수를 안 박음.
+ *   - 이미 cellRenderer 가 있으면 유지. */
+function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
+  const c = col as any;
+  if (c.type !== "date" && c.type !== "datetime") return col;
+  if (c.cellRenderer) return col;
+  const field = (c.field ?? c.colId) as string | undefined;
+  if (!field) return col;
+  const ins = c.insertable === true;
+  const edt = c.editable === true;
+  if (!ins && !edt) return col;
+
+  const withTime = c.type === "datetime";
+  const { setRowData } = opts;
+
+  return {
+    ...col,
+    insertable: undefined,
+    editable: undefined,
+    cellRenderer: (params: any) => {
+      if (!params.data || params.node?.rowPinned) return null;
+      const row = params.node?.data;
+      const editStsI = row?.EDIT_STS === "I";
+      const cellEditable = ins && edt ? true : ins ? editStsI : !editStsI;
+      const raw = params.value;
+
+      const display = Util.formatDttm(raw);
+      if (!cellEditable) {
+        return <span>{display}</span>;
+      }
+      // popup 셀과 동일한 [값 + 작은 아이콘 버튼] 패턴 — 텍스트 가리지 않음
+      return (
+        <div className="flex items-center gap-1 h-full w-full">
+          <span className="flex-1 truncate">{display}</span>
+          <DatePickerPopover
+            value={pickerInputFromRaw(raw, withTime)}
+            onChange={(v: string) => {
+              const next = v ? pickerOutputToCompact(v) : "";
+              commitRowChange(setRowData, row, field, next);
+            }}
+            withTime={withTime}
+            iconOnly
+          />
+        </div>
+      );
+    },
+  } as AnyCol;
 }
 
 /** insertable / editable 을 EDIT_STS 기반 editable 함수로 변환.
@@ -250,25 +465,28 @@ function applyEditPolicy(col: AnyCol): AnyCol {
   return { ...c, editable: editableFn } as AnyCol;
 }
 
-function processColumnDefRaw(
-  col: AnyCol,
-  opts: ProcessOptions = {},
-): AnyCol {
+function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
   const codeMap = opts.codeMap;
 
   // codeKey → cellRenderer (라벨 표시) + type "combo" 면 cellEditor (dropdown) 주입
-  // + type "check" 면 체크박스 cellRenderer 주입  
+  // + type "check" 면 체크박스 cellRenderer 주입
   const prepared = applyEditPolicy(
-    injectPasswordEditor(
-      injectCheckRenderer(
-        injectComboEditor(
-          injectCodeRenderer(col, codeMap),
-          codeMap,
+    injectDateCell(
+      injectPopupCell(
+        injectCheckRenderer(
+          injectPasswordEditor(
+            injectComboEditor(
+              injectCodeRenderer(col, codeMap),
+              codeMap,
+              opts.setRowData,
+            ),
+            opts.setRowData,
+          ),
           opts.setRowData,
         ),
-        opts.setRowData,
+        opts,
       ),
-      opts.setRowData,
+      opts,
     ),
   );
 
@@ -316,11 +534,7 @@ function processColumnDefRaw(
     : null;
   const typeBlock = (prepared as any).type ? {} : { type: "text" };
 
-  const translatedChildren = walkChildren(
-    (prepared as any).children,
-    codeMap,
-    opts.setRowData,
-  );
+  const translatedChildren = walkChildren((prepared as any).children, opts);
 
   if ((prepared as any).disableMaxWidth === true) {
     return {
@@ -336,10 +550,12 @@ function processColumnDefRaw(
   const colDef = prepared as ColDef<any>;
   const field = (colDef.field ?? colDef.colId ?? "") as string;
 
-  // DTTM 필드: 자동 포맷 + 정렬(align prop > type:"date" → center > 미지정)
+  // DTTM 필드: 자동 포맷 + 정렬(align prop > type:"date|datetime" → center > 미지정)
   if (field.includes("DTTM")) {
     const isDateTypedDttm =
-      (colDef as any).type === "date" || (colDef as any).fieldType === "date";
+      (colDef as any).type === "date" ||
+      (colDef as any).type === "datetime" ||
+      (colDef as any).fieldType === "date";
     const userDttmCellStyle = (colDef as any).cellStyle;
     const baseDttmCellStyle =
       userDttmCellStyle && typeof userDttmCellStyle === "object"
@@ -363,11 +579,15 @@ function processColumnDefRaw(
     } as AnyCol;
   }
 
-  // type:"date" / fieldType:"date" → 가운데 정렬 (align prop 우선) + YYYY-MM-DD 슬라이스
+  // type:"date" / "datetime" / fieldType:"date" → 가운데 정렬 (align prop 우선)
+  //   date     → YYYY-MM-DD 까지만
+  //   datetime → "YYYY-MM-DD HH:MM:SS" (T 는 공백으로) — Util.formatDttm 과 동일 톤
   if (
     (colDef as any).type === "date" ||
+    (colDef as any).type === "datetime" ||
     (colDef as any).fieldType === "date"
   ) {
+    const isDatetime = (colDef as any).type === "datetime";
     const userDateCellStyle = (colDef as any).cellStyle;
     const baseDateCellStyle =
       userDateCellStyle && typeof userDateCellStyle === "object"
@@ -377,11 +597,18 @@ function processColumnDefRaw(
     return {
       ...prepared,
       headerName: translate(prepared),
-      valueFormatter: (params: any) => {
-        const v = params?.value;
-        if (v == null || v === "") return "";
-        return String(v).slice(0, 10);
-      },
+      valueFormatter: (params: any) =>
+        isDatetime
+          ? Util.formatDttm(params?.value)
+          : (() => {
+              const v = params?.value;
+              if (v == null || v === "") return "";
+              const s = String(v);
+              if (s.includes("-")) return s.slice(0, 10);
+              if (s.length >= 8)
+                return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+              return s;
+            })(),
       cellStyle: { ...baseDateCellStyle, textAlign: finalDateAlign },
       headerClass: `ag-header-${finalDateAlign}`,
       ...(translatedChildren ? { children: translatedChildren } : {}),
@@ -404,9 +631,7 @@ function processColumnDefRaw(
             const v = params?.value;
             if (v == null || v === "") return "";
             const n =
-              typeof v === "number"
-                ? v
-                : Number(String(v).replaceAll(",", ""));
+              typeof v === "number" ? v : Number(String(v).replaceAll(",", ""));
             if (Number.isNaN(n)) return String(v);
             return n.toLocaleString(undefined, {
               minimumFractionDigits: decimalPlaces,

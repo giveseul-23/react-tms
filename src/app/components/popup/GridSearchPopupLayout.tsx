@@ -1,26 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Search, X, Check, Truck, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
 
-export type GridSearchField = {
+type GridSearchFieldBase = {
   label: string;
+  placeholder?: string;
+  /** true 면 타입 불문 화면에서 값 수정 불가 (조회 스코프 고정 등) */
+  disable?: boolean;
+};
+
+export type GridSearchInputField = GridSearchFieldBase & {
+  type?: "text" | "combo";
   value: string;
   onChange: (v: string) => void;
-  type?: "text" | "combo";
   options?: { CODE: string; NAME: string }[];
-  placeholder?: string;
 };
+
+/** 메인 조회조건 popup 타입처럼 코드+코드명 둘 다 표시 + 돋보기.
+ *  picker 는 화면이 onClickSearch 로 제공 (disable 이면 돋보기 비활성). */
+export type GridSearchPopupField = GridSearchFieldBase & {
+  type: "popup";
+  code: string;
+  name: string;
+  onChangeCode?: (v: string) => void;
+  onChangeName?: (v: string) => void;
+  onClickSearch?: () => void;
+  onEnterSubmit?: (code: string, name: string) => void;
+};
+
+export type GridSearchField = GridSearchInputField | GridSearchPopupField;
 
 type GridSearchPopupLayoutProps = {
   fields: GridSearchField[];
   columnDefs: any[];
   rows: any[];
   gridHeight: number;
-  selectedBadgeFields: [string, string, string];
+  selectedBadgeFields: string[];
   selectedLabel?: string;
   /** 그리드 선택 모드 — 자식 팝업에서 지정. 기본 "single".
    *  "multiple" 이면 배지에 선택 다건을 표시하고 onConfirm 에 payload 배열을 전달. */
@@ -66,8 +85,6 @@ export function GridSearchPopupLayout({
     );
   };
 
-  const [f0, f1, f2] = selectedBadgeFields;
-
   return (
     <div className="flex flex-col gap-3 w-full h-full">
       {/* 조회 조건 */}
@@ -91,7 +108,12 @@ export function GridSearchPopupLayout({
           </Button>
         </div>
 
-        <div className="grid grid-cols-3 divide-x divide-y divide-slate-100">
+        <div
+          className="grid divide-x divide-y divide-slate-100"
+          style={{
+            gridTemplateColumns: `repeat(${Math.min(fields.length, 3)}, minmax(0, 1fr))`,
+          }}
+        >
           {fields.map((f) => (
             <div
               key={f.label}
@@ -100,12 +122,50 @@ export function GridSearchPopupLayout({
               <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
                 {f.label}
               </label>
-              {f.type === "combo" ? (
+              {f.type === "popup" ? (
+                <div className="flex items-center gap-1.5 w-full min-w-0">
+                  <input
+                    value={f.code}
+                    onChange={(e) => f.onChangeCode?.(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Enter") return;
+                      if (f.onEnterSubmit) f.onEnterSubmit(e.currentTarget.value, "");
+                      else onSearch();
+                    }}
+                    disabled={f.disable}
+                    className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-[80px] shrink-0 disabled:cursor-not-allowed disabled:text-slate-400"
+                    placeholder="코드"
+                  />
+                  <span className="text-slate-200">|</span>
+                  <input
+                    value={f.name}
+                    onChange={(e) => f.onChangeName?.(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Enter") return;
+                      if (f.onEnterSubmit) f.onEnterSubmit("", e.currentTarget.value);
+                      else onSearch();
+                    }}
+                    disabled={f.disable}
+                    className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 flex-1 min-w-0 disabled:cursor-not-allowed disabled:text-slate-400"
+                    placeholder="코드명"
+                  />
+                  <button
+                    type="button"
+                    onClick={f.onClickSearch}
+                    disabled={f.disable}
+                    className="shrink-0 text-slate-400 hover:text-[rgb(var(--primary))] transition-colors disabled:cursor-not-allowed disabled:text-slate-300"
+                    aria-label="검색"
+                  >
+                    <Search className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : f.type === "combo" ? (
                 <ComboFilter
                   placeholder={f.placeholder ?? "선택"}
                   options={f.options ?? []}
                   value={f.value}
                   onChange={f.onChange}
+                  disabled={f.disable}
                   inputClassName="text-[12px] text-slate-700 bg-transparent outline-none border-none h-auto p-0"
                 />
               ) : (
@@ -113,7 +173,8 @@ export function GridSearchPopupLayout({
                   value={f.value}
                   onChange={(e) => f.onChange(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && onSearch()}
-                  className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full"
+                  disabled={f.disable}
+                  className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full disabled:cursor-not-allowed disabled:text-slate-400"
                   placeholder={f.placeholder ?? "입력"}
                 />
               )}
@@ -129,10 +190,12 @@ export function GridSearchPopupLayout({
             <Truck className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
             <span
               className="truncate min-w-0"
-              title={selectedRows.map((r) => r[f0]).join(", ")}
+              title={selectedRows
+                .map((r) => r[selectedBadgeFields[0]])
+                .join(", ")}
             >
               {selectedRows
-                .map((r) => r[f0] + " | " + r[f1] + " | " + r[f2])
+                .map((r) => selectedBadgeFields.map((f) => r[f]).join(" | "))
                 .join(", ")}
             </span>
             <span className="ml-auto flex-shrink-0 text-[10px] text-blue-400 font-medium">
@@ -142,11 +205,14 @@ export function GridSearchPopupLayout({
         ) : (
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-700">
             <Truck className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />
-            <span className="font-semibold">{selectedRows[0][f0]}</span>
-            <span className="text-blue-300">|</span>
-            <span>{selectedRows[0][f1]}</span>
-            <span className="text-blue-300">|</span>
-            <span>{selectedRows[0][f2]}</span>
+            {selectedBadgeFields.map((field, i) => (
+              <Fragment key={field}>
+                {i > 0 && <span className="text-blue-300">|</span>}
+                <span className={i === 0 ? "font-semibold" : undefined}>
+                  {selectedRows[0][field]}
+                </span>
+              </Fragment>
+            ))}
             <span className="ml-auto text-[10px] text-blue-400 font-medium">
               {selectedLabel}
             </span>

@@ -75,7 +75,11 @@ export function toDsSave<T = any>(
   const out: Array<Record<string, any>> = [];
   for (const row of rows ?? []) {
     const sts = (row as any)?.EDIT_STS;
-    if (sts === ROW_STATUS.INSERT || sts === ROW_STATUS.UPDATE || sts === ROW_STATUS.DELETE) {
+    if (
+      sts === ROW_STATUS.INSERT ||
+      sts === ROW_STATUS.UPDATE ||
+      sts === ROW_STATUS.DELETE
+    ) {
       // __rid__ 는 useBaseModel 이 ag-grid getRowId 용으로 부여한 클라이언트 전용 id — 서버 전송 제외
       const { EDIT_STS, __rid__, ...rest } = row as any;
       out.push({ ...rest, rowStatus: sts });
@@ -114,12 +118,23 @@ export function commitRowChange(
   field: string,
   value: any,
 ): void {
-  if (!setRowData || !targetRow || !field) return;
+  if (!field) return;
+  commitRowChanges(setRowData, targetRow, { [field]: value });
+}
+
+/** commitRowChange 의 다필드 버전 — patch 객체의 모든 필드를 한 번의 setRowData 로
+ *  갱신하고 EDIT_STS 자동 마킹. (팝업 셀에서 CODE/NAME 동시 기록 등) */
+export function commitRowChanges(
+  setRowData: ((updater: any) => void) | undefined,
+  targetRow: any,
+  patch: Record<string, any>,
+): void {
+  if (!setRowData || !targetRow || !patch) return;
   setRowData((prev: any) => ({
     ...prev,
     rows: (prev?.rows ?? []).map((r: any) =>
       r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__)
-        ? { ...r, [field]: value, EDIT_STS: nextEditSts(r) }
+        ? { ...r, ...patch, EDIT_STS: nextEditSts(r) }
         : r,
     ),
   }));

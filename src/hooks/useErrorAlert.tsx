@@ -28,6 +28,7 @@ export function useErrorAlert() {
   return useCallback(
     (description: string) => {
       openPopup({
+        type: "error",
         content: (
           <ConfirmModal
             title="에러"

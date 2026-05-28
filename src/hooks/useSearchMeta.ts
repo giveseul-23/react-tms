@@ -4,7 +4,7 @@
 //    키:  소문자  (dbcolumn, columndescr_lang, type, ...)
 //    값:  대문자  (type: "COMBO", "TEXT", "YMD", "YMDT", "POPUP")
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { commonApi, comboOptRequest } from "@/app/services/common/commonApi";
 import { getSessionFields } from "@/app/services/auth/auth";
 import type {
@@ -204,89 +204,112 @@ function sanitizeComboOptions(
   return options.filter((opt) => String(opt?.CODE ?? "").trim() !== "");
 }
 
+// 조회조건 로드 실패 시 재시도 — 화면을 반쪽으로 띄우지 않기 위함
+const SEARCH_META_MAX_RETRY = 2;
+const SEARCH_META_RETRY_DELAY = 700;
+
 export function useSearchMeta(menuCode: string) {
   const [meta, setMeta] = useState<SearchMeta[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const menuCodeRef = useRef(menuCode);
   menuCodeRef.current = menuCode;
+
+  const retry = useCallback(() => setReloadKey((k) => k + 1), []);
 
   useEffect(() => {
     if (!menuCode) return;
     let cancelled = false;
 
-    async function load() {
-      setLoading(true);
+    // 1회 시도 — 실패 시 throw (재시도는 load 가 담당)
+    async function loadOnce(): Promise<SearchMeta[]> {
       const { userId, sesUserId, ACCESS_TOKEN, sesLang } = getSessionFields();
 
-      try {
-        const [condRes, operatorMap] = await Promise.all([
-          commonApi.fetchSearchCondition(
-            menuCodeRef.current,
-            sesLang,
-            userId,
-          ),
-          loadOperatorMap(),
-        ]);
-        const rawRows: ServerSearchConditionRow[] =
-          condRes.data?.data?.dsSearchCondition ?? [];
+      const [condRes, operatorMap] = await Promise.all([
+        commonApi.fetchSearchCondition(menuCodeRef.current, sesLang, userId),
+        loadOperatorMap(),
+      ]);
+      const rawRows: ServerSearchConditionRow[] =
+        condRes.data?.data?.dsSearchCondition ?? [];
 
-        const baseMeta = toSearchMeta(rawRows, operatorMap);
+      const baseMeta = toSearchMeta(rawRows, operatorMap);
 
-        // keyParam 이 없어도 sqlProp 이 있으면 콤보 요청 대상으로 포함
-        const comboItems = baseMeta.filter(
-          (m): m is Extract<SearchMeta, { type: "COMBO" }> =>
-            m.type === "COMBO" && !!m.sqlProp,
-        );
+      // keyParam 이 없어도 sqlProp 이 있으면 콤보 요청 대상으로 포함
+      const comboItems = baseMeta.filter(
+        (m): m is Extract<SearchMeta, { type: "COMBO" }> =>
+          m.type === "COMBO" && !!m.sqlProp,
+      );
 
-        if (comboItems.length === 0) {
+      if (comboItems.length === 0) return baseMeta;
+
+      const comboRes = await commonApi.fetchComboOptions(
+        comboItems.map((m) => ({
+          key: m.keyParam ?? m.sqlProp,
+          sqlProp: m.sqlProp,
+          keyParam: m.keyParam ?? m.sqlProp,
+          sesUserId,
+          userId,
+          ACCESS_TOKEN,
+          sesLang,
+        })),
+      );
+
+      const optionMap = comboRes?.data?.data ?? {}; // ← as any 제거
+
+      return baseMeta.map((m) => {
+        if (m.type !== "COMBO") return m;
+
+        // keyParam → sqlProp → "" 순으로 fallback
+        let options = resolveOptions(optionMap, m.keyParam, m.sqlProp);
+
+        if (m.filterValues && m.filterValues.length > 0) {
+          options = options.filter((opt) =>
+            (
+              m as Extract<SearchMeta, { type: "COMBO" }>
+            ).filterValues!.includes(opt.CODE),
+          );
+        }
+
+        if (m.includeAll) {
+          options = [{ CODE: "ALL", NAME: "모두" }, ...options];
+        }
+
+        return { ...m, options: sanitizeComboOptions(options) };
+      });
+    }
+
+    async function load() {
+      setLoading(true);
+      setError(false);
+
+      for (let attempt = 0; attempt <= SEARCH_META_MAX_RETRY; attempt++) {
+        try {
+          const resolved = await loadOnce();
           if (!cancelled) {
-            setMeta(baseMeta);
+            setMeta(resolved);
             setLoading(false);
           }
           return;
-        }
-
-        const comboRes = await commonApi.fetchComboOptions(
-          comboItems.map((m) => ({
-            key: m.keyParam ?? m.sqlProp,
-            sqlProp: m.sqlProp,
-            keyParam: m.keyParam ?? m.sqlProp,
-            sesUserId,
-            userId,
-            ACCESS_TOKEN,
-            sesLang,
-          })),
-        );
-
-        const optionMap = comboRes?.data?.data ?? {}; // ← as any 제거
-
-        const resolved = baseMeta.map((m) => {
-          if (m.type !== "COMBO") return m;
-
-          // keyParam → sqlProp → "" 순으로 fallback
-          let options = resolveOptions(optionMap, m.keyParam, m.sqlProp);
-
-          if (m.filterValues && m.filterValues.length > 0) {
-            options = options.filter((opt) =>
-              (
-                m as Extract<SearchMeta, { type: "COMBO" }>
-              ).filterValues!.includes(opt.CODE),
+        } catch (e) {
+          console.error(
+            `[useSearchMeta] load failed (attempt ${attempt + 1}/${SEARCH_META_MAX_RETRY + 1})`,
+            e,
+          );
+          if (cancelled) return;
+          if (attempt < SEARCH_META_MAX_RETRY) {
+            // loading 유지(skeleton 노출)한 채 잠시 후 재시도
+            await new Promise((r) =>
+              setTimeout(r, SEARCH_META_RETRY_DELAY),
             );
+            if (cancelled) return;
+          } else {
+            // 재시도 소진 — 빈 화면 노출 대신 error 게이트 유지
+            setMeta([]);
+            setError(true);
+            setLoading(false);
           }
-
-          if (m.includeAll) {
-            options = [{ CODE: "ALL", NAME: "모두" }, ...options];
-          }
-
-          return { ...m, options: sanitizeComboOptions(options) };
-        });
-
-        if (!cancelled) setMeta(resolved);
-      } catch (e) {
-        console.error("[useSearchMeta] load failed", e);
-        if (!cancelled) setMeta([]);
-      } finally {
-        if (!cancelled) setLoading(false);
+        }
       }
     }
 
@@ -294,9 +317,9 @@ export function useSearchMeta(menuCode: string) {
     return () => {
       cancelled = true;
     };
-  }, [menuCode]);
+  }, [menuCode, reloadKey]);
 
-  return { meta, loading };
+  return { meta, loading, error, retry };
 }
 
 export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {

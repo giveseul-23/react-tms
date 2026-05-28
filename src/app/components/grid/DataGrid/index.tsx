@@ -1,7 +1,7 @@
 "use client";
 // app/components/grid/DataGrid/index.tsx
 
-import React, { useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef, ColGroupDef } from "ag-grid-community";
 
@@ -18,6 +18,7 @@ import { useRowLifecycle } from "./useRowLifecycle";
 import { useGridHandlers } from "./useGridHandlers";
 import { useGridProps } from "./useGridProps";
 import { Pagination } from "./Pagination";
+import { usePopup } from "@/app/components/popup/PopupContext";
 
 // (Note: Util.formatDttm 등 컬럼 변환 관련 유틸은 gridUtils/processColumn 으로 이동.)
 
@@ -117,6 +118,9 @@ type DataGridProps<TRow> = {
       };
   /** audit delete 컬럼이 행 삭제 시 호출할 setter (model.bind() 가 자동 주입). */
   setRowData?: (updater: any) => void;
+  /** columnDefs 변경 시 호출 — model.bind() 가 자동 주입.
+   *  saveGrid 의 required 검증이 slot.columnDefsRef 로 컬럼 메타 read. */
+  onColumnDefsReady?: (cols: any[]) => void;
 };
 
 export default function DataGrid<TRow>({
@@ -153,7 +157,14 @@ export default function DataGrid<TRow>({
   onTabChange,
   audit,
   setRowData,
+  onColumnDefsReady,
 }: DataGridProps<TRow>) {
+  // columnDefs 가 바뀔 때마다 외부(useBaseModel slot)에 알린다.
+  // saveGrid 의 required 검증이 columnDefsRef 로 메타 read.
+  useEffect(() => {
+    onColumnDefsReady?.(columnDefs as any[]);
+  }, [columnDefs, onColumnDefsReady]);
+  const { openPopup, closePopup } = usePopup();
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
     tabs?.[0]?.key ?? null,
@@ -196,6 +207,8 @@ export default function DataGrid<TRow>({
     codeMap,
     audit,
     setRowData,
+    openPopup,
+    closePopup,
   });
 
   const { handleGridReady, handleFirstDataRendered } = useAutoSize<TRow>({

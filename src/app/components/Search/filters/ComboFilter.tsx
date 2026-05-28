@@ -19,6 +19,7 @@ type ComboFilterProps = {
   placeholder?: string;
   inputClassName?: string;
   options?: { CODE: string; NAME: string }[];
+  disabled?: boolean;
 };
 
 export function ComboFilter({
@@ -29,6 +30,7 @@ export function ComboFilter({
   placeholder = "선택",
   className,
   inputClassName,
+  disabled,
 }: ComboFilterProps) {
   const safeOptions = useMemo(() => options ?? [], [options]);
 
@@ -40,7 +42,7 @@ export function ComboFilter({
 
   return (
     <div className={cn(className ? "w-full min-w-0" : className)}>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger
           id={selectId}
           className={cn(

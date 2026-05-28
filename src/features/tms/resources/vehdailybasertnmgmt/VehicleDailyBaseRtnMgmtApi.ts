@@ -39,4 +39,12 @@ export const vehicleDailyBaseRtnMgmtApi = {
       },
     );
   },
+
+  // 팝업 차량조회
+  getVehicleCodeName(payload: any) {
+    return apiClient.post<CommonResponse>(
+      `/tmsCommonService/searchVehicleCodeName`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
 };

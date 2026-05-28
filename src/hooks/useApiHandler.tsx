@@ -12,6 +12,7 @@ export function useApiHandler() {
     const showError = (description: string) => {
       openPopup({
         title: "LBL_ERROR",
+        type: "error",
         content: (
           <ConfirmModal
             title={Lang.get("LBL_ERROR")}
@@ -40,6 +41,7 @@ export function useApiHandler() {
       }
 
       openPopup({
+        type: "confirm",
         content: (
           <ConfirmModal
             title="확인"

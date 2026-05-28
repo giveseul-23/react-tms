@@ -50,6 +50,7 @@ export function useBaseController<K extends string>({
   const alertMsg = useCallback(
     (msg: string, title = "알림") => {
       openPopup({
+        type: "check",
         content: (
           <ConfirmModal
             title={title}
@@ -69,6 +70,7 @@ export function useBaseController<K extends string>({
   const confirmMsg = useCallback(
     (msg: string, onYes: () => void, title = "확인") => {
       openPopup({
+        type: "confirm",
         content: (
           <ConfirmModal
             title={title}
@@ -153,6 +155,35 @@ export function useBaseController<K extends string>({
       if (dirty.length === 0) {
         alertMsg("변경된 데이터가 없습니다.");
         return;
+      }
+
+      // ── required 컬럼 검증 ────────────────────────────────
+      //   DataGrid 가 등록한 columnDefs (slot.columnDefsRef) 에서 required:true
+      //   를 모은 뒤, dirty 행 중 I/U(저장 대상) 에 한해 값 누락 체크.
+      //   누락 시 헤더명을 모아 alert 후 저장 중단. 삭제(D) 행은 검증 안 함.
+      const cols = slot.columnDefsRef.current ?? [];
+      const requiredCols = cols.filter(
+        (c: any) => c?.required === true && (c?.field || c?.colId),
+      );
+      if (requiredCols.length > 0) {
+        const targets = dirty.filter(
+          (r: any) => r.EDIT_STS !== "D" && r.delStatus !== true,
+        );
+        const missing: string[] = [];
+        for (const r of targets) {
+          for (const c of requiredCols) {
+            const f = (c.field ?? c.colId) as string;
+            const v = (r as any)[f];
+            if (v == null || v === "") {
+              const label = c.noLang ? c.headerName : Lang.get(c.headerName);
+              if (!missing.includes(label)) missing.push(label);
+            }
+          }
+        }
+        if (missing.length > 0) {
+          alertMsg(`필수 입력 항목을 확인해주세요: ${missing.join(", ")}`);
+          return;
+        }
       }
 
       // ── 사전 검증 ──────────────────────────────────────────

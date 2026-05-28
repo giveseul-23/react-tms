@@ -1,10 +1,18 @@
 import { useBaseModel } from "@/app/feature/useBaseModel";
+import { useCommonStores } from "@/hooks/useCommonStores";
 
 export type GridKey = "main";
 
 export function useVehicleDailyBaseRtnMgmtModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
-    return { ...base };
+
+  const { stores } = useCommonStores({
+    vehTp: { sqlProp: "selectVehTpList" },
+  });
+
+  return { ...base, stores };
 }
 
-export type VehicleDailyBaseRtnMgmtModel = ReturnType<typeof useVehicleDailyBaseRtnMgmtModel>;
+export type VehicleDailyBaseRtnMgmtModel = ReturnType<
+  typeof useVehicleDailyBaseRtnMgmtModel
+>;

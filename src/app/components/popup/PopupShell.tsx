@@ -19,7 +19,19 @@ interface PopupShellProps {
   title?: string;
   children: React.ReactNode;
   width?: PopupWidth;
+  /** title 미지정 시 헤더에 표시할 기본값 결정 — alertMsg/errorMsg 등에서 type 만
+   *  넘기면 헤더 라벨이 "undefined***" 가 아닌 한국어 기본값으로 표시됨. */
+  type?: string;
 }
+
+const DEFAULT_TITLE_BY_TYPE: Record<string, string> = {
+  error: "에러",
+  confirm: "확정",
+  check: "알림",
+  normal: "알림",
+  info: "알림",
+  alert: "알림",
+};
 
 const WIDTH_PX: Record<PopupWidth, number> = {
   sm: 384,
@@ -39,6 +51,7 @@ export function PopupShell({
   title,
   children,
   width = "xl",
+  type,
 }: PopupShellProps) {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const dragging = useRef(false);
@@ -163,7 +176,7 @@ export function PopupShell({
           className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-slate-700 cursor-grab active:cursor-grabbing select-none"
         >
           <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-            {Lang.get(title) ?? ""}
+            {title ? Lang.get(title) : (DEFAULT_TITLE_BY_TYPE[type ?? ""] ?? "알림")}
           </span>
           <button
             onClick={() => onOpenChange(false)}

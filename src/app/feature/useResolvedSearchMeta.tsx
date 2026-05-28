@@ -11,6 +11,7 @@
 // menuCode 가 없으면 fallback(meta) 그대로 사용 — 기존 화면 호환.
 
 import { Skeleton } from "@/app/components/ui/skeleton";
+import { Button } from "@/app/components/ui/button";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 import type { SearchMeta } from "@/features/search/search.meta.types";
 
@@ -29,7 +30,22 @@ export function useResolvedSearchMeta(
 
   const meta = useAuto ? auto.meta : (fallbackMeta ?? []);
   const loading = useAuto ? auto.loading : false;
-  const gate = loading ? <Skeleton className="h-24" /> : null;
+  const error = useAuto ? auto.error : false;
+
+  let gate: React.ReactNode | null = null;
+  if (loading) {
+    gate = <Skeleton className="h-24" />;
+  } else if (error) {
+    // 조회조건 로드가 재시도까지 실패 — 반쪽 화면 대신 재시도 버튼 노출
+    gate = (
+      <div className="flex flex-col items-center justify-center gap-3 py-16 text-sm text-slate-500">
+        <span>조회조건을 불러오지 못했습니다</span>
+        <Button variant="outline" size="sm" onClick={auto.retry}>
+          다시 시도
+        </Button>
+      </div>
+    );
+  }
 
   return { meta, gate };
 }
