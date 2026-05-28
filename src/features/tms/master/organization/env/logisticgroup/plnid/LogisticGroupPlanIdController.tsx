@@ -84,6 +84,18 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
   // ── 그리드별 actions 배열 ─────────────────────────────────────
   // 추가/저장/사용자정의 버튼 결정은 모두 여기서. View 는 binding 만.
   // ActionItem[] 타입 명시 — 화면 고유 버튼 추가 시 type 추론 도움.
+    const mainActions: ActionItem[] = useMemo(
+      () => [
+        makeExcelGroupAction({
+          columns: MAIN_COLUMN_DEFS,
+          menuName: Lang.get("MENU_LGST_GRP_PLN_ID"),
+          fetchFn: () => api.getList(model.filtersRef.current),
+          rows: model.grids.main.rows,
+        }),
+      ],
+      [model],
+    );
+
   const detailActions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddDetail }),
@@ -95,7 +107,8 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
           );
 
           if (!hasDefault) {
-            throw new Error(Lang.get("MSG_NO_DEFAULT_AREA"));
+            base.alert(Lang.get('MSG_NO_DEFAULT_AREA', Lang.get('LBL_PLAN_ID')));
+            return false;
           }
 
           onSaveDetail();
@@ -120,6 +133,7 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
     fetchList,
     onSearchCallback,
     onMainGridClick,
+    mainActions,
     detailActions,
   };
 }
