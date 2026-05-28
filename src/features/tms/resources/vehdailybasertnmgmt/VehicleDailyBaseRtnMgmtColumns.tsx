@@ -4,15 +4,25 @@ export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
     type: "text",
+    field: "LGST_GRP_CD",
+    hide: true,
+  },
+  {
+    type: "text",
+    field: "LGST_GRP_NM",
+    hide: true,
+  },
+  {
+    type: "text",
     headerName: "LBL_ID",
     field: "BASE_RTN_CNT_ID",
+    align: "center",
   },
   {
     type: "popuser",
     headerName: "LBL_VEH_NO",
     field: "VEH_NO",
     popupTitle: "BTN_SELECT_VEH",
-    sqlId: "CODE",
     renderPopup: ({ row, commit, close }) => (
       <VehicleAssignPopup
         initialValues={row}
@@ -66,5 +76,6 @@ export const MAIN_COLUMN_DEFS = [
     required: true,
     insertable: true,
     editable: true,
+    align: "right",
   },
 ];
