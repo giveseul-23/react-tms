@@ -15,7 +15,6 @@ const withSession = (payload: any = {}) => {
 };
 
 export const tripCountApi = {
-  // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
     return apiClient.post<CommonResponse>(
       `/tripCountService/search`,
@@ -23,8 +22,6 @@ export const tripCountApi = {
     );
   },
 
-  // ── 저장 (추가/수정/삭제 한 번에) — dsSave 패턴 ─────────────────
-  // useBaseController.saveGrid 가 { dsSave: [...] } 형태로 호출.
   save(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(

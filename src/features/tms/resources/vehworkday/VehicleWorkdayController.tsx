@@ -17,7 +17,7 @@ import type { VehicleWorkdayModel, GridKey } from "./VehicleWorkdayModel";
 import { Lang } from "@/app/services/common/Lang";
 import { ROW_STATUS } from "@/app/components/grid/gridUtils/rowStatus";
 import { usePopup } from "@/app/components/popup/PopupContext";
-import WorkdayDetailPopup from "./WorkdayDetailPopup";
+import WorkdayDetailPopup from "./popup/WorkdayDetailPopup";
 
 interface ControllerArgs {
   model: VehicleWorkdayModel;
@@ -151,29 +151,13 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
     [getSearchDateRange],
   );
 
-  const onExcelTemplateDownload = useCallback(async () => {
-    const res = await api.downloadExcelTemplate();
-    const blob = new Blob([res.data], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "VehicleWorkdayTemplate.xlsx";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // TODO: 엑셀템플릿 다운로드
+  const onExcelTemplateDownload = useCallback(() => {
   }, []);
 
   // TODO: 엑셀업로드
   const onExcelUpload = useCallback(() => {
-    base.callAjax(
-      api.gridExcelUpload(model.filtersRef.current),
-      "MSG_FILE_UPLOAD_CMPLT",
-    )
-      .then(() => base.search());
-  }, [base, model.filtersRef]);
+  }, []);
 
   const mainActions: ActionItem[] = useMemo(
     () => [

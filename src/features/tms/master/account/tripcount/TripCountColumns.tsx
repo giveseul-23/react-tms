@@ -1,16 +1,34 @@
+import { CommonPopup } from "@/app/components/popup/CommonPopup";
+
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_DEPARTURE_ID",
     field: "FRM_LOC_ID",
     hide: true,
   },
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_DEPARTURE_CODE",
     field: "FRM_LOC_CD",
-    editable: true, insertable: true,
+    popupTitle: "LBL_DEPARTURE_CODE",
+    renderPopup: ({ commit, close }) => (
+      <CommonPopup
+        sqlId="selectLocationCodeName"
+        onApply={(picked: any) => {
+          commit({
+            FRM_LOC_CD: picked.CODE,
+            FRM_LOC_NM: picked.NAME,
+            FRM_LOC_ID: picked.LOC_ID,
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
+    insertable: true,
+    required: true,
   },
   {
     type: "text",
@@ -18,16 +36,32 @@ export const MAIN_COLUMN_DEFS = [
     field: "FRM_LOC_NM",
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_DESTINATION_ID",
     field: "TO_LOC_ID",
     hide: true,
   },
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_DESTINATION_CODE",
     field: "TO_LOC_CD",
-    editable: true, insertable: true,
+    popupTitle: "LBL_DESTINATION_CODE",
+    renderPopup: ({ commit, close }) => (
+      <CommonPopup
+        sqlId="selectLocationCodeName"
+        onApply={(picked: any) => {
+          commit({
+            TO_LOC_CD: picked.CODE,
+            TO_LOC_NM: picked.NAME,
+            TO_LOC_ID: picked.LOC_ID,
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
+    insertable: true,
+    required: true,
   },
   {
     type: "text",
@@ -38,6 +72,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "numeric",
     headerName: "LBL_TRIP_COUNT",
     field: "TRIP_CNT",
-    editable: true, insertable: true,
+    editable: true,
+    insertable: true,
   },
 ];

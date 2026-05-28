@@ -30,25 +30,12 @@ export function useTripCountController({ model }: ControllerArgs) {
     [model.grids.main],
   );
 
-  // ── 메인 행 추가 ─────────────────────────────────────────────
-  // base.addRow 가 EDIT_STS: "I" 자동 주입 + push.
   const onAddMain = useCallback(() => {
-    base.addRow("main", {});
+    base.addRow("main", { TRIP_CNT: 2 });
   }, [base]);
 
-  // ── 메인 저장 — 삭제행 있으면 confirm 후 저장 ─────────────────
-  // confirmOnDelete 옵션 한 줄로 처리. 후처리는 기본값 "refresh"(메인 재조회).
-  const onSaveMain = useCallback(
-    () =>
-      base.saveGrid("main", api.save, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
-      }),
-    [base],
-  );
+  const onSaveMain = useCallback(() => base.saveGrid("main", api.save), [base]);
 
-  // ── 그리드별 actions 배열 ─────────────────────────────────────
-  // 추가/저장/사용자정의 버튼 결정은 모두 여기서. View 는 binding 만.
-  // ActionItem[] 타입 명시 — 화면 고유 버튼 추가 시 type 추론 도움.
   const mainActions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddMain }),

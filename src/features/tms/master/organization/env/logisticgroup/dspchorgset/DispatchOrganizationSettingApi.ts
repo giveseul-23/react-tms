@@ -1,6 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
-import { MENU_CODE } from "./VehicleWorkday";
+import { MENU_CODE } from "./DispatchOrganizationSetting";
 
 type CommonResponse = {
   rows: [];
@@ -14,40 +14,29 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
-export const vehicleWorkdayApi = {
+export const dispatchOrganizationSetting = {
+  // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
     return apiClient.post<CommonResponse>(
-      `/vehicleWorkdaysService/search`,
+      `/dispatchOrganizationSettingService/search`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
+  // ── 상세 조회 ─────────────────────────────────────────────────
+  getDetailList(payload: any) {
+    return apiClient.post<CommonResponse>(
+      `/dispatchOrganizationSettingService/searchDetail`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // ── 저장 (추가/수정/삭제 한 번에) — dsSave 패턴 ─────────────────
+  // useBaseController.saveGrid 가 { dsSave: [...] } 형태로 호출.
   save(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      `/vehicleWorkdaysService/save`,
-      { dsSave },
-      {
-        params: {
-          ...getSessionFields(),
-          MENU_CD: MENU_CODE,
-          ...rest,
-        },
-      },
-    );
-  },
-
-  saveWorkday(payload: any) {
-    return apiClient.post<CommonResponse>(
-      `/vehicleWorkdaysService/saveWorkday`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-
-  initWorkday(payload: any) {
-    const { dsSave, ...rest } = payload ?? {};
-    return apiClient.post<CommonResponse>(
-      `/vehicleWorkdaysService/initWorkday`,
+      `/dispatchOrganizationSettingService/saveDetail`,
       { dsSave },
       {
         params: {

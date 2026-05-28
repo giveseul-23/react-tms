@@ -1,11 +1,35 @@
+import { CommonPopup } from "@/app/components/popup/CommonPopup";
+
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_DIVISION_CODE",
     field: "DIV_CD",
-    insertable: true,
-    editable: true,
+    popupTitle: "LBL_DIVISION_CODE",
+    renderPopup: ({ commit, close }) => (
+      <CommonPopup
+        sqlId="selectDivisionCodeName"
+        onApply={(picked: any) => {
+          commit({
+            DIV_CD: picked.CODE,
+            DIV_NM: picked.NAME,
+            LGST_GRP_CD: "",
+            LGST_GRP_NM: "",
+            FRM_ZN_CD: "",
+            FRM_ZN_NM: "",
+            TO_ZN_CD: "",
+            TO_ZN_NM: "",
+            VEH_ID: "",
+            VEH_NO: "",
+            CARR_CD: "",
+            CARR_NM: "",
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
     required: true,
   },
   {
@@ -14,11 +38,32 @@ export const MAIN_COLUMN_DEFS = [
     field: "DIV_NM",
   },
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_LOGISTICS_GROUP_CODE",
     field: "LGST_GRP_CD",
-    insertable: true,
-    editable: true,
+    popupTitle: "LBL_LOGISTICS_GROUP_CODE",
+    renderPopup: ({ row, commit, close }) => (
+      <CommonPopup
+        sqlId="selectLogisticsgroupCodeName"
+        extraParams={{ keyParam: row?.DIV_CD ?? "" }}
+        onApply={(picked: any) => {
+          commit({
+            LGST_GRP_CD: picked.CODE,
+            LGST_GRP_NM: picked.NAME,
+            FRM_ZN_CD: "",
+            FRM_ZN_NM: "",
+            TO_ZN_CD: "",
+            TO_ZN_NM: "",
+            VEH_ID: "",
+            VEH_NO: "",
+            CARR_CD: "",
+            CARR_NM: "",
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
     required: true,
   },
   {
@@ -49,12 +94,27 @@ export const MAIN_COLUMN_DEFS = [
     insertable: true,
     editable: true,
   },
-  {
-    type: "text",
+  { // 차량팝업으로 수정 필요
+    type: "popuser",
     headerName: "LBL_VEHICLE_CODE",
     field: "VEH_ID",
-    insertable: true,
-    editable: true,
+    popupTitle: "LBL_VEHICLE_CODE",
+    renderPopup: ({ row, commit, close }) => (
+      <CommonPopup
+        sqlId="selectVehicleCodeName"
+        extraParams={{ sqlParam1: row?.LGST_GRP_CD ?? "" }}
+        onApply={(picked: any) => {
+          commit({
+            VEH_ID: picked.CODE,
+            VEH_NO: picked.NAME,
+            // CARR_CD: picked.CARR_CD, 
+            // CARR_NM: picked.CARR_NM,
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
     required: true,
   },
   {
@@ -73,11 +133,28 @@ export const MAIN_COLUMN_DEFS = [
     field: "CARR_NM",
   },
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_FROM_ZONE_CD",
     field: "FRM_ZN_CD",
+    popupTitle: "LBL_FROM_ZONE_CD",
+    renderPopup: ({ row, commit, close }) => (
+      <CommonPopup
+        sqlId="selectZoneCodeName"
+        extraParams={{
+          sqlParam1: row?.DIV_CD ?? "",
+          sqlParam2: row?.LGST_GRP_CD ?? "",
+        }}
+        onApply={(picked: any) => {
+          commit({
+            FRM_ZN_CD: picked.CODE,
+            FRM_ZN_NM: picked.NAME,
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
     insertable: true,
-    editable: true,
     required: true,
   },
   {
@@ -86,11 +163,28 @@ export const MAIN_COLUMN_DEFS = [
     field: "FRM_ZN_NM",
   },
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_TO_ZONE_CD",
     field: "TO_ZN_CD",
+    popupTitle: "LBL_TO_ZONE_CD",
+    renderPopup: ({ row, commit, close }) => (
+      <CommonPopup
+        sqlId="selectZoneCodeName"
+        extraParams={{
+          sqlParam1: row?.DIV_CD ?? "",
+          sqlParam2: row?.LGST_GRP_CD ?? "",
+        }}
+        onApply={(picked: any) => {
+          commit({
+            TO_ZN_CD: picked.CODE,
+            TO_ZN_NM: picked.NAME,
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
     insertable: true,
-    editable: true,
     required: true,
   },
   {

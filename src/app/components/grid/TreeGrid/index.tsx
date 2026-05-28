@@ -40,7 +40,6 @@ import {
   GRID_CSS_VARS,
   GRID_HEADER_HEIGHT,
   GRID_ROW_HEIGHT,
-  SELECTION_COLUMN_DEF,
   DEFAULT_COL_DEF_BASE,
 } from "../gridCommon";
 import { standardAudit } from "../columns/commonColumns";
@@ -662,9 +661,12 @@ function TreeGridInner<TRow extends TreeRow>(
             getRowId={getRowId}
             onGridReady={handleGridReady}
             suppressMovableColumns
-            // ── 행 선택 처리 ──────────────────────────────────────────────
-            rowSelection={{ mode: "multiRow", enableClickSelection: false }}
-            selectionColumnDef={SELECTION_COLUMN_DEF}
+            // ── 행 선택 처리 — tree 는 체크박스 미사용, 단일 행 클릭 선택 ──
+            rowSelection={{
+              mode: "singleRow",
+              enableClickSelection: true,
+              checkboxes: false,
+            }}
             onRowSelected={(e: any) => {
               if (!e.api) return;
               const rows = e.api.getSelectedRows() as TRow[];
@@ -681,13 +683,8 @@ function TreeGridInner<TRow extends TreeRow>(
             }}
             onRowClicked={(e: any) => {
               const target = e.event?.target as HTMLElement;
-              if (
-                target?.closest(".ag-selection-checkbox") ||
-                target?.closest(".ag-checkbox") ||
-                target?.tagName === "INPUT"
-              ) {
-                return;
-              }
+              // 셀 내부 input (USE_YN 체크 셀 등) 클릭은 행 선택 트리거하지 않음
+              if (target?.tagName === "INPUT") return;
               if (e.event?.shiftKey) return;
               if (!e.data) return;
               onRowClicked?.(e.data);
