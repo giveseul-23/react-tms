@@ -22,9 +22,7 @@ export default function LanguagePack() {
       searchProps={{
         fetchFn: ctrl.fetchLanguagePackList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid
