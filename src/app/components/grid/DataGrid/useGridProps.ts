@@ -5,6 +5,12 @@
 import { useMemo } from "react";
 import type { ColDef } from "ag-grid-community";
 import { MIN_COL_WIDTH } from "./autosize";
+import {
+  DEFAULT_COL_DEF_BASE,
+  GRID_HEADER_HEIGHT,
+  GRID_ROW_HEIGHT,
+  SELECTION_COLUMN_DEF,
+} from "../gridUtils/gridShell";
 
 export function useGridProps<TRow>({
   finalColumnDefs,
@@ -43,13 +49,12 @@ export function useGridProps<TRow>({
 }) {
   // ag-grid 에 흘러가는 prop 의 reference 를 안정화 — 부모 re-render 시에도
   // ag-grid 가 내부 상태(cellEditor 등) 를 reset 하지 않도록 한다.
+  // 공통 부분(resizable/filter/floatingFilter) 은 gridShell 에서 관리.
   const defaultColDef = useMemo(
     () => ({
-      resizable: true,
+      ...DEFAULT_COL_DEF_BASE,
       sortable: true,
       minWidth: MIN_COL_WIDTH,
-      filter: true,
-      floatingFilter: true,
     }),
     [],
   );
@@ -69,15 +74,7 @@ export function useGridProps<TRow>({
         };
   }, [rowSelectionProp, headerCheckbox]);
 
-  const selectionColumnDef = useMemo(
-    () => ({
-      headerClass: "ag-selection-header-center",
-      width: 30,
-      minWidth: 30,
-      maxWidth: 30,
-    }),
-    [],
-  );
+  const selectionColumnDef = useMemo(() => ({ ...SELECTION_COLUMN_DEF }), []);
 
   const treeProps = useMemo(
     () =>
@@ -97,8 +94,8 @@ export function useGridProps<TRow>({
       columnDefs: finalColumnDefs,
       pinnedBottomRowData: summaryRow,
       defaultColDef,
-      headerHeight: 28,
-      rowHeight: 22,
+      headerHeight: GRID_HEADER_HEIGHT,
+      rowHeight: GRID_ROW_HEIGHT,
       onGridReady: handleGridReady,
       onFirstDataRendered: handleFirstDataRendered,
       // tree 모드는 getDataPath 가 row id 를 결정 — 충돌 방지로 getRowId 안 줌.

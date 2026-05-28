@@ -69,21 +69,25 @@ export const Lang = {
    * @param key 번역 키
    * @param args 플레이스홀더 치환에 사용할 값들 (문자열 또는 배열)
    */
-  get(key: string, ...args: string[]): string {
+  get(key: string, ...args: (string | string[])[]): string {
     const template = Lang.data[key];
-    
+
     // 키가 존재하지 않을 때 처리
     if (!template) {
       return key + "***";
     }
 
-    // 두 번째 인자들이 들어왔다면 {0}, {1} 등의 패턴을 치환
-    if (args.length > 0) {
-      return template.replace(/{(\d+)}/g, (match, index) => {
-        return args[index] !== undefined ? args[index] : match;
-      });
-    }
+    // 가변인자 / 단일 배열 인자 둘 다 지원
+    // Lang.get("MSG", "a", "b") / Lang.get("MSG", ["a", "b"]) 동일 동작
+    const flat = args.flat() as string[];
 
-    return template;
+    if (flat.length === 0) return template;
+
+    return template.replace(/{(\d+)}/g, (match, index) => {
+      const raw = flat[Number(index)];
+      if (raw === undefined) return match;
+      // 인자 자체가 언어팩 키면 자동 번역, 아니면 그대로 사용
+      return Lang.data[raw] ?? raw;
+    });
   },
 };

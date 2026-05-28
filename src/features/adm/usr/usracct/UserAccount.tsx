@@ -6,9 +6,7 @@ import { SplitPane } from "@/app/components/layout/SplitPane";
 import { Pane } from "@/app/components/layout/Pane";
 import { OuterTabs } from "@/app/components/layout/OuterTabs";
 import DataGrid from "@/app/components/grid/DataGrid";
-import TreeGrid, {
-  type TreeCellContext,
-} from "@/app/components/grid/TreeGrid";
+import TreeGrid, { type TreeCellContext } from "@/app/components/grid/TreeGrid";
 import TreeNameCell from "@/app/components/grid/TreeGrid/TreeNameCell";
 import { Lang } from "@/app/services/common/Lang";
 import { useUserAccountModel } from "./UserAccountModel";
@@ -29,10 +27,6 @@ export default function UserAccount() {
 
   const model = useUserAccountModel(MENU_CD);
   const ctrl = useUserAccountController({ model, activeTabRef });
-  const mainColumnDefs = useMemo(
-    () => MAIN_COLUMN_DEFS(model.grids.main.setData),
-    [model.grids.main],
-  );
   const sub01ColumnDefs = useMemo(
     () => SUB01_COLUMN_DEFS(model.grids.sub01.setData),
     [model.grids.sub01],
@@ -69,7 +63,7 @@ export default function UserAccount() {
           {...model.bind("main")}
           audit={false}
           codeMap={model.codeMap}
-          columnDefs={mainColumnDefs}
+          columnDefs={MAIN_COLUMN_DEFS}
           headerCheckbox={false}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}

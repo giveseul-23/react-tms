@@ -1,7 +1,5 @@
 import React from "react";
-import {
-  makeAuditColumns,
-} from "@/app/components/grid/columns/commonColumns";
+import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
 
 export const AUTH_COLUMN_SPECS = [
   { field: "S_COLUMN", label: "BTN_SEARCH" },
@@ -44,7 +42,8 @@ function makeCheckboxColumn(
   setRoleTreeRows: (updater: any) => void,
   selectedRoleType: string | null,
 ) {
-  const noLang = !headerName.startsWith("LBL_") && !headerName.startsWith("BTN_");
+  const noLang =
+    !headerName.startsWith("LBL_") && !headerName.startsWith("BTN_");
   return {
     type: "text",
     headerName,
@@ -87,8 +86,7 @@ function makeCheckboxColumn(
                           ...Object.fromEntries(
                             AUTH_COLUMN_SPECS.map((spec) => [spec.field, next]),
                           ),
-                          EDIT_STS:
-                            row.EDIT_STS === "I" ? "I" : "U",
+                          EDIT_STS: row.EDIT_STS === "I" ? "I" : "U",
                         },
                   ),
                 );
@@ -119,7 +117,7 @@ function makeCheckboxColumn(
   };
 }
 
-export const MAIN_COLUMN_DEFS = (setRowData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -301,15 +299,6 @@ export const MAIN_COLUMN_DEFS = (setRowData?: (updater: any) => void) => [
     editable: true,
     insertable: true,
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];
 
 export const SUB01_COLUMN_DEFS = (setRowData?: (updater: any) => void) => [

@@ -6,10 +6,14 @@
 // - INSERT/DELETE 마킹된 행은 그대로 유지
 // - 그 외 → node.setDataValue("EDIT_STS", "U") 로 갱신
 //
-// 단순 객체 mutation (`row.EDIT_STS = "U"`) 만 하면 AG Grid 의 value cache 가
-// stale 한 채로 남아 EDIT_STS 셀의 cellRenderer 가 옛 값을 그대로 그림.
-// setDataValue 는 (1) 값 갱신 (2) cache 무효화 (3) 셀 redraw 까지 일괄 처리하므로
-// 편집 즉시 rowStatus 가 "수정" 라벨로 바뀜.
+// EDIT_STS 컬럼이 그리드에 있을 때:
+//   단순 객체 mutation (`row.EDIT_STS = "U"`) 만 하면 AG Grid 의 value cache 가
+//   stale 한 채로 남아 EDIT_STS 셀의 cellRenderer 가 옛 값을 그대로 그림.
+//   setDataValue 는 (1) 값 갱신 (2) cache 무효화 (3) 셀 redraw 까지 일괄 처리하므로
+//   편집 즉시 rowStatus 가 "수정" 라벨로 바뀜.
+// EDIT_STS 컬럼이 없을 때:
+//   setDataValue 는 컬럼 lookup 실패로 크래시 → 직접 mutation 으로 fallback.
+//   표시할 셀이 없으므로 redraw 도 불필요. 저장 로직은 row.EDIT_STS 만 읽으므로 정상 동작.
 
 import { ROW_STATUS } from "./rowStatus";
 
@@ -25,7 +29,12 @@ export function withRowStatusTracking(
     if (data && params.node) {
       const cur = data.EDIT_STS;
       if (cur !== ROW_STATUS.INSERT && cur !== ROW_STATUS.DELETE) {
-        params.node.setDataValue("EDIT_STS", ROW_STATUS.UPDATE);
+        const hasEditStsCol = !!params.api?.getColumn?.("EDIT_STS");
+        if (hasEditStsCol) {
+          params.node.setDataValue("EDIT_STS", ROW_STATUS.UPDATE);
+        } else {
+          data.EDIT_STS = ROW_STATUS.UPDATE;
+        }
       }
     }
     userHandler?.(params);

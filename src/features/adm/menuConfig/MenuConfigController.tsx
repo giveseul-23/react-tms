@@ -1,12 +1,11 @@
 // src/views/MenuConfig/MenuConfigController.tsx
 import { useCallback, MutableRefObject } from "react";
 import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
-import { downExcelSearch, downExcelSearched } from "@/views/common/common";
 import { menuApi } from "@/features/adm/menuConfig/menuApi";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { MAIN_COLUMN_DEFS } from "./MenuConfigColumns";
 import { MenuConfigModel } from "./MenuConfigModel";
-import { buildSource } from "./MenuConfig";
+import { buildSource, MENU_CD } from "./MenuConfig";
 import MenuFolderAddPopup, {
   type FolderFormData,
 } from "./popup/MenuFolderAddPopup";
@@ -15,20 +14,26 @@ import MenuItemAddPopup, {
 } from "./popup/MenuItemAddPopup";
 import type { MenuRow } from "./MenuConfig";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
-import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
+import {
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/actions/commonActions";
 import { useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import { Lang } from "@/app/services/common/Lang";
 
 type ControllerProps = {
   model: MenuConfigModel;
   treeGridRef: MutableRefObject<TreeGridHandle | null>;
   filtersRef: MutableRefObject<Record<string, unknown>>;
+  searchRef: MutableRefObject<((page?: number) => void) | null>;
 };
 
 export function useMenuConfigController({
   model,
   treeGridRef,
   filtersRef,
+  searchRef,
 }: ControllerProps) {
   const { openPopup, closePopup } = usePopup();
 
@@ -61,6 +66,7 @@ export function useMenuConfigController({
     rows: model.source,
     setRows: model.setSource,
     saveFn: saveMenuConfig,
+    onSaved: () => searchRef.current?.(),
   });
 
   const handleRowClicked = useCallback(
@@ -90,6 +96,37 @@ export function useMenuConfigController({
       .filter((r) => r.isVirtualRoot)
       .map((r) => ({ CODE: r.APPLCODE, NAME: r.APPLNAME || r.APPLCODE }));
   }, [model.source]);
+
+  // 새 행 id / parentId 사전 검증 — 통과 시 true, 실패 시 alert 표시 후 false.
+  // self-cycle(id === parentId) 또는 중복 id 가 들어가면 TreeGrid 의
+  // calcVisibleRows 가 무한 재귀에 빠지거나 AG-Grid getRowId 충돌이 나므로 차단.
+  const validateNewRowKeys = useCallback(
+    (newId: string, parentId: string): boolean => {
+      const showAlert = (description: string) =>
+        openPopup({
+          title: "",
+          width: "sm",
+          content: (
+            <ConfirmModal
+              type="check"
+              description={description}
+              onClose={closePopup}
+            />
+          ),
+        });
+
+      if (newId === parentId) {
+        showAlert("메뉴코드가 상위 메뉴코드와 같을 수 없습니다.");
+        return false;
+      }
+      if (model.source.some((r) => r.id === newId)) {
+        showAlert("이미 존재하는 메뉴코드입니다.");
+        return false;
+      }
+      return true;
+    },
+    [model.source, openPopup, closePopup],
+  );
 
   // 팝업 폼 데이터 → TreeRow 변환 공통 헬퍼
   const toNewRow = useCallback(
@@ -160,7 +197,7 @@ export function useMenuConfigController({
               <ConfirmModal
                 type="check"
                 title="행을 선택하세요"
-                description="메뉴경로를 추가할 상위 항목을 먼저 선택해주세요."
+                description={Lang.get("MSG_SELECT_UPR_MENU_CD")}
                 onClose={closePopup}
               />
             ),
@@ -169,7 +206,7 @@ export function useMenuConfigController({
         }
         const applOptions = getApplOptions();
         openPopup({
-          title: "메뉴경로 추가 (폴더)",
+          title: "BTN_ADD_MENU_PATH",
           width: "md",
           content: (
             <MenuFolderAddPopup
@@ -179,6 +216,9 @@ export function useMenuConfigController({
                 closePopup();
                 // 서버 호출 없이 source 에 바로 추가 → 그리드에 즉시 반영
                 const newRow = toNewRow(data, applOptions);
+                if (!validateNewRowKeys(newRow.id, newRow.parentId ?? "")) {
+                  return;
+                }
                 model.setSource((prev: MenuRow[]) => [...prev, newRow]);
                 // 부모 → 가상루트까지 ancestor 체인만 expand
                 // (전체 접힌 상태에서 추가해도 그 한 줄기만 펼쳐 새 row 노출)
@@ -205,8 +245,7 @@ export function useMenuConfigController({
             content: (
               <ConfirmModal
                 type="check"
-                title="행을 선택하세요"
-                description="메뉴를 추가할 상위 항목을 먼저 선택해주세요."
+                description={Lang.get("MSG_SELECT_UPR_MENU_CD")}
                 onClose={closePopup}
               />
             ),
@@ -215,7 +254,7 @@ export function useMenuConfigController({
         }
         const applOptions = getApplOptions();
         openPopup({
-          title: "메뉴 추가 (화면)",
+          title: "BTN_ADD_MENU",
           width: "md",
           content: (
             <MenuItemAddPopup
@@ -225,6 +264,9 @@ export function useMenuConfigController({
                 closePopup();
                 // 서버 호출 없이 source 에 바로 추가 → 그리드에 즉시 반영
                 const newRow = toNewRow(data, applOptions);
+                if (!validateNewRowKeys(newRow.id, newRow.parentId ?? "")) {
+                  return;
+                }
                 model.setSource((prev: MenuRow[]) => [...prev, newRow]);
                 // 부모 → 가상루트까지 ancestor 체인만 expand
                 expandAncestors(newRow.parentId);
@@ -240,36 +282,12 @@ export function useMenuConfigController({
     makeSaveAction({ onClick: handleSave }),
 
     // ── 엑셀 ────────────────────────────────────────────────────
-    {
-      type: "group",
-      key: "BTN_EXCEL",
-      label: "BTN_EXCEL",
-      items: [
-        {
-          type: "button",
-          key: "조회된모든데이터다운로드",
-          label: "BTN_EXCEL_DOWN_ALL",
-          onClick: () => {
-            downExcelSearch({
-              columns: MAIN_COLUMN_DEFS(),
-              menuName: "메뉴설정",
-              fetchFn: () => menuApi.getMenuConfigList(filtersRef.current),
-            });
-          },
-        },
-        {
-          type: "button",
-          key: "보이는데이터다운로드",
-          label: "BTN_EXCEL_DOWN_GRID",
-          onClick: () => {
-            downExcelSearched({
-              columns: MAIN_COLUMN_DEFS(),
-              rows: model.source,
-            });
-          },
-        },
-      ],
-    },
+    makeExcelGroupAction({
+      columns: MAIN_COLUMN_DEFS,
+      menuName: MENU_CD,
+      fetchFn: () => menuApi.getMenuConfigList(filtersRef.current),
+      rows: model.gridData.rows,
+    }),
   ];
 
   return {

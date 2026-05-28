@@ -20,7 +20,6 @@ export function PasswordCellEditor(props: PasswordCellEditorProps) {
 
   const commitValue = () => {
     if (!field) return;
-    props.node?.setDataValue?.(field, valueRef.current);
     commitRowChange(
       props.setRowData,
       props.node?.data,
@@ -50,7 +49,6 @@ export function PasswordCellEditor(props: PasswordCellEditorProps) {
       maxLength={props.maxLength}
       onChange={(e) => {
         valueRef.current = e.target.value;
-        commitValue();
       }}
       onBlur={() => {
         commitValue();

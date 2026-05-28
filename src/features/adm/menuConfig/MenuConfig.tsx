@@ -67,6 +67,10 @@ export function buildSource(serverData: any[]): MenuRow[] {
       USE_YN: node.USE_YN ?? "Y",
       RSRC_CNT: node.RSRC_CNT ?? "",
       isVirtualRoot,
+      CRE_DTTM: node.CRE_DTTM,
+      CRE_USR_ID: node.CRE_USR_ID,
+      UPD_DTTM: node.UPD_DTTM,
+      UPD_USR_ID: node.UPD_USR_ID,
     });
 
     (node.data ?? []).forEach((child: any) => visit(child, id, level + 1));
@@ -79,10 +83,16 @@ export function buildSource(serverData: any[]): MenuRow[] {
 export default function MenuConfig() {
   const filtersRef = useRef<Record<string, unknown>>({});
   const treeGridRef = useRef<TreeGridHandle>(null);
+  const searchRef = useRef<((page?: number) => void) | null>(null);
 
   const { meta, loading } = useSearchMeta(MENU_CD);
   const model = useMenuConfigModel();
-  const ctrl = useMenuConfigController({ model, treeGridRef, filtersRef });
+  const ctrl = useMenuConfigController({
+    model,
+    treeGridRef,
+    filtersRef,
+    searchRef,
+  });
 
   const renderNameCell = (params: any, ctx: TreeCellContext) => {
     const row: MenuRow = params.data;
@@ -108,6 +118,7 @@ export default function MenuConfig() {
         onSearchCallback: ctrl.onSearchCallback,
         filtersRef,
         treeGridRef,
+        searchRef,
         computeTotalCount: (rows) => {
           // data 배열이 있는 실제 leaf 노드 수 합산
           function countLeafs(nodes: any[]): number {
@@ -128,8 +139,9 @@ export default function MenuConfig() {
         <TreeGrid<MenuRow>
           ref={treeGridRef}
           source={ctrl.source}
+          setSource={model.setSource}
           renderNameCell={renderNameCell}
-          columnDefs={MAIN_COLUMN_DEFS(model.setSource)}
+          columnDefs={MAIN_COLUMN_DEFS}
           nameColumnHeader=""
           nameColumnWidth={160}
           sortField="DSPLY_SEQ"
@@ -137,6 +149,7 @@ export default function MenuConfig() {
           getRowId={(p) => p.data.id}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.handleRowClicked}
+          audit={true}
         />
       }
     />

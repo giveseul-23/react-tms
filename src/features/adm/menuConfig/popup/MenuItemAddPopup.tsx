@@ -8,6 +8,7 @@ import { Search } from "lucide-react";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import type { MenuRow } from "../MenuConfig";
+import { Lang } from "@/app/services/common/Lang";
 
 interface MenuItemAddPopupProps {
   selectedRow: MenuRow | null;
@@ -55,12 +56,12 @@ export default function MenuItemAddPopup({
 
   const [form, setForm] = useState({
     APPLCODE: defaultAppl,
-    MENUCODE: null,
-    MENUNAME: null,
-    MSG_CD: null,
-    MSG_DESC: null,
+    MENUCODE: "",
+    MENUNAME: "",
+    MSG_CD: "",
+    MSG_DESC: "",
     DSPLY_SEQ: "1",
-    URL: null,
+    URL: "",
     USE_YN: "Y" as "Y" | "N",
   });
 
@@ -73,12 +74,17 @@ export default function MenuItemAddPopup({
 
   const validate = () => {
     const errs: Record<string, string> = {};
-    if (!form.APPLCODE) errs.APPLCODE = "응용프로그램을 선택하세요.";
-    if (!form.MENUCODE) errs.MENUCODE = "메뉴코드를 입력하세요.";
-    if (!form.MENUNAME) errs.MENUNAME = "메뉴명(영문)을 입력하세요.";
-    if (!form.MSG_CD) errs.MSG_CD = "다국어 키를 선택하세요.";
-    if (!form.MSG_DESC) errs.MSG_DESC = "메뉴명(국문)을 입력하세요.";
-    if (!form.URL) errs.URL = "URL을 입력하세요.";
+    if (!form.APPLCODE)
+      errs.APPLCODE = Lang.get("MSG_CHK_SELECT", ["LBL_APPLICATION"]);
+    if (!form.MENUCODE)
+      errs.MENUCODE = Lang.get("MSG_CHK_INPUT", ["LBL_MENU_CD"]);
+    if (!form.MENUNAME)
+      errs.MENUNAME = Lang.get("MSG_CHK_INPUT", ["LBL_MENU_NM"]);
+    if (!form.MSG_CD)
+      errs.MSG_CD = Lang.get("MSG_CHK_SELECT", ["LBL_MLT_LANG_KEY"]);
+    if (!form.MSG_DESC)
+      errs.MSG_DESC = Lang.get("MSG_CHK_INPUT", ["LBL_MENU_NM"]);
+    if (!form.URL) errs.URL = Lang.get("MSG_CHK_INPUT", ["LBL_URL_PATH"]);
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -97,7 +103,7 @@ export default function MenuItemAddPopup({
   // 다국어키 팝업 — 선택 시 MSG_CD, MSG_DESC, MENUCODE 자동 세팅
   const openMsgCdPopup = () => {
     openPopup({
-      title: "다국어 키 조회",
+      title: "LBL_LANG_KEY_SEARCH",
       width: "2xl",
       content: (
         <CommonPopup
@@ -124,7 +130,7 @@ export default function MenuItemAddPopup({
   return (
     <div className="flex flex-col gap-3 w-full">
       {/* ── 상위 메뉴코드 (읽기전용 표시, 수정 불가) ── */}
-      <Field label="상위 메뉴코드">
+      <Field label={Lang.get("LBL_PARENT_MENU_CODE")}>
         <Input
           value={parentMenuLabel}
           readOnly
@@ -133,7 +139,7 @@ export default function MenuItemAddPopup({
       </Field>
 
       {/* ── 응용프로그램 ── */}
-      <Field label="응용프로그램 *" error={errors.APPLCODE}>
+      <Field label={Lang.get("LBL_APPLICATION")} error={errors.APPLCODE}>
         <div className="relative w-full">
           <select
             value={form.APPLCODE}
@@ -141,7 +147,7 @@ export default function MenuItemAddPopup({
             className="w-full h-8 pl-2 pr-8 border border-slate-200 rounded-md text-sm bg-slate-100 cursor-not-allowed text-slate-600 focus:outline-none focus:border-blue-500 appearance-none"
             disabled
           >
-            <option value="">선택</option>
+            <option value="">{Lang.get("BTN_TMS_SELECT")}</option>
             {applOptions.map((o) => (
               <option key={o.CODE} value={o.CODE}>
                 {o.NAME} ({o.CODE})
@@ -168,12 +174,12 @@ export default function MenuItemAddPopup({
       </Field>
 
       {/* ── 다국어 키 (팝업 조회) ── */}
-      <Field label="다국어 키 *" error={errors.MSG_CD}>
+      <Field label={Lang.get("LBL_LANG_KEY")} error={errors.MSG_CD}>
         <div className="flex gap-1.5">
           <Input
-            value={form.MSG_CD}
+            value={form.MSG_CD ?? ""}
             readOnly
-            placeholder="돋보기 클릭하여 선택"
+            placeholder={Lang.get("MSG_CLICK_SRCH_ICON")}
             className="h-8 text-sm flex-1 bg-slate-50 cursor-pointer"
             onClick={openMsgCdPopup}
           />
@@ -191,12 +197,12 @@ export default function MenuItemAddPopup({
 
       {/* ── 메뉴코드 — 다국어키 선택 시 자동 세팅, 직접 수정 가능 ── */}
       <Field
-        label="메뉴코드 *"
+        label={Lang.get("LBL_MENU_CD")}
         error={errors.MENUCODE}
-        hint="다국어 키 선택 시 자동 입력. 직접 수정 가능."
+        hint={Lang.get("MSG_MULTILINGUAL_KEY_AUTO_FILL_EDITABLE")}
       >
         <Input
-          value={form.MENUCODE}
+          value={form.MENUCODE ?? ""}
           onChange={set("MENUCODE")}
           placeholder="MENU_XXX_YYY"
           className="h-8 text-sm"
@@ -204,9 +210,9 @@ export default function MenuItemAddPopup({
       </Field>
 
       {/* ── 메뉴명(영문) ── */}
-      <Field label="메뉴명(영문) *" error={errors.MENUNAME}>
+      <Field label={Lang.get("LBL_MENU_NM_EN")} error={errors.MENUNAME}>
         <Input
-          value={form.MENUNAME}
+          value={form.MENUNAME ?? ""}
           onChange={set("MENUNAME")}
           placeholder="Menu Configuration"
           className="h-8 text-sm"
@@ -214,42 +220,42 @@ export default function MenuItemAddPopup({
       </Field>
 
       {/* ── 메뉴명(국문) — 다국어키 선택 시 자동 세팅, 직접 수정 가능 ── */}
-      <Field label="메뉴명(국문) *" error={errors.MSG_DESC}>
+      <Field label={Lang.get("LBL_MENU_NM_KR")} error={errors.MSG_DESC}>
         <Input
-          value={form.MSG_DESC}
+          value={form.MSG_DESC ?? ""}
           onChange={set("MSG_DESC")}
-          placeholder="다국어 키 선택 시 자동 입력"
+          placeholder={Lang.get("MSG_MULTILINGUAL_KEY_AUTO_FILL")}
           className="h-8 text-sm"
         />
       </Field>
 
       {/* ── URL ── */}
       <Field
-        label="URL(컴포넌트 경로) *"
+        label={Lang.get("LBL_URL_PATH")}
         error={errors.URL}
-        hint="예: tms/folder/fileName"
+        hint="tms/folder/fileName"
       >
         <Input
-          value={form.URL}
+          value={form.URL ?? ""}
           onChange={set("URL")}
           placeholder="tms/folder/fileName"
-          className="h-8 text-sm font-mono text-xs"
+          className="h-8 text-sm font-mono"
         />
       </Field>
 
       {/* ── 정렬순서 ── */}
-      <Field label="정렬순서">
+      <Field label={Lang.get("LBL_ORDER_BY")}>
         <Input
           type="number"
           min={1}
-          value={form.DSPLY_SEQ}
+          value={form.DSPLY_SEQ ?? ""}
           onChange={set("DSPLY_SEQ")}
           className="h-8 text-sm w-24"
         />
       </Field>
 
       {/* ── 사용여부 ── */}
-      <Field label="사용여부">
+      <Field label={Lang.get("LBL_USE_YN")}>
         <div className="flex items-center gap-3 h-8">
           {(["Y", "N"] as const).map((v) => (
             <label
@@ -263,7 +269,7 @@ export default function MenuItemAddPopup({
                 checked={form.USE_YN === v}
                 onChange={() => setForm((p) => ({ ...p, USE_YN: v }))}
               />
-              {v === "Y" ? "사용" : "미사용"}
+              {v === "Y" ? Lang.get("LBL_USE") : Lang.get("LBL_NOT_USE")}
             </label>
           ))}
         </div>
@@ -272,10 +278,10 @@ export default function MenuItemAddPopup({
       {/* ── 버튼 ── */}
       <div className="flex justify-end gap-2 pt-2 border-t mt-1">
         <Button size="sm" variant="outline" onClick={onClose}>
-          취소
+          {Lang.get("BTN_CANCEL")}
         </Button>
         <Button size="sm" variant="outline" onClick={handleConfirm}>
-          추가
+          {Lang.get("BTN_ADD")}
         </Button>
       </div>
     </div>

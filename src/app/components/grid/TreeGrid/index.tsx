@@ -23,6 +23,8 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef, GetRowIdParams, GridReadyEvent } from "ag-grid-community";
@@ -32,7 +34,16 @@ import {
   processColumnDef,
   wrapActions,
   withRowStatusTracking,
+  GRID_WRAPPER_CLASS,
+  GRID_BODY_CLASS,
+  GRID_INNER_CLASS,
+  GRID_CSS_VARS,
+  GRID_HEADER_HEIGHT,
+  GRID_ROW_HEIGHT,
+  SELECTION_COLUMN_DEF,
+  DEFAULT_COL_DEF_BASE,
 } from "../gridCommon";
+import { standardAudit } from "../columns/commonColumns";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -104,6 +115,27 @@ type TreeGridProps<TRow extends TreeRow> = {
   onRowSelected?: (row: TRow | null) => void;
   /** 셀 값 변경 콜백. 공통단에서 EDIT_STS = "U" 자동 마킹 후 호출됨. */
   onCellValueChanged?: (params: any) => void;
+  /** flat source 배열의 setter. 넘기면 type:"check"/"combo"/"popup"/"date" 등
+   *  cellRenderer 안의 onChange 가 source 를 직접 갱신할 수 있도록 어댑터를 만들어
+   *  processColumnDef 에 setRowData 로 주입한다. 미지정 시 기존 동작 유지(읽기 전용). */
+  setSource?: Dispatch<SetStateAction<TRow[]>>;
+  /**
+   * columnDefs 끝에 standardAudit 자동 spread. (DataGrid 와 동일 형태)
+   *   true       — 모두 ON (delete/rowStatus/insertPerson/insertDate/updatePerson/updateTime)
+   *   false      — 자동 추가 안 함
+   *   undefined  — 자동 추가 안 함 (기존 화면 호환)
+   *   객체       — 부분 토글 (예: { updatePerson: false })
+   */
+  audit?:
+    | boolean
+    | {
+        delete?: boolean;
+        rowStatus?: boolean;
+        insertPerson?: boolean;
+        insertDate?: boolean;
+        updatePerson?: boolean;
+        updateTime?: boolean;
+      };
 };
 
 // ─── 트리 유틸 (컴포넌트 내부) ───────────────────────────────────────────────
@@ -164,6 +196,8 @@ function calcVisibleRows<TRow extends TreeRow>(
   sortField?: keyof TRow,
 ): TRow[] {
   const result: TRow[] = [];
+  // 사이클(parentId === id) / 중복 id 방어 — 무한 재귀로 스택 오버플로우 방지
+  const visited = new Set<string>();
   function visit(parentId: string | null) {
     const children = source.filter((r) => r.parentId === parentId);
     const sorted = sortField
@@ -172,6 +206,8 @@ function calcVisibleRows<TRow extends TreeRow>(
         )
       : children;
     sorted.forEach((row) => {
+      if (visited.has(row.id)) return;
+      visited.add(row.id);
       result.push(row);
       if (expandedIds.has(row.id)) visit(row.id);
     });
@@ -190,14 +226,16 @@ function TreeGridInner<TRow extends TreeRow>(
     nameColumnHeader = "",
     nameColumnWidth = 180,
     getRowId,
-    headerHeight = 22,
-    rowHeight = 22,
+    headerHeight = GRID_HEADER_HEIGHT,
+    rowHeight = GRID_ROW_HEIGHT,
     sortField,
     defaultExpandLevel = 0,
     actions,
     onRowClicked,
     onRowSelected,
     onCellValueChanged,
+    setSource,
+    audit,
   }: TreeGridProps<TRow>,
   ref: React.Ref<TreeGridHandle>,
 ) {
@@ -326,13 +364,46 @@ function TreeGridInner<TRow extends TreeRow>(
     [expandedIds, isLastMap, toggle, nameColumnHeader, nameColumnWidth],
   );
 
+  // commitRowChange/Changes 는 { rows } 모양을 가정 → flat source[] ↔ { rows } 어댑터.
+  // setSource 미지정 시 어댑터 undefined → 기존 동작 유지(읽기 전용 셀).
+  const setRowDataAdapter = useMemo(
+    () =>
+      setSource
+        ? (updater: any) => {
+            setSource((prev) => {
+              const next =
+                typeof updater === "function"
+                  ? updater({ rows: prev })
+                  : updater;
+              return next?.rows ?? prev;
+            });
+          }
+        : undefined,
+    [setSource],
+  );
+
   // 컬럼 변환은 gridCommon.processColumnDef 가 처리. (Lang/align/type/DTTM/date/numeric/_STS)
+  // audit truthy → columnDefs 끝에 standardAudit 자동 추가 후 동일하게 processColumnDef 적용 (DataGrid 와 동일).
   const finalColumnDefs = useMemo<ColDef<TRow>[]>(
-    () => [
-      nameColDef,
-      ...columnDefs.map((col) => processColumnDef(col) as ColDef<TRow>),
-    ],
-    [nameColDef, columnDefs],
+    () => {
+      const auditCols = audit
+        ? (standardAudit(
+            setRowDataAdapter,
+            typeof audit === "object" ? audit : undefined,
+          ) as ColDef<TRow>[])
+        : [];
+      // nameColDef 는 트리 셀 전용 — processColumnDef 통과 안 함.
+      return [
+        nameColDef,
+        ...[...columnDefs, ...auditCols].map(
+          (col) =>
+            processColumnDef(col, {
+              setRowData: setRowDataAdapter,
+            }) as ColDef<TRow>,
+        ),
+      ];
+    },
+    [nameColDef, columnDefs, setRowDataAdapter, audit],
   );
 
   // ── 드래그 범위 선택 + Ctrl+C 복사 ────────────────────────────────────────
@@ -571,48 +642,29 @@ function TreeGridInner<TRow extends TreeRow>(
     };
   }, []);
 
-  // ── 스타일 ────────────────────────────────────────────────────────────────
-  const gridStyle = {
-    ["--ag-font-size" as any]: "11px",
-    ["--ag-header-font-size" as any]: "11px",
-    ["--ag-row-height" as any]: `${rowHeight}px`,
-    ["--ag-header-height" as any]: `${headerHeight}px`,
-    ["--ag-cell-horizontal-padding" as any]: "4px",
-    ["--ag-cell-vertical-padding" as any]: "1px",
-    ["--ag-grid-size" as any]: "3px",
-    ["--ag-background-color" as any]: "transparent",
-  };
-
   return (
-    <div className="border border-gray-200 rounded-lg bg-[rgb(var(--bg))] flex flex-col h-full min-h-0">
+    <div className={GRID_WRAPPER_CLASS}>
       {/* ── 액션바 (DataGrid 와 동일한 GridActionsBar 사용) ── */}
       <div className="relative z-1 shrink-0 min-w-0 w-full">
         <GridActionsBar actions={wrappedActions} />
       </div>
 
       {/* ── 그리드 본문 ── */}
-      <div ref={gridContainerRef} className="flex-1 min-h-0 overflow-auto">
-        <div
-          className="ag-theme-quartz ag-theme-bridge h-full"
-          style={{ ...gridStyle, minWidth: "max-content" }}
-        >
+      <div ref={gridContainerRef} className={GRID_BODY_CLASS}>
+        <div className={GRID_INNER_CLASS} style={GRID_CSS_VARS}>
           <AgGridReact<TRow>
             rowData={visibleRows}
             columnDefs={finalColumnDefs}
-            defaultColDef={{
-              resizable: true,
-              sortable: false,
-              filter: true,
-              floatingFilter: true,
-            }}
+            // tree 는 정렬을 sortField 기반으로 자체 처리 → ag-grid sort 끔.
+            defaultColDef={{ ...DEFAULT_COL_DEF_BASE, sortable: false }}
             headerHeight={headerHeight}
             rowHeight={rowHeight}
             getRowId={getRowId}
             onGridReady={handleGridReady}
             suppressMovableColumns
-            suppressHorizontalScroll
             // ── 행 선택 처리 ──────────────────────────────────────────────
             rowSelection={{ mode: "multiRow", enableClickSelection: false }}
+            selectionColumnDef={SELECTION_COLUMN_DEF}
             onRowSelected={(e: any) => {
               if (!e.api) return;
               const rows = e.api.getSelectedRows() as TRow[];

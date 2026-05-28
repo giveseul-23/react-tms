@@ -10,7 +10,13 @@ import type { GridPreset, GridTab } from "./types";
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 
 import { Lang } from "@/app/services/common/Lang";
-import { wrapActions } from "../gridCommon";
+import {
+  wrapActions,
+  GRID_WRAPPER_CLASS,
+  GRID_BODY_CLASS,
+  GRID_INNER_CLASS,
+  GRID_CSS_VARS,
+} from "../gridCommon";
 import { useCellRangeSelection } from "./useCellRangeSelection";
 import { useActivePreset } from "./useActivePreset";
 import { useAutoSize } from "./useAutoSize";
@@ -281,22 +287,8 @@ export default function DataGrid<TRow>({
     [activeRowData],
   );
 
-  const gridStyle = {
-    ["--ag-font-size" as any]: "11px",
-    ["--ag-header-font-size" as any]: "11px",
-    ["--ag-row-height" as any]: "22px",
-    ["--ag-header-height" as any]: "28px",
-    ["--ag-cell-horizontal-padding" as any]: "3px",
-    ["--ag-cell-vertical-padding" as any]: "1px",
-    ["--ag-grid-size" as any]: "3px",
-    ["--ag-checkbox-column-width" as any]: "16px",
-  };
-
   return (
-    <div
-      ref={gridContainerRef}
-      className="border border-gray-200 rounded-md bg-[rgb(var(--bg))] flex flex-col h-full min-h-0"
-    >
+    <div ref={gridContainerRef} className={GRID_WRAPPER_CLASS}>
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-3 shrink-0">
           <GridTabs
@@ -317,14 +309,11 @@ export default function DataGrid<TRow>({
         />
       </div>
 
-      <div className="flex-1 min-h-0 overflow-hidden">
+      <div className={GRID_BODY_CLASS}>
         {activeRender ? (
           activeRender()
         ) : (
-          <div
-            className="ag-theme-quartz ag-theme-bridge w-full h-full"
-            style={gridStyle}
-          >
+          <div className={GRID_INNER_CLASS} style={GRID_CSS_VARS}>
             <AgGridReact<TRow>
               ref={internalGridRef}
               {...commonGridProps}
