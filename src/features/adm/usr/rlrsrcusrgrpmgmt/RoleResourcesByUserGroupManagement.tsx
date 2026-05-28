@@ -84,6 +84,7 @@ export default function RoleResourcesByUserGroupManagement() {
             headerCheckbox={false}
             onRowClicked={ctrl.onMainGridClick}
             actions={[]}
+            audit={false}
           />
           <DataGrid
             {...model.bind("sub01")}
@@ -91,6 +92,7 @@ export default function RoleResourcesByUserGroupManagement() {
             headerCheckbox={false}
             onRowClicked={ctrl.onSub01GridClick}
             actions={[]}
+            audit={false}
           />
         </SplitPane>
       }
@@ -109,7 +111,6 @@ export default function RoleResourcesByUserGroupManagement() {
               nameColumnWidth={180}
               sortField="RSRC_ID"
               defaultExpandLevel={-1}
-              headerCheckbox={true}
               actions={ctrl.treeActions}
             />
           </div>
