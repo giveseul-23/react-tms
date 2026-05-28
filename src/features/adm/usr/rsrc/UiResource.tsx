@@ -31,9 +31,7 @@ export default function UiResource() {
 
   const renderNameCell = (params: any, ctx: TreeCellContext) => {
     const row: UiResourceRow = params.data;
-    const hasChild =
-      row.LEAFYN === "N" ||
-      model.source.some((item) => item.parentId === row.id);
+    const hasChild = model.source.some((item) => item.parentId === row.id);
 
     return (
       <TreeNameCell
@@ -79,6 +77,9 @@ export default function UiResource() {
           columnDefs={columnDefs}
           nameColumnHeader={Lang.get("LBL_RSRC_ID")}
           nameColumnWidth={300}
+          nameColumnField="RSRC_ID"
+          nameColumnEditable={false}
+          nameColumnInsertable={true}
           defaultExpandLevel={-1}
           getRowId={(p) => String(p.data.id)}
           headerCheckbox={false}
