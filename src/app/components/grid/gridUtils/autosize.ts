@@ -1,6 +1,7 @@
-// app/components/grid/autosize.ts
+// app/components/grid/gridUtils/autosize.ts
 // 컬럼 자동 너비 계산 유틸. canvas 텍스트 측정 기반으로 헤더/셀 텍스트의
 // 최적 width 를 산출해 ag-grid api 로 적용한다.
+// DataGrid · TreeGrid 양쪽에서 사용.
 
 import type { ColDef, ColGroupDef } from "ag-grid-community";
 

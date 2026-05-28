@@ -4,13 +4,13 @@
 
 import { useMemo } from "react";
 import type { ColDef } from "ag-grid-community";
-import { MIN_COL_WIDTH } from "./autosize";
 import {
+  MIN_COL_WIDTH,
   DEFAULT_COL_DEF_BASE,
   GRID_HEADER_HEIGHT,
   GRID_ROW_HEIGHT,
   SELECTION_COLUMN_DEF,
-} from "../gridUtils/gridShell";
+} from "../gridCommon";
 
 export function useGridProps<TRow>({
   finalColumnDefs,

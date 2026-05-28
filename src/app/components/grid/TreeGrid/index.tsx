@@ -27,7 +27,7 @@ import React, {
   type SetStateAction,
 } from "react";
 import { AgGridReact } from "ag-grid-react";
-import type { ColDef, GetRowIdParams, GridReadyEvent } from "ag-grid-community";
+import type { ColDef, GetRowIdParams } from "ag-grid-community";
 
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 import {
@@ -41,6 +41,7 @@ import {
   GRID_HEADER_HEIGHT,
   GRID_ROW_HEIGHT,
   DEFAULT_COL_DEF_BASE,
+  useAutoSize,
 } from "../gridCommon";
 import { standardAudit } from "../columns/commonColumns";
 
@@ -135,6 +136,10 @@ type TreeGridProps<TRow extends TreeRow> = {
         updatePerson?: boolean;
         updateTime?: boolean;
       };
+  /** autoSize 끄기 (DataGrid 와 동일 옵션). */
+  disableAutoSize?: boolean;
+  /** autoSize 재실행 트리거 — 조회 시점에 +1 (DataGrid 와 동일). */
+  autoSizeKey?: number;
 };
 
 // ─── 트리 유틸 (컴포넌트 내부) ───────────────────────────────────────────────
@@ -235,6 +240,8 @@ function TreeGridInner<TRow extends TreeRow>(
     onCellValueChanged,
     setSource,
     audit,
+    disableAutoSize,
+    autoSizeKey,
   }: TreeGridProps<TRow>,
   ref: React.Ref<TreeGridHandle>,
 ) {
@@ -383,26 +390,30 @@ function TreeGridInner<TRow extends TreeRow>(
 
   // 컬럼 변환은 gridCommon.processColumnDef 가 처리. (Lang/align/type/DTTM/date/numeric/_STS)
   // audit truthy → columnDefs 끝에 standardAudit 자동 추가 후 동일하게 processColumnDef 적용 (DataGrid 와 동일).
+  //
+  // 두 단계로 분리:
+  //   1) stableColumnDefs — nameColDef 제외. expandedIds 등 트리 내부 상태와 무관 → ref 안정.
+  //      useAutoSize 에 이 리스트를 넘겨 펼침/접기 시 autoSize 재발화를 방지.
+  //   2) finalColumnDefs — nameColDef + stableColumnDefs. AG-Grid 에 넘기는 실제 컬럼 정의.
+  const stableColumnDefs = useMemo<ColDef<TRow>[]>(() => {
+    const auditCols = audit
+      ? (standardAudit(
+          setRowDataAdapter,
+          typeof audit === "object" ? audit : undefined,
+        ) as ColDef<TRow>[])
+      : [];
+    return [...columnDefs, ...auditCols].map(
+      (col) =>
+        processColumnDef(col, {
+          setRowData: setRowDataAdapter,
+        }) as ColDef<TRow>,
+    );
+  }, [columnDefs, setRowDataAdapter, audit]);
+
+  // nameColDef 는 트리 셀 전용 — processColumnDef 통과 안 함.
   const finalColumnDefs = useMemo<ColDef<TRow>[]>(
-    () => {
-      const auditCols = audit
-        ? (standardAudit(
-            setRowDataAdapter,
-            typeof audit === "object" ? audit : undefined,
-          ) as ColDef<TRow>[])
-        : [];
-      // nameColDef 는 트리 셀 전용 — processColumnDef 통과 안 함.
-      return [
-        nameColDef,
-        ...[...columnDefs, ...auditCols].map(
-          (col) =>
-            processColumnDef(col, {
-              setRowData: setRowDataAdapter,
-            }) as ColDef<TRow>,
-        ),
-      ];
-    },
-    [nameColDef, columnDefs, setRowDataAdapter, audit],
+    () => [nameColDef, ...stableColumnDefs],
+    [nameColDef, stableColumnDefs],
   );
 
   // ── 드래그 범위 선택 + Ctrl+C 복사 ────────────────────────────────────────
@@ -415,14 +426,29 @@ function TreeGridInner<TRow extends TreeRow>(
     null,
   );
 
-  const handleGridReady = useCallback((e: GridReadyEvent<TRow>) => {
-    gridApiRef.current = e.api;
-    columnOrderRef.current =
-      e.api
-        .getColumns()
-        ?.map((c: any) => c.getColId())
-        .filter(Boolean) ?? [];
-  }, []);
+  // 외부에서 autoSizeKey 를 안 넘기면 source 가 새로 로드될 때마다 내부적으로
+  // 키를 bump 해 autoSize 가 결정적으로 재발화하도록 한다.
+  // source 참조 자체가 바뀔 때만 카운트 — 같은 배열에서 cell edit / mutate 한
+  // 경우는 ref 가 그대로라 trigger 안 됨 → 펼침/접기 / 셀 편집에는 영향 없음.
+  const internalAutoSizeVersionRef = useRef(0);
+  const internalAutoSizeKey = useMemo(() => {
+    internalAutoSizeVersionRef.current += 1;
+    return internalAutoSizeVersionRef.current;
+  }, [source]);
+
+  // autoSize — DataGrid 와 동일한 hook 사용 (handleGridReady 안에서
+  // gridApiRef / columnOrderRef 초기화도 함께 처리).
+  // 트리에서는 펼침 상태와 무관하게 source 전체 기준으로 폭 계산 — 펼쳤을 때
+  // audit / 긴 셀값이 잘리지 않도록.
+  // 펼침/접기 시에는 autoSize 재발화 안 하도록 nameColDef 제외한 stableColumnDefs 전달.
+  const { handleGridReady, handleFirstDataRendered } = useAutoSize<TRow>({
+    disableAutoSize,
+    finalColumnDefs: stableColumnDefs,
+    activeRowData: source,
+    autoSizeKey: autoSizeKey ?? internalAutoSizeKey,
+    gridApiRef,
+    columnOrderRef,
+  });
 
   useEffect(() => {
     const container = gridContainerRef.current;
@@ -660,6 +686,7 @@ function TreeGridInner<TRow extends TreeRow>(
             rowHeight={rowHeight}
             getRowId={getRowId}
             onGridReady={handleGridReady}
+            onFirstDataRendered={handleFirstDataRendered}
             suppressMovableColumns
             // ── 행 선택 처리 — tree 는 체크박스 미사용, 단일 행 클릭 선택 ──
             rowSelection={{

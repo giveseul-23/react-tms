@@ -1,7 +1,7 @@
 // src/views/MenuConfig/MenuConfigController.tsx
 import { useCallback, MutableRefObject } from "react";
 import { type TreeGridHandle } from "@/app/components/grid/TreeGrid";
-import { menuApi } from "@/features/adm/menuConfig/menuApi";
+import { menuApi } from "@/features/adm/menu/cnfg/menuApi";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { MAIN_COLUMN_DEFS } from "./MenuConfigColumns";
 import { MenuConfigModel } from "./MenuConfigModel";

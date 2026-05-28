@@ -1,8 +1,9 @@
-// app/components/grid/useAutoSize.ts
+// app/components/grid/gridUtils/useAutoSize.ts
 // ag-grid onGridReady / onFirstDataRendered 시점에 컬럼 자동 너비 계산을 트리거.
 // autoSize 재실행 effect 는 activeRowData 대신 autoSizeKey 를 dep 으로 사용 —
 // 객체 set(조회) 에만 +1 되므로 셀 편집/행 추가 같은 함수형 setter 호출에는
 // autoSize 가 재발화하지 않는다 (가로 스크롤 유지).
+// DataGrid · TreeGrid 양쪽에서 사용.
 
 import { useCallback, useEffect } from "react";
 import type {
@@ -25,7 +26,7 @@ export function useAutoSize<TRow>({
   disableAutoSize?: boolean;
   finalColumnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[];
   activeRowData: TRow[];
-  activeTab: string | null;
+  activeTab?: string | null;
   autoSizeKey?: number;
   gridApiRef: React.MutableRefObject<any>;
   columnOrderRef: React.MutableRefObject<string[]>;

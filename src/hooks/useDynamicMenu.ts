@@ -18,7 +18,7 @@ import {
   Layers,
   Box,
 } from "lucide-react";
-import { menuApi } from "@/features/adm/menuConfig/menuApi";
+import { menuApi } from "@/features/adm/menu/cnfg/menuApi";
 import { getSessionFields } from "@/app/services/auth/auth";
 import { Lang } from "@/app/services/common/Lang";
 import type { MenuSection, MenuNode } from "@/app/config/menuConfig";
@@ -148,9 +148,7 @@ export function useDynamicMenu() {
 
   const menuUrlMap: Record<string, string> = Object.fromEntries(
     sections.flatMap((s) =>
-      s.items
-        .filter((i) => !!i.url)
-        .map((i) => [i.menuCode, i.url as string]),
+      s.items.filter((i) => !!i.url).map((i) => [i.menuCode, i.url as string]),
     ),
   );
 

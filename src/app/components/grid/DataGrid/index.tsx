@@ -12,6 +12,7 @@ import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
 import { Lang } from "@/app/services/common/Lang";
 import {
   wrapActions,
+  useAutoSize,
   GRID_WRAPPER_CLASS,
   GRID_BODY_CLASS,
   GRID_INNER_CLASS,
@@ -19,7 +20,6 @@ import {
 } from "../gridCommon";
 import { useCellRangeSelection } from "./useCellRangeSelection";
 import { useActivePreset } from "./useActivePreset";
-import { useAutoSize } from "./useAutoSize";
 import { useRowLifecycle } from "./useRowLifecycle";
 import { useGridHandlers } from "./useGridHandlers";
 import { useGridProps } from "./useGridProps";

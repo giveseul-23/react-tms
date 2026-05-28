@@ -7,4 +7,6 @@ export * from "./gridUtils/processColumn";
 export * from "./gridUtils/wrapActions";
 export * from "./gridUtils/cellChangeHandler";
 export * from "./gridUtils/gridShell";
+export * from "./gridUtils/autosize";
+export * from "./gridUtils/useAutoSize";
 export * from "./actions/useGridActions";
