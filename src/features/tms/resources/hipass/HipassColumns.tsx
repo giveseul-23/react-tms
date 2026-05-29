@@ -1,0 +1,109 @@
+export type FieldType =
+  | "text"
+  | "popup"
+  | "select"
+  | "check"
+  | "date"
+  | "number";
+
+export type ColumnDef = {
+  headerName: string;
+  type?: string;
+  field?: string;
+  areaNo?: number;
+  areaLabel?: string;
+  fieldType?: FieldType;
+  required?: boolean;
+  hide?: boolean;
+  formHide?: boolean;
+  readOnly?: boolean;
+  sqlProp?: string;
+  nameValue?: string;
+  nameField?: string;
+  codeKey?: string;
+};
+export const MAIN_COLUMN_DEFS: ColumnDef[] = [
+  { headerName: "No" },
+  {
+    type: "text",
+    headerName: "LBL_LOGISTICS_GROUP_CODE",
+    field: "LGST_GRP_CD",
+    areaNo: 0,
+    fieldType: "popup",
+    required: true,
+    sqlProp: "selectLogisticsgroupCodeName",
+    nameValue: "LGST_GRP_NM",
+    nameField: "LBL_LOGISTICS_GROUP_NAME",
+  },
+  {
+    type: "text",
+    headerName: "LBL_LOGISTICS_GROUP_NAME",
+    field: "LGST_GRP_NM",
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
+    formHide: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_ID_TXT",
+    field: "HIPASS_ID",
+    hide: true,
+    formHide: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_CARD_COM_NM",
+    field: "CARD_COM_NM",
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_HIPASS_CARDNO",
+    field: "HIPASS_CARD_NO",
+    areaNo: 0,
+    fieldType: "text",
+    required: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VALID_DTTM",
+    field: "VALID_DTTM",
+    areaNo: 0,
+    fieldType: "text",
+    required: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_CODE",
+    field: "VEH_ID",
+    areaNo: 0,
+    fieldType: "popup",
+    required: true,
+    readOnly: true,
+    sqlProp: "selectVehicleCodeNameInOperation",
+    nameValue: "VEH_NO",
+    nameField: "LBL_VEH_NO",
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEH_NO",
+    field: "VEH_NO",
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
+    formHide: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DRIVER_CODE",
+    field: "DRVR_ID",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DRIVER_NAME",
+    field: "DRVR_NM",
+  },
+];
