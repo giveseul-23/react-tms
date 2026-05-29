@@ -32,7 +32,7 @@ export function useCommonCodeController({ model }: Args) {
 
   const fetchSub01 = useCallback(
     (row: any) =>
-      commonCodeApi.getLogisticCarrierInfoList(MENU_CD, {
+      commonCodeApi.getCommonCodeDetailList(MENU_CD, {
         CMMN_CD: row.CMMN_CD,
       }),
     [],
