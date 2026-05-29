@@ -22,23 +22,13 @@ export default function LogisticGroupDefault() {
   return (
     <MasterDetailPage
       menuCode={MENU_CODE}
-      defaultSizes={[40, 60]}
+      defaultSizes={[20, 80]}
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CODE,
+        ...model.bindSearch(),
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
+      defaultDirection={"horizontal"}
       storageKey={model.storageKeys.outer}
       master={
         <SplitPane
@@ -52,11 +42,13 @@ export default function LogisticGroupDefault() {
             {...model.bind("header")}
             columnDefs={CNFG_HEADER_COLUMN_DEFS}
             onRowClicked={ctrl.onHeaderGridClick}
+            actions={ctrl.headerActions}
             audit={false}
           />
           <DataGrid
             {...model.bind("subCnfg")}
             columnDefs={CNFG_DETAIL_COLUMN_DEFS}
+            actions={ctrl.subCnfgActions}
             onRowClicked={ctrl.onSubCnfgGridClick}
             audit={false}
           />
@@ -67,6 +59,8 @@ export default function LogisticGroupDefault() {
           {...model.bind("detail")}
           columnDefs={DETAIL_COLUMN_DEFS}
           actions={ctrl.detailActions}
+          codeMap={model.codeMap}
+          headerCheckbox={false}
         />
       }
     />

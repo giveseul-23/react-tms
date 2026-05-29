@@ -47,4 +47,34 @@ export const logisticGroupDefaultApi = {
       }),
     );
   },
+
+  syncConfig(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
+    return apiClient.post<commonResponse>(
+      `/logisticGroupDefaultService/saveLgstGrpSync`,
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CODE,
+          ...rest,
+        },
+      },
+    );
+  },
+
+  saveDetail(payload: any) {
+    const { dsSave, ...rest } = payload ?? {};
+    return apiClient.post<commonResponse>(
+      `/logisticGroupDefaultService/saveLgstGrpCnfgDtl`,
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CODE,
+          ...rest,
+        },
+      },
+    );
+  },
 };

@@ -5,13 +5,13 @@
 export const CNFG_HEADER_COLUMN_DEFS = [
   {
     type: "text",
-    headerName: "LBL_LGST_GRP_CNFG_GRP_CD",
     field: "LGST_GRP_CNFG_GRP_CD",
     isPrimaryKey: true,
+    hide: true,
   },
   {
     type: "text",
-    headerName: "LBL_LGST_GRP_CNFG_GRP_NM",
+    headerName: "LBL_LGST_GRP_CNFG_GRP_CD",
     field: "LGST_GRP_CNFG_GRP_NM",
   },
 ];
@@ -19,21 +19,21 @@ export const CNFG_HEADER_COLUMN_DEFS = [
 export const CNFG_DETAIL_COLUMN_DEFS = [
   {
     type: "text",
-    headerName: "LBL_LGST_GRP_CNFG_CD",
-    field: "CNFG_CD",
-    isPrimaryKey: true,
-  },
-  {
-    type: "text",
     headerName: "LBL_LGST_GRP_CNFG_NM",
     field: "CNFG_NM",
+    isPrimaryKey: true,
   },
 ];
 
 // DETAIL 만 audit 컬럼 사용 — DataGrid 자동 추가 (model.bind 의 audit:true).
 export const DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_LGST_GRP_CNFG_CD", field: "CNFG_CD" },
+  {
+    type: "text",
+    headerName: "LBL_LGST_GRP_CNFG_CD",
+    field: "CNFG_CD",
+    hide: true,
+  },
   {
     type: "text",
     headerName: "LBL_LOGISTICS_GROUP_CODE",
@@ -44,5 +44,12 @@ export const DETAIL_COLUMN_DEFS = [
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
   },
-  { type: "text", headerName: "LBL_SETTING_VAL", field: "CNFG_DTL_CD" },
+  {
+    type: "combo",
+    headerName: "LBL_SETTING_VAL",
+    field: "CNFG_DTL_CD",
+    codeKey: "cnfgDtlTcd",
+    editable: true,
+    insertable: true,
+  },
 ];
