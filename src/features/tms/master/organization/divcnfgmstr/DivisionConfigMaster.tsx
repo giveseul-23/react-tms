@@ -26,58 +26,59 @@ export default function DivisionConfigMaster() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
-      direction="vertical"
+      defaultDirection="horizontal"
       defaultSizes={[55, 45]}
       storageKey={model.storageKeys.outer}
       master={
         <SplitPane
-          direction="horizontal"
+          direction="vertical"
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
           storageKey={model.storageKeys.top}
         >
-          {/* 메인 그리드 (top-left) */}
+          {/* 디비전운영설정코드 */}
           <DataGrid
-            {...model.bind("main")}
+            {...model.bind("divCd")}
             columnDefs={CONFIG_COLUMN_DEFS}
             onRowClicked={ctrl.onMainGridClick}
             actions={ctrl.mainActions}
+            codeMap={model.codeMap}
           />
-          {/* 상세 그리드 (top-right) */}
+          {/* 디비전운영설정코드 다국어설정 */}
           <DataGrid
-            {...model.bind("sub01")}
-            columnDefs={CONFIG_DETAIL_COLUMN_DEFS}
-            onRowClicked={ctrl.onSub01GridClick}
-            actions={ctrl.sub01Actions}
+            {...model.bind("divCd18n")}
+            columnDefs={CONFIG_I18N_COLUMN_DEFS}
+            subTitle="LBL_CNFG_CD_LANG_SETTING"
+            actions={ctrl.divCd18nActions}
+            codeMap={model.codeMap}
           />
         </SplitPane>
       }
       detail={
         <SplitPane
-          direction="horizontal"
+          direction="vertical"
           defaultSizes={[50, 50]}
           minSizes={[25, 25]}
           handleThickness="1.5"
           storageKey={model.storageKeys.bottom}
         >
-          {/* detail-i18n (bottom-left) — 상세 행에 종속 */}
+          {/* 디비전운영정책상세코드 */}
           <DataGrid
-            {...model.bind("sub02")}
-            columnDefs={CONFIG_I18N_COLUMN_DEFS}
-            subTitle="LBL_CNFG_CD_LANG_SETTING"
-            actions={ctrl.sub02Actions}
+            {...model.bind("divDtlCd")}
+            columnDefs={CONFIG_DETAIL_COLUMN_DEFS}
+            actions={ctrl.divDtlCdActions}
+            onRowClicked={ctrl.ondivDtlCdGridClick}
           />
-          {/* 메인-i18n (bottom-right) — 메인 행에 종속 */}
+          {/* 디비전운영정책상세코드 다국어 */}
           <DataGrid
-            {...model.bind("sub03")}
+            {...model.bind("divDtlCd18n")}
             columnDefs={CONFIG_DETAIL_I18N_COLUMN_DEFS}
             subTitle="LBL_CNFG_DTL_CD_LANG_SETTING"
-            actions={ctrl.sub03Actions}
+            actions={ctrl.divDtlCd18nActions}
+            codeMap={model.codeMap}
           />
         </SplitPane>
       }
