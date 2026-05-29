@@ -8,6 +8,9 @@ import { newRid } from "@/app/feature/useBaseModel";
 import { Lang } from "@/app/services/common/Lang";
 import { uiResourceApi } from "./UiResourceApi";
 import type { UiResourceModel, UiResourceRow } from "./UiResourceModel";
+import UiResourceAddPopup, {
+  type UiResourceAddFormData,
+} from "./popup/UiResourceAddPopup";
 
 type ControllerArgs = {
   model: UiResourceModel;
@@ -16,8 +19,8 @@ type ControllerArgs = {
 };
 
 const CHILD_RESOURCE_TYPES: Record<string, string[]> = {
-  "10": ["20", "30"],
-  "20": ["40"],
+  "10": ["20"],
+  "20": ["30", "40"],
   "30": ["40"],
   "40": [],
 };
@@ -71,7 +74,7 @@ export function useUiResourceController({
   const { openPopup, closePopup } = usePopup();
 
   const openAlert = useCallback(
-    (message: string, title = Lang.get("BTN_OK")) => {
+    (message: string, title = "") => {
       openPopup({
         width: "sm",
         content: (
@@ -166,37 +169,60 @@ export function useUiResourceController({
       return;
     }
 
-    const childType =
-      parentType === "20" || parentType === "30" ? "40" : "";
-    const childRow: UiResourceRow = {
-      id: `${selected.id}>new-${Date.now()}`,
-      parentId: selected.id,
-      level: Number(selected.level ?? 0) + 1,
-      RSRC_ID: "",
-      PRNT_RSRC_ID: parentCode,
-      RSRC_DESC: "",
-      MSG_DESC: "",
-      RSRC_TP: childType,
-      CRE_USR_ID: "",
-      CRE_DTTM: "",
-      LEAFYN: childType === "40" ? "Y" : "N",
-      EDIT_STS: "I",
-      __rid__: newRid(),
-    };
+    const allowedChildTypes = CHILD_RESOURCE_TYPES[parentType] ?? [];
+    const defaultChildType = allowedChildTypes[0] ?? "";
 
-    model.setSource((prev) =>
-      syncLeafFlag([
-        ...prev.map((row) =>
-          row.__rid__ === selected.__rid__
-            ? { ...row, LEAFYN: "N" }
-            : row,
-        ),
-        childRow,
-      ]),
-    );
-    treeGridRef.current?.expand(selected.id);
-    model.setSelectedRow(childRow);
-  }, [model, openAlert, syncLeafFlag, treeGridRef]);
+    openPopup({
+      title: "BTN_ADD",
+      width: "md",
+      content: (
+        <UiResourceAddPopup
+          parentRow={selected}
+          resourceTypeMap={model.codeMap.resourceType ?? {}}
+          allowedChildTypes={allowedChildTypes}
+          defaultChildType={defaultChildType}
+          onConfirm={(data: UiResourceAddFormData) => {
+            const newId = data.RSRC_ID.trim();
+            if (model.source.some((row) => String(row.RSRC_ID ?? "") === newId)) {
+              openAlert(Lang.get("MSG_DUPLICATE_DATA"));
+              return;
+            }
+
+            const childRow: UiResourceRow = {
+              id: newId,
+              parentId: selected.id,
+              level: Number(selected.level ?? 0) + 1,
+              RSRC_ID: newId,
+              PRNT_RSRC_ID: parentCode,
+              RSRC_DESC: data.RSRC_DESC,
+              MSG_DESC: "",
+              RSRC_TP: data.RSRC_TP,
+              CRE_USR_ID: "",
+              CRE_DTTM: "",
+              LEAFYN: data.RSRC_TP === "40" ? "Y" : "N",
+              EDIT_STS: "I",
+              __rid__: newRid(),
+            };
+
+            model.setSource((prev) =>
+              syncLeafFlag([
+                ...prev.map((row) =>
+                  row.__rid__ === selected.__rid__
+                    ? { ...row, LEAFYN: "N" }
+                    : row,
+                ),
+                childRow,
+              ]),
+            );
+            closePopup();
+            treeGridRef.current?.expand(selected.id);
+            model.setSelectedRow(childRow);
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [closePopup, model, openAlert, openPopup, syncLeafFlag, treeGridRef]);
 
   const validateBeforeSave = useCallback(() => {
     for (const row of model.source) {
