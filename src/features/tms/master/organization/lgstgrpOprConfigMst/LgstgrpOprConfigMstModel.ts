@@ -44,6 +44,8 @@ export function useLgstgrpOprConfigMstModel(menuCode: string) {
   }, []);
 
   const { codeMap } = useCommonStores({
+    dataTp: { sqlProp: "CODE", keyParam: "DATA_TP" },
+    dataCreTp: { sqlProp: "CODE", keyParam: "DATA_CRE_TCD" },
     langTp: { sqlProp: "CODE", keyParam: "LANG_TP" },
   });
 

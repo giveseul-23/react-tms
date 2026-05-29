@@ -42,12 +42,21 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
         row,
         [
           {
-            to: "detail",
-            fetch: (r) => api.getConfigDetailList({ CNFG_CD: r.CNFG_CD }),
-          },
-          {
             to: "mainLang",
             fetch: (r) => api.getConfigI18nList({ CNFG_CD: r.CNFG_CD }),
+          },
+          {
+            to: "detail",
+            fetch: async (r) => {
+              const res = await api.getConfigDetailList({ CNFG_CD: r.CNFG_CD });
+
+              setTimeout(() => {
+                const first = model.grids.detail.rows[0];
+                if (first) onSub01GridClick(first);
+              }, 0);
+
+              return res;
+            },
           },
         ],
         { alsoReset: ["detailLang"] },
@@ -95,7 +104,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 상세 행 추가 (센차: onAddDetail) — checkHeader 시리즈 검증 ──
   const onAddSub01 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, "물류운영그룹운영설정코드")) return;
+    if (!base.requireParentRow(main, "LBL_LGST_GRP_CNFG_CD")) return;
     base.resetGrids(["detailLang"]);
     base.addRow("detail", {
       CNFG_CD: main.CNFG_CD,
@@ -105,7 +114,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 메인-다국어 행 추가 (센차: onAddLang) ──────────────────────
   const onAddSub03 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, "물류운영그룹운영설정코드")) return;
+    if (!base.requireParentRow(main, "LBL_LGST_GRP_CNFG_CD")) return;
     base.addRow("mainLang", {
       CNFG_CD: main.CNFG_CD,
     });
@@ -114,7 +123,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 상세-다국어 행 추가 (센차: onAddDetailLang) ────────────────
   const onAddSub02 = useCallback(() => {
     const sub01 = model.grids.detail.selectedRef.current;
-    if (!base.requireParentRow(sub01, "물류운영그룹운영설정상세코드")) return;
+    if (!base.requireParentRow(sub01, "LBL_LGST_GRP_CNFG_DTL_CD")) return;
     base.addRow("detailLang", {
       CNFG_CD: sub01.CNFG_CD,
       CNFG_DTL_CD: sub01.CNFG_DTL_CD,
@@ -135,7 +144,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("main", api.saveConfig, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+        confirmOnDelete: "MSG_CHK_DELETE",
       }),
     [base],
   );
@@ -187,7 +196,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
     base
       .callAjax(
         api.syncConfig({ LGST_GRP_CNFG_GRP_CD: model.activeType }),
-        "동기화되었습니다.",
+        "MSG_CMPLT_SYNC",
       )
       .then(() => base.search());
   }, [model.activeType, base]);

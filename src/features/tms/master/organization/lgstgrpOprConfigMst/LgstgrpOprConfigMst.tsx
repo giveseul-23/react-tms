@@ -26,9 +26,7 @@ export default function LgstgrpOprConfigMst() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       outerTabs={{
         tabs: model.configTabs,
@@ -52,6 +50,7 @@ export default function LgstgrpOprConfigMst() {
             columnDefs={CONFIG_COLUMN_DEFS}
             onRowClicked={ctrl.onMainGridClick}
             actions={ctrl.mainActions}
+            codeMap={model.codeMap}
           />
           {/* 메인-다국어 (bottom-left) — 메인 행에 종속 */}
           <DataGrid
