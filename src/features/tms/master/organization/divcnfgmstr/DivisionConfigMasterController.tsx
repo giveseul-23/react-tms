@@ -101,42 +101,43 @@ export function useDivisionConfigMasterController({ model }: Args) {
       }),
     [base],
   );
-  const checkAddDivCd18n = useCallback(() => {
-    const rows = model.grids.divCd18n.rows.filter(
-      (r: any) => r.EDIT_STS !== "D" && r.delStatus !== true,
-    );
+  const checkAdd18n = useCallback((rows) => {
+    rows.filter((r: any) => r.EDIT_STS !== "D" && r.delStatus !== true);
     return rows.length >= 3;
-  }, [model]);
+  }, []);
 
-  const checkSaveDivCd18n = useCallback(() => {
-    const rows = model.grids.divCd18n.rows.filter(
-      (r: any) => r.EDIT_STS !== "D" && r.delStatus !== true,
-    );
+  const checkSave18n = useCallback((rows) => {
+    rows.filter((r: any) => r.EDIT_STS !== "D" && r.delStatus !== true);
     const langs = rows.map((r: any) => r.LANG_TP);
     const ALLOWED = ["KO", "EN", "CN"];
     if (!langs.every((t: string) => ALLOWED.includes(t))) return false;
     return new Set(langs).size === langs.length;
-  }, [model]);
+  }, []);
 
   // 디비전운영설정코드 다국어설정 추가
   const onAddDivCd18n = useCallback(() => {
     const grid = model.grids.divCd.selectedRef.current;
     if (!base.requireParentRow(grid, "LBL_DIV_CNFG_CD")) return;
-    if (checkAddDivCd18n()) return;
+    if (checkAdd18n(model.grids.divCd18n.rows)) return;
     base.resetGrids(["divDtlCd", "divDtlCd18n"]);
     base.addRow("divCd18n", {
       CNFG_CD: grid.CNFG_CD,
       LANG_TP: "",
       LANG_DESC: "",
     });
-  }, [model.grids.divCd.selectedRef, base, checkAddDivCd18n]);
+  }, [
+    model.grids.divCd.selectedRef,
+    model.grids.divCd18n.rows,
+    base,
+    checkAdd18n,
+  ]);
 
   //디비전설정코드다국어 저장
   const onSaveDivCd18n = useCallback(
     () =>
       base.saveGrid("divCd18n", api.saveConfigI18n, {
         beforeSave: () => {
-          const valid = checkSaveDivCd18n();
+          const valid = checkSave18n(model.grids.divCd18n.rows);
 
           if (!valid) base.alert(Lang.get("MSG_CHK_SAVE_DIV_18N"));
 
@@ -150,7 +151,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
             }),
         },
       }),
-    [base],
+    [base, checkSave18n, model.grids.divCd18n.rows],
   );
 
   // 디비전상세설정코드 추가
@@ -181,18 +182,32 @@ export function useDivisionConfigMasterController({ model }: Args) {
   const onAddDivDtlCd18n = useCallback(() => {
     const grid = model.grids.divDtlCd.selectedRef.current;
     if (!base.requireParentRow(grid, "LBL_DIV_CNFG_DTL_CD")) return;
+    if (checkAdd18n(model.grids.divDtlCd18n.rows)) return;
+
     base.addRow("divDtlCd18n", {
       CNFG_CD: grid.CNFG_CD,
       CNFG_DTL_CD: grid.CNFG_DTL_CD,
       LANG_TP: "",
       LANG_DESC: "",
     });
-  }, [model, base]);
+  }, [
+    model.grids.divDtlCd.selectedRef,
+    model.grids.divDtlCd18n.rows,
+    base,
+    checkAdd18n,
+  ]);
 
   // 디비전설정상세코드 다국어 저장
   const onSaveDivDtlCd18n = useCallback(
     () =>
       base.saveGrid("divDtlCd18n", api.saveConfigDetailI18n, {
+        beforeSave: () => {
+          const valid = checkSave18n(model.grids.divDtlCd18n.rows);
+
+          if (!valid) base.alert(Lang.get("MSG_CHK_SAVE_DIV_18N"));
+
+          return valid;
+        },
         afterSave: {
           cascadeFrom: "divDtlCd",
           fetch: (divDtlCd) =>
@@ -202,7 +217,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
             }),
         },
       }),
-    [base],
+    [base, checkSave18n, model.grids.divDtlCd18n.rows],
   );
 
   // ── 동기화 ────────────────────────────────────────────────────
