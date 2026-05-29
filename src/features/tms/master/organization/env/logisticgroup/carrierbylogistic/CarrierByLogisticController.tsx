@@ -8,6 +8,7 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { CarrierByLogisticModel, GridKey } from "./CarrierByLogisticModel";
+import { MENU_CODE } from "./CarrierByLogistic";
 
 interface Args {
   model: CarrierByLogisticModel;
@@ -98,17 +99,30 @@ export function useCarrierByLogisticController({
     });
   }, [model, base]);
 
-  const onSaveSub01 = useCallback(
-    () =>
-      base.saveGrid("sub01", api.saveLogisticCarrierInfo, {
-        afterSave: {
-          cascadeFrom: "main",
-          fetch: (main) => api.getLogisticCarrierDetailInfoList({ LGST_GRP_CD: main.LGST_GRP_CD, CARR_CD: main.CARR_CD}),
-        },
-      }),
-    [base],
-  );
+    const fetchSub01 = useCallback(
+      (row: any) =>
+        api.getLogisticCarrierInfoList({
+          DIV_CD: row.DIV_CD,
+          LGST_GRP_CD: row.LGST_GRP_CD
+        }),
+      [],
+    );
 
+  const onSaveSub01 = useCallback(
+      () =>
+        base.saveGrid("sub01", (payload) => api.saveLogisticCarrierInfo({
+              ...payload,
+              MENU_CD: MENU_CODE,
+            }),
+          {
+            afterSave: {
+              cascadeFrom: "main",
+              fetch: (main) => fetchSub01(main),
+            },
+          },
+        ),
+      [base, fetchSub01],
+  );    
 
   const sub01Actions: ActionItem[] = useMemo(
     () => [

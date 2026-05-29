@@ -76,6 +76,7 @@ export default function CarrierByLogistic() {
             {...model.bind("sub02")}
             columnDefs={LOGISTIC_CARRIER_DETAIL_INFO_COLUMN_DEFS}
             actions={ctrl.sub02Actions}
+            codeMap={model.codeMap}
           />
         </SplitPane>
       }
