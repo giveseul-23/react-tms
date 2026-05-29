@@ -126,6 +126,8 @@ export const MAIN_COLUMN_DEFS = [
     field: "USR_GRP_CD",
     editable: false,
     insertable: false,
+    flex: 1,
+    minWidth: 120,
   },
   {
     type: "text",
@@ -133,6 +135,8 @@ export const MAIN_COLUMN_DEFS = [
     field: "USR_GRP_NM",
     editable: false,
     insertable: false,
+    flex: 1,
+    minWidth: 120,    
   },
 ];
 
