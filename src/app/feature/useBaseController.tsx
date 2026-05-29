@@ -42,7 +42,7 @@ export function useBaseController<K extends string>({
   // 센차: me.callAjax — API Promise 한 번 감쌈 (성공/에러 토스트)
   const callAjax = useCallback(
     <T,>(apiCall: Promise<T>, successMsg = "MSG_SAVE_CMPLT") =>
-      handleApi(apiCall, Lang.get(successMsg)),
+      handleApi(apiCall, successMsg),
     [handleApi],
   );
 
