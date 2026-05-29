@@ -17,16 +17,48 @@ export const CONFIG_COLUMN_DEFS = [
     field: "CNFG_CD",
     fieldType: "text",
     isPrimaryKey: true,
+    editable: false,
+    insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_DIV_CNFG_NM",
     field: "CNFG_NM",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_DATA_CRE_TCD",
+    field: "DATA_CRE_TCD",
+    codeKey: "datCreTcd",
+    editable: true,
+    insertable: true,
+  },
+];
+
+// ── 설정상세코드다국어설정 (Bottom-left) ──────────────────────────
+export const CONFIG_I18N_COLUMN_DEFS = [
+  { headerName: "No" },
+  {
+    type: "text",
+    headerName: "LBL_DIV_CNFG_CD",
+    field: "CNFG_CD",
+  },
+  {
+    type: "combo",
+    headerName: "LBL_LNG_PACK",
+    field: "LANG_TP",
+    codeKey: "langTp",
+    insertable: true,
+    editable: true,
   },
   {
     type: "text",
-    headerName: "LBL_DATA_CRE_TCD",
-    field: "DATA_CRE_TCD",
+    headerName: "LBL_DIV_CNFG_NM",
+    field: "LANG_DESC",
+    insertable: true,
+    editable: true,
   },
 ];
 
@@ -39,57 +71,53 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_DIV_CNFG_DTL_CD",
     field: "CNFG_DTL_CD",
-    editable: true, insertable: true,
+    editable: true,
+    insertable: true,
     isPrimaryKey: true,
   },
   {
     type: "text",
     headerName: "LBL_DIV_CNFG_DTL_NM",
     field: "CNFG_DTL_NM",
-    editable: true, insertable: true,
+    editable: true,
+    insertable: true,
   },
   {
-    type: "text",
-    //기본값
+    type: "check",
     headerName: "LBL_DFT_VAL_NM",
     field: "DFT_YN",
     width: 70,
-    cellRenderer: (params: any) => (
-      <div className="flex items-center justify-center h-full">
-        <input
-          type="checkbox"
-          className="ag-input-field-input ag-checkbox-input"
-          checked={params.value === "Y"}
-          readOnly
-        />
-      </div>
-    ),
+    editable: true,
+    insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL1",
     field: "CNFG_VAL1",
-    editable: true, insertable: true,
+    editable: true,
+    insertable: true,
     width: 80,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL2",
     field: "CNFG_VAL2",
-    editable: true, insertable: true,
+    editable: true,
+    insertable: true,
     width: 80,
   },
   {
     type: "text",
     headerName: "LBL_CMMN_CD_CNFG_VAL3",
     field: "CNFG_VAL3",
-    editable: true, insertable: true,
+    editable: true,
+    insertable: true,
     width: 80,
   },
 ];
 
-// ── 설정코드다국어설정 (Bottom-left) ───────────────────────────────
-export const CONFIG_I18N_COLUMN_DEFS = [
+// ── 설정코드다국어설정 (Bottom-right) ───────────────────────────────
+export const CONFIG_DETAIL_I18N_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -102,33 +130,18 @@ export const CONFIG_I18N_COLUMN_DEFS = [
     field: "CNFG_DTL_CD",
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_LNG_PACK",
     field: "LANG_TP",
+    codeKey: "langTp",
+    editable: true,
+    insertable: true,
   },
   {
     type: "text",
     headerName: "LBL_DIV_CNFG_DTL_NM",
     field: "LANG_DESC",
-  },
-];
-
-// ── 설정상세코드다국어설정 (Bottom-right) ──────────────────────────
-export const CONFIG_DETAIL_I18N_COLUMN_DEFS = [
-  { headerName: "No" },
-  {
-    type: "text",
-    headerName: "LBL_DIV_CNFG_CD",
-    field: "CNFG_CD",
-  },
-  {
-    type: "text",
-    headerName: "LBL_LNG_PACK",
-    field: "LANG_TP",
-  },
-  {
-    type: "text",
-    headerName: "LBL_DIV_CNFG_NM",
-    field: "LANG_DESC",
+    editable: true,
+    insertable: true,
   },
 ];

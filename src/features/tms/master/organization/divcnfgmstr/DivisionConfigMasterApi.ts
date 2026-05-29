@@ -3,6 +3,7 @@ import { getSessionFields } from "@/app/services/auth/auth";
 import { MENU_CODE } from "./DivisionConfigMaster";
 
 type CommonResponse = {
+  data: any;
   rows: [];
 };
 
@@ -34,7 +35,7 @@ export const divisionConfigMasterApi = {
   saveConfig(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/divisionConfigMasterService/saveConfig",
+      "/divisionConfigMasterService/save",
       { dsSave },
       {
         params: {
@@ -64,7 +65,7 @@ export const divisionConfigMasterApi = {
   saveConfigDetail(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/divisionConfigMasterService/saveConfigDetail",
+      "/divisionConfigMasterService/saveDetail",
       { dsSave },
       {
         params: {
@@ -87,7 +88,7 @@ export const divisionConfigMasterApi = {
   saveConfigI18n(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/divisionConfigMasterService/saveConfigI18n",
+      "/divisionConfigMasterService/saveLang",
       { dsSave },
       {
         params: {
@@ -110,7 +111,7 @@ export const divisionConfigMasterApi = {
   saveConfigDetailI18n(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/divisionConfigMasterService/saveConfigDetailI18n",
+      "/divisionConfigMasterService/saveDetailLang",
       { dsSave },
       {
         params: {

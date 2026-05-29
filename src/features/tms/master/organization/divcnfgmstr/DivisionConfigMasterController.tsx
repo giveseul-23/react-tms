@@ -15,6 +15,7 @@ import type {
   DivisionConfigMasterModel,
   GridKey,
 } from "./DivisionConfigMasterModel";
+import { Lang } from "@/app/services/common/Lang";
 
 interface Args {
   model: DivisionConfigMasterModel;
@@ -34,29 +35,38 @@ export function useDivisionConfigMasterController({ model }: Args) {
   const onMainGridClick = useCallback(
     (row: any) =>
       base.handleRowClick(
-        "main",
+        "divCd",
         row,
         [
           {
-            to: "sub01",
-            fetch: (r) => api.getConfigDetailList({ CNFG_CD: r.CNFG_CD }),
-          },
-          {
-            to: "sub03",
+            to: "divCd18n",
             fetch: (r) => api.getConfigI18nList({ CNFG_CD: r.CNFG_CD }),
           },
+          {
+            to: "divDtlCd",
+            fetch: async (r) => {
+              const res = await api.getConfigDetailList({ CNFG_CD: r.CNFG_CD });
+
+              setTimeout(() => {
+                const first = model.grids.divDtlCd.rows[0];
+                if (first) ondivDtlCdGridClick(first);
+              }, 0);
+
+              return res;
+            },
+          },
         ],
-        { alsoReset: ["sub02"] },
+        { alsoReset: ["divDtlCd18n"] },
       ),
     [base],
   );
 
   // ── 상세 행 클릭 — sub02(detail-i18n) cascade ──────────────────
-  const onSub01GridClick = useCallback(
+  const ondivDtlCdGridClick = useCallback(
     (row: any) =>
-      base.handleRowClick("sub01", row, [
+      base.handleRowClick("divDtlCd", row, [
         {
-          to: "sub02",
+          to: "divDtlCd18n",
           fetch: (r) =>
             api.getConfigDetailI18nList({
               CNFG_CD: r.CNFG_CD,
@@ -70,95 +80,126 @@ export function useDivisionConfigMasterController({ model }: Args) {
   // ── 메인 조회 콜백 — 첫 행 자동 선택 + cascade ─────────────────
   const onSearchCallback = useCallback(
     (data: any) => {
-      model.grids.main.setData(data);
+      model.grids.divCd.setData(data);
       onMainGridClick(data?.rows?.[0]);
     },
-    [model.grids.main, onMainGridClick],
+    [model.grids.divCd, onMainGridClick],
   );
 
   // ── Add 핸들러 ────────────────────────────────────────────────
+  //디비전운영설정코드 추가
   const onAddMain = useCallback(() => {
-    base.resetGrids(["sub01", "sub02", "sub03"]);
-    base.addRow("main", { CNFG_CD: "", CNFG_NM: "" });
+    base.resetGrids(["divCd18n", "divDtlCd", "divDtlCd18n"]);
+    base.addRow("divCd", { CNFG_CD: "", CNFG_NM: "" });
   }, [base]);
 
-  const onAddSub01 = useCallback(() => {
-    const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, "디비전운영설정코드")) return;
-    base.resetGrids(["sub02"]);
-    base.addRow("sub01", {
-      CNFG_CD: main.CNFG_CD,
-      CNFG_DTL_CD: "",
-      CNFG_DTL_NM: "",
-    });
-  }, [model, base]);
-
-  // sub02 = detail-i18n (CNFG_CD + CNFG_DTL_CD)
-  const onAddSub02 = useCallback(() => {
-    const sub01 = model.grids.sub01.selectedRef.current;
-    if (!base.requireParentRow(sub01, "디비전운영설정상세코드")) return;
-    base.addRow("sub02", {
-      CNFG_CD: sub01.CNFG_CD,
-      CNFG_DTL_CD: sub01.CNFG_DTL_CD,
-      LANG_TP: "",
-      LANG_DESC: "",
-    });
-  }, [model, base]);
-
-  // sub03 = 메인-i18n (CNFG_CD)
-  const onAddSub03 = useCallback(() => {
-    const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, "디비전운영설정코드")) return;
-    base.addRow("sub03", {
-      CNFG_CD: main.CNFG_CD,
-      LANG_TP: "",
-      LANG_DESC: "",
-    });
-  }, [model, base]);
-
-  // ── Save 핸들러 ───────────────────────────────────────────────
+  // 메인그리드 저장
   const onSaveMain = useCallback(
     () =>
-      base.saveGrid("main", api.saveConfig, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+      base.saveGrid("divCd", api.saveConfig, {
+        confirmOnDelete: "MSG_CHK_DELETE",
       }),
     [base],
   );
+  const checkAddDivCd18n = useCallback(() => {
+    const rows = model.grids.divCd18n.rows.filter(
+      (r: any) => r.EDIT_STS !== "D" && r.delStatus !== true,
+    );
+    return rows.length >= 3;
+  }, [model]);
 
-  const onSaveSub01 = useCallback(
+  const checkSaveDivCd18n = useCallback(() => {
+    const rows = model.grids.divCd18n.rows.filter(
+      (r: any) => r.EDIT_STS !== "D" && r.delStatus !== true,
+    );
+    const langs = rows.map((r: any) => r.LANG_TP);
+    const ALLOWED = ["KO", "EN", "CN"];
+    if (!langs.every((t: string) => ALLOWED.includes(t))) return false;
+    return new Set(langs).size === langs.length;
+  }, [model]);
+
+  // 디비전운영설정코드 다국어설정 추가
+  const onAddDivCd18n = useCallback(() => {
+    const grid = model.grids.divCd.selectedRef.current;
+    if (!base.requireParentRow(grid, "LBL_DIV_CNFG_CD")) return;
+    if (checkAddDivCd18n()) return;
+    base.resetGrids(["divDtlCd", "divDtlCd18n"]);
+    base.addRow("divCd18n", {
+      CNFG_CD: grid.CNFG_CD,
+      LANG_TP: "",
+      LANG_DESC: "",
+    });
+  }, [model.grids.divCd.selectedRef, base, checkAddDivCd18n]);
+
+  //디비전설정코드다국어 저장
+  const onSaveDivCd18n = useCallback(
     () =>
-      base.saveGrid("sub01", api.saveConfigDetail, {
-        afterSave: {
-          cascadeFrom: "main",
-          fetch: (main) => api.getConfigDetailList({ CNFG_CD: main.CNFG_CD }),
+      base.saveGrid("divCd18n", api.saveConfigI18n, {
+        beforeSave: () => {
+          const valid = checkSaveDivCd18n();
+
+          if (!valid) base.alert(Lang.get("MSG_CHK_SAVE_DIV_18N"));
+
+          return valid;
         },
-      }),
-    [base],
-  );
-
-  // sub02 save → sub01 기준 cascade 재조회 (detail-i18n)
-  const onSaveSub02 = useCallback(
-    () =>
-      base.saveGrid("sub02", api.saveConfigDetailI18n, {
         afterSave: {
-          cascadeFrom: "sub01",
-          fetch: (sub01) =>
-            api.getConfigDetailI18nList({
-              CNFG_CD: sub01.CNFG_CD,
-              CNFG_DTL_CD: sub01.CNFG_DTL_CD,
+          cascadeFrom: "divCd",
+          fetch: (main) =>
+            api.getConfigI18nList({
+              CNFG_CD: main.CNFG_CD,
             }),
         },
       }),
     [base],
   );
 
-  // sub03 save → main 기준 cascade 재조회 (메인-i18n)
-  const onSaveSub03 = useCallback(
+  // 디비전상세설정코드 추가
+  const onAddDivCdDtl = useCallback(() => {
+    const grid = model.grids.divCd.selectedRef.current;
+    if (!base.requireParentRow(grid, "LBL_DIV_CNFG_CD")) return;
+    base.resetGrids(["divDtlCd18n"]);
+    base.addRow("divDtlCd", {
+      CNFG_CD: grid.CNFG_CD,
+      LANG_TP: "",
+      LANG_DESC: "",
+    });
+  }, [model, base]);
+
+  //디비전설정상세코드저장
+  const onSaveDivDtlCd = useCallback(
     () =>
-      base.saveGrid("sub03", api.saveConfigI18n, {
+      base.saveGrid("divDtlCd", api.saveConfigDetail, {
         afterSave: {
-          cascadeFrom: "main",
-          fetch: (main) => api.getConfigI18nList({ CNFG_CD: main.CNFG_CD }),
+          cascadeFrom: "divCd",
+          fetch: (main) => api.getConfigDetailList({ CNFG_CD: main.CNFG_CD }),
+        },
+      }),
+    [base],
+  );
+
+  // 디비전상세설정코드 다국어 추가
+  const onAddDivDtlCd18n = useCallback(() => {
+    const grid = model.grids.divDtlCd.selectedRef.current;
+    if (!base.requireParentRow(grid, "LBL_DIV_CNFG_DTL_CD")) return;
+    base.addRow("divDtlCd18n", {
+      CNFG_CD: grid.CNFG_CD,
+      CNFG_DTL_CD: grid.CNFG_DTL_CD,
+      LANG_TP: "",
+      LANG_DESC: "",
+    });
+  }, [model, base]);
+
+  // 디비전설정상세코드 다국어 저장
+  const onSaveDivDtlCd18n = useCallback(
+    () =>
+      base.saveGrid("divDtlCd18n", api.saveConfigDetailI18n, {
+        afterSave: {
+          cascadeFrom: "divDtlCd",
+          fetch: (divDtlCd) =>
+            api.getConfigDetailI18nList({
+              CNFG_CD: divDtlCd.CNFG_CD,
+              CNFG_DTL_CD: divDtlCd.CNFG_DTL_CD,
+            }),
         },
       }),
     [base],
@@ -168,7 +209,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
   const syncConfig = useCallback(
     () =>
       base
-        .callAjax(api.syncConfig({}), "동기화되었습니다.")
+        .callAjax(api.syncConfig({}), Lang.get("MSG_CMPLT_SYNC"))
         .then(() => base.search()),
     [base],
   );
@@ -179,7 +220,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       {
-        type: "button" as const,
+        type: "button",
         key: "LBL_SYNC",
         label: "LBL_SYNC",
         onClick: syncConfig,
@@ -188,38 +229,38 @@ export function useDivisionConfigMasterController({ model }: Args) {
     [onAddMain, onSaveMain, syncConfig],
   );
 
-  const sub01Actions: ActionItem[] = useMemo(
+  const divDtlCdActions: ActionItem[] = useMemo(
     () => [
-      makeAddAction({ onClick: onAddSub01 }),
-      makeSaveAction({ onClick: onSaveSub01 }),
+      makeAddAction({ onClick: onAddDivCdDtl }),
+      makeSaveAction({ onClick: onSaveDivDtlCd }),
     ],
-    [onAddSub01, onSaveSub01],
+    [onAddDivCdDtl, onSaveDivDtlCd],
   );
 
-  const sub02Actions: ActionItem[] = useMemo(
+  const divCd18nActions: ActionItem[] = useMemo(
     () => [
-      makeAddAction({ onClick: onAddSub02 }),
-      makeSaveAction({ onClick: onSaveSub02 }),
+      makeAddAction({ onClick: onAddDivCd18n }),
+      makeSaveAction({ onClick: onSaveDivCd18n }),
     ],
-    [onAddSub02, onSaveSub02],
+    [onAddDivCd18n, onSaveDivCd18n],
   );
 
-  const sub03Actions: ActionItem[] = useMemo(
+  const divDtlCd18nActions: ActionItem[] = useMemo(
     () => [
-      makeAddAction({ onClick: onAddSub03 }),
-      makeSaveAction({ onClick: onSaveSub03 }),
+      makeAddAction({ onClick: onAddDivDtlCd18n }),
+      makeSaveAction({ onClick: onSaveDivDtlCd18n }),
     ],
-    [onAddSub03, onSaveSub03],
+    [onAddDivDtlCd18n, onSaveDivDtlCd18n],
   );
 
   return {
     fetchList,
     onSearchCallback,
     onMainGridClick,
-    onSub01GridClick,
+    ondivDtlCdGridClick,
     mainActions,
-    sub01Actions,
-    sub02Actions,
-    sub03Actions,
+    divDtlCdActions,
+    divCd18nActions,
+    divDtlCd18nActions,
   };
 }
