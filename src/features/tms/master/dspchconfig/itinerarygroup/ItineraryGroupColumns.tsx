@@ -26,6 +26,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_ITNR_GRP_CD",
     field: "ITNR_GRP_CD",
     insertable: true,
+    required: true,
   },
   {
     type: "text",
@@ -33,6 +34,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "ITNR_GRP_NM",
     insertable: true,
     editable: true,
+    required: true,
   },
   {
     type: "text",
@@ -48,5 +50,6 @@ export const MAIN_COLUMN_DEFS = [
     codeKey: "ynList",
     insertable: true,
     editable: true,
+    required: true,
   }
 ]
