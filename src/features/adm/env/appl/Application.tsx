@@ -38,6 +38,7 @@ export default function Application() {
           columnDefs={columnDefs}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
+          audit={false}
         />
       }
     />
