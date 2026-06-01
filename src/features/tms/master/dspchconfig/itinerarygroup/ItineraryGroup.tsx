@@ -5,12 +5,14 @@ import { useItineraryGroupModel } from "./ItineraryGroupModel";
 import { useItineraryGroupController } from "./ItineraryGroupController";
 import { MAIN_COLUMN_DEFS } from "./ItineraryGroupColumns";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
+import { useRef } from "react";
 
 export const MENU_CODE = "MENU_ITNR_GRP_MGMT";
 
 export default function ItineraryGroup() {
   const model = useItineraryGroupModel(MENU_CODE);
-  const ctrl = useItineraryGroupController({ model });
+  const rawFiltersRef = useRef<Record<string, string>>({});
+  const ctrl = useItineraryGroupController({ model, rawFiltersRef });
 
   return (
     <GridOnlyPage
@@ -21,6 +23,7 @@ export default function ItineraryGroup() {
         onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
+        rawFiltersRef,
         pageSize: model.pageSize,
       }}
       grid={
