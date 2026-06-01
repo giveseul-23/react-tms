@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { MutableRefObject, useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
@@ -16,10 +16,11 @@ import { Lang } from "@/app/services/common/Lang";
 
 interface ControllerArgs {
   model: VehicleDailyBaseRtnMgmtModel;
+  rawFiltersRef: MutableRefObject<Record<string, string>>;
 }
 
 export function useVehicleDailyBaseRtnMgmtController({
-  model,
+  model, rawFiltersRef
 }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
 
@@ -39,25 +40,13 @@ export function useVehicleDailyBaseRtnMgmtController({
 
   // ── 메인 행 추가 ─────────────────────────────────────────────
   // base.addRow 가 EDIT_STS: "I" 자동 주입 + push.
-
-  // 검색 조건에서 필요한 값 가져오는 헬퍼 함수. 
-  // DIV_CD, LGST_GRP_CD 등 행 추가 시 기본값으로 사용
-  type SearchCondition = {
-    val0: string;
-    val3: string;
-  };
-
-  const getSearchValue = (key: string) => {
-    const searchConditions = (model.filtersRef?.current?.dsSearchCondition as SearchCondition[]) || [];
-    return searchConditions.find((item) => item.val0 === key)?.val3 ?? "";
-  };
-
   const onAddMain = useCallback(() => {
+    const srchObj = rawFiltersRef.current;
     base.addRow("main", {
-      LGST_GRP_CD: getSearchValue("LGST_GRP_CD"),
+      LGST_GRP_CD: srchObj.SRCH_LGST_GRP_CD  ?? "",
       BASE_RTN_CNT: 3,
     });
-  }, [base]);
+  }, [base, rawFiltersRef]);
 
   const parseDate = (value: string | Date) => {
     if (value instanceof Date) return value;
