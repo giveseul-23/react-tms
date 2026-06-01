@@ -28,10 +28,14 @@ export const DETAIL_COLUMN_DEFS = [
     hide: true, 
   },
   {
-    type: "text",
+    type: "popup",
     headerName: "LBL_CUSTOMER_CODE",
     field: "CUST_CD",
+    nameField: "CUST_NM",  
+    sqlId: "selectCustomerCodeName",
     required: true,
+    insertable: true,
+    editable: false,
   },
   {
     type: "text",
