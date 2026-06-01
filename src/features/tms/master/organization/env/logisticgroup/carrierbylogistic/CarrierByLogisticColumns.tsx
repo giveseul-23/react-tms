@@ -16,15 +16,12 @@ export const LOGISTIC_COLUMN_DEFS  = (setGridData?: (updater: any) => void) => [
 ];
 
 export const LOGISTIC_CARRIER_INFO_COLUMN_DEFS = [{
-    type: "text",
+    type: "popup",
     headerName: "LBL_CARRIER_CODE",
     field: "CARR_CD",
-    fieldType: "popup",
     required: true,
-    sqlProp: "selectCarrList",
-    nameField: "LBL_CARRIER_NAME",
-    nameValue: "CARR_NM",
-    editable: true, 
+    sqlId: "selectCarrList",
+    nameField: "CARR_NM",
     insertable: true,
  }, {
     type: "text",
@@ -71,9 +68,8 @@ export const LOGISTIC_CARRIER_DETAIL_INFO_COLUMN_DEFS = [{
     headerName: "LBL_EMAIL_GROUP",
     field: "EMAIL_OP_CD",
     codeKey: "emailOpCd",
-    editable: true, 
+    editable: true,
     insertable: true,
-    required: true,
   }, {
     type: "text",
     headerName: "LBL_EMAIL_ADDR",

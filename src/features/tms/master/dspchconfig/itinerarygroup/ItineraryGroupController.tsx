@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { MutableRefObject, useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
@@ -13,9 +13,10 @@ import { Lang } from "@/app/services/common/Lang";
 
 interface ControllerArgs {
   model: ItineraryGroupModel;
+  rawFiltersRef: MutableRefObject<Record<string, string>>;
 }
 
-export function useItineraryGroupController({ model }: ControllerArgs) {
+export function useItineraryGroupController({ model, rawFiltersRef }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
@@ -34,26 +35,14 @@ export function useItineraryGroupController({ model }: ControllerArgs) {
 
   // ── 메인 행 추가 ─────────────────────────────────────────────
   // base.addRow 가 EDIT_STS: "I" 자동 주입 + push.
-  
-  // 검색 조건에서 필요한 값 가져오는 헬퍼 함수. 
-  // DIV_CD, LGST_GRP_CD 등 행 추가 시 기본값으로 사용
-  type SearchCondition = {
-    val0: string;
-    val3: string;
-  };
-
-  const getSearchValue = (key: string) => {
-    const searchConditions = (model.filtersRef?.current?.dsSearchCondition as SearchCondition[]) || [];
-    return searchConditions.find((item) => item.val0 === key)?.val3 ?? "";
-  };
-
-  const onAddMain = useCallback(() => {
+    const onAddMain = useCallback(() => {
+    const srchObj = rawFiltersRef.current;
     base.addRow("main", {
-      DIV_CD: getSearchValue("TI.DIV_CD"),
-      LGST_GRP_CD: getSearchValue("TI.LGST_GRP_CD"),
-      LGST_GRP_NM: ''
+      DIV_CD: srchObj.SRCH_TI_DIV_CD  ?? "",
+      LGST_GRP_CD: srchObj.SRCH_TI_LGST_GRP_CD  ?? "",
+      LGST_GRP_NM: srchObj.SRCH_TI_LGST_GRP_NM  ?? "",
     });
-  }, [base, model]);
+  }, [base, model, rawFiltersRef]);
 
   // ── 메인 저장 — 삭제행 있으면 confirm 후 저장 ─────────────────
   // confirmOnDelete 옵션 한 줄로 처리. 후처리는 기본값 "refresh"(메인 재조회).

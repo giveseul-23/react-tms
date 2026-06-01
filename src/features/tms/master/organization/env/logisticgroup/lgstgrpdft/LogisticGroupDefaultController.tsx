@@ -1,13 +1,23 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { logisticGroupDefaultApi as api } from "./LogisticGroupDefaultApi";
-import { CNFG_HEADER_COLUMN_DEFS } from "./LogisticGroupDefaultColumns";
+import {
+  CNFG_HEADER_COLUMN_DEFS,
+  CNFG_DETAIL_COLUMN_DEFS,
+  DETAIL_COLUMN_DEFS,
+} from "./LogisticGroupDefaultColumns";
 import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { LogisticGroupDefaultModel, GridKey } from "./LogisticGroupDefaultModel";
+import type {
+  LogisticGroupDefaultModel,
+  GridKey,
+} from "./LogisticGroupDefaultModel";
+
+import { MENU_CODE } from "./LogisticGroupDefault";
+import { Lang } from "@/app/services/common/Lang";
 
 interface Args {
   model: LogisticGroupDefaultModel;
@@ -61,17 +71,69 @@ export function useLogisticGroupDefaultController({ model }: Args) {
     [model.grids.header, onHeaderGridClick],
   );
 
-  const detailActions: ActionItem[] = useMemo(
+  // ── Save ──────────────────────────────────────────────────────
+  const onSaveDetail = useCallback(
+    () =>
+      base.saveGrid("detail", api.saveDetail, {
+        afterSave: {
+          cascadeFrom: "subCnfg",
+          fetch: (main) =>
+            api.getLgstDefaultDetailList({ CNFG_CD: main.CNFG_CD }),
+        },
+      }),
+    [base],
+  );
+
+  const syncConfig = useCallback(
+    () =>
+      base
+        .callAjax(api.syncConfig({}), Lang.get("MSG_CMPLT_SYNC"))
+        .then(() => base.search()),
+    [base],
+  );
+
+  const headerActions: ActionItem[] = useMemo(
     () => [
-      makeSaveAction(),
+      {
+        //todo : popup
+        type: "button",
+        key: "LBL_SYNC",
+        label: "LBL_SYNC",
+        onClick: syncConfig,
+      },
       makeExcelGroupAction({
         columns: CNFG_HEADER_COLUMN_DEFS,
-        menuName: "운송사요청목록",
+        menuName: Lang.get(MENU_CODE),
         fetchFn: () => api.getLgstDefaultCnfgGrpList(model.filtersRef.current),
         rows: model.grids.header.rows,
       }),
     ],
-    [model],
+    [model.filtersRef, model.grids.header.rows, syncConfig],
+  );
+
+  const subCnfgActions: ActionItem[] = useMemo(
+    () => [
+      makeExcelGroupAction({
+        columns: CNFG_DETAIL_COLUMN_DEFS,
+        menuName: Lang.get(MENU_CODE),
+        fetchFn: () => api.getLgstDefaultCnfgList(model.filtersRef.current),
+        rows: model.grids.header.rows,
+      }),
+    ],
+    [model.filtersRef, model.grids.header.rows],
+  );
+
+  const detailActions: ActionItem[] = useMemo(
+    () => [
+      makeSaveAction({ onClick: onSaveDetail }),
+      makeExcelGroupAction({
+        columns: DETAIL_COLUMN_DEFS,
+        menuName: Lang.get(MENU_CODE),
+        fetchFn: () => api.getLgstDefaultDetailList(model.filtersRef.current),
+        rows: model.grids.header.rows,
+      }),
+    ],
+    [model.filtersRef, model.grids.header.rows, onSaveDetail],
   );
 
   return {
@@ -79,6 +141,8 @@ export function useLogisticGroupDefaultController({ model }: Args) {
     onSearchCallback,
     onHeaderGridClick,
     onSubCnfgGridClick,
+    headerActions,
+    subCnfgActions,
     detailActions,
   };
 }

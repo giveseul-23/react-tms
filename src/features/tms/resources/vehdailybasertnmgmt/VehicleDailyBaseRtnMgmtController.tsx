@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { MutableRefObject, useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
@@ -16,10 +16,11 @@ import { Lang } from "@/app/services/common/Lang";
 
 interface ControllerArgs {
   model: VehicleDailyBaseRtnMgmtModel;
+  rawFiltersRef: MutableRefObject<Record<string, string>>;
 }
 
 export function useVehicleDailyBaseRtnMgmtController({
-  model,
+  model, rawFiltersRef
 }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
 
@@ -39,12 +40,13 @@ export function useVehicleDailyBaseRtnMgmtController({
 
   // ── 메인 행 추가 ─────────────────────────────────────────────
   // base.addRow 가 EDIT_STS: "I" 자동 주입 + push.
-
   const onAddMain = useCallback(() => {
+    const srchObj = rawFiltersRef.current;
     base.addRow("main", {
+      LGST_GRP_CD: srchObj.SRCH_LGST_GRP_CD  ?? "",
       BASE_RTN_CNT: 3,
     });
-  }, [base]);
+  }, [base, rawFiltersRef]);
 
   const parseDate = (value: string | Date) => {
     if (value instanceof Date) return value;

@@ -67,6 +67,9 @@ export default function VehicleAssignPopup({
         LGST_GRP_CD: logisticGroupCode,
         ...extraParams,
         MENU_CD: MENU_CODE,
+        filter: logisticGroupCode,
+        name: vehicleNo,
+        keyParam: "100"
       })
       .then((res: any) => {
         if (res?.data?.success === false) {
@@ -89,6 +92,9 @@ export default function VehicleAssignPopup({
     fetchData({
       LGST_GRP_CD: logisticGroupCode,
       VEH_NO: vehicleNo,
+      filter: logisticGroupCode,
+      name: vehicleNo,
+      keyParam: "100"
     });
   };
 
