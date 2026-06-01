@@ -31,11 +31,13 @@ export const DETAIL_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_CUSTOMER_CODE",
     field: "CUST_CD",
+    required: true,
   },
   {
     type: "text",
     headerName: "LBL_CUSTOMER_NAME",
     field: "CUST_NM",
+    required: true,
   },
   {
     type: "check",

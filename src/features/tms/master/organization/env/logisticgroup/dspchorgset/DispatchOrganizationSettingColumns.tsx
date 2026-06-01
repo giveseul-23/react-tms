@@ -33,6 +33,7 @@ export const DETAIL_COLUMN_DEFS = [
     codeKey: "shpmTpList",
     insertable: true,
     editable: true,
+    required: true,
   },
   {
     type: "text",
@@ -40,6 +41,7 @@ export const DETAIL_COLUMN_DEFS = [
     field: "PLANT_CD",
     insertable: true,
     editable: true,
+    required: true,
   },
   {
     type: "text",
@@ -62,6 +64,7 @@ export const DETAIL_COLUMN_DEFS = [
     codeKey: "ynList",
     insertable: true,
     editable: true,
+    required: true,
   },
   {
     type: "text",

@@ -26,12 +26,14 @@ export const DETAIL_COLUMN_DEFS = [
     headerName: "LBL_PLAN_ID",
     field: "PLN_ID",
     insertable: true,
+    required: true,
   },
   {
     type: "text",
     headerName: "LBL_PLAN_NAME",
     field: "PLN_NM",
     insertable: true,
+    required: true,
   },
   {
     type: "combo",
@@ -40,6 +42,7 @@ export const DETAIL_COLUMN_DEFS = [
     codeKey: "plnOpDiv",
     insertable: true,
     editable: true,
+    required: true,
   },
   {
     type: "combo",
@@ -48,6 +51,7 @@ export const DETAIL_COLUMN_DEFS = [
     codeKey: "ynList",
     insertable: true,
     editable: true,
+    required: true,
   },
   {
     type: "combo",
@@ -56,5 +60,6 @@ export const DETAIL_COLUMN_DEFS = [
     codeKey: "ynList",
     insertable: true,
     editable: true,
+    required: true,
   },
 ];
