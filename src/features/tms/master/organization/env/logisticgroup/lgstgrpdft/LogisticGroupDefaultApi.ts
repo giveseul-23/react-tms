@@ -77,4 +77,25 @@ export const logisticGroupDefaultApi = {
       },
     );
   },
+
+  //popup
+  getLgstGrpCnfgGrp(payload: any) {
+    return apiClient.post<commonResponse>(
+      "/logisticGroupDefaultService/searchUsrDivLgstGrp",
+      withSession({
+        MENU_CD: MENU_CODE,
+        ...payload,
+      }),
+    );
+  },
+
+  getLgstGrpCnfgDtlPop(payload: any) {
+    return apiClient.post<commonResponse>(
+      "/logisticGroupDefaultService/selectLgstGrpCnfgDtlPop",
+      withSession({
+        MENU_CD: MENU_CODE,
+        ...payload,
+      }),
+    );
+  },
 };

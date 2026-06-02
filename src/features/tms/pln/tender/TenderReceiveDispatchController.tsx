@@ -26,8 +26,6 @@ import type {
   GridKey,
 } from "./TenderReceiveDispatchModel";
 
-import { MENU_CD } from "./TenderReceiveDispatch";
-
 interface Args {
   model: TenderReceiveDispatchModel;
 }

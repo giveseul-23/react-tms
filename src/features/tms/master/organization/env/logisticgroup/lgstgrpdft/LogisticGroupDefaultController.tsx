@@ -18,6 +18,10 @@ import type {
 
 import { MENU_CODE } from "./LogisticGroupDefault";
 import { Lang } from "@/app/services/common/Lang";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import { useGuard } from "@/hooks/useGuard";
+
+import LgstSyncPopup from "./popup/LgstSyncPopup";
 
 interface Args {
   model: LogisticGroupDefaultModel;
@@ -25,6 +29,8 @@ interface Args {
 
 export function useLogisticGroupDefaultController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { openPopup, closePopup } = usePopup();
+  const { guardHasData } = useGuard();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getLgstDefaultCnfgGrpList(params),
@@ -99,7 +105,24 @@ export function useLogisticGroupDefaultController({ model }: Args) {
         type: "button",
         key: "LBL_SYNC",
         label: "LBL_SYNC",
-        onClick: syncConfig,
+        onClick: (e: any) => {
+          if (!guardHasData(e.data)) return;
+          openPopup({
+            title: "LBL_SYNC",
+            content: (
+              <LgstSyncPopup
+                onConfirm={(payload: any) => {
+                  closePopup();
+                  base
+                    .callAjax(api.syncConfig(payload), Lang.get("MSG_CMPLT_SYNC"))
+                    .then(() => base.search());
+                }}
+                onClose={closePopup}
+              />
+            ),
+            width: "full",
+          });
+        },
       },
       makeExcelGroupAction({
         columns: CNFG_HEADER_COLUMN_DEFS,

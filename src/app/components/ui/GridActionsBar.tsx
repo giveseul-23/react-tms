@@ -92,7 +92,7 @@ export function GridActionsBar({
     return () => window.removeEventListener("pointerdown", handler, true);
   }, [openKey, anchorEl]);
 
-  if (!actions?.length) return null;
+  if (!actions?.length && !subTitle) return null;
 
   const openGroup = actions.find(
     (a): a is ActionGroup => isGroupLike(a) && a.key === openKey,
