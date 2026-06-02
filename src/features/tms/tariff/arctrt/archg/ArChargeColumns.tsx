@@ -1,3 +1,5 @@
+import { Lang } from "@/app/services/common/Lang";
+
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
@@ -27,7 +29,8 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: "LBL_GL_LDGR_CD" + "(" + "LBL_DEFAULT" + ")",
+    headerName: Lang.get ("LBL_GL_LDGR_CD") + "(" + Lang.get("LBL_DEFAULT") + ")",
+    noLang:true,
     field: "GNRL_LDGR_CD",
     insertable: true,
     editable: true,
@@ -43,7 +46,8 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "combo",
-    headerName: "LBL_TAX_TCD" + "(" + "LBL_DEFAULT" + ")",
+    headerName: Lang.get("LBL_TAX_TCD") + "(" + Lang.get("LBL_DEFAULT") + ")",
+    noLang:true,
     field: "TAX_TCD",
     codeKey: "taxTcdList",
     required: true,
