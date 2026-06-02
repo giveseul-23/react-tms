@@ -257,7 +257,9 @@ function injectPasswordEditor(
 
 /**
  * type "popup" / "popuser" 컬럼에 셀 렌더러(값 + 돋보기) 자동 주입.
- *   - 표시: codeKey 있으면 라벨, 없으면 원값.
+ *   - 편집(돋보기 노출) 정책은 다른 컬럼 타입과 동일하게 insertable/editable + EDIT_STS 로 제어:
+ *       insertable → 추가행(EDIT_STS "I"), editable → 수정행, 둘 다 → 항상, 둘 다 미지정 → 노출 안 함.
+ *     편집 불가 행은 돋보기 없이 표시값(라벨/원값) 텍스트만 렌더.
  *   - 돋보기 클릭:
  *       popup   → CommonPopup(sqlId/fetchFn) 오픈. 선택 시 field=CODE, nameField=NAME write-back.
  *       popuser → 컬럼의 renderPopup({ row, commit, close }) 결과를 openPopup content 로 띄움.
@@ -272,9 +274,19 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
 
   const codeKey = c.codeKey as string | undefined;
   const isUser = c.type === "popuser";
+  // 돋보기 노출(편집) 정책 — 다른 컬럼 타입과 동일 (insertable/editable + EDIT_STS):
+  //   insertable → 추가행(EDIT_STS "I") 에서만, editable → 수정행에서만,
+  //   둘 다 → 항상, 둘 다 미지정 → 노출 안 함.
+  const ins = c.insertable === true;
+  const edt = c.editable === true;
+  if (!ins && !edt) return col;
 
   return {
     ...col,
+    // 팝업 셀은 ag-grid 네이티브 인라인 편집을 쓰지 않음 →
+    // applyEditPolicy 가 editable 함수를 박지 않도록 strip.
+    insertable: undefined,
+    editable: undefined,
     cellRenderer: (params: any) => {
       if (!params.data || params.node?.rowPinned) return null;
       const { openPopup, closePopup, setRowData, codeMap } = opts;
@@ -285,6 +297,13 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
           : codeKey
             ? (codeMap?.[codeKey]?.[String(raw)] ?? raw)
             : raw;
+
+      // 편집 가능 여부 (EDIT_STS 기반) — 안 되면 돋보기 없이 표시값만
+      const editStsI = params.node?.data?.EDIT_STS === "I";
+      const cellEditable = ins && edt ? true : ins ? editStsI : !editStsI;
+      if (!cellEditable) {
+        return <span className="truncate">{display}</span>;
+      }
 
       const row = params.node?.data;
       const close = () => closePopup?.();

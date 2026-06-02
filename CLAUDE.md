@@ -158,6 +158,7 @@ export function useXxxModel(menuCode: string) {
   - `insertable: true, editable: true` 둘 다 → 항상 편집 가능
   - 둘 다 미지정/`false` → 편집 불가
   - `editable: <함수|변수>` 는 그대로 ag-grid 에 전달 (커스텀 분기 그대로 유지)
+  - **이 정책은 모든 편집형 컬럼 타입(`combo`/`date`/`datetime`/`popup`/`popuser` 등)에 공통 적용** — 특히 `popup`/`popuser` 의 돋보기 노출도 동일하게 `insertable`(추가행 `EDIT_STS:"I"`)/`editable`(수정행)/둘 다(항상)/둘 다 미지정(노출 안 함) 으로 제어. 앞으로 편집형 컬럼 타입을 새로 추가하면 반드시 `insertable`/`editable` 속성으로 편집 가부를 관리할 것.
 - **PK 컬럼**: `isPrimaryKey: true` 표시 → DataGrid 가 `rowKeys`/`autoSelectFirstRow` 자동 활성화 (View 에서 prop 명시 불필요). 보통 `isPrimaryKey: true` + `insertable: true` 조합 (추가 시 입력 / 수정 시 잠금).
 - **audit 컬럼**: `model.bind` 가 `audit:true` 자동 spread → DataGrid 가 컬럼 끝에 standardAudit 자동 추가. 컬럼 파일에서 `standardAudit` 직접 호출 안 함.
 - audit 부분 토글: View 에서 `audit={{ updatePerson: false }}` 명시
