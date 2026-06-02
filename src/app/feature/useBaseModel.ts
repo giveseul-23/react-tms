@@ -26,6 +26,7 @@ import {
   type SetStateAction,
 } from "react";
 import type { LayoutType } from "@/app/components/layout/LayoutToggleButton";
+import { captureOrig } from "@/app/components/grid/gridUtils/rowStatus";
 
 export type GridData = {
   rows: any[];
@@ -140,9 +141,14 @@ function ensureRid(data: GridData): GridData {
   if (!data?.rows?.length) return data;
   let touched = false;
   const rows = data.rows.map((r: any) => {
-    if (r && r.__rid__) return r;
+    if (r && r.__rid__) {
+      captureOrig(r); // 함수형 updater 경로: 이미 있으면 no-op
+      return r;
+    }
     touched = true;
-    return { ...r, __rid__: newRid() };
+    const next = { ...r, __rid__: newRid() };
+    captureOrig(next); // 조회 시점 서버 원본 스냅샷
+    return next;
   });
   return touched ? { ...data, rows } : data;
 }

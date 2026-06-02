@@ -27,7 +27,7 @@ export function markUpdate(row: any): void {
   if (!row) return;
   if (row.EDIT_STS === ROW_STATUS.INSERT) return;
   if (row.EDIT_STS === ROW_STATUS.DELETE) return;
-  row.EDIT_STS = ROW_STATUS.UPDATE;
+  row.EDIT_STS = resolveUpdateSts(row);
 }
 
 /** 삭제 마킹 — 직전 상태("" / "U") 를 보조필드에 기억한 뒤 "D" 로 덮어씀.
@@ -98,11 +98,63 @@ export function isDeleted(row: any): boolean {
   return row?.EDIT_STS === ROW_STATUS.DELETE;
 }
 
-/** row mutate 후 EDIT_STS 결정 — 신규 "I" / 삭제 "D" 는 유지, 그 외 "U". */
-function nextEditSts(row: any): string {
+// ── 서버 원본 스냅샷(__orig__) 기반 dirty 판정 ────────────────────────────
+// 셀을 수정했다가 "서버에서 가져온 원래 값" 으로 되돌리면 EDIT_STS 를 "U" 가 아닌
+// "" (미변경) 으로 되돌리기 위함. 원본은 조회 시점에 captureOrig 로 비열거(non-enum)
+// 프로퍼티에 저장 → spread / 저장 페이로드(toDsSave)에 새지 않음.
+const ORIG_KEY = "__orig__";
+const ORIG_INTERNAL_KEYS = new Set([
+  "EDIT_STS",
+  "__rid__",
+  ORIG_KEY,
+  "_prevSts",
+  "_delete",
+]);
+
+/** 조회 시점의 서버 원본을 비열거 스냅샷으로 저장 (이미 있으면 유지). */
+export function captureOrig(row: any): void {
+  if (!row || row[ORIG_KEY]) return;
+  const snap: Record<string, any> = {};
+  for (const k of Object.keys(row)) {
+    if (ORIG_INTERNAL_KEYS.has(k)) continue;
+    snap[k] = row[k];
+  }
+  Object.defineProperty(row, ORIG_KEY, {
+    value: snap,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
+}
+
+/** spread 로 새 객체가 되어도 원본 스냅샷을 옮겨 단다. */
+function carryOrig(next: any, src: any): void {
+  const orig = src?.[ORIG_KEY];
+  if (!orig) return;
+  Object.defineProperty(next, ORIG_KEY, {
+    value: orig,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
+}
+
+/** 원본과 모든 필드가 동일한가 (number/string 차이는 문자열 비교로 흡수). */
+function matchesOrig(row: any, orig: Record<string, any>): boolean {
+  for (const k of Object.keys(orig)) {
+    if (String(row[k] ?? "") !== String(orig[k] ?? "")) return false;
+  }
+  return true;
+}
+
+/** row mutate 후 EDIT_STS 결정 — 신규 "I" / 삭제 "D" 유지.
+ *  원본 스냅샷이 있으면 원복(원본과 동일) → "" / 변경됨 → "U". 없으면 "U". */
+export function resolveUpdateSts(row: any): RowStatus {
   if (row?.EDIT_STS === ROW_STATUS.INSERT) return ROW_STATUS.INSERT;
   if (row?.EDIT_STS === ROW_STATUS.DELETE) return ROW_STATUS.DELETE;
-  return ROW_STATUS.UPDATE;
+  const orig = row?.[ORIG_KEY];
+  if (!orig) return ROW_STATUS.UPDATE;
+  return matchesOrig(row, orig) ? "" : ROW_STATUS.UPDATE;
 }
 
 /**
@@ -132,10 +184,14 @@ export function commitRowChanges(
   if (!setRowData || !targetRow || !patch) return;
   setRowData((prev: any) => ({
     ...prev,
-    rows: (prev?.rows ?? []).map((r: any) =>
-      r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__)
-        ? { ...r, ...patch, EDIT_STS: nextEditSts(r) }
-        : r,
-    ),
+    rows: (prev?.rows ?? []).map((r: any) => {
+      const isTarget =
+        r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__);
+      if (!isTarget) return r;
+      const next = { ...r, ...patch };
+      carryOrig(next, r); // spread 로 사라진 원본 스냅샷 복원
+      next.EDIT_STS = resolveUpdateSts(next); // 원복이면 "" 로 되돌림
+      return next;
+    }),
   }));
 }

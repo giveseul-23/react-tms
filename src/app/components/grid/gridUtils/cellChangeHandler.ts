@@ -15,7 +15,7 @@
 //   setDataValue 는 컬럼 lookup 실패로 크래시 → 직접 mutation 으로 fallback.
 //   표시할 셀이 없으므로 redraw 도 불필요. 저장 로직은 row.EDIT_STS 만 읽으므로 정상 동작.
 
-import { ROW_STATUS } from "./rowStatus";
+import { ROW_STATUS, resolveUpdateSts } from "./rowStatus";
 
 export function withRowStatusTracking(
   userHandler?: (params: any) => void,
@@ -29,11 +29,13 @@ export function withRowStatusTracking(
     if (data && params.node) {
       const cur = data.EDIT_STS;
       if (cur !== ROW_STATUS.INSERT && cur !== ROW_STATUS.DELETE) {
+        // 원본 스냅샷이 있으면 원복 시 ""(미변경), 아니면 "U". 없으면 "U".
+        const sts = resolveUpdateSts(data);
         const hasEditStsCol = !!params.api?.getColumn?.("EDIT_STS");
         if (hasEditStsCol) {
-          params.node.setDataValue("EDIT_STS", ROW_STATUS.UPDATE);
+          params.node.setDataValue("EDIT_STS", sts);
         } else {
-          data.EDIT_STS = ROW_STATUS.UPDATE;
+          data.EDIT_STS = sts;
         }
       }
     }
