@@ -44,6 +44,7 @@ import {
   useAutoSize,
 } from "../gridCommon";
 import { standardAudit } from "../columns/commonColumns";
+import { Lang } from "@/app/services/common/Lang";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -103,6 +104,10 @@ type TreeGridProps<TRow extends TreeRow> = {
   sortField?: keyof TRow;
   /** 기본 펼침 레벨 (-1: 전체, 0: 루트만, N: N레벨까지 / 기본: 0) */
   defaultExpandLevel?: number;
+  /** 액션바 좌측에 표시할 부제목 (DataGrid 의 subTitle 과 동일). LBL_ 키면 Lang.get 자동 적용. */
+  subTitle?: string;
+  /** true 면 subTitle 에 Lang.get 을 적용하지 않고 원문 그대로 표시 (동적 내용용). */
+  subTitleNoLang?: boolean;
   /**
    * GridActionsBar에 넘길 액션 목록.
    * DataGrid 와 동일한 ActionItem[] 타입을 사용합니다.
@@ -229,6 +234,8 @@ function TreeGridInner<TRow extends TreeRow>(
     columnDefs,
     nameColumnHeader = "",
     nameColumnWidth = 180,
+    subTitle,
+    subTitleNoLang,
     getRowId,
     headerHeight = GRID_HEADER_HEIGHT,
     rowHeight = GRID_ROW_HEIGHT,
@@ -426,13 +433,21 @@ function TreeGridInner<TRow extends TreeRow>(
     null,
   );
 
-  // 외부에서 autoSizeKey 를 안 넘기면 source 가 새로 로드될 때마다 내부적으로
-  // 키를 bump 해 autoSize 가 결정적으로 재발화하도록 한다.
-  // source 참조 자체가 바뀔 때만 카운트 — 같은 배열에서 cell edit / mutate 한
-  // 경우는 ref 가 그대로라 trigger 안 됨 → 펼침/접기 / 셀 편집에는 영향 없음.
+  // 외부에서 autoSizeKey 를 안 넘기면 내부적으로 키를 bump 해 autoSize 를 재발화시킨다.
+  // 단 "조회(새 데이터 로드)" 에만 bump — 추가/편집/삭제 같은 in-place mutation 은 제외 →
+  // 셀 편집(체크박스 토글 등) 시 스크롤이 최상단으로 튀지 않음. (DataGrid autoSizeKey 정책과 동일)
+  //
+  // 판별: mutation 은 이전 source 의 행 객체를 재사용(spread/filter/map-keep)하므로 일부 ref 가
+  //       prev 에 존재한다. 조회/재조회는 buildSource 로 전부 새 객체를 만들어 prev 와 겹치는
+  //       ref 가 하나도 없다 → 그 경우에만 fresh load 로 보고 bump.
   const internalAutoSizeVersionRef = useRef(0);
+  const prevSourceRef = useRef<TRow[]>([]);
   const internalAutoSizeKey = useMemo(() => {
-    internalAutoSizeVersionRef.current += 1;
+    const prevSet = new Set(prevSourceRef.current);
+    prevSourceRef.current = source;
+    const isFreshLoad =
+      source.length > 0 && source.every((r) => !prevSet.has(r));
+    if (isFreshLoad) internalAutoSizeVersionRef.current += 1;
     return internalAutoSizeVersionRef.current;
   }, [source]);
 
@@ -671,7 +686,12 @@ function TreeGridInner<TRow extends TreeRow>(
     <div className={GRID_WRAPPER_CLASS}>
       {/* ── 액션바 (DataGrid 와 동일한 GridActionsBar 사용) ── */}
       <div className="relative z-1 shrink-0 min-w-0 w-full">
-        <GridActionsBar actions={wrappedActions} />
+        <GridActionsBar
+          actions={wrappedActions}
+          subTitle={
+            subTitle ? (subTitleNoLang ? subTitle : Lang.get(subTitle)) : undefined
+          }
+        />
       </div>
 
       {/* ── 그리드 본문 ── */}

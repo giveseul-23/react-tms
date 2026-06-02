@@ -44,6 +44,8 @@ type DataGridProps<TRow> = {
   /** 그리드별 액션 버튼들. 비거나 생략하면 actions 바 자체 숨김. */
   actions?: ActionItem[];
   subTitle?: string;
+  /** true 면 subTitle 에 Lang.get 을 적용하지 않고 원문 그대로 표시 (동적 내용용). */
+  subTitleNoLang?: boolean;
 
   pagination?: boolean;
 
@@ -137,6 +139,7 @@ export default function DataGrid<TRow>({
   layoutType = "tab",
   actions,
   subTitle,
+  subTitleNoLang,
   pagination = true,
   pageSize = 500,
   onRowSelected,
@@ -305,7 +308,9 @@ export default function DataGrid<TRow>({
       <div className="relative z-1 shrink-0 min-w-0 w-full">
         <GridActionsBar
           actions={wrappedActions}
-          subTitle={subTitle && Lang.get(subTitle)}
+          subTitle={
+            subTitle ? (subTitleNoLang ? subTitle : Lang.get(subTitle)) : undefined
+          }
         />
       </div>
 

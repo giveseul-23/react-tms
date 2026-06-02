@@ -38,7 +38,9 @@ export default function RoleResourcesByUserGroupManagement() {
 
   const renderRoleTreeNameCell = (params: any, ctx: TreeCellContext) => {
     const row = params.data;
-    const hasChild = model.roleTreeRows.some((item) => item.parentId === row.id);
+    const hasChild = model.roleTreeRows.some(
+      (item) => item.parentId === row.id,
+    );
 
     return (
       <TreeNameCell
@@ -66,11 +68,7 @@ export default function RoleResourcesByUserGroupManagement() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        rawFiltersRef: model.rawFiltersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CD,
+        ...model.bindSearch(),
       }}
       master={
         <SplitPane
@@ -98,9 +96,6 @@ export default function RoleResourcesByUserGroupManagement() {
       }
       detail={
         <div className="h-full min-h-0 flex flex-col">
-          <div className="shrink-0 px-3 py-2 border border-gray-200 rounded-t-lg bg-slate-50 text-sm font-medium text-slate-700">
-            {sub02Title || "\u00A0"}
-          </div>
           <div className="flex-1 min-h-0">
             <TreeGrid
               ref={treeGridRef}
@@ -111,7 +106,10 @@ export default function RoleResourcesByUserGroupManagement() {
               nameColumnWidth={180}
               sortField="RSRC_ID"
               defaultExpandLevel={-1}
+              subTitle={sub02Title}
+              subTitleNoLang
               actions={ctrl.treeActions}
+              getRowId={(p) => p.data.id}
             />
           </div>
         </div>
