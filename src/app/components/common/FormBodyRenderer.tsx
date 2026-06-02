@@ -106,11 +106,13 @@ function FormField({
     type,
     fieldType,
     dateUnit,
-    required,
     readOnly,
     sqlProp,
     nameField,
   } = col;
+  // required 는 top-level prop 또는 validators.required 둘 다 인정 (그리드와 동일).
+  const required =
+    col.required === true || (col as any).validators?.required === true;
 
   const headerNameSetLang = Lang.get(headerName);
   // 그리드와 동일한 위젯을 폼에도 — type 이 의미있는 위젯(text 아님)이면 type,

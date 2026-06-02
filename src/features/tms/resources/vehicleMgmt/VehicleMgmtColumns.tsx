@@ -18,6 +18,16 @@ export type ColumnDef = {
   fieldType?: FieldType; // 폼 입력 타입 (type 미지정 시 fallback)
   dateUnit?: "year" | "month" | "day"; // type "date" 단위
   required?: boolean;
+  // type "text" 검증
+  regex?: RegExp;
+  validators?: {
+    required?: boolean;
+    max?: number;
+    min?: number;
+    integerLength?: number;
+    pointLength?: number;
+    regexTp?: string;
+  };
   hide?: boolean; // 그리드에서 숨김
   formHide?: boolean; // 폼에서 숨김
   readOnly?: boolean;

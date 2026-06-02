@@ -9,6 +9,7 @@
 import { useCallback, useMemo } from "react";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { dirtyRows, toDsSave } from "@/app/components/grid/gridUtils/rowStatus";
+import { getColumnError } from "@/app/components/grid/gridUtils/processColumn";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
@@ -163,7 +164,9 @@ export function useBaseController<K extends string>({
       //   누락 시 헤더명을 모아 alert 후 저장 중단. 삭제(D) 행은 검증 안 함.
       const cols = slot.columnDefsRef.current ?? [];
       const requiredCols = cols.filter(
-        (c: any) => c?.required === true && (c?.field || c?.colId),
+        (c: any) =>
+          (c?.required === true || c?.validators?.required === true) &&
+          (c?.field || c?.colId),
       );
       if (requiredCols.length > 0) {
         const targets = dirty.filter(
@@ -182,6 +185,28 @@ export function useBaseController<K extends string>({
         }
         if (missing.length > 0) {
           alertMsg(`필수 입력 항목을 확인해주세요: ${missing.join(", ")}`);
+          return;
+        }
+      }
+
+      // ── 형식(regex/자릿수) 검증 — 위반 값은 저장 차단 ──────────
+      //   text regex / number integerLength·pointLength 위반이 I/U 행에 있으면 저장 중단.
+      //   (셀 마커로 표시되지만 잘못된 값은 절대 커밋되지 않도록 함. min/max 는 입력에서 이미 차단.)
+      {
+        const checkCols = cols.filter((c: any) => c?.field || c?.colId);
+        const targets = dirty.filter(
+          (r: any) => r.EDIT_STS !== "D" && r.delStatus !== true,
+        );
+        const msgs: string[] = [];
+        for (const r of targets) {
+          for (const c of checkCols) {
+            const f = (c.field ?? c.colId) as string;
+            const err = getColumnError(c, (r as any)[f]);
+            if (err && !msgs.includes(err)) msgs.push(err);
+          }
+        }
+        if (msgs.length > 0) {
+          alertMsg(msgs.join("\n"));
           return;
         }
       }

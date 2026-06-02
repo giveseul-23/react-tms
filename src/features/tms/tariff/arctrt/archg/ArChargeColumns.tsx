@@ -6,9 +6,12 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_AR_CHG_CD",
     field: "AR_CHG_CD",
-    required: true,
     insertable: true,
     align: "center",
+    validators: {
+      required: true,
+      regexTp: "GCODE",
+    },
   },
   {
     type: "text",
@@ -29,8 +32,9 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: Lang.get ("LBL_GL_LDGR_CD") + "(" + Lang.get("LBL_DEFAULT") + ")",
-    noLang:true,
+    headerName:
+      Lang.get("LBL_GL_LDGR_CD") + "(" + Lang.get("LBL_DEFAULT") + ")",
+    noLang: true,
     field: "GNRL_LDGR_CD",
     insertable: true,
     editable: true,
@@ -47,7 +51,7 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "combo",
     headerName: Lang.get("LBL_TAX_TCD") + "(" + Lang.get("LBL_DEFAULT") + ")",
-    noLang:true,
+    noLang: true,
     field: "TAX_TCD",
     codeKey: "taxTcdList",
     required: true,

@@ -24,6 +24,15 @@ export type ColumnDef = {
   dateUnit?: "year" | "month" | "day";
   insertable?: boolean;
   editable?: boolean;
+  regex?: RegExp;
+  validators?: {
+    required?: boolean;
+    max?: number;
+    min?: number;
+    integerLength?: number;
+    pointLength?: number;
+    regexTp?: string;
+  };
 };
 export const MAIN_COLUMN_DEFS: ColumnDef[] = [
   { headerName: "No" },

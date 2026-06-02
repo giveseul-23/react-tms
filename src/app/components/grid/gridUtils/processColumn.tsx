@@ -25,6 +25,11 @@ import { Lang } from "@/app/services/common/Lang";
 import { Util } from "@/app/services/common/Util";
 import { ComboCellEditor } from "@/app/components/grid/cellEditors/ComboCellEditor";
 import { PasswordCellEditor } from "@/app/components/grid/cellEditors/PasswordCellEditor";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/app/components/ui/popover";
 import { DatePickerPopover } from "@/app/components/Search/filters/DatePickerPopover";
 import { commitRowChange, commitRowChanges } from "./rowStatus";
 
@@ -75,6 +80,8 @@ const CUSTOM_KEYS = new Set([
   "summable",
   "defaultYn",
   "dateUnit",
+  "regex",
+  "validators",
   "isPrimaryKey",
   "insertable",
   "inputType",
@@ -125,12 +132,14 @@ function walkChildren(
       setRowData,
     ) as any;
     const withPassword = injectPasswordEditor(withEditor, setRowData) as any;
-    const withCheck = injectCheckRenderer(withPassword, setRowData) as any;
+    const withText = injectValidation(withPassword) as any;
+    const withCheck = injectCheckRenderer(withText, setRowData) as any;
     const withPopup = injectPopupCell(withCheck, opts) as any;
     const withDate = injectDateCell(withPopup, opts) as any;
     const withPolicy = applyEditPolicy(withDate) as any;
     const withRequired =
-      (child as any).required === true
+      (child as any).required === true ||
+      (child as any).validators?.required === true
         ? mergeHeaderClass(withPolicy, "ag-header-required")
         : withPolicy;
     return stripCustomKeys({
@@ -256,6 +265,160 @@ function injectPasswordEditor(
   } as AnyCol;
 }
 
+const GCODE_REGEX = /^[a-zA-Z0-9_ ]+$/;
+
+const isNumberType = (col: any) =>
+  col?.type === "numeric" ||
+  col?.type === "number" ||
+  col?.dataType === "number" ||
+  col?.cellDataType === "number";
+
+/** 컬럼의 검증 regex 반환 — type "text" + (regex | validators.regexTp). 없으면 undefined. */
+export function getColumnRegex(col: any): RegExp | undefined {
+  if (col?.type !== "text") return undefined;
+  if (col.regex instanceof RegExp) return col.regex;
+  if (col.validators?.regexTp === "GCODE") return GCODE_REGEX;
+  return undefined;
+}
+
+/** number 컬럼의 자릿수 검증 — integerLength(정수부)/pointLength(소수부) 위반 시 메시지, 통과 null.
+ *  (min/max 는 메시지 없이 valueSetter 에서 입력 자체를 막으므로 여기서 안 봄) */
+function getNumberError(col: any, value: any): string | null {
+  const v = col?.validators;
+  if (!v) return null;
+  const s = String(value).replace(/,/g, "");
+  if (s === "" || Number.isNaN(Number(s))) return null;
+  const headerName = col.noLang ? col.headerName : Lang.get(col.headerName);
+
+  if (v.integerLength != null) {
+    const intLen = s.split(".")[0].replace("-", "").length;
+    if (intLen > Number(v.integerLength)) {
+      return Lang.get("MSG_VALID_INT_LEN_MAX", headerName, String(v.integerLength));
+    }
+  }
+  if (v.pointLength != null) {
+    const dot = s.indexOf(".");
+    const decLen = dot === -1 ? 0 : s.length - dot - 1;
+    if (Number(v.pointLength) === 0 && decLen > 0) {
+      return Lang.get("MSG_VALID_NUM_INT", headerName);
+    }
+    if (decLen > Number(v.pointLength)) {
+      return Lang.get("MSG_VALID_POINT_LEN_MAX", headerName, String(v.pointLength));
+    }
+  }
+  return null;
+}
+
+/** 컬럼 값 검증 — 위반 시 에러 메시지(이미 Lang 적용), 통과 시 null.
+ *  text: regex → MSG_REGEX_TEXT / number: integerLength·pointLength.
+ *  빈값은 null(필수 여부는 required 정책에서 별도 처리). cellRenderer·saveGrid 공용. */
+export function getColumnError(col: any, value: any): string | null {
+  if (value == null || value === "") return null;
+  if (col?.type === "text") {
+    const re = getColumnRegex(col);
+    return re && !re.test(String(value)) ? Lang.get("MSG_REGEX_TEXT") : null;
+  }
+  if (isNumberType(col)) return getNumberError(col, value);
+  return null;
+}
+
+/**
+ * type "text"/"number" 컬럼에 검증 주입 (저장은 saveGrid 에서 차단).
+ *   - text  validators.max     → cellEditorParams.maxLength (입력 길이 제한)
+ *   - text  regex/regexTp       → "!" 마커 + 셀 밖 floating 메시지 (getColumnError)
+ *   - number validators.min/max → valueSetter 로 범위 밖 값 입력 거부(메시지 없음)
+ *   - number integerLength/pointLength → "!" 마커 + 셀 밖 floating 메시지
+ *   값이 유효해지면 사라짐(수정/추가 행 EDIT_STS I/U 에서만). required 는 기존 정책.
+ *   - 이미 cellRenderer 가 있으면 마커 미주입.
+ */
+function injectValidation(col: AnyCol): AnyCol {
+  const c = col as any;
+  const isText = c.type === "text";
+  const isNum = isNumberType(c);
+  if (!isText && !isNum) return col;
+  const v = c.validators;
+
+  const out: any = { ...col };
+  let changed = false;
+
+  // text: 입력 길이 제한
+  if (isText && v?.max != null) {
+    out.cellEditor = c.cellEditor ?? "agTextCellEditor";
+    out.cellEditorParams = { ...(c.cellEditorParams ?? {}), maxLength: Number(v.max) };
+    changed = true;
+  }
+
+  // number: min/max → 범위 밖 값 입력 거부 (메시지 없이 원복)
+  if (isNum && (v?.min != null || v?.max != null)) {
+    const field = (c.field ?? c.colId) as string | undefined;
+    if (field && !c.valueSetter) {
+      const min = v.min != null ? Number(v.min) : undefined;
+      const max = v.max != null ? Number(v.max) : undefined;
+      out.valueSetter = (p: any) => {
+        const raw = p.newValue;
+        const num = Number(String(raw ?? "").replace(/,/g, ""));
+        if (raw !== "" && raw != null && !Number.isNaN(num)) {
+          if (min != null && num < min) return false;
+          if (max != null && num > max) return false;
+        }
+        if (p.data) p.data[field] = raw;
+        return true;
+      };
+      changed = true;
+    }
+  }
+
+  // "!" 마커 + 셀 밖 floating 메시지 (text regex / number integer·pointLength)
+  const hasMarker = isText
+    ? !!getColumnRegex(c)
+    : v?.integerLength != null || v?.pointLength != null;
+  if (hasMarker && !c.cellRenderer) {
+    const renderCol = c;
+    out.cellRenderer = (p: any) => {
+      if (!p.data || p.node?.rowPinned) return p.value ?? null;
+      const display = p.valueFormatted ?? (p.value == null ? "" : String(p.value));
+      const sts = p.data.EDIT_STS;
+      const err =
+        sts === "I" || sts === "U" ? getColumnError(renderCol, p.value) : null;
+      if (!err) return <span className="truncate">{display}</span>;
+      return (
+        <Popover open>
+          <PopoverAnchor asChild>
+            <div
+              className={`flex items-center gap-1 h-full w-full ${isNum ? "justify-end" : ""}`}
+            >
+              {isNum && (
+                <span className="shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                  !
+                </span>
+              )}
+              <span className="min-w-0 truncate text-red-600">{display}</span>
+              {!isNum && (
+                <span className="shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                  !
+                </span>
+              )}
+            </div>
+          </PopoverAnchor>
+          <PopoverContent
+            side="bottom"
+            align="start"
+            sideOffset={2}
+            hideWhenDetached
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            className="w-auto max-w-[260px] px-2 py-1 text-[11px] text-red-600 border border-red-200 bg-red-50 shadow rounded"
+          >
+            {err}
+          </PopoverContent>
+        </Popover>
+      );
+    };
+    changed = true;
+  }
+
+  return changed ? (out as AnyCol) : col;
+}
+
 /**
  * type "popup" / "popuser" 컬럼에 셀 렌더러(값 + 돋보기) 자동 주입.
  *   - 편집(돋보기 노출) 정책은 다른 컬럼 타입과 동일하게 insertable/editable + EDIT_STS 로 제어:
@@ -375,7 +538,9 @@ export function processColumnDef(
   col: AnyCol,
   opts: ProcessOptions = {},
 ): AnyCol {
-  const required = (col as any).required === true;
+  const required =
+    (col as any).required === true ||
+    (col as any).validators?.required === true;
   const raw = processColumnDefRaw(col, opts);
   const withRequired = required
     ? mergeHeaderClass(raw, "ag-header-required")
@@ -554,13 +719,15 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
     injectDateCell(
       injectPopupCell(
         injectCheckRenderer(
-          injectPasswordEditor(
-            injectComboEditor(
-              injectCodeRenderer(col, codeMap),
-              codeMap,
+          injectValidation(
+            injectPasswordEditor(
+              injectComboEditor(
+                injectCodeRenderer(col, codeMap),
+                codeMap,
+                opts.setRowData,
+              ),
               opts.setRowData,
             ),
-            opts.setRowData,
           ),
           opts.setRowData,
         ),
