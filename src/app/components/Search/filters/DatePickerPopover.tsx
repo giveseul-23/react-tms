@@ -96,11 +96,67 @@ function MonthYearPicker({
   );
 }
 
+// 연 선택 그리드 (precision="year")
+function YearPicker({
+  initialYear,
+  selectedYear,
+  onSelect,
+}: {
+  initialYear: number;
+  selectedYear?: number;
+  onSelect: (year: number) => void;
+}) {
+  const [base, setBase] = useState<number>(initialYear - 5);
+  const years = Array.from({ length: 12 }, (_, i) => base + i);
+  return (
+    <div className="p-3 w-[252px]">
+      <div className="flex items-center justify-between mb-3">
+        <button
+          type="button"
+          onClick={() => setBase((b) => b - 12)}
+          className="size-7 flex items-center justify-center rounded border border-input bg-background hover:bg-accent"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
+        <span className="text-sm font-medium">
+          {years[0]} - {years[11]}
+        </span>
+        <button
+          type="button"
+          onClick={() => setBase((b) => b + 12)}
+          className="size-7 flex items-center justify-center rounded border border-input bg-background hover:bg-accent"
+        >
+          <ChevronRight className="size-4" />
+        </button>
+      </div>
+      <div className="grid grid-cols-3 gap-1.5">
+        {years.map((y) => (
+          <button
+            key={y}
+            type="button"
+            onClick={() => onSelect(y)}
+            className={cn(
+              "h-9 text-xs rounded border transition-colors",
+              y === selectedYear
+                ? "bg-primary border-primary text-[rgb(var(--primary))]"
+                : "border-input bg-background hover:bg-accent",
+            )}
+          >
+            {y}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 type Props = {
   id?: string;
   value: string;
   onChange: (value: string) => void;
   withTime?: boolean;
+  /** 선택 단위 — "day"(기본, YYYY-MM-DD) / "month"(YYYY-MM) / "year"(YYYY). */
+  precision?: "year" | "month" | "day";
   className?: string;
   placeholder?: string;
   /** true 면 트리거를 캘린더 아이콘 단일 버튼으로 표시 (값 텍스트 숨김).
@@ -112,8 +168,17 @@ type Props = {
 function parseValue(
   value: string,
   withTime: boolean,
+  precision: "year" | "month" | "day" = "day",
 ): { date?: Date; time: string } {
   if (!value) return { time: "00:00:00" };
+  if (precision === "year") {
+    const parsed = parse(value, "yyyy", new Date());
+    return { date: isValid(parsed) ? parsed : undefined, time: "00:00:00" };
+  }
+  if (precision === "month") {
+    const parsed = parse(value, "yyyy-MM", new Date());
+    return { date: isValid(parsed) ? parsed : undefined, time: "00:00:00" };
+  }
   if (withTime) {
     const [datePart, timeRaw = "00:00:00"] = value.split("T");
     const parsed = parse(datePart, "yyyy-MM-dd", new Date());
@@ -139,6 +204,7 @@ export function DatePickerPopover({
   value,
   onChange,
   withTime = false,
+  precision = "day",
   className,
   placeholder,
   iconOnly = false,
@@ -152,22 +218,36 @@ export function DatePickerPopover({
   // 팝오버가 열릴 때마다 현재 value 로 초기화
   useEffect(() => {
     if (!open) return;
-    const { date, time } = parseValue(value, withTime);
+    const { date, time } = parseValue(value, withTime, precision);
     setDraftDate(date);
     setDraftTime(time);
     setViewMonth(date ?? new Date());
     setViewMode("day");
-  }, [open, value, withTime]);
+  }, [open, value, withTime, precision]);
 
   const display = formatDisplay(value, withTime);
   const placeholderText =
-    placeholder ?? (withTime ? "YYYY-MM-DD HH:MM:SS" : "YYYY-MM-DD");
+    placeholder ??
+    (precision === "year"
+      ? "YYYY"
+      : precision === "month"
+        ? "YYYY-MM"
+        : withTime
+          ? "YYYY-MM-DD HH:MM:SS"
+          : "YYYY-MM-DD");
+
+  // precision 별 draftDate → 저장 문자열
+  const formatResult = (d: Date) =>
+    precision === "year"
+      ? format(d, "yyyy")
+      : precision === "month"
+        ? format(d, "yyyy-MM")
+        : withTime
+          ? `${format(d, "yyyy-MM-dd")}T${draftTime || "00:00:00"}`
+          : format(d, "yyyy-MM-dd");
 
   const handleToday = () => {
-    const today = new Date();
-    const dateStr = format(today, "yyyy-MM-dd");
-    const result = withTime ? `${dateStr}T${draftTime || "00:00:00"}` : dateStr;
-    onChange(result);
+    onChange(formatResult(new Date()));
     setOpen(false);
   };
 
@@ -176,9 +256,7 @@ export function DatePickerPopover({
       setOpen(false);
       return;
     }
-    const dateStr = format(draftDate, "yyyy-MM-dd");
-    const result = withTime ? `${dateStr}T${draftTime || "00:00:00"}` : dateStr;
-    onChange(result);
+    onChange(formatResult(draftDate));
     setOpen(false);
   };
 
@@ -223,7 +301,20 @@ export function DatePickerPopover({
       </PopoverTrigger>
 
       <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
-        {viewMode === "day" ? (
+        {precision === "year" ? (
+          <YearPicker
+            initialYear={(draftDate ?? new Date()).getFullYear()}
+            selectedYear={draftDate?.getFullYear()}
+            onSelect={(y) => setDraftDate(new Date(y, 0, 1))}
+          />
+        ) : precision === "month" ? (
+          <MonthYearPicker
+            initialYear={(draftDate ?? viewMonth).getFullYear()}
+            currentYear={draftDate?.getFullYear() ?? -1}
+            currentMonth={draftDate?.getMonth() ?? -1}
+            onSelect={(y, m) => setDraftDate(new Date(y, m, 1))}
+          />
+        ) : viewMode === "day" ? (
           <Calendar
             mode="single"
             selected={draftDate}
@@ -275,8 +366,8 @@ export function DatePickerPopover({
           />
         )}
 
-        {/* 오늘 버튼 (day 모드에서만) */}
-        {viewMode === "day" && (
+        {/* 오늘 버튼 (day precision 의 day 모드에서만) */}
+        {precision === "day" && viewMode === "day" && (
           <div className="flex justify-center pb-1.5">
             <button
               type="button"

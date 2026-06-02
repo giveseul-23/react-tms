@@ -153,12 +153,16 @@ export function useXxxModel(menuCode: string) {
 - `headerName: "No"` → 자동 일련번호 + 고정 너비
 - 공통코드 → 라벨: 컬럼에 `codeKey` 지정 (DataGrid 자동 cellRenderer)
 - **편집 가능 여부** (EDIT_STS 기반 자동 변환):
-  - `insertable: true` → 추가 상태(`EDIT_STS:"I"`) 행에서만 편집 가능
-  - `editable: true` → 수정 상태(`EDIT_STS:"I"` 아닌 행)에서만 편집 가능
-  - `insertable: true, editable: true` 둘 다 → 항상 편집 가능
-  - 둘 다 미지정/`false` → 편집 불가
+  - **둘 다 미지정**: 입력 위젯 타입(`date`/`datetime`/`popup`/`popuser`)만 **기본 편집 ON**(데이트피커·돋보기 자동 노출). 그 외 타입(`text`/`numeric`/`combo`/표시용)과 `field` 없는 컬럼은 **읽기전용**(안전장치 — 읽기전용 컬럼에 `editable:false` 를 일일이 안 달아도 됨).
+  - `insertable`/`editable` 을 하나라도 명시하면 **타입 무관하게 그 설정이 우선** 적용:
+    - `insertable: true` → 추가 상태(`EDIT_STS:"I"`) 행에서만 편집 가능
+    - `editable: true` → 수정 상태(`EDIT_STS:"I"` 아닌 행)에서만 편집 가능
+    - `insertable: true, editable: true` 둘 다 → 항상 편집 가능
+    - 그 외(명시적 `false` 조합) → 편집 불가
   - `editable: <함수|변수>` 는 그대로 ag-grid 에 전달 (커스텀 분기 그대로 유지)
-  - **이 정책은 모든 편집형 컬럼 타입(`combo`/`date`/`datetime`/`popup`/`popuser` 등)에 공통 적용** — 특히 `popup`/`popuser` 의 돋보기 노출도 동일하게 `insertable`(추가행 `EDIT_STS:"I"`)/`editable`(수정행)/둘 다(항상)/둘 다 미지정(노출 안 함) 으로 제어. 앞으로 편집형 컬럼 타입을 새로 추가하면 반드시 `insertable`/`editable` 속성으로 편집 가부를 관리할 것.
+  - 위젯 타입을 읽기전용으로 둘 땐 `editable: false` 명시. (audit/삭제/상태 등 공통 컬럼은 `editable:false` 기본 적용됨)
+  - **이 정책은 모든 편집형 컬럼 타입(`combo`/`date`/`datetime`/`popup`/`popuser` 등)에 공통 적용** — 특히 `popup`/`popuser` 의 돋보기, `date` 의 데이트피커 노출도 동일하게 위 정책(둘 다 미지정→항상, `insertable`→추가행, `editable`→수정행, 명시적 끔→미노출)으로 제어. 앞으로 편집형 컬럼 타입을 새로 추가하면 반드시 이 `insertable`/`editable` 정책으로 편집 가부를 관리할 것.
+  - **폼(`FormBodyRenderer`)도 그리드와 동일하게 컬럼 `type`/`dateUnit` 으로 위젯을 렌더한다** — `popup`/`popuser`→검색버튼, `date`(+`dateUnit`)→데이트피커, `combo`/`select`→셀렉트, `check`→체크박스. (`fieldType` 는 `type` 미지정 시의 fallback)
 - **PK 컬럼**: `isPrimaryKey: true` 표시 → DataGrid 가 `rowKeys`/`autoSelectFirstRow` 자동 활성화 (View 에서 prop 명시 불필요). 보통 `isPrimaryKey: true` + `insertable: true` 조합 (추가 시 입력 / 수정 시 잠금).
 - **audit 컬럼**: `model.bind` 가 `audit:true` 자동 spread → DataGrid 가 컬럼 끝에 standardAudit 자동 추가. 컬럼 파일에서 `standardAudit` 직접 호출 안 함.
 - audit 부분 토글: View 에서 `audit={{ updatePerson: false }}` 명시

@@ -8,6 +8,7 @@ import FormInput from "@/app/components/common/FormInput";
 import FormSelect from "@/app/components/common/FormSelect";
 import FormCheckbox from "@/app/components/common/FormCheckbox";
 import PopupField from "@/app/components/common/PopupField";
+import { DatePickerPopover } from "@/app/components/Search/filters/DatePickerPopover";
 import { Lang } from "@/app/services/common/Lang";
 
 type Props = {
@@ -66,7 +67,7 @@ export function FormBodyRenderer({
                 nameValue={col.nameValue ? data[col.nameValue] : undefined}
                 onChange={onChange}
                 onPopupSearch={onPopupSearch}
-                options={col.optionsKey ? codeMap[col.optionsKey] : undefined}
+                options={col.codeKey ? codeMap[col.codeKey] : undefined}
                 mode={mode}
               />
             ))}
@@ -102,7 +103,9 @@ function FormField({
   const {
     field,
     headerName,
+    type,
     fieldType,
+    dateUnit,
     required,
     readOnly,
     sqlProp,
@@ -110,9 +113,13 @@ function FormField({
   } = col;
 
   const headerNameSetLang = Lang.get(headerName);
+  // 그리드와 동일한 위젯을 폼에도 — type 이 의미있는 위젯(text 아님)이면 type,
+  // 아니면 fieldType fallback. (vehicleMgmt 처럼 type:"text"+fieldType 인 화면 호환)
+  const kind = type && type !== "text" ? type : fieldType;
 
-  switch (fieldType) {
+  switch (kind) {
     case "popup":
+    case "popuser":
       return (
         <PopupField
           label={headerNameSetLang}
@@ -126,6 +133,7 @@ function FormField({
       );
 
     case "select":
+    case "combo":
       return (
         <FormSelect
           label={headerNameSetLang}
@@ -155,29 +163,20 @@ function FormField({
       );
 
     case "date":
+    case "datetime":
       return (
-        <FormInput
+        <FormDateField
           label={headerNameSetLang}
           required={required}
-          value={value ?? ""}
+          value={value}
+          dateUnit={dateUnit}
           onChange={(v) => onChange(field!, v)}
           readOnly={readOnly}
-          type="date"
         />
       );
 
     case "number":
-      return (
-        <FormInput
-          label={headerNameSetLang}
-          required={required}
-          value={value ?? ""}
-          onChange={(v) => onChange(field!, v)}
-          readOnly={readOnly}
-          type="number"
-        />
-      );
-
+    case "numeric":
     default: // "text"
       return (
         <FormInput
@@ -189,4 +188,56 @@ function FormField({
         />
       );
   }
+}
+
+/* ── 날짜 입력 — 그리드 date 셀과 동일한 DatePickerPopover (dateUnit 단위) ── */
+function FormDateField({
+  label,
+  required,
+  value,
+  dateUnit = "day",
+  onChange,
+  readOnly,
+}: {
+  label: string;
+  required?: boolean;
+  value: any;
+  dateUnit?: "year" | "month" | "day";
+  onChange: (v: string) => void;
+  readOnly?: boolean;
+}) {
+  // 저장값(compact: YYYY/YYYYMM/YYYYMMDD) ↔ 피커값(대시) 변환
+  const toPicker = (raw: any): string => {
+    if (raw == null || raw === "") return "";
+    const s = String(raw).replace(/[\s\-:/T]/g, "");
+    if (dateUnit === "year") return s.length >= 4 ? s.slice(0, 4) : "";
+    if (dateUnit === "month")
+      return s.length >= 6 ? `${s.slice(0, 4)}-${s.slice(4, 6)}` : "";
+    return s.length >= 8
+      ? `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`
+      : "";
+  };
+  const toCompact = (v: string) => v.replace(/[\s\-:T]/g, "");
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[11px] text-muted-foreground">
+        {label}
+        {required && <span className="text-destructive ml-0.5">*</span>}
+      </label>
+      {readOnly ? (
+        <input
+          className="h-8 rounded-md border border-input px-2.5 text-xs bg-muted text-muted-foreground cursor-default"
+          value={toPicker(value)}
+          readOnly
+        />
+      ) : (
+        <DatePickerPopover
+          value={toPicker(value)}
+          precision={dateUnit}
+          onChange={(v) => onChange(v ? toCompact(v) : "")}
+        />
+      )}
+    </div>
+  );
 }

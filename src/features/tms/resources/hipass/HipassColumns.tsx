@@ -21,6 +21,9 @@ export type ColumnDef = {
   nameValue?: string;
   nameField?: string;
   codeKey?: string;
+  dateUnit?: "year" | "month" | "day";
+  insertable?: boolean;
+  editable?: boolean;
 };
 export const MAIN_COLUMN_DEFS: ColumnDef[] = [
   { headerName: "No" },
@@ -68,12 +71,15 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     required: true,
   },
   {
-    type: "text",
+    type: "date",
     headerName: "LBL_VALID_DTTM",
+    dateUnit: "month",
     field: "VALID_DTTM",
     areaNo: 0,
     fieldType: "text",
     required: true,
+    insertable: true,
+    editable: true,
   },
   {
     type: "text",

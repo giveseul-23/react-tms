@@ -70,6 +70,7 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   type: "text",
   headerName: "LBL_DELETE",
   field: "_delete",
+  editable: false,
   width: 60,
   filter: false,
   floatingFilter: false,
@@ -141,6 +142,7 @@ export const makeRowStatusColumn = (overrides: Record<string, any> = {}) => ({
   type: "text",
   headerName: "LBL_ROW_STATUS",
   field: "EDIT_STS",
+  editable: false,
   width: 80,
   cellRenderer: (params: any) => {
     if (params.node?.rowPinned) return null;
@@ -165,6 +167,7 @@ export const makeInsertPersonColumn = (
   type: "text",
   headerName: "LBL_INSERT_PERSON_ID",
   field: "CRE_USR_ID",
+  editable: false,
   ...overrides,
 });
 
@@ -172,6 +175,7 @@ export const makeInsertDateColumn = (overrides: Record<string, any> = {}) => ({
   type: "date",
   headerName: "LBL_INSERT_DATE",
   field: "CRE_DTTM",
+  editable: false,
   ...overrides,
 });
 
@@ -181,6 +185,7 @@ export const makeUpdatePersonColumn = (
   type: "text",
   headerName: "LBL_UPDATE_PERSON_ID",
   field: "UPD_USR_ID",
+  editable: false,
   ...overrides,
 });
 
@@ -188,6 +193,7 @@ export const makeUpdateTimeColumn = (overrides: Record<string, any> = {}) => ({
   type: "date",
   headerName: "LBL_UPDATE_TIME",
   field: "UPD_DTTM",
+  editable: false,
   ...overrides,
 });
 

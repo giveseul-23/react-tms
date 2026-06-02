@@ -74,6 +74,7 @@ const CUSTOM_KEYS = new Set([
   "noLang",
   "summable",
   "defaultYn",
+  "dateUnit",
   "isPrimaryKey",
   "insertable",
   "inputType",
@@ -274,19 +275,17 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
 
   const codeKey = c.codeKey as string | undefined;
   const isUser = c.type === "popuser";
-  // 돋보기 노출(편집) 정책 — 다른 컬럼 타입과 동일 (insertable/editable + EDIT_STS):
-  //   insertable → 추가행(EDIT_STS "I") 에서만, editable → 수정행에서만,
-  //   둘 다 → 항상, 둘 다 미지정 → 노출 안 함.
-  const ins = c.insertable === true;
-  const edt = c.editable === true;
-  if (!ins && !edt) return col;
+  // 돋보기 노출(편집) 정책 — 다른 컬럼 타입과 동일 (resolveEditMode):
+  //   둘 다 미지정 → 항상 노출, insertable → 추가행, editable → 수정행, 명시적 끔 → 노출 안 함.
+  const mode = resolveEditMode(c);
+  if (mode === "none") return col;
 
   return {
     ...col,
     // 팝업 셀은 ag-grid 네이티브 인라인 편집을 쓰지 않음 →
-    // applyEditPolicy 가 editable 함수를 박지 않도록 strip.
+    // applyEditPolicy 의 기본값(true)이 인라인 에디터를 안 박도록 editable:false 로 strip.
     insertable: undefined,
-    editable: undefined,
+    editable: false,
     cellRenderer: (params: any) => {
       if (!params.data || params.node?.rowPinned) return null;
       const { openPopup, closePopup, setRowData, codeMap } = opts;
@@ -300,7 +299,7 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
 
       // 편집 가능 여부 (EDIT_STS 기반) — 안 되면 돋보기 없이 표시값만
       const editStsI = params.node?.data?.EDIT_STS === "I";
-      const cellEditable = ins && edt ? true : ins ? editStsI : !editStsI;
+      const cellEditable = rowEditableByMode(mode, editStsI);
       if (!cellEditable) {
         return <span className="truncate">{display}</span>;
       }
@@ -399,9 +398,16 @@ function mergeHeaderClass(col: AnyCol, cls: string): AnyCol {
 // ── 날짜 셀 picker: 표시값/저장값 포맷 변환 헬퍼 ──────────────────
 //   화면의 저장 포맷은 검색 필터 컨벤션과 동일 (compact: 대시/콜론/T 제거).
 //   DatePickerPopover 는 "YYYY-MM-DD" 또는 "YYYY-MM-DDTHH:MM:SS" 만 받음.
-function pickerInputFromRaw(value: any, withTime: boolean): string {
+function pickerInputFromRaw(
+  value: any,
+  withTime: boolean,
+  unit: "year" | "month" | "day" = "day",
+): string {
   if (value == null || value === "") return "";
   const s = String(value).replace(/[\s\-:/T]/g, "");
+  if (unit === "year") return s.length >= 4 ? s.slice(0, 4) : "";
+  if (unit === "month")
+    return s.length >= 6 ? `${s.slice(0, 4)}-${s.slice(4, 6)}` : "";
   if (s.length < 8) return "";
   const d = `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
   if (!withTime) return d;
@@ -413,9 +419,19 @@ function pickerOutputToCompact(v: string): string {
   return v.replace(/[\s\-:T]/g, "");
 }
 
+// 단위별 표시 포맷 — 년: "YYYY", 년월: "YYYY-MM" (day 는 Util.formatDttm 사용).
+function formatDateByUnit(value: any, unit: "year" | "month"): string {
+  if (value == null || value === "") return "";
+  const s = String(value).replace(/[\s\-:/T]/g, "");
+  if (unit === "year") return s.slice(0, 4);
+  return s.length >= 6 ? `${s.slice(0, 4)}-${s.slice(4, 6)}` : s;
+}
+
 /** type "date" / "datetime" + (insertable|editable) 컬럼에 picker cellRenderer 주입.
  *   - 셀 안에 DatePickerPopover (border-less) → 클릭 시 조회조건과 동일한 데이트피커.
  *   - withTime = (type === "datetime") 으로 시간 입력 토글.
+ *   - type "date" 는 dateUnit 으로 단위 지정 — "year"(YYYY) / "month"(YYYYMM) / "day"(YYYYMMDD, 기본).
+ *     단위별로 데이트피커 화면(연/년월/일)과 저장·표시 포맷이 달라진다.
  *   - 편집 가능 row 판단 (insertable/editable + EDIT_STS) → 안 되면 plain 텍스트.
  *   - ag-grid 의 default cellEditor 와 충돌 막기 위해 insertable/editable 을
  *     strip 해서 반환 → applyEditPolicy 가 editable:true 함수를 안 박음.
@@ -426,25 +442,28 @@ function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
   if (c.cellRenderer) return col;
   const field = (c.field ?? c.colId) as string | undefined;
   if (!field) return col;
-  const ins = c.insertable === true;
-  const edt = c.editable === true;
-  if (!ins && !edt) return col;
+  const mode = resolveEditMode(c);
+  if (mode === "none") return col;
 
   const withTime = c.type === "datetime";
+  // 선택 단위 — datetime 은 항상 day(+시간), date 는 dateUnit 으로 년/년월/년월일 지정.
+  const unit: "year" | "month" | "day" =
+    c.type === "datetime" ? "day" : ((c.dateUnit as any) ?? "day");
   const { setRowData } = opts;
 
   return {
     ...col,
     insertable: undefined,
-    editable: undefined,
+    editable: false,
     cellRenderer: (params: any) => {
       if (!params.data || params.node?.rowPinned) return null;
       const row = params.node?.data;
       const editStsI = row?.EDIT_STS === "I";
-      const cellEditable = ins && edt ? true : ins ? editStsI : !editStsI;
+      const cellEditable = rowEditableByMode(mode, editStsI);
       const raw = params.value;
 
-      const display = Util.formatDttm(raw);
+      const display =
+        unit === "day" ? Util.formatDttm(raw) : formatDateByUnit(raw, unit);
       if (!cellEditable) {
         return <span>{display}</span>;
       }
@@ -453,12 +472,13 @@ function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
         <div className="flex items-center gap-1 h-full w-full">
           <span className="flex-1 truncate">{display}</span>
           <DatePickerPopover
-            value={pickerInputFromRaw(raw, withTime)}
+            value={pickerInputFromRaw(raw, withTime, unit)}
             onChange={(v: string) => {
               const next = v ? pickerOutputToCompact(v) : "";
               commitRowChange(setRowData, row, field, next);
             }}
             withTime={withTime}
+            precision={unit}
             iconOnly
           />
         </div>
@@ -467,19 +487,60 @@ function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
   } as AnyCol;
 }
 
-/** insertable / editable 을 EDIT_STS 기반 editable 함수로 변환.
- *   - insertable + editable → 항상 편집 가능
- *   - insertable 만        → 추가 상태(EDIT_STS:"I") 행에서만 편집
- *   - editable 만          → 수정 상태(EDIT_STS:"I" 아닌 행) 에서만 편집
- *   - 둘 다 없음/false     → 변경 안 함 (편집 불가) */
-function applyEditPolicy(col: AnyCol): AnyCol {
-  const c = col as any;
+type EditMode = "always" | "insert" | "update" | "none" | "custom";
+
+// insertable/editable 미지정 시 "기본 편집 ON" 으로 둘 입력 위젯 타입.
+// 그 외 타입(text/numeric/combo/표시용 등)은 미지정이면 읽기전용 →
+// 읽기전용 컬럼에 editable:false 를 일일이 안 달아도 안전(안전장치).
+const DEFAULT_EDITABLE_TYPES = new Set([
+  "date",
+  "datetime",
+  "popup",
+  "popuser",
+]);
+
+/** insertable / editable + type 으로 편집 모드 결정.
+ *   - 둘 다 미지정:
+ *       입력 위젯 타입(date/datetime/popup/popuser) → "always" (기본 편집),
+ *       그 외 타입 / field 없는 컬럼 → "none" (읽기전용 기본 — 안전장치).
+ *   - 하나라도 명시하면 타입 무관하게 그 설정이 우선:
+ *       insertable:true → "insert"(추가행), editable:true → "update"(수정행), 둘 다 true → "always",
+ *       그 외(명시적 false 조합) → "none"
+ *   - editable 이 함수/변수(boolean 아님) → "custom" (ag-grid 로 그대로 passthrough). */
+function resolveEditMode(c: any): EditMode {
+  if (
+    typeof c.editable !== "undefined" &&
+    c.editable !== true &&
+    c.editable !== false
+  ) {
+    return "custom";
+  }
+  if (c.insertable === undefined && c.editable === undefined) {
+    return (c.field || c.colId) && DEFAULT_EDITABLE_TYPES.has(c.type)
+      ? "always"
+      : "none";
+  }
   const ins = c.insertable === true;
   const edt = c.editable === true;
-  if (!ins && !edt) return col;
+  if (ins && edt) return "always";
+  if (ins) return "insert";
+  if (edt) return "update";
+  return "none";
+}
+
+/** mode + EDIT_STS 로 해당 행 편집 가능 여부. */
+function rowEditableByMode(mode: EditMode, editStsI: boolean): boolean {
+  return mode === "insert" ? editStsI : mode === "update" ? !editStsI : true;
+}
+
+/** insertable / editable 을 EDIT_STS 기반 editable 함수로 변환 (resolveEditMode 정책). */
+function applyEditPolicy(col: AnyCol): AnyCol {
+  const c = col as any;
+  const mode = resolveEditMode(c);
+  if (mode === "custom" || mode === "none") return col;
   let editableFn: any;
-  if (ins && edt) editableFn = true;
-  else if (ins) editableFn = (p: any) => p.data?.EDIT_STS === "I";
+  if (mode === "always") editableFn = true;
+  else if (mode === "insert") editableFn = (p: any) => p.data?.EDIT_STS === "I";
   else editableFn = (p: any) => p.data?.EDIT_STS !== "I";
   return { ...c, editable: editableFn } as AnyCol;
 }
@@ -607,6 +668,11 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
     (colDef as any).fieldType === "date"
   ) {
     const isDatetime = (colDef as any).type === "datetime";
+    const dateUnit = (colDef as any).dateUnit as
+      | "year"
+      | "month"
+      | "day"
+      | undefined;
     const userDateCellStyle = (colDef as any).cellStyle;
     const baseDateCellStyle =
       userDateCellStyle && typeof userDateCellStyle === "object"
@@ -619,15 +685,17 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
       valueFormatter: (params: any) =>
         isDatetime
           ? Util.formatDttm(params?.value)
-          : (() => {
-              const v = params?.value;
-              if (v == null || v === "") return "";
-              const s = String(v);
-              if (s.includes("-")) return s.slice(0, 10);
-              if (s.length >= 8)
-                return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
-              return s;
-            })(),
+          : dateUnit === "year" || dateUnit === "month"
+            ? formatDateByUnit(params?.value, dateUnit)
+            : (() => {
+                const v = params?.value;
+                if (v == null || v === "") return "";
+                const s = String(v);
+                if (s.includes("-")) return s.slice(0, 10);
+                if (s.length >= 8)
+                  return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+                return s;
+              })(),
       cellStyle: { ...baseDateCellStyle, textAlign: finalDateAlign },
       headerClass: `ag-header-${finalDateAlign}`,
       ...(translatedChildren ? { children: translatedChildren } : {}),

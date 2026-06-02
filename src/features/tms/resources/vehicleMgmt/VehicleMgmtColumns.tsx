@@ -15,7 +15,8 @@ export type ColumnDef = {
   field?: string;
   areaNo?: number; // 폼 그룹 번호
   areaLabel?: string; // 섹션 제목 (areaNo별 첫 컬럼에만 선언)
-  fieldType?: FieldType; // 폼 입력 타입
+  fieldType?: FieldType; // 폼 입력 타입 (type 미지정 시 fallback)
+  dateUnit?: "year" | "month" | "day"; // type "date" 단위
   required?: boolean;
   hide?: boolean; // 그리드에서 숨김
   formHide?: boolean; // 폼에서 숨김
