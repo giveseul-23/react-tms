@@ -32,6 +32,7 @@ export default function DivisionSto() {
           columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
           audit={false}
+          headerCheckbox={false}
         />
       }
       detail={
@@ -39,6 +40,7 @@ export default function DivisionSto() {
           {...model.bind("detail")}
           columnDefs={DETAIL_COLUMN_DEFS}
           actions={ctrl.detailActions}
+          headerCheckbox={false}
         />
       }
     />
