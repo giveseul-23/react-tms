@@ -156,57 +156,47 @@ export const MAIN_COLUMN_DEFS = [
     insertable: true,
     editable: true,
   },
-]
+];
 
 export const DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", 
-    headerName: "LBL_DIVISION_CODE", 
+  {
+    type: "text",
+    headerName: "LBL_DIVISION_CODE",
     field: "ORG_DIV_CD",
     hide: true,
   },
-  { type: "popup", 
-    headerName: "LBL_DIVISION_CODE", 
+  {
+    type: "popup",
+    headerName: "LBL_DIVISION_CODE",
     field: "DIV_CD",
-    nameField: "DIV_NM",  
+    nameField: "DIV_NM",
     sqlId: "selectDivisionCodeName",
     popupTitle: "LBL_DIVISION_CODE",
     required: true,
     insertable: true,
     editable: true,
-    onChange: (newValue, currentRow, gridApi) => {
-      if (newValue) {
-        currentRow.setValue('LGST_GRP_CD', '');
-        currentRow.setValue('LGST_GRP_NM', '');
-      }
-    }
+    callback: ({ commit }) => {
+      commit({ LGST_GRP_CD: "", LGST_GRP_NM: "" });
+    },
   },
-  { type: "text", 
-    headerName: "LBL_RATE_ITEM_CD", 
-    field: "CHG_CD",
-    hide: true, 
-  },
-  { type: "text", 
-    headerName: "LBL_DIVISION_NAME", 
-    field: "DIV_NM" 
-  },
-  { type: "popup", 
-    headerName: "LBL_LOGISTICS_GROUP_CODE", 
+  { type: "text", headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD", hide: true },
+  { type: "text", headerName: "LBL_DIVISION_NAME", field: "DIV_NM" },
+  {
+    type: "popup",
+    headerName: "LBL_LOGISTICS_GROUP_CODE",
     field: "LGST_GRP_CD",
-    nameField: "LGST_GRP_NM",  
+    nameField: "LGST_GRP_NM",
     sqlId: "selectLogisticsgroupCodeName",
     popupTitle: "LBL_LOGISTICS_GROUP_CODE",
     required: true,
     insertable: true,
     editable: true,
-    getPopupParams: (currentRow) => {
-      return {
-        keyParam : currentRow.DIV_CD
-      };
-    }
+    extraParams: (row) => ({ keyParam: row?.DIV_CD ?? "" }),
   },
-  { type: "text", 
-    headerName: "LBL_LOGISTICS_GROUP_NAME", 
-    field: "LGST_GRP_NM" 
+  {
+    type: "text",
+    headerName: "LBL_LOGISTICS_GROUP_NAME",
+    field: "LGST_GRP_NM",
   },
 ];

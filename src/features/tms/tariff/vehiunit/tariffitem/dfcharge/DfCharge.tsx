@@ -22,9 +22,7 @@ export default function DfCharge() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       defaultDirection="horizontal"
       layoutToggle={true}
@@ -43,6 +41,7 @@ export default function DfCharge() {
           {...model.bind("detail")}
           columnDefs={DETAIL_COLUMN_DEFS}
           actions={ctrl.detailActions}
+          model={model}
         />
       }
     />

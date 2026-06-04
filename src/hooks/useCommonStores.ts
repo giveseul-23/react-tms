@@ -63,7 +63,7 @@ export function useCommonStores(params: Record<string, CommonStoreSpec>) {
               return {
                 key,
                 sqlProp,
-                keyParam: keyParam ?? sqlProp,
+                keyParam: keyParam,
                 ...rest,
                 ...sessionFields,
               };

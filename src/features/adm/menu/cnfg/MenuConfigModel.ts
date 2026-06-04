@@ -4,13 +4,6 @@ import { useCommonStores } from "@/hooks/useCommonStores";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import type { MenuRow } from "./MenuConfig";
 
-export type GridData = {
-  rows: any[];
-  totalCount: number;
-  page: number;
-  limit: number;
-};
-
 export function useMenuConfigModel() {
   // ── 레이아웃
   const [layout, setLayout] = useState<LayoutType>("side");
@@ -18,14 +11,6 @@ export function useMenuConfigModel() {
   // ── 트리 SOURCE (buildSource 결과 flat 배열)
   // 조회 전: [] / 조회 후: buildSource(serverData) 결과
   const [source, setSource] = useState<MenuRow[]>([]);
-
-  // ── 메인 그리드 데이터 (서버 원본 — 엑셀 등에서 사용)
-  const [gridData, setGridData] = useState<GridData>({
-    rows: [],
-    totalCount: 0,
-    page: 1,
-    limit: 20,
-  });
 
   // ── 선택 행
   const [selectedRow, setSelectedRow] = useState<any>(null);
@@ -58,8 +43,6 @@ export function useMenuConfigModel() {
     setLayout,
     source,
     setSource,
-    gridData,
-    setGridData,
     selectedRow,
     setSelectedRow: setSelectedRowWithRef,
     selectedRowRef,

@@ -132,6 +132,9 @@ type DataGridProps<TRow> = {
   /** columnDefs 변경 시 호출 — model.bind() 가 자동 주입.
    *  saveGrid 의 required 검증이 slot.columnDefsRef 로 컬럼 메타 read. */
   onColumnDefsReady?: (cols: any[]) => void;
+  /** 화면 model — popup 컬럼의 extraParams(row, model) 2번째 인자로 전달.
+   *  다른 그리드 선택행 공유 등에 사용 (View 에서 model={model} 로 명시 전달). */
+  model?: any;
 };
 
 export default function DataGrid<TRow>({
@@ -171,6 +174,7 @@ export default function DataGrid<TRow>({
   setRowData,
   readOnly,
   onColumnDefsReady,
+  model,
 }: DataGridProps<TRow>) {
   // columnDefs 가 바뀔 때마다 외부(useBaseModel slot)에 알린다.
   // saveGrid 의 required 검증이 columnDefsRef 로 메타 read.
@@ -223,6 +227,7 @@ export default function DataGrid<TRow>({
     openPopup,
     closePopup,
     readOnly,
+    model,
   });
 
   const { handleGridReady, handleFirstDataRendered } = useAutoSize<TRow>({

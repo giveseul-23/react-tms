@@ -9,12 +9,16 @@
 // 기존 Controller 코드와 byte-for-byte 동일하게 유지한다.
 
 import { useCallback, useMemo, useState } from "react";
-import { downExcelSearch, downExcelSearched } from "@/views/common/common";
+import {
+  downExcelSearch,
+  downExcelSearched,
+} from "@/app/services/common/excelService";
 import { TrackPanel } from "@/app/components/track/TrackPanel";
 import {
   TRACK_KEY_FIELD_MAP,
   type TrackType,
 } from "@/app/components/track/trackColumns";
+import { Lang } from "@/app/services/common/Lang";
 
 // ────────────────────────────────────────────────────────────────
 // Types
@@ -36,9 +40,10 @@ export type SaveActionConfig = {
 
 export type ExcelGroupActionConfig = {
   columns: any;
-  menuName: string;
+  menuCode: string;
   fetchFn: () => Promise<any> | any;
   rows: any[];
+  searchUrl?: string;
   /** 조회된 모든 데이터 다운로드 버튼 숨김 */
   hideAll?: boolean;
   /** 보이는 데이터 다운로드 버튼 숨김 */
@@ -223,7 +228,8 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
       onClick: () => {
         downExcelSearch({
           columns: config.columns,
-          menuName: config.menuName,
+          menuName: config.menuCode,
+          menuCd: config.menuCode,
           fetchFn: config.fetchFn,
         });
       },
@@ -238,8 +244,10 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
       onClick: () => {
         downExcelSearched({
           columns: config.columns,
-          menuName: config.menuName,
+          menuName: config.menuCode,
+          menuCd: config.menuCode,
           rows: config.rows,
+          searchUrl: config.searchUrl,
         });
       },
     });

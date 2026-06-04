@@ -125,16 +125,4 @@ export const vehicleMgmtApi = {
       }),
     );
   },
-
-  // ── 엑셀 ────────────────────────────────────────────────────
-  gridExcelAll(payload: any) {
-    return apiClient.post<CommonResponse>(
-      "/vehicleMgmtService/downloadExcel",
-      withSession({
-        MENU_CD: MENU_CODE,
-        ...payload,
-      }),
-      { responseType: "blob" },
-    );
-  },
 };

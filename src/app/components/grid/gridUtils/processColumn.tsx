@@ -31,6 +31,7 @@ import {
   PopoverContent,
 } from "@/app/components/ui/popover";
 import { DatePickerPopover } from "@/app/components/Search/filters/DatePickerPopover";
+import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import { commitRowChange, commitRowChanges } from "./rowStatus";
 
 // CommonPopup 은 내부에서 DataGrid 를 렌더 → 정적 import 시 순환참조.
@@ -72,6 +73,9 @@ export type ProcessOptions = {
   /** 그리드 인라인 편집 전면 차단 — 폼(GridFormPage)이 편집 surface 인 화면.
    *  picker/돋보기/combo/native editable/체크박스 토글을 모두 끄고 표시 전용으로. */
   readOnly?: boolean;
+  /** 화면 model — popup 컬럼의 extraParams(row, model) 2번째 인자로 전달.
+   *  다른 그리드 선택행 값 공유에 사용 (예: model.grids.main.selectedRef.current). */
+  model?: any;
 };
 
 const HEADER_PADDING = 32;
@@ -108,6 +112,7 @@ const CUSTOM_KEYS = new Set([
   "renderPopup",
   "keyParam",
   "extraParams",
+  "callback",
 ]);
 
 function stripCustomKeys<T extends Record<string, any>>(col: T): T {
@@ -510,6 +515,14 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
             commit: (patch: Record<string, any>) =>
               commitRowChanges(setRowData, row, patch),
             close,
+            // popup 타입과 동일한 추가 세팅 콜백 — renderPopup 의 onApply 에서 callback(picked) 호출.
+            callback: (picked: any) =>
+              c.callback?.({
+                picked,
+                row,
+                commit: (p: Record<string, any>) =>
+                  commitRowChanges(setRowData, row, p),
+              }),
           });
           if (content) {
             openPopup({
@@ -519,6 +532,31 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
             });
           }
         } else {
+          // extraParams 평가 — 함수형이면 (row, model) 전달. 같은 행은 row,
+          // 다른 그리드 값은 model.grids.<key>.selectedRef. 참조 중 throw 하면 "선택행 없음" 가드 모달.
+          let resolvedExtra: Record<string, any>;
+          try {
+            resolvedExtra = {
+              ...(c.keyParam ? { keyParam: c.keyParam } : {}),
+              // 정적 객체 또는 (row, model)=>객체 — 같은 행 값(row) 또는 다른 그리드 선택행(model.grids.<key>.selectedRef)을 SQL 파라미터로 전달.
+              ...(typeof c.extraParams === "function"
+                ? c.extraParams(row, opts.model)
+                : (c.extraParams ?? {})),
+            };
+          } catch (e: any) {
+            openPopup({
+              title: c.popupTitle ?? c.headerName,
+              content: (
+                <ConfirmModal
+                  type="check"
+                  title={Lang.get("TTL_CONFIRM")}
+                  description={e?.message || "선택된 행이 없습니다."}
+                  onClose={close}
+                />
+              ),
+            });
+            return;
+          }
           openPopup({
             title: c.popupTitle ?? c.headerName,
             width: c.popupWidth ?? "2xl",
@@ -527,14 +565,18 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
                 <CommonPopup
                   sqlId={c.sqlId}
                   fetchFn={c.fetchFn}
-                  extraParams={{
-                    ...(c.keyParam ? { keyParam: c.keyParam } : {}),
-                    ...(c.extraParams ?? {}),
-                  }}
+                  extraParams={resolvedExtra}
                   onApply={(picked: any) => {
                     const patch: Record<string, any> = { [field]: picked.CODE };
                     if (c.nameField) patch[c.nameField] = picked.NAME;
                     commitRowChanges(setRowData, row, patch);
+                    // 선택 후 추가 세팅 콜백 (예: 종속 필드 초기화). 센차 callback(params,opener,receiveRecord) 대응.
+                    c.callback?.({
+                      picked,
+                      row,
+                      commit: (p: Record<string, any>) =>
+                        commitRowChanges(setRowData, row, p),
+                    });
                     close();
                   }}
                   onClose={close}

@@ -1,5 +1,5 @@
 import { apiClient } from "@/app/http/client";
-import { getSessionFields } from "@/app/services/auth/auth";
+import { getSessionFields, getUserGroup } from "@/app/services/auth/auth";
 import type { ServerSearchConditionRow } from "@/features/search/search.meta.types";
 
 export type commonRequest = {
@@ -77,5 +77,47 @@ export const commonApi = {
     };
     const url = (params.url as string) || urls[module];
     return apiClient.post(url, { ...getSessionFields(), ...params });
+  },
+
+  // ── Excel Service (공통 엑셀 다운로드 3단계) ──────────────────
+  // 센차 ExGridEditor/ExTreeEditor 의 saveUserTempData → commonExcelDownPrepare
+  // → commonExcelDown(iframe) 흐름을 React 로 포팅. 위젯별로 흩어져 있던 호출을
+  // 이 공통 API 하나로 통일한다. 마지막 단계는 JWT Bearer 인증을 위해 iframe GET
+  // 대신 apiClient blob GET 으로 받는다.
+
+  /** 1단계 — 임시 데이터 저장. jsonData(=DS_JSONDATA) 는 body, 나머지는 query. */
+  saveUserTempData(
+    jsonData: Record<string, unknown>,
+    params: Record<string, unknown> = {},
+  ) {
+    return apiClient.post("/downloaderService/saveUserTempData", jsonData, {
+      params: { ...getSessionFields(), ...params },
+    });
+  },
+
+  /** 2단계 — 다운로드 준비 (센차: userLang/sesUserGroup/sesUserId/MENU_CD).
+   *  EXCEL_INFO/SEARCH_URL 은 1단계에서 저장된 세션(PARAM_MAP)에서 서버가 읽으므로 여기선 안 보냄. */
+  commonExcelDownPrepare(menuCd: string) {
+    const session = getSessionFields();
+    return apiClient.post(
+      "/downloaderService/commonExcelDownPrepare",
+      {},
+      {
+        params: {
+          ...session,
+          userLang: session.sesLang,
+          sesUserGroup: getUserGroup() ?? "",
+          MENU_CD: menuCd,
+        },
+      },
+    );
+  },
+
+  /** 3단계 — 파일 스트림 다운로드 (blob). */
+  downloadCommonExcel(menuCd: string) {
+    return apiClient.get("/downloaderService/commonExcelDown", {
+      params: { ...getSessionFields(), MENU_CD: menuCd },
+      responseType: "blob",
+    });
   },
 };

@@ -156,16 +156,5 @@ export const tenderApi = {
       }),
     );
   },
-
-  gridExcelAll(payload: any) {
-    return apiClient.post<commonResponse>(
-      "/openapina/carrier/downloadExcel",
-      withSession({
-        MENU_CD: MENU_CD,
-        ...payload,
-      }),
-      { responseType: "blob" },
-    );
-  },
-  // gridExcel, onCarrierRateExcelAll, gridExcelAllBySearch 제거 (미사용)
+  // gridExcel, onCarrierRateExcelAll, gridExcelAllBySearch, gridExcelAll(공통 excelService 로 이관) 제거 (미사용)
 };

@@ -116,7 +116,7 @@ export function useMenuConfigController({
         });
 
       if (newId === parentId) {
-        showAlert("메뉴코드가 상위 메뉴코드와 같을 수 없습니다.");
+        showAlert(Lang.get("MSG_MENU_CD_SAME_AS_PARENT"));
         return false;
       }
       if (model.source.some((r) => r.id === newId)) {
@@ -284,9 +284,9 @@ export function useMenuConfigController({
     // ── 엑셀 ────────────────────────────────────────────────────
     makeExcelGroupAction({
       columns: MAIN_COLUMN_DEFS,
-      menuName: MENU_CD,
+      menuCode: MENU_CD,
       fetchFn: () => menuApi.getMenuConfigList(filtersRef.current),
-      rows: model.gridData.rows,
+      rows: model.source,
     }),
   ];
 
