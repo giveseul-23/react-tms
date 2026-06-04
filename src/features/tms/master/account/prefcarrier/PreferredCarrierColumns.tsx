@@ -1,9 +1,28 @@
+import { CommonPopup } from "@/app/components/popup/CommonPopup";
+
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_LOCATION_CODE",
     field: "LOC_CD",
+    renderPopup: ({ commit, close }) => (
+        <CommonPopup
+          sqlId="selectLocationCodeName"
+          onApply={(picked: any) => {
+            commit({
+              LOC_CD: picked.CODE,
+              LOC_NM: picked.NAME,
+              LOC_ID: picked.LOC_ID,
+            });
+            close();
+          }}
+          onClose={close}
+        />
+      ),
+    required: true,
+    insertable: true,
+    editable: false,
   },
   {
     type: "text",
