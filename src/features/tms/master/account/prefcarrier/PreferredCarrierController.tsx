@@ -10,6 +10,8 @@ import { MAIN_COLUMN_DEFS } from "./PreferredCarrierColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { PreferredCarrierModel, GridKey } from "./PreferredCarrierModel";
 import { Lang } from "@/app/services/common/Lang";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import VehicleAddPopup from "../location/popup/VehicleAddPopup";
 
 interface ControllerArgs {
   model: PreferredCarrierModel;
@@ -17,6 +19,7 @@ interface ControllerArgs {
 
 export function usePreferredCarrierController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { openPopup, closePopup } = usePopup();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -31,11 +34,12 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
     },
     [model.grids.main],
   );
-
+  
   // ── 메인 행 추가 ─────────────────────────────────────────────
   // base.addRow 가 EDIT_STS: "I" 자동 주입 + push.
-  const onAddMain = useCallback(() => {
-    base.addRow("main", {});
+  const onAddMain = useCallback((rowData: any) => {
+    // {} 대신 팝업에서 가공되어 넘어온 rowData를 넣어줌
+    base.addRow("main", rowData); 
   }, [base]);
 
   // ── 메인 저장 — 삭제행 있으면 confirm 후 저장 ─────────────────
@@ -53,7 +57,32 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
   // ActionItem[] 타입 명시 — 화면 고유 버튼 추가 시 type 추론 도움.
   const mainActions: ActionItem[] = useMemo(
     () => [
-      makeAddAction({ onClick: onAddMain }),
+      {
+        type: "button",
+        key: "LBL_ADD",
+        label: "BTN_ADD",
+        onClick: (e: any) => {
+          openPopup({
+            title: "LBL_PREFERED_CARRIER",
+            content: (
+              <VehicleAddPopup
+                onConfirm={(payload: any[]) => {
+                  // 팝업에서 선택되어 배열로 넘어온 차량 데이터들을 루프 돌며 추가
+                  payload.forEach((data) => {
+                    const rowParam = {
+                      ...data,
+                    };
+                    onAddMain(rowParam); 
+                  });
+                  closePopup(); 
+                }}
+                onClose={closePopup}
+              />
+            ),
+            width: "full",
+          });
+        },
+      },
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
@@ -62,7 +91,7 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
         rows: model.grids.main.rows,
       }),
     ],
-    [onAddMain, onSaveMain, model],
+    [onSaveMain, model],
   );
 
 

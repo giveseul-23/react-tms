@@ -29,6 +29,7 @@ export default function ControlDataReceptionStatus() {
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           audit={false}
+          headerCheckbox={false}
         />
       }
     />

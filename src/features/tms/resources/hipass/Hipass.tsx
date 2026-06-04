@@ -158,6 +158,7 @@ export default function Hipass() {
           actions={ctrl.mainActions}
           onRowClicked={ctrl.handleRowClicked}
           codeMap={model.codeMap}
+          headerCheckbox={false}
         />
       }
       form={{
