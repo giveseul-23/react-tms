@@ -1,0 +1,212 @@
+export const MAIN_COLUMN_DEFS = [
+  { headerName: "No" }, // 자동 일련번호
+  {
+    type: "combo",
+    headerName: "LBL_OP_TCD",
+    field: "DF_CHG_OP_DIV_TCD",
+    codeKey: "dfChgOpDivTcd",
+    required: true,
+    insertable: true,
+    editable: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_RATE_ITEM_CD",
+    field: "CHG_CD",
+    insertable: true,
+    validators: {
+      required: true,
+      regexTp: "GCODE",
+    },
+  },
+  {
+    type: "text",
+    headerName: "LBL_RATE_ITEM_NAME",
+    field: "CHG_NM",
+    required: true,
+    insertable: true,
+    editable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_USE_YN",
+    field: "USE_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_DLY_ALCD_YN",
+    field: "DLY_ALCD_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_DEDUCTION_YN",
+    field: "DDCT_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "popup",
+    headerName: "LBL_DEDUCTION_CHARGE_CODE",
+    field: "DEDUCTION_CHG_CD",
+    sqlId: "selectTariffDfLgstChgList",
+    popupTitle: "LBL_DEDUCTION_CHARGE_CODE",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_USR_REG_CHG_YN",
+    field: "USR_REG_CHG_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_USR_REG_CHG_RSN_REQD_YN",
+    field: "USR_REG_CHG_RSN_REQD_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_SAVE_RECALC_YN",
+    field: "SAVE_RECALC_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_SAVE_EXCEL_OPER_YN",
+    field: "EXCL_OPER_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_FUEL_PRICE_YN",
+    field: "FUEL_PRICE_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "check",
+    headerName: "LBL_ALLOWED_CANCEL_YN",
+    field: "ALW_CHG_CAN_YN",
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_CALC_SEQ",
+    field: "CALC_SEQ",
+    required: true,
+    editable: true,
+    insertable: true,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_RATE_ALLOC_RULE",
+    field: "RATE_ALLC_RULE_CD",
+    codeKey: "rateAllcRuleCd",
+    required: true,
+    insertable: true,
+    editable: true,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_ROUND_TYPE",
+    field: "RDNG_RCD",
+    codeKey: "roundingType",
+    required: true,
+    insertable: true,
+    editable: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_SQLID_NM",
+    field: "SQL_ID",
+    insertable: true,
+    editable: true,
+    validators: {
+      regexTp: "GCODE",
+    },
+  },
+  {
+    type: "text",
+    headerName: "LBL_REMARK",
+    field: "RMK",
+    insertable: true,
+    editable: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_REF_CD1",
+    field: "REF_CD1",
+    insertable: true,
+    editable: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_REF_CD2",
+    field: "REF_CD2",
+    insertable: true,
+    editable: true,
+  },
+]
+
+export const DETAIL_COLUMN_DEFS = [
+  { headerName: "No" },
+  { type: "text", 
+    headerName: "LBL_DIVISION_CODE", 
+    field: "ORG_DIV_CD",
+    hide: true,
+  },
+  { type: "popup", 
+    headerName: "LBL_DIVISION_CODE", 
+    field: "DIV_CD",
+    nameField: "DIV_NM",  
+    sqlId: "selectDivisionCodeName",
+    popupTitle: "LBL_DIVISION_CODE",
+    required: true,
+    insertable: true,
+    editable: true,
+    onChange: (newValue, currentRow, gridApi) => {
+      if (newValue) {
+        currentRow.setValue('LGST_GRP_CD', '');
+        currentRow.setValue('LGST_GRP_NM', '');
+      }
+    }
+  },
+  { type: "text", 
+    headerName: "LBL_RATE_ITEM_CD", 
+    field: "CHG_CD",
+    hide: true, 
+  },
+  { type: "text", 
+    headerName: "LBL_DIVISION_NAME", 
+    field: "DIV_NM" 
+  },
+  { type: "popup", 
+    headerName: "LBL_LOGISTICS_GROUP_CODE", 
+    field: "LGST_GRP_CD",
+    nameField: "LGST_GRP_NM",  
+    sqlId: "selectLogisticsgroupCodeName",
+    popupTitle: "LBL_LOGISTICS_GROUP_CODE",
+    required: true,
+    insertable: true,
+    editable: true,
+    getPopupParams: (currentRow) => {
+      return {
+        keyParam : currentRow.DIV_CD
+      };
+    }
+  },
+  { type: "text", 
+    headerName: "LBL_LOGISTICS_GROUP_NAME", 
+    field: "LGST_GRP_NM" 
+  },
+];
