@@ -14,7 +14,6 @@ import { MENU_CD } from "./Application";
 import { Lang } from "@/app/services/common/Lang";
 
 type ControllerProps = {
-  menuCd: string;
   model: ApplicationModel;
 };
 
