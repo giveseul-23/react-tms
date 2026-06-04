@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { markUpdate } from "@/app/components/grid/gridCommon";
+import { commitRowChange, commitRowChanges } from "@/app/components/grid/gridCommon";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { usePopup } from "@/app/components/popup/PopupContext";
 
 import { useHipassModel } from "./HipassModel";
 import { useHipassController } from "./HipassController";
 import { MAIN_COLUMN_DEFS } from "./HipassColumns";
-import type { ColumnDef } from "./HipassColumns";
+import type { ColumnDef } from "@/app/components/common/formColumnDef";
 import { FormBodyRenderer } from "@/app/components/common/FormBodyRenderer";
 import { GridFormPage } from "@/app/components/layout/presets/GridFormPage";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
@@ -18,7 +18,7 @@ export const MENU_CODE = "MENU_HIPASS_MGMT";
 
 type HipassFormBodyProps = {
   data: any;
-  setData: (updater: (prev: any) => any) => void;
+  onChange: (field: string, value: any) => void;
   mode: DetailMode;
   onPopupSearch: (sqlId: string, codeField: string, nameField: string) => void;
   codeMap: Record<string, Record<string, string>>;
@@ -39,14 +39,11 @@ function formColumnsForRow(mode: DetailMode): ColumnDef[] {
 
 export function HipassFormBody({
   data,
-  setData,
+  onChange,
   mode,
   onPopupSearch,
   codeMap,
 }: HipassFormBodyProps) {
-  const onChange = (field: string, value: any) =>
-    setData((prev: any) => ({ ...prev, [field]: value }));
-
   const columns = useMemo(() => formColumnsForRow(mode), [mode]);
 
   return (
@@ -65,22 +62,11 @@ export default function Hipass() {
   const model = useHipassModel(MENU_CODE);
   const ctrl = useHipassController({ model });
 
-  const setDetailDataWithGrid = useCallback(
-    (updater: ((prev: any) => any) | any) => {
-      model.setDetailData((prev) => {
-        const next = typeof updater === "function" ? updater(prev) : updater;
-        const selected = model.grids.main.selectedRef.current;
-        if (selected && model.detailOpen) {
-          const merged = { ...selected, ...next };
-          markUpdate(merged);
-          model.grids.main.setData((p) => ({
-            ...p,
-            rows: p.rows.map((r) => (r === selected ? merged : r)),
-          }));
-          model.grids.main.setSelected(merged);
-        }
-        return next;
-      });
+  const onFormChange = useCallback(
+    (field: string, value: any) => {
+      const selected = model.grids.main.selectedRef.current;
+      if (!selected) return;
+      commitRowChange(model.grids.main.setData, selected, field, value);
     },
     [model],
   );
@@ -104,7 +90,7 @@ export default function Hipass() {
         <CommonPopup
           sqlId={sqlId}
           filterCol={isVehicle ? "LGST_GRP_CD" : ""}
-          filterValue={isVehicle ? String(model.detailData.LGST_GRP_CD ?? "") : ""}
+          filterValue={isVehicle ? String(model.grids.main.selectedRef.current?.LGST_GRP_CD ?? "") : ""}
           extraParams={isVehicle ? { keyParam: "100" } : undefined}
           onApply={(row: any) => {
             closePopup();
@@ -116,7 +102,9 @@ export default function Hipass() {
             } else if (nameField === "LBL_VEH_NO") {
               patch.VEH_NO = row.NAME;
             }
-            setDetailDataWithGrid((prev: any) => ({ ...prev, ...patch }));
+            const selected = model.grids.main.selectedRef.current;
+            if (selected)
+              commitRowChanges(model.grids.main.setData, selected, patch);
           }}
           onClose={closePopup}
         />
@@ -134,7 +122,7 @@ export default function Hipass() {
     </button>
   );
 
-  const detailTitle = model.detailData?.HIPASS_CARD_NO || "상세내역";
+  const detailTitle = model.grids.main.selected?.HIPASS_CARD_NO || "상세내역";
 
   return (
     <GridFormPage
@@ -169,7 +157,7 @@ export default function Hipass() {
         onClose: model.closeDetail,
         nav: {
           current: model.detailIndex + 1,
-          total: model.grids.main.data.totalCount,
+          total: model.grids.main.data.rows.length,
           onPrev: () => ctrl.handleNavigate(-1),
           onNext: () => ctrl.handleNavigate(1),
           onJump: (n) => ctrl.handleJumpTo(n),
@@ -180,8 +168,8 @@ export default function Hipass() {
         onJumpInputBlur: () => setJumpInput(String(model.detailIndex + 1)),
         body: (
           <HipassFormBody
-            data={model.detailData}
-            setData={setDetailDataWithGrid}
+            data={model.grids.main.selected ?? {}}
+            onChange={onFormChange}
             mode={model.detailMode}
             onPopupSearch={handlePopupSearch}
             codeMap={model.codeMap}

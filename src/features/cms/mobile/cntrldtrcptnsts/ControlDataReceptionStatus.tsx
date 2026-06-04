@@ -20,7 +20,6 @@ export default function ControlDataReceptionStatus() {
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
-        menuCode: MENU_CODE,
       }}
       grid={
         <DataGrid

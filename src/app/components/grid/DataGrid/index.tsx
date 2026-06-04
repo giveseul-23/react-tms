@@ -126,6 +126,9 @@ type DataGridProps<TRow> = {
       };
   /** audit delete 컬럼이 행 삭제 시 호출할 setter (model.bind() 가 자동 주입). */
   setRowData?: (updater: any) => void;
+  /** 인라인 편집 전면 차단 (picker/돋보기/combo/체크박스/native editable 모두 OFF).
+   *  GridFormPage 가 자동 주입 — 폼이 편집 surface 인 화면의 그리드는 표시 전용. */
+  readOnly?: boolean;
   /** columnDefs 변경 시 호출 — model.bind() 가 자동 주입.
    *  saveGrid 의 required 검증이 slot.columnDefsRef 로 컬럼 메타 read. */
   onColumnDefsReady?: (cols: any[]) => void;
@@ -166,6 +169,7 @@ export default function DataGrid<TRow>({
   onTabChange,
   audit,
   setRowData,
+  readOnly,
   onColumnDefsReady,
 }: DataGridProps<TRow>) {
   // columnDefs 가 바뀔 때마다 외부(useBaseModel slot)에 알린다.
@@ -218,6 +222,7 @@ export default function DataGrid<TRow>({
     setRowData,
     openPopup,
     closePopup,
+    readOnly,
   });
 
   const { handleGridReady, handleFirstDataRendered } = useAutoSize<TRow>({

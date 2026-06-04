@@ -41,6 +41,16 @@ const CommonPopup = React.lazy(() =>
   })),
 );
 
+// insertable 은 ag-grid 표준이 아닌 프로젝트 자체 편집정책 prop (EDIT_STS 기반).
+// AbstractColDef 에 선언 병합 → ColDef/ColGroupDef(=AnyCol) 전체가 1급 속성으로 보유.
+declare module "ag-grid-community" {
+  // 제네릭 시그니처는 ag-grid 원본과 동일해야 선언 병합됨 (본문 미사용은 정상).
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface AbstractColDef<TData = any, TValue = any> {
+    insertable?: boolean;
+  }
+}
+
 type AnyCol = ColDef<any> | ColGroupDef<any>;
 
 export type ProcessOptions = {
@@ -59,6 +69,9 @@ export type ProcessOptions = {
     width?: any;
   }) => void;
   closePopup?: () => void;
+  /** 그리드 인라인 편집 전면 차단 — 폼(GridFormPage)이 편집 surface 인 화면.
+   *  picker/돋보기/combo/native editable/체크박스 토글을 모두 끄고 표시 전용으로. */
+  readOnly?: boolean;
 };
 
 const HEADER_PADDING = 32;
@@ -133,10 +146,10 @@ function walkChildren(
     ) as any;
     const withPassword = injectPasswordEditor(withEditor, setRowData) as any;
     const withText = injectValidation(withPassword) as any;
-    const withCheck = injectCheckRenderer(withText, setRowData) as any;
+    const withCheck = injectCheckRenderer(withText, setRowData, opts.readOnly) as any;
     const withPopup = injectPopupCell(withCheck, opts) as any;
     const withDate = injectDateCell(withPopup, opts) as any;
-    const withPolicy = applyEditPolicy(withDate) as any;
+    const withPolicy = applyEditPolicy(withDate, opts.readOnly) as any;
     const withRequired =
       (child as any).required === true ||
       (child as any).validators?.required === true
@@ -186,6 +199,7 @@ function injectCodeRenderer(
 function injectCheckRenderer(
   col: AnyCol,
   setRowData?: (updater: any) => void,
+  readOnly?: boolean,
 ): AnyCol {
   const c = col as any;
   if (c.type !== "check") return col;
@@ -202,10 +216,15 @@ function injectCheckRenderer(
             type="checkbox"
             className="ag-input-field-input ag-checkbox-input"
             checked={checked}
-            onChange={() => {
-              const next = checked ? "N" : "Y";
-              commitRowChange(setRowData, params.node?.data, field, next);
-            }}
+            disabled={readOnly}
+            onChange={
+              readOnly
+                ? undefined
+                : () => {
+                    const next = checked ? "N" : "Y";
+                    commitRowChange(setRowData, params.node?.data, field, next);
+                  }
+            }
           />
         </div>
       );
@@ -293,7 +312,11 @@ function getNumberError(col: any, value: any): string | null {
   if (v.integerLength != null) {
     const intLen = s.split(".")[0].replace("-", "").length;
     if (intLen > Number(v.integerLength)) {
-      return Lang.get("MSG_VALID_INT_LEN_MAX", headerName, String(v.integerLength));
+      return Lang.get(
+        "MSG_VALID_INT_LEN_MAX",
+        headerName,
+        String(v.integerLength),
+      );
     }
   }
   if (v.pointLength != null) {
@@ -303,7 +326,11 @@ function getNumberError(col: any, value: any): string | null {
       return Lang.get("MSG_VALID_NUM_INT", headerName);
     }
     if (decLen > Number(v.pointLength)) {
-      return Lang.get("MSG_VALID_POINT_LEN_MAX", headerName, String(v.pointLength));
+      return Lang.get(
+        "MSG_VALID_POINT_LEN_MAX",
+        headerName,
+        String(v.pointLength),
+      );
     }
   }
   return null;
@@ -344,7 +371,10 @@ function injectValidation(col: AnyCol): AnyCol {
   // text: 입력 길이 제한
   if (isText && v?.max != null) {
     out.cellEditor = c.cellEditor ?? "agTextCellEditor";
-    out.cellEditorParams = { ...(c.cellEditorParams ?? {}), maxLength: Number(v.max) };
+    out.cellEditorParams = {
+      ...(c.cellEditorParams ?? {}),
+      maxLength: Number(v.max),
+    };
     changed = true;
   }
 
@@ -376,7 +406,8 @@ function injectValidation(col: AnyCol): AnyCol {
     const renderCol = c;
     out.cellRenderer = (p: any) => {
       if (!p.data || p.node?.rowPinned) return p.value ?? null;
-      const display = p.valueFormatted ?? (p.value == null ? "" : String(p.value));
+      const display =
+        p.valueFormatted ?? (p.value == null ? "" : String(p.value));
       const sts = p.data.EDIT_STS;
       const err =
         sts === "I" || sts === "U" ? getColumnError(renderCol, p.value) : null;
@@ -433,6 +464,7 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
   const c = col as any;
   if (c.type !== "popup" && c.type !== "popuser") return col;
   if (c.cellRenderer) return col;
+  if (opts.readOnly) return col; // 폼 화면 그리드: 돋보기 미주입(표시 전용)
   const field = (c.field ?? c.colId) as string | undefined;
   if (!field) return col;
 
@@ -447,7 +479,7 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
     ...col,
     // 팝업 셀은 ag-grid 네이티브 인라인 편집을 쓰지 않음 →
     // applyEditPolicy 의 기본값(true)이 인라인 에디터를 안 박도록 editable:false 로 strip.
-    insertable: undefined,
+    insertable: false,
     editable: false,
     cellRenderer: (params: any) => {
       if (!params.data || params.node?.rowPinned) return null;
@@ -584,12 +616,23 @@ function pickerOutputToCompact(v: string): string {
   return v.replace(/[\s\-:T]/g, "");
 }
 
-// 단위별 표시 포맷 — 년: "YYYY", 년월: "YYYY-MM" (day 는 Util.formatDttm 사용).
+// 단위별 표시 포맷 — 년: "YYYY", 년월: "YYYY-MM".
 function formatDateByUnit(value: any, unit: "year" | "month"): string {
   if (value == null || value === "") return "";
   const s = String(value).replace(/[\s\-:/T]/g, "");
   if (unit === "year") return s.slice(0, 4);
   return s.length >= 6 ? `${s.slice(0, 4)}-${s.slice(4, 6)}` : s;
+}
+
+// day 단위 날짜 표시 — 값에 시간이 있어도 떼고 "YYYY-MM-DD" 까지만.
+//   (읽기전용 date 컬럼 표시 경로와 동일하게 맞춤)
+function formatDateDay(value: any): string {
+  if (value == null || value === "") return "";
+  const s = String(value);
+  if (s.includes("-")) return s.slice(0, 10);
+  if (s.length >= 8)
+    return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+  return s;
 }
 
 /** type "date" / "datetime" + (insertable|editable) 컬럼에 picker cellRenderer 주입.
@@ -605,6 +648,7 @@ function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
   const c = col as any;
   if (c.type !== "date" && c.type !== "datetime") return col;
   if (c.cellRenderer) return col;
+  if (opts.readOnly) return col; // 폼 화면 그리드: picker 미주입(표시 전용)
   const field = (c.field ?? c.colId) as string | undefined;
   if (!field) return col;
   const mode = resolveEditMode(c);
@@ -618,7 +662,7 @@ function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
 
   return {
     ...col,
-    insertable: undefined,
+    insertable: false,
     editable: false,
     cellRenderer: (params: any) => {
       if (!params.data || params.node?.rowPinned) return null;
@@ -627,8 +671,13 @@ function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
       const cellEditable = rowEditableByMode(mode, editStsI);
       const raw = params.value;
 
+      // date(day) 는 무조건 YYYY-MM-DD, datetime 만 시간 표시.
       const display =
-        unit === "day" ? Util.formatDttm(raw) : formatDateByUnit(raw, unit);
+        unit !== "day"
+          ? formatDateByUnit(raw, unit)
+          : withTime
+            ? Util.formatDttm(raw)
+            : formatDateDay(raw);
       if (!cellEditable) {
         return <span>{display}</span>;
       }
@@ -654,9 +703,9 @@ function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
 
 type EditMode = "always" | "insert" | "update" | "none" | "custom";
 
-// insertable/editable 미지정 시 "기본 편집 ON" 으로 둘 입력 위젯 타입.
-// 그 외 타입(text/numeric/combo/표시용 등)은 미지정이면 읽기전용 →
-// 읽기전용 컬럼에 editable:false 를 일일이 안 달아도 안전(안전장치).
+// insertable/editable 미지정 시 "추가행에서만 편집 ON"(insert) 으로 둘 입력 위젯 타입.
+// 기존행에는 picker/돋보기가 안 뜬다 — 기존행도 편집하려면 editable:true 를 명시.
+// 그 외 타입(text/numeric/combo/표시용 등)은 미지정이면 읽기전용.
 const DEFAULT_EDITABLE_TYPES = new Set([
   "date",
   "datetime",
@@ -666,7 +715,7 @@ const DEFAULT_EDITABLE_TYPES = new Set([
 
 /** insertable / editable + type 으로 편집 모드 결정.
  *   - 둘 다 미지정:
- *       입력 위젯 타입(date/datetime/popup/popuser) → "always" (기본 편집),
+ *       입력 위젯 타입(date/datetime/popup/popuser) → "insert" (실제 추가된 행에서만 편집),
  *       그 외 타입 / field 없는 컬럼 → "none" (읽기전용 기본 — 안전장치).
  *   - 하나라도 명시하면 타입 무관하게 그 설정이 우선:
  *       insertable:true → "insert"(추가행), editable:true → "update"(수정행), 둘 다 true → "always",
@@ -682,7 +731,7 @@ function resolveEditMode(c: any): EditMode {
   }
   if (c.insertable === undefined && c.editable === undefined) {
     return (c.field || c.colId) && DEFAULT_EDITABLE_TYPES.has(c.type)
-      ? "always"
+      ? "insert"
       : "none";
   }
   const ins = c.insertable === true;
@@ -699,8 +748,10 @@ function rowEditableByMode(mode: EditMode, editStsI: boolean): boolean {
 }
 
 /** insertable / editable 을 EDIT_STS 기반 editable 함수로 변환 (resolveEditMode 정책). */
-function applyEditPolicy(col: AnyCol): AnyCol {
+function applyEditPolicy(col: AnyCol, readOnly?: boolean): AnyCol {
   const c = col as any;
+  // 폼 화면 그리드: 명시 editable:true / 커스텀 함수까지 모두 무력화 (표시 전용).
+  if (readOnly) return { ...c, editable: false } as AnyCol;
   const mode = resolveEditMode(c);
   if (mode === "custom" || mode === "none") return col;
   let editableFn: any;
@@ -730,11 +781,13 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
             ),
           ),
           opts.setRowData,
+          opts.readOnly,
         ),
         opts,
       ),
       opts,
     ),
+    opts.readOnly,
   );
 
   // "No" 컬럼 (DataGrid 전용 — rowCountForNo 가 없으면 일반 처리)

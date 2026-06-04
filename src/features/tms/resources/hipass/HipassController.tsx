@@ -8,7 +8,7 @@ import { hipassApi as api } from "./HipassApi";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { HipassModel, GridKey } from "./HipassModel";
 import { Lang } from "@/app/services/common/Lang";
-import { ROW_STATUS, markUpdate } from "@/app/components/grid/gridCommon";
+import { ROW_STATUS } from "@/app/components/grid/gridCommon";
 import { newRid } from "@/app/feature/useBaseModel";
 
 const CARD_NO_PATTERN = /^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}$/;
@@ -35,23 +35,21 @@ export function useHipassController({ model }: ControllerArgs) {
 
   const handleRowClicked = useCallback(
     async (row: any) => {
-      const data = model.grids.main.data;
-      let localIdx = data.rows.findIndex(
+      const rows = model.grids.main.data.rows;
+      let localIdx = rows.findIndex(
         (r: any) =>
           r === row ||
           (row.__rid__ != null && r.__rid__ === row.__rid__) ||
           (row.HIPASS_ID != null && r.HIPASS_ID === row.HIPASS_ID),
       );
       if (localIdx < 0 && row.EDIT_STS === ROW_STATUS.INSERT) {
-        localIdx = data.rows.length;
+        localIdx = rows.length;
       }
-      const globalIdx = (data.page - 1) * data.limit + localIdx;
       model.grids.main.setSelected(row);
-      model.setDetailData({ ...row });
       model.setDetailMode(
         row.EDIT_STS === ROW_STATUS.INSERT || !row.HIPASS_ID ? "new" : "edit",
       );
-      model.setDetailIndex(globalIdx);
+      model.setDetailIndex(localIdx);
       model.setDetailOpen(true);
 
       if (row.EDIT_STS === ROW_STATUS.INSERT || !row.HIPASS_ID) {
@@ -64,7 +62,14 @@ export function useHipassController({ model }: ControllerArgs) {
         const ds = res?.data?.data?.dsOut ?? res?.data?.dsOut;
         const one =
           ds && typeof ds === "object" && !Array.isArray(ds) ? ds : {};
-        model.setDetailData({ ...row, ...one });
+        // 상세 재조회 값을 그리드 행에 반영. 새 객체라 __orig__ 가 재캡처되어
+        // 비교 기준이 폼에 표시되는 값과 일치 → 원복 시 EDIT_STS 정상 해제.
+        model.grids.main.setData((prev) => ({
+          ...prev,
+          rows: prev.rows.map((r) =>
+            r.__rid__ === row.__rid__ ? { ...r, ...one } : r,
+          ),
+        }));
       } finally {
         model.setNavigating(false);
       }
@@ -73,92 +78,34 @@ export function useHipassController({ model }: ControllerArgs) {
   );
 
   const handleNavigate = useCallback(
-    async (dir: number) => {
-      const data = model.grids.main.data;
-      const nextGlobalIdx = model.detailIndex + dir;
-      if (nextGlobalIdx < 0 || nextGlobalIdx >= data.totalCount) return;
-
-      const pageSize = data.limit;
-      const currentPage = data.page;
-      const nextPage = Math.floor(nextGlobalIdx / pageSize) + 1;
-      const localIdx = nextGlobalIdx % pageSize;
-
-      if (nextPage === currentPage) {
-        const nextRow = data.rows[localIdx];
-        model.grids.main.setSelected(nextRow);
-        model.setDetailData({ ...nextRow });
-        model.setDetailMode("edit");
-        model.setDetailIndex(nextGlobalIdx);
-      } else {
-        try {
-          model.setNavigating(true);
-          const res: any = await api.getList({
-            ...model.filtersRef.current,
-            page: nextPage,
-            limit: pageSize,
-          });
-          const rows =
-            res.data.result ??
-            res.data.data.allData?.data ??
-            res.data.data.dsOut ??
-            [];
-          const nextRow = rows[localIdx];
-          if (nextRow) {
-            model.grids.main.setSelected(nextRow);
-            model.setDetailData({ ...nextRow });
-            model.setDetailMode("edit");
-            model.setDetailIndex(nextGlobalIdx);
-          }
-        } finally {
-          model.setNavigating(false);
-        }
-      }
+    (dir: number) => {
+      const rows = model.grids.main.data.rows;
+      const nextLocal = model.detailIndex + dir;
+      if (nextLocal < 0 || nextLocal >= rows.length) return;
+      const nextRow = rows[nextLocal];
+      model.grids.main.setSelected(nextRow);
+      model.setDetailMode(
+        nextRow.EDIT_STS === ROW_STATUS.INSERT || !nextRow.HIPASS_ID
+          ? "new"
+          : "edit",
+      );
+      model.setDetailIndex(nextLocal);
     },
     [model],
   );
 
   const handleJumpTo = useCallback(
-    async (targetNum: number) => {
-      const data = model.grids.main.data;
-      const globalIdx = targetNum - 1;
-      if (globalIdx < 0 || globalIdx >= data.totalCount) return;
-      if (globalIdx === model.detailIndex) return;
-
-      const pageSize = data.limit;
-      const currentPage = data.page;
-      const targetPage = Math.floor(globalIdx / pageSize) + 1;
-      const localIdx = globalIdx % pageSize;
-
-      if (targetPage === currentPage) {
-        const row = data.rows[localIdx];
-        model.grids.main.setSelected(row);
-        model.setDetailData({ ...row });
-        model.setDetailMode("edit");
-        model.setDetailIndex(globalIdx);
-      } else {
-        try {
-          model.setNavigating(true);
-          const res: any = await api.getList({
-            ...model.filtersRef.current,
-            page: targetPage,
-            limit: pageSize,
-          });
-          const rows =
-            res.data.result ??
-            res.data.data.allData?.data ??
-            res.data.data.dsOut ??
-            [];
-          const row = rows[localIdx];
-          if (row) {
-            model.grids.main.setSelected(row);
-            model.setDetailData({ ...row });
-            model.setDetailMode("edit");
-            model.setDetailIndex(globalIdx);
-          }
-        } finally {
-          model.setNavigating(false);
-        }
-      }
+    (targetNum: number) => {
+      const rows = model.grids.main.data.rows;
+      const localIdx = targetNum - 1;
+      if (localIdx < 0 || localIdx >= rows.length) return;
+      if (localIdx === model.detailIndex) return;
+      const row = rows[localIdx];
+      model.grids.main.setSelected(row);
+      model.setDetailMode(
+        row.EDIT_STS === ROW_STATUS.INSERT || !row.HIPASS_ID ? "new" : "edit",
+      );
+      model.setDetailIndex(localIdx);
     },
     [model],
   );
@@ -180,17 +127,6 @@ export function useHipassController({ model }: ControllerArgs) {
   }, [model, handleRowClicked]);
 
   const onSaveMain = useCallback(() => {
-    const selected = model.grids.main.selectedRef.current;
-    if (selected && model.detailOpen) {
-      const merged = { ...selected, ...model.detailData };
-      markUpdate(merged);
-      model.grids.main.setData((prev) => ({
-        ...prev,
-        rows: prev.rows.map((r) => (r === selected ? merged : r)),
-      }));
-      model.grids.main.setSelected(merged);
-    }
-
     base.saveGrid("main", api.save, {
       beforeSave: () => {
         for (const row of model.grids.main.rows) {

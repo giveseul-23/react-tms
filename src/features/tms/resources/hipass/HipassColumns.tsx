@@ -1,39 +1,5 @@
-export type FieldType =
-  | "text"
-  | "popup"
-  | "select"
-  | "check"
-  | "date"
-  | "number";
+import type { ColumnDef } from "@/app/components/common/formColumnDef";
 
-export type ColumnDef = {
-  headerName: string;
-  type?: string;
-  field?: string;
-  areaNo?: number;
-  areaLabel?: string;
-  fieldType?: FieldType;
-  required?: boolean;
-  hide?: boolean;
-  formHide?: boolean;
-  readOnly?: boolean;
-  sqlProp?: string;
-  nameValue?: string;
-  nameField?: string;
-  codeKey?: string;
-  dateUnit?: "year" | "month" | "day";
-  insertable?: boolean;
-  editable?: boolean;
-  regex?: RegExp;
-  validators?: {
-    required?: boolean;
-    max?: number;
-    min?: number;
-    integerLength?: number;
-    pointLength?: number;
-    regexTp?: string;
-  };
-};
 export const MAIN_COLUMN_DEFS: ColumnDef[] = [
   { headerName: "No" },
   {
