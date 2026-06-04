@@ -96,6 +96,36 @@ export const vehicleMgmtApi = {
     );
   },
 
+  getVehPopLgstGrp(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/vehicleService/searchVehPopLgstGrp",
+      withSession({
+        MENU_CD: MENU_CODE,
+        ...payload,
+      }),
+    );
+  },
+
+  getVehPopCarr(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/vehicleService/searchVehPopCarr",
+      withSession({
+        MENU_CD: MENU_CODE,
+        ...payload,
+      }),
+    );
+  },
+
+  getVehPopTrck(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/vehicleService/searchVehPopTrck",
+      withSession({
+        MENU_CD: MENU_CODE,
+        ...payload,
+      }),
+    );
+  },
+
   // ── 엑셀 ────────────────────────────────────────────────────
   gridExcelAll(payload: any) {
     return apiClient.post<CommonResponse>(
