@@ -6,6 +6,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { loadRequestExcludedOrderType as api } from "./LoadRequestExcludedOrderTypeApi";
+import { MENU_CODE } from "./LoadRequestExcludedOrderType";
 import {
   MAIN_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
@@ -81,6 +82,8 @@ export function useLoadRequestExcludedOrderTypeController({ model }: ControllerA
     () => [
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_LOAD_REQ_EXCPT_ORD_TP"),
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -132,6 +135,8 @@ export function useLoadRequestExcludedOrderTypeController({ model }: ControllerA
         makeSaveAction({ onClick: onSaveDetail }),
         makeExcelGroupAction({
           columns: DETAIL_COLUMN_DEFS,
+          excelColumns: () => model.grids.detail.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: Lang.get("MENU_LOAD_REQ_EXCPT_ORD_TP"),
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;

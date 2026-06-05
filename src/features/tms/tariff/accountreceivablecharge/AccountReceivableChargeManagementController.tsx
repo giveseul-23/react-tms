@@ -108,6 +108,7 @@ export function useAccountReceivableChargeController({
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
       columns: MAIN_COLUMN_DEFS,
+      excelColumns: () => model.grids.main.getExcelColumns(),
       menuCode: MENU_CD,
       fetchFn: () => api.getArChargeList({ MENU_CD, ...model.filtersRef.current }),
       rows: model.grids.main.rows

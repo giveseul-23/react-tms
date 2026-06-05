@@ -122,6 +122,8 @@ export function useStoppedVehicleControlController({ model }: Args) {
     () => [
      makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: MENU_CODE,
         fetchFn: () =>
           api.getMainList(model.filtersRef.current),
@@ -145,6 +147,8 @@ export function useStoppedVehicleControlController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: SUB02_COLUMN_DEFS,
+        excelColumns: () => model.grids.sub01.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: MENU_CODE,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
@@ -164,6 +168,8 @@ export function useStoppedVehicleControlController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: SUB03_COLUMN_DEFS,
+        excelColumns: () => model.grids.sub03.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: MENU_CODE,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;

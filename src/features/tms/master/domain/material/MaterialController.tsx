@@ -59,6 +59,8 @@ export function useMaterialController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: "품목관리",
         fetchFn: () => api.getList(MENU_CD, model.filtersRef.current ?? {}),
         rows: model.grids.main.rows,
@@ -71,6 +73,8 @@ export function useMaterialController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: SUB02_COLUMN_DEFS,
+        excelColumns: () => model.grids.sub02.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: "품목관리-단위환산",
         fetchFn: () => {
           const parent = model.grids.main.selectedRef.current;
@@ -88,6 +92,8 @@ export function useMaterialController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: SUB01_COLUMN_DEFS,
+        excelColumns: () => model.grids.sub01.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: "품목관리-판매처",
         fetchFn: () => {
           const parent = model.grids.main.selectedRef.current;

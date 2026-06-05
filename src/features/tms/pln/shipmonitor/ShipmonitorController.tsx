@@ -27,6 +27,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { featureApi as api } from "./ShipmonitorApi";
+import { MENU_CODE } from "./Shipmonitor";
 import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./ShipmonitorColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { FeatureModel, GridKey } from "./ShipmonitorModel";
@@ -111,6 +112,8 @@ export function useFeatureController({ model }: ControllerArgs) {
     () => [
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "화면명",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -125,6 +128,8 @@ export function useFeatureController({ model }: ControllerArgs) {
       //makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
         columns: DETAIL_COLUMN_DEFS,
+        excelColumns: () => model.grids.detail.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "화면명-상세",
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;

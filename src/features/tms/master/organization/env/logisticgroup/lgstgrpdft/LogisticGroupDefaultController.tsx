@@ -126,6 +126,8 @@ export function useLogisticGroupDefaultController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: CNFG_HEADER_COLUMN_DEFS,
+        excelColumns: () => model.grids.header.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get(MENU_CODE),
         fetchFn: () => api.getLgstDefaultCnfgGrpList(model.filtersRef.current),
         rows: model.grids.header.rows,
@@ -138,6 +140,8 @@ export function useLogisticGroupDefaultController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: CNFG_DETAIL_COLUMN_DEFS,
+        excelColumns: () => model.grids.header.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get(MENU_CODE),
         fetchFn: () => api.getLgstDefaultCnfgList(model.filtersRef.current),
         rows: model.grids.header.rows,
@@ -151,6 +155,8 @@ export function useLogisticGroupDefaultController({ model }: Args) {
       makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
         columns: DETAIL_COLUMN_DEFS,
+        excelColumns: () => model.grids.header.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get(MENU_CODE),
         fetchFn: () => api.getLgstDefaultDetailList(model.filtersRef.current),
         rows: model.grids.header.rows,

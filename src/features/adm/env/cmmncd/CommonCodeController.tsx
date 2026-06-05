@@ -53,7 +53,8 @@ export function useCommonCodeController({ model }: Args) {
       if (!sub01Row) return;
 
       const sub02Rows = await base.searchSub("sub02", fetchSub02(sub01Row));
-      const firstSub02 = model.grids.sub02.ref.current?.rows?.[0] ?? sub02Rows?.[0];
+      const firstSub02 =
+        model.grids.sub02.ref.current?.rows?.[0] ?? sub02Rows?.[0];
       if (firstSub02) {
         model.grids.sub02.setSelected(firstSub02);
       }
@@ -67,7 +68,8 @@ export function useCommonCodeController({ model }: Args) {
       if (!mainRow) return;
 
       const sub01Rows = await base.searchSub("sub01", fetchSub01(mainRow));
-      const firstSub01 = model.grids.sub01.ref.current?.rows?.[0] ?? sub01Rows?.[0];
+      const firstSub01 =
+        model.grids.sub01.ref.current?.rows?.[0] ?? sub01Rows?.[0];
       if (firstSub01) {
         model.grids.sub01.setSelected(firstSub01);
         await loadSub02(firstSub01);
@@ -223,7 +225,8 @@ export function useCommonCodeController({ model }: Args) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
-        menuName: MENU_CD,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         fetchFn: () =>
           commonCodeApi.getCommonCodeList(MENU_CD, model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -244,7 +247,8 @@ export function useCommonCodeController({ model }: Args) {
       makeSaveAction({ onClick: onSaveSub01 }),
       makeExcelGroupAction({
         columns: SUB01_COLUMN_DEFS,
-        menuName: MENU_CD,
+        excelColumns: () => model.grids.sub01.getExcelColumns(),
+        menuCode: MENU_CD,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;
@@ -268,7 +272,8 @@ export function useCommonCodeController({ model }: Args) {
       makeSaveAction({ onClick: onSaveSub02 }),
       makeExcelGroupAction({
         columns: SUB02_COLUMN_DEFS,
-        menuName: MENU_CD,
+        excelColumns: () => model.grids.sub02.getExcelColumns(),
+        menuCode: MENU_CD,
         fetchFn: () => {
           const sub01 = model.grids.sub01.selectedRef.current;
           return sub01 ? fetchSub02(sub01) : EMPTY_RESULT;
@@ -276,7 +281,13 @@ export function useCommonCodeController({ model }: Args) {
         rows: model.grids.sub02.rows,
       }),
     ],
-    [fetchSub02, model.grids.sub01, model.grids.sub02.rows, onAddSub02, onSaveSub02],
+    [
+      fetchSub02,
+      model.grids.sub01,
+      model.grids.sub02.rows,
+      onAddSub02,
+      onSaveSub02,
+    ],
   );
 
   return {

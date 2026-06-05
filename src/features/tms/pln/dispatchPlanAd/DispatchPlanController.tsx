@@ -3,6 +3,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchPlanApi as api } from "./dispatchPlanApi";
 import { useGuard } from "@/hooks/useGuard";
+import { MENU_CODE } from "./DispatchPlan";
 import { MAIN_COLUMN_DEFS } from "./DispatchPlanColumns";
 import {
   makeSaveAction,
@@ -217,6 +218,8 @@ export function useDispatchPlanController({ model }: Args) {
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "배차관리",
         fetchFn: () => api.getDispatchPlanList(model.filtersRef.current),
         rows: model.grids.main.rows,

@@ -27,6 +27,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { featureApi as api } from "./CargoApi.ts";
+import { MENU_CODE } from "./Cargo";
 import {
   MAIN_COLUMN_DEFS,
 } from "./CargoColumns.tsx";
@@ -113,6 +114,8 @@ export function useFeatureController({ model }: ControllerArgs) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "화면명",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

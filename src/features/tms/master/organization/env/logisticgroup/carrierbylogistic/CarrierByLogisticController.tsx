@@ -159,6 +159,8 @@ export function useCarrierByLogisticController({
     () => [
       makeExcelGroupAction({
         columns: model.mainColumnDefs,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "운송협력사",
         fetchFn: () => api.getLogisticsList(model.filtersRef.current),
         rows: model.grids.main.rows,

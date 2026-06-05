@@ -7,7 +7,12 @@
 //
 // 주의: className / DOM 구조 / onChange 동작은 기존 코드와 byte-for-byte 동일하게 유지.
 
-import { ROW_STATUS, isInserted, markDelete, unmarkDelete } from "../gridCommon";
+import {
+  ROW_STATUS,
+  isInserted,
+  markDelete,
+  unmarkDelete,
+} from "../gridCommon";
 
 // 삭제 컬럼 헤더 — 체크박스 없이 "삭제" 라벨만 표시.
 // 정렬 기능이 없는 컬럼이라, 헤더 클릭 시 전체 행 삭제를 토글한다.
@@ -71,6 +76,7 @@ export const makeDeleteColumn = (setRowData?: (updater: any) => void) => ({
   headerName: "LBL_DELETE",
   field: "_delete",
   editable: false,
+  excelPrint: false, // UI 전용 — 엑셀 출력 제외
   width: 60,
   filter: false,
   floatingFilter: false,
@@ -143,6 +149,7 @@ export const makeRowStatusColumn = (overrides: Record<string, any> = {}) => ({
   headerName: "LBL_ROW_STATUS",
   field: "EDIT_STS",
   editable: false,
+  excelPrint: false, // UI 전용 — 엑셀 출력 제외
   width: 80,
   cellRenderer: (params: any) => {
     if (params.node?.rowPinned) return null;
@@ -167,6 +174,7 @@ export const makeInsertPersonColumn = (
   type: "text",
   headerName: "LBL_INSERT_PERSON_ID",
   field: "CRE_USR_ID",
+  align: "center",
   editable: false,
   ...overrides,
 });
@@ -185,6 +193,7 @@ export const makeUpdatePersonColumn = (
   type: "text",
   headerName: "LBL_UPDATE_PERSON_ID",
   field: "UPD_USR_ID",
+  align: "center",
   editable: false,
   ...overrides,
 });

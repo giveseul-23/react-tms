@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { controlDataReceptionStatusApi as api } from "./ControlDataReceptionStatusApi";
+import { MENU_CODE } from "./ControlDataReceptionStatus";
 import { MAIN_COLUMN_DEFS } from "./ControlDataReceptionStatusColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
@@ -36,6 +37,8 @@ export function useControlDataReceptionStatusController({
     () => [
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_CTRL_DATA_RCPTN_STS"),
         fetchFn: () => api.getList(model.filtersRef.current ?? {}),
         rows: model.grids.main.rows,

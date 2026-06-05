@@ -28,7 +28,6 @@ export default function CommonCode() {
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,
         pageSize: model.pageSize,
-        menuCode: MENU_CD,
       }}
       master={
         <DataGrid

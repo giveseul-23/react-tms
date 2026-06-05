@@ -6,6 +6,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { itineraryGroupApi as api } from "./ItineraryGroupApi";
+import { MENU_CODE } from "./ItineraryGroup";
 import { MAIN_COLUMN_DEFS } from "./ItineraryGroupColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ItineraryGroupModel, GridKey } from "./ItineraryGroupModel";
@@ -63,6 +64,8 @@ export function useItineraryGroupController({ model, rawFiltersRef }: Controller
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_ITINERARY_GROUP_MANAGER"),
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

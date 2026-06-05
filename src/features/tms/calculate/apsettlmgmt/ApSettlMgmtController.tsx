@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { apSettlMgmtApi as api } from "./ApSettlMgmtApi";
+import { MENU_CODE } from "./ApSettlMgmt";
 import { MAIN_COLUMN_DEFS } from "./ApSettlMgmtColumns";
 import {
   makeAddAction,
@@ -181,6 +182,8 @@ export function useApSettlMgmtController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS as any,
+        excelColumns: () => model.grids.config.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "매입정산관리",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.config.rows,
@@ -194,6 +197,8 @@ export function useApSettlMgmtController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: [],
+        excelColumns: () => model.grids.summary.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "종합내역",
         fetchFn: () =>
           api.getSummaryList({
@@ -212,6 +217,8 @@ export function useApSettlMgmtController({ model }: Args) {
       makeSaveAction({ onClick: onSaveCostCenter }),
       makeExcelGroupAction({
         columns: [],
+        excelColumns: () => model.grids.costCenter.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "코스트센터/계정별내역",
         fetchFn: () =>
           api.getEachCostOrGlList({
@@ -228,6 +235,8 @@ export function useApSettlMgmtController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: [],
+        excelColumns: () => model.grids.materialCost.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "원재료비내역",
         fetchFn: () =>
           api.getEachItmCostList({

@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { overheadTariffManagementApi as api } from "./OverheadTariffManagementApi";
 import { MAIN_COLUMN_DEFS } from "./OverheadTariffManagementColumns";
+import { MENU_CODE } from "./OverheadTariffManagement";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -82,6 +83,8 @@ export function useOverheadTariffManagementController({ model }: Args) {
         save: true,
         excel: {
           columns: MAIN_COLUMN_DEFS(),
+          excelColumns: () => model.grids.main.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: "기타요금관리",
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,

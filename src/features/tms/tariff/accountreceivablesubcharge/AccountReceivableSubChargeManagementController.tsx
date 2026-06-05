@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { accountReceivableSubChargeManagementApi as api } from "./AccountReceivableSubChargeManagementApi";
 import { MAIN_COLUMN_DEFS } from "./AccountReceivableSubChargeManagementColumns";
+import { MENU_CODE } from "./AccountReceivableSubChargeManagement";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { AccountReceivableSubChargeManagementModel, GridKey } from "./AccountReceivableSubChargeManagementModel";
@@ -70,6 +71,8 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
         save: true,
         excel: {
           columns: MAIN_COLUMN_DEFS(),
+          excelColumns: () => model.grids.main.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: "운영자매출계약-부가요금관리",
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
@@ -90,6 +93,8 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
         },
         excel: {
           columns: MAIN_COLUMN_DEFS(),
+          excelColumns: () => model.grids.detail01.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: "운영자매출계약-부가요금관리-상세",
           fetchFn: () => api.getDetail01List(model.filtersRef.current),
           rows: model.grids.detail01.rows,

@@ -56,6 +56,8 @@ export function useApplicationController({ model }: ControllerProps) {
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: Lang.get("MENU_CD"),
         fetchFn: () =>
           applicationApi.getApplicationList(MENU_CD, model.filtersRef.current),

@@ -1,6 +1,7 @@
 import { useCallback, useRef, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { apMonthlyManagementApi as api } from "./ApMonthlyManagementApi";
+import { MENU_CODE } from "./ApMonthlyManagement";
 import {
   MONTHLY_MAIN_HEAD,
   MONTHLY_MAIN_TAIL,
@@ -134,6 +135,8 @@ export function useApMonthlyManagementController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: model.mainColumnDefs,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "월실적관리",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

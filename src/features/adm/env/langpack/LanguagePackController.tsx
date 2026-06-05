@@ -8,6 +8,7 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { LanguagePackModel, GridKey } from "./LanguagePackModel";
+import { MENU_CD } from "./LanguagePack";
 import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
 
 type ControllerProps = {
@@ -82,6 +83,8 @@ export function useLanguagePackController({ menuCd, model }: ControllerProps) {
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: menuCd,
         fetchFn: () => langPackApi.getLangPackList(model.filtersRef.current),
         rows: model.grids.main.rows,

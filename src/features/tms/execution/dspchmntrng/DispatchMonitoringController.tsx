@@ -28,6 +28,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import type {ActionItem} from "@/app/components/ui/GridActionsBar.tsx";
+import { MENU_CODE } from "./DispatchMonitoring";
 import {MAIN_COLUMN_DEFS} from "./DispatchMonitoringColumns.tsx";
 
 interface ControllerArgs {
@@ -48,6 +49,8 @@ export function useFeatureController({ model }: ControllerArgs) {
       () => [
         makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "MENU_DISPATCH_SEARCH",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

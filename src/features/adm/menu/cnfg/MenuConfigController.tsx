@@ -21,6 +21,30 @@ import {
 import { useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { Lang } from "@/app/services/common/Lang";
+import {
+  makeInsertPersonColumn,
+  makeInsertDateColumn,
+  makeUpdatePersonColumn,
+  makeUpdateTimeColumn,
+} from "@/app/components/grid/columns/commonColumns";
+
+// 엑셀 다운로드 전용 컬럼 — 화면 트리 이름 컬럼(MSG_DESC)과 audit 컬럼은
+// 그리드가 따로 그려서 MAIN_COLUMN_DEFS 에 없으므로 엑셀에만 별도로 합쳐준다.
+const EXCEL_COLUMN_DEFS = [
+  // 트리 이름 컬럼 — grid colId 는 "id"(매칭용), export 데이터는 MSG_DESC.
+  {
+    colId: "id",
+    type: "text",
+    headerName: "LBL_MENU_NM",
+    field: "MSG_DESC",
+    width: 160,
+  },
+  ...MAIN_COLUMN_DEFS,
+  makeInsertPersonColumn(),
+  makeInsertDateColumn(),
+  makeUpdatePersonColumn(),
+  makeUpdateTimeColumn(),
+];
 
 type ControllerProps = {
   model: MenuConfigModel;
@@ -283,10 +307,12 @@ export function useMenuConfigController({
 
     // ── 엑셀 ────────────────────────────────────────────────────
     makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
+      hideAll: true,
+      columns: EXCEL_COLUMN_DEFS,
       menuCode: MENU_CD,
       fetchFn: () => menuApi.getMenuConfigList(filtersRef.current),
       rows: model.source,
+      getVisibleColIds: () => treeGridRef.current?.getVisibleColIds() ?? null,
     }),
   ];
 

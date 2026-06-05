@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchOperatorCostApi as api } from "./DispatchOperatorCostManagementApi";
+import { MENU_CODE } from "./DispatchOperatorCostManagement";
 import { MAIN_COLUMN_DEFS } from "./DispatchOperatorCostManagementColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
@@ -183,6 +184,8 @@ export function useDispatchOperatorCostController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "배차단위정산",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

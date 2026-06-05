@@ -1,7 +1,7 @@
 "use client";
 // app/components/grid/DataGrid/index.tsx
 
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef, ColGroupDef } from "ag-grid-community";
 
@@ -132,6 +132,9 @@ type DataGridProps<TRow> = {
   /** columnDefs 변경 시 호출 — model.bind() 가 자동 주입.
    *  saveGrid 의 required 검증이 slot.columnDefsRef 로 컬럼 메타 read. */
   onColumnDefsReady?: (cols: any[]) => void;
+  /** 엑셀 컬럼 getter 등록 — model.bind() 가 자동 주입.
+   *  호출 시점의 "표시 중인 컬럼 defs(audit 포함, 표시 순서, 런타임 숨김 반영)" 를 반환하는 함수를 넘긴다. */
+  onExcelColumnsReady?: (getExcelColumns: () => any[]) => void;
   /** 화면 model — popup 컬럼의 extraParams(row, model) 2번째 인자로 전달.
    *  다른 그리드 선택행 공유 등에 사용 (View 에서 model={model} 로 명시 전달). */
   model?: any;
@@ -174,6 +177,7 @@ export default function DataGrid<TRow>({
   setRowData,
   readOnly,
   onColumnDefsReady,
+  onExcelColumnsReady,
   model,
 }: DataGridProps<TRow>) {
   // columnDefs 가 바뀔 때마다 외부(useBaseModel slot)에 알린다.
@@ -210,6 +214,7 @@ export default function DataGrid<TRow>({
     effectiveRowKeys,
     effectiveAutoSelect,
     activeRender,
+    activeCodeMap,
     finalColumnDefs,
   } = useActivePreset<TRow>({
     layoutType,
@@ -239,6 +244,41 @@ export default function DataGrid<TRow>({
     gridApiRef,
     columnOrderRef,
   });
+
+  // ── 엑셀 컬럼 getter ─────────────────────────────────────────────────────
+  // activeColumnDefs(audit 포함, 커스텀 키 보존된 원본 defs) 를 grid api 의 표시 순서로 거른다.
+  // → 런타임 숨김/순서변경이 그대로 반영된 "보이는 컬럼" defs. (엑셀 다운로드용)
+  // codeKey 컬럼에는 그리드 codeMap(코드→명)을 codeLabels 로 붙여, 엑셀에서 라벨 치환/변환에 사용.
+  const activeColumnDefsRef = useRef(activeColumnDefs);
+  activeColumnDefsRef.current = activeColumnDefs;
+  const activeCodeMapRef = useRef(activeCodeMap);
+  activeCodeMapRef.current = activeCodeMap;
+  const getExcelColumns = useCallback(() => {
+    const cm = activeCodeMapRef.current as
+      | Record<string, Record<string, string>>
+      | undefined;
+    const withLabels = (col: any) => {
+      const codeKey = col?.codeKey as string | undefined;
+      const labels = codeKey ? cm?.[codeKey] : undefined;
+      return labels ? { ...col, codeLabels: labels } : col;
+    };
+    const defs = (activeColumnDefsRef.current as any[]).map(withLabels);
+    const api = gridApiRef.current;
+    if (!api || api.isDestroyed?.()) return defs;
+    const displayed = api.getAllDisplayedColumns?.() ?? [];
+    if (displayed.length === 0) return defs;
+    const byKey = new Map<string, any>();
+    for (const c of defs) {
+      const key = (c as any).colId ?? (c as any).field;
+      if (key != null) byKey.set(key, c);
+    }
+    return displayed
+      .map((col: any) => byKey.get(col.getColId()))
+      .filter(Boolean);
+  }, []);
+  useEffect(() => {
+    onExcelColumnsReady?.(getExcelColumns);
+  }, [onExcelColumnsReady, getExcelColumns]);
 
   useRowLifecycle<TRow>({
     gridApiRef,

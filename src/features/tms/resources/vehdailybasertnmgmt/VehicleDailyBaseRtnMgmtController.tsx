@@ -6,6 +6,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { vehicleDailyBaseRtnMgmtApi as api } from "./VehicleDailyBaseRtnMgmtApi";
+import { MENU_CODE } from "./VehicleDailyBaseRtnMgmt";
 import { MAIN_COLUMN_DEFS } from "./VehicleDailyBaseRtnMgmtColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
@@ -93,6 +94,8 @@ export function useVehicleDailyBaseRtnMgmtController({
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_DAILY_VEH_BSE_RTN_MGMT"),
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

@@ -1,6 +1,7 @@
 import { useCallback, useRef, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { apDailyManagementApi as api } from "./ApDailyManagementApi";
+import { MENU_CODE } from "./ApDailyManagement";
 import {
   DAILY_MAIN_HEAD,
   DAILY_MAIN_TAIL,
@@ -176,6 +177,8 @@ export function useApDailyManagementController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: model.mainColumnDefs,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "일일실적관리",
         fetchFn: () => api.getDailyList(model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -188,6 +191,8 @@ export function useApDailyManagementController({ model }: Args) {
     () => [
       makeExcelGroupAction({
         columns: model.detailColumnDefs,
+        excelColumns: () => model.grids.detail.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "상세내역",
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;

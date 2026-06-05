@@ -66,6 +66,8 @@ export type TreeGridHandle = {
   /** 특정 노드를 펼침 — 행 추가 직후 부모 펼치기에 사용. */
   expand: (id: string) => void;
   expandedIds: Set<string>;
+  /** 현재 화면에 표시 중인(런타임 숨김 제외) 컬럼 colId 목록 — 표시 순서. 엑셀 등에서 사용. */
+  getVisibleColIds: () => string[];
 };
 
 /** NameCell 렌더러에 주입되는 트리 컨텍스트 */
@@ -340,10 +342,16 @@ function TreeGridInner<TRow extends TreeRow>(
   );
 
   // ── 부모에게 명령형 API 노출 ───────────────────────────────────────────────
+  const getVisibleColIds = useCallback(() => {
+    const api = gridApiRef.current;
+    if (!api || api.isDestroyed?.()) return [];
+    return (api.getAllDisplayedColumns() ?? []).map((c: any) => c.getColId());
+  }, []);
+
   useImperativeHandle(
     ref,
-    () => ({ expandAll, collapseAll, expand, expandedIds }),
-    [expandAll, collapseAll, expand, expandedIds],
+    () => ({ expandAll, collapseAll, expand, expandedIds, getVisibleColIds }),
+    [expandAll, collapseAll, expand, expandedIds, getVisibleColIds],
   );
 
   // ── 액션 래핑 (gridCommon.wrapActions 사용) ──────────────────────────────

@@ -56,6 +56,10 @@ export interface GridSlot {
   /** DataGrid 가 onColumnDefsReady 콜백으로 등록한 마지막 columnDefs.
    *  saveGrid 의 required 검증이 이 ref 를 읽어 컬럼 메타에 접근한다. */
   columnDefsRef: { readonly current: any[] };
+  /** 호출 시점에 "표시 중인 컬럼 defs(audit 포함, 표시 순서, 런타임 숨김 반영)" 를 반환.
+   *  엑셀 다운로드 columns 로 사용 — `columns: () => model.grids.main.getExcelColumns()`.
+   *  DataGrid 미마운트 시 빈 배열. */
+  getExcelColumns: () => any[];
 }
 
 export interface StorageKeys {
@@ -87,6 +91,8 @@ export interface BoundGridProps {
   selectedRow: any;
   /** DataGrid 가 마운트/columnDefs 변경 시 호출 — slot.columnDefsRef 채움. */
   onColumnDefsReady: (cols: any[]) => void;
+  /** DataGrid 가 엑셀 컬럼 getter 등록 시 호출 — slot.getExcelColumns 와 연결. */
+  onExcelColumnsReady: (getExcelColumns: () => any[]) => void;
 }
 
 /** SearchFilters(searchProps)에 spread 용 묶음 — model 이 소유한 검색 ref/pageSize.
@@ -238,6 +244,7 @@ export function useBaseModel<K extends string = string>(
   // columnDefs 는 state 가 아닌 ref — DataGrid 가 마운트/변경 시 register.
   // saveGrid 등에서 required 등 컬럼 메타를 읽기 위한 escape hatch.
   const allColumnDefsRef = useRef<Record<string, any[]>>({});
+  const allExcelColsFnRef = useRef<Record<string, () => any[]>>({});
 
   const setSlotData = useCallback(
     (key: string, updater: SetStateAction<GridData>) => {
@@ -334,6 +341,7 @@ export function useBaseModel<K extends string = string>(
               return allColumnDefsRef.current[k] ?? [];
             },
           },
+          getExcelColumns: () => allExcelColsFnRef.current[k]?.() ?? [],
         };
         slotCache[k] = slot;
         return slot;
@@ -373,6 +381,9 @@ export function useBaseModel<K extends string = string>(
         selectedRow: slot.selected,
         onColumnDefsReady: (cols: any[]) => {
           allColumnDefsRef.current[gridKey as string] = cols;
+        },
+        onExcelColumnsReady: (getExcelColumns: () => any[]) => {
+          allExcelColsFnRef.current[gridKey as string] = getExcelColumns;
         },
       };
     },

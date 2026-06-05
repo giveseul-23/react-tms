@@ -7,6 +7,7 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { Lang } from "@/app/services/common/Lang";
 import { qtyItineraryApi as api } from "./QtyItineraryApi";
+import { MENU_CODE } from "./QtyItinerary";
 import { MAIN_COLUMN_DEFS } from "./QtyItineraryColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { QtyItineraryModel, GridKey } from "./QtyItineraryModel";
@@ -52,6 +53,8 @@ export function useQtyItineraryController({ model }: ControllerArgs) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_QTY_ITNR"),
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

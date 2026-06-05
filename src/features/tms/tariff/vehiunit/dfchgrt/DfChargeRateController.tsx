@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dfChargeRateApi as api } from "./DfChargeRateApi";
 import { MAIN_COLUMN_DEFS } from "./DfChargeRateColumns";
+import { MENU_CODE } from "./DfChargeRate";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -81,6 +82,8 @@ export function useDfChargeRateController({ model }: Args) {
         save: true,
         excel: {
           columns: MAIN_COLUMN_DEFS(),
+          excelColumns: () => model.grids.main.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: "기본요금단가관리",
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,

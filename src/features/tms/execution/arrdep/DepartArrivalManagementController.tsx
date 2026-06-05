@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { departArrivalManagementApi as api } from "./DepartArrivalManagementApi";
+import { MENU_CD } from "./DepartArrivalManagement";
 import { MAIN_COLUMN_DEFS } from "./DepartArrivalManagementColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
@@ -147,6 +148,8 @@ export function useDepartArrivalManagementController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: "출도착관리",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
