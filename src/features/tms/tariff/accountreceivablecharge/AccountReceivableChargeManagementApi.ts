@@ -46,5 +46,10 @@ export const AccountReceivableChargeManagementApi = {
     );
   },
 
-
+  getPopData(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/accountReceivableChargeManagementService/searchAccountReceivablePopup",
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  }
 };

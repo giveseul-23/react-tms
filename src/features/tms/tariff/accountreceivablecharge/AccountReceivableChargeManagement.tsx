@@ -1,6 +1,5 @@
 "use client";
 
-import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useAccountReceivableChargeModel } from "./AccountReceivableChargeManagementModel";

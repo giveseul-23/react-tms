@@ -11,6 +11,7 @@ export function useAccountReceivableChargeModel(menuCode: string) {
     supersedeTpList: { sqlProp: "CODE", keyParam: "SUPERSEDE_TP" },
     rdngRcdList: { sqlProp: "CODE", keyParam: "RDNG_RCD" },
     ynList: { sqlProp: "CODE", keyParam: "YN" },
+    arTrfLevelList: { sqlProp: "CODE", keyParam: "AR_TRF_LCD" },
   });
 
     const codeMap = useMemo(() => {
