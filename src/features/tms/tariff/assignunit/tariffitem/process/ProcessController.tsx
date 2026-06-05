@@ -1,0 +1,64 @@
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
+import {
+  makeAddAction,
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/actions/commonActions";
+import { processApi as api } from "./ProcessApi";
+import { MAIN_COLUMN_DEFS } from "./ProcessColumns";
+import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import type { ProcessModel, GridKey } from "./ProcessModel";
+import { Lang } from "@/app/services/common/Lang";
+
+interface ControllerArgs {
+  model: ProcessModel;
+}
+
+export function useProcessController({ model }: ControllerArgs) {
+  const base = useBaseController<GridKey>({ model });
+
+  const fetchList = useCallback(
+    (params: Record<string, unknown>) => api.getList(params),
+    [],
+  );
+
+  const onSearchCallback = useCallback(
+    (data: any) => {
+      model.grids.main.setData(data);
+    },
+    [model.grids.main],
+  );
+
+  const onAddMain = useCallback(() => {
+    base.addRow("main", {});
+  }, [base]);
+
+  const onSaveMain = useCallback(
+    () =>
+      base.saveGrid("main", api.save, {
+        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+      }),
+    [base],
+  );
+
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      makeAddAction({ onClick: onAddMain }),
+      makeSaveAction({ onClick: onSaveMain }),
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS,
+        menuName: Lang.get("MENU_DSPTCH_PROCESS_MGMT"),
+        fetchFn: () => api.getList(model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
+    [onAddMain, onSaveMain, model],
+  );
+
+  return {
+    fetchList,
+    onSearchCallback,
+    mainActions,
+  };
+}
