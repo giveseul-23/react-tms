@@ -16,6 +16,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "APPL_NM",
     editable: true,
     insertable: true,
+    validators: { max: 60, required: true }
   },
   {
     type: "combo",
