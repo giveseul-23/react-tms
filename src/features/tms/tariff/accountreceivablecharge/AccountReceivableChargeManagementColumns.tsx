@@ -7,9 +7,11 @@ export const MAIN_COLUMN_DEFS = [
     align: "center",
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_LEVEL_CODE",
     field: "AR_TRF_LCD",
+    codeKey: "arTrfLevelList",
+    width: 120,
   },
   {
     type: "text",
@@ -33,15 +35,14 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_CAL_RNK",
     field: "CALC_RNK",
   }, {
-    type: "text",
+    type: "popup",
     headerName: "LBL_RATE_ITEM_CODE",
     field: "AR_CHG_CD",
-    fieldType: "popup",
-    sqlProp: "selectArChgCodeName",
-    nameField: "LBL_HELPER_NAME",
-    nameValue: "AR_CHG_NM",
+    nameField: "AR_CHG_NM",
+    sqlId: "selectArChgCodeName",
+    popupTitle: "LBL_RATE_ITEM_CODE",
+    required: true,
     insertable: true,
-    editable: false
   }, {
     type: "text",
     headerName: "LBL_RATE_ITEM_NAME",

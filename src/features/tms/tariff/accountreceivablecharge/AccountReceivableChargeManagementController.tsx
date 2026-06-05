@@ -89,7 +89,6 @@ export function useAccountReceivableChargeController({
         />
       ),
     });
-
     }, [base]);
 
     const onSaveMain = useCallback(

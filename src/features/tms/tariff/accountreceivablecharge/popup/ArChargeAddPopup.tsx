@@ -34,7 +34,7 @@ export default function ArChargeAddPopup({
     });
   }, []);
 
-  const { stores, codeMap } = useCommonStores({
+  const { stores } = useCommonStores({
     ynList: {
       sqlProp: "CODE",
       keyParam: "YN",
@@ -42,15 +42,14 @@ export default function ArChargeAddPopup({
     arTrfLevelList: {
       sqlProp: "CODE",
       keyParam: "AR_TRF_LCD",
-    },
+    }
   });
 
   const showError = useErrorAlert();
 
   const fetchData = (extraParams: any) => {
-    api
-      .getPopData({
-        CUST_CD: custCode,
+      api.getPopData({
+        CUST_CD:  custCode,
         CUST_NM: custName,
         AR_TRF_CD: arTrfCd,
         AR_TRF_NM: arTrfNm,
@@ -87,35 +86,27 @@ export default function ArChargeAddPopup({
 
   const fields: GridSearchField[] = useMemo(
     () => [
-      {
-        label: Lang.get("LBL_CUSTOMER_CODE"),
-        value: custCode,
-        onChange: setCustCode,
-      },
-      {
-        label: Lang.get("LBL_CUSTOMER_NAME"),
-        value: custName,
-        onChange: setCustName,
-      },
-      {
-        label: Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE"),
-        value: arTrfCd,
-        onChange: setArTrfCd,
-      },
-      {
-        label: Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME"),
-        value: arTrfNm,
-        onChange: setArTrfNm,
-      },
+      { label: Lang.get("LBL_CUSTOMER_CODE"), value: custCode, onChange: setCustCode },
+      { label: Lang.get("LBL_CUSTOMER_NAME"), value: custName, onChange: setCustName },
+      { label: Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE"), value: arTrfCd, onChange: setArTrfCd },
+      { label: Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME"), value: arTrfNm, onChange: setArTrfNm },
       {
         label: Lang.get("LBL_USE_YN"),
         value: useYn,
         onChange: setUseYn,
         type: "combo",
-        options: stores.ynList,
+        options: stores.ynList
       },
     ],
-    [custCode, custName, arTrfCd, arTrfNm, useYn, stores.ynList],
+    [
+      custCode,
+      custName,
+      arTrfCd,
+      arTrfNm,
+      useYn,
+      MENU_CD,
+      stores.ynList
+    ],
   );
 
   const columnDefs = useMemo(
@@ -126,44 +117,37 @@ export default function ArChargeAddPopup({
         sendField: "CUST_CD",
         field: "CUST_CD",
         width: 90,
-        align: "center",
-      },
-      {
+        align: "center"
+      },{
         headerName: "LBL_CUSTOMER_NAME",
         sendField: "CUST_NM",
         field: "CUST_NM",
         width: 120,
-      },
-      {
+      }, {
         headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_LEVEL_CODE",
         sendField: "AR_TRF_LCD",
         field: "AR_TRF_LCD",
         type: "combo",
-        codeKey: "arTrfLevelList",
+        options: stores.arTrfLevelList,
         width: 120,
-      },
-      {
+      }, {
         headerName: "LBL_CUSTOMER_CONTRACT_CODE",
         sendField: "CUST_CNTRCT_CD",
         field: "CUST_CNTRCT_CD",
-      },
-      {
+      }, {
         headerName: "LBL_CUSTOMER_CONTRACT_NAME",
         sendField: "CUST_CNTRCT_NM",
         field: "CUST_CNTRCT_NM",
-      },
-      {
+      }, {
         headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE",
         sendField: "AR_TRF_CD",
-        field: "AR_TRF_CD",
-      },
-      {
+        field: "AR_TRF_CD", 
+      }, {
         headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME",
         sendField: "AR_TRF_NM",
         field: "AR_TRF_NM",
-      },
-    ],
-    [],
+      }
+    ],[]
   );
 
   return (
@@ -172,17 +156,11 @@ export default function ArChargeAddPopup({
       columnDefs={columnDefs}
       rows={rows}
       gridHeight={350}
-      selectedBadgeFields={[
-        "CUST_CD",
-        "AR_TRF_LCD",
-        "CUST_CNTRCT_CD",
-        "AR_TRF_CD",
-      ]}
+      selectedBadgeFields={["CUST_CD", "AR_TRF_LCD", "CUST_CNTRCT_CD", "AR_TRF_CD"]}
       rowSelection="multiple"
       onSearch={onSearch}
       onConfirm={onApply}
       onClose={onClose}
-      codeMap={codeMap}
     />
   );
 }
