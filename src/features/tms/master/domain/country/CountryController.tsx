@@ -6,15 +6,10 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { countryApi as api } from "./CountryApi";
-import {
-  MAIN_COLUMN_DEFS,
-  STATE_COLUMN_DEFS,
-  ZIP_COLUMN_DEFS,
-  CITY_COLUMN_DEFS,
-} from "./CountryColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { MENU_CD } from "./Country";
 import type { CountryModel, GridKey } from "./CountryModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: CountryModel;
@@ -22,6 +17,7 @@ interface Args {
 
 export function useCountryController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getCountryList(params),
@@ -160,10 +156,9 @@ export function useCountryController({ model }: Args) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "국가관리",
+        menuName: menuName,
         fetchFn: () => api.getCountryList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
@@ -176,10 +171,9 @@ export function useCountryController({ model }: Args) {
       makeAddAction({ onClick: onAddState }),
       makeSaveAction({ onClick: onSaveState }),
       makeExcelGroupAction({
-        columns: STATE_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "국가관리",
+        menuName: menuName,
         fetchFn: () => api.getStateList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
@@ -192,10 +186,9 @@ export function useCountryController({ model }: Args) {
       makeAddAction({ onClick: onAddCity }),
       makeSaveAction({ onClick: onSaveCity }),
       makeExcelGroupAction({
-        columns: CITY_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "국가관리",
+        menuName: menuName,
         fetchFn: () => api.getCityList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
@@ -208,10 +201,9 @@ export function useCountryController({ model }: Args) {
       makeAddAction({ onClick: onAddZip }),
       makeSaveAction({ onClick: onSaveZip }),
       makeExcelGroupAction({
-        columns: ZIP_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "국가관리",
+        menuName: menuName,
         fetchFn: () => api.getZipList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

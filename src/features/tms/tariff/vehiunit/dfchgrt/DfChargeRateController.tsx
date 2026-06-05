@@ -1,12 +1,16 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dfChargeRateApi as api } from "./DfChargeRateApi";
-import { MAIN_COLUMN_DEFS } from "./DfChargeRateColumns";
 import { MENU_CODE } from "./DfChargeRate";
-import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
+import {
+  makeAddAction,
+  makeCommonActions,
+  makeSaveAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DfChargeRateModel, GridKey } from "./DfChargeRateModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: DfChargeRateModel;
@@ -14,6 +18,7 @@ interface Args {
 
 export function useDfChargeRateController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -42,7 +47,13 @@ export function useDfChargeRateController({ model }: Args) {
   const onMainGridClick = useCallback(
     async (row: any) => {
       model.grids.main.setSelected(row);
-      base.resetGrids(["rtItem", "rtCarr", "rtVehTp", "rtItemVehTp", "rtItemVeh"]);
+      base.resetGrids([
+        "rtItem",
+        "rtCarr",
+        "rtVehTp",
+        "rtItemVehTp",
+        "rtItemVeh",
+      ]);
       if (!row) return;
       const [itemRows] = await Promise.all([
         base.searchSub("rtItem", api.getRateItemList({ TRF_CD: row.TRF_CD })),
@@ -81,31 +92,20 @@ export function useDfChargeRateController({ model }: Args) {
         add: true,
         save: true,
         excel: {
-          columns: MAIN_COLUMN_DEFS(),
           excelColumns: () => model.grids.main.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: "기본요금단가관리",
+          menuName: menuName,
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
         },
       }),
-    [model],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   const detailActions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button" as const,
-        key: "BTN_ADD",
-        label: "BTN_ADD",
-        onClick: handleDetailAdd,
-      },
-      {
-        type: "button" as const,
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: handleDetailSave,
-      },
+      makeAddAction({ onClick: handleDetailAdd }),
+      makeSaveAction({ onClick: handleDetailSave }),
     ],
     [handleDetailAdd, handleDetailSave],
   );

@@ -7,10 +7,9 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { itineraryGroupApi as api } from "./ItineraryGroupApi";
 import { MENU_CODE } from "./ItineraryGroup";
-import { MAIN_COLUMN_DEFS } from "./ItineraryGroupColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ItineraryGroupModel, GridKey } from "./ItineraryGroupModel";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: ItineraryGroupModel;
@@ -19,6 +18,7 @@ interface ControllerArgs {
 
 export function useItineraryGroupController({ model, rawFiltersRef }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -63,10 +63,9 @@ export function useItineraryGroupController({ model, rawFiltersRef }: Controller
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: Lang.get("MENU_ITINERARY_GROUP_MANAGER"),
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

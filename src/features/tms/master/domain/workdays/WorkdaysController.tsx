@@ -6,11 +6,11 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import { MAIN_COLUMN_DEFS } from "./WorkdaysColumns";
 import { WorkdaysApi } from "./WorkdaysApi";
 import { MENU_CD } from "./Workdays";
 import type { WorkdaysModel, GridKey } from "./WorkdaysModel";
 import WorkdaysHolidayPopup from "./popup/WorkdaysHolidayPopup";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: WorkdaysModel;
@@ -24,6 +24,7 @@ export function useWorkdaysController({ model }: Args) {
       save: WorkdaysApi.save,
     },
   });
+  const { menuName } = useMenuMeta();
 
   const { openPopup, closePopup } = usePopup();
 
@@ -80,10 +81,9 @@ export function useWorkdaysController({ model }: Args) {
       makeAddAction({ onClick: handleOpenHolidayPopup }),
       ...base.mainActions,
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "MENU_WORKINGDAY_MANAGEMENT",
+        menuName: menuName,
         fetchFn: () =>
           WorkdaysApi.getWorkdaysList(MENU_CD, model.filtersRef.current),
         rows: model.grids.main.rows,

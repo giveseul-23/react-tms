@@ -2,11 +2,17 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { departArrivalManagementApi as api } from "./DepartArrivalManagementApi";
 import { MENU_CD } from "./DepartArrivalManagement";
-import { MAIN_COLUMN_DEFS } from "./DepartArrivalManagementColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
+import {
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { DepartArrivalManagementModel, GridKey } from "./DepartArrivalManagementModel";
+import type {
+  DepartArrivalManagementModel,
+  GridKey,
+} from "./DepartArrivalManagementModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: DepartArrivalManagementModel;
@@ -14,6 +20,7 @@ interface Args {
 
 export function useDepartArrivalManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -44,7 +51,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+    (apiCall: () => Promise<any>, msg = "MSG_SAVE_CMPLT.") =>
       base.callAjax(apiCall(), msg).then(() => base.search()),
     [base],
   );
@@ -61,101 +68,73 @@ export function useDepartArrivalManagementController({ model }: Args) {
         key: "BTN_SHOW_POD",
         label: "BTN_SHOW_POD",
         onClick: () =>
-          doAction(
-            () => api.inquireReceipt(model.filtersRef.current),
-            "수령증을 조회했습니다.",
-          ),
+          doAction(() => api.inquireReceipt(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_DRIVE_HISTORY",
         label: "BTN_DRIVE_HISTORY",
         onClick: () =>
-          doAction(
-            () => api.controlRoute(model.filtersRef.current),
-            "운행이력을 조회했습니다.",
-          ),
+          doAction(() => api.controlRoute(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_SP_START_WORK",
         label: "BTN_SP_START_WORK",
         onClick: () =>
-          doAction(
-            () => api.startLoading(model.filtersRef.current),
-            "상차를 시작했습니다.",
-          ),
+          doAction(() => api.startLoading(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_START_TRANSPORTATION",
         label: "BTN_START_TRANSPORTATION",
         onClick: () =>
-          doAction(
-            () => api.startTransport(model.filtersRef.current),
-            "운송을 시작했습니다.",
-          ),
+          doAction(() => api.startTransport(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_RETURN_TO_CONFIRM",
         label: "BTN_RETURN_TO_CONFIRM",
         onClick: () =>
-          doAction(
-            () => api.cancelTransport(model.filtersRef.current),
-            "운송이 취소되었습니다.",
-          ),
+          doAction(() => api.cancelTransport(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_DLVRY_CONFIRM/OFF_CANCEL",
         label: "BTN_DLVRY_CONFIRM/OFF_CANCEL",
         onClick: () =>
-          doAction(
-            () => api.cancelDeliveryComplete(model.filtersRef.current),
-            "배송 확정이 취소되었습니다.",
-          ),
+          doAction(() => api.cancelDeliveryComplete(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "LBL_DRV_OFF",
         label: "LBL_DRV_OFF",
         onClick: () =>
-          doAction(
-            () => api.completeTransport(model.filtersRef.current),
-            "운송이 완료되었습니다.",
-          ),
+          doAction(() => api.completeTransport(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_RE_SET",
         label: "BTN_RE_SET",
         onClick: () =>
-          doAction(
-            () => api.resetDispatch(model.filtersRef.current),
-            "배차가 초기화되었습니다.",
-          ),
+          doAction(() => api.resetDispatch(model.filtersRef.current)),
       },
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
+      makeSaveAction({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
           api.save(saveRows).then(() => base.search());
         },
-      },
+      }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "출도착관리",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, model, base],
+    [menuName, model.grids.main, model.filtersRef, doAction, base],
   );
 
   const stopoverActions: ActionItem[] = useMemo(
@@ -166,16 +145,11 @@ export function useDepartArrivalManagementController({ model }: Args) {
         label: "BTN_SHOW_ROUTE",
         onClick: () => {},
       },
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
+      makeSaveAction({
         onClick: (e: any) => {
-          const saveRows = dirtyRows(e.data);
-          if (saveRows.length === 0) return;
-          api.saveStopover(saveRows).then(() => refetchSubTabs());
+          api.saveStopover(e).then(() => refetchSubTabs());
         },
-      },
+      }),
       {
         type: "button",
         key: "BTN_SAVE_CNTR",
@@ -183,10 +157,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          doAction(
-            () => api.confirmPBoxRecovery({ DSPCH_NO: row.DSPCH_NO }),
-            "P-BOX 회수가 확정되었습니다.",
-          );
+          doAction(() => api.confirmPBoxRecovery({ DSPCH_NO: row.DSPCH_NO }));
         },
       },
     ],

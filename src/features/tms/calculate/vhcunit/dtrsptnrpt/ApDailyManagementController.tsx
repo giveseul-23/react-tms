@@ -13,6 +13,7 @@ import { makeExcelGroupAction } from "@/app/components/grid/actions/commonAction
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ApDailyManagementModel, GridKey } from "./ApDailyManagementModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: ApDailyManagementModel;
@@ -20,6 +21,7 @@ interface Args {
 
 export function useApDailyManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // dynamicColumns 캐시 — DIV_CD + LGST_GRP_CD 조합이 바뀔 때만 재조회
   const chgCacheRef = useRef<{ key: string; list: any[] }>({
@@ -176,24 +178,22 @@ export function useApDailyManagementController({ model }: Args) {
         items: [],
       },
       makeExcelGroupAction({
-        columns: model.mainColumnDefs,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "일일실적관리",
+        menuName: menuName,
         fetchFn: () => api.getDailyList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, model],
+    [doAction, menuName, model.filtersRef, model.grids.main, model.searchRef],
   );
 
   const detailActions = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: model.detailColumnDefs,
         excelColumns: () => model.grids.detail.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "상세내역",
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return api.getDetailList({
@@ -205,7 +205,7 @@ export function useApDailyManagementController({ model }: Args) {
         rows: model.grids.detail.rows,
       }),
     ],
-    [model],
+    [menuName, model.grids.detail, model.grids.main.selectedRef],
   );
 
   return {

@@ -7,9 +7,9 @@ import {
 import { useBaseController } from "@/app/feature/useBaseController";
 import { commodityApi as api } from "@/features/tms/master/domain/commodity/CommodityApi";
 import { MENU_CD } from "@/features/tms/master/domain/commodity/Commodity";
-import { MAIN_COLUMN_DEFS } from "@/features/tms/master/domain/commodity/CommodityColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { CommodityModel, GridKey } from "@/features/tms/master/domain/commodity/CommodityModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: CommodityModel;
@@ -17,6 +17,7 @@ interface Args {
 
 export function useCommodityController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getCommodityList(params),
@@ -47,10 +48,9 @@ export function useCommodityController({ model }: Args) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "상품관리",
+        menuName: menuName,
         fetchFn: () => api.getCommodityList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

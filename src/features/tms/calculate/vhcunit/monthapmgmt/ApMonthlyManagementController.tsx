@@ -7,10 +7,16 @@ import {
   MONTHLY_MAIN_TAIL,
   buildMonthlyColumns,
 } from "./ApMonthlyManagementColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import {
+  makeExcelGroupAction,
+  makeSaveAction,
+} from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { ApMonthlyManagementModel, GridKey } from "./ApMonthlyManagementModel";
+import type {
+  ApMonthlyManagementModel,
+  GridKey,
+} from "./ApMonthlyManagementModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: ApMonthlyManagementModel;
@@ -18,6 +24,7 @@ interface Args {
 
 export function useApMonthlyManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // dynamicColumns 캐시
   const chgCacheRef = useRef<{ key: string; list: any[] }>({
@@ -75,6 +82,17 @@ export function useApMonthlyManagementController({ model }: Args) {
     [base],
   );
 
+  const handleSave = useCallback(
+    () =>
+      base.saveGrid("main", (payload) =>
+        api.save({
+          dsSave: payload.dsSave,
+          MENU_CD: MENU_CODE,
+        }),
+      ),
+    [base],
+  );
+
   const mainActions: ActionItem[] = useMemo(
     () => [
       {
@@ -82,20 +100,14 @@ export function useApMonthlyManagementController({ model }: Args) {
         key: "BTN_CREATE_MONTHLY_AP",
         label: "BTN_CREATE_MONTHLY_AP",
         onClick: () =>
-          doAction(
-            () => api.createMonthlyResult(model.filtersRef.current),
-            "월 실적이 생성되었습니다.",
-          ),
+          doAction(() => api.createMonthlyResult(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_CANCEL_MONTHLY_AP",
         label: "BTN_CANCEL_MONTHLY_AP",
         onClick: () =>
-          doAction(
-            () => api.cancelMonthlyResult(model.filtersRef.current),
-            "월 실적이 취소되었습니다.",
-          ),
+          doAction(() => api.cancelMonthlyResult(model.filtersRef.current)),
       },
       {
         type: "dropdown",
@@ -103,46 +115,29 @@ export function useApMonthlyManagementController({ model }: Args) {
         label: "BTN_MANUAL_RATE_MGMT",
         items: [],
       },
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: (e: any) => {
-          const saveRows = dirtyRows(e.data);
-          if (saveRows.length === 0) return;
-          api.save(saveRows).then(() => base.search());
-        },
-      },
+      makeSaveAction({ onClick: handleSave }),
       {
         type: "button",
         key: "BTN_AP_SETTLEMENT_CONFIRM",
         label: "BTN_AP_SETTLEMENT_CONFIRM",
-        onClick: () =>
-          doAction(
-            () => api.confirm(model.filtersRef.current),
-            "지급 확정되었습니다.",
-          ),
+        onClick: () => doAction(() => api.confirm(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_AP_SETTLEMENT_CONFIRM_CANCEL",
         label: "BTN_AP_SETTLEMENT_CONFIRM_CANCEL",
         onClick: () =>
-          doAction(
-            () => api.cancelConfirm(model.filtersRef.current),
-            "지급 확정이 취소되었습니다.",
-          ),
+          doAction(() => api.cancelConfirm(model.filtersRef.current)),
       },
       makeExcelGroupAction({
-        columns: model.mainColumnDefs,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "월실적관리",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, model, base],
+    [menuName, model.grids.main, model.filtersRef, doAction, base],
   );
 
   return {

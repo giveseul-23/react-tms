@@ -7,13 +7,14 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridUtils/rowStatus";
 import { tariffChargeServiceApi as api } from "./TariffChargeServiceApi";
-import { MAIN_COLUMN_DEFS } from "./TariffChargeServiceColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   TariffChargeServiceModel,
   GridKey,
 } from "./TariffChargeServiceModel";
 import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { MENU_CODE } from "./TariffChargeService";
 
 interface ControllerArgs {
   model: TariffChargeServiceModel;
@@ -21,6 +22,7 @@ interface ControllerArgs {
 
 export function useTariffChargeServiceController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -64,8 +66,9 @@ export function useTariffChargeServiceController({ model }: ControllerArgs) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
-        menuName: Lang.get("MENU_DSPTCH_SERVICE_MGMT"),
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

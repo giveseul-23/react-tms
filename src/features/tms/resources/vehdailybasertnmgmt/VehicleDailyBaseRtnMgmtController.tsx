@@ -7,13 +7,13 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { vehicleDailyBaseRtnMgmtApi as api } from "./VehicleDailyBaseRtnMgmtApi";
 import { MENU_CODE } from "./VehicleDailyBaseRtnMgmt";
-import { MAIN_COLUMN_DEFS } from "./VehicleDailyBaseRtnMgmtColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   VehicleDailyBaseRtnMgmtModel,
   GridKey,
 } from "./VehicleDailyBaseRtnMgmtModel";
 import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: VehicleDailyBaseRtnMgmtModel;
@@ -24,6 +24,7 @@ export function useVehicleDailyBaseRtnMgmtController({
   model, rawFiltersRef
 }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -93,10 +94,9 @@ export function useVehicleDailyBaseRtnMgmtController({
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: Lang.get("MENU_DAILY_VEH_BSE_RTN_MGMT"),
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

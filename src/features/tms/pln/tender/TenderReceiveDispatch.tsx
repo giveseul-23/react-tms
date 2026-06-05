@@ -25,9 +25,7 @@ export default function TenderReceiveDispatch() {
       searchProps={{
         fetchFn: ctrl.fetchDispatchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
         excludes: ["BOOKING"],
       }}
       defaultDirection="horizontal"
@@ -35,7 +33,7 @@ export default function TenderReceiveDispatch() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS()}
+          columnDefs={MAIN_COLUMN_DEFS}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
           codeMap={model.codeMap}

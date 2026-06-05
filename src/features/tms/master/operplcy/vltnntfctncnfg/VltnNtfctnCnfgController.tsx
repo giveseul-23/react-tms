@@ -2,7 +2,6 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { vltnNtfctnCnfgApi as api } from "./VltnNtfctnCnfgApi";
 import { MENU_CODE } from "./VltnNtfctnCnfg";
-import { NTFC_TARGET_COLUMN_DEFS } from "./VltnNtfctnCnfgColumns";
 import {
   makeAddAction,
   makeSaveAction,
@@ -10,6 +9,7 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { VltnNtfctnCnfgModel, GridKey } from "./VltnNtfctnCnfgModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: VltnNtfctnCnfgModel;
@@ -17,6 +17,7 @@ interface Args {
 
 export function useVltnNtfctnCnfgController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getVltnNtfctnCnfgList(params),
@@ -126,10 +127,9 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
       makeAddAction(),
       makeSaveAction(),
       makeExcelGroupAction({
-        columns: NTFC_TARGET_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "위반알림설정관리",
+        menuName: menuName,
         fetchFn: () => api.getVltnNtfctnCnfgList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

@@ -2,10 +2,10 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { ifDeliveryDocumentApi as api } from "./IfDeliveryDocumentApi";
 import { MENU_CODE } from "./IfDeliveryDocument";
-import { MAIN_COLUMN_DEFS } from "./IfDeliveryDocumentColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { IfDeliveryDocumentModel, GridKey } from "./IfDeliveryDocumentModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: IfDeliveryDocumentModel;
@@ -13,6 +13,7 @@ interface Args {
 
 export function useIfDeliveryDocumentController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) =>
@@ -52,10 +53,9 @@ export function useIfDeliveryDocumentController({ model }: Args) {
         },
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "판매문서수신내역",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

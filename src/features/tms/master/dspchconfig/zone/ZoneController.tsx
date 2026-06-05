@@ -7,13 +7,9 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { zoneApi as api } from "./ZoneApi";
-import {
-  MAIN_COLUMN_DEFS,
-  SUB01_COLUMN_DEFS,
-  SUB02_COLUMN_DEFS,
-} from "./ZoneColumns";
 import type { GridKey, ZoneModel } from "./ZoneModel";
 import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const MENU_CD = "MENU_ZONE_MGMT";
 
@@ -25,6 +21,7 @@ const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
 export function useZoneController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
   const { resetGrids, searchSub } = base;
 
   const fetchList = useCallback(
@@ -203,10 +200,9 @@ export function useZoneController({ model }: Args) {
   const mainExcelDown = useMemo(
     () =>
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: MENU_CD,
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
@@ -245,10 +241,9 @@ export function useZoneController({ model }: Args) {
         makeAddAction({ onClick: onAddSub01 }),
         makeSaveAction({ onClick: onSaveSub01 }),
         makeExcelGroupAction({
-          columns: SUB01_COLUMN_DEFS,
           excelColumns: () => model.grids.sub01.getExcelColumns(),
           menuCode: MENU_CD,
-          menuName: MENU_CD,
+          menuName: menuName,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
             return main ? fetchSub01(main) : EMPTY_RESULT;
@@ -260,10 +255,9 @@ export function useZoneController({ model }: Args) {
         makeAddAction({ onClick: onAddSub02 }),
         makeSaveAction({ onClick: onSaveSub02 }),
         makeExcelGroupAction({
-          columns: SUB02_COLUMN_DEFS,
           excelColumns: () => model.grids.sub02.getExcelColumns(),
           menuCode: MENU_CD,
-          menuName: MENU_CD,
+          menuName: menuName,
           fetchFn: () => {
             const sub01 = model.grids.sub01.selectedRef.current;
             return sub01 ? fetchSub02(sub01) : EMPTY_RESULT;

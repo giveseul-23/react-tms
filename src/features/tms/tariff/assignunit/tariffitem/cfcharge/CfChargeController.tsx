@@ -6,10 +6,11 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { cfChargeApi as api } from "./CfChargeApi";
-import { MAIN_COLUMN_DEFS } from "./CfChargeColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { CfChargeModel, GridKey } from "./CfChargeModel";
 import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { MENU_CODE } from "./CfCharge";
 
 interface ControllerArgs {
   model: CfChargeModel;
@@ -18,6 +19,7 @@ interface ControllerArgs {
 
 export function useCfChargeController({ model, rawFiltersRef }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -80,8 +82,9 @@ export function useCfChargeController({ model, rawFiltersRef }: ControllerArgs) 
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
-        menuName: Lang.get("MENU_DSPTCH_BS_GHRG_MGMT"),
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

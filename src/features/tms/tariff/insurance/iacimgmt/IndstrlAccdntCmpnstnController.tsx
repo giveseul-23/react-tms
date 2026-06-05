@@ -2,11 +2,11 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { indstrlAccdntCmpnstnApi as api } from "./IndstrlAccdntCmpnstnApi";
 import { MENU_CODE } from "./IndstrlAccdntCmpnstn";
-import { MAIN_COLUMN_DEFS } from "./IndstrlAccdntCmpnstnColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { IndstrlAccdntCmpnstnModel, GridKey } from "./IndstrlAccdntCmpnstnModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: IndstrlAccdntCmpnstnModel;
@@ -14,6 +14,7 @@ interface Args {
 
 export function useIndstrlAccdntCmpnstnController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -103,10 +104,9 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
         onClick: handleDetailSave,
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.rate.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "산재보험료관리",
+        menuName: menuName,
         fetchFn: () => api.getRateList(model.filtersRef.current),
         rows: model.grids.rate.rows,
       }),

@@ -11,8 +11,8 @@ import type {
   SearchConditionModel,
   GridKey,
 } from "@/features/adm/menu/srchCond/SearchConditionModel";
-import { MAIN_COLUMN_DEFS } from "@/features/adm/menu/srchCond/SearchConditionColumns";
 import { MENU_CD } from "@/features/adm/menu/srchCond/SearchCondition";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const DEFAULT_NEW_ROW = {
   MENU_CD: "",
@@ -74,6 +74,7 @@ export function useSearchConditionController({ model }: ControllerProps) {
         }),
     },
   });
+  const { menuName } = useMenuMeta();
 
   const handleAdd = useCallback(() => {
     base.addRow("main", { ...DEFAULT_NEW_ROW });
@@ -95,10 +96,9 @@ export function useSearchConditionController({ model }: ControllerProps) {
       makeAddAction({ onClick: handleAdd }),
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: MENU_CD,
+        menuName: menuName,
         fetchFn: () => searchConditionApi.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

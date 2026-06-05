@@ -7,10 +7,6 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { loadRequestExcludedOrderType as api } from "./LoadRequestExcludedOrderTypeApi";
 import { MENU_CODE } from "./LoadRequestExcludedOrderType";
-import {
-  MAIN_COLUMN_DEFS,
-  DETAIL_COLUMN_DEFS,
-} from "./LoadRequestExcludedOrderTypeColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   LoadRequestExcludedOrderTypeModel,
@@ -18,7 +14,7 @@ import type {
 } from "./LoadRequestExcludedOrderTypeModel";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: LoadRequestExcludedOrderTypeModel;
@@ -26,6 +22,7 @@ interface ControllerArgs {
 
 export function useLoadRequestExcludedOrderTypeController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
     const { openPopup, closePopup } = usePopup();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
@@ -81,10 +78,9 @@ export function useLoadRequestExcludedOrderTypeController({ model }: ControllerA
   const mainActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: Lang.get("MENU_LOAD_REQ_EXCPT_ORD_TP"),
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
@@ -134,10 +130,9 @@ export function useLoadRequestExcludedOrderTypeController({ model }: ControllerA
         },
         makeSaveAction({ onClick: onSaveDetail }),
         makeExcelGroupAction({
-          columns: DETAIL_COLUMN_DEFS,
           excelColumns: () => model.grids.detail.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: Lang.get("MENU_LOAD_REQ_EXCPT_ORD_TP"),
+          menuName: menuName,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
             return main

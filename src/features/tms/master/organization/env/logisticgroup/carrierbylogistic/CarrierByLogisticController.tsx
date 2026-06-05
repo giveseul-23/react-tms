@@ -9,6 +9,7 @@ import {
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { CarrierByLogisticModel, GridKey } from "./CarrierByLogisticModel";
 import { MENU_CODE } from "./CarrierByLogistic";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: CarrierByLogisticModel;
@@ -20,6 +21,7 @@ export function useCarrierByLogisticController({
   rawFiltersRef,
 }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     async (params: Record<string, unknown>) => {
@@ -158,10 +160,9 @@ export function useCarrierByLogisticController({
   const mainActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: model.mainColumnDefs,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "운송협력사",
+        menuName: menuName,
         fetchFn: () => api.getLogisticsList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

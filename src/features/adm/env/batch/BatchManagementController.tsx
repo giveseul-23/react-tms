@@ -10,12 +10,8 @@ import {
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { Lang } from "@/app/services/common/Lang";
 import { batchManagementApi } from "./BatchManagementApi";
-import {
-  MAIN_COLUMN_DEFS,
-  SUB01_COLUMN_DEFS,
-  SUB02_COLUMN_DEFS,
-} from "./BatchManagementColumns";
 import type { BatchManagementModel, GridKey } from "./BatchManagementModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: BatchManagementModel;
@@ -31,6 +27,7 @@ const HOUR_PAIR = /(2[0-3]|1[0-9]|0[0-9]|^[0-9]{1})\/(2[0-3]|1[0-9]|0[0-9]|[0-9]
 
 export function useBatchManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
   const { openPopup, closePopup } = usePopup();
   const selectedMain = model.grids.main.selected;
   const sub01ActionDisabled =
@@ -287,10 +284,9 @@ export function useBatchManagementController({ model }: Args) {
       makeAddAction({ onClick: onMainGridAdd }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: MENU_CD,
+        menuName: menuName,
         fetchFn: () =>
           batchManagementApi.getBatchManagementList(MENU_CD, model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -310,10 +306,9 @@ export function useBatchManagementController({ model }: Args) {
         disabled: sub01ActionDisabled,
       }),
       makeExcelGroupAction({
-        columns: SUB01_COLUMN_DEFS,
         excelColumns: () => model.grids.sub01.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: MENU_CD,
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;

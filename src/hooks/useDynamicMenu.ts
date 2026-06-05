@@ -21,7 +21,7 @@ import {
 import { menuApi } from "@/features/adm/menu/cnfg/menuApi";
 import { getSessionFields } from "@/app/services/auth/auth";
 import { Lang } from "@/app/services/common/Lang";
-import type { MenuSection, MenuNode } from "@/app/config/menuConfig";
+import type { MenuSection, MenuNode, MenuItem } from "@/app/config/menuConfig";
 
 const ICON_MAP: Record<string, any> = {
   ADM: Settings2,
@@ -59,6 +59,7 @@ function toMenuNode(node: any): MenuNode | null {
       type: "item",
       menuCode: node.MENUCODE,
       label: node.MSG_DESC || node.MENUNAME || node.MENUCODE,
+      menuName: node.MENUNAME || node.MENUCODE,
       url: node.URL,
     };
   }
@@ -77,13 +78,16 @@ function toMenuNode(node: any): MenuNode | null {
   return null;
 }
 
-function collectItems(
-  nodes: MenuNode[],
-): { menuCode: string; label: string; url?: string }[] {
-  const result: { menuCode: string; label: string; url?: string }[] = [];
+function collectItems(nodes: MenuNode[]): MenuItem[] {
+  const result: MenuItem[] = [];
   nodes.forEach((n) => {
     if (n.type === "item")
-      result.push({ menuCode: n.menuCode, label: n.label, url: n.url });
+      result.push({
+        menuCode: n.menuCode,
+        label: n.label,
+        menuName: n.menuName,
+        url: n.url,
+      });
     else result.push(...collectItems(n.children));
   });
   return result;
@@ -117,30 +121,59 @@ function buildSections(serverData: any[]): MenuSection[] {
   return sections;
 }
 
-export function useDynamicMenu() {
-  const [sections, setSections] = useState<MenuSection[]>([]);
-  const [loading, setLoading] = useState(true);
+// 모듈 캐시 — 사이드바/페이지가 메뉴 데이터를 공유해 재조회(추가 fetch)를 막는다.
+// 초기 로드는 캐시 우선, refetch(사이드바 수동 새로고침)는 강제 재조회.
+let cachedSections: MenuSection[] | null = null;
+let inflight: Promise<MenuSection[]> | null = null;
 
-  const refetch = useCallback(() => {
+function loadSections(force: boolean): Promise<MenuSection[]> {
+  if (!force && cachedSections) return Promise.resolve(cachedSections);
+  if (!force && inflight) return inflight;
+  const { userId } = getSessionFields();
+  const p = menuApi
+    .getMenuConfigList({ userId, DYNAMIC_QUERY: "1=1" })
+    .then((res: any) => {
+      const data: any[] =
+        res.data?.data?.allData?.data ??
+        res.data?.result ??
+        res.data?.data?.data ??
+        [];
+      const s = data.length ? buildSections(data) : [];
+      cachedSections = s;
+      return s;
+    })
+    .catch(() => cachedSections ?? [])
+    .finally(() => {
+      inflight = null;
+    });
+  inflight = p;
+  return p;
+}
+
+export function useDynamicMenu() {
+  const [sections, setSections] = useState<MenuSection[]>(
+    cachedSections ?? [],
+  );
+  const [loading, setLoading] = useState(!cachedSections);
+
+  const load = useCallback((force: boolean) => {
+    if (!force && cachedSections) {
+      setSections(cachedSections);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const { userId } = getSessionFields();
-    menuApi
-      .getMenuConfigList({ userId, DYNAMIC_QUERY: "1=1" })
-      .then((res: any) => {
-        const data: any[] =
-          res.data?.data?.allData?.data ??
-          res.data?.result ??
-          res.data?.data?.data ??
-          [];
-        setSections(data.length ? buildSections(data) : []);
-      })
-      .catch(() => setSections([]))
+    loadSections(force)
+      .then((s) => setSections(s))
       .finally(() => setLoading(false));
   }, []);
 
+  // 사이드바 수동 새로고침용 — 캐시 무시하고 강제 재조회.
+  const refetch = useCallback(() => load(true), [load]);
+
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    load(false);
+  }, [load]);
 
   const menuLabelMap: Record<string, string> = Object.fromEntries(
     sections.flatMap((s) => s.items.map((i) => [i.menuCode, i.label])),
@@ -152,5 +185,11 @@ export function useDynamicMenu() {
     ),
   );
 
-  return { sections, menuLabelMap, menuUrlMap, loading, refetch };
+  return {
+    sections,
+    menuLabelMap,
+    menuUrlMap,
+    loading,
+    refetch,
+  };
 }

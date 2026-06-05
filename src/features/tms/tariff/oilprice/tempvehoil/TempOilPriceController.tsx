@@ -3,10 +3,6 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { tempOilPriceApi as api } from "./TempOilPriceApi";
 import { MENU_CODE } from "./TempOilPrice";
 import {
-  OIL_PRICE_COLUMN_DEFS,
-  PERIOD_COLUMN_DEFS,
-} from "./TempOilPriceColumns";
-import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
@@ -15,6 +11,7 @@ import {
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { TempOilPriceModel, GridKey } from "./TempOilPriceModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: TempOilPriceModel;
@@ -23,6 +20,7 @@ interface Args {
 
 export function useTempOilPriceController({ model, activeTabRef }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => {
@@ -78,10 +76,9 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
       makeAddAction({ onClick: handleOilPriceAdd }),
       makeSaveAction({ onClick: handleOilPriceSave }),
       makeExcelGroupAction({
-        columns: OIL_PRICE_COLUMN_DEFS,
         excelColumns: () => model.grids.oilPrice.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "용차유가관리",
+        menuName: menuName,
         fetchFn: () => api.getTempOilPrice(model.filtersRef.current),
         rows: model.grids.oilPrice.rows,
       }),
@@ -95,10 +92,9 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
     () =>
       makeCommonActions({
         excel: {
-          columns: PERIOD_COLUMN_DEFS,
           excelColumns: () => model.grids.period.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: "용차유가 기간별조회",
+          menuName: menuName,
           fetchFn: () =>
             api.getTempOilPriceByPeriod(model.filtersRef.current),
           rows: model.grids.period.rows,

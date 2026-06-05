@@ -10,11 +10,12 @@ import { ROW_STATUS } from "@/app/components/grid/gridCommon";
 import { dirtyRows, toDsSave } from "@/app/components/grid/gridUtils/rowStatus";
 import { Lang } from "@/app/services/common/Lang";
 import { itineraryApi as api } from "./ItineraryApi";
-import { MAIN_COLUMN_DEFS, SUB01_COLUMN_DEFS } from "./ItineraryColumns";
 import { ItineraryGroupPop } from "./popup/ItineraryGroupPop";
 import { ItineraryAddStopPop } from "./popup/ItineraryAddStopPop";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { GridKey, ItineraryModel } from "./ItineraryModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { MENU_CODE } from "./Itinerary";
 
 const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
@@ -63,6 +64,7 @@ function validateStopDirtyRows(
 
 export function useItineraryController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
   const { openPopup, closePopup } = usePopup();
   const { resetGrids, searchSub, requireParentRow } = base;
 
@@ -259,8 +261,9 @@ export function useItineraryController({ model }: ControllerArgs) {
         label: "BTN_EXCEL",
         items: [
           ...(makeExcelGroupAction({
-            columns: MAIN_COLUMN_DEFS,
-            menuName: Lang.get("MENU_ITINERARY_MANAGER"),
+            excelColumns: () => model.grids.main.getExcelColumns(),
+            menuCode: MENU_CODE,
+            menuName: menuName,
             fetchFn: () => api.getList(model.filtersRef.current),
             rows: model.grids.main.rows,
           }).items ?? []),
@@ -299,8 +302,9 @@ export function useItineraryController({ model }: ControllerArgs) {
       },
       makeSaveAction({ onClick: onSaveSub01 }),
       makeExcelGroupAction({
-        columns: SUB01_COLUMN_DEFS,
-        menuName: Lang.get("MENU_ITINERARY_MANAGER"),
+        excelColumns: () => model.grids.sub01.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;

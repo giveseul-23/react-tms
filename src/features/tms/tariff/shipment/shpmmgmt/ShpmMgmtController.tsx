@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { shpmMgmtApi as api } from "./ShpmMgmtApi";
-import { MAIN_COLUMN_DEFS } from "./ShpmMgmtColumns";
 import { MENU_CODE } from "./ShpmMgmt";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ShpmMgmtModel, GridKey } from "./ShpmMgmtModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: ShpmMgmtModel;
@@ -14,6 +14,7 @@ interface Args {
 
 export function useShpmMgmtController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -110,10 +111,9 @@ export function useShpmMgmtController({ model }: Args) {
         add: true,
         save: true,
         excel: {
-          columns: MAIN_COLUMN_DEFS(),
           excelColumns: () => model.grids.main.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: "계약요금관리",
+          menuName: menuName,
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
         },

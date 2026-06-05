@@ -7,10 +7,9 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { tripCountApi as api } from "./TripCountApi";
 import { MENU_CODE } from "./TripCount";
-import { MAIN_COLUMN_DEFS } from "./TripCountColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { TripCountModel, GridKey } from "./TripCountModel";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: TripCountModel;
@@ -18,6 +17,7 @@ interface ControllerArgs {
 
 export function useTripCountController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -42,10 +42,9 @@ export function useTripCountController({ model }: ControllerArgs) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: Lang.get("MENU_TRIPCNT_MGMT"),
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

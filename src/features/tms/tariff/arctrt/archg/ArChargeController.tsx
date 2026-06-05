@@ -7,13 +7,12 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { arChargeApi as api } from "./ArChargeApi";
 import { MENU_CODE } from "./ArCharge";
-import { MAIN_COLUMN_DEFS } from "./ArChargeColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   ArChargeModel,
   GridKey,
 } from "./ArChargeModel";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: ArChargeModel;
@@ -21,6 +20,7 @@ interface ControllerArgs {
 
 export function useArChargeController({model}: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -67,10 +67,9 @@ export function useArChargeController({model}: ControllerArgs) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: Lang.get("MENU_AR_CHG_MGMT"),
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

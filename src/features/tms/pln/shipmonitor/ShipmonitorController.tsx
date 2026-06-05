@@ -28,9 +28,9 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { featureApi as api } from "./ShipmonitorApi";
 import { MENU_CODE } from "./Shipmonitor";
-import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./ShipmonitorColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { FeatureModel, GridKey } from "./ShipmonitorModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: FeatureModel;
@@ -38,6 +38,7 @@ interface ControllerArgs {
 
 export function useFeatureController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -111,10 +112,9 @@ export function useFeatureController({ model }: ControllerArgs) {
   const mainActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "화면명",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
@@ -127,10 +127,9 @@ export function useFeatureController({ model }: ControllerArgs) {
       //makeAddAction({ onClick: onAddDetail }),
       //makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
-        columns: DETAIL_COLUMN_DEFS,
         excelColumns: () => model.grids.detail.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "화면명-상세",
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main

@@ -262,7 +262,10 @@ export default function DataGrid<TRow>({
       const labels = codeKey ? cm?.[codeKey] : undefined;
       return labels ? { ...col, codeLabels: labels } : col;
     };
-    const defs = (activeColumnDefsRef.current as any[]).map(withLabels);
+    // excelPrint:false → 엑셀 제외.
+    const defs = (activeColumnDefsRef.current as any[])
+      .map(withLabels)
+      .filter((c) => (c as any).excelPrint !== false);
     const api = gridApiRef.current;
     if (!api || api.isDestroyed?.()) return defs;
     const displayed = api.getAllDisplayedColumns?.() ?? [];
@@ -272,9 +275,19 @@ export default function DataGrid<TRow>({
       const key = (c as any).colId ?? (c as any).field;
       if (key != null) byKey.set(key, c);
     }
-    return displayed
+    // 표시 중인 컬럼(표시 순서) — 런타임 숨김은 제외됨.
+    const result = displayed
       .map((col: any) => byKey.get(col.getColId()))
       .filter(Boolean);
+    // excelPrint:true 인데 화면 숨김(미표시)인 컬럼은 강제로 엑셀에 포함.
+    const includedKeys = new Set(
+      result.map((c: any) => c.colId ?? c.field),
+    );
+    const forced = defs.filter(
+      (c: any) =>
+        c.excelPrint === true && !includedKeys.has(c.colId ?? c.field),
+    );
+    return [...result, ...forced];
   }, []);
   useEffect(() => {
     onExcelColumnsReady?.(getExcelColumns);

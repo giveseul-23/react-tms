@@ -2,10 +2,10 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { ifDispatchResultApi as api } from "./IfDispatchResultApi";
 import { MENU_CODE } from "./IfDispatchResult";
-import { MAIN_COLUMN_DEFS } from "./IfDispatchResultColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { IfDispatchResultModel, GridKey } from "./IfDispatchResultModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: IfDispatchResultModel;
@@ -13,6 +13,7 @@ interface Args {
 
 export function useIfDispatchResultController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) =>
@@ -35,19 +36,18 @@ export function useIfDispatchResultController({ model }: Args) {
         label: "BTN_REPRO",
         onClick: () =>
           base
-            .callAjax(api.reprocess(model.filtersRef.current), "재처리되었습니다.")
+            .callAjax(api.reprocess(model.filtersRef.current))
             .then(() => base.search()),
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "배차결과송신내역",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [model, base],
+    [model, base, menuName],
   );
 
   return {

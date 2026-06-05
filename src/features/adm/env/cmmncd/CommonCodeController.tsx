@@ -6,23 +6,21 @@ import {
   makeSaveAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { commonCodeApi } from "./CommonCodeApi";
-import {
-  MAIN_COLUMN_DEFS,
-  SUB01_COLUMN_DEFS,
-  SUB02_COLUMN_DEFS,
-} from "./CommonCodeColumns";
 import type { CommonCodeModel, GridKey } from "./CommonCodeModel";
 
 interface Args {
   model: CommonCodeModel;
 }
 
-const MENU_CD = "MENU_CMMN_CD";
+import { MENU_CD } from "./CommonCode";
+
 const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
 export function useCommonCodeController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) =>
@@ -224,15 +222,15 @@ export function useCommonCodeController({ model }: Args) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
+        menuName: menuName,
         fetchFn: () =>
           commonCodeApi.getCommonCodeList(MENU_CD, model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [model.filtersRef, model.grids.main.rows, onAddMain, onSaveMain],
+    [menuName, model.filtersRef, model.grids.main, onAddMain, onSaveMain],
   );
 
   const sub01Actions: ActionItem[] = useMemo(
@@ -246,9 +244,9 @@ export function useCommonCodeController({ model }: Args) {
       makeAddAction({ onClick: onAddSub01 }),
       makeSaveAction({ onClick: onSaveSub01 }),
       makeExcelGroupAction({
-        columns: SUB01_COLUMN_DEFS,
         excelColumns: () => model.grids.sub01.getExcelColumns(),
         menuCode: MENU_CD,
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;
@@ -258,11 +256,12 @@ export function useCommonCodeController({ model }: Args) {
     ],
     [
       fetchSub01,
-      model.grids.main,
-      model.grids.sub01.rows,
+      model.grids.main.selectedRef,
+      model.grids.sub01,
       onAddSub01,
       onSaveSub01,
       reorderDisplaySequence,
+      menuName,
     ],
   );
 
@@ -271,9 +270,9 @@ export function useCommonCodeController({ model }: Args) {
       makeAddAction({ onClick: onAddSub02 }),
       makeSaveAction({ onClick: onSaveSub02 }),
       makeExcelGroupAction({
-        columns: SUB02_COLUMN_DEFS,
         excelColumns: () => model.grids.sub02.getExcelColumns(),
         menuCode: MENU_CD,
+        menuName: menuName,
         fetchFn: () => {
           const sub01 = model.grids.sub01.selectedRef.current;
           return sub01 ? fetchSub02(sub01) : EMPTY_RESULT;
@@ -283,10 +282,11 @@ export function useCommonCodeController({ model }: Args) {
     ],
     [
       fetchSub02,
-      model.grids.sub01,
-      model.grids.sub02.rows,
+      model.grids.sub01.selectedRef,
+      model.grids.sub02,
       onAddSub02,
       onSaveSub02,
+      menuName,
     ],
   );
 
