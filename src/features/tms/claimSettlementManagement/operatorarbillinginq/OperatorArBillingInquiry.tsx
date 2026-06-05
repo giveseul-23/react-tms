@@ -1,7 +1,6 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useOperatorArBillingInquiryModel } from "./OperatorArBillingInquiryModel";
@@ -27,9 +26,7 @@ export default function OperatorArBillingInquiry() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
         excludes: [
           {
             column: "PLN.AR_TO_DT",
@@ -37,16 +34,8 @@ export default function OperatorArBillingInquiry() {
             transform: (v) => String(v).replace(/-/g, ""),
           },
         ],
-        menuCode: MENU_CD,
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
+      defaultDirection={"horizontal"}
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid

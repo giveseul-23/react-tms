@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { distanceTransitTimeApi as api } from "./DistanceTransitTimeApi";
-import { MAIN_COLUMN_DEFS } from "./DistanceTransitTimeColumns";
 import { MENU_CD } from "./DistanceTransitTime";
 import {
   makeCommonActions,
@@ -10,6 +9,7 @@ import {
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DistanceTransitTimeModel, GridKey } from "./DistanceTransitTimeModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: DistanceTransitTimeModel;
@@ -17,6 +17,7 @@ interface Args {
 
 export function useDistanceTransitTimeController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -94,10 +95,9 @@ export function useDistanceTransitTimeController({ model }: Args) {
           },
         },
         excel: {
-          columns: MAIN_COLUMN_DEFS,
           excelColumns: () => model.grids.main.getExcelColumns(),
           menuCode: MENU_CD,
-          menuName: "거리/이동시간관리",
+          menuName: menuName,
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
         },

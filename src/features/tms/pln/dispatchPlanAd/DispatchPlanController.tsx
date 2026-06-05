@@ -4,7 +4,6 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchPlanApi as api } from "./dispatchPlanApi";
 import { useGuard } from "@/hooks/useGuard";
 import { MENU_CODE } from "./DispatchPlan";
-import { MAIN_COLUMN_DEFS } from "./DispatchPlanColumns";
 import {
   makeSaveAction,
   makeExcelGroupAction,
@@ -12,6 +11,7 @@ import {
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DispatchPlanModel, GridKey } from "./DispatchPlanModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: DispatchPlanModel;
@@ -19,6 +19,7 @@ interface Args {
 
 export function useDispatchPlanController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
   const { guardHasData } = useGuard();
 
   const fetchList = useCallback(
@@ -217,10 +218,9 @@ export function useDispatchPlanController({ model }: Args) {
       },
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "배차관리",
+        menuName: menuName,
         fetchFn: () => api.getDispatchPlanList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

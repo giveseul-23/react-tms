@@ -8,10 +8,10 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { AccountReceivableChargeModel, GridKey } from "./AccountReceivableChargeManagementModel";
-import { MAIN_COLUMN_DEFS } from "./AccountReceivableChargeManagementColumns";
 import { Lang } from "@/app/services/common/Lang";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ArChargeAddPopup from "./popup/ArChargeAddPopup";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: AccountReceivableChargeModel;
@@ -23,6 +23,7 @@ export function useAccountReceivableChargeController({
 }: Args) {
   const { openPopup, closePopup } = usePopup();
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     async (params: Record<string, unknown>) => {
@@ -107,9 +108,9 @@ export function useAccountReceivableChargeController({
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS,
       excelColumns: () => model.grids.main.getExcelColumns(),
       menuCode: MENU_CD,
+      menuName: menuName,
       fetchFn: () => api.getArChargeList({ MENU_CD, ...model.filtersRef.current }),
       rows: model.grids.main.rows
     }),

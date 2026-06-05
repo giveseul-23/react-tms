@@ -56,10 +56,10 @@ export const apMonthlyManagementApi = {
     );
   },
 
-  save(rows: any[]) {
+  save(payload: any) {
     return apiClient.post<commonResponse>(
       `/apMonthlyManagementService/save`,
-      withSession(rows),
+      withSession(payload),
     );
   },
 

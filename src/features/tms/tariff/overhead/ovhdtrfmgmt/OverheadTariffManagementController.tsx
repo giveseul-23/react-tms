@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { overheadTariffManagementApi as api } from "./OverheadTariffManagementApi";
-import { MAIN_COLUMN_DEFS } from "./OverheadTariffManagementColumns";
 import { MENU_CODE } from "./OverheadTariffManagement";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { OverheadTariffManagementModel, GridKey } from "./OverheadTariffManagementModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: OverheadTariffManagementModel;
@@ -14,6 +14,7 @@ interface Args {
 
 export function useOverheadTariffManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -82,10 +83,9 @@ export function useOverheadTariffManagementController({ model }: Args) {
         add: true,
         save: true,
         excel: {
-          columns: MAIN_COLUMN_DEFS(),
           excelColumns: () => model.grids.main.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: "기타요금관리",
+          menuName: menuName,
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
         },

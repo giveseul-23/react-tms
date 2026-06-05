@@ -6,10 +6,10 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { processApi as api } from "./ProcessApi";
-import { MAIN_COLUMN_DEFS } from "./ProcessColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ProcessModel, GridKey } from "./ProcessModel";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { MENU_CODE } from "./Process";
 
 interface ControllerArgs {
   model: ProcessModel;
@@ -17,6 +17,7 @@ interface ControllerArgs {
 
 export function useProcessController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -47,8 +48,9 @@ export function useProcessController({ model }: ControllerArgs) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
-        menuName: Lang.get("MENU_DSPTCH_PROCESS_MGMT"),
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

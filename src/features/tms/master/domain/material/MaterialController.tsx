@@ -4,12 +4,8 @@ import { makeExcelGroupAction } from "@/app/components/grid/actions/commonAction
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { materialApi as api } from "./MaterialApi";
 import { MENU_CD } from "./materialMenu";
-import {
-  MAIN_COLUMN_DEFS,
-  SUB01_COLUMN_DEFS,
-  SUB02_COLUMN_DEFS,
-} from "./MaterialColumns";
 import type { MaterialModel, GridKey } from "./MaterialModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const masterParam = (row: any) => ({
   SALES_ORG_CD: row?.SALES_ORG_CD,
@@ -22,6 +18,7 @@ interface Args {
 
 export function useMaterialController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
   const { handleRowClick, resetGrids } = base;
 
   const fetchList = useCallback(
@@ -58,10 +55,9 @@ export function useMaterialController({ model }: Args) {
   const mainActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "품목관리",
+        menuName: menuName,
         fetchFn: () => api.getList(MENU_CD, model.filtersRef.current ?? {}),
         rows: model.grids.main.rows,
       }),
@@ -72,10 +68,9 @@ export function useMaterialController({ model }: Args) {
   const sub02Actions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: SUB02_COLUMN_DEFS,
         excelColumns: () => model.grids.sub02.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "품목관리-단위환산",
+        menuName: menuName,
         fetchFn: () => {
           const parent = model.grids.main.selectedRef.current;
           return parent
@@ -91,10 +86,9 @@ export function useMaterialController({ model }: Args) {
   const sub01Actions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: SUB01_COLUMN_DEFS,
         excelColumns: () => model.grids.sub01.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "품목관리-판매처",
+        menuName: menuName,
         fetchFn: () => {
           const parent = model.grids.main.selectedRef.current;
           return parent

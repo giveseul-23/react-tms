@@ -7,10 +7,10 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { confirmDispatchApi as api } from "./ConfirmDispatchApi";
 import { MENU_CODE } from "./ConfirmDispatch";
-import { MAIN_COLUMN_DEFS } from "./ConfirmDispatchColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ConfirmDispatchModel, GridKey } from "./ConfirmDispatchModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const masterChildParamMap = (row: any) => ({
   DSPCH_NO: row?.DSPCH_NO,
@@ -23,6 +23,7 @@ interface Args {
 
 export function useConfirmDispatchController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch ────────────────────────────────────────────────
   const fetchList = useCallback(
@@ -146,10 +147,9 @@ export function useConfirmDispatchController({ model }: Args) {
         items: [],
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS as any,
         excelColumns: () => model.grids.config.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "배차확정",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.config.rows,
       }),

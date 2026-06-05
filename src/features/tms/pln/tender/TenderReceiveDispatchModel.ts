@@ -24,21 +24,10 @@ export type GridKey = "main" | "stop" | "sms" | "apSetl";
 export function useTenderReceiveDispatchModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
     apFiSts: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return {
     ...base,

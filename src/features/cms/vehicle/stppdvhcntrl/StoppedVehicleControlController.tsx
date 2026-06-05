@@ -1,16 +1,11 @@
 import { useCallback, useRef, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { stoppedVehicleControlApi as api } from "./StoppedVehicleControlApi";
-import {
-  MAIN_COLUMN_DEFS,
-  SUB01_COLUMN_DEFS,
-  SUB02_COLUMN_DEFS,
-  SUB03_COLUMN_DEFS,
-} from "./StoppedVehicleControlColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { StoppedVehicleControlModel, GridKey } from "./StoppedVehicleControlModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: StoppedVehicleControlModel;
@@ -21,6 +16,7 @@ const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
 export function useStoppedVehicleControlController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // dynamicColumns 캐시 — DIV_CD + LGST_GRP_CD 조합이 바뀔 때만 재조회
   const chgCacheRef = useRef<{ key: string; list: any[] }>({
@@ -121,10 +117,9 @@ export function useStoppedVehicleControlController({ model }: Args) {
   const mainActions: ActionItem[] = useMemo(
     () => [
      makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: MENU_CODE,
+        menuName: menuName,
         fetchFn: () =>
           api.getMainList(model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -146,10 +141,9 @@ export function useStoppedVehicleControlController({ model }: Args) {
   const sub02Actions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: SUB02_COLUMN_DEFS,
         excelColumns: () => model.grids.sub01.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: MENU_CODE,
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub02(main) : EMPTY_RESULT;
@@ -167,10 +161,9 @@ export function useStoppedVehicleControlController({ model }: Args) {
   const sub03Actions = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: SUB03_COLUMN_DEFS,
         excelColumns: () => model.grids.sub03.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: MENU_CODE,
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return api.getSub03List({

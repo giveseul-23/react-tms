@@ -7,11 +7,10 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { applicationApi } from "./ApplicationApi";
-import { MAIN_COLUMN_DEFS } from "./ApplicationColumns";
 import type { ApplicationModel, GridKey } from "./ApplicationModel";
 
 import { MENU_CD } from "./Application";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 type ControllerProps = {
   model: ApplicationModel;
@@ -30,6 +29,7 @@ export function useApplicationController({ model }: ControllerProps) {
         }),
     },
   });
+  const { menuName } = useMenuMeta();
 
   const handleAdd = useCallback(() => {
     base.addRow("main", {
@@ -43,7 +43,7 @@ export function useApplicationController({ model }: ControllerProps) {
     () =>
       base.saveGrid("main", (payload) =>
         applicationApi.saveApplication({
-          dsSave: payload.dsSave,
+          ...payload,
           MENU_CD: MENU_CD,
         }),
       ),
@@ -55,10 +55,9 @@ export function useApplicationController({ model }: ControllerProps) {
       makeAddAction({ onClick: handleAdd }),
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: Lang.get("MENU_CD"),
+        menuName: menuName,
         fetchFn: () =>
           applicationApi.getApplicationList(MENU_CD, model.filtersRef.current),
         rows: model.grids.main.rows,

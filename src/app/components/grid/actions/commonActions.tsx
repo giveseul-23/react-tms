@@ -39,8 +39,8 @@ export type SaveActionConfig = {
 };
 
 export type ExcelGroupActionConfig = {
-  /** 정적 컬럼 defs (폴백). excelColumns 가 값을 주면 그쪽이 우선. */
-  columns: any[];
+  /** 정적 컬럼 defs (폴백). excelColumns 만으로 구성할 땐 생략 가능. */
+  columns?: any[];
   /** 클릭 시점에 "표시 중인 컬럼 defs(audit 포함 + 런타임 숨김/순서 반영)" 를 반환하는 getter.
    *  DataGrid 화면 권장: `() => model.grids.<key>.getExcelColumns()`.
    *  빈 배열이면(그리드 미마운트 등) columns 로 폴백. */
@@ -236,7 +236,7 @@ const resolveExcelColumns = (config: ExcelGroupActionConfig) => {
   const fromGrid = config.excelColumns?.();
   if (fromGrid && fromGrid.length > 0) return fromGrid;
 
-  const base = config.columns;
+  const base = config.columns ?? [];
   const visible = config.getVisibleColIds?.();
   if (!visible || visible.length === 0) return base;
   const byKey = new Map<string, any>();

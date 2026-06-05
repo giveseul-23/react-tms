@@ -2,14 +2,18 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { operatorArBillingInquiryApi as api } from "./OperatorArBillingInquiryApi";
 import { MENU_CD } from "./OperatorArBillingInquiry";
-import { MAIN_COLUMN_DEFS } from "./OperatorArBillingInquiryColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
+import {
+  makeAddAction,
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   OperatorArBillingInquiryModel,
   GridKey,
 } from "./OperatorArBillingInquiryModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const masterParam = (row: any) => ({ AR_ID: row?.AR_ID });
 
@@ -19,6 +23,7 @@ interface Args {
 
 export function useOperatorArBillingInquiryController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -53,7 +58,7 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+    (apiCall: () => Promise<any>, msg = "MSG_SAVE_CMPLT") =>
       base.callAjax(apiCall(), msg).then(() => base.search()),
     [base],
   );
@@ -65,56 +70,45 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
 
   const mainActions: ActionItem[] = useMemo(
     () => [
-      { type: "dropdown", key: "LBL_AR_TRACE", label: "LBL_AR_TRACE", items: [] },
       {
         type: "button",
         key: "BTN_RATESHOP",
         label: "BTN_RATESHOP",
         onClick: () =>
-          doAction(
-            () => api.changeContract(model.filtersRef.current),
-            "계약이 변경되었습니다.",
-          ),
+          doAction(() => api.changeContract(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "LBL_AR_SALES_CALC",
         label: "LBL_AR_SALES_CALC",
         onClick: () =>
-          doAction(
-            () => api.recalculateSales(model.filtersRef.current),
-            "매출이 재계산되었습니다.",
-          ),
+          doAction(() => api.recalculateSales(model.filtersRef.current)),
       },
       {
-        type: "dropdown",
+        type: "group",
         key: "BTN_DLY_SETL",
         label: "BTN_DLY_SETL",
         items: [
           {
+            type: "button",
             key: "BTN_DLY_SETL",
             label: "BTN_DLY_SETL",
             onClick: () =>
-              doAction(
-                () => api.dailyClose(model.filtersRef.current),
-                "일마감되었습니다.",
-              ),
+              doAction(() => api.dailyClose(model.filtersRef.current)),
           },
         ],
       },
       {
-        type: "dropdown",
+        type: "group",
         key: "LBL_AR_SALES_CONFIRM",
         label: "LBL_AR_SALES_CONFIRM",
         items: [
           {
+            type: "button",
             key: "LBL_AR_SALES_CONFIRM",
             label: "LBL_AR_SALES_CONFIRM",
             onClick: () =>
-              doAction(
-                () => api.confirmSales(model.filtersRef.current),
-                "매출이 확정되었습니다.",
-              ),
+              doAction(() => api.confirmSales(model.filtersRef.current)),
           },
         ],
       },
@@ -123,33 +117,29 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         key: "LBL_AR_DELETE_SETTLEMENT_INFO",
         label: "LBL_AR_DELETE_SETTLEMENT_INFO",
         onClick: () =>
-          doAction(
-            () => api.cancelSettlementDoc(model.filtersRef.current),
-            "정산정보가 삭제되었습니다.",
-          ),
+          doAction(() => api.cancelSettlementDoc(model.filtersRef.current)),
       },
       {
-        type: "dropdown",
+        type: "group",
         key: "BTN_MEMO",
         label: "BTN_MEMO",
         items: [],
       },
       {
-        type: "dropdown",
+        type: "group",
         key: "LBL_AR_SALES_EXCEL_UPLOAD",
         label: "LBL_AR_SALES_EXCEL_UPLOAD",
         items: [],
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "운영자매출청구조회",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, model],
+    [doAction, menuName, model.filtersRef, model.grids.main],
   );
 
   const billingItemActions: ActionItem[] = useMemo(
@@ -159,31 +149,20 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         key: "LBL_AR_CALC_RESULT_TRACE",
         label: "LBL_AR_CALC_RESULT_TRACE",
         onClick: () =>
-          doAction(
-            () =>
-              api.traceCalculation({
-                SETL_DOC_NO:
-                  model.grids.main.selectedRef.current?.SETL_DOC_NO,
-              }),
-            "계산결과가 추적되었습니다.",
+          doAction(() =>
+            api.traceCalculation({
+              SETL_DOC_NO: model.grids.main.selectedRef.current?.SETL_DOC_NO,
+            }),
           ),
       },
-      {
-        type: "button",
-        key: "BTN_ADD",
-        label: "BTN_ADD",
-        onClick: () => {},
-      },
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
+      makeAddAction({ onClick: () => {} }),
+      makeSaveAction({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
           api.saveBillingItem(saveRows).then(() => refetchSubTabs());
         },
-      },
+      }),
     ],
     [doAction, refetchSubTabs, model],
   );

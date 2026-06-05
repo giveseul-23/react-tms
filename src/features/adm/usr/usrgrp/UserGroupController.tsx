@@ -10,14 +10,9 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { userGroupApi } from "./UserGroupApi";
-import {
-  MAIN_COLUMN_DEFS,
-  SUB01_COLUMN_DEFS,
-  SUB02_COLUMN_DEFS,
-  SUB03_COLUMN_DEFS,
-} from "./UserGroupColumns";
 import type { GridKey, UserGroupModel } from "./UserGroupModel";
 import UserAccountSelectPopup from "./popup/UserGroupUserAccountPopup";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const MENU_CD = "MENU_USER_GROUP";
 
@@ -29,6 +24,7 @@ const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
 export function useUserGroupController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
   const { openPopup, closePopup } = usePopup();
 
   const fetchList = useCallback(
@@ -228,10 +224,9 @@ export function useUserGroupController({ model }: Args) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: MENU_CD,
+        menuName: menuName,
         fetchFn: () => userGroupApi.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
@@ -245,10 +240,9 @@ export function useUserGroupController({ model }: Args) {
         makeAddAction({ onClick: onAddSub01 }),
         makeSaveAction({ onClick: onSaveSub01 }),
         makeExcelGroupAction({
-          columns: SUB01_COLUMN_DEFS,
           excelColumns: () => model.grids.sub01.getExcelColumns(),
           menuCode: MENU_CD,
-          menuName: MENU_CD,
+          menuName: menuName,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
             return main ? fetchSub01(main) : EMPTY_RESULT;
@@ -260,10 +254,9 @@ export function useUserGroupController({ model }: Args) {
         makeAddAction({ onClick: onAddSub02 }),
         makeSaveAction({ onClick: onSaveSub02 }),
         makeExcelGroupAction({
-          columns: SUB02_COLUMN_DEFS,
           excelColumns: () => model.grids.sub02.getExcelColumns(),
           menuCode: MENU_CD,
-          menuName: MENU_CD,
+          menuName: menuName,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
             return main ? fetchSub02(main) : EMPTY_RESULT;
@@ -275,10 +268,9 @@ export function useUserGroupController({ model }: Args) {
         makeAddAction({ onClick: onAddSub03 }),
         makeSaveAction({ onClick: onSaveSub03 }),
         makeExcelGroupAction({
-          columns: SUB03_COLUMN_DEFS,
           excelColumns: () => model.grids.sub03.getExcelColumns(),
           menuCode: MENU_CD,
-          menuName: MENU_CD,
+          menuName: menuName,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
             return main ? fetchSub03(main) : EMPTY_RESULT;

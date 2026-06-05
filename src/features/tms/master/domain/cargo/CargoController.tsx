@@ -28,11 +28,9 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { featureApi as api } from "./CargoApi.ts";
 import { MENU_CODE } from "./Cargo";
-import {
-  MAIN_COLUMN_DEFS,
-} from "./CargoColumns.tsx";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { FeatureModel, GridKey } from "./CargoModel.ts";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: FeatureModel;
@@ -40,6 +38,7 @@ interface ControllerArgs {
 
 export function useFeatureController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -113,10 +112,9 @@ export function useFeatureController({ model }: ControllerArgs) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "화면명",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

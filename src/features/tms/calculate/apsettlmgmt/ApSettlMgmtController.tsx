@@ -7,7 +7,6 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { apSettlMgmtApi as api } from "./ApSettlMgmtApi";
 import { MENU_CODE } from "./ApSettlMgmt";
-import { MAIN_COLUMN_DEFS } from "./ApSettlMgmtColumns";
 import {
   makeAddAction,
   makeSaveAction,
@@ -15,6 +14,7 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ApSettlMgmtModel, GridKey } from "./ApSettlMgmtModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const masterChildParamMap = (row: any) => ({
   AP_SETL_ID: row?.AP_SETL_ID,
@@ -27,6 +27,7 @@ interface Args {
 
 export function useApSettlMgmtController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch ────────────────────────────────────────────────
   const fetchList = useCallback(
@@ -181,10 +182,9 @@ export function useApSettlMgmtController({ model }: Args) {
         onClick: () => {},
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS as any,
         excelColumns: () => model.grids.config.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "매입정산관리",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.config.rows,
       }),
@@ -196,10 +196,9 @@ export function useApSettlMgmtController({ model }: Args) {
   const summaryActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: [],
         excelColumns: () => model.grids.summary.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "종합내역",
+        menuName: menuName,
         fetchFn: () =>
           api.getSummaryList({
             CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
@@ -216,10 +215,9 @@ export function useApSettlMgmtController({ model }: Args) {
       makeAddAction({ onClick: onAddCostCenter }),
       makeSaveAction({ onClick: onSaveCostCenter }),
       makeExcelGroupAction({
-        columns: [],
         excelColumns: () => model.grids.costCenter.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "코스트센터/계정별내역",
+        menuName: menuName,
         fetchFn: () =>
           api.getEachCostOrGlList({
             CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
@@ -234,10 +232,9 @@ export function useApSettlMgmtController({ model }: Args) {
   const materialCostActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: [],
         excelColumns: () => model.grids.materialCost.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "원재료비내역",
+        menuName: menuName,
         fetchFn: () =>
           api.getEachItmCostList({
             CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,

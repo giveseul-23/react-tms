@@ -8,8 +8,8 @@ import {
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { locationApi as api } from "./LocationApi";
 import { MENU_CD } from "./Location";
-import { MAIN_COLUMN_DEFS } from "./LocationColumns";
 import type { LocationModel, GridKey } from "./LocationModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const masterParam = (row: any) => ({ LOC_ID: row?.LOC_ID });
 
@@ -43,6 +43,7 @@ interface Args {
 
 export function useLocationController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch ─────────────────────────────────────────────
   const fetchList = useCallback(
@@ -121,10 +122,9 @@ export function useLocationController({ model }: Args) {
       makeAddAction({ onClick: () => base.addRow("main", {}) }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "착지관리",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { rateApi as api } from "./RateApi";
-import { MAIN_COLUMN_DEFS } from "./RateColumns";
 import { MENU_CODE } from "./Rate";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { RateModel, GridKey } from "./RateModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: RateModel;
@@ -13,6 +13,7 @@ interface Args {
 
 export function useRateController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -68,10 +69,9 @@ export function useRateController({ model }: Args) {
         add: true,
         save: true,
         excel: {
-          columns: MAIN_COLUMN_DEFS(),
           excelColumns: () => model.grids.main.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: "운임관리",
+          menuName: menuName,
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
         },
@@ -90,10 +90,9 @@ export function useRateController({ model }: Args) {
               .then(() => base.search()),
         },
         excel: {
-          columns: MAIN_COLUMN_DEFS(),
           excelColumns: () => model.grids.costInfo.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: "운임관리-상세",
+          menuName: menuName,
           fetchFn: () => api.getCostInfoList(model.filtersRef.current),
           rows: model.grids.costInfo.rows,
         },

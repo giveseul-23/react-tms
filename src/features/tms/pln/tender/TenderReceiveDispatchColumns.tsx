@@ -1,4 +1,4 @@
-export const MAIN_COLUMN_DEFS = () => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",

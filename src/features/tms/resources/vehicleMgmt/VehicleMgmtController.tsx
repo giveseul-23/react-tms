@@ -4,10 +4,10 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { vehicleMgmtApi as api } from "./vehicleMgmtApi";
 import { useGuard } from "@/hooks/useGuard";
 import { MENU_CODE } from "./VehicleMgmt";
-import { MAIN_COLUMN_DEFS } from "./VehicleMgmtColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { VehicleMgmtModel, GridKey } from "./VehicleMgmtModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: VehicleMgmtModel;
@@ -15,6 +15,7 @@ interface Args {
 
 export function useVehicleMgmtController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
   const { guardHasData } = useGuard();
 
   const fetchList = useCallback(
@@ -234,10 +235,9 @@ export function useVehicleMgmtController({ model }: Args) {
         },
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "차량관리",
+        menuName: menuName,
         fetchFn: () => api.getVehicleList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

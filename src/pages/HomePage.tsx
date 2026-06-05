@@ -13,6 +13,7 @@ import { Skeleton } from "@/app/components/ui/skeleton";
 import { usePageTabs } from "@/hooks/usePageTabs";
 import { SearchToast } from "@/app/components/ui/SearchToast";
 import { useDynamicMenu } from "@/hooks/useDynamicMenu";
+import { MenuMetaProvider } from "@/app/context/MenuMetaContext";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 
@@ -101,6 +102,25 @@ export default function HomePage() {
   );
 
   const mountedMenuCodes = useMemo(() => tabs.map((t) => t.menuCode), [tabs]);
+
+  // menuCode → 메뉴 메타(applName/label). 화면 열릴 때 MenuMetaProvider 로 주입.
+  // sections 변경 시에만 재계산 → 화면별 value 레퍼런스 안정.
+  const menuMetaByCode = useMemo(() => {
+    const map: Record<
+      string,
+      { menuCode: string; menuName: string; label: string }
+    > = {};
+    sections.forEach((s) => {
+      s.items.forEach((i) => {
+        map[i.menuCode] = {
+          menuCode: i.menuCode,
+          menuName: i.menuName || i.menuCode,
+          label: i.label,
+        };
+      });
+    });
+    return map;
+  }, [sections]);
 
   // ── 분할 비율 / 드래그 디바이더 ─────────────────────────────────
   const [splitRatio, setSplitRatio] = useState(0.5);
@@ -231,7 +251,17 @@ export default function HomePage() {
               >
                 {Component ? (
                   <Suspense fallback={<Skeleton className="h-full w-full" />}>
-                    <Component />
+                    <MenuMetaProvider
+                      value={
+                        menuMetaByCode[menuCode] ?? {
+                          menuCode,
+                          menuName: menuCode,
+                          label: mergedLabelMap[menuCode] ?? menuCode,
+                        }
+                      }
+                    >
+                      <Component />
+                    </MenuMetaProvider>
                   </Suspense>
                 ) : (
                   <div className="text-gray-400 flex items-center justify-center h-full text-sm">

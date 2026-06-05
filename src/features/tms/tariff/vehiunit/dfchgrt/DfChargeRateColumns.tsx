@@ -16,7 +16,7 @@
 // ────────────────────────────────────────────────────────────────
 
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
-export const MAIN_COLUMN_DEFS = () => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
   {
     type: "text",
@@ -73,14 +73,11 @@ export const MAIN_COLUMN_DEFS = () => [
     headerName: "LBL_DIVISION_NAME",
     field: "DIV_NM",
   },
-
 ];
 
 // ── 상세 그리드 컬럼 (codeMap 주입 — 코드→라벨 치환용) ─────────
 //bottom - left
-export const RT_ITM_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const RT_ITM_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
   {
@@ -95,9 +92,7 @@ export const RT_ITM_COLUMN_DEFS = (
   },
 ];
 
-export const RT_CARR_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const RT_CARR_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_CARRIER_CODE", field: "CARR_CD" },
   {
@@ -112,9 +107,7 @@ export const RT_CARR_COLUMN_DEFS = (
   },
 ];
 
-export const RT_VEH_TP_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const RT_VEH_TP_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
   {
@@ -125,9 +118,7 @@ export const RT_VEH_TP_COLUMN_DEFS = (
 ];
 
 //bottom - right
-export const RT_ITM_VEH_TP_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const RT_ITM_VEH_TP_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
   {
@@ -182,9 +173,7 @@ export const RT_ITM_VEH_TP_COLUMN_DEFS = (
   },
 ];
 
-export const RT_ITM_VEH_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const RT_ITM_VEH_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM" },
   {

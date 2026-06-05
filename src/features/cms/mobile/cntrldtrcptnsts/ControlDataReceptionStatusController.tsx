@@ -3,13 +3,12 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { controlDataReceptionStatusApi as api } from "./ControlDataReceptionStatusApi";
 import { MENU_CODE } from "./ControlDataReceptionStatus";
-import { MAIN_COLUMN_DEFS } from "./ControlDataReceptionStatusColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   ControlDataReceptionStatusModel,
   GridKey,
 } from "./ControlDataReceptionStatusModel";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: ControlDataReceptionStatusModel;
@@ -19,6 +18,7 @@ export function useControlDataReceptionStatusController({
   model,
 }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -36,10 +36,9 @@ export function useControlDataReceptionStatusController({
   const mainActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: Lang.get("MENU_CTRL_DATA_RCPTN_STS"),
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current ?? {}),
         rows: model.grids.main.rows,
       }),

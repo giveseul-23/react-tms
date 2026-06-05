@@ -20,11 +20,7 @@ export default function IfDispatchResult() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        userTz: "Asia/Seoul",
-        menuCode: MENU_CODE,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid

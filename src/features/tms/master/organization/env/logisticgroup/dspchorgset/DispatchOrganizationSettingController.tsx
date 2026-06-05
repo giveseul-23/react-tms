@@ -7,16 +7,12 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { dispatchOrganizationSetting as api } from "./DispatchOrganizationSettingApi";
 import { MENU_CODE } from "./DispatchOrganizationSetting";
-import {
-  MAIN_COLUMN_DEFS,
-  DETAIL_COLUMN_DEFS,
-} from "./DispatchOrganizationSettingColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   DispatchOrganizationSettingModel,
   GridKey,
 } from "./DispatchOrganizationSettingModel";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: DispatchOrganizationSettingModel;
@@ -24,6 +20,7 @@ interface ControllerArgs {
 
 export function useDispatchOrganizationSettingController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -88,10 +85,9 @@ export function useDispatchOrganizationSettingController({ model }: ControllerAr
     const mainActions: ActionItem[] = useMemo(
       () => [
         makeExcelGroupAction({
-          columns: MAIN_COLUMN_DEFS,
           excelColumns: () => model.grids.main.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: Lang.get("MENU_DSPCH_ORG_SET"),
+          menuName: menuName,
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
         }),
@@ -104,10 +100,9 @@ export function useDispatchOrganizationSettingController({ model }: ControllerAr
       makeAddAction({ onClick: onAddDetail }),
       makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
-        columns: DETAIL_COLUMN_DEFS,
         excelColumns: () => model.grids.detail.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: Lang.get("MENU_DSPCH_ORG_SET"),
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main

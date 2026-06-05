@@ -9,7 +9,7 @@ import {
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { LanguagePackModel, GridKey } from "./LanguagePackModel";
 import { MENU_CD } from "./LanguagePack";
-import { MAIN_COLUMN_DEFS } from "./LanguagePackColumns";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 type ControllerProps = {
   menuCd: string;
@@ -28,6 +28,7 @@ export function useLanguagePackController({ menuCd, model }: ControllerProps) {
         }),
     },
   });
+  const { menuName } = useMenuMeta();
 
   const handleAdd = useCallback(() => {
     base.addRow("main", {
@@ -82,10 +83,9 @@ export function useLanguagePackController({ menuCd, model }: ControllerProps) {
       makeAddAction({ onClick: handleAdd }),
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: menuCd,
+        menuName: menuName,
         fetchFn: () => langPackApi.getLangPackList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),

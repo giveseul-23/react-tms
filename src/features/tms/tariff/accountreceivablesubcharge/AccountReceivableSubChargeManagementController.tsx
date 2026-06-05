@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { accountReceivableSubChargeManagementApi as api } from "./AccountReceivableSubChargeManagementApi";
-import { MAIN_COLUMN_DEFS } from "./AccountReceivableSubChargeManagementColumns";
 import { MENU_CODE } from "./AccountReceivableSubChargeManagement";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { AccountReceivableSubChargeManagementModel, GridKey } from "./AccountReceivableSubChargeManagementModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: AccountReceivableSubChargeManagementModel;
@@ -13,6 +13,7 @@ interface Args {
 
 export function useAccountReceivableSubChargeManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -70,10 +71,9 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
         add: true,
         save: true,
         excel: {
-          columns: MAIN_COLUMN_DEFS(),
           excelColumns: () => model.grids.main.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: "운영자매출계약-부가요금관리",
+          menuName: menuName,
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
         },
@@ -92,10 +92,9 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
               .then(() => base.search()),
         },
         excel: {
-          columns: MAIN_COLUMN_DEFS(),
           excelColumns: () => model.grids.detail01.getExcelColumns(),
           menuCode: MENU_CODE,
-          menuName: "운영자매출계약-부가요금관리-상세",
+          menuName: menuName,
           fetchFn: () => api.getDetail01List(model.filtersRef.current),
           rows: model.grids.detail01.rows,
         },

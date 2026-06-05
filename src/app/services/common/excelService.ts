@@ -14,6 +14,8 @@ export interface ColumnDefine {
   headerName?: string;
   field?: string;
   excelPrint?: boolean;
+  /** 엑셀 헤더 텍스트 덮어쓰기 — 미지정 시 headerName 사용. (화면 컬럼명과 다른 헤더가 필요할 때) */
+  excelColName?: string;
   xtype?: string;
   editType?: string;
   // 오타 수정: edityType → editorType (기존 코드 호환을 위해 둘 다 허용)
@@ -73,6 +75,16 @@ export interface ExcelParams {
 // 컬럼을 종류별로 분류
 // ────────────────────────────────────────────
 
+// 체크박스(Y/N) 컬럼 판별 — 그리드 컨벤션(type:"check") + 센차(xtype/editorType) 모두 인식.
+export function isCheckboxColumn(col: ColumnDefine): boolean {
+  const editorType = col.editorType ?? (col as any).edityType;
+  return (
+    col.type === "check" ||
+    col.xtype === "excheckcolumn" ||
+    editorType === "check"
+  );
+}
+
 export function setColumnsForExcel(columns: ColumnDefine[]): {
   checkboxColumns: ColumnDefine[];
   comboColumns: ColumnDefine[];
@@ -90,10 +102,7 @@ export function setColumnsForExcel(columns: ColumnDefine[]): {
     if (col.excelPrint === false) continue;
     if (col.headerName === "No") continue;
 
-    // 오타 수정: edityType → editorType (기존 데이터 호환)
-    const editorType = col.editorType ?? (col as any).edityType;
-
-    if (col.xtype === "excheckcolumn" || editorType === "check") {
+    if (isCheckboxColumn(col)) {
       checkboxColumns.push(col);
     } else if (col.editType === "combo") {
       comboColumns.push(col);
@@ -136,10 +145,13 @@ export function getColumnInfoForExcelDown(
     if (col.headerName === "No" || col.excelPrint === false) continue;
     if (!col.field) continue;
 
-    headerCols.push(col.headerName ?? col.field);
+    headerCols.push(col.excelColName ?? col.headerName ?? col.field);
     colNames.push(col.field);
     colWidths.push(col.width ?? defaultColWidth);
-    const colAlign = (col.align as string) ?? resolveDefaultAlign(col);
+    // Y/N 체크박스 컬럼은 무조건 center (align 명시보다 우선).
+    const colAlign = isCheckboxColumn(col)
+      ? "center"
+      : ((col.align as string) ?? resolveDefaultAlign(col));
     colAligns.push(colAlign);
   }
 
@@ -203,7 +215,9 @@ function resolveDefaultAlign(col: ColumnDefine): string {
   const isDate =
     type === "date" || type === "datetime" || c.fieldType === "date";
   const isNumeric =
-    type === "numeric" || c.dataType === "number" || c.cellDataType === "number";
+    type === "numeric" ||
+    c.dataType === "number" ||
+    c.cellDataType === "number";
   const field = (col.field ?? c.colId ?? "") as string;
 
   if (field.includes("DTTM")) return isDate ? "center" : "left";
@@ -384,8 +398,8 @@ export async function downExcelSearch({
     excelInfo,
     rows,
     filtered: "N",
-    menuCd: menuCd ?? menuName,
-    fileName: menuName,
+    menuCd: menuCd,
+    fileName: String(menuName).replaceAll(" ", "_") + Date.now(),
     searchUrl,
     extraParams,
     codeData: buildComboCodeData(columns),
@@ -411,8 +425,8 @@ export async function downExcelSearched({
     excelInfo,
     rows: applyCodeLabels(rows, columns),
     filtered: "Y",
-    menuCd: menuCd ?? menuName,
-    fileName: menuName,
+    menuCd: menuCd,
+    fileName: String(menuName).replaceAll(" ", "_") + Date.now(),
     searchUrl,
   });
 }

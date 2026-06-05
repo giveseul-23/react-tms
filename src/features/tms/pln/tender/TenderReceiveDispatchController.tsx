@@ -26,6 +26,7 @@ import type {
   TenderReceiveDispatchModel,
   GridKey,
 } from "./TenderReceiveDispatchModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: TenderReceiveDispatchModel;
@@ -33,6 +34,7 @@ interface Args {
 
 export function useTenderReceiveDispatchController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
   const { openPopup, closePopup } = usePopup();
   const { guardHasData } = useGuard();
   const track = useTrackGroupAction();
@@ -263,8 +265,8 @@ export function useTenderReceiveDispatchController({ model }: Args) {
       },
       {
         type: "group",
-        key: "운송비엑셀관리",
-        label: "운송비엑셀관리",
+        key: "BTN_CARRIER_RATE_EXCEL_MGMT",
+        label: "BTN_CARRIER_RATE_EXCEL_MGMT",
         items: [
           {
             type: "button",
@@ -272,36 +274,41 @@ export function useTenderReceiveDispatchController({ model }: Args) {
             label: "BTN_CARRIER_RATE_EXCEL_FORM_DOWN",
             onClick: () => {
               downExcelSearch({
-                columns: MAIN_COLUMN_DEFS(),
+                columns: MAIN_COLUMN_DEFS,
                 searchParams: model.filtersRef.current,
-                menuName: "운송수배현황",
+                menuName: menuName,
                 fetchFn: (params) => api.getDispatchList(params),
               });
             },
           },
           {
             type: "button",
-            key: "운송비업로드",
-            label: "운송비업로드",
+            key: "BTN_CARRIER_RATE_EXCEL_UPLOAD",
+            label: "BTN_CARRIER_RATE_EXCEL_UPLOAD",
             onClick: () => {
-              base.callAjax(
-                api.gridExcelUpload(model.filtersRef.current),
-                "업로드가 완료되었습니다.",
-              );
+              base.callAjax(api.gridExcelUpload(model.filtersRef.current));
             },
           },
         ],
       },
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS(),
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: "운송사요청목록",
+        menuName: menuName,
         fetchFn: () => api.getDispatchList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [base, openPopup, closePopup, guardHasData, model, track.action],
+    [
+      track.action,
+      menuName,
+      model.grids.main,
+      model.filtersRef,
+      guardHasData,
+      base,
+      openPopup,
+      closePopup,
+    ],
   );
 
   const apSetlActions: ActionItem[] = useMemo(
