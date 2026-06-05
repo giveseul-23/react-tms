@@ -1,4 +1,5 @@
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
+import { ItineraryVehPop } from "../itinerary/popup/ItineraryVehPop";
 
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
@@ -94,21 +95,23 @@ export const MAIN_COLUMN_DEFS = [
     insertable: true,
     editable: true,
   },
-  { // 차량팝업으로 수정 필요
+  {
     type: "popuser",
     headerName: "LBL_VEHICLE_CODE",
     field: "VEH_ID",
     popupTitle: "LBL_VEHICLE_CODE",
+    popupWidth: "2xl",
     renderPopup: ({ row, commit, close }) => (
-      <CommonPopup
-        sqlId="selectVehicleCodeName"
-        extraParams={{ sqlParam1: row?.LGST_GRP_CD ?? "" }}
-        onApply={(picked: any) => {
+      <ItineraryVehPop
+        lgstGrpCd={String(row?.LGST_GRP_CD ?? "")}
+        onApply={(picked) => {
           commit({
-            VEH_ID: picked.CODE,
-            VEH_NO: picked.NAME,
-            // CARR_CD: picked.CARR_CD, 
-            // CARR_NM: picked.CARR_NM,
+            VEH_ID: picked.VEH_ID,
+            VEH_NO: picked.VEH_NO,
+            CARR_CD: picked.CARR_CD,
+            CARR_NM: picked.CARR_NM,
+            DRVR_ID: picked.DRVR_ID,
+            DRVR_NM: picked.DRVR_NM,
           });
           close();
         }}
