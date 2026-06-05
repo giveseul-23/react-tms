@@ -113,10 +113,7 @@ export function useApSettlMgmtController({ model }: Args) {
   const onCreateClose = useCallback(
     () =>
       base
-        .callAjax(
-          api.createClose(model.filtersRef.current),
-          "정산이 생성되었습니다.",
-        )
+        .callAjax(api.createClose(model.filtersRef.current))
         .then(() => base.search()),
     [base, model.filtersRef],
   );
@@ -124,10 +121,7 @@ export function useApSettlMgmtController({ model }: Args) {
   const onCancelClose = useCallback(
     () =>
       base
-        .callAjax(
-          api.cancelClose(model.filtersRef.current),
-          "정산이 취소되었습니다.",
-        )
+        .callAjax(api.cancelClose(model.filtersRef.current))
         .then(() => base.search()),
     [base, model.filtersRef],
   );
@@ -189,7 +183,14 @@ export function useApSettlMgmtController({ model }: Args) {
         rows: model.grids.config.rows,
       }),
     ],
-    [onCreateClose, onCancelClose, onSaveMain, model],
+    [
+      onCreateClose,
+      onCancelClose,
+      onSaveMain,
+      menuName,
+      model.grids.config,
+      model.filtersRef,
+    ],
   );
 
   // ── 종합내역 탭 액션 ──────────────────────────────────────────
@@ -206,7 +207,7 @@ export function useApSettlMgmtController({ model }: Args) {
         rows: model.grids.summary.rows,
       }),
     ],
-    [model],
+    [menuName, model.grids.config.selectedRef, model.grids.summary],
   );
 
   // ── 코스트센터 탭 액션 ────────────────────────────────────────

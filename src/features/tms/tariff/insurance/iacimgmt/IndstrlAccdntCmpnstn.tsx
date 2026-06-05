@@ -27,19 +27,9 @@ export default function IndstrlAccdntCmpnstn() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CODE,
+        ...model.bindSearch(),
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
+      defaultDirection="horizontal"
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
@@ -60,14 +50,14 @@ export default function IndstrlAccdntCmpnstn() {
         >
           <DataGrid
             {...model.bind("rate")}
-            columnDefs={DETAIL01_COLUMN_DEFS()}
+            columnDefs={DETAIL01_COLUMN_DEFS}
             codeMap={model.codeMap}
             actions={ctrl.detailActions}
             onRowClicked={ctrl.onRateRowClicked}
           />
           <DataGrid
             {...model.bind("chg")}
-            columnDefs={DETAIL02_COLUMN_DEFS()}
+            columnDefs={DETAIL02_COLUMN_DEFS}
             codeMap={model.codeMap}
             actions={ctrl.detailActions}
           />

@@ -7,7 +7,7 @@ export type GridKey = "main" | "costInfo" | "conditionInfo";
 export function useRateModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     operatorTypeList: [
       { CODE: "*", NAME: "*" },
       { CODE: "/", NAME: "/" },
@@ -30,17 +30,6 @@ export function useRateModel(menuCode: string) {
     ],
     rdngRcdList: { sqlProp: "CODE", keyParam: "RDNG_RCD" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return { ...base, codeMap };
 }

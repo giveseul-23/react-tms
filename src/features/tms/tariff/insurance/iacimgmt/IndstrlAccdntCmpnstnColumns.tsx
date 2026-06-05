@@ -33,7 +33,7 @@ export const MAIN_COLUMN_DEFS = [
 // ── 상세 그리드 컬럼 ─────────────────────────────────────────
 // 공통코드 → 라벨 치환은 컬럼에 codeKey 만 지정하고,
 // DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
-export const DETAIL01_COLUMN_DEFS = () => [
+export const DETAIL01_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_TARIFF_TYPE", field: "AP_PROC_TP" },
   {
@@ -108,7 +108,7 @@ export const DETAIL01_COLUMN_DEFS = () => [
   },
 ];
 
-export const DETAIL02_COLUMN_DEFS = () => [
+export const DETAIL02_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_IACI_ID", field: "INSRNC_ID" },
   {

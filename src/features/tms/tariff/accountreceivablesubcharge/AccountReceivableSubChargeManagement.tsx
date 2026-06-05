@@ -2,7 +2,6 @@
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { SplitPane } from "@/app/components/layout/SplitPane";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useAccountReceivableSubChargeManagementModel } from "./AccountReceivableSubChargeManagementModel";
@@ -27,24 +26,14 @@ export default function AccountReceivableSubChargeManagement() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CODE,
+        ...model.bindSearch(),
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
+      defaultDirection="horizontal"
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS()}
+          columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           audit={{
@@ -53,6 +42,7 @@ export default function AccountReceivableSubChargeManagement() {
             updatePerson: false,
             updateTime: false,
           }}
+          codeMap={model.codeMap}
         />
       }
       detail={
@@ -65,7 +55,7 @@ export default function AccountReceivableSubChargeManagement() {
         >
           <DataGrid
             {...model.bind("detail01")}
-            columnDefs={DETAIL01_COLUMN_DEFS(model.codeMap)}
+            columnDefs={DETAIL01_COLUMN_DEFS}
             actions={ctrl.detailActions}
             onRowClicked={ctrl.onDetail01RowClicked}
             audit={{
@@ -75,10 +65,11 @@ export default function AccountReceivableSubChargeManagement() {
               updatePerson: false,
               updateTime: false,
             }}
+            codeMap={model.codeMap}
           />
           <DataGrid
             {...model.bind("detail02")}
-            columnDefs={DETAIL02_COLUMN_DEFS(model.codeMap)}
+            columnDefs={DETAIL02_COLUMN_DEFS}
             actions={ctrl.detailActions}
             audit={{
               rowStatus: false,
@@ -87,6 +78,7 @@ export default function AccountReceivableSubChargeManagement() {
               updatePerson: false,
               updateTime: false,
             }}
+            codeMap={model.codeMap}
           />
         </SplitPane>
       }

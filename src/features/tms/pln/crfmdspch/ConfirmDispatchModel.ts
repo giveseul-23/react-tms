@@ -2,7 +2,6 @@
 //
 // useBaseModel + 화면 고유 codeMap (공통코드 lookup).
 
-import { useMemo } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
@@ -22,7 +21,7 @@ export type GridKey =
 export function useConfirmDispatchModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode, { defaultLayout: "vertical" });
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
     stopTp: { sqlProp: "CODE", keyParam: "STOP_TP" },
     shpmOpSts: { sqlProp: "CODE", keyParam: "SHPM_OP_STS" },
@@ -34,17 +33,6 @@ export function useConfirmDispatchModel(menuCode: string) {
     vehOpType: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
     invSys: { sqlProp: "CODE", keyParam: "HARIM_INV_SYS_ID" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return { ...base, codeMap };
 }

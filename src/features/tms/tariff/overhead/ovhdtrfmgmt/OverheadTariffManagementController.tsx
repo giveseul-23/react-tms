@@ -2,10 +2,17 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { overheadTariffManagementApi as api } from "./OverheadTariffManagementApi";
 import { MENU_CODE } from "./OverheadTariffManagement";
-import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
+import {
+  makeAddAction,
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { OverheadTariffManagementModel, GridKey } from "./OverheadTariffManagementModel";
+import type {
+  OverheadTariffManagementModel,
+  GridKey,
+} from "./OverheadTariffManagementModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
@@ -75,39 +82,27 @@ export function useOverheadTariffManagementController({ model }: Args) {
     () => [
       {
         type: "button",
-        key: "계약서복사",
-        label: "계약서복사",
+        key: "BUTTON_COPY_CONTRACT",
+        label: "BUTTON_COPY_CONTRACT",
         onClick: () => {},
       },
-      ...makeCommonActions({
-        add: true,
-        save: true,
-        excel: {
-          excelColumns: () => model.grids.main.getExcelColumns(),
-          menuCode: MENU_CODE,
-          menuName: menuName,
-          fetchFn: () => api.getList(model.filtersRef.current),
-          rows: model.grids.main.rows,
-        },
+      makeAddAction(),
+      makeSaveAction(),
+      makeExcelGroupAction({
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
+        fetchFn: () => api.getList(model.filtersRef.current),
+        rows: model.grids.main.rows,
       }),
     ],
-    [model],
+    [menuName, model],
   );
 
   const detailActions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button" as const,
-        key: "BTN_ADD",
-        label: "BTN_ADD",
-        onClick: handleDetailAdd,
-      },
-      {
-        type: "button" as const,
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: handleDetailSave,
-      },
+      makeAddAction({ onClick: handleDetailAdd }),
+      makeSaveAction({ onClick: handleDetailSave }),
     ],
     [handleDetailAdd, handleDetailSave],
   );

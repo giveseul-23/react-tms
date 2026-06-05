@@ -178,7 +178,7 @@ export function useCountryController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [onAddState, onSaveState, model],
+    [onAddState, onSaveState, menuName, model.grids.main, model.filtersRef],
   );
 
   const cityActions: ActionItem[] = useMemo(
@@ -193,7 +193,7 @@ export function useCountryController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [onAddCity, onSaveCity, model],
+    [onAddCity, onSaveCity, menuName, model.grids.main, model.filtersRef],
   );
 
   const zipActions: ActionItem[] = useMemo(
@@ -208,7 +208,7 @@ export function useCountryController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [onAddZip, onSaveZip, model],
+    [onAddZip, onSaveZip, menuName, model.grids.main, model.filtersRef],
   );
 
   return {

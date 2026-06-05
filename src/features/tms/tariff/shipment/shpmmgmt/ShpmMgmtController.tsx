@@ -2,7 +2,11 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { shpmMgmtApi as api } from "./ShpmMgmtApi";
 import { MENU_CODE } from "./ShpmMgmt";
-import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
+import {
+  makeAddAction,
+  makeSaveAction,
+  makeExcelGroupAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ShpmMgmtModel, GridKey } from "./ShpmMgmtModel";
@@ -103,52 +107,33 @@ export function useShpmMgmtController({ model }: Args) {
     () => [
       {
         type: "button",
-        key: "계약서복사",
-        label: "계약서복사",
+        key: "BUTTON_COPY_CONTRACT",
+        label: "BUTTON_COPY_CONTRACT",
         onClick: () => {},
       },
-      ...makeCommonActions({
-        add: true,
-        save: true,
-        excel: {
-          excelColumns: () => model.grids.main.getExcelColumns(),
-          menuCode: MENU_CODE,
-          menuName: menuName,
-          fetchFn: () => api.getList(model.filtersRef.current),
-          rows: model.grids.main.rows,
-        },
+      makeAddAction(),
+      makeSaveAction(),
+      makeExcelGroupAction({
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
+        fetchFn: () => api.getList(model.filtersRef.current),
+        rows: model.grids.main.rows,
       }),
     ],
-    [model],
+    [menuName, model],
   );
 
   const detail01Actions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button" as const,
-        key: "BTN_ADD",
-        label: "BTN_ADD",
-        onClick: handleDetail01Add,
-      },
-      {
-        type: "button" as const,
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: handleDetail01Save,
-      },
+      makeAddAction({ onClick: handleDetail01Add }),
+      makeSaveAction({ onClick: handleDetail01Save }),
     ],
     [handleDetail01Add, handleDetail01Save],
   );
 
   const detail02Actions: ActionItem[] = useMemo(
-    () => [
-      {
-        type: "button" as const,
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: handleDetail02Save,
-      },
-    ],
+    () => [makeSaveAction({ onClick: handleDetail02Save })],
     [handleDetail02Save],
   );
 

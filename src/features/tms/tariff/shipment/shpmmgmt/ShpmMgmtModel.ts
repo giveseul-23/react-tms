@@ -7,7 +7,7 @@ export type GridKey = "main" | "lgst" | "zone" | "rate" | "zoneCond";
 export function useShpmMgmtModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     rateRvrsPcd: { sqlProp: "CODE", keyParam: "RATE_RVRS_PCD" },
     itmUom: { sqlProp: "CODE", keyParam: "ITEM_UOM" },
     rngCalcTcd: { sqlProp: "CODE", keyParam: "RNG_CALC_TCD" },
@@ -31,17 +31,6 @@ export function useShpmMgmtModel(menuCode: string) {
       { CODE: "NOT_IN", NAME: "NOT_IN" },
     ],
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return { ...base, codeMap };
 }

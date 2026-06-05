@@ -49,21 +49,20 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
   // main 클릭 → detail fetch + channel/target 도 alsoReset
   const onMainGridClick = useCallback(
     (row: any) =>
-      base
-        .handleRowClick(
-          "main",
-          row,
-          [
-            {
-              to: "detail",
-              fetch: (r) =>
-                api.getVltnNtfctnCnfgDetailList({
-                  LGST_GRP_CD: r.LGST_GRP_CD,
-                }),
-            },
-          ],
-          { alsoReset: ["channel", "target"] },
-        ),
+      base.handleRowClick(
+        "main",
+        row,
+        [
+          {
+            to: "detail",
+            fetch: (r) =>
+              api.getVltnNtfctnCnfgDetailList({
+                LGST_GRP_CD: r.LGST_GRP_CD,
+              }),
+          },
+        ],
+        { alsoReset: ["channel", "target"] },
+      ),
     [base],
   );
 
@@ -134,7 +133,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [model],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   return {

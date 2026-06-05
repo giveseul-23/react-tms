@@ -7,7 +7,6 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_COMMODITY_CODE",
     field: "CMDT_CD",
     width: 150,
-    align: "center",
     editable: true,
     insertable: true,
     isPrimaryKey: true,
@@ -17,6 +16,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_COMMODITY_NAME",
     field: "CMDT_NM",
     width: 150,
-    editable: true, insertable: true,
+    editable: true,
+    insertable: true,
   },
 ];

@@ -32,10 +32,7 @@ export default function ApSettlMgmt() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CODE,
+        ...model.bindSearch(),
       }}
       defaultDirection="vertical"
       storageKey={model.storageKeys.outer}

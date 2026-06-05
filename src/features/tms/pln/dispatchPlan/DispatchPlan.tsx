@@ -2,7 +2,6 @@
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { SplitPane } from "@/app/components/layout/SplitPane";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useDispatchPlanModel } from "../dispatchPlanAd/DispatchPlanModel";
@@ -30,17 +29,9 @@ export default function DispatchPlan() {
         fetchFn: ctrl.fetchDispatchPlanList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
-        menuCode: MENU_CODE,
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
+      defaultDirection="horizontal"
       defaultSizes={[65, 35]}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid

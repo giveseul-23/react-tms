@@ -16,7 +16,7 @@
 // ────────────────────────────────────────────────────────────────
 
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
-export const MAIN_COLUMN_DEFS = () => [
+export const MAIN_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CODE",
@@ -105,9 +105,7 @@ export const MAIN_COLUMN_DEFS = () => [
 ];
 
 // ── 상세 그리드 컬럼 (codeMap 주입 — 코드→라벨 치환용) ─────────
-export const DETAIL01_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const DETAIL01_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_CALC_FORMULA_SEQ", field: "SEQ" },
   {
     type: "text",
@@ -146,9 +144,7 @@ export const DETAIL01_COLUMN_DEFS = (
   },
 ];
 
-export const DETAIL02_COLUMN_DEFS = (
-  codeMap: Record<string, Record<string, string>>,
-) => [
+export const DETAIL02_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_SEQ", field: "COND_SEQ" },
   {
     type: "text",

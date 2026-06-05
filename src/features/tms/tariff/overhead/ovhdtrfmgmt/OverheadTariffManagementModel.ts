@@ -7,20 +7,9 @@ export type GridKey = "main" | "subChg" | "subChgDtl";
 export function useOverheadTariffManagementModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     ovrhdChgType: { sqlProp: "CODE", keyParam: "OVRHD_CHG_TP" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return { ...base, codeMap };
 }

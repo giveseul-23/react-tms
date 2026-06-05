@@ -76,7 +76,7 @@ export function useRateController({ model }: Args) {
           rows: model.grids.main.rows,
         },
       }),
-    [model],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   const detailActions: ActionItem[] = useMemo(
@@ -97,7 +97,7 @@ export function useRateController({ model }: Args) {
           rows: model.grids.costInfo.rows,
         },
       }),
-    [model, base],
+    [menuName, model.grids.costInfo, model.filtersRef, base],
   );
 
   return {

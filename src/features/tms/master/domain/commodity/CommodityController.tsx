@@ -8,7 +8,10 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { commodityApi as api } from "@/features/tms/master/domain/commodity/CommodityApi";
 import { MENU_CD } from "@/features/tms/master/domain/commodity/Commodity";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { CommodityModel, GridKey } from "@/features/tms/master/domain/commodity/CommodityModel";
+import type {
+  CommodityModel,
+  GridKey,
+} from "@/features/tms/master/domain/commodity/CommodityModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
@@ -24,7 +27,7 @@ export function useCommodityController({ model }: Args) {
     [],
   );
 
-  const handleSearch = useCallback(
+  const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
     },
@@ -55,12 +58,12 @@ export function useCommodityController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [onAddMain, onSaveMain, model],
+    [onAddMain, onSaveMain, menuName, model.grids.main, model.filtersRef],
   );
 
   return {
     fetchList,
-    handleSearch,
+    onSearchCallback,
     mainActions,
   };
 }

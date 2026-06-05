@@ -4,7 +4,10 @@ import { ifDeliveryDocumentApi as api } from "./IfDeliveryDocumentApi";
 import { MENU_CODE } from "./IfDeliveryDocument";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { IfDeliveryDocumentModel, GridKey } from "./IfDeliveryDocumentModel";
+import type {
+  IfDeliveryDocumentModel,
+  GridKey,
+} from "./IfDeliveryDocumentModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
@@ -16,8 +19,7 @@ export function useIfDeliveryDocumentController({ model }: Args) {
   const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
-    (params: Record<string, unknown>) =>
-      api.getList({ userTz: "Asia/Seoul", ...params }),
+    (params: Record<string, unknown>) => api.getList({ ...params }),
     [],
   );
 
@@ -48,7 +50,7 @@ export function useIfDeliveryDocumentController({ model }: Args) {
         label: "BTN_REPRO",
         onClick: () => {
           base
-            .callAjax(api.reprocess(model.filtersRef.current), "재처리되었습니다.")
+            .callAjax(api.reprocess(model.filtersRef.current))
             .then(() => base.search());
         },
       },
@@ -60,7 +62,7 @@ export function useIfDeliveryDocumentController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [model, base],
+    [menuName, model.grids.main, model.filtersRef, base],
   );
 
   const detailActions: ActionItem[] = useMemo(() => [], []);

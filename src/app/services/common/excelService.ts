@@ -399,7 +399,8 @@ export async function downExcelSearch({
     rows,
     filtered: "N",
     menuCd: menuCd,
-    fileName: String(menuName).replaceAll(" ", "_") + Date.now(),
+    fileName:
+      String(menuName).replaceAll(" ", "_").replaceAll("/", " ") + Date.now(),
     searchUrl,
     extraParams,
     codeData: buildComboCodeData(columns),
@@ -426,7 +427,8 @@ export async function downExcelSearched({
     rows: applyCodeLabels(rows, columns),
     filtered: "Y",
     menuCd: menuCd,
-    fileName: String(menuName).replaceAll(" ", "_") + Date.now(),
+    fileName:
+      String(menuName).replaceAll(" ", "_").replaceAll("/", " ") + Date.now(),
     searchUrl,
   });
 }

@@ -161,9 +161,7 @@ export default function VehicleMgmt() {
           moduleDefault: "TMS",
           fetchFn: ctrl.fetchVehicleList,
           onSearchCallback: ctrl.onSearchCallback,
-          searchRef: model.searchRef,
-          filtersRef: model.filtersRef,
-          pageSize: model.pageSize,
+          ...model.bindSearch(),
         }}
         grid={
           <DataGrid

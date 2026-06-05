@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useMemo } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
 import { PopupShell } from "./PopupShell";
 import type { PopupWidth } from "./popup.types";
 
@@ -22,6 +29,13 @@ type PopupContextType = {
 
 const PopupContext = createContext<PopupContextType | null>(null);
 
+// 모듈 레벨 imperative 핸들 — React 컴포넌트 밖(예: makeExcelGroupAction 의 onClick)에서
+// 모달을 띄울 때 사용. Provider 마운트 동안만 유효. (SearchToast 의 showSearchToast 와 동일 패턴)
+let _popupApi: PopupContextType | null = null;
+export function getPopupApi(): PopupContextType | null {
+  return _popupApi;
+}
+
 export function PopupProvider({ children }: { children: React.ReactNode }) {
   // 팝업 스택으로 변경 → 중첩 팝업 지원
   const [stack, setStack] = useState<PopupState[]>([]);
@@ -38,6 +52,14 @@ export function PopupProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const ctxValue = useMemo(() => ({ openPopup, closePopup }), [openPopup, closePopup]);
+
+  // 모듈 레벨 핸들 동기화 — 비-React 코드에서 getPopupApi() 로 접근.
+  useEffect(() => {
+    _popupApi = ctxValue;
+    return () => {
+      if (_popupApi === ctxValue) _popupApi = null;
+    };
+  }, [ctxValue]);
 
   return (
     <PopupContext.Provider value={ctxValue}>

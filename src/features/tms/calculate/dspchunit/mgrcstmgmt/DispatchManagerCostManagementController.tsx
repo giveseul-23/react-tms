@@ -2,10 +2,16 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchManagerCostApi as api } from "./DispatchManagerCostManagementApi";
 import { MENU_CODE } from "./DispatchManagerCostManagement";
-import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
+import {
+  makeExcelGroupAction,
+  makeSaveAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { DispatchManagerCostModel, GridKey } from "./DispatchManagerCostManagementModel";
+import type {
+  DispatchManagerCostModel,
+  GridKey,
+} from "./DispatchManagerCostManagementModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const masterParam = (row: any) => ({
@@ -51,7 +57,7 @@ export function useDispatchManagerCostController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
+    (apiCall: () => Promise<any>, msg = "MSG_SAVE_CMPLT.") =>
       base.callAjax(apiCall(), msg).then(() => base.search()),
     [base],
   );
@@ -68,50 +74,34 @@ export function useDispatchManagerCostController({ model }: Args) {
         key: "BTN_RATE_OP_CONFIRM_CANCEL",
         label: "BTN_RATE_OP_CONFIRM_CANCEL",
         onClick: () =>
-          doAction(
-            () => api.cancelOperatorConfirm(model.filtersRef.current),
-            "운영자 확정이 취소되었습니다.",
-          ),
+          doAction(() => api.cancelOperatorConfirm(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_RATE_MG_CONFIRM",
         label: "BTN_RATE_MG_CONFIRM",
         onClick: () =>
-          doAction(
-            () => api.approveByManager(model.filtersRef.current),
-            "관리자 승인되었습니다.",
-          ),
+          doAction(() => api.approveByManager(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_RATE_MG_CONFIRM_CANCEL",
         label: "BTN_RATE_MG_CONFIRM_CANCEL",
         onClick: () =>
-          doAction(
-            () => api.cancelManagerApprove(model.filtersRef.current),
-            "관리자 승인이 취소되었습니다.",
-          ),
+          doAction(() => api.cancelManagerApprove(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_RATE_CLOSE",
         label: "BTN_RATE_CLOSE",
-        onClick: () =>
-          doAction(
-            () => api.closeCost(model.filtersRef.current),
-            "비용이 마감되었습니다.",
-          ),
+        onClick: () => doAction(() => api.closeCost(model.filtersRef.current)),
       },
       {
         type: "button",
         key: "BTN_RATE_CLOSE_CANCEL",
         label: "BTN_RATE_CLOSE_CANCEL",
         onClick: () =>
-          doAction(
-            () => api.cancelCostClose(model.filtersRef.current),
-            "비용 마감이 취소되었습니다.",
-          ),
+          doAction(() => api.cancelCostClose(model.filtersRef.current)),
       },
       makeExcelGroupAction({
         excelColumns: () => model.grids.main.getExcelColumns(),
@@ -121,21 +111,18 @@ export function useDispatchManagerCostController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, model],
+    [doAction, menuName, model.filtersRef, model.grids.main],
   );
 
   const costDetailActions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
+      makeSaveAction({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
           api.saveCostDetail(saveRows).then(() => refetchSubTabs());
         },
-      },
+      }),
     ],
     [refetchSubTabs],
   );

@@ -3,7 +3,8 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { distanceTransitTimeApi as api } from "./DistanceTransitTimeApi";
 import { MENU_CD } from "./DistanceTransitTime";
 import {
-  makeCommonActions,
+  makeAddAction,
+  makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
@@ -85,25 +86,23 @@ export function useDistanceTransitTimeController({ model }: Args) {
         onClick: () =>
           doAction(() => api.changeRouteOption(model.filtersRef.current)),
       },
-      ...makeCommonActions({
-        add: true,
-        save: {
-          onClick: (e: any) => {
-            const saveRows = dirtyRows(e.data);
-            if (saveRows.length === 0) return;
-            api.save(saveRows).then(() => base.search());
-          },
-        },
-        excel: {
-          excelColumns: () => model.grids.main.getExcelColumns(),
-          menuCode: MENU_CD,
-          menuName: menuName,
-          fetchFn: () => api.getList(model.filtersRef.current),
-          rows: model.grids.main.rows,
+      makeAddAction(),
+      makeSaveAction({
+        onClick: (e: any) => {
+          const saveRows = dirtyRows(e.data);
+          if (saveRows.length === 0) return;
+          api.save(saveRows).then(() => base.search());
         },
       }),
+      makeExcelGroupAction({
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
+        menuName: menuName,
+        fetchFn: () => api.getList(model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
     ],
-    [doAction, model, base],
+    [menuName, doAction, model, base],
   );
 
   const historyActions: ActionItem[] = useMemo(
@@ -124,16 +123,8 @@ export function useDistanceTransitTimeController({ model }: Args) {
             api.calculateWithoutMoveDistance(model.filtersRef.current),
           ),
       },
-      {
-        type: "button",
-        key: "BTN_ADD",
-        label: "BTN_ADD",
-        onClick: () => {},
-      },
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
+      makeAddAction({ onClick: () => {} }),
+      makeSaveAction({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
@@ -151,7 +142,7 @@ export function useDistanceTransitTimeController({ model }: Args) {
             }
           });
         },
-      },
+      }),
     ],
     [doAction, model, base],
   );

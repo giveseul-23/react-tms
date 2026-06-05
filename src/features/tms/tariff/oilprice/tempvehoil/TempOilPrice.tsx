@@ -26,17 +26,14 @@ export default function TempOilPrice() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CODE,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid
           layoutType="tab"
           tabs={[
-            { key: "REGISTER", label: "유가등록" },
-            { key: "PERIOD", label: "기간별조회" },
+            { key: "REGISTER", label: "LBL_REGI_OILPRICE" },
+            { key: "PERIOD", label: "LBL_SEARCH_BY_PERIOD" },
           ]}
           onTabChange={(k) => {
             activeTabRef.current = k;

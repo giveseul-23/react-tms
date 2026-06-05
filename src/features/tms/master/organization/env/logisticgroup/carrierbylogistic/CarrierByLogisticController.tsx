@@ -1,10 +1,10 @@
-import { useCallback, useMemo, MutableRefObject} from "react";
+import { useCallback, useMemo, MutableRefObject } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { carrierByLogisticApi as api } from "./CarrierByLogisticApi";
 import {
-    makeAddAction,
-    makeSaveAction,
-    makeExcelGroupAction
+  makeAddAction,
+  makeSaveAction,
+  makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { CarrierByLogisticModel, GridKey } from "./CarrierByLogisticModel";
@@ -13,19 +13,15 @@ import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: CarrierByLogisticModel;
-  rawFiltersRef: MutableRefObject<Record<string, string>>;
 }
 
-export function useCarrierByLogisticController({
-  model,
-  rawFiltersRef,
-}: Args) {
+export function useCarrierByLogisticController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     async (params: Record<string, unknown>) => {
-      const srchObj = rawFiltersRef.current;
+      const srchObj = model.rawFiltersRef.current;
       const divCd = srchObj["SRCH_DIV_CD"];
       const lgstGrpCd = srchObj["SRCH_LGST_GRP_CD"];
 
@@ -35,7 +31,7 @@ export function useCarrierByLogisticController({
         ...params,
       });
     },
-    [rawFiltersRef, model],
+    [model],
   );
 
   const onMainGridClick = useCallback(
@@ -46,8 +42,12 @@ export function useCarrierByLogisticController({
         [
           {
             to: "sub01",
-            fetch: (r) => api.getLogisticCarrierInfoList({ DIV_CD: r.DIV_CD, LGST_GRP_CD: r.LGST_GRP_CD }),
-          }
+            fetch: (r) =>
+              api.getLogisticCarrierInfoList({
+                DIV_CD: r.DIV_CD,
+                LGST_GRP_CD: r.LGST_GRP_CD,
+              }),
+          },
         ],
         { alsoReset: ["sub02"] },
       ),
@@ -87,7 +87,7 @@ export function useCarrierByLogisticController({
       CARR_CD: "",
       DSPCH_AP_FRM_DAY_ADJ: 0,
       DSPCH_AP_TO_DAY_ADJ: 0,
-      USE_YN: "Y"
+      USE_YN: "Y",
     });
   }, [model, base]);
 
@@ -97,34 +97,37 @@ export function useCarrierByLogisticController({
     base.addRow("sub02", {
       DIV_CD: sub01.DIV_CD,
       LGST_GRP_CD: sub01.LGST_GRP_CD,
-      CARR_CD: sub01.CARR_CD
+      CARR_CD: sub01.CARR_CD,
     });
   }, [model, base]);
 
-    const fetchSub01 = useCallback(
-      (row: any) =>
-        api.getLogisticCarrierInfoList({
-          DIV_CD: row.DIV_CD,
-          LGST_GRP_CD: row.LGST_GRP_CD
-        }),
-      [],
-    );
+  const fetchSub01 = useCallback(
+    (row: any) =>
+      api.getLogisticCarrierInfoList({
+        DIV_CD: row.DIV_CD,
+        LGST_GRP_CD: row.LGST_GRP_CD,
+      }),
+    [],
+  );
 
   const onSaveSub01 = useCallback(
-      () =>
-        base.saveGrid("sub01", (payload) => api.saveLogisticCarrierInfo({
-              ...payload,
-              MENU_CD: MENU_CODE,
-            }),
-          {
-            afterSave: {
-              cascadeFrom: "main",
-              fetch: (main) => fetchSub01(main),
-            },
+    () =>
+      base.saveGrid(
+        "sub01",
+        (payload) =>
+          api.saveLogisticCarrierInfo({
+            ...payload,
+            MENU_CD: MENU_CODE,
+          }),
+        {
+          afterSave: {
+            cascadeFrom: "main",
+            fetch: (main) => fetchSub01(main),
           },
-        ),
-      [base, fetchSub01],
-  );    
+        },
+      ),
+    [base, fetchSub01],
+  );
 
   const sub01Actions: ActionItem[] = useMemo(
     () => [
@@ -142,7 +145,7 @@ export function useCarrierByLogisticController({
           fetch: (sub01) =>
             api.getLogisticCarrierDetailInfoList({
               LGST_GRP_CD: sub01.LGST_GRP_CD,
-              CARR_CD: sub01.CARR_CD
+              CARR_CD: sub01.CARR_CD,
             }),
         },
       }),
@@ -167,7 +170,7 @@ export function useCarrierByLogisticController({
         rows: model.grids.main.rows,
       }),
     ],
-    [],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   return {
@@ -177,6 +180,6 @@ export function useCarrierByLogisticController({
     onSub01GridClick,
     sub01Actions,
     sub02Actions,
-    mainActions
+    mainActions,
   };
 }

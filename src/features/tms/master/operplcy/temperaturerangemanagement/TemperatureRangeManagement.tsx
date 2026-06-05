@@ -41,16 +41,12 @@ export default function Feature() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid
           {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
-          //codeMap={model.codeMap}
-          // onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
         />
       }

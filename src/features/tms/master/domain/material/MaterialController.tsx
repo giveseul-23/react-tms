@@ -3,7 +3,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { materialApi as api } from "./MaterialApi";
-import { MENU_CD } from "./materialMenu";
+import { MENU_CD } from "./Material";
 import type { MaterialModel, GridKey } from "./MaterialModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
@@ -62,7 +62,7 @@ export function useMaterialController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [model.filtersRef, model.grids.main.rows],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   const sub02Actions: ActionItem[] = useMemo(
@@ -80,7 +80,7 @@ export function useMaterialController({ model }: Args) {
         rows: model.grids.sub02.rows,
       }),
     ],
-    [model.grids.main.selectedRef, model.grids.sub02.rows],
+    [menuName, model.grids.main.selectedRef, model.grids.sub02],
   );
 
   const sub01Actions: ActionItem[] = useMemo(
@@ -98,7 +98,7 @@ export function useMaterialController({ model }: Args) {
         rows: model.grids.sub01.rows,
       }),
     ],
-    [model.grids.main.selectedRef, model.grids.sub01.rows],
+    [menuName, model.grids.main.selectedRef, model.grids.sub01],
   );
 
   return {

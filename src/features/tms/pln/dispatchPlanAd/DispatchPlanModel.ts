@@ -12,25 +12,14 @@ export type GridKey =
   | "unallocSub";
 
 export function useDispatchPlanModel(menuCode: string) {
-  const base = useBaseModel<GridKey>(menuCode, { defaultLayout: "vertical" });
+  const base = useBaseModel<GridKey>(menuCode);
 
   const [unallocSearching, setUnallocSearching] = useState(false);
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
     vehOpTp: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return {
     ...base,

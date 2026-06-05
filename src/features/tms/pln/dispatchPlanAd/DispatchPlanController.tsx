@@ -225,7 +225,14 @@ export function useDispatchPlanController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [handleSave, base, guardHasData, model],
+    [
+      handleSave,
+      menuName,
+      model.grids.main,
+      model.filtersRef,
+      guardHasData,
+      base,
+    ],
   );
 
   const stopActions: ActionItem[] = useMemo(
@@ -237,10 +244,7 @@ export function useDispatchPlanController({ model }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          base.callAjax(
-            api.predictEta({ DSPCH_NO: row.DSPCH_NO }),
-            "ETA 예측 완료",
-          );
+          base.callAjax(api.predictEta({ DSPCH_NO: row.DSPCH_NO }));
         },
       },
       {
@@ -250,10 +254,7 @@ export function useDispatchPlanController({ model }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          base.callAjax(
-            api.calcEta({ DSPCH_NO: row.DSPCH_NO }),
-            "ETA 계산 완료",
-          );
+          base.callAjax(api.calcEta({ DSPCH_NO: row.DSPCH_NO }));
         },
       },
       {
@@ -286,7 +287,6 @@ export function useDispatchPlanController({ model }: Args) {
               DSPCH_NO: row.DSPCH_NO,
               stops: model.grids.stop.rows,
             }),
-            "MSG_SAVE_CMPLT",
           );
         },
       },

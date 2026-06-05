@@ -11,19 +11,12 @@ import {
   LOGISTIC_CARRIER_INFO_COLUMN_DEFS,
   LOGISTIC_CARRIER_DETAIL_INFO_COLUMN_DEFS,
 } from "./CarrierByLogisticColumns";
-import { useRef } from "react";
-import { useMemo } from "react";
 
 export const MENU_CODE = "MENU_LGST_GRP_CARR";
 
 export default function CarrierByLogistic() {
   const model = useCarrierByLogisticModel(MENU_CODE);
-  const rawFiltersRef = useRef<Record<string, string>>({});
-  const ctrl = useCarrierByLogisticController({ model, rawFiltersRef });
-  const columnDefs = useMemo(
-    () => LOGISTIC_COLUMN_DEFS(model.grids.main.setData),
-    [model.grids.main.setData],
-  );
+  const ctrl = useCarrierByLogisticController({ model });
 
   return (
     <MasterDetailPage
@@ -32,10 +25,7 @@ export default function CarrierByLogistic() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        rawFiltersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       defaultSizes={[55, 45]}
       storageKey={model.storageKeys.outer}
@@ -50,10 +40,10 @@ export default function CarrierByLogistic() {
           {/* 메인 그리드 (top-left) */}
           <DataGrid
             {...model.bind("main")}
-            columnDefs= {columnDefs}
+            columnDefs={LOGISTIC_COLUMN_DEFS}
             onRowClicked={ctrl.onMainGridClick}
             actions={ctrl.mainActions}
-            audit={{ delete: false , rowStatus: false}}
+            audit={{ delete: false, rowStatus: false }}
           />
           {/* 상세 그리드 (top-right) */}
           <DataGrid

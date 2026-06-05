@@ -2,10 +2,17 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { indstrlAccdntCmpnstnApi as api } from "./IndstrlAccdntCmpnstnApi";
 import { MENU_CODE } from "./IndstrlAccdntCmpnstn";
-import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
+import {
+  makeAddAction,
+  makeExcelGroupAction,
+  makeSaveAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { IndstrlAccdntCmpnstnModel, GridKey } from "./IndstrlAccdntCmpnstnModel";
+import type {
+  IndstrlAccdntCmpnstnModel,
+  GridKey,
+} from "./IndstrlAccdntCmpnstnModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
@@ -75,14 +82,14 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
     () => [
       {
         type: "button",
-        key: "월대보험료등록",
-        label: "월대보험료등록",
+        key: "BTN_DF_CREATE",
+        label: "BTN_DF_CREATE",
         onClick: () => {},
       },
       {
         type: "button",
-        key: "용차/회당보험료등록",
-        label: "용차/회당보험료등록",
+        key: "BTN_TEMP_AP_CREATE",
+        label: "BTN_TEMP_AP_CREATE",
         onClick: () => {},
       },
     ],
@@ -91,18 +98,8 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
 
   const detailActions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button" as const,
-        key: "BTN_ADD",
-        label: "BTN_ADD",
-        onClick: handleDetailAdd,
-      },
-      {
-        type: "button" as const,
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: handleDetailSave,
-      },
+      makeAddAction({ onClick: handleDetailAdd }),
+      makeSaveAction({ onClick: handleDetailSave }),
       makeExcelGroupAction({
         excelColumns: () => model.grids.rate.getExcelColumns(),
         menuCode: MENU_CODE,
@@ -111,7 +108,13 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
         rows: model.grids.rate.rows,
       }),
     ],
-    [handleDetailAdd, handleDetailSave, model],
+    [
+      handleDetailAdd,
+      handleDetailSave,
+      menuName,
+      model.filtersRef,
+      model.grids.rate,
+    ],
   );
 
   return {

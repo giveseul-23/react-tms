@@ -13,6 +13,7 @@ import {
   downExcelSearch,
   downExcelSearched,
 } from "@/app/services/common/excelService";
+import { showErrorModal } from "@/app/components/popup/showErrorModal";
 import { TrackPanel } from "@/app/components/track/TrackPanel";
 import {
   TRACK_KEY_FIELD_MAP,
@@ -247,6 +248,12 @@ const resolveExcelColumns = (config: ExcelGroupActionConfig) => {
   return visible.map((id) => byKey.get(id)).filter(Boolean);
 };
 
+// 엑셀 다운로드 실패 메시지 추출 (서버 메시지 → axios 에러 → 기본 문구).
+const excelErrorMsg = (e: any): string =>
+  e?.response?.data?.error?.message ??
+  e?.message ??
+  "엑셀 다운로드에 실패했습니다.";
+
 export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
   const items: any[] = [];
 
@@ -261,7 +268,7 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
           menuName: config.menuName ?? config.menuCode,
           menuCd: config.menuCode,
           fetchFn: config.fetchFn,
-        });
+        }).catch((e) => showErrorModal(excelErrorMsg(e)));
       },
     });
   }
@@ -278,7 +285,7 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
           menuCd: config.menuCode,
           rows: config.rows,
           searchUrl: config.searchUrl,
-        });
+        }).catch((e) => showErrorModal(excelErrorMsg(e)));
       },
     });
   }

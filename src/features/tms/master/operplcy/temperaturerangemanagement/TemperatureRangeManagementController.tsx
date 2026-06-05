@@ -29,14 +29,19 @@ import {
 import { temperatureRangeManagementApi as api } from "./TemperatureRangeManagementApi.ts";
 import { MENU_CODE } from "./TemperatureRangeManagement";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { TemperatureRangeManagementModel, GridKey } from "./TemperatureRangeManagementModel.ts";
+import type {
+  TemperatureRangeManagementModel,
+  GridKey,
+} from "./TemperatureRangeManagementModel.ts";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface ControllerArgs {
   model: TemperatureRangeManagementModel;
 }
 
-export function useTemperatureRangeManagementController({ model }: ControllerArgs) {
+export function useTemperatureRangeManagementController({
+  model,
+}: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
 
@@ -119,9 +124,8 @@ export function useTemperatureRangeManagementController({ model }: ControllerArg
         rows: model.grids.main.rows,
       }),
     ],
-    [onAddMain, onSaveMain, model],
+    [onAddMain, onSaveMain, menuName, model.grids.main, model.filtersRef],
   );
-
 
   return {
     fetchList,

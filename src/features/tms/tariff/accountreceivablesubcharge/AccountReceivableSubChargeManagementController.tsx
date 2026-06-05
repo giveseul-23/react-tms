@@ -4,14 +4,19 @@ import { accountReceivableSubChargeManagementApi as api } from "./AccountReceiva
 import { MENU_CODE } from "./AccountReceivableSubChargeManagement";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { AccountReceivableSubChargeManagementModel, GridKey } from "./AccountReceivableSubChargeManagementModel";
+import type {
+  AccountReceivableSubChargeManagementModel,
+  GridKey,
+} from "./AccountReceivableSubChargeManagementModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: AccountReceivableSubChargeManagementModel;
 }
 
-export function useAccountReceivableSubChargeManagementController({ model }: Args) {
+export function useAccountReceivableSubChargeManagementController({
+  model,
+}: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
 
@@ -78,7 +83,7 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
           rows: model.grids.main.rows,
         },
       }),
-    [model],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   const detailActions: ActionItem[] = useMemo(
@@ -99,7 +104,7 @@ export function useAccountReceivableSubChargeManagementController({ model }: Arg
           rows: model.grids.detail01.rows,
         },
       }),
-    [model, base],
+    [menuName, model.grids.detail01, model.filtersRef, base],
   );
 
   return {

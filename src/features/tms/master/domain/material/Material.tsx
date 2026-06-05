@@ -10,9 +10,8 @@ import {
   SUB01_COLUMN_DEFS,
   SUB02_COLUMN_DEFS,
 } from "./MaterialColumns";
-import { MENU_CD } from "./materialMenu";
 
-export { MENU_CD };
+export const MENU_CD = "MENU_MATERIAL_MGMT";
 
 export default function Material() {
   const model = useMaterialModel(MENU_CD);
@@ -27,9 +26,7 @@ export default function Material() {
         menuCode: MENU_CD,
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.handleSearch,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       defaultDirection="vertical"
       layoutToggle={true}
