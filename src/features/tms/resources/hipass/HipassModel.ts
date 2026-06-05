@@ -10,7 +10,6 @@ export function useHipassModel(menuCode: string) {
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailMode, setDetailMode] = useState<DetailMode>("view");
-  const [detailData, setDetailData] = useState<any>({});
   const [detailIndex, setDetailIndex] = useState(-1);
   const [navigating, setNavigating] = useState(false);
 
@@ -28,8 +27,6 @@ export function useHipassModel(menuCode: string) {
     setDetailOpen,
     detailMode,
     setDetailMode,
-    detailData,
-    setDetailData,
     detailIndex,
     setDetailIndex,
     navigating,

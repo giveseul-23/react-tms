@@ -1,6 +1,4 @@
-import { standardAudit } from "@/app/components/grid/columns/commonColumns";
-
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = [
   {
     headerName: "No",
   },
@@ -10,7 +8,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "APPL_CD",
     editable: true,
     insertable: true,
-    validators: { max: 20, required: true }
+    required: true,
   },
   {
     type: "text",
@@ -28,5 +26,4 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     editable: true,
     insertable: true,
   },
-  ...standardAudit(setGridData, { delete: false }),
 ];

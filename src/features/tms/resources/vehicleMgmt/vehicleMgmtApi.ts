@@ -96,15 +96,33 @@ export const vehicleMgmtApi = {
     );
   },
 
-  // ── 엑셀 ────────────────────────────────────────────────────
-  gridExcelAll(payload: any) {
+  getVehPopLgstGrp(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/vehicleMgmtService/downloadExcel",
+      "/vehicleService/searchVehPopLgstGrp",
       withSession({
         MENU_CD: MENU_CODE,
         ...payload,
       }),
-      { responseType: "blob" },
+    );
+  },
+
+  getVehPopCarr(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/vehicleService/searchVehPopCarr",
+      withSession({
+        MENU_CD: MENU_CODE,
+        ...payload,
+      }),
+    );
+  },
+
+  getVehPopTrck(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/vehicleService/searchVehPopTrck",
+      withSession({
+        MENU_CD: MENU_CODE,
+        ...payload,
+      }),
     );
   },
 };

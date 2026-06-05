@@ -112,13 +112,4 @@ export const dispatchPlanApi = {
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
-
-  // ── 엑셀 다운로드 ───────────────────────────────────────────
-  gridExcelAll(payload: any) {
-    return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/downloadExcel",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-      { responseType: "blob" },
-    );
-  },
 };

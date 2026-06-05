@@ -15,10 +15,25 @@ interface ControllerArgs {
 
 export function useDivisionStoController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { resetGrids } = base;
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
     [],
+  );
+
+  const fetchDetail = useCallback(
+    (mainRow: any) => api.getDetailList({ DIV_CD: mainRow.DIV_CD }),
+    [],
+  );
+
+  const loadDetail = useCallback(
+    async (mainRow: any) => {
+      resetGrids(["detail"]);
+      if (!mainRow?.DIV_CD) return;
+      await base.searchSub("detail", fetchDetail(mainRow));
+    },
+    [base, fetchDetail, resetGrids],
   );
 
   const onMainGridClick = useCallback(
@@ -26,18 +41,25 @@ export function useDivisionStoController({ model }: ControllerArgs) {
       base.handleRowClick("main", row, [
         {
           to: "detail",
-          fetch: (r) => api.getDetailList({ DIV_CD: r.DIV_CD }),
+          fetch: fetchDetail,
         },
       ]),
-    [base],
+    [base, fetchDetail],
   );
 
   const onSearchCallback = useCallback(
-    (data: any) => {
+    async (data: any) => {
       model.grids.main.setData(data);
-      onMainGridClick(data?.rows?.[0]);
+      const firstMain =
+        model.grids.main.ref.current?.rows?.[0] ?? data?.rows?.[0] ?? null;
+      if (firstMain) {
+        model.grids.main.setSelected(firstMain);
+        await loadDetail(firstMain);
+      } else {
+        resetGrids(["detail"]);
+      }
     },
-    [model.grids.main, onMainGridClick],
+    [loadDetail, model.grids.main, resetGrids],
   );
 
   const onAddDetail = useCallback(() => {
@@ -54,10 +76,10 @@ export function useDivisionStoController({ model }: ControllerArgs) {
       base.saveGrid("detail", api.saveDetail, {
         afterSave: {
           cascadeFrom: "main",
-          fetch: (main) => api.getDetailList({ DIV_CD: main.DIV_CD }),
-        }
+          fetch: fetchDetail,
+        },
       }),
-    [base],
+    [base, fetchDetail],
   );
 
   const detailActions: ActionItem[] = useMemo(

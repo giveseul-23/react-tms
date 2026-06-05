@@ -21,6 +21,7 @@ export type FolderFormData = {
   APPLCODE: string;
   MENUCODE: string;
   MSG_CD: string;
+  MSG_DESC: string;
   MENUNAME: string;
   PARANT_MENU_CD: string;
   SUPERMENUCODE: string;
@@ -92,6 +93,7 @@ export default function MenuFolderAddPopup({
       DSPLY_SEQ: Number(form.DSPLY_SEQ) || 1,
       LEAFYN: "N",
       URL: null,
+      MSG_DESC: "",
     });
   };
 

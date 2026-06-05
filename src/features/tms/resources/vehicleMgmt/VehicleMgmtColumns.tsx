@@ -1,43 +1,4 @@
-// src/views/vehicleMgmt/VehicleMgmtColumns.tsx
-import { VEH_OP_STS_COLOR_MAP } from "./VehicleMgmtModel";
-
-export type FieldType =
-  | "text"
-  | "popup"
-  | "select"
-  | "check"
-  | "date"
-  | "number";
-
-export type ColumnDef = {
-  headerName: string;
-  type?: string;
-  field?: string;
-  areaNo?: number; // 폼 그룹 번호
-  areaLabel?: string; // 섹션 제목 (areaNo별 첫 컬럼에만 선언)
-  fieldType?: FieldType; // 폼 입력 타입 (type 미지정 시 fallback)
-  dateUnit?: "year" | "month" | "day"; // type "date" 단위
-  required?: boolean;
-  // type "text" 검증
-  regex?: RegExp;
-  validators?: {
-    required?: boolean;
-    max?: number;
-    min?: number;
-    integerLength?: number;
-    pointLength?: number;
-    regexTp?: string;
-  };
-  hide?: boolean; // 그리드에서 숨김
-  formHide?: boolean; // 폼에서 숨김
-  readOnly?: boolean;
-  // popup 타입일 때
-  sqlProp?: string;
-  nameValue?: string;
-  nameField?: string; // 코드에 대응하는 명칭 field
-  // select 타입일 때
-  codeKey?: string; // codeMap의 key
-};
+import type { ColumnDef } from "@/app/components/common/formColumnDef";
 
 export const AREA_LABELS: Record<number, string> = {
   0: "일반",

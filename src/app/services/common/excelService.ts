@@ -1,5 +1,10 @@
-// excelUtils.ts
-import { tenderApi } from "@/features/tms/pln/tender/tenderApi";
+// excelService.ts
+//
+// 공통 엑셀 다운로드 서비스. 컬럼 → 엑셀 파라미터 조립 + 3단계 다운로드 흐름.
+// 서버 호출은 commonApi 의 공통 3단계 API(saveUserTempData → commonExcelDownPrepare
+// → downloadCommonExcel)로 통일한다. (기능별 gridExcelAll 사본 사용 안 함)
+
+import { commonApi } from "@/app/services/common/commonApi";
 
 // ────────────────────────────────────────────
 // Types
@@ -194,13 +199,15 @@ function resolveDefaultAlign(col: ColumnDefine): string {
 }
 
 // ────────────────────────────────────────────
-// 엑셀 다운로드
+// 엑셀 다운로드 (공통 3단계)
 // ────────────────────────────────────────────
 
 interface DownExcelOptions {
   columns: ColumnDefine[];
   searchParams?: Record<string, unknown>;
   menuName?: string;
+  /** 서버 임시데이터 키 — 미지정 시 menuName 으로 폴백 (3단계 모두 동일 값 사용). */
+  menuCd?: string;
   comboStores?: Record<string, ComboOption[]>;
   fetchFn: (params: any) => Promise<any>;
 }
@@ -216,51 +223,88 @@ async function triggerDownload(blob: Blob, fileName: string) {
   URL.revokeObjectURL(url);
 }
 
+// 공통 3단계 흐름: 임시저장 → 준비 → blob 다운로드.
+// 서버는 1단계 body 를 세션(PARAM_MAP)에 저장하고, 2단계 prepare 에서 그걸 읽는다.
+//   - excelInfoMap = PARAM_MAP.EXCEL_INFO  → DOWN_EXCEL_FILTERED_ROWS 는 EXCEL_INFO 안에서 읽음
+//   - searchUrl    = PARAM_MAP.SEARCH_URL  → EXCEL_INFO 와 형제(최상위)에서 읽음
+async function runCommonExcelDownload(opts: {
+  excelInfo: Partial<ExcelParams>;
+  rows: Record<string, unknown>[];
+  filtered: "Y" | "N";
+  menuCd: string;
+  fileName: string;
+  searchUrl?: string;
+}): Promise<void> {
+  const { excelInfo, rows, filtered, menuCd, fileName, searchUrl = "" } = opts;
+
+  await commonApi.saveUserTempData(
+    {
+      EXCEL_INFO: { ...excelInfo, DOWN_EXCEL_FILTERED_ROWS: filtered },
+      ...(searchUrl ? { SEARCH_URL: searchUrl } : {}),
+      dsSave: rows,
+    },
+    { MENU_CD: menuCd, CURRENT_MENUNAME: fileName },
+  );
+
+  const prepare = await commonApi.commonExcelDownPrepare(menuCd);
+  if ((prepare.data as any)?.success === false) {
+    throw new Error((prepare.data as any)?.msg ?? "엑셀 다운로드 준비 실패");
+  }
+
+  const response = await commonApi.downloadCommonExcel(menuCd);
+  await triggerDownload(
+    new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
+    fileName,
+  );
+}
+
 export async function downExcelSearch({
   columns,
   searchParams = {},
   menuName = "download",
+  menuCd,
   fetchFn,
 }: DownExcelOptions): Promise<void> {
   const excelInfo = getColumnInfoForExcelDown(columns, { menuName });
   const searchResponse = await fetchFn(searchParams);
   const rows = searchResponse.data?.result ?? searchResponse.data?.rows ?? [];
+  // fetchFn 이 실제 호출한 API URL 을 SEARCH_URL 로 전달 — 어떤 api 든 자동.
+  // (axios 응답의 config.url = 요청 시 넘긴 상대 경로, 예 "/menuService/searchByReact")
+  const searchUrl: string = searchResponse?.config?.url ?? "";
 
-  const response = await tenderApi.gridExcelAll({
-    fileName: menuName,
+  await runCommonExcelDownload({
+    excelInfo,
     rows,
-    EXCEL_INFO: excelInfo,
+    filtered: "N",
+    menuCd: menuCd ?? menuName,
+    fileName: menuName,
+    searchUrl,
   });
-
-  await triggerDownload(
-    new Blob([response.data], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    }),
-    menuName,
-  );
 }
 
 export async function downExcelSearched({
   columns,
   rows,
   menuName = "download",
+  menuCd,
+  searchUrl = "",
 }: {
   columns: ColumnDefine[];
   rows: Record<string, unknown>[];
   menuName?: string;
+  menuCd?: string;
+  searchUrl?: string;
 }): Promise<void> {
   const excelInfo = getColumnInfoForExcelDown(columns, { menuName });
 
-  const response = await tenderApi.gridExcelAll({
-    fileName: menuName,
+  await runCommonExcelDownload({
+    excelInfo,
     rows,
-    EXCEL_INFO: excelInfo,
+    filtered: "Y",
+    menuCd: menuCd ?? menuName,
+    fileName: menuName,
+    searchUrl,
   });
-
-  await triggerDownload(
-    new Blob([response.data], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    }),
-    menuName,
-  );
 }

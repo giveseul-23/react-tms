@@ -1,8 +1,6 @@
 // src/components/common/FormBodyRenderer.tsx
-import {
-  ColumnDef,
-  AREA_LABELS,
-} from "@/features/tms/resources/vehicleMgmt/VehicleMgmtColumns";
+import type { ColumnDef } from "@/app/components/common/formColumnDef";
+import { AREA_LABELS } from "@/features/tms/resources/vehicleMgmt/VehicleMgmtColumns";
 
 import FormInput from "@/app/components/common/FormInput";
 import FormSelect from "@/app/components/common/FormSelect";

@@ -23,7 +23,7 @@ import {useCallback, useMemo} from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchMonitoringApi as api } from "./DispatchMonitoringApi.ts";
 import type { FeatureModel, GridKey } from "./DispatchMonitoringModel.ts";
-import { downExcelSearch } from "@/views/common/common";
+import { downExcelSearch } from "@/app/services/common/excelService";
 import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";

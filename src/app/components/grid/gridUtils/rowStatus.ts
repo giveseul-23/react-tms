@@ -127,8 +127,10 @@ export function captureOrig(row: any): void {
   });
 }
 
-/** spread 로 새 객체가 되어도 원본 스냅샷을 옮겨 단다. */
-function carryOrig(next: any, src: any): void {
+/** spread 로 새 객체가 되어도 원본 스냅샷(__orig__)을 옮겨 단다.
+ *  폼→그리드 라이브 동기화처럼 `{...row}` 로 새 객체를 만든 뒤 markUpdate 하기 전에
+ *  호출해야 "원래값으로 되돌림 → EDIT_STS 해제" 판정(resolveUpdateSts)이 동작한다. */
+export function carryOrig(next: any, src: any): void {
   const orig = src?.[ORIG_KEY];
   if (!orig) return;
   Object.defineProperty(next, ORIG_KEY, {
@@ -139,10 +141,18 @@ function carryOrig(next: any, src: any): void {
   });
 }
 
+// 날짜성 필드(DTTM)는 서버 포맷("2024-01-01")과 폼 입력 포맷(compact "20240101")이
+// 달라도 같은 날짜면 동일하게 본다 — 구분자 제거 후 비교.
+const stripDateSep = (v: any) => String(v ?? "").replace(/[\s\-:/T]/g, "");
+
 /** 원본과 모든 필드가 동일한가 (number/string 차이는 문자열 비교로 흡수). */
 function matchesOrig(row: any, orig: Record<string, any>): boolean {
   for (const k of Object.keys(orig)) {
-    if (String(row[k] ?? "") !== String(orig[k] ?? "")) return false;
+    if (k.includes("DTTM")) {
+      if (stripDateSep(row[k]) !== stripDateSep(orig[k])) return false;
+    } else if (String(row[k] ?? "") !== String(orig[k] ?? "")) {
+      return false;
+    }
   }
   return true;
 }

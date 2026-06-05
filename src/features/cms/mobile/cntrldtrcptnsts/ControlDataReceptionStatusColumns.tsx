@@ -3,12 +3,12 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "date",
     headerName: "LBL_TRANSACTION_DLVRY_DT",
-    field: "DLVRY_DT"
+    field: "DLVRY_DT",
   },
   {
     type: "text",
     headerName: "LBL_DISPATCH_NO",
-    field: "DSPCH_NO"
+    field: "DSPCH_NO",
   },
   {
     type: "text",
@@ -19,32 +19,32 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_VEHICLE_TYPE_NAME",
-    field: "VEH_TP_NM"
+    field: "VEH_TP_NM",
   },
   {
     type: "text",
     headerName: "LBL_VEH_NO",
-    field: "VEH_NO"
+    field: "VEH_NO",
   },
   {
     type: "text",
     headerName: "LBL_DRIVER_NM",
-    field: "DRVR_NM"
+    field: "DRVR_NM",
   },
   {
     type: "text",
     headerName: "LBL_LATITUDE",
-    field: "LAT"
+    field: "LAT",
   },
   {
     type: "text",
     headerName: "LBL_LONGITUDE",
-    field: "LON"
+    field: "LON",
   },
   {
     type: "text",
     headerName: "LBL_UPDATE_GAP",
-    field: "LATEST_UPDATE_DTTM"
+    field: "LATEST_UPDATE_DTTM",
   },
   {
     type: "text",
@@ -55,17 +55,17 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "numeric",
     headerName: "LBL_GAP_TIME_MIN",
-    field: "GAP_TIME"
+    field: "GAP_TIME",
   },
   {
     type: "text",
     headerName: "LBL_REST_YN",
-    field: "REST_YN"
+    field: "REST_YN",
   },
   {
     type: "text",
     headerName: "LBL_REST_START_TIME",
-    field: "REST_START_DTTM"
+    field: "REST_START_DTTM",
   },
   {
     type: "text",
