@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import { MENU_CD } from "./ParameterConfiguration";
 
 type CommonResponse = {
   rows: [];
@@ -31,6 +32,7 @@ export const parameterConfigurationApi = {
       {
         params: {
           ...getSessionFields(),
+          MENU_CD,
           ...rest,
         },
       },
@@ -45,6 +47,7 @@ export const parameterConfigurationApi = {
       {
         params: {
           ...getSessionFields(),
+          MENU_CD,
           ...rest,
         },
       },

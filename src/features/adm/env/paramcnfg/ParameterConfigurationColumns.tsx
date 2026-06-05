@@ -1,6 +1,5 @@
-import { standardAudit } from "@/app/components/grid/columns/commonColumns";
 
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = [
   {
     headerName: "No",
   },
@@ -10,6 +9,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "SYS_CNFG_CD",
     editable: false,
     insertable: true,
+    validators: { max: 20, required: true }
   },
   {
     type: "text",
@@ -17,6 +17,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "SYS_CNFG_VAL",
     editable: true,
     insertable: true,
+    validators: { max: 200, required: true }
   },
   {
     type: "text",
@@ -24,6 +25,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "SYS_CNFG_DESC",
     editable: true,
     insertable: true,
+    validators: { max: 200, required: true }
   },
   {
     type: "combo",
@@ -32,6 +34,6 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     codeKey: "cnfgUseTp",
     editable: true,
     insertable: true,
+    required: true
   },
-  ...standardAudit(setGridData),
 ];

@@ -1,119 +1,75 @@
-import { useCallback, type MutableRefObject } from "react";
-import { newRid } from "@/app/feature/useBaseModel";
+import { useCallback, useMemo } from "react";
+import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
-import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import { useApiHandler } from "@/hooks/useApiHandler";
 import { parameterConfigurationApi } from "./ParameterConfigurationApi";
 import { MENU_CD } from "./ParameterConfiguration";
 import { MAIN_COLUMN_DEFS } from "./ParameterConfigurationColumns";
-import type { ParameterConfigurationModel } from "./ParameterConfigurationModel";
+import { Lang } from "@/app/services/common/Lang";
+
+import type { ParameterConfigurationModel, GridKey } from "./ParameterConfigurationModel";
 
 type ControllerProps = {
-  menuCd: string;
   model: ParameterConfigurationModel;
-  searchRef: MutableRefObject<((page?: number) => void) | null>;
-  filtersRef: MutableRefObject<Record<string, unknown>>;
 };
 
-export function useParameterConfigurationController({
-  menuCd,
-  model,
-  searchRef,
-  filtersRef,
-}: ControllerProps) {
-  const { handleApi } = useApiHandler();
-
-  const fetchParameterConfigurationList = useCallback(
-    (params: Record<string, unknown>) =>
-      parameterConfigurationApi.getParameterConfigurationList(menuCd, { ...params }),
-    [menuCd],
-  );
-
-  const saveParameterConfiguration = useCallback(
-    (payload: any) =>
-      parameterConfigurationApi.saveParameterConfiguration({
-        dsSave: payload.dsSave,
-        MENU_CD: menuCd,
-      }),
-    [menuCd],
-  );
-
-  const onSearchCallback = useCallback(
-    (data: any) => {
-      const rows = Array.isArray(data?.rows)
-        ? data.rows.map((row: any) =>
-            row?.__rid__ ? row : { ...row, __rid__: newRid() },
-          )
-        : [];
-
-      model.setGridData({
-        ...data,
-        rows,
-      });
+export function useParameterConfigurationController({ model }: ControllerProps) {
+  const base = useBaseController<GridKey>({
+    model,
+    api: {
+      search: (params) =>
+        parameterConfigurationApi.getParameterConfigurationList(MENU_CD, { ...params }),
+      save: (payload) =>
+        parameterConfigurationApi.saveParameterConfiguration({
+          dsSave: payload.dsSave,
+          MENU_CD: MENU_CD,
+        }),
     },
-    [model],
-  );
-
-  const handleAdd = useGridAdd({
-    setRows: model.setGridData,
-    newRow: {
-      __rid__: newRid(),
-      SYS_CNFG_CD: "",
-      SYS_CNFG_VAL: "",
-      SYS_CNFG_DESC: "",
-      CNFG_USE_TP: "",
-    },
-    position: "top",
   });
 
-  const handleSave = useGridSave({
-    rows: model.gridData.rows,
-    setRows: model.setGridData,
-    saveFn: saveParameterConfiguration,
-    onSaved: () => searchRef.current?.(),
-  });
+  const handleAdd = useCallback(() => {
+    base.addRow("main", {
+      APPL_CD: "",
+      APPL_NM: "",
+      USE_YN: "Y",
+    });
+  }, [base]);
 
-  const handleReloadServiceUtil = useCallback(
+  const handleSave = useCallback(
     () =>
-      handleApi(
-        parameterConfigurationApi.reloadServiceUtil({
-          MENU_CD: menuCd,
-          dsSave: [],
+      base.saveGrid("main", (payload) =>
+        parameterConfigurationApi.saveParameterConfiguration({
+          dsSave: payload.dsSave,
+          MENU_CD: MENU_CD,
         }),
       ),
-    [handleApi, menuCd],
+    [base],
   );
 
-  const mainActions: ActionItem[] = [
-    makeAddAction({ onClick: handleAdd }),
-    makeSaveAction({ onClick: handleSave }),
-    {
-      type: "button",
-      key: "BTN_PARAM_CONFIG_RELOAD",
-      label: "BTN_PARAM_CONFIG_RELOAD",
-      onClick: handleReloadServiceUtil,
-    },
-    makeExcelGroupAction({
-      columns: MAIN_COLUMN_DEFS(),
-      menuCode: MENU_CD,
-      menuName: "MENU_PARAM_CNFG",
-      fetchFn: () =>
-        parameterConfigurationApi.getParameterConfigurationList(
-          menuCd,
-          filtersRef.current,
-        ),
-      rows: model.gridData.rows,
-    }),
-  ];
+  const mainActions: ActionItem[] = useMemo(
+    () => [
+      makeAddAction({ onClick: handleAdd }),
+      makeSaveAction({ onClick: handleSave }),
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
+        menuName: Lang.get("MENU_CD"),
+        fetchFn: () =>
+          parameterConfigurationApi.getParameterConfigurationList(MENU_CD, model.filtersRef.current),
+        rows: model.grids.main.rows,
+      }),
+    ],
+    [handleAdd, handleSave, model.filtersRef, model.grids.main.rows],
+  );
 
   return {
-    fetchParameterConfigurationList,
-    onSearchCallback,
+    fetchApplicationList: base.fetchList,
+    onSearchCallback: base.onSearchCallback,
     mainActions,
   };
 }
