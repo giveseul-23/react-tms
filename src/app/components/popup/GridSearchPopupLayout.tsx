@@ -47,6 +47,7 @@ type GridSearchPopupLayoutProps = {
   onSearch: () => void;
   onConfirm: (payload: Record<string, any> | Record<string, any>[]) => void;
   onClose: () => void;
+  codeMap?: any;
 };
 
 export function GridSearchPopupLayout({
@@ -60,6 +61,7 @@ export function GridSearchPopupLayout({
   onSearch,
   onConfirm,
   onClose,
+  codeMap,
 }: GridSearchPopupLayoutProps) {
   const isMultiple = rowSelection === "multiple";
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
@@ -129,7 +131,8 @@ export function GridSearchPopupLayout({
                     onChange={(e) => f.onChangeCode?.(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key !== "Enter") return;
-                      if (f.onEnterSubmit) f.onEnterSubmit(e.currentTarget.value, "");
+                      if (f.onEnterSubmit)
+                        f.onEnterSubmit(e.currentTarget.value, "");
                       else onSearch();
                     }}
                     disabled={f.disable}
@@ -142,7 +145,8 @@ export function GridSearchPopupLayout({
                     onChange={(e) => f.onChangeName?.(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key !== "Enter") return;
-                      if (f.onEnterSubmit) f.onEnterSubmit("", e.currentTarget.value);
+                      if (f.onEnterSubmit)
+                        f.onEnterSubmit("", e.currentTarget.value);
                       else onSearch();
                     }}
                     disabled={f.disable}
@@ -234,6 +238,7 @@ export function GridSearchPopupLayout({
           columnDefs={columnDefs}
           rowData={rows}
           rowSelection={rowSelection}
+          codeMap={codeMap}
           onRowSelected={
             isMultiple
               ? undefined
