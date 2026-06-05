@@ -27,6 +27,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { temperatureRangeManagementApi as api } from "./TemperatureRangeManagementApi.ts";
+import { MENU_CODE } from "./TemperatureRangeManagement";
 import {
   MAIN_COLUMN_DEFS,
 } from "./TemperatureRangeManagementColumns.tsx";
@@ -113,6 +114,8 @@ export function useTemperatureRangeManagementController({ model }: ControllerArg
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "화면명",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

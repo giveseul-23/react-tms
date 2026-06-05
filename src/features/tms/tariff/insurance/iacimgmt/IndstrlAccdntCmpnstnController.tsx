@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { indstrlAccdntCmpnstnApi as api } from "./IndstrlAccdntCmpnstnApi";
+import { MENU_CODE } from "./IndstrlAccdntCmpnstn";
 import { MAIN_COLUMN_DEFS } from "./IndstrlAccdntCmpnstnColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
@@ -103,6 +104,8 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.rate.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "산재보험료관리",
         fetchFn: () => api.getRateList(model.filtersRef.current),
         rows: model.grids.rate.rows,

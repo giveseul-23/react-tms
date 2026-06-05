@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dfChargeApi as api } from "./DfChargeApi";
+import { MENU_CODE } from "./DfCharge";
 import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./DfChargeColumns";
 import type { DfChargeModel, GridKey } from "./DfChargeModel";
 import { makeAddAction, makeExcelGroupAction, makeSaveAction } from "@/app/components/grid/actions/commonActions";
@@ -120,6 +121,8 @@ export function useDfChargeController({ model }: ControllerArgs) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_DF_BASED_CHARGE_CODE"),
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -134,6 +137,8 @@ export function useDfChargeController({ model }: ControllerArgs) {
       makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
         columns: DETAIL_COLUMN_DEFS,
+        excelColumns: () => model.grids.detail.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_DF_BASED_CHARGE_CODE"),
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;

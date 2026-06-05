@@ -6,6 +6,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { dispatchOrganizationSetting as api } from "./DispatchOrganizationSettingApi";
+import { MENU_CODE } from "./DispatchOrganizationSetting";
 import {
   MAIN_COLUMN_DEFS,
   DETAIL_COLUMN_DEFS,
@@ -88,6 +89,8 @@ export function useDispatchOrganizationSettingController({ model }: ControllerAr
       () => [
         makeExcelGroupAction({
           columns: MAIN_COLUMN_DEFS,
+          excelColumns: () => model.grids.main.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: Lang.get("MENU_DSPCH_ORG_SET"),
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
@@ -102,6 +105,8 @@ export function useDispatchOrganizationSettingController({ model }: ControllerAr
       makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
         columns: DETAIL_COLUMN_DEFS,
+        excelColumns: () => model.grids.detail.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_DSPCH_ORG_SET"),
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;

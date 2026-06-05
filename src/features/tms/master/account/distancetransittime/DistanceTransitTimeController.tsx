@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { distanceTransitTimeApi as api } from "./DistanceTransitTimeApi";
 import { MAIN_COLUMN_DEFS } from "./DistanceTransitTimeColumns";
+import { MENU_CD } from "./DistanceTransitTime";
 import {
   makeCommonActions,
   makeExcelGroupAction,
@@ -94,6 +95,8 @@ export function useDistanceTransitTimeController({ model }: Args) {
         },
         excel: {
           columns: MAIN_COLUMN_DEFS,
+          excelColumns: () => model.grids.main.getExcelColumns(),
+          menuCode: MENU_CD,
           menuName: "거리/이동시간관리",
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,

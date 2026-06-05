@@ -37,6 +37,7 @@ export function useFreightClassController({ model}: Args) {
         makeSaveAction({ onClick: onSaveMain }),
           makeExcelGroupAction({
               columns: MAIN_COLUMN_DEFS,
+              excelColumns: () => model.grids.main.getExcelColumns(),
               menuCode: MENU_CD,
               fetchFn: () =>
                 freightClassApi.getFreightClassList(

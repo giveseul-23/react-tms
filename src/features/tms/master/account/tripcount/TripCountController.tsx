@@ -6,6 +6,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { tripCountApi as api } from "./TripCountApi";
+import { MENU_CODE } from "./TripCount";
 import { MAIN_COLUMN_DEFS } from "./TripCountColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { TripCountModel, GridKey } from "./TripCountModel";
@@ -42,6 +43,8 @@ export function useTripCountController({ model }: ControllerArgs) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_TRIPCNT_MGMT"),
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

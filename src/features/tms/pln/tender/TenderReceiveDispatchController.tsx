@@ -20,6 +20,7 @@ import TemporaryVehicleChangePopup from "@/features/tms/pln/tender/popup/Tempora
 import AppInstallSmsPopup from "@/features/tms/pln/tender/popup/AppInstallSmsPopup";
 import VehicleChangePopup from "@/features/tms/pln/tender/popup/VehicleChangePopup";
 import VehicleAssignPopup from "@/features/tms/pln/tender/popup/VehicleAssignPopup";
+import { MENU_CD } from "./TenderReceiveDispatch";
 import { MAIN_COLUMN_DEFS } from "./TenderReceiveDispatchColumns";
 import type {
   TenderReceiveDispatchModel,
@@ -293,6 +294,8 @@ export function useTenderReceiveDispatchController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS(),
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: "운송사요청목록",
         fetchFn: () => api.getDispatchList(model.filtersRef.current),
         rows: model.grids.main.rows,

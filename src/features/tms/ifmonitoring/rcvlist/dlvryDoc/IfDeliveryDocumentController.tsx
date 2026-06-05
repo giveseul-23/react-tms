@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { ifDeliveryDocumentApi as api } from "./IfDeliveryDocumentApi";
+import { MENU_CODE } from "./IfDeliveryDocument";
 import { MAIN_COLUMN_DEFS } from "./IfDeliveryDocumentColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -52,6 +53,8 @@ export function useIfDeliveryDocumentController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "판매문서수신내역",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

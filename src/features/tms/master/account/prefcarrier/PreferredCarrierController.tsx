@@ -6,6 +6,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { preferredCarrierApi as api } from "./PreferredCarrierApi";
+import { MENU_CODE } from "./PreferredCarrier";
 import { MAIN_COLUMN_DEFS } from "./PreferredCarrierColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { PreferredCarrierModel, GridKey } from "./PreferredCarrierModel";
@@ -86,6 +87,8 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_PREF_CARR_MGMT"),
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

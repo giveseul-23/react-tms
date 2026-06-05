@@ -81,6 +81,8 @@ export function useWorkdaysController({ model }: Args) {
       ...base.mainActions,
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: "MENU_WORKINGDAY_MANAGEMENT",
         fetchFn: () =>
           WorkdaysApi.getWorkdaysList(MENU_CD, model.filtersRef.current),

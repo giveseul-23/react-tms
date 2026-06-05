@@ -280,6 +280,8 @@ export function useFuelEfficiencyController({ model }: Args) {
     () =>
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: MENU_CD,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -307,6 +309,8 @@ export function useFuelEfficiencyController({ model }: Args) {
       sub01: [
         makeExcelGroupAction({
           columns: SUB01_COLUMN_DEFS,
+          excelColumns: () => model.grids.sub01.getExcelColumns(),
+          menuCode: MENU_CD,
           menuName: MENU_CD,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
@@ -320,6 +324,8 @@ export function useFuelEfficiencyController({ model }: Args) {
         makeSaveAction({ onClick: onSaveSub02 }),
         makeExcelGroupAction({
           columns: SUB02_COLUMN_DEFS,
+          excelColumns: () => model.grids.sub02.getExcelColumns(),
+          menuCode: MENU_CD,
           menuName: MENU_CD,
           fetchFn: () => {
             const sub01 = model.grids.sub01.selectedRef.current;

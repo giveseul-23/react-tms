@@ -288,6 +288,8 @@ export function useBatchManagementController({ model }: Args) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: MENU_CD,
         fetchFn: () =>
           batchManagementApi.getBatchManagementList(MENU_CD, model.filtersRef.current),
@@ -309,6 +311,8 @@ export function useBatchManagementController({ model }: Args) {
       }),
       makeExcelGroupAction({
         columns: SUB01_COLUMN_DEFS,
+        excelColumns: () => model.grids.sub01.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: MENU_CD,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;

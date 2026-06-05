@@ -96,6 +96,8 @@ export function useSearchConditionController({ model }: ControllerProps) {
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: MENU_CD,
         fetchFn: () => searchConditionApi.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { vltnNtfctnCnfgApi as api } from "./VltnNtfctnCnfgApi";
+import { MENU_CODE } from "./VltnNtfctnCnfg";
 import { NTFC_TARGET_COLUMN_DEFS } from "./VltnNtfctnCnfgColumns";
 import {
   makeAddAction,
@@ -126,6 +127,8 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
       makeSaveAction(),
       makeExcelGroupAction({
         columns: NTFC_TARGET_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "위반알림설정관리",
         fetchFn: () => api.getVltnNtfctnCnfgList(model.filtersRef.current),
         rows: model.grids.main.rows,

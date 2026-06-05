@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { rateApi as api } from "./RateApi";
 import { MAIN_COLUMN_DEFS } from "./RateColumns";
+import { MENU_CODE } from "./Rate";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { RateModel, GridKey } from "./RateModel";
@@ -68,6 +69,8 @@ export function useRateController({ model }: Args) {
         save: true,
         excel: {
           columns: MAIN_COLUMN_DEFS(),
+          excelColumns: () => model.grids.main.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: "운임관리",
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,
@@ -88,6 +91,8 @@ export function useRateController({ model }: Args) {
         },
         excel: {
           columns: MAIN_COLUMN_DEFS(),
+          excelColumns: () => model.grids.costInfo.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: "운임관리-상세",
           fetchFn: () => api.getCostInfoList(model.filtersRef.current),
           rows: model.grids.costInfo.rows,

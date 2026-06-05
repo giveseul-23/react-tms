@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { ifDispatchResultApi as api } from "./IfDispatchResultApi";
+import { MENU_CODE } from "./IfDispatchResult";
 import { MAIN_COLUMN_DEFS } from "./IfDispatchResultColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -39,6 +40,8 @@ export function useIfDispatchResultController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "배차결과송신내역",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

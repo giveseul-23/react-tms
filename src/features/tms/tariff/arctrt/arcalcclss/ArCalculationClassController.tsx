@@ -6,6 +6,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { arCalculationClassApi as api } from "./ArCalculationClassApi";
+import { MENU_CODE } from "./ArCalculationClass";
 import { MAIN_COLUMN_DEFS } from "./ArCalculationClassColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
@@ -62,6 +63,8 @@ export function useArCalculationClassController({model}: ControllerArgs) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: Lang.get("MENU_AR_CALC_CLSS_MGMT"),
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

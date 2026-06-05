@@ -192,7 +192,12 @@ export function getColumnsCodeData(
 
 function resolveDefaultAlign(col: ColumnDefine): string {
   const DATE_TYPES = ["date", "month", "datetime", "time"];
-  if (col.editType && DATE_TYPES.includes(col.editType)) return "center";
+  const CODE_TYPES = ["popup", "combo", "popuser"];
+  if (
+    col.editType &&
+    (DATE_TYPES.includes(col.editType) || CODE_TYPES.includes(col.editType))
+  )
+    return "center";
   if (col.type === "numeric") return "right";
   if (col.type === "string") return "left";
   return "left";
@@ -234,11 +239,22 @@ async function runCommonExcelDownload(opts: {
   menuCd: string;
   fileName: string;
   searchUrl?: string;
+  /** 검색 조건 — filtered:"N"(전체조회) 시 서버가 SEARCH_URL 재조회에 쓰도록 PARAM_MAP 최상위에 실어줌. */
+  extraParams?: Record<string, unknown>;
 }): Promise<void> {
-  const { excelInfo, rows, filtered, menuCd, fileName, searchUrl = "" } = opts;
+  const {
+    excelInfo,
+    rows,
+    filtered,
+    menuCd,
+    fileName,
+    searchUrl = "",
+    extraParams = {},
+  } = opts;
 
   await commonApi.saveUserTempData(
     {
+      ...extraParams,
       EXCEL_INFO: { ...excelInfo, DOWN_EXCEL_FILTERED_ROWS: filtered },
       ...(searchUrl ? { SEARCH_URL: searchUrl } : {}),
       dsSave: rows,
@@ -260,6 +276,31 @@ async function runCommonExcelDownload(opts: {
   );
 }
 
+// fetchFn 이 실제로 보낸 요청 파라미터를 axios 응답 config 에서 추출.
+// 검색 API 는 POST body(config.data) 또는 query(config.params) 로 조건을 보낸다.
+// page/limit 은 전체조회를 막지 않도록 제외.
+function extractRequestParams(config: any): Record<string, unknown> {
+  if (!config) return {};
+  let body: Record<string, unknown> = {};
+  const raw = config.data;
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        body = parsed;
+      }
+    } catch {
+      /* JSON 이 아니면 무시 */
+    }
+  } else if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    body = raw;
+  }
+  const query =
+    config.params && typeof config.params === "object" ? config.params : {};
+  const { page: _page, limit: _limit, ...rest } = { ...query, ...body };
+  return rest;
+}
+
 export async function downExcelSearch({
   columns,
   searchParams = {},
@@ -273,6 +314,8 @@ export async function downExcelSearch({
   // fetchFn 이 실제 호출한 API URL 을 SEARCH_URL 로 전달 — 어떤 api 든 자동.
   // (axios 응답의 config.url = 요청 시 넘긴 상대 경로, 예 "/menuService/searchByReact")
   const searchUrl: string = searchResponse?.config?.url ?? "";
+  // 서버가 filtered:"N"(전체조회) 시 SEARCH_URL 로 동일 조건 재조회하도록 검색 파라미터 동봉.
+  const extraParams = extractRequestParams(searchResponse?.config);
 
   await runCommonExcelDownload({
     excelInfo,
@@ -281,6 +324,7 @@ export async function downExcelSearch({
     menuCd: menuCd ?? menuName,
     fileName: menuName,
     searchUrl,
+    extraParams,
   });
 }
 

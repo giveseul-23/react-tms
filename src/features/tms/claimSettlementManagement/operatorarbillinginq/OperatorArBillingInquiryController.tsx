@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { operatorArBillingInquiryApi as api } from "./OperatorArBillingInquiryApi";
+import { MENU_CD } from "./OperatorArBillingInquiry";
 import { MAIN_COLUMN_DEFS } from "./OperatorArBillingInquiryColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
@@ -141,6 +142,8 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: "운영자매출청구조회",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,

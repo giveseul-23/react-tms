@@ -6,6 +6,7 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { commodityApi as api } from "@/features/tms/master/domain/commodity/CommodityApi";
+import { MENU_CD } from "@/features/tms/master/domain/commodity/Commodity";
 import { MAIN_COLUMN_DEFS } from "@/features/tms/master/domain/commodity/CommodityColumns";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { CommodityModel, GridKey } from "@/features/tms/master/domain/commodity/CommodityModel";
@@ -47,6 +48,8 @@ export function useCommodityController({ model }: Args) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: "상품관리",
         fetchFn: () => api.getCommodityList(model.filtersRef.current),
         rows: model.grids.main.rows,

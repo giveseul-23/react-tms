@@ -39,11 +39,22 @@ export type SaveActionConfig = {
 };
 
 export type ExcelGroupActionConfig = {
-  columns: any;
+  /** 정적 컬럼 defs (폴백). excelColumns 가 값을 주면 그쪽이 우선. */
+  columns: any[];
+  /** 클릭 시점에 "표시 중인 컬럼 defs(audit 포함 + 런타임 숨김/순서 반영)" 를 반환하는 getter.
+   *  DataGrid 화면 권장: `() => model.grids.<key>.getExcelColumns()`.
+   *  빈 배열이면(그리드 미마운트 등) columns 로 폴백. */
+  excelColumns?: () => any[];
+  /** 서버 MENU_CD — 엑셀 3단계 세션 키. 화면의 MENU_CD/MENU_CODE 상수. */
   menuCode: string;
+  /** 다운로드 파일 표시명(시트 제목). 미지정 시 menuCode 로 폴백. */
+  menuName?: string;
   fetchFn: () => Promise<any> | any;
   rows: any[];
   searchUrl?: string;
+  /** 지정 시 클릭 시점에 표시 중인 colId 목록을 받아 columns 를 표시된 것만/표시 순서로 거른다.
+   *  (런타임 컬럼 숨김/보임 반영) 미지정이면 정적 columns 그대로 사용. */
+  getVisibleColIds?: () => string[] | null | undefined;
   /** 조회된 모든 데이터 다운로드 버튼 숨김 */
   hideAll?: boolean;
   /** 보이는 데이터 다운로드 버튼 숨김 */
@@ -217,6 +228,25 @@ export const makeHistoryAction = (config: HistoryActionConfig = {}) => ({
   ...(config.disabled !== undefined && { disabled: config.disabled }),
 });
 
+// 클릭 시점에 엑셀 columns 를 확정한다.
+//  1순위: excelColumns() — DataGrid 표시 컬럼(audit 포함, 런타임 숨김/순서 반영). 비면 폴백.
+//  폴백: 정적 columns. getVisibleColIds 가 있으면(TreeGrid) 그 표시 순서로 필터.
+//  컬럼 매칭 키는 colId(트리 컬럼 등) → field 순.
+const resolveExcelColumns = (config: ExcelGroupActionConfig) => {
+  const fromGrid = config.excelColumns?.();
+  if (fromGrid && fromGrid.length > 0) return fromGrid;
+
+  const base = config.columns;
+  const visible = config.getVisibleColIds?.();
+  if (!visible || visible.length === 0) return base;
+  const byKey = new Map<string, any>();
+  for (const col of base) {
+    const key = col?.colId ?? col?.field;
+    if (key != null) byKey.set(key, col);
+  }
+  return visible.map((id) => byKey.get(id)).filter(Boolean);
+};
+
 export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
   const items: any[] = [];
 
@@ -227,8 +257,8 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
       label: "BTN_EXCEL_DOWN_ALL",
       onClick: () => {
         downExcelSearch({
-          columns: config.columns,
-          menuName: config.menuCode,
+          columns: resolveExcelColumns(config),
+          menuName: config.menuName ?? config.menuCode,
           menuCd: config.menuCode,
           fetchFn: config.fetchFn,
         });
@@ -243,8 +273,8 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
       label: "BTN_EXCEL_DOWN_GRID",
       onClick: () => {
         downExcelSearched({
-          columns: config.columns,
-          menuName: config.menuCode,
+          columns: resolveExcelColumns(config),
+          menuName: config.menuName ?? config.menuCode,
           menuCd: config.menuCode,
           rows: config.rows,
           searchUrl: config.searchUrl,

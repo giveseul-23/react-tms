@@ -6,6 +6,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { confirmDispatchApi as api } from "./ConfirmDispatchApi";
+import { MENU_CODE } from "./ConfirmDispatch";
 import { MAIN_COLUMN_DEFS } from "./ConfirmDispatchColumns";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -146,6 +147,8 @@ export function useConfirmDispatchController({ model }: Args) {
       },
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS as any,
+        excelColumns: () => model.grids.config.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "배차확정",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.config.rows,

@@ -229,6 +229,8 @@ export function useUserGroupController({ model }: Args) {
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
         columns: MAIN_COLUMN_DEFS,
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CD,
         menuName: MENU_CD,
         fetchFn: () => userGroupApi.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -244,6 +246,8 @@ export function useUserGroupController({ model }: Args) {
         makeSaveAction({ onClick: onSaveSub01 }),
         makeExcelGroupAction({
           columns: SUB01_COLUMN_DEFS,
+          excelColumns: () => model.grids.sub01.getExcelColumns(),
+          menuCode: MENU_CD,
           menuName: MENU_CD,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
@@ -257,6 +261,8 @@ export function useUserGroupController({ model }: Args) {
         makeSaveAction({ onClick: onSaveSub02 }),
         makeExcelGroupAction({
           columns: SUB02_COLUMN_DEFS,
+          excelColumns: () => model.grids.sub02.getExcelColumns(),
+          menuCode: MENU_CD,
           menuName: MENU_CD,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
@@ -270,6 +276,8 @@ export function useUserGroupController({ model }: Args) {
         makeSaveAction({ onClick: onSaveSub03 }),
         makeExcelGroupAction({
           columns: SUB03_COLUMN_DEFS,
+          excelColumns: () => model.grids.sub03.getExcelColumns(),
+          menuCode: MENU_CD,
           menuName: MENU_CD,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;

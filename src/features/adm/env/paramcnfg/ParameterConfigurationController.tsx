@@ -9,6 +9,7 @@ import { useGridAdd, useGridSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { useApiHandler } from "@/hooks/useApiHandler";
 import { parameterConfigurationApi } from "./ParameterConfigurationApi";
+import { MENU_CD } from "./ParameterConfiguration";
 import { MAIN_COLUMN_DEFS } from "./ParameterConfigurationColumns";
 import type { ParameterConfigurationModel } from "./ParameterConfigurationModel";
 
@@ -99,6 +100,7 @@ export function useParameterConfigurationController({
     },
     makeExcelGroupAction({
       columns: MAIN_COLUMN_DEFS(),
+      menuCode: MENU_CD,
       menuName: "MENU_PARAM_CNFG",
       fetchFn: () =>
         parameterConfigurationApi.getParameterConfigurationList(

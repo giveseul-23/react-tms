@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { shpmMgmtApi as api } from "./ShpmMgmtApi";
 import { MAIN_COLUMN_DEFS } from "./ShpmMgmtColumns";
+import { MENU_CODE } from "./ShpmMgmt";
 import { makeCommonActions } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -110,6 +111,8 @@ export function useShpmMgmtController({ model }: Args) {
         save: true,
         excel: {
           columns: MAIN_COLUMN_DEFS(),
+          excelColumns: () => model.grids.main.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: "계약요금관리",
           fetchFn: () => api.getList(model.filtersRef.current),
           rows: model.grids.main.rows,

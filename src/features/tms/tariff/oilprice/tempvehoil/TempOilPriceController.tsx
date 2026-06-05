@@ -1,6 +1,7 @@
 import { useCallback, useMemo, MutableRefObject } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { tempOilPriceApi as api } from "./TempOilPriceApi";
+import { MENU_CODE } from "./TempOilPrice";
 import {
   OIL_PRICE_COLUMN_DEFS,
   PERIOD_COLUMN_DEFS,
@@ -78,6 +79,8 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
       makeSaveAction({ onClick: handleOilPriceSave }),
       makeExcelGroupAction({
         columns: OIL_PRICE_COLUMN_DEFS,
+        excelColumns: () => model.grids.oilPrice.getExcelColumns(),
+        menuCode: MENU_CODE,
         menuName: "용차유가관리",
         fetchFn: () => api.getTempOilPrice(model.filtersRef.current),
         rows: model.grids.oilPrice.rows,
@@ -93,6 +96,8 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
       makeCommonActions({
         excel: {
           columns: PERIOD_COLUMN_DEFS,
+          excelColumns: () => model.grids.period.getExcelColumns(),
+          menuCode: MENU_CODE,
           menuName: "용차유가 기간별조회",
           fetchFn: () =>
             api.getTempOilPriceByPeriod(model.filtersRef.current),
