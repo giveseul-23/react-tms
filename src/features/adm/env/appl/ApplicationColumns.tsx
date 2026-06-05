@@ -10,6 +10,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "APPL_CD",
     editable: true,
     insertable: true,
+    validators: { max: 20, required: true }
   },
   {
     type: "text",
@@ -17,6 +18,7 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     field: "APPL_NM",
     editable: true,
     insertable: true,
+    validators: { max: 60, required: true }
   },
   {
     type: "combo",
