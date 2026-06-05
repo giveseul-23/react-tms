@@ -214,6 +214,7 @@ export default function DataGrid<TRow>({
     effectiveRowKeys,
     effectiveAutoSelect,
     activeRender,
+    activeCodeMap,
     finalColumnDefs,
   } = useActivePreset<TRow>({
     layoutType,
@@ -247,10 +248,21 @@ export default function DataGrid<TRow>({
   // ── 엑셀 컬럼 getter ─────────────────────────────────────────────────────
   // activeColumnDefs(audit 포함, 커스텀 키 보존된 원본 defs) 를 grid api 의 표시 순서로 거른다.
   // → 런타임 숨김/순서변경이 그대로 반영된 "보이는 컬럼" defs. (엑셀 다운로드용)
+  // codeKey 컬럼에는 그리드 codeMap(코드→명)을 codeLabels 로 붙여, 엑셀에서 라벨 치환/변환에 사용.
   const activeColumnDefsRef = useRef(activeColumnDefs);
   activeColumnDefsRef.current = activeColumnDefs;
+  const activeCodeMapRef = useRef(activeCodeMap);
+  activeCodeMapRef.current = activeCodeMap;
   const getExcelColumns = useCallback(() => {
-    const defs = activeColumnDefsRef.current as any[];
+    const cm = activeCodeMapRef.current as
+      | Record<string, Record<string, string>>
+      | undefined;
+    const withLabels = (col: any) => {
+      const codeKey = col?.codeKey as string | undefined;
+      const labels = codeKey ? cm?.[codeKey] : undefined;
+      return labels ? { ...col, codeLabels: labels } : col;
+    };
+    const defs = (activeColumnDefsRef.current as any[]).map(withLabels);
     const api = gridApiRef.current;
     if (!api || api.isDestroyed?.()) return defs;
     const displayed = api.getAllDisplayedColumns?.() ?? [];

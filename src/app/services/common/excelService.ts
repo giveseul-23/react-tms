@@ -125,8 +125,7 @@ export function getColumnInfoForExcelDown(
     defaultColWidth = 100,
   } = options;
 
-  const { checkboxColumns, comboColumns, dateColumns } =
-    setColumnsForExcel(columns);
+  const { checkboxColumns, dateColumns } = setColumnsForExcel(columns);
 
   const headerCols: string[] = [];
   const colNames: string[] = [];
@@ -144,9 +143,11 @@ export function getColumnInfoForExcelDown(
     colAligns.push(colAlign);
   }
 
-  const comboCols = comboColumns
-    .map((c) => c.field ?? c.dataIndex ?? "")
-    .filter(Boolean)
+  // 콤보(코드→명 변환) 대상 — getExcelColumns 가 codeLabels(코드→명)를 붙여준 codeKey 컬럼.
+  // 서버는 EXCEL_COL_COMBOCOLS 의 각 컬럼에 대해 allDataMap.get(컬럼명) 으로 데이터를 찾으므로,
+  // 데이터를 함께 보내는 컬럼만 포함해야 한다(없으면 서버 NPE).
+  const comboCols = collectComboCodeColumns(columns)
+    .map((c) => c.field as string)
     .join(",");
 
   const checkCols = checkboxColumns
@@ -190,16 +191,25 @@ export function getColumnsCodeData(
     .filter((item) => item.key !== "");
 }
 
+// align prop 미지정 시의 기본 정렬 — 그리드(processColumnDef)의 규칙과 동일하게 맞춘다.
+//   DTTM 필드: date형(type date/datetime, fieldType date)일 때만 center, 아니면 left
+//   type date/datetime / fieldType date → center
+//   numeric(type numeric / dataType number / cellDataType number) → right
+//   _STS 접미(type/cellStyle 미지정 시) → center
+//   그 외 → left
 function resolveDefaultAlign(col: ColumnDefine): string {
-  const DATE_TYPES = ["date", "month", "datetime", "time"];
-  const CODE_TYPES = ["popup", "combo", "popuser"];
-  if (
-    col.editType &&
-    (DATE_TYPES.includes(col.editType) || CODE_TYPES.includes(col.editType))
-  )
-    return "center";
-  if (col.type === "numeric") return "right";
-  if (col.type === "string") return "left";
+  const type = col.type;
+  const c = col as any;
+  const isDate =
+    type === "date" || type === "datetime" || c.fieldType === "date";
+  const isNumeric =
+    type === "numeric" || c.dataType === "number" || c.cellDataType === "number";
+  const field = (col.field ?? c.colId ?? "") as string;
+
+  if (field.includes("DTTM")) return isDate ? "center" : "left";
+  if (isDate) return "center";
+  if (isNumeric) return "right";
+  if (!c.cellStyle && !type && field.endsWith("_STS")) return "center";
   return "left";
 }
 
@@ -215,6 +225,54 @@ interface DownExcelOptions {
   menuCd?: string;
   comboStores?: Record<string, ComboOption[]>;
   fetchFn: (params: any) => Promise<any>;
+}
+
+// codeKey 컬럼 중 codeLabels(코드→명 맵)가 붙어 데이터를 보낼 수 있는 컬럼만 모은다.
+type ComboCodeColumn = ColumnDefine & { codeLabels: Record<string, string> };
+function collectComboCodeColumns(columns: ColumnDefine[]): ComboCodeColumn[] {
+  return columns.filter(
+    (c) =>
+      c.field &&
+      (c as any).codeLabels &&
+      c.excelPrint !== false &&
+      c.headerName !== "No",
+  ) as ComboCodeColumn[];
+}
+
+// (B) 서버 변환용 코드 데이터 — { [컬럼field]: [{CODE,NAME}, ...] }.
+// 서버 replaceComboValueToName 가 allDataMap.get(컬럼field) 로 읽어 코드→명 치환(filtered:"N").
+function buildComboCodeData(
+  columns: ColumnDefine[],
+): Record<string, { CODE: string; NAME: string }[]> {
+  const out: Record<string, { CODE: string; NAME: string }[]> = {};
+  for (const c of collectComboCodeColumns(columns)) {
+    out[c.field as string] = Object.entries(c.codeLabels).map(
+      ([CODE, NAME]) => ({ CODE, NAME }),
+    );
+  }
+  return out;
+}
+
+// (A) codeKey 컬럼 코드→라벨 치환 — getExcelColumns 가 컬럼에 붙여준 codeLabels(코드→명) 사용.
+// 서버 "Y"(보이는 데이터) 분기는 dsSave 를 그대로 출력하므로, 여기서 라벨로 바꿔 보내면 라벨이 찍힌다.
+function applyCodeLabels(
+  rows: Record<string, unknown>[],
+  columns: ColumnDefine[],
+): Record<string, unknown>[] {
+  const codeCols = columns.filter(
+    (c) => c.field && (c as any).codeLabels,
+  ) as (ColumnDefine & { codeLabels: Record<string, string> })[];
+  if (codeCols.length === 0) return rows;
+  return rows.map((row) => {
+    const out = { ...row };
+    for (const c of codeCols) {
+      const v = out[c.field as string];
+      if (v == null || v === "") continue;
+      const label = c.codeLabels[String(v)];
+      if (label != null) out[c.field as string] = label;
+    }
+    return out;
+  });
 }
 
 async function triggerDownload(blob: Blob, fileName: string) {
@@ -241,6 +299,8 @@ async function runCommonExcelDownload(opts: {
   searchUrl?: string;
   /** 검색 조건 — filtered:"N"(전체조회) 시 서버가 SEARCH_URL 재조회에 쓰도록 PARAM_MAP 최상위에 실어줌. */
   extraParams?: Record<string, unknown>;
+  /** 콤보 코드→명 데이터 — { [컬럼field]: [{CODE,NAME}] }. 서버가 재조회 결과 코드 치환에 사용. */
+  codeData?: Record<string, unknown>;
 }): Promise<void> {
   const {
     excelInfo,
@@ -250,10 +310,13 @@ async function runCommonExcelDownload(opts: {
     fileName,
     searchUrl = "",
     extraParams = {},
+    codeData = {},
   } = opts;
 
   await commonApi.saveUserTempData(
     {
+      // codeData 를 먼저 펼치고 검색조건(extraParams)을 나중에 → field 명 충돌 시 검색조건이 우선(재조회 정확성 보존).
+      ...codeData,
       ...extraParams,
       EXCEL_INFO: { ...excelInfo, DOWN_EXCEL_FILTERED_ROWS: filtered },
       ...(searchUrl ? { SEARCH_URL: searchUrl } : {}),
@@ -325,6 +388,7 @@ export async function downExcelSearch({
     fileName: menuName,
     searchUrl,
     extraParams,
+    codeData: buildComboCodeData(columns),
   });
 }
 
@@ -345,7 +409,7 @@ export async function downExcelSearched({
 
   await runCommonExcelDownload({
     excelInfo,
-    rows,
+    rows: applyCodeLabels(rows, columns),
     filtered: "Y",
     menuCd: menuCd ?? menuName,
     fileName: menuName,
