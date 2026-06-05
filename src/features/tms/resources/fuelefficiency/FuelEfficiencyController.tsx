@@ -228,7 +228,7 @@ export function useFuelEfficiencyController({ model }: Args) {
     if (!requireParentRow(sub01, Lang.get("LBL_LOGISTICS_GROUP_CODE"))) return;
 
     openPopup({
-      title: Lang.get("LBL_VEHICLE_TYPE_CODE"),
+      title: "LBL_VEHICLE_TYPE_CODE",
       width: "2xl",
       content: (
         <CommonPopup

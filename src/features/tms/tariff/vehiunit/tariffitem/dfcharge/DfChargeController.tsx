@@ -63,12 +63,42 @@ export function useDfChargeController({ model }: ControllerArgs) {
     });
   }, [model, base]);
 
+  const checkBeforeSave = useCallback(() => {
+    const rows = model.grids.main.ref.current?.rows ?? [];
+
+    const modifiedRows = rows.filter((row: any) => 
+      row.EDIT_STS === 'I' || row.EDIT_STS === 'U'
+    );
+
+    if (modifiedRows.length === 0) return true;
+
+    for (const row of modifiedRows) {
+      const chgCd = row.CHG_CD ?? '';
+      const dfChgOpDivTcd = row.DF_CHG_OP_DIV_TCD;
+      const alwChgCanYn = row.ALW_CHG_CAN_YN;
+
+      // 조건 1: CHG_CD의 첫 글자가 숫자인지 체크
+      if (chgCd.length > 0 && /^[0-9]/.test(chgCd)) {
+        base.alert(Lang.get("MSG_VALID_CHARGE_CODE"));
+        return false;
+      }
+
+      // 조건 2: CONFIRM 또는 MONTHLY 이면서 취소 가능 여부가 true(Y)인 경우
+      if ((dfChgOpDivTcd === 'CONFIRM' || dfChgOpDivTcd === 'MONTHLY') && alwChgCanYn) {
+        base.alert(Lang.get("MSG_FAIL_CONFIRM_CAN_YN"));
+        return false;
+      }
+    }
+    return true;
+  }, [model, base]);
+
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("main", api.save, {
+        beforeSave: checkBeforeSave,
         confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
       }),
-    [base],
+    [base, checkBeforeSave],
   );
 
   // ── 상세 저장 — 부모 행 기반 cascade 재조회 ────────────────────
