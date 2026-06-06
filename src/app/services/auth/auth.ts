@@ -7,6 +7,7 @@ const USERID = "userId";
 const USERNM = "userNm";
 const SESLANG = "sesLang";
 const USRGRP = "userGroupName";
+const USRGRPCODE = "userGroupCode";
 
 export function setTokens(
   accessToken: string,
@@ -15,6 +16,7 @@ export function setTokens(
   userNm: string,
   sesLang: string,
   userGroupName: string,
+  userGroupCode = "",
 ) {
   sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
@@ -22,6 +24,8 @@ export function setTokens(
   sessionStorage.setItem(USERNM, userNm);
   sessionStorage.setItem(SESLANG, sesLang);
   sessionStorage.setItem(USRGRP, userGroupName);
+  // 사용자 그룹코드(쉼표구분 다중) — 리소스 권한 매칭(USR_GRP_CD)에 사용.
+  sessionStorage.setItem(USRGRPCODE, userGroupCode ?? "");
 }
 
 export function getAccessToken() {
@@ -40,6 +44,15 @@ export function getUserGroup() {
   return sessionStorage.getItem(USRGRP);
 }
 
+/** 사용자 그룹코드 목록 (쉼표구분 → 배열). 리소스 권한(USR_GRP_CD) 매칭용. 1개·다중 모두. */
+export function getUserGroupCodes(): string[] {
+  const raw = sessionStorage.getItem(USRGRPCODE) ?? "";
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 /**
  * 로그아웃 처리 — 세션 토큰 + Lang 캐시 모두 정리
  * 요구사항 6: 자동 로그아웃 시에도 호출됨 (client.ts 인터셉터)
@@ -51,6 +64,7 @@ export function clearTokens() {
   sessionStorage.removeItem(USERNM);
   sessionStorage.removeItem(SESLANG);
   sessionStorage.removeItem(USRGRP);
+  sessionStorage.removeItem(USRGRPCODE);
 
   // 요구사항 6: Lang 캐시도 함께 정리 (보안 상 로그아웃 시 삭제)
   Lang.clearCache();

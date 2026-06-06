@@ -35,6 +35,8 @@ export type AddActionConfig = {
   label?: string;
   key?: string;
   disabled?: boolean;
+  /** 리소스 권한 클래스. 기본 "I"(추가). null/"" 로 권한제어 해제 가능. */
+  authCls?: string;
 };
 
 export type SaveActionConfig = {
@@ -42,6 +44,8 @@ export type SaveActionConfig = {
   label?: string;
   key?: string;
   disabled?: boolean;
+  /** 리소스 권한 클래스. 기본 "C"(저장). */
+  authCls?: string;
 };
 
 export type ExcelGroupActionConfig = {
@@ -65,6 +69,8 @@ export type ExcelGroupActionConfig = {
   hideAll?: boolean;
   /** 보이는 데이터 다운로드 버튼 숨김 */
   hideVisible?: boolean;
+  /** 리소스 권한 클래스. 기본 "E"(엑셀). */
+  authCls?: string;
   label?: string;
   key?: string;
   disabled?: boolean;
@@ -79,6 +85,7 @@ export const makeAddAction = (config: AddActionConfig = {}) => ({
   key: config.key ?? "BTN_ADD",
   label: config.label ?? "BTN_ADD",
   onClick: config.onClick ?? ((_e: any) => {}),
+  authCls: config.authCls ?? "I",
   ...(config.disabled !== undefined && { disabled: config.disabled }),
 });
 
@@ -87,6 +94,7 @@ export const makeSaveAction = (config: SaveActionConfig = {}) => ({
   key: config.key ?? "BTN_SAVE",
   label: config.label ?? "BTN_SAVE",
   onClick: config.onClick ?? ((_e: any) => {}),
+  authCls: config.authCls ?? "C",
   ...(config.disabled !== undefined && { disabled: config.disabled }),
 });
 
@@ -300,6 +308,7 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
     key: config.key ?? "BTN_EXCEL",
     label: config.label ?? "BTN_EXCEL",
     items,
+    authCls: config.authCls ?? "E",
     ...(config.disabled !== undefined && { disabled: config.disabled }),
   };
 };

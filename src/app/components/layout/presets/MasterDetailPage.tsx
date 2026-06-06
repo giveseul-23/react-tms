@@ -15,6 +15,7 @@ import { PageShell } from "../PageShell";
 import { Pane } from "../Pane";
 import { SplitPane } from "../SplitPane";
 import { SearchFilters } from "@/app/components/Search/SearchFilters";
+import { MenuAuthProvider, isMenuDenied } from "@/app/feature/menuAuth";
 import { LayoutToggleButton } from "../LayoutToggleButton";
 import { OuterTabs, type OuterTab } from "../OuterTabs";
 import { useResolvedSearchMeta } from "@/app/feature/useResolvedSearchMeta";
@@ -89,7 +90,7 @@ export function MasterDetailPage({
   topSlot,
   outerTabs,
 }: MasterDetailPageProps) {
-  const { meta, gate } = useResolvedSearchMeta(menuCode, searchProps.meta);
+  const { meta, gate, menuAuth } = useResolvedSearchMeta(menuCode, searchProps.meta);
 
   const directionKey = storageKey ? `${storageKey}-direction` : null;
   const [direction, setDirection] = useState<Direction>(() => {
@@ -105,6 +106,21 @@ export function MasterDetailPage({
   }, [directionKey]);
 
   if (gate) return <>{gate}</>;
+
+  // 메뉴 권한 — 권한 매트릭스에 있는(통제 대상) 메뉴인데 내 그룹 권한이 전무하면 화면 숨김.
+  // 매트릭스에 없으면(통제 대상 아님) 제한하지 않음 — 기존 화면 호환.
+  const menuAccess = {
+    controlled: !!menuCode && menuAuth.controlled.has(menuCode),
+    flags: menuCode ? (menuAuth.byId[menuCode] ?? null) : null,
+  };
+  if (isMenuDenied(menuAccess)) {
+    return (
+      <div className="flex h-full items-center justify-center text-sm text-slate-500">
+        접근 권한이 없습니다.
+      </div>
+    );
+  }
+
   const finalSearchProps: SearchProps = { menuCode, ...searchProps, meta };
   const layoutToggleNode = (
     <LayoutToggleButton
@@ -115,6 +131,7 @@ export function MasterDetailPage({
   );
 
   return (
+    <MenuAuthProvider value={menuAuth}>
     <PageShell
       searchSlot={
         <SearchFilters {...finalSearchProps} layoutToggle={layoutToggleNode} />
@@ -147,5 +164,6 @@ export function MasterDetailPage({
         </div>
       </div>
     </PageShell>
+    </MenuAuthProvider>
   );
 }

@@ -131,7 +131,8 @@ function loadSections(force: boolean): Promise<MenuSection[]> {
   if (!force && inflight) return inflight;
   const { userId } = getSessionFields();
   const p = menuApi
-    .getMenuConfigList({ userId, DYNAMIC_QUERY: "1=1" })
+    // 권한 필터된 사용자 메뉴(서버 selectUserModuleMenuByReact). 전체목록(searchByReact)+DYNAMIC_QUERY 대신.
+    .getUserMenuByReact({ userId })
     .then((res: any) => {
       const data: any[] =
         res.data?.data?.allData?.data ??

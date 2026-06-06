@@ -8,6 +8,7 @@ import type { ColDef, ColGroupDef } from "ag-grid-community";
 import { GridTabs } from "./GridTabs";
 import type { GridPreset, GridTab } from "./types";
 import { GridActionsBar, ActionItem } from "@/app/components/ui/GridActionsBar";
+import { useResourceAccess, isGridDenied } from "@/app/feature/menuAuth";
 
 import { Lang } from "@/app/services/common/Lang";
 import {
@@ -39,6 +40,9 @@ type DataGridProps<TRow> = {
 
   rowData?: TRow[] | Record<string, TRow[]>;
   columnDefs?: (ColDef<TRow> | ColGroupDef<TRow>)[];
+
+  /** 서버 리소스 권한 식별자 (센차 grid.authId). 리소스 권한 적용(2단계)에서 사용. */
+  authId?: string;
 
   layoutType?: "tab" | "plain";
   /** 그리드별 액션 버튼들. 비거나 생략하면 actions 바 자체 숨김. */
@@ -145,6 +149,7 @@ export default function DataGrid<TRow>({
   presets,
   rowData = [],
   columnDefs = [],
+  authId,
   layoutType = "tab",
   actions,
   subTitle,
@@ -324,9 +329,14 @@ export default function DataGrid<TRow>({
     prevSelectedRef,
   });
 
+  // 리소스 권한 — authId 가 권한 매트릭스에 있고(통제 대상) 내 그룹 조회(S) 권한이
+  // 없으면 그리드 비활성 (센차 grid setDisabled 대응). authId 미전달/통제 대상 아님 → 제한 없음.
+  const access = useResourceAccess(authId);
+  const gridDenied = isGridDenied(access);
+
   const wrappedActions = useMemo(
-    () => wrapActions(activeActions, selectedRows),
-    [activeActions, selectedRows],
+    () => wrapActions(activeActions, selectedRows, access.flags),
+    [activeActions, selectedRows, access.flags],
   );
 
   const handlers = useGridHandlers<TRow>({
@@ -372,7 +382,18 @@ export default function DataGrid<TRow>({
   );
 
   return (
-    <div ref={gridContainerRef} className={GRID_WRAPPER_CLASS}>
+    <div
+      ref={gridContainerRef}
+      className={GRID_WRAPPER_CLASS}
+      style={{ position: "relative" }}
+    >
+      {/* 리소스 권한 없음 → 클릭 차단 + 딤 처리(센차 setDisabled 대응). */}
+      {gridDenied && (
+        <div
+          className="absolute inset-0 z-[5] cursor-not-allowed bg-white/50"
+          aria-hidden
+        />
+      )}
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-3 shrink-0">
           <GridTabs

@@ -16,6 +16,8 @@ export type ActionButton = {
   disabled?: boolean;
   /** Button variant (선택). 미지정 시 "outline". */
   variant?: "default" | "outline" | "primary" | "ghost" | "destructive";
+  /** 리소스 권한 클래스 (센차 authCls). 부모 그리드 권한비트로 활성 판정. S/E/C/U/D/P/I */
+  authCls?: string;
 };
 
 export type ActionGroup = {
@@ -25,6 +27,8 @@ export type ActionGroup = {
   label?: string;
   items: ActionButton[];
   disabled?: boolean;
+  /** 리소스 권한 클래스 (센차 authCls). 그룹 전체 활성 판정. */
+  authCls?: string;
 };
 
 export type ActionItem = ActionButton | ActionGroup;

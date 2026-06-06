@@ -28,6 +28,14 @@ export const menuApi = {
     );
   },
 
+  // nav 메뉴 — 로그인 사용자 권한 필터된 메뉴만 (서버 selectUserModuleMenuByReact).
+  getUserMenuByReact(payload: any = {}) {
+    return apiClient.post<commonResponse>(
+      `/menuService/searchUserMenuByReact`,
+      withSession({ ...payload }),
+    );
+  },
+
   getMsgCodeName(payload: any) {
     return apiClient.post<commonResponse>(
       `/menuService/selectMsgCodeName`,

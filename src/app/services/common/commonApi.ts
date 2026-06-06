@@ -54,12 +54,28 @@ export const commonApi = {
    */
   fetchSearchCondition(menuCode: string, sesLang: string, userId: string) {
     return apiClient.post<{
-      data: { dsSearchCondition: ServerSearchConditionRow[] };
-    }>("/appService/getSerchConditionAndUserAuth", {
-      menuCode,
-      sesLang,
-      userId,
-    });
+      data: {
+        dsSearchCondition: ServerSearchConditionRow[];
+        // 리소스 권한 행 — 모든 그룹 매트릭스. USR_GRP_CD 로 내 그룹만 필터.
+        dsUserMenuAuth?: Array<{
+          RSRC_ID: string;
+          RSRC_TP?: string;
+          CONCAT_CNFG_VAL?: string | number;
+          USR_GRP_CD?: string;
+        }>;
+      };
+    }>(
+      "/appService/getSerchConditionAndUserAuth",
+      { menuCode, sesLang, userId },
+      {
+        // 그룹별 권한은 서버가 쿼리 params 에서 읽음(센차 callAjax 동일). body 만으론 *DFT 폴백.
+        params: {
+          ...getSessionFields(),
+          sesUserGroup: getUserGroup() ?? "",
+          menuCode,
+        },
+      },
+    );
   },
 
   /**

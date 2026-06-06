@@ -1,10 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import {
-  operatorArBillingInquiryApi as api,
-  GRID_ID,
-} from "./OperatorArBillingInquiryApi";
-import { MENU_CD } from "./OperatorArBillingInquiry";
+import { operatorArBillingInquiryApi as api } from "./OperatorArBillingInquiryApi";
+import { MENU_CD, AUTH } from "./OperatorArBillingInquiry";
 import {
   makeAddAction,
   makeSaveAction,
@@ -127,7 +124,7 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         key: "LBL_AR_UPLOAD",
         label: "LBL_AR_UPLOAD",
         menuCode: MENU_CD,
-        gridId: GRID_ID,
+        gridId: AUTH.grids.main,
         onUploaded: () => base.search(),
       }),
     [base],
@@ -224,23 +221,8 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
           uploadArExcelAction,
         ],
       },
-      makeExcelGroupAction({
-        excelColumns: () => model.grids.main.getExcelColumns(),
-        menuCode: MENU_CD,
-        menuName: menuName,
-        fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
-      }),
     ],
-    [
-      base,
-      doAction,
-      menuName,
-      model.filtersRef,
-      model.grids.main,
-      onDownloadArExcel,
-      uploadArExcelAction,
-    ],
+    [base, doAction, model.filtersRef, onDownloadArExcel, uploadArExcelAction],
   );
 
   const billingItemActions: ActionItem[] = useMemo(

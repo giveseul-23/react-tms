@@ -13,12 +13,15 @@
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { Button } from "@/app/components/ui/button";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
+import type { MenuAuth } from "@/app/feature/menuAuth";
 import type { SearchMeta } from "@/features/search/search.meta.types";
 
 interface ResolvedSearchMeta {
   meta: readonly SearchMeta[];
   /** loading 중이면 Skeleton, 아니면 null. preset 시작 부분에서 `if (gate) return gate;` */
   gate: React.ReactNode | null;
+  /** 리소스 권한 — preset 이 MenuAuthProvider 로 주입. */
+  menuAuth: MenuAuth;
 }
 
 export function useResolvedSearchMeta(
@@ -31,6 +34,9 @@ export function useResolvedSearchMeta(
   const meta = useAuto ? auto.meta : (fallbackMeta ?? []);
   const loading = useAuto ? auto.loading : false;
   const error = useAuto ? auto.error : false;
+  const menuAuth: MenuAuth = useAuto
+    ? auto.menuAuth
+    : { byId: {}, controlled: new Set<string>() };
 
   let gate: React.ReactNode | null = null;
   if (loading) {
@@ -47,5 +53,5 @@ export function useResolvedSearchMeta(
     );
   }
 
-  return { meta, gate };
+  return { meta, gate, menuAuth };
 }

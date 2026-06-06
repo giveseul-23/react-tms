@@ -6,7 +6,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { commonApi, comboOptRequest } from "@/app/services/common/commonApi";
-import { getSessionFields } from "@/app/services/auth/auth";
+import { getSessionFields, getUserGroupCodes } from "@/app/services/auth/auth";
+import {
+  decodeAuthFlags,
+  orAuthFlags,
+  type AuthFlags,
+  type MenuAuth,
+} from "@/app/feature/menuAuth";
 import type {
   SearchMeta,
   ServerSearchConditionRow,
@@ -210,6 +216,10 @@ const SEARCH_META_RETRY_DELAY = 700;
 
 export function useSearchMeta(menuCode: string) {
   const [meta, setMeta] = useState<SearchMeta[]>([]);
+  const [menuAuth, setMenuAuth] = useState<MenuAuth>(() => ({
+    byId: {},
+    controlled: new Set<string>(),
+  }));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -223,7 +233,7 @@ export function useSearchMeta(menuCode: string) {
     let cancelled = false;
 
     // 1회 시도 — 실패 시 throw (재시도는 load 가 담당)
-    async function loadOnce(): Promise<SearchMeta[]> {
+    async function loadOnce(): Promise<{ meta: SearchMeta[]; menuAuth: MenuAuth }> {
       const { userId, sesUserId, ACCESS_TOKEN, sesLang } = getSessionFields();
 
       const [condRes, operatorMap] = await Promise.all([
@@ -233,6 +243,29 @@ export function useSearchMeta(menuCode: string) {
       const rawRows: ServerSearchConditionRow[] =
         condRes.data?.data?.dsSearchCondition ?? [];
 
+      // 리소스 권한 — 같은 응답의 dsUserMenuAuth(모든 그룹 매트릭스)를
+      //   byId: 내 그룹(USR_GRP_CD === 내 userGroup) 행만 디코드
+      //   controlled: 매트릭스에 등장하는 authId 전체 (통제 대상 여부)
+      // 내 그룹코드(USR_GRP_CD)로 명시된 행만 "부여된 권한"으로 인정한다.
+      //   - 그룹코드 없음(undefined) = 시스템 기본값 → 제외 (부여 안 함 = 비활성)
+      //   - 타 그룹(예: *DFT) → 제외
+      //   - 내 그룹코드(다중이면 OR 합집합) → 적용
+      // controlled: 매트릭스에 존재하는 authId 전체 = 통제 대상 여부.
+      const myGroups = new Set(getUserGroupCodes());
+      const byId: Record<string, AuthFlags> = {};
+      const controlled = new Set<string>();
+      for (const row of condRes.data?.data?.dsUserMenuAuth ?? []) {
+        if (!row?.RSRC_ID) continue;
+        controlled.add(row.RSRC_ID);
+        const grp = (row.USR_GRP_CD ?? "").trim();
+        if (!myGroups.has(grp)) continue; // 그룹없음/타그룹 제외, 내 그룹만 인정
+        const flags = decodeAuthFlags(row.CONCAT_CNFG_VAL);
+        byId[row.RSRC_ID] = byId[row.RSRC_ID]
+          ? orAuthFlags(byId[row.RSRC_ID], flags)
+          : flags;
+      }
+      const menuAuth: MenuAuth = { byId, controlled };
+
       const baseMeta = toSearchMeta(rawRows, operatorMap);
 
       // keyParam 이 없어도 sqlProp 이 있으면 콤보 요청 대상으로 포함
@@ -241,7 +274,7 @@ export function useSearchMeta(menuCode: string) {
           m.type === "COMBO" && !!m.sqlProp,
       );
 
-      if (comboItems.length === 0) return baseMeta;
+      if (comboItems.length === 0) return { meta: baseMeta, menuAuth };
 
       const comboRes = await commonApi.fetchComboOptions(
         comboItems.map((m) => ({
@@ -257,7 +290,7 @@ export function useSearchMeta(menuCode: string) {
 
       const optionMap = comboRes?.data?.data ?? {}; // ← as any 제거
 
-      return baseMeta.map((m) => {
+      const resolvedMeta = baseMeta.map((m) => {
         if (m.type !== "COMBO") return m;
 
         // keyParam → sqlProp → "" 순으로 fallback
@@ -277,6 +310,8 @@ export function useSearchMeta(menuCode: string) {
 
         return { ...m, options: sanitizeComboOptions(options) };
       });
+
+      return { meta: resolvedMeta, menuAuth };
     }
 
     async function load() {
@@ -287,7 +322,8 @@ export function useSearchMeta(menuCode: string) {
         try {
           const resolved = await loadOnce();
           if (!cancelled) {
-            setMeta(resolved);
+            setMeta(resolved.meta);
+            setMenuAuth(resolved.menuAuth);
             setLoading(false);
           }
           return;
@@ -319,7 +355,7 @@ export function useSearchMeta(menuCode: string) {
     };
   }, [menuCode, reloadKey]);
 
-  return { meta, loading, error, retry };
+  return { meta, loading, error, retry, menuAuth };
 }
 
 export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {

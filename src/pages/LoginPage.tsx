@@ -81,6 +81,7 @@ export default function AuthPage() {
           userNm,
           userLang,
           userGroupName,
+          userGroupCode,
         );
 
         Util.setUtilUserInfo({
