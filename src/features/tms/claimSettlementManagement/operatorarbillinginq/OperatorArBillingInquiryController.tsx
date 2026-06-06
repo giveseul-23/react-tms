@@ -124,7 +124,6 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         key: "LBL_AR_UPLOAD",
         label: "LBL_AR_UPLOAD",
         menuCode: MENU_CD,
-        gridId: AUTH.grids.main,
         onUploaded: () => base.search(),
       }),
     [base],
