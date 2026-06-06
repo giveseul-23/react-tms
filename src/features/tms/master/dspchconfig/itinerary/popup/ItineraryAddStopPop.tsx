@@ -7,6 +7,7 @@ import DataGrid from "@/app/components/grid/DataGrid";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import type { GridSearchField } from "@/app/components/popup/GridSearchPopupLayout";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
 import { newRid } from "@/app/feature/useBaseModel";
 import { ROW_STATUS } from "@/app/components/grid/gridCommon";
 import { Lang } from "@/app/services/common/Lang";
@@ -435,12 +436,7 @@ export function ItineraryAddStopPop({
         onClick: ({ data }: { data: any[] }) =>
           handleAdjustStopSeq(1, data?.[0] ?? selectedStopRow),
       },
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
-        onClick: onSave,
-      },
+      makeSaveAction({ onClick: onSave }),
     ],
     [handleAdjustStopSeq, onSave, selectedStopRow],
   );

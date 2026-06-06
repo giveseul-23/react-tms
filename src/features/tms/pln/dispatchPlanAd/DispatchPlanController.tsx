@@ -173,14 +173,14 @@ export function useDispatchPlanController({ model }: Args) {
         items: [
           {
             type: "button",
-            key: "메모작성",
-            label: "메모작성",
+            key: "BTN_REGISTRATION",
+            label: "BTN_REGISTRATION",
             onClick: () => {},
           },
           {
             type: "button",
-            key: "메모삭제",
-            label: "메모삭제",
+            key: "BTN_CANCEL",
+            label: "BTN_CANCEL",
             onClick: () => {},
           },
         ],

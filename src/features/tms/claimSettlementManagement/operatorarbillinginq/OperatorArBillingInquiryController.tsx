@@ -1,13 +1,20 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import { operatorArBillingInquiryApi as api } from "./OperatorArBillingInquiryApi";
+import {
+  operatorArBillingInquiryApi as api,
+  GRID_ID,
+} from "./OperatorArBillingInquiryApi";
 import { MENU_CD } from "./OperatorArBillingInquiry";
 import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
+  makeExcelUploadAction,
+  makeMemoGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { showErrorModal } from "@/app/components/popup/showErrorModal";
+import { Lang } from "@/app/services/common/Lang";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   OperatorArBillingInquiryModel,
@@ -68,6 +75,64 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
     if (row) onMainGridClick(row);
   }, [model.grids.main, onMainGridClick]);
 
+  // 매출 엑셀 다운로드 — 검색조건 검증 → prepare → 파일(blob) 다운로드. (센차 onDownloadArTemplate 대응)
+  const onDownloadArExcel = useCallback(async () => {
+    const f = (model.rawFiltersRef.current ?? {}) as Record<string, any>;
+    const params = {
+      DIV_CD: f.SRCH_PLN_DIV_CD,
+      LGST_GRP_CD: f.SRCH_PLN_LGST_GRP_CD,
+      AR_TO_DT_FROM: f.SRCH_PLN_AR_TO_DT_FRM,
+      AR_TO_DT_TO: f.SRCH_PLN_AR_TO_DT_TO,
+      CUST_CD: f.SRCH_PLN_CUST_CD,
+    };
+    if (
+      !params.DIV_CD ||
+      !params.LGST_GRP_CD ||
+      !params.AR_TO_DT_FROM ||
+      !params.AR_TO_DT_TO ||
+      !params.CUST_CD
+    ) {
+      base.alert(Lang.get("MSG_CHECK_SEARCH_CONDITION"));
+      return;
+    }
+    try {
+      const prep = await api.downloadArExcelPrepare(params);
+      if ((prep.data as any)?.success === false) {
+        showErrorModal((prep.data as any)?.msg ?? Lang.get("TTL_ERR"));
+        return;
+      }
+      const res = await api.downloadArExcelFile();
+      const cd = (res.headers?.["content-disposition"] as string) ?? "";
+      const m = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)/i);
+      const fileName = m
+        ? decodeURIComponent(m[1])
+        : `${String(menuName).replaceAll(" ", "_").replaceAll("/", " ") + Date.now()}.xlsx`;
+      const url = URL.createObjectURL(new Blob([res.data as BlobPart]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      showErrorModal(e?.message ?? Lang.get("TTL_ERR"));
+    }
+  }, [base, menuName, model.rawFiltersRef]);
+
+  // 매출 엑셀 업로드 — 공통 업로드 버튼 (센차 gridExcelUpload 대응). 성공 시 재조회.
+  const uploadArExcelAction = useMemo(
+    () =>
+      makeExcelUploadAction({
+        key: "LBL_AR_UPLOAD",
+        label: "LBL_AR_UPLOAD",
+        menuCode: MENU_CD,
+        gridId: GRID_ID,
+        onUploaded: () => base.search(),
+      }),
+    [base],
+  );
+
   const mainActions: ActionItem[] = useMemo(
     () => [
       {
@@ -119,17 +184,45 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         onClick: () =>
           doAction(() => api.cancelSettlementDoc(model.filtersRef.current)),
       },
-      {
-        type: "group",
-        key: "BTN_MEMO",
-        label: "BTN_MEMO",
-        items: [],
-      },
+      makeMemoGroupAction({
+        saveMemo: (rows, text) => api.saveMemo(rows, text),
+        cancelMemo: (rows) => api.cancelMemo(rows),
+        onDone: () => base.search(),
+        confirmOnCancel: true,
+        noSelectionMsg: "MSG_SELECT_TARGET_FOR_AR_MEMO",
+        popupInfo: (rows) =>
+          Lang.get("MSG_AR_MEMO_BATCH_REG_INFO_BY_OP", String(rows.length)),
+        // 센차 checkValidForChange — AR_FI_STS 가 5010/5020 일 때만 메모 등록/취소 가능.
+        validate: (rows, mode) => {
+          const ok = rows.every(
+            (r: any) => r.AR_FI_STS === "5010" || r.AR_FI_STS === "5020",
+          );
+          if (!ok) {
+            base.alert(
+              Lang.get(
+                mode === "register"
+                  ? "MSG_INVALID_AR_STS_OF_FOR_MEMO_REG_BY_OP"
+                  : "MSG_INVALID_AR_STS_OF_FOR_MEMO_CAN_BY_OP",
+              ),
+            );
+            return false;
+          }
+          return true;
+        },
+      }),
       {
         type: "group",
         key: "LBL_AR_SALES_EXCEL_UPLOAD",
         label: "LBL_AR_SALES_EXCEL_UPLOAD",
-        items: [],
+        items: [
+          {
+            type: "button",
+            key: "LBL_AR_DOWNLOAD",
+            label: "LBL_AR_DOWNLOAD",
+            onClick: onDownloadArExcel,
+          },
+          uploadArExcelAction,
+        ],
       },
       makeExcelGroupAction({
         excelColumns: () => model.grids.main.getExcelColumns(),
@@ -139,7 +232,15 @@ export function useOperatorArBillingInquiryController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [doAction, menuName, model.filtersRef, model.grids.main],
+    [
+      base,
+      doAction,
+      menuName,
+      model.filtersRef,
+      model.grids.main,
+      onDownloadArExcel,
+      uploadArExcelAction,
+    ],
   );
 
   const billingItemActions: ActionItem[] = useMemo(

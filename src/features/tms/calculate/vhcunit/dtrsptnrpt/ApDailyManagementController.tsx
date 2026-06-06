@@ -9,7 +9,11 @@ import {
   DAILY_DETAIL_TAIL,
   buildDailyColumns,
 } from "./ApDailyManagementColumns";
-import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
+import {
+  makeExcelGroupAction,
+  makeMemoGroupAction,
+  makeSaveAction,
+} from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ApDailyManagementModel, GridKey } from "./ApDailyManagementModel";
@@ -149,28 +153,24 @@ export function useApDailyManagementController({ model }: Args) {
         label: "BTN_REGI_RATE_MGMT",
         items: [],
       },
-      {
-        type: "dropdown",
-        key: "BTN_MEMO",
-        label: "BTN_MEMO",
-        items: [],
-      },
+      makeMemoGroupAction({
+        saveMemo: (rows, text) => api.saveMemo(rows, text),
+        cancelMemo: (rows) => api.cancelMemo(rows),
+        onDone: () => model.searchRef.current?.(),
+      }),
       {
         type: "dropdown",
         key: "BTN_RE_CALC",
         label: "BTN_RE_CALC",
         items: [],
       },
-      {
-        type: "button",
-        key: "BTN_SAVE",
-        label: "BTN_SAVE",
+      makeSaveAction({
         onClick: (e: any) => {
           const saveRows = dirtyRows(e.data);
           if (saveRows.length === 0) return;
           api.save(saveRows).then(() => model.searchRef.current?.());
         },
-      },
+      }),
       {
         type: "dropdown",
         key: "BTN_FREIGHT_EXCEL_UP",

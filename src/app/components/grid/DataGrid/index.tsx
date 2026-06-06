@@ -262,10 +262,28 @@ export default function DataGrid<TRow>({
       const labels = codeKey ? cm?.[codeKey] : undefined;
       return labels ? { ...col, codeLabels: labels } : col;
     };
+    // 그룹(children) 컬럼을 leaf 로 평탄화 + 상위 헤더 체인(__excelHeaderGroups, 최상위→직속부모) 부착.
+    // (평탄화 안 하면 그룹 안 leaf 가 byKey 매칭에서 빠져 엑셀에서 누락됨)
+    const flatten = (cols: any[], ancestors: string[]): any[] => {
+      const out: any[] = [];
+      for (const col of cols ?? []) {
+        if (col?.children) {
+          out.push(...flatten(col.children, [...ancestors, col.headerName]));
+        } else {
+          const labeled = withLabels(col);
+          out.push(
+            ancestors.length
+              ? { ...labeled, __excelHeaderGroups: ancestors }
+              : labeled,
+          );
+        }
+      }
+      return out;
+    };
     // excelPrint:false → 엑셀 제외.
-    const defs = (activeColumnDefsRef.current as any[])
-      .map(withLabels)
-      .filter((c) => (c as any).excelPrint !== false);
+    const defs = flatten(activeColumnDefsRef.current as any[], []).filter(
+      (c) => (c as any).excelPrint !== false,
+    );
     const api = gridApiRef.current;
     if (!api || api.isDestroyed?.()) return defs;
     const displayed = api.getAllDisplayedColumns?.() ?? [];

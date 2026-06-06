@@ -44,6 +44,7 @@ export default function OperatorArBillingInquiry() {
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          audit={{ delete: false, rowStatus: false }}
         />
       }
       detail={
@@ -62,7 +63,6 @@ export default function OperatorArBillingInquiry() {
                   columnDefs={BILLING_ITEM_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.billingItemActions}
-                  audit={false}
                 />
               ),
             },
@@ -84,7 +84,7 @@ export default function OperatorArBillingInquiry() {
                   columnDefs={ATTACHMENT_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.attachmentActions}
-                  audit={false}
+                  audit={{ updatePerson: false, updateTime: false }}
                 />
               ),
             },

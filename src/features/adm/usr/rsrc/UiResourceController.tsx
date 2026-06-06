@@ -2,7 +2,10 @@ import { useCallback, useMemo, type MutableRefObject } from "react";
 import type { TreeGridHandle } from "@/app/components/grid/TreeGrid";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
-import { makeSaveAction } from "@/app/components/grid/actions/commonActions";
+import {
+  makeAddAction,
+  makeSaveAction,
+} from "@/app/components/grid/actions/commonActions";
 import { useGridSave } from "@/app/components/grid/gridCommon";
 import { newRid } from "@/app/feature/useBaseModel";
 import { Lang } from "@/app/services/common/Lang";
@@ -291,12 +294,7 @@ export function useUiResourceController({
         label: "BTN_FOLD_ALL",
         onClick: () => treeGridRef.current?.collapseAll(),
       },
-      {
-        type: "button" as const,
-        key: "BTN_ADD",
-        label: "BTN_ADD",
-        onClick: onAddResource,
-      },
+      makeAddAction({ onClick: onAddResource }),
       makeSaveAction({ onClick: handleSave }),
     ],
     [handleSave, onAddResource, treeGridRef],

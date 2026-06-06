@@ -17,7 +17,6 @@ export interface ColumnDefine {
   /** 엑셀 헤더 텍스트 덮어쓰기 — 미지정 시 headerName 사용. (화면 컬럼명과 다른 헤더가 필요할 때) */
   excelColName?: string;
   xtype?: string;
-  editType?: string;
   // 오타 수정: edityType → editorType (기존 코드 호환을 위해 둘 다 허용)
   editorType?: string;
   dataIndex?: string;
@@ -104,9 +103,9 @@ export function setColumnsForExcel(columns: ColumnDefine[]): {
 
     if (isCheckboxColumn(col)) {
       checkboxColumns.push(col);
-    } else if (col.editType === "combo") {
+    } else if (col.type === "combo") {
       comboColumns.push(col);
-    } else if (col.editType != null && DATE_TYPES.includes(col.editType)) {
+    } else if (col.type != null && DATE_TYPES.includes(col.type)) {
       dateColumns.push(col);
     } else {
       columnDefines.push(col);
@@ -172,10 +171,32 @@ export function getColumnInfoForExcelDown(
     .filter(Boolean)
     .join(",");
 
+  // 다단 그룹 헤더 — leaf 컬럼의 상위 헤더 체인(__excelHeaderGroups, 최상위→직속부모)으로 구성.
+  // 위 헤더 루프와 동일 순서/필터(field 有·No 제외·excelPrint 유지)를 써야 행이 정렬된다.
+  const printCols = columns.filter(
+    (c) => c.field && c.headerName !== "No" && c.excelPrint !== false,
+  );
+  const maxGroupDepth = printCols.reduce(
+    (m, c) => Math.max(m, ((c as any).__excelHeaderGroups?.length ?? 0) as number),
+    0,
+  );
+  const headerDepth = maxGroupDepth + 1; // 그룹 행 수 + leaf 헤더 행
+  const headerGroups: Record<string, string> = {};
+  for (let d = 0; d < headerDepth - 1; d++) {
+    // 그룹 없는(또는 더 얕은) 컬럼은 자기 헤더로 채움 — 서버 setParentHeaderTextArr 와 동일.
+    const row = printCols.map((c) => {
+      const chain = (c as any).__excelHeaderGroups as string[] | undefined;
+      const own = c.excelColName ?? c.headerName ?? c.field ?? "";
+      return chain?.[d] ?? own;
+    });
+    headerGroups[`EXCEL_HEADER_GROUP_${d}`] = encodeURI(row.join(","));
+  }
+
   return {
     EXCEL_SHEET_TITLE: menuName,
     EXCEL_HEADERCOLS: encodeURI(headerCols.join(",")),
-    EXCEL_HEADER_DEPTH: 1,
+    EXCEL_HEADER_DEPTH: headerDepth,
+    ...headerGroups,
     EXCEL_REQUIRED_HEADERS: "",
     EXCEL_COLNAMES: encodeURI(colNames.join(",")),
     EXCEL_COL_WIDTH: encodeURI(colWidths.join(",")),

@@ -47,8 +47,16 @@ export const MAIN_COLUMN_DEFS = [
   },
   { type: "text", headerName: "LBL_AR_CUSTOMER_CD", field: "CUST_CD" },
   { type: "text", headerName: "LBL_AR_CUSTOMER_NM", field: "CUST_NM" },
-  { type: "text", headerName: "LBL_AR_CUSTOMER_CONTRACT_CD", field: "CUST_CNTRCT_CD" },
-  { type: "text", headerName: "LBL_AR_CUSTOMER_CONTRACT_NM", field: "CUST_CNTRCT_NM" },
+  {
+    type: "text",
+    headerName: "LBL_AR_CUSTOMER_CONTRACT_CD",
+    field: "CUST_CNTRCT_CD",
+  },
+  {
+    type: "text",
+    headerName: "LBL_AR_CUSTOMER_CONTRACT_NM",
+    field: "CUST_CNTRCT_NM",
+  },
   { type: "text", headerName: "LBL_AR_SALES_CONTRACT_CD", field: "AR_TRF_CD" },
   {
     type: "text",
@@ -62,13 +70,17 @@ export const MAIN_COLUMN_DEFS = [
     field: "AR_STL_BASE_DT_TP",
     codeKey: "arBaseDateType",
   },
-  { type: "text", headerName: "LBL_AR_REF_SALES_SETTLEMENT_DOC_NO", field: "REF_AR_ID" },
-  { type: "text", headerName: "LBL_AR_REF_PURCHASE_SETTLEMENT_DOC_NO", field: "REF_AP_ID" },
+  {
+    type: "text",
+    headerName: "LBL_AR_REF_SALES_SETTLEMENT_DOC_NO",
+    field: "REF_AR_ID",
+  },
+  {
+    type: "text",
+    headerName: "LBL_AR_REF_PURCHASE_SETTLEMENT_DOC_NO",
+    field: "REF_AP_ID",
+  },
   { type: "text", headerName: "LBL_AR_SALES_CLOSE_ID", field: "AR_SETL_ID" },
-  { type: "text", headerName: "LBL_AR_CREATOR_REG_USER", field: "CRE_USR_ID" },
-  { type: "text", headerName: "LBL_AR_REG_DTTM", field: "CRE_DTTM" },
-  { type: "text", headerName: "LBL_AR_UPD_USER", field: "UPD_USR_ID" },
-  { type: "text", headerName: "LBL_AR_UPD_DTTM", field: "UPD_DTTM" },
 ];
 
 // 청구항목
@@ -105,12 +117,6 @@ export const BILLING_ITEM_COLUMN_DEFS = [
   },
   { type: "text", headerName: "LBL_AR_DTL_ID", field: "AR_DTL_ID" },
   { type: "text", headerName: "LBL_AP_ID", field: "AR_ID" },
-  ...makeAuditColumns({
-    insertPerson: true,
-    insertDate: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
 ];
 
 // 주문정보
@@ -124,8 +130,16 @@ export const ORDER_INFO_COLUMN_DEFS = [
     field: "AR_CNTRCT_LCD",
     codeKey: "arContractLevel",
   },
-  { type: "text", headerName: "LBL_CUSTOMER_CONTRACT_CODE", field: "CUST_CNTRCT_CD" },
-  { type: "text", headerName: "LBL_CUSTOMER_CONTRACT_NAME", field: "CUST_CNTRCT_NM" },
+  {
+    type: "text",
+    headerName: "LBL_CUSTOMER_CONTRACT_CODE",
+    field: "CUST_CNTRCT_CD",
+  },
+  {
+    type: "text",
+    headerName: "LBL_CUSTOMER_CONTRACT_NAME",
+    field: "CUST_CNTRCT_NM",
+  },
   { type: "text", headerName: "LBL_SHIPMENT_ID", field: "SHPM_ID" },
   { type: "text", headerName: "LBL_SHIPMENT_NO", field: "SHPM_NO" },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
@@ -191,16 +205,61 @@ export const ORDER_INFO_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_PLN_BOX_QTY", field: "PLN_BOX_QTY" },
   { type: "text", headerName: "LBL_CFM_BOX_QTY", field: "CFM_BOX_QTY" },
   { type: "text", headerName: "LBL_PLANNED_FLEX_QTY1", field: "PLN_FLEX_QTY1" },
-  { type: "text", headerName: "LBL_CONFIRMED_FLEX_QTY1", field: "CFM_FLEX_QTY1" },
+  {
+    type: "text",
+    headerName: "LBL_CONFIRMED_FLEX_QTY1",
+    field: "CFM_FLEX_QTY1",
+  },
   { type: "text", headerName: "LBL_PLANNED_FLEX_QTY2", field: "PLN_FLEX_QTY2" },
-  { type: "text", headerName: "LBL_CONFIRMED_FLEX_QTY2", field: "CFM_FLEX_QTY2" },
+  {
+    type: "text",
+    headerName: "LBL_CONFIRMED_FLEX_QTY2",
+    field: "CFM_FLEX_QTY2",
+  },
   { type: "text", headerName: "LBL_PLANNED_FLEX_QTY3", field: "PLN_FLEX_QTY3" },
-  { type: "text", headerName: "LBL_CONFIRMED_FLEX_QTY3", field: "CFM_FLEX_QTY3" },
+  {
+    type: "text",
+    headerName: "LBL_CONFIRMED_FLEX_QTY3",
+    field: "CFM_FLEX_QTY3",
+  },
   { type: "text", headerName: "LBL_PLANNED_FLEX_QTY4", field: "PLN_FLEX_QTY4" },
-  { type: "text", headerName: "LBL_CONFIRMED_FLEX_QTY4", field: "CFM_FLEX_QTY4" },
+  {
+    type: "text",
+    headerName: "LBL_CONFIRMED_FLEX_QTY4",
+    field: "CFM_FLEX_QTY4",
+  },
   { type: "text", headerName: "LBL_PLANNED_FLEX_QTY5", field: "PLN_FLEX_QTY5" },
-  { type: "text", headerName: "LBL_CONFIRMED_FLEX_QTY5", field: "CFM_FLEX_QTY5" },
+  {
+    type: "text",
+    headerName: "LBL_CONFIRMED_FLEX_QTY5",
+    field: "CFM_FLEX_QTY5",
+  },
 ];
 
 // 증빙문서
-export const ATTACHMENT_COLUMN_DEFS = [{ headerName: "No" }];
+export const ATTACHMENT_COLUMN_DEFS = [
+  { headerName: "No" },
+  { type: "text", field: "arId", hide: true },
+  {
+    type: "text",
+    headerName: "LBL_OPER_TCD",
+    field: "arChargeCode",
+    align: "center",
+  },
+  { type: "text", headerName: "LBL_OPER_TNM", field: "arChargeName" },
+  {
+    type: "text",
+    headerName: "LBL_FILE_ID",
+    field: "fileId",
+    align: "center",
+    width: 80,
+  },
+  { type: "text", headerName: "LBL_ORG_FILE_NM", field: "orgFileNm" },
+  {
+    type: "text",
+    headerName: "LBL_FILE_EXTENSION",
+    field: "fileNmExtension",
+    align: "center",
+    width: 70,
+  },
+];

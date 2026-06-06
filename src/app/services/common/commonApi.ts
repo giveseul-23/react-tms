@@ -120,4 +120,39 @@ export const commonApi = {
       responseType: "blob",
     });
   },
+
+  // ── 공통 업로더 (센차 gridExcelUpload / gridExcelTemplateDownload) ──────
+  // 업로드 대상 그리드는 GRID_ID(=센차 grid.authId)로 구분된다.
+
+  /** 엑셀 업로드 — multipart. UPLOAD_FILE/MENU_CD/GRID_ID/JSON_READ_PASS + 세션. */
+  uploadCommonExcel(opts: {
+    file: File;
+    menuCode: string;
+    gridId?: string;
+    url?: string;
+  }) {
+    const form = new FormData();
+    form.append("UPLOAD_FILE", opts.file);
+    form.append("MENU_CD", opts.menuCode);
+    if (opts.gridId) form.append("GRID_ID", opts.gridId);
+    form.append("JSON_READ_PASS", "Y");
+    Object.entries(getSessionFields()).forEach(([k, v]) =>
+      form.append(k, String(v ?? "")),
+    );
+    return apiClient.post(opts.url ?? "/uploaderService/upload", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  /** 엑셀 업로드 양식 다운로드 — blob (MENU_CD=화면 menuCode, GRID_ID=grid authId). */
+  downloadExcelTemplate(opts: { menuCode: string; gridId?: string }) {
+    return apiClient.get("/uploaderService/downloadTemplate", {
+      params: {
+        ...getSessionFields(),
+        MENU_CD: opts.menuCode,
+        ...(opts.gridId ? { GRID_ID: opts.gridId } : {}),
+      },
+      responseType: "blob",
+    });
+  },
 };

@@ -4,6 +4,8 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
+  makeExcelUploadAction,
+  makeExcelTemplateDownloadAction,
 } from "@/app/components/grid/actions/commonActions";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { ROW_STATUS } from "@/app/components/grid/gridCommon";
@@ -16,6 +18,9 @@ import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { GridKey, ItineraryModel } from "./ItineraryModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { MENU_CODE } from "./Itinerary";
+
+// 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
+const GRID_ID = "MAIN_GRID_ITNR_MGMT";
 
 const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
@@ -267,22 +272,22 @@ export function useItineraryController({ model }: ControllerArgs) {
             fetchFn: () => api.getList(model.filtersRef.current),
             rows: model.grids.main.rows,
           }).items ?? []),
-          {
-            type: "button",
-            key: "BTN_EXCEL_UP",
-            label: "BTN_EXCEL_UP",
-            onClick: () => { },
-          },
-          {
-            type: "button",
-            key: "BTN_EXCEL_TEMPLATE_DOWNLOAD",
-            label: "BTN_EXCEL_TEMPLATE_DOWNLOAD",
-            onClick: () => { },
-          },
+          makeExcelUploadAction({
+            menuCode: MENU_CODE,
+            gridId: GRID_ID,
+            onUploaded: () => base.search(),
+          }),
+          makeExcelTemplateDownloadAction({
+            menuCode: MENU_CODE,
+            gridId: GRID_ID,
+            fileName: menuName,
+          }),
         ],
       },
     ],
     [
+      base,
+      menuName,
       model.filtersRef,
       model.grids.main.rows,
       onAddMain,

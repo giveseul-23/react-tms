@@ -2,6 +2,8 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeSaveAction,
+  makeExcelUploadAction,
+  makeExcelTemplateDownloadAction,
 } from "@/app/components/grid/actions/commonActions";
 import { vehicleWorkdayApi as api } from "./VehicleWorkdayApi";
 import {
@@ -21,6 +23,10 @@ import { Lang } from "@/app/services/common/Lang";
 import { ROW_STATUS } from "@/app/components/grid/gridUtils/rowStatus";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import WorkdayDetailPopup from "./popup/WorkdayDetailPopup";
+
+const MENU_CD = "MENU_VEH_WORKDAY_MGMT";
+// 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
+const GRID_ID = "MAIN_GRID_VEH_WORKDAY_MGMT";
 
 interface ControllerArgs {
   model: VehicleWorkdayModel;
@@ -154,13 +160,25 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
     [getSearchDateRange],
   );
 
-  // TODO: 엑셀템플릿 다운로드
-  const onExcelTemplateDownload = useCallback(() => {
-  }, []);
-
-  // TODO: 엑셀업로드
-  const onExcelUpload = useCallback(() => {
-  }, []);
+  // 엑셀 업로드 / 양식 다운로드 — 공통 버튼. (센차 gridExcelUpload / gridExcelTemplateDownload)
+  const excelUploadAction = useMemo(
+    () =>
+      makeExcelUploadAction({
+        menuCode: MENU_CD,
+        gridId: GRID_ID,
+        onUploaded: () => base.search(),
+      }),
+    [base],
+  );
+  const excelTemplateDownloadAction = useMemo(
+    () =>
+      makeExcelTemplateDownloadAction({
+        menuCode: MENU_CD,
+        gridId: GRID_ID,
+        fileName: Lang.get("MENU_VEH_WORKDAY_MGMT"),
+      }),
+    [],
+  );
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -199,22 +217,19 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
                 menuName: Lang.get("MENU_VEH_WORKDAY_MGMT"),
               }),
           },
-          {
-            type: "button",
-            key: "BTN_EXCEL_UP",
-            label: "BTN_EXCEL_UP",
-            onClick: onExcelUpload,
-          },
-          {
-            type: "button",
-            key: "BTN_EXCEL_TEMPLATE_DOWNLOAD",
-            label: "BTN_EXCEL_TEMPLATE_DOWNLOAD",
-            onClick: onExcelTemplateDownload,
-          },
+          excelUploadAction,
+          excelTemplateDownloadAction,
         ],
       },
     ],
-    [onInitialize, onSaveMain, model, getExcelSearchParams, onExcelUpload, onExcelTemplateDownload],
+    [
+      onInitialize,
+      onSaveMain,
+      model,
+      getExcelSearchParams,
+      excelUploadAction,
+      excelTemplateDownloadAction,
+    ],
   );
 
   return {

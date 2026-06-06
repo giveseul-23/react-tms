@@ -7,6 +7,7 @@ import {
   makeAddAction,
   makeExcelGroupAction,
   makeSaveAction,
+  makeMemoGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -161,12 +162,11 @@ export function useDispatchOperatorCostController({ model }: Args) {
             "정산이 생성되었습니다.",
           ),
       },
-      {
-        type: "dropdown",
-        key: "BTN_MEMO",
-        label: "BTN_MEMO",
-        items: [],
-      },
+      makeMemoGroupAction({
+        saveMemo: (rows, text) => api.saveMemo(rows, text),
+        cancelMemo: (rows) => api.cancelMemo(rows),
+        onDone: () => base.search(),
+      }),
       {
         type: "dropdown",
         key: "BTN_FREIGHT_EXCEL_UP",

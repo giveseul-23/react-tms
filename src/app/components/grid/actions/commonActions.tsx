@@ -13,7 +13,12 @@ import {
   downExcelSearch,
   downExcelSearched,
 } from "@/app/services/common/excelService";
+import { commonApi } from "@/app/services/common/commonApi";
 import { showErrorModal } from "@/app/components/popup/showErrorModal";
+import { showInfoModal } from "@/app/components/popup/showInfoModal";
+import { getPopupApi } from "@/app/components/popup/PopupContext";
+import ConfirmModal from "@/app/components/popup/ConfirmPopup";
+import MemoInputPopup from "@/app/components/popup/MemoInputPopup";
 import { TrackPanel } from "@/app/components/track/TrackPanel";
 import {
   TRACK_KEY_FIELD_MAP,
@@ -295,6 +300,251 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
     key: config.key ?? "BTN_EXCEL",
     label: config.label ?? "BTN_EXCEL",
     items,
+    ...(config.disabled !== undefined && { disabled: config.disabled }),
+  };
+};
+
+// ────────────────────────────────────────────────────────────────
+// 엑셀 업로드 / 양식 다운로드 (센차 gridExcelUpload / gridExcelTemplateDownload)
+//  - 공통 uploaderService 사용. 업로드 대상 그리드는 gridId(=센차 grid.authId)로 구분.
+//  - 버튼 1개씩 반환 — 화면이 원하는 그룹/위치에 끼워 넣는다 (makeAddAction 과 동일 패턴).
+// ────────────────────────────────────────────────────────────────
+
+// blob 응답 → 파일 저장. Content-Disposition 파일명 우선, 없으면 fallback.
+const downloadBlobResponse = (res: any, fallbackName: string) => {
+  const cd = (res?.headers?.["content-disposition"] as string) ?? "";
+  const m = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)/i);
+  const fileName = m ? decodeURIComponent(m[1]) : fallbackName;
+  const url = URL.createObjectURL(new Blob([res.data as BlobPart]));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+export type ExcelUploadActionConfig = {
+  /** 서버 MENU_CD — 화면 menuCode. */
+  menuCode: string;
+  /** 업로드 대상 그리드 식별자 (센차 grid.authId). 서버가 업로드 컬럼 매핑을 찾는 키. */
+  gridId?: string;
+  /** 업로드 성공 후 콜백 (보통 그리드 재조회 `() => base.search()`). */
+  onUploaded?: () => void;
+  /** 업로더 URL 오버라이드. 기본 `/uploaderService/upload`. */
+  url?: string;
+  /** 파일 확장자 필터. 기본 `.xlsx,.xls`. */
+  accept?: string;
+  label?: string;
+  key?: string;
+  disabled?: boolean;
+};
+
+export const makeExcelUploadAction = (config: ExcelUploadActionConfig) => ({
+  type: "button" as const,
+  key: config.key ?? "BTN_EXCEL_UP",
+  label: config.label ?? "BTN_EXCEL_UP",
+  onClick: () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = config.accept ?? ".xlsx,.xls";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      commonApi
+        .uploadCommonExcel({
+          file,
+          menuCode: config.menuCode,
+          gridId: config.gridId,
+          url: config.url,
+        })
+        .then((res: any) => {
+          // 서버가 HTTP 200 으로 비즈니스 에러를 알리는 경우.
+          if (res?.data?.success === false) {
+            showErrorModal(res.data?.msg ?? Lang.get("TTL_ERR"));
+            return;
+          }
+          showInfoModal(Lang.get("MSG_FILE_UPLOAD_CMPLT"));
+          config.onUploaded?.();
+        })
+        .catch((e: any) => showErrorModal(excelErrorMsg(e)));
+    };
+    input.click();
+  },
+  ...(config.disabled !== undefined && { disabled: config.disabled }),
+});
+
+export type ExcelTemplateDownloadActionConfig = {
+  menuCode: string;
+  gridId?: string;
+  /** 다운로드 파일명(확장자 제외). 서버 Content-Disposition 이 없을 때만 사용. */
+  fileName?: string;
+  label?: string;
+  key?: string;
+  disabled?: boolean;
+};
+
+export const makeExcelTemplateDownloadAction = (
+  config: ExcelTemplateDownloadActionConfig,
+) => ({
+  type: "button" as const,
+  key: config.key ?? "BTN_EXCEL_TEMPLATE_DOWNLOAD",
+  label: config.label ?? "BTN_EXCEL_TEMPLATE_DOWNLOAD",
+  onClick: () => {
+    commonApi
+      .downloadExcelTemplate({ menuCode: config.menuCode, gridId: config.gridId })
+      .then((res: any) =>
+        downloadBlobResponse(res, `${config.fileName ?? config.menuCode}.xlsx`),
+      )
+      .catch((e: any) => showErrorModal(excelErrorMsg(e)));
+  },
+  ...(config.disabled !== undefined && { disabled: config.disabled }),
+});
+
+// ────────────────────────────────────────────────────────────────
+// 메모 등록/취소 그룹 (센차 onSaveMemo·onSaveApplnMemo / onCancelMemo·onCancelApplnMemo)
+//  - 공통 플로우: 선택행 → 검증 → [등록] 메모입력팝업 → saveMemo / [취소] (confirm) → cancelMemo → 재조회.
+//  - 화면별 차이(필드명/상태/URL)는 saveMemo·cancelMemo(api) 가 책임. 팩토리는 플로우만.
+//  - 선택행은 wrapActions 가 onClick 에 주입하는 e.data 로 받는다.
+// ────────────────────────────────────────────────────────────────
+
+// 메모 입력 팝업 열기 — 확인 시 onConfirm(text).
+const openMemoInput = (
+  infoText: string | undefined,
+  onConfirm: (text: string) => void,
+) => {
+  const popup = getPopupApi();
+  if (!popup) return;
+  popup.openPopup({
+    title: Lang.get("LBL_MEMO"),
+    width: "lg",
+    content: (
+      <MemoInputPopup
+        infoText={infoText}
+        onClose={popup.closePopup}
+        onConfirm={(text) => {
+          popup.closePopup();
+          onConfirm(text);
+        }}
+      />
+    ),
+  });
+};
+
+// 확인 모달 — "확인" 클릭 시 onYes (ESC/외부클릭 = 취소). base.confirm 과 동일 패턴.
+const confirmThen = (msg: string, onYes: () => void) => {
+  const popup = getPopupApi();
+  if (!popup) return;
+  popup.openPopup({
+    type: "confirm",
+    width: "lg",
+    content: (
+      <ConfirmModal
+        type="confirm"
+        title={Lang.get("TTL_CONFIRM")}
+        description={Lang.get(msg)}
+        onClose={() => {
+          popup.closePopup();
+          onYes();
+        }}
+      />
+    ),
+  });
+};
+
+export type MemoGroupActionConfig = {
+  /** 메모 저장 — rows(선택행) + 입력 text. 화면 api 가 필드/상태/URL 처리. */
+  saveMemo: (rows: any[], text: string) => Promise<any>;
+  /** 메모 등록취소 — rows(선택행). */
+  cancelMemo: (rows: any[]) => Promise<any>;
+  /** 성공 후 콜백 (보통 재조회 `() => base.search()`). */
+  onDone?: () => void;
+  /** 사전 검증 — false 반환 시 중단 (alert 는 validate 내부 책임). mode 로 등록/취소 구분. */
+  validate?: (rows: any[], mode: "register" | "cancel") => boolean;
+  /** 취소 시 confirm 노출 여부. */
+  confirmOnCancel?: boolean;
+  /** confirm 메시지 키. 기본 MSG_MEMO_DELETE_IRREVERSIBLE_NOTICE. */
+  confirmCancelMsg?: string;
+  /** 선택행 없을 때 alert 메시지 키. 기본 MSG_SELECT_NO_DATA. */
+  noSelectionMsg?: string;
+  /** 메모 입력 팝업 상단 안내문 생성 (optional). */
+  popupInfo?: (rows: any[]) => string;
+  registerKey?: string;
+  registerLabel?: string;
+  cancelKey?: string;
+  cancelLabel?: string;
+  label?: string;
+  key?: string;
+  disabled?: boolean;
+};
+
+export const makeMemoGroupAction = (config: MemoGroupActionConfig) => {
+  const noSel = config.noSelectionMsg ?? "MSG_SELECT_NO_DATA";
+
+  const getRows = (e: any): any[] | null => {
+    const rows = (e?.data ?? []) as any[];
+    if (rows.length === 0) {
+      showInfoModal(Lang.get(noSel));
+      return null;
+    }
+    return rows;
+  };
+
+  const afterApi = (res: any) => {
+    if (res?.data?.success === false) {
+      showErrorModal(res.data?.msg ?? Lang.get("TTL_ERR"));
+      return;
+    }
+    showInfoModal(Lang.get("MSG_SAVE_CMPLT"));
+    config.onDone?.();
+  };
+
+  return {
+    type: "group" as const,
+    key: config.key ?? "BTN_MEMO",
+    label: config.label ?? "BTN_MEMO",
+    items: [
+      {
+        type: "button" as const,
+        key: config.registerKey ?? "BTN_REGISTRATION",
+        label: config.registerLabel ?? "BTN_REGISTRATION",
+        onClick: (e: any) => {
+          const rows = getRows(e);
+          if (!rows) return;
+          if (config.validate && !config.validate(rows, "register")) return;
+          openMemoInput(config.popupInfo?.(rows), (text) => {
+            config
+              .saveMemo(rows, text)
+              .then(afterApi)
+              .catch((err: any) => showErrorModal(excelErrorMsg(err)));
+          });
+        },
+      },
+      {
+        type: "button" as const,
+        key: config.cancelKey ?? "BTN_CANCEL",
+        label: config.cancelLabel ?? "BTN_CANCEL",
+        onClick: (e: any) => {
+          const rows = getRows(e);
+          if (!rows) return;
+          if (config.validate && !config.validate(rows, "cancel")) return;
+          const run = () =>
+            config
+              .cancelMemo(rows)
+              .then(afterApi)
+              .catch((err: any) => showErrorModal(excelErrorMsg(err)));
+          if (config.confirmOnCancel) {
+            confirmThen(
+              config.confirmCancelMsg ?? "MSG_MEMO_DELETE_IRREVERSIBLE_NOTICE",
+              run,
+            );
+          } else {
+            run();
+          }
+        },
+      },
+    ],
     ...(config.disabled !== undefined && { disabled: config.disabled }),
   };
 };

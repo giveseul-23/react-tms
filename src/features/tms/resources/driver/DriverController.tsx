@@ -3,6 +3,8 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
+  makeExcelUploadAction,
+  makeExcelTemplateDownloadAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { Lang } from "@/app/services/common/Lang";
@@ -20,6 +22,9 @@ import { MAIN_COLUMN_DEFS, SUB01_COLUMN_DEFS } from "./DriverColumns";
 import type { DriverModel, GridKey } from "./DriverModel";
 
 const DRVR_ID_PATTERN = /^[a-zA-Z0-9_]+$/;
+const MENU_CD = "MENU_DRVR_MGMT";
+// 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
+const GRID_ID = "MAIN_GRID_DRVR_MGMT";
 
 interface ControllerArgs {
   model: DriverModel;
@@ -317,8 +322,26 @@ export function useDriverController({ model }: ControllerArgs) {
     [base, model.grids.main.selectedRef],
   );
 
-  const onExcelUpload = useCallback(() => { }, []);
-  const onExcelTemplateDownload = useCallback(() => { }, []);
+  // 엑셀 업로드(드라이버 전용 URL) / 양식 다운로드 — 공통 버튼. (센차 onUploadDrvrExcel / gridExcelTemplateDownload)
+  const excelUploadAction = useMemo(
+    () =>
+      makeExcelUploadAction({
+        menuCode: MENU_CD,
+        gridId: GRID_ID,
+        url: "/driverService/uploadDrvr",
+        onUploaded: () => base.search(),
+      }),
+    [base],
+  );
+  const excelTemplateDownloadAction = useMemo(
+    () =>
+      makeExcelTemplateDownloadAction({
+        menuCode: MENU_CD,
+        gridId: GRID_ID,
+        fileName: Lang.get("MENU_DRIVER_MANAGER"),
+      }),
+    [],
+  );
 
   const getExcelSearchParams = useCallback(() => {
     const params = { ...(model.filtersRef.current ?? {}) };
@@ -372,18 +395,8 @@ export function useDriverController({ model }: ControllerArgs) {
                 menuName: Lang.get("MENU_DRIVER_MANAGER"),
               }),
           },
-          {
-            type: "button",
-            key: "BTN_EXCEL_UP",
-            label: "BTN_EXCEL_UP",
-            onClick: onExcelUpload,
-          },
-          {
-            type: "button",
-            key: "BTN_EXCEL_TEMPLATE_DOWNLOAD",
-            label: "BTN_EXCEL_TEMPLATE_DOWNLOAD",
-            onClick: onExcelTemplateDownload,
-          },
+          excelUploadAction,
+          excelTemplateDownloadAction,
         ],
       },
     ],
@@ -394,8 +407,8 @@ export function useDriverController({ model }: ControllerArgs) {
       onAddMain,
       onInitPasswd,
       onSaveMain,
-      onExcelUpload,
-      onExcelTemplateDownload,
+      excelUploadAction,
+      excelTemplateDownloadAction,
     ],
   );
 

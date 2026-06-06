@@ -90,10 +90,7 @@ export function useLoadRequestExcludedOrderTypeController({ model }: ControllerA
 
   const detailActions: ActionItem[] = useMemo(
       () => [
-        {
-          type: "button",
-          key: "BTN_ADD",
-          label: "BTN_ADD",
+        makeAddAction({
           onClick: () => {
             const main = model.grids.main.selectedRef.current;
             if (!base.requireParentRow(main, "물류운영그룹코드")) return;
@@ -127,7 +124,7 @@ export function useLoadRequestExcludedOrderTypeController({ model }: ControllerA
               width: "2xl",
             });
           },
-        },
+        }),
         makeSaveAction({ onClick: onSaveDetail }),
         makeExcelGroupAction({
           excelColumns: () => model.grids.detail.getExcelColumns(),

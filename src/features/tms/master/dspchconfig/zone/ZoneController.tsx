@@ -4,6 +4,8 @@ import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
+  makeExcelUploadAction,
+  makeExcelTemplateDownloadAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { zoneApi as api } from "./ZoneApi";
@@ -12,6 +14,8 @@ import { Lang } from "@/app/services/common/Lang";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const MENU_CD = "MENU_ZONE_MGMT";
+// 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
+const GRID_ID = "MAIN_GRID_ZONE_MGMT";
 
 interface Args {
   model: ZoneModel;
@@ -191,11 +195,26 @@ export function useZoneController({ model }: Args) {
     [base, fetchSub03],
   );
 
-  // TODO: 엑셀 템플릿 다운로드
-  const onExcelTemplateDownload = useCallback(() => { }, []);
+  // 엑셀 업로드 / 양식 다운로드 — 공통 버튼 (센차 gridExcelUpload / gridExcelTemplateDownload)
+  const excelUploadAction = useMemo(
+    () =>
+      makeExcelUploadAction({
+        menuCode: MENU_CD,
+        gridId: GRID_ID,
+        onUploaded: () => base.search(),
+      }),
+    [base],
+  );
 
-  // TODO: 엑셀 업로드
-  const onExcelUpload = useCallback(() => { }, []);
+  const excelTemplateDownloadAction = useMemo(
+    () =>
+      makeExcelTemplateDownloadAction({
+        menuCode: MENU_CD,
+        gridId: GRID_ID,
+        fileName: menuName,
+      }),
+    [menuName],
+  );
 
   const mainExcelDown = useMemo(
     () =>
@@ -217,22 +236,12 @@ export function useZoneController({ model }: Args) {
         label: "BTN_EXCEL",
         items: [
           ...(mainExcelDown.items ?? []),
-          {
-            type: "button",
-            key: "BTN_EXCEL_UP",
-            label: "BTN_EXCEL_UP",
-            onClick: onExcelUpload,
-          },
-          {
-            type: "button",
-            key: "BTN_EXCEL_TEMPLATE_DOWNLOAD",
-            label: "BTN_EXCEL_TEMPLATE_DOWNLOAD",
-            onClick: onExcelTemplateDownload,
-          },
+          excelUploadAction,
+          excelTemplateDownloadAction,
         ],
       },
     ],
-    [mainExcelDown, onExcelUpload, onExcelTemplateDownload],
+    [mainExcelDown, excelUploadAction, excelTemplateDownloadAction],
   );
 
   const subActions = useMemo(

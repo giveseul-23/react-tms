@@ -143,4 +143,27 @@ export const dispatchOperatorCostApi = {
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+
+  // 메모 등록 — 선택행에 MEMO_DESC 세팅 후 저장. (센차 onSaveApplnMemo, rowStatus 'I')
+  saveMemo(rows: any[], text: string) {
+    return apiClient.post<commonResponse>(
+      `/dispatchOperatorCostManagementService/saveApplnMemo`,
+      withSession(
+        rows.map((r) => ({
+          ...r,
+          MEMO_DESC: text,
+          EDIT_STS: "I",
+          MENU_CD: MENU_CODE,
+        })),
+      ),
+    );
+  },
+
+  // 메모 등록취소. (센차 onCancelApplnMemo)
+  cancelMemo(rows: any[]) {
+    return apiClient.post<commonResponse>(
+      `/dispatchOperatorCostManagementService/cancelApplnMemo`,
+      withSession(rows.map((r) => ({ ...r, EDIT_STS: "I", MENU_CD: MENU_CODE }))),
+    );
+  },
 };

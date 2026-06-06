@@ -91,10 +91,7 @@ export function useLogisticGroupArCustomerController({ model }: ControllerArgs) 
 
   const detailActions: ActionItem[] = useMemo(
       () => [
-        {
-          type: "button",
-          key: "BTN_ADD",
-          label: "BTN_ADD",
+        makeAddAction({
           onClick: () => {
             const main = model.grids.main.selectedRef.current;
             if (!base.requireParentRow(main, "물류운영그룹코드")) return;
@@ -130,7 +127,7 @@ export function useLogisticGroupArCustomerController({ model }: ControllerArgs) 
               width: "2xl",
             });
           },
-        },
+        }),
         makeSaveAction({
           onClick: () => {
             // delStatus가 없고, DFT_YN이 'Y'인 로우가 하나라도 있는지 확인
