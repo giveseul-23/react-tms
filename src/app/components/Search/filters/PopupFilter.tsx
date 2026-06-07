@@ -57,7 +57,10 @@ export function PopupFilter({
   };
 
   return (
-    <div className={cn("w-full min-w-0 flex flex-col gap-2", className)}>
+    <div
+      className={cn("w-full min-w-0 flex flex-col gap-2", className)}
+      data-popup-field
+    >
       <div className="flex items-center gap-3">
         {/* 코드 */}
         <Input

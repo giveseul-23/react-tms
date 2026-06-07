@@ -7,7 +7,7 @@
 //   - [확인] / [취소] 버튼으로 적용/닫기
 // ────────────────────────────────────────────────────────────
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { format, parse, isValid } from "date-fns";
 import { ko } from "date-fns/locale";
 import {
@@ -214,6 +214,17 @@ export function DatePickerPopover({
   const [draftTime, setDraftTime] = useState<string>("00:00:00");
   const [viewMonth, setViewMonth] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<"day" | "month">("day");
+  // 데이트피커(day) 위에서 휠 스크롤 → 이전/다음 달 이동. 한 제스처의 연속 이벤트는 스로틀.
+  const wheelTsRef = useRef(0);
+  const onCalendarWheel = (e: React.WheelEvent) => {
+    if (e.timeStamp - wheelTsRef.current < 120) return;
+    wheelTsRef.current = e.timeStamp;
+    setViewMonth((prev) => {
+      const d = new Date(prev);
+      d.setMonth(d.getMonth() + (e.deltaY > 0 ? 1 : -1));
+      return d;
+    });
+  };
 
   // 팝오버가 열릴 때마다 현재 value 로 초기화
   useEffect(() => {
@@ -315,6 +326,7 @@ export function DatePickerPopover({
             onSelect={(y, m) => setDraftDate(new Date(y, m, 1))}
           />
         ) : viewMode === "day" ? (
+          <div onWheel={onCalendarWheel}>
           <Calendar
             mode="single"
             selected={draftDate}
@@ -354,6 +366,7 @@ export function DatePickerPopover({
             }}
             showOutsideDays
           />
+          </div>
         ) : (
           <MonthYearPicker
             initialYear={viewMonth.getFullYear()}

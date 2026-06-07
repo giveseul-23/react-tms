@@ -1,7 +1,7 @@
 // src/views/inTrnstVehCtrl/InTrnstVehCtrlColumns.tsx
 // 수송중 차량제어 그리드 컬럼 정의
 
-export const MAIN_COLUMN_DEFS = () => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { Pane } from "@/app/components/layout/Pane";
@@ -27,10 +27,6 @@ export default function UserAccount() {
 
   const model = useUserAccountModel(MENU_CD);
   const ctrl = useUserAccountController({ model, activeTabRef });
-  const sub01ColumnDefs = useMemo(
-    () => SUB01_COLUMN_DEFS(model.grids.sub01.setData),
-    [model.grids.sub01],
-  );
   const renderRoleTreeNameCell = (params: any, ctx: TreeCellContext) => {
     const row = params.data;
     return (
@@ -88,8 +84,8 @@ export default function UserAccount() {
             {activeTab === "USER_GROUP" ? (
               <DataGrid
                 {...model.bind("sub01")}
-                audit={false}
-                columnDefs={sub01ColumnDefs}
+                audit={{ updatePerson: false, updateTime: false }}
+                columnDefs={SUB01_COLUMN_DEFS}
                 headerCheckbox={false}
                 actions={ctrl.sub01Actions}
               />
@@ -112,6 +108,7 @@ export default function UserAccount() {
                 <Pane>
                   <TreeGrid
                     source={model.roleTreeRows}
+                    setSource={model.setRoleTreeRows}
                     renderNameCell={renderRoleTreeNameCell}
                     columnDefs={ctrl.roleTreeColumnDefs}
                     nameColumnHeader={Lang.get("LBL_RSRC_ID")}

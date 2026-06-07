@@ -1,10 +1,4 @@
-import { ComboCellEditor } from "@/app/components/grid/cellEditors/ComboCellEditor";
-import { standardAudit } from "@/app/components/grid/columns/commonColumns";
-
-export const MAIN_COLUMN_DEFS = (
-  setRows?: (updater: any) => void,
-  resourceTypeMap: Record<string, string> = {},
-) => [
+export const MAIN_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_PRNT_RSRC_ID",
@@ -30,21 +24,15 @@ export const MAIN_COLUMN_DEFS = (
     insertable: false,
   },
   {
-    type: "text",
+    // codeKey → 자동 combo(라벨 표시 + 편집 시 dropdown). resourceType 코드맵.
+    type: "combo",
     headerName: "LBL_RSRC_TP",
     field: "RSRC_TP",
     width: 100,
     align: "center",
     editable: false,
     insertable: true,
-    cellEditor: ComboCellEditor,
-    cellEditorParams: {
-      codeMap: resourceTypeMap,
-      setRowData: setRows,
-    },
-    cellEditorPopup: true,
-    cellRenderer: (params: any) =>
-      resourceTypeMap[String(params.value ?? "")] ?? params.value ?? "",
+    codeKey: "resourceType",
   },
   {
     type: "text",
@@ -64,13 +52,4 @@ export const MAIN_COLUMN_DEFS = (
     editable: false,
     insertable: false,
   },
-  ...standardAudit(setRows, {
-    delete: true,
-    deleteSetRowData: setRows,
-    rowStatus: true,
-    insertPerson: false,
-    insertDate: false,
-    updatePerson: false,
-    updateTime: false,
-  }),
 ];

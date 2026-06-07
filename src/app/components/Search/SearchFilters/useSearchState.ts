@@ -24,25 +24,54 @@ export function useSearchState(
   const buildInitialSearchState = useCallback((): SearchState => {
     const today = getToday();
     const now = getNowLocal();
+    const month = today.slice(0, 7); // YYYY-MM (YM 기본값)
+    const year = today.slice(0, 4); // YYYY (Y 기본값)
     const initial: SearchState = {};
 
     meta.forEach((m) => {
-      if (m.type !== "YMD" && m.type !== "YMDT") return;
+      if (
+        m.type !== "YMD" &&
+        m.type !== "YMDT" &&
+        m.type !== "YM" &&
+        m.type !== "Y"
+      )
+        return;
 
       if (m.mode === "N") {
-        // 단일: YMD=오늘 / YMDT=지금(초까지)
+        // 단일: Y=올해 / YM=이번달 / YMD=오늘 / YMDT=지금(초까지)
         initial[m.key] = {
           key: m.key,
           operator: m.condition ?? "equal",
           dataType: m.dataType,
-          value: m.type === "YMDT" ? now : today,
+          value:
+            m.type === "YMDT"
+              ? now
+              : m.type === "YM"
+                ? month
+                : m.type === "Y"
+                  ? year
+                  : today,
         };
       } else {
-        // 범위: YMD=오늘~오늘 / YMDT=오늘 00:00:00 ~ 오늘 23:59:59
+        // 범위: Y=올해~올해 / YM=이번달~이번달 / YMD=오늘~오늘 / YMDT=00:00:00~23:59:59
         const fromKey = `${m.key}_FRM`;
         const toKey = `${m.key}_TO`;
-        const fromVal = m.type === "YMDT" ? getTodayAt("00:00:00") : today;
-        const toVal = m.type === "YMDT" ? getTodayAt("23:59:59") : today;
+        const fromVal =
+          m.type === "YMDT"
+            ? getTodayAt("00:00:00")
+            : m.type === "YM"
+              ? month
+              : m.type === "Y"
+                ? year
+                : today;
+        const toVal =
+          m.type === "YMDT"
+            ? getTodayAt("23:59:59")
+            : m.type === "YM"
+              ? month
+              : m.type === "Y"
+                ? year
+                : today;
 
         initial[fromKey] = {
           key: fromKey,

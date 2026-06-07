@@ -84,7 +84,12 @@ function buildRawFilters(
 ): Record<string, string> {
   const dateKeys = new Set<string>();
   meta.forEach((m) => {
-    if (m.type === "YMD" || m.type === "YMDT") {
+    if (
+      m.type === "YMD" ||
+      m.type === "YMDT" ||
+      m.type === "YM" ||
+      m.type === "Y"
+    ) {
       if (m.mode === "N") {
         dateKeys.add(m.key);
       } else {
@@ -133,7 +138,12 @@ export function useSearchExecute({
       const missingFields = meta
         .filter((m) => m.required === true)
         .filter((m) => {
-          if (m.type === "YMD" || m.type === "YMDT") {
+          if (
+            m.type === "YMD" ||
+            m.type === "YMDT" ||
+            m.type === "YM" ||
+            m.type === "Y"
+          ) {
             if (m.mode === "N") {
               return !searchState[m.key]?.value;
             }
@@ -162,6 +172,34 @@ export function useSearchExecute({
               type="error"
               title="필수 항목 누락"
               description={`다음 항목을 입력해주세요 : ${labels}`}
+              onClose={closePopup}
+            />
+          ),
+          width: "sm",
+        });
+        return;
+      }
+
+      // ── 타입 검증 — 사용자가 직접 입력하는 TEXT 필드만 ─────────
+      //   combo/popup/date/datetime 은 입력 위젯이라 잘못된 타입이 들어갈 수 없어 제외.
+      //   현재 검증 대상: dataType NUMBER → 숫자가 아니면 조회 차단.
+      const typeInvalidFields = meta
+        .filter((m) => m.type === "TEXT" && m.dataType === "NUMBER")
+        .filter((m) => {
+          const v = searchState[m.key]?.value;
+          if (v == null || String(v).trim() === "") return false;
+          return !/^-?\d+(\.\d+)?$/.test(String(v).trim());
+        });
+
+      if (typeInvalidFields.length > 0) {
+        const labels = typeInvalidFields.map((m) => m.label).join(", ");
+        openPopup({
+          title: "",
+          content: (
+            <ConfirmModal
+              type="error"
+              title="입력값 오류"
+              description={`숫자만 입력할 수 있습니다 : ${labels}`}
               onClose={closePopup}
             />
           ),

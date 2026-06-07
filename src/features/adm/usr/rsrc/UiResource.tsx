@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
@@ -23,11 +23,6 @@ export default function UiResource() {
   const { meta, loading } = useSearchMeta(MENU_CD);
   const model = useUiResourceModel();
   const ctrl = useUiResourceController({ model, treeGridRef, searchRef });
-
-  const columnDefs = useMemo(
-    () => MAIN_COLUMN_DEFS(model.setSource, model.codeMap.resourceType ?? {}),
-    [model.codeMap.resourceType, model.setSource],
-  );
 
   const renderNameCell = (params: any, ctx: TreeCellContext) => {
     const row: UiResourceRow = params.data;
@@ -73,8 +68,16 @@ export default function UiResource() {
         <TreeGrid<UiResourceRow>
           ref={treeGridRef}
           source={ctrl.source}
+          setSource={model.setSource}
+          codeMap={model.codeMap}
+          audit={{
+            insertPerson: false,
+            insertDate: false,
+            updatePerson: false,
+            updateTime: false,
+          }}
           renderNameCell={renderNameCell}
-          columnDefs={columnDefs}
+          columnDefs={MAIN_COLUMN_DEFS}
           nameColumnHeader={Lang.get("LBL_RSRC_ID")}
           nameColumnWidth={300}
           nameColumnField="RSRC_ID"

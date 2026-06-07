@@ -211,23 +211,64 @@ function injectCheckRenderer(
   if (c.cellRenderer) return col;
   const field = (c.field ?? c.colId) as string | undefined;
   if (!field) return col;
+
+  // 선언형 확장 (옵션 — 없으면 기존 단순 동작):
+  //   checkEditable(params): 셀별 편집 가능 여부. false → disabled + 회색 배경.
+  //   checkGroup({ total, members }): 전체↔개별 cascade.
+  //     - field === total: 토글 시 total + 모든 members 일괄 set
+  //     - members 중 하나: 토글 시 자신 set + total 재계산(members 전부 Y면 Y)
+  const checkEditable = c.checkEditable as
+    | ((params: any) => boolean)
+    | undefined;
+  const group = c.checkGroup as
+    | { total: string; members: string[] }
+    | undefined;
+  const extended = !!checkEditable || !!group;
+  const isOn = (v: any) => v === "Y" || (extended && v === true);
+
   return {
     ...col,
+    // 편집 불가 셀 회색 처리 (checkEditable 지정 시, 기존 cellStyle 없을 때만).
+    ...(checkEditable && !c.cellStyle
+      ? {
+          cellStyle: (params: any) =>
+            checkEditable(params)
+              ? { textAlign: "center" }
+              : { textAlign: "center", backgroundColor: "#f3f4f6" },
+        }
+      : {}),
     cellRenderer: (params: any) => {
-      const checked = params.value === "Y";
+      const checked = isOn(params.value);
+      const cellDisabled =
+        readOnly || (checkEditable ? !checkEditable(params) : false);
       return (
         <div className="flex items-center justify-center h-full">
           <input
             type="checkbox"
             className="ag-input-field-input ag-checkbox-input"
             checked={checked}
-            disabled={readOnly}
+            disabled={cellDisabled}
             onChange={
-              readOnly
+              cellDisabled
                 ? undefined
                 : () => {
                     const next = checked ? "N" : "Y";
-                    commitRowChange(setRowData, params.node?.data, field, next);
+                    const row = params.node?.data;
+                    if (group && field === group.total) {
+                      const patch: Record<string, any> = { [group.total]: next };
+                      group.members.forEach((m) => (patch[m] = next));
+                      commitRowChanges(setRowData, row, patch);
+                    } else if (group) {
+                      const allOn = group.members.every((m) =>
+                        m === field ? next === "Y" : isOn(row?.[m]),
+                      );
+                      commitRowChanges(setRowData, row, {
+                        [field]: next,
+                        [group.total]: allOn ? "Y" : "N",
+                      });
+                    } else {
+                      commitRowChange(setRowData, row, field, next);
+                    }
                   }
             }
           />

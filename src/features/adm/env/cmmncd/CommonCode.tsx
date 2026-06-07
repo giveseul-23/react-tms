@@ -25,9 +25,8 @@ export default function CommonCode() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
+        excludes: ["CMMN_DTL_CD", "LANG_DESC"],
       }}
       master={
         <DataGrid

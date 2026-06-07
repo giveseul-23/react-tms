@@ -187,6 +187,106 @@ export function SearchFieldRenderer({
             );
           }
 
+          case "Y":
+            if (m.mode === "N") {
+              return (
+                <SearchFilter
+                  {...common}
+                  key={m.key}
+                  type="Y"
+                  mode="N"
+                  fromValue={getCondition(m.key)?.value ?? ""}
+                  toValue=""
+                  onChangeFrom={(v: string) =>
+                    updateCondition(
+                      m.key,
+                      v,
+                      (getCondition(m.key)?.operator ??
+                        m.condition ??
+                        "equal") as any,
+                      m.dataType ?? "STRING",
+                    )
+                  }
+                />
+              );
+            }
+            return (
+              <SearchFilter
+                {...common}
+                key={m.key}
+                type="Y"
+                mode="Y"
+                fromValue={getCondition(`${m.key}_FRM`)?.value ?? ""}
+                toValue={getCondition(`${m.key}_TO`)?.value ?? ""}
+                onChangeFrom={(v: string) =>
+                  updateCondition(
+                    `${m.key}_FRM`,
+                    v,
+                    m.condition ?? "equal",
+                    m.dataType ?? "STRING",
+                  )
+                }
+                onChangeTo={(v: string) =>
+                  updateCondition(
+                    `${m.key}_TO`,
+                    v,
+                    m.condition ?? "equal",
+                    m.dataType ?? "STRING",
+                  )
+                }
+              />
+            );
+
+          case "YM":
+            if (m.mode === "N") {
+              return (
+                <SearchFilter
+                  {...common}
+                  key={m.key}
+                  type="YM"
+                  mode="N"
+                  fromValue={getCondition(m.key)?.value ?? ""}
+                  toValue=""
+                  onChangeFrom={(v: string) =>
+                    updateCondition(
+                      m.key,
+                      v,
+                      (getCondition(m.key)?.operator ??
+                        m.condition ??
+                        "equal") as any,
+                      m.dataType ?? "STRING",
+                    )
+                  }
+                />
+              );
+            }
+            return (
+              <SearchFilter
+                {...common}
+                key={m.key}
+                type="YM"
+                mode="Y"
+                fromValue={getCondition(`${m.key}_FRM`)?.value ?? ""}
+                toValue={getCondition(`${m.key}_TO`)?.value ?? ""}
+                onChangeFrom={(v: string) =>
+                  updateCondition(
+                    `${m.key}_FRM`,
+                    v,
+                    m.condition ?? "equal",
+                    m.dataType ?? "STRING",
+                  )
+                }
+                onChangeTo={(v: string) =>
+                  updateCondition(
+                    `${m.key}_TO`,
+                    v,
+                    m.condition ?? "equal",
+                    m.dataType ?? "STRING",
+                  )
+                }
+              />
+            );
+
           case "YMD":
             if (m.mode === "N") {
               return (
@@ -309,6 +409,11 @@ export function SearchFieldRenderer({
           case "POPUP": {
             const baseKey = m.key.replace("_CD", "");
 
+            // 값 세팅 시 operator 를 "equal" 로 덮지 않고 현재 선택된 operator(iconbox) 를 유지.
+            // m.key(=_CD) 에 onConditionChange 가 기록한 operator 를 단일 소스로 사용.
+            const curOp = () =>
+              (getCondition(m.key)?.operator ?? m.condition ?? "equal") as any;
+
             if (m.filterComponent && m.filterRefColumn) {
               const filterM = meta.filter(
                 (x) => x.key.indexOf(m.filterComponent!) > -1,
@@ -331,14 +436,14 @@ export function SearchFieldRenderer({
                       updateCondition(
                         `${baseKey}_CD`,
                         row.CODE,
-                        "equal",
+                        curOp(),
                         m.dataType ?? "STRING",
                         "POPUP",
                       );
                       updateCondition(
                         `${baseKey}_NM`,
                         row.NAME,
-                        "equal",
+                        curOp(),
                         m.dataType ?? "STRING",
                         "POPUP",
                       );
@@ -376,14 +481,14 @@ export function SearchFieldRenderer({
                   updateCondition(
                     `${baseKey}_CD`,
                     datas[0].CODE,
-                    "equal",
+                    curOp(),
                     m.dataType ?? "STRING",
                     "POPUP",
                   );
                   updateCondition(
                     `${baseKey}_NM`,
                     datas[0].NAME,
-                    "equal",
+                    curOp(),
                     m.dataType ?? "STRING",
                     "POPUP",
                   );
@@ -410,7 +515,7 @@ export function SearchFieldRenderer({
                   updateCondition(
                     `${baseKey}_CD`,
                     v,
-                    "equal",
+                    curOp(),
                     m.dataType ?? "STRING",
                     "POPUP",
                   )
@@ -419,7 +524,7 @@ export function SearchFieldRenderer({
                   updateCondition(
                     `${baseKey}_NM`,
                     v,
-                    "equal",
+                    curOp(),
                     m.dataType ?? "STRING",
                     "POPUP",
                   )

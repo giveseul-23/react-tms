@@ -5,7 +5,10 @@ import { dtgDailyVehHisControllerApi as api } from "./DtgDailyVehHisControllerAp
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import type { StopMarker } from "@/app/components/map/TmapView";
-import type { DtgDailyVehHisControllerModel, GridKey } from "./DtgDailyVehHisControllerModel";
+import type {
+  DtgDailyVehHisControllerModel,
+  GridKey,
+} from "./DtgDailyVehHisControllerModel";
 
 interface Args {
   model: DtgDailyVehHisControllerModel;
@@ -17,15 +20,15 @@ export function useDtgDailyVehHisControllerController({ model }: Args) {
 
   // useSearchExecute(paramMode:"RAW") 가 SRCH_* 접두 rawFilters 를 전달 →
   // 서버 키로 리매핑 후 호출
-  const fetchList = useCallback(
-    (params: Record<string, unknown>) =>
-      api.getInTrnstVehList({
-        SRCH_PSTN_DTTM_FROM: params["SRCH_PSTN_DTTM_FRM"],
-        SRCH_PSTN_DTTM_TO: params["SRCH_PSTN_DTTM_TO"],
-        SRCH_VEH_NO: params["SRCH_VEH_NO_NM"],
-      }),
-    [],
-  );
+  const fetchList = useCallback(() => {
+    const srchObj = model.rawFiltersRef.current;
+
+    return api.getInTrnstVehList({
+      SRCH_PSTN_DTTM_FROM: srchObj.SRCH_PSTN_DTTM_FRM,
+      SRCH_PSTN_DTTM_TO: srchObj.SRCH_PSTN_DTTM_TO,
+      SRCH_VEH_NO: srchObj.SRCH_VEH_NO,
+    });
+  }, [model.rawFiltersRef]);
 
   const onSearchCallback = useCallback(
     (data: any) => {
@@ -61,7 +64,6 @@ export function useDtgDailyVehHisControllerController({ model }: Args) {
               content: (
                 <ConfirmModal
                   type="error"
-                  title="조회 오류"
                   description={res.data.msg ?? "조회 중 오류가 발생했습니다."}
                   onClose={closePopup}
                 />
@@ -125,7 +127,6 @@ export function useDtgDailyVehHisControllerController({ model }: Args) {
             content: (
               <ConfirmModal
                 type="error"
-                title="조회 오류"
                 description={message}
                 onClose={closePopup}
               />

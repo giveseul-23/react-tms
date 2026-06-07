@@ -18,10 +18,9 @@ export interface GridMapPageProps {
   searchProps: SearchProps;
   grid: ReactNode;
   map: ReactNode;
-  direction: "horizontal" | "vertical";
+  defaultDirection: "horizontal" | "vertical";
   /** [grid, map] 비율 (default [50, 50]) */
   defaultSizes?: [number, number];
-  layoutToggle?: { layout: LayoutType; onToggle: () => void };
   storageKey?: string;
   breakpoint?: { mobile?: "horizontal" | "vertical"; maxWidth?: number };
 }
@@ -31,9 +30,8 @@ export function GridMapPage({
   searchProps,
   grid,
   map,
-  direction,
+  defaultDirection,
   defaultSizes,
-  layoutToggle,
   storageKey,
   breakpoint,
 }: GridMapPageProps) {
@@ -43,9 +41,8 @@ export function GridMapPage({
       searchProps={searchProps}
       master={grid}
       detail={map}
-      direction={direction}
+      defaultDirection={defaultDirection}
       defaultSizes={defaultSizes}
-      layoutToggle={layoutToggle}
       storageKey={storageKey}
       breakpoint={breakpoint}
     />

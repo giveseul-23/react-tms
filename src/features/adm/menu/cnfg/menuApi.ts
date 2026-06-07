@@ -32,7 +32,7 @@ export const menuApi = {
   getUserMenuByReact(payload: any = {}) {
     return apiClient.post<commonResponse>(
       `/menuService/searchUserMenuByReact`,
-      withSession({ ...payload }),
+      withSession({ ...payload, MENU_CD: "Navigation" }),
     );
   },
 

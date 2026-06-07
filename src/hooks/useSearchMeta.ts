@@ -23,6 +23,8 @@ const TYPE_MAP: Record<string, SearchMeta["type"]> = {
   TEXT: "TEXT",
   COMBO: "COMBO",
   POPUP: "POPUP",
+  Y: "Y",
+  YM: "YM",
   YMD: "YMD",
   YMDT: "YMDT",
   CHECK: "CHECKBOX",
@@ -158,6 +160,24 @@ function toSearchMeta(
         sqlId: row.SQLPROP,
         filterComponent: row.FLTRCMPONM || undefined,
         filterRefColumn: row.FLTRREFCOLNM || undefined,
+      };
+    }
+
+    if (type === "Y") {
+      const rng = (row as any).RNGSRCHYN ?? (row as any).rngsrchyn ?? "Y";
+      return {
+        ...base,
+        type: "Y",
+        mode: rng === "N" ? "N" : "Y",
+      };
+    }
+
+    if (type === "YM") {
+      const rng = (row as any).RNGSRCHYN ?? (row as any).rngsrchyn ?? "Y";
+      return {
+        ...base,
+        type: "YM",
+        mode: rng === "N" ? "N" : "Y",
       };
     }
 

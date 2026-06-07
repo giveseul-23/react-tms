@@ -1,4 +1,3 @@
-import React from "react";
 import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
 
 export const AUTH_COLUMN_SPECS = [
@@ -18,8 +17,6 @@ const ROLE_TYPE_TO_RESOURCE_TYPE: Record<string, string> = {
   BUTTON: "40",
 };
 
-const isChecked = (value: unknown) => value === true || value === "Y";
-
 function canEditRoleAuthCell(
   row: any,
   selectedRoleType: string | null,
@@ -34,87 +31,6 @@ function canEditRoleAuthCell(
     return field === AUTH_COLUMN_SPECS[0].field || field === "DEL_AUTH_INFO";
   }
   return true;
-}
-
-function makeCheckboxColumn(
-  field: string,
-  headerName: string,
-  setRoleTreeRows: (updater: any) => void,
-  selectedRoleType: string | null,
-) {
-  const noLang =
-    !headerName.startsWith("LBL_") && !headerName.startsWith("BTN_");
-  return {
-    type: "text",
-    headerName,
-    noLang,
-    field,
-    width: 58,
-    filter: false,
-    floatingFilter: false,
-    cellStyle: (params: any) =>
-      canEditRoleAuthCell(params.data, selectedRoleType, field)
-        ? { textAlign: "center" }
-        : { textAlign: "center", backgroundColor: "#f3f4f6" },
-    headerClass: "ag-header-center",
-    cellRenderer: (params: any) => {
-      const disabled = !canEditRoleAuthCell(
-        params.data,
-        selectedRoleType,
-        field,
-      );
-      const checked = isChecked(params.value);
-      return (
-        <div className="flex items-center justify-center h-full">
-          <input
-            type="checkbox"
-            className="ag-input-field-input ag-checkbox-input"
-            disabled={disabled}
-            checked={checked}
-            onChange={() => {
-              if (disabled) return;
-
-              if (field === "AUTH_TOTAL") {
-                const next = checked ? "N" : "Y";
-                setRoleTreeRows((prev: any[]) =>
-                  prev.map((row) =>
-                    row.__rid__ !== params.data.__rid__
-                      ? row
-                      : {
-                          ...row,
-                          AUTH_TOTAL: next,
-                          ...Object.fromEntries(
-                            AUTH_COLUMN_SPECS.map((spec) => [spec.field, next]),
-                          ),
-                          EDIT_STS: row.EDIT_STS === "I" ? "I" : "U",
-                        },
-                  ),
-                );
-                return;
-              }
-
-              const next = checked ? "N" : "Y";
-              setRoleTreeRows((prev: any[]) =>
-                prev.map((row) => {
-                  if (row.__rid__ !== params.data.__rid__) return row;
-                  const updated = {
-                    ...row,
-                    [field]: next,
-                    EDIT_STS: row.EDIT_STS === "I" ? "I" : "U",
-                  };
-                  const authValues = AUTH_COLUMN_SPECS.map((spec) =>
-                    spec.field === field ? next : updated[spec.field],
-                  );
-                  updated.AUTH_TOTAL = authValues.every(isChecked) ? "Y" : "N";
-                  return updated;
-                }),
-              );
-            }}
-          />
-        </div>
-      );
-    },
-  };
 }
 
 export const MAIN_COLUMN_DEFS = [
@@ -301,7 +217,7 @@ export const MAIN_COLUMN_DEFS = [
   },
 ];
 
-export const SUB01_COLUMN_DEFS = (setRowData?: (updater: any) => void) => [
+export const SUB01_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -338,13 +254,6 @@ export const SUB01_COLUMN_DEFS = (setRowData?: (updater: any) => void) => [
     editable: false,
     insertable: false,
   },
-  ...makeAuditColumns({
-    delete: true,
-    deleteSetRowData: setRowData,
-    rowStatus: true,
-    insertPerson: true,
-    insertDate: true,
-  }),
 ];
 
 export const SUB03_COLUMN_DEFS = [
@@ -391,10 +300,24 @@ export const SUB03_COLUMN_DEFS = [
   },
 ];
 
-export function makeRoleTreeColumnDefs(
-  setRoleTreeRows: (updater: any) => void,
-  selectedRoleType: string | null,
-) {
+export function makeRoleTreeColumnDefs(selectedRoleType: string | null) {
+  // 권한 체크박스 — 셀별 편집 가능(canEditAuth) + 전체(AUTH_TOTAL)↔개별 cascade(checkGroup).
+  // 값 갱신은 TreeGrid 의 setRowData(=setRoleTreeRows)를 통해 공통 check 렌더러가 처리.
+  const canEditAuth = (params: any) =>
+    canEditRoleAuthCell(params.data, selectedRoleType, params.colDef?.field);
+  const AUTH_GROUP = {
+    total: "AUTH_TOTAL",
+    members: AUTH_COLUMN_SPECS.map((s) => s.field),
+  };
+  const authChk = {
+    type: "check" as const,
+    width: 58,
+    filter: false,
+    floatingFilter: false,
+    headerClass: "ag-header-center",
+    checkEditable: canEditAuth,
+    checkGroup: AUTH_GROUP,
+  };
   return [
     {
       type: "text",
@@ -407,26 +330,13 @@ export function makeRoleTreeColumnDefs(
     {
       headerName: "LBL_RL_CNFG_VAL",
       children: [
-        makeCheckboxColumn(
-          "AUTH_TOTAL",
-          "LBL_TOTAL",
-          setRoleTreeRows,
-          selectedRoleType,
-        ),
-        ...AUTH_COLUMN_SPECS.map((spec) =>
-          makeCheckboxColumn(
-            spec.field,
-            spec.label,
-            setRoleTreeRows,
-            selectedRoleType,
-          ),
-        ),
-        makeCheckboxColumn(
-          "DEL_AUTH_INFO",
-          "LBL_DELETE",
-          setRoleTreeRows,
-          selectedRoleType,
-        ),
+        { ...authChk, headerName: "LBL_TOTAL", field: "AUTH_TOTAL" },
+        ...AUTH_COLUMN_SPECS.map((spec) => ({
+          ...authChk,
+          headerName: spec.label,
+          field: spec.field,
+        })),
+        { ...authChk, headerName: "LBL_DELETE", field: "DEL_AUTH_INFO" },
       ],
     },
     {

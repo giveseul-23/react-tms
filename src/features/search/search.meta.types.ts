@@ -48,7 +48,7 @@ export interface PopupSearchMeta extends SearchMetaBase {
 }
 
 export interface DateRangeSearchMeta extends SearchMetaBase {
-  type: "YMD" | "YMDT";
+  type: "YMD" | "YMDT" | "YM" | "Y";
   mode?: "Y" | "N";
   granularity?: string;
 }

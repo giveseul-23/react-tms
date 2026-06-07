@@ -3,8 +3,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
-  makeExcelUploadAction,
-  makeExcelTemplateDownloadAction,
+  makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { Lang } from "@/app/services/common/Lang";
@@ -13,16 +12,14 @@ import {
   dirtyRows,
   toDsSave,
 } from "@/app/components/grid/gridCommon";
-import {
-  downExcelSearch,
-  downExcelSearched,
-} from "@/app/services/common/excelService";
 import { driverApi as api } from "./DriverApi";
 import { MAIN_COLUMN_DEFS, SUB01_COLUMN_DEFS } from "./DriverColumns";
 import type { DriverModel, GridKey } from "./DriverModel";
 
+import { MENU_CODE as MENU_CD } from "./Driver";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
+
 const DRVR_ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-const MENU_CD = "MENU_DRVR_MGMT";
 // 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
 const GRID_ID = "MAIN_GRID_DRVR_MGMT";
 
@@ -31,6 +28,7 @@ interface ControllerArgs {
 }
 
 export function useDriverController({ model }: ControllerArgs) {
+  const { menuName } = useMenuMeta();
   const base = useBaseController<GridKey>({ model });
   const { resetGrids, requireParentRow } = base;
 
@@ -43,15 +41,12 @@ export function useDriverController({ model }: ControllerArgs) {
     return api.getList(next);
   }, []);
 
-  const fetchSub01 = useCallback(
-    (mainRow: any) => {
-      if (!mainRow?.DRVR_ID || mainRow.EDIT_STS === ROW_STATUS.INSERT) {
-        return Promise.resolve({ data: { data: { dsOut: [] } } });
-      }
-      return api.getCustList({ DRVR_ID: mainRow.DRVR_ID });
-    },
-    [],
-  );
+  const fetchSub01 = useCallback((mainRow: any) => {
+    if (!mainRow?.DRVR_ID || mainRow.EDIT_STS === ROW_STATUS.INSERT) {
+      return Promise.resolve({ data: { data: { dsOut: [] } } });
+    }
+    return api.getCustList({ DRVR_ID: mainRow.DRVR_ID });
+  }, []);
 
   const loadSub01 = useCallback(
     async (mainRow: any) => {
@@ -97,7 +92,10 @@ export function useDriverController({ model }: ControllerArgs) {
         let changed = false;
         const nextRows = rows.map((gridRow: any) => {
           if (gridRow !== row && gridRow?.__rid__ !== rowKey) return gridRow;
-          if (gridRow.MBL_PHN_NO === phone && gridRow.MBL_PHN_NO_DEC === phone) {
+          if (
+            gridRow.MBL_PHN_NO === phone &&
+            gridRow.MBL_PHN_NO_DEC === phone
+          ) {
             return gridRow;
           }
           changed = true;
@@ -267,16 +265,19 @@ export function useDriverController({ model }: ControllerArgs) {
         row.CUST_CD = custRow?.CUST_CD;
       }
 
-      if (
-        row.EDIT_STS !== ROW_STATUS.DELETE &&
-        !(await checkDrvrPhnNo(row))
-      ) {
+      if (row.EDIT_STS !== ROW_STATUS.DELETE && !(await checkDrvrPhnNo(row))) {
         return;
       }
     }
 
     await base.saveGrid("main", api.save);
-  }, [base, checkDrvrPhnNo, model.grids.main, model.grids.sub01.rows, validateMainBeforeSave]);
+  }, [
+    base,
+    checkDrvrPhnNo,
+    model.grids.main,
+    model.grids.sub01.rows,
+    validateMainBeforeSave,
+  ]);
 
   const onInitPasswd = useCallback(async () => {
     const selected = model.grids.main.selectedRef.current;
@@ -298,9 +299,7 @@ export function useDriverController({ model }: ControllerArgs) {
       base.alert(Lang.get("MSG_NOT_SELECTED_DRIVER"));
       return;
     }
-    base.addRow("sub01",
-      { DRVR_ID: main.DRVR_ID }
-    );
+    base.addRow("sub01", { DRVR_ID: main.DRVR_ID });
   }, [base, model.grids.main.selectedRef, requireParentRow]);
 
   const onSaveSub01 = useCallback(
@@ -320,27 +319,6 @@ export function useDriverController({ model }: ControllerArgs) {
         },
       }),
     [base, model.grids.main.selectedRef],
-  );
-
-  // 엑셀 업로드(드라이버 전용 URL) / 양식 다운로드 — 공통 버튼. (센차 onUploadDrvrExcel / gridExcelTemplateDownload)
-  const excelUploadAction = useMemo(
-    () =>
-      makeExcelUploadAction({
-        menuCode: MENU_CD,
-        gridId: GRID_ID,
-        url: "/driverService/uploadDrvr",
-        onUploaded: () => base.search(),
-      }),
-    [base],
-  );
-  const excelTemplateDownloadAction = useMemo(
-    () =>
-      makeExcelTemplateDownloadAction({
-        menuCode: MENU_CD,
-        gridId: GRID_ID,
-        fileName: Lang.get("MENU_DRIVER_MANAGER"),
-      }),
-    [],
   );
 
   const getExcelSearchParams = useCallback(() => {
@@ -367,38 +345,22 @@ export function useDriverController({ model }: ControllerArgs) {
       },
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
-      {
-        type: "group",
-        key: "BTN_EXCEL",
-        label: "BTN_EXCEL",
-        items: [
-          {
-            type: "button",
-            key: "BTN_EXCEL_DOWN_ALL",
-            label: "BTN_EXCEL_DOWN_ALL",
-            onClick: () =>
-              downExcelSearch({
-                columns: MAIN_COLUMN_DEFS(),
-                searchParams: getExcelSearchParams(),
-                menuName: Lang.get("MENU_DRIVER_MANAGER"),
-                fetchFn: (params) => fetchList(params),
-              }),
-          },
-          {
-            type: "button",
-            key: "BTN_EXCEL_DOWN_GRID",
-            label: "BTN_EXCEL_DOWN_GRID",
-            onClick: () =>
-              downExcelSearched({
-                columns: MAIN_COLUMN_DEFS(),
-                rows: model.grids.main.rows,
-                menuName: Lang.get("MENU_DRIVER_MANAGER"),
-              }),
-          },
-          excelUploadAction,
-          excelTemplateDownloadAction,
-        ],
-      },
+      makeExcelGroupAction({
+        columns: MAIN_COLUMN_DEFS(),
+        menuCode: MENU_CD,
+        menuName: menuName,
+        fetchFn: () => fetchList(getExcelSearchParams()),
+        rows: model.grids.main.rows,
+        upload: {
+          gridId: GRID_ID,
+          url: "/driverService/uploadDrvr",
+          onUploaded: () => base.search(),
+        },
+        templateDownload: {
+          gridId: GRID_ID,
+          fileName: menuName,
+        },
+      }),
     ],
     [
       model,
@@ -407,8 +369,7 @@ export function useDriverController({ model }: ControllerArgs) {
       onAddMain,
       onInitPasswd,
       onSaveMain,
-      excelUploadAction,
-      excelTemplateDownloadAction,
+      base,
     ],
   );
 
@@ -416,36 +377,13 @@ export function useDriverController({ model }: ControllerArgs) {
     () => [
       makeAddAction({ onClick: onAddSub01 }),
       makeSaveAction({ onClick: onSaveSub01 }),
-      {
-        type: "group",
-        key: "BTN_EXCEL",
-        label: "BTN_EXCEL",
-        items: [
-          {
-            type: "button",
-            key: "BTN_EXCEL_DOWN_ALL",
-            label: "BTN_EXCEL_DOWN_ALL",
-            onClick: () =>
-              downExcelSearch({
-                columns: SUB01_COLUMN_DEFS(),
-                searchParams: getSub01ExcelSearchParams(),
-                menuName: Lang.get("MENU_DRIVER_MANAGER"),
-                fetchFn: (params) => api.getCustList(params),
-              }),
-          },
-          {
-            type: "button",
-            key: "BTN_EXCEL_DOWN_GRID",
-            label: "BTN_EXCEL_DOWN_GRID",
-            onClick: () =>
-              downExcelSearched({
-                columns: SUB01_COLUMN_DEFS(),
-                rows: model.grids.sub01.rows,
-                menuName: Lang.get("MENU_DRIVER_MANAGER"),
-              }),
-          },
-        ],
-      },
+      makeExcelGroupAction({
+        columns: SUB01_COLUMN_DEFS(),
+        menuCode: MENU_CD,
+        menuName: Lang.get("MENU_DRIVER_MANAGER"),
+        fetchFn: () => api.getCustList(getSub01ExcelSearchParams()),
+        rows: model.grids.sub01.rows,
+      }),
     ],
     [model, getSub01ExcelSearchParams, onAddSub01, onSaveSub01],
   );

@@ -8,6 +8,8 @@ type DateMode = "Y" | "N";
 type DateFilterProps = {
   mode?: DateMode;
   granularity?: DateGranularity;
+  /** 선택 단위 — "day"(기본, YYYY-MM-DD) / "month"(YYYY-MM, 년월) / "year"(YYYY, 년). */
+  precision?: "year" | "month" | "day";
 
   fromId?: string;
   toId?: string;
@@ -15,13 +17,25 @@ type DateFilterProps = {
   fromValue: string;
   toValue?: string;
 
-  onChangeFrom: (value: string) => void;
+  onChangeFrom?: (value: string) => void;
   onChangeTo?: (value: string) => void;
+
+  // SearchFilter 가 {...props} 로 함께 넘기는 표시/조건 필드 (여기선 미사용 — passthrough 허용).
+  type?: "YMD" | "YMDT" | "YM" | "Y";
+  label?: string;
+  span?: number;
+  className?: string;
+  condition?: string;
+  onConditionChange?: (c: string) => void;
+  conditionLocked?: boolean;
+  required?: boolean;
+  onChange?: (value: string) => void;
 };
 
 export function DateRangeFilter({
   mode = "Y",
   granularity = "date",
+  precision = "day",
 
   fromId = "dateFrom",
   toId = "dateTo",
@@ -29,7 +43,7 @@ export function DateRangeFilter({
   fromValue = "",
   toValue = "",
 
-  onChangeFrom,
+  onChangeFrom = () => {},
   onChangeTo,
 }: DateFilterProps) {
   const isDatetime = granularity === "datetime";
@@ -57,6 +71,7 @@ export function DateRangeFilter({
         value={fromValue}
         onChange={onChangeFrom}
         withTime={isDatetime}
+        precision={precision}
       />
     );
   }
@@ -69,6 +84,7 @@ export function DateRangeFilter({
         value={fromValue}
         onChange={handleFromChange}
         withTime={isDatetime}
+        precision={precision}
       />
 
       <span className="text-xs text-muted-foreground select-none">~</span>
@@ -78,6 +94,7 @@ export function DateRangeFilter({
         value={toValue}
         onChange={handleToChange}
         withTime={isDatetime}
+        precision={precision}
       />
     </div>
   );

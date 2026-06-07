@@ -13,7 +13,8 @@ import type { GridKey, ZoneModel } from "./ZoneModel";
 import { Lang } from "@/app/services/common/Lang";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
-const MENU_CD = "MENU_ZONE_MGMT";
+import { MENU_CODE as MENU_CD } from "./Zone";
+
 // 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
 const GRID_ID = "MAIN_GRID_ZONE_MGMT";
 
@@ -42,18 +43,17 @@ export function useZoneController({ model }: Args) {
     [],
   );
 
-  const fetchSub02 = useCallback(
-    (row: any) => {
-      if (!row || String(row.EDIT_STS ?? "").trim() === "I") {
-        return EMPTY_RESULT;
-      }
-      return api.getZoneCodeDetailList({
-        DIV_CD: row.DIV_CD,
-        LGST_GRP_CD: row.LGST_GRP_CD,
-        ZN_CD: row.ZN_CD,
-        CTRY_CD: row.CTRY_CD,
-      });
-    }, []);
+  const fetchSub02 = useCallback((row: any) => {
+    if (!row || String(row.EDIT_STS ?? "").trim() === "I") {
+      return EMPTY_RESULT;
+    }
+    return api.getZoneCodeDetailList({
+      DIV_CD: row.DIV_CD,
+      LGST_GRP_CD: row.LGST_GRP_CD,
+      ZN_CD: row.ZN_CD,
+      CTRY_CD: row.CTRY_CD,
+    });
+  }, []);
 
   const fetchSub03 = useCallback((row: any) => {
     if (!row || String(row.EDIT_STS ?? "").trim() === "I") {
@@ -133,7 +133,8 @@ export function useZoneController({ model }: Args) {
 
   const onAddSub01 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, Lang.get("LBL_LOGISTICS_GROUP_CODE"))) return;
+    if (!base.requireParentRow(main, Lang.get("LBL_LOGISTICS_GROUP_CODE")))
+      return;
     base.resetGrids(["sub02", "sub03"]);
     base.addRow("sub01", {
       DIV_CD: main.DIV_CD,

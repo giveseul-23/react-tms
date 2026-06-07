@@ -3,7 +3,6 @@
 
 import { useMemo } from "react";
 import { GridMapPage } from "@/app/components/layout/presets/GridMapPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { TmapView, TmapMarker } from "@/app/components/map/TmapView";
 
@@ -47,7 +46,7 @@ export default function DtgDailyVehHisController() {
   const gridPane = (
     <DataGrid
       {...model.bind("main")}
-      columnDefs={MAIN_COLUMN_DEFS()}
+      columnDefs={MAIN_COLUMN_DEFS}
       onRowClicked={ctrl.handleRowClicked}
       disableAutoSize
       audit={false}
@@ -68,17 +67,10 @@ export default function DtgDailyVehHisController() {
         fetchFn: ctrl.fetchInTrnstVehList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
-        paramMode: "RAW",
+        excludes: ["PSTN_DTTM_FROM", "PSTN_DTTM_TO", "VEH_NO"],
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
+      defaultDirection="horizontal"
       defaultSizes={[20, 80]}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
       storageKey={model.storageKeys.outer}
       grid={gridPane}
       map={mapPane}

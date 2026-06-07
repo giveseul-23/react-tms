@@ -459,8 +459,8 @@ export function useUserAccountController({ model, activeTabRef }: Args) {
 
   const selectedRoleType = model.grids.sub03.selectedRef.current?.RL_TP_CD ?? null;
   const roleTreeColumnDefs = useMemo(
-    () => makeRoleTreeColumnDefs(model.setRoleTreeRows, selectedRoleType),
-    [model.setRoleTreeRows, selectedRoleType],
+    () => makeRoleTreeColumnDefs(selectedRoleType),
+    [selectedRoleType],
   );
 
   return {

@@ -126,6 +126,8 @@ type TreeGridProps<TRow extends TreeRow> = {
    *  cellRenderer 안의 onChange 가 source 를 직접 갱신할 수 있도록 어댑터를 만들어
    *  processColumnDef 에 setRowData 로 주입한다. 미지정 시 기존 동작 유지(읽기 전용). */
   setSource?: Dispatch<SetStateAction<TRow[]>>;
+  /** codeKey 컬럼의 코드→명 변환 맵 (DataGrid 와 동일). { [codeKey]: { 코드: 명 } } */
+  codeMap?: Record<string, Record<string, string>>;
   /**
    * columnDefs 끝에 standardAudit 자동 spread. (DataGrid 와 동일 형태)
    *   true       — 모두 ON (delete/rowStatus/insertPerson/insertDate/updatePerson/updateTime)
@@ -248,6 +250,7 @@ function TreeGridInner<TRow extends TreeRow>(
     onRowSelected,
     onCellValueChanged,
     setSource,
+    codeMap,
     audit,
     disableAutoSize,
     autoSizeKey,
@@ -421,9 +424,10 @@ function TreeGridInner<TRow extends TreeRow>(
       (col) =>
         processColumnDef(col, {
           setRowData: setRowDataAdapter,
+          codeMap,
         }) as ColDef<TRow>,
     );
-  }, [columnDefs, setRowDataAdapter, audit]);
+  }, [columnDefs, setRowDataAdapter, audit, codeMap]);
 
   // nameColDef 는 트리 셀 전용 — processColumnDef 통과 안 함.
   const finalColumnDefs = useMemo<ColDef<TRow>[]>(

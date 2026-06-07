@@ -69,6 +69,11 @@ export type ExcelGroupActionConfig = {
   hideAll?: boolean;
   /** 보이는 데이터 다운로드 버튼 숨김 */
   hideVisible?: boolean;
+  /** 지정 시 엑셀 그룹 items "안"에 업로드 버튼 포함. (menuCode 는 그룹 것 재사용)
+   *  그룹 "밖" 별도 버튼으로 두려면 이걸 생략하고 makeExcelUploadAction 을 따로 호출. */
+  upload?: Omit<ExcelUploadActionConfig, "menuCode">;
+  /** 지정 시 엑셀 그룹 items "안"에 양식 다운로드 버튼 포함. (밖으로 빼려면 makeExcelTemplateDownloadAction 별도 호출) */
+  templateDownload?: Omit<ExcelTemplateDownloadActionConfig, "menuCode">;
   /** 리소스 권한 클래스. 기본 "E"(엑셀). */
   authCls?: string;
   label?: string;
@@ -301,6 +306,23 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
         }).catch((e) => showErrorModal(excelErrorMsg(e)));
       },
     });
+  }
+
+  // 업로드 / 양식 다운로드를 그룹 "안"에 포함 (config 로 넘긴 경우). menuCode 는 그룹 것 재사용.
+  // 그룹 "밖" 별도 버튼으로 두려면 이 옵션을 생략하고 화면에서 makeExcelUploadAction /
+  // makeExcelTemplateDownloadAction 을 따로 호출한다.
+  if (config.upload) {
+    items.push(
+      makeExcelUploadAction({ menuCode: config.menuCode, ...config.upload }),
+    );
+  }
+  if (config.templateDownload) {
+    items.push(
+      makeExcelTemplateDownloadAction({
+        menuCode: config.menuCode,
+        ...config.templateDownload,
+      }),
+    );
   }
 
   return {

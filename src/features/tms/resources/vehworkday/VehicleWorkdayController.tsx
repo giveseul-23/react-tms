@@ -2,14 +2,9 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeSaveAction,
-  makeExcelUploadAction,
-  makeExcelTemplateDownloadAction,
+  makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { vehicleWorkdayApi as api } from "./VehicleWorkdayApi";
-import {
-  downExcelSearch,
-  downExcelSearched,
-} from "@/app/services/common/excelService";
 import {
   MAIN_COLUMN_DEFS,
   buildVehicleWorkdayColumns,
@@ -23,6 +18,7 @@ import { Lang } from "@/app/services/common/Lang";
 import { ROW_STATUS } from "@/app/components/grid/gridUtils/rowStatus";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import WorkdayDetailPopup from "./popup/WorkdayDetailPopup";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 const MENU_CD = "MENU_VEH_WORKDAY_MGMT";
 // 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
@@ -33,18 +29,21 @@ interface ControllerArgs {
 }
 
 export function useVehicleWorkdayController({ model }: ControllerArgs) {
+  const { menuName } = useMenuMeta();
   const base = useBaseController<GridKey>({ model });
   const { openPopup, closePopup } = usePopup();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => {
-      const dayList = getDayFields(params.SDATE as string, params.EDATE as string);
+      const dayList = getDayFields(
+        params.SDATE as string,
+        params.EDATE as string,
+      );
       model.setMainColumnDefs(
-        buildVehicleWorkdayColumns(MAIN_COLUMN_DEFS, dayList)
+        buildVehicleWorkdayColumns(MAIN_COLUMN_DEFS, dayList),
       );
       return api.getList(params);
-    }
-    ,
+    },
     [model],
   );
 
@@ -72,8 +71,7 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
             record={row}
             onConfirm={(data) => {
               const needsDetail =
-                data.workDayTp !== "WDT_1000" &&
-                data.workDayTp !== "WDT_1100";
+                data.workDayTp !== "WDT_1000" && data.workDayTp !== "WDT_1100";
               const updatedRow: Record<string, any> = {
                 ...row,
                 [field]: data.workDayTp,
@@ -160,26 +158,6 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
     [getSearchDateRange],
   );
 
-  // 엑셀 업로드 / 양식 다운로드 — 공통 버튼. (센차 gridExcelUpload / gridExcelTemplateDownload)
-  const excelUploadAction = useMemo(
-    () =>
-      makeExcelUploadAction({
-        menuCode: MENU_CD,
-        gridId: GRID_ID,
-        onUploaded: () => base.search(),
-      }),
-    [base],
-  );
-  const excelTemplateDownloadAction = useMemo(
-    () =>
-      makeExcelTemplateDownloadAction({
-        menuCode: MENU_CD,
-        gridId: GRID_ID,
-        fileName: Lang.get("MENU_VEH_WORKDAY_MGMT"),
-      }),
-    [],
-  );
-
   const mainActions: ActionItem[] = useMemo(
     () => [
       {
@@ -189,46 +167,28 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
         onClick: onInitialize,
       },
       makeSaveAction({ onClick: onSaveMain }),
-      {
-        type: "group",
-        key: "BTN_EXCEL",
-        label: "BTN_EXCEL",
-        items: [
-          {
-            type: "button",
-            key: "BTN_EXCEL_DOWN_ALL",
-            label: "BTN_EXCEL_DOWN_ALL",
-            onClick: () =>
-              downExcelSearch({
-                columns: model.mainColumnDefs as any,
-                searchParams: getExcelSearchParams(),
-                menuName: Lang.get("MENU_VEH_WORKDAY_MGMT"),
-                fetchFn: (params) => api.getList(params),
-              }),
-          },
-          {
-            type: "button",
-            key: "BTN_EXCEL_DOWN_GRID",
-            label: "BTN_EXCEL_DOWN_GRID",
-            onClick: () =>
-              downExcelSearched({
-                columns: model.mainColumnDefs as any,
-                rows: model.grids.main.rows,
-                menuName: Lang.get("MENU_VEH_WORKDAY_MGMT"),
-              }),
-          },
-          excelUploadAction,
-          excelTemplateDownloadAction,
-        ],
-      },
+      makeExcelGroupAction({
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        columns: model.mainColumnDefs as any,
+        menuCode: MENU_CD,
+        menuName: menuName,
+        fetchFn: () => api.getList(getExcelSearchParams()),
+        rows: model.grids.main.rows,
+        upload: { gridId: GRID_ID, onUploaded: () => base.search() },
+        templateDownload: {
+          gridId: GRID_ID,
+          fileName: menuName,
+        },
+      }),
     ],
     [
       onInitialize,
       onSaveMain,
-      model,
+      model.mainColumnDefs,
+      model.grids.main,
+      menuName,
       getExcelSearchParams,
-      excelUploadAction,
-      excelTemplateDownloadAction,
+      base,
     ],
   );
 

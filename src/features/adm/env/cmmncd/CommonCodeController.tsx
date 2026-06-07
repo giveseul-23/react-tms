@@ -23,9 +23,15 @@ export function useCommonCodeController({ model }: Args) {
   const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
-    (params: Record<string, unknown>) =>
-      commonCodeApi.getCommonCodeList(MENU_CD, params),
-    [],
+    (params: Record<string, unknown>) => {
+      const srchObj = model.rawFiltersRef.current;
+      return commonCodeApi.getCommonCodeList(MENU_CD, {
+        ...params,
+        CMMN_DTL_CD_SQL: srchObj.CMMN_DTL_CD,
+        CMMN_DTL_NM_SQL: srchObj.LANG_DESC,
+      });
+    },
+    [model.rawFiltersRef],
   );
 
   const fetchSub01 = useCallback(

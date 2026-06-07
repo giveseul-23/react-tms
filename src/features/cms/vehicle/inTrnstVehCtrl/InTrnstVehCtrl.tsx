@@ -3,7 +3,6 @@
 
 import { useMemo } from "react";
 import { GridMapPage } from "@/app/components/layout/presets/GridMapPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { TmapView, TmapMarker } from "@/app/components/map/TmapView";
 
@@ -36,23 +35,6 @@ export default function InTrnstVehCtrl() {
       .filter((m: TmapMarker | null): m is TmapMarker => m !== null);
   }, [model.grids.main.rows, ctrl]);
 
-  const gridPane = (
-    <DataGrid
-      {...model.bind("main")}
-      columnDefs={MAIN_COLUMN_DEFS()}
-      actions={ctrl.mainActions}
-      onRowClicked={ctrl.handleRowClicked}
-      audit={{
-        delete: false,
-        rowStatus: false,
-        insertPerson: false,
-        insertDate: false,
-        updatePerson: false,
-        updateTime: true,
-      }}
-    />
-  );
-
   const mapPane = (
     <div className="h-full w-full min-h-0 min-w-0 border border-gray-200 rounded-lg overflow-hidden bg-white">
       <TmapView ref={model.mapRef} markers={markers} />
@@ -66,22 +48,28 @@ export default function InTrnstVehCtrl() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchInTrnstVehList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CODE,
+        ...model.bindSearch(),
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
+      defaultDirection={"horizontal"}
       defaultSizes={[45, 55]}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
       storageKey={model.storageKeys.outer}
-      grid={gridPane}
+      grid={
+        <DataGrid
+          {...model.bind("main")}
+          columnDefs={MAIN_COLUMN_DEFS}
+          actions={ctrl.mainActions}
+          onRowClicked={ctrl.handleRowClicked}
+          codeMap={model.codeMap}
+          audit={{
+            delete: false,
+            rowStatus: false,
+            insertPerson: false,
+            insertDate: false,
+            updatePerson: false,
+            updateTime: true,
+          }}
+        />
+      }
       map={mapPane}
     />
   );

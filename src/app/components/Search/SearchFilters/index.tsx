@@ -182,8 +182,11 @@ export function SearchFilters({
             onKeyDownCapture={(e) => {
               if (e.key !== "Enter" || e.nativeEvent.isComposing || searching)
                 return;
+              // 팝업 필드 Enter 는 조회로 가로채지 않고 필드 자체 처리(코드해석→자동적용/팝업)에 맡긴다.
+              if ((e.target as HTMLElement)?.closest?.("[data-popup-field]"))
+                return;
               e.preventDefault();
-              e.stopPropagation(); // 필드 자체 Enter 동작(팝업 코드조회/콤보 열기) 억제하고 조회만 실행
+              e.stopPropagation(); // 그 외 필드의 Enter 는 자체 동작(콤보 열기 등) 억제하고 조회만 실행
               handleSearch(1);
             }}
             className="
