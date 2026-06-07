@@ -5,10 +5,20 @@
 //   - 네트워크 에러(서버 미응답) → 로그인 화면에서는 LoginPage 자체 오류팝업으로 처리
 //     이미 로그인된 상태라면 세션 끊김으로 간주하고 자동 로그아웃
 
-import axios, { type AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { API_CONFIG } from "./config";
 import { getAccessToken, clearTokens } from "@/app/services/auth/auth";
 import { Lang } from "@/app/services/common/Lang";
+import { showSessionExpiredModal } from "@/app/components/popup/showErrorModal";
+
+// 병렬 요청이 동시에 401 을 받아도 만료 모달은 한 번만 띄운다.
+let sessionExpiredHandled = false;
+
+function goLogin() {
+  clearTokens();
+  Lang.clearCache();
+  window.location.href = "/login";
+}
 
 // Vercel rewrites(/api/* → 백엔드) 때문에 백엔드가 발급한 세션 쿠키가
 // 프론트 도메인에 저장되어 재배포/재시작 후 stale 상태로 계속 전송 → 500 유발.
@@ -45,129 +55,25 @@ apiClient.interceptors.request.use((config) => {
 });
 
 /* =========================
- * Token Refresh
- * ========================= */
-let isRefreshing = false;
-let pendingRequests: Array<{
-  resolve: (token: string) => void;
-  reject: (error: unknown) => void;
-}> = [];
-
-function onRefreshed(newToken: string) {
-  pendingRequests.forEach(({ resolve }) => resolve(newToken));
-  pendingRequests = [];
-}
-
-function onRefreshFailed(error: unknown) {
-  pendingRequests.forEach(({ reject }) => reject(error));
-  pendingRequests = [];
-}
-
-async function refreshAccessToken(): Promise<string> {
-  const refreshToken = sessionStorage.getItem("REFRESH_TOKEN");
-  const res = await axios.post(
-    `${API_CONFIG.baseURL}/sessionService/refreshToken`,
-    { REFRESH_TOKEN: refreshToken },
-    { withCredentials: true,
-      headers: { "Content-Type": "application/json" } 
-    },
-  );
-
-  const { ACCESS_TOKEN, REFRESH_TOKEN } = res.data.data;
-
-  sessionStorage.setItem("ACCESS_TOKEN", ACCESS_TOKEN);
-  if (REFRESH_TOKEN) {
-    sessionStorage.setItem("REFRESH_TOKEN", REFRESH_TOKEN);
-  }
-
-  return ACCESS_TOKEN;
-}
-
-/* =========================
  * Response Interceptor
  * ========================= */
 apiClient.interceptors.response.use(
-  (res) => {
-    const msgCode = res.data?.msgCode;
-
-    // ── ACCESS_TOKEN 만료 → 갱신 후 원래 요청 재시도 ──────────
-    if (msgCode === "MSG_ACCESS_EXPIRED") {
-      const originalRequest = res.config as AxiosRequestConfig & { _retry?: boolean };
-
-      if (originalRequest._retry) {
-        clearTokens();
-        Lang.clearCache();
-        window.location.href = "/login";
-        return Promise.reject(new Error("Token refresh failed"));
-      }
-      originalRequest._retry = true;
-
-      if (isRefreshing) {
-        return new Promise<string>((resolve, reject) => {
-          pendingRequests.push({ resolve, reject });
-        }).then((newToken) => {
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${newToken}`,
-          };
-          return apiClient(originalRequest);
-        });
-      }
-
-      isRefreshing = true;
-
-      return refreshAccessToken()
-        .then((newToken) => {
-          isRefreshing = false;
-          onRefreshed(newToken);
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${newToken}`,
-          };
-          return apiClient(originalRequest);
-        })
-        .catch((err) => {
-          isRefreshing = false;
-          onRefreshFailed(err);
-          clearTokens();
-          Lang.clearCache();
-          window.location.href = "/login";
-          return Promise.reject(err);
-        });
-    }
-
-    // ── REFRESH_TOKEN 만료 → 로그아웃 ────────────────────────
-    if (msgCode === "MSG_REFRESH_EXPIRED") {
-      clearTokens();
-      Lang.clearCache();
-      window.location.href = "/login";
-      return Promise.reject(new Error("Refresh token expired"));
-    }
-
-    return res;
-  },
+  (res) => res,
   (error) => {
-    const isLoginPage =
-      window.location.pathname === "/login" ||
-      window.location.pathname === "/";
+    const isLoginPage = window.location.pathname === "/login";
 
-    // ── 401: 토큰 만료 / 세션 만료 ───────────────────────────
-    if (error.response?.status === 401) {
-      clearTokens();
-      Lang.clearCache();
-      window.location.href = "/login";
-      return Promise.reject(error);
-    }
+    // 401(세션/토큰 만료) 또는 로그인 상태에서 서버 무응답(연결 끊김) → 만료 모달 후 로그인 페이지.
+    const sessionLost =
+      error.response?.status === 401 ||
+      (!error.response && !isLoginPage && !!getAccessToken());
 
-    // ── 네트워크 에러 (서버 미응답 / 연결 끊김) ──────────────
-    if (!error.response && !isLoginPage) {
-      const token = getAccessToken();
-      if (token) {
-        clearTokens();
-        Lang.clearCache();
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
+    if (sessionLost && !sessionExpiredHandled) {
+      sessionExpiredHandled = true;
+      const msg =
+        error.response?.data?.error?.message ??
+        error.response?.data?.msg ??
+        "세션이 만료되었거나 서버에 연결할 수 없습니다. 다시 로그인해 주세요.";
+      showSessionExpiredModal(msg, goLogin);
     }
 
     return Promise.reject(error);
