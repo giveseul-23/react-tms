@@ -84,6 +84,8 @@ export const MAIN_COLUMN_DEFS = [
     field: "EXCL_OPER_YN",
     editable: true,
     insertable: true,
+    editAllowField: "ALW_EXCL_OPER_YN",
+    editDisableMsg: "MSG_ERR_EXCEL_OPER",
   },
   {
     type: "check",

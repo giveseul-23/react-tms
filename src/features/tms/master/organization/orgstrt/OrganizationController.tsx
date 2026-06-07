@@ -1,9 +1,9 @@
-import { useCallback, useMemo, MutableRefObject} from "react";
+import { useCallback, useMemo, MutableRefObject } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { OrganizationApi as api } from "./OrganizationApi";
 import {
-    makeAddAction,
-    makeSaveAction,
+  makeAddAction,
+  makeSaveAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { OrganizationModel, GridKey } from "./OrganizationModel";
@@ -13,36 +13,27 @@ interface Args {
 }
 const MENU_CD = "MENU_ORGANIZATION_STRUCT";
 
-export function useOrganizationController({
-  model,
-}: Args) {
+export function useOrganizationController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
 
-  const fetchList = useCallback(
-    async (params: Record<string, unknown>) => {
-
-      return api.getDivisionList({
-        ...params,
-      });
-    },
-    [model],
-  );
+  const fetchList = useCallback(async (params: Record<string, unknown>) => {
+    return api.getDivisionList({
+      ...params,
+    });
+  }, []);
 
   const onMainGridClick = useCallback(
     (row: any) =>
-      base.handleRowClick(
-        "main",
-        row,
-        [
-          {
-            to: "sub01",
-            fetch: (r) => api.getLogisticsList({
-                DIV_CD: r.DIV_CD,
-                CUST_CD: r.CUST_CD
+      base.handleRowClick("main", row, [
+        {
+          to: "sub01",
+          fetch: (r) =>
+            api.getLogisticsList({
+              DIV_CD: r.DIV_CD,
+              CUST_CD: r.CUST_CD,
             }),
-          }
-        ],
-      ),
+        },
+      ]),
     [base],
   );
 
@@ -53,23 +44,23 @@ export function useOrganizationController({
     },
     [model],
   );
-    const onAddMain = useCallback(() => {
-        base.resetGrids(["sub01"]);
-        base.addRow("main", {
-        USE_YN: "Y"
-        });
-    }, [base]);
+  const onAddMain = useCallback(() => {
+    base.resetGrids(["sub01"]);
+    base.addRow("main", {
+      USE_YN: "Y",
+    });
+  }, [base]);
 
-    const onSaveMain = useCallback(
-      () =>
-        base.saveGrid("main", (payload) =>
-          api.saveDivision({
-            ...payload,
-            MENU_CD,
-          }),
-        ),
-      [base],
-    );
+  const onSaveMain = useCallback(
+    () =>
+      base.saveGrid("main", (payload) =>
+        api.saveDivision({
+          ...payload,
+          MENU_CD,
+        }),
+      ),
+    [base],
+  );
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -88,20 +79,21 @@ export function useOrganizationController({
     });
   }, [base, model.grids.main]);
 
-    const onSaveSub01 = useCallback(() =>
-        base.saveGrid("sub01", (payload) =>
-          api.saveLogistics({
-            ...payload,
-            MENU_CD,
-          }),
-        ),
-      [base],
-    );
+  const onSaveSub01 = useCallback(
+    () =>
+      base.saveGrid("sub01", (payload) =>
+        api.saveLogistics({
+          ...payload,
+          MENU_CD,
+        }),
+      ),
+    [base],
+  );
 
-
-    const sub01Actions: ActionItem[] = useMemo(() => [
-        makeAddAction({ onClick: onAddSub01 }),
-        makeSaveAction({ onClick: onSaveSub01 }),
+  const sub01Actions: ActionItem[] = useMemo(
+    () => [
+      makeAddAction({ onClick: onAddSub01 }),
+      makeSaveAction({ onClick: onSaveSub01 }),
     ],
     [model.filtersRef, model.grids.main.rows, onAddSub01, onSaveSub01],
   );
@@ -111,6 +103,6 @@ export function useOrganizationController({
     onMainGridClick,
     onSearchCallback,
     mainActions,
-    sub01Actions
+    sub01Actions,
   };
 }

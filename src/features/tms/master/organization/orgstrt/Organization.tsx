@@ -1,14 +1,10 @@
 "use client";
 
-import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useOrganizationModel } from "./OrganizationModel";
 import { useOrganizationController } from "./OrganizationController";
-import {
-  MAIN_COLUMN_DEFS,
-  SUB01_COLUMN_DEFS
-} from "./OrganizationColumns";
+import { MAIN_COLUMN_DEFS, SUB01_COLUMN_DEFS } from "./OrganizationColumns";
 
 export const MENU_CD = "MENU_ORGANIZATION_STRUCT";
 export default function Organization() {
@@ -23,10 +19,7 @@ export default function Organization() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CD,
+        ...model.bindSearch(),
       }}
       defaultDirection="vertical"
       master={
@@ -40,7 +33,7 @@ export default function Organization() {
         />
       }
       detail={
-          <DataGrid
+        <DataGrid
           {...model.bind("sub01")}
           columnDefs={SUB01_COLUMN_DEFS}
           headerCheckbox={false}

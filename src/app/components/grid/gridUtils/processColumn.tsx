@@ -25,6 +25,8 @@ import { Lang } from "@/app/services/common/Lang";
 import { Util } from "@/app/services/common/Util";
 import { ComboCellEditor } from "@/app/components/grid/cellEditors/ComboCellEditor";
 import { PasswordCellEditor } from "@/app/components/grid/cellEditors/PasswordCellEditor";
+import { MaskedTextCellEditor } from "@/app/components/grid/cellEditors/MaskedTextCellEditor";
+import { showInfoModal } from "@/app/components/popup/showInfoModal";
 import {
   Popover,
   PopoverAnchor,
@@ -41,6 +43,27 @@ const CommonPopup = React.lazy(() =>
     default: m.CommonPopup,
   })),
 );
+
+// 주소찾기 팝업 — type "address" 셀이 열릴 때만 로드.
+const AddressPop = React.lazy(() =>
+  import("@/app/components/popup/AddressPop").then((m) => ({
+    default: m.AddressPop,
+  })),
+);
+
+// type "address" 컬럼이 그리드 행에 write-back 할 필드명 (센차 record* 매핑 대응).
+// 컬럼의 addrFields 로 부분 오버라이드 가능.
+const DEFAULT_ADDR_FIELDS = {
+  ctryCd: "CTRY_CD",
+  ctryNm: "CTRY_NM",
+  sttCd: "STT_CD",
+  sttNm: "STT_NM",
+  ctyCd: "CTY_CD",
+  ctyNm: "CTY_NM",
+  zipCd: "ZIP_CD",
+  dtlAddr1: "DTL_ADDR1",
+  dtlAddr2: "DTL_ADDR2",
+};
 
 // insertable 은 ag-grid 표준이 아닌 프로젝트 자체 편집정책 prop (EDIT_STS 기반).
 // AbstractColDef 에 선언 병합 → ColDef/ColGroupDef(=AnyCol) 전체가 1급 속성으로 보유.
@@ -98,6 +121,9 @@ const CUSTOM_KEYS = new Set([
   "defaultYn",
   "dateUnit",
   "regex",
+  "maskRe",
+  "editAllowField",
+  "editDisableMsg",
   "validators",
   "isPrimaryKey",
   "insertable",
@@ -113,6 +139,8 @@ const CUSTOM_KEYS = new Set([
   "keyParam",
   "extraParams",
   "callback",
+  // address 컬럼 전용
+  "addrFields",
 ]);
 
 function stripCustomKeys<T extends Record<string, any>>(col: T): T {
@@ -150,10 +178,12 @@ function walkChildren(
       setRowData,
     ) as any;
     const withPassword = injectPasswordEditor(withEditor, setRowData) as any;
-    const withText = injectValidation(withPassword) as any;
+    const withMask = injectMaskEditor(withPassword, setRowData) as any;
+    const withText = injectValidation(withMask) as any;
     const withCheck = injectCheckRenderer(withText, setRowData, opts.readOnly) as any;
     const withPopup = injectPopupCell(withCheck, opts) as any;
-    const withDate = injectDateCell(withPopup, opts) as any;
+    const withAddress = injectAddressCell(withPopup, opts) as any;
+    const withDate = injectDateCell(withAddress, opts) as any;
     const withPolicy = applyEditPolicy(withDate, opts.readOnly) as any;
     const withRequired =
       (child as any).required === true ||
@@ -223,6 +253,10 @@ function injectCheckRenderer(
   const group = c.checkGroup as
     | { total: string; members: string[] }
     | undefined;
+  // editAllowField: 토글 허용 조건 필드 — row[editAllowField] === "Y" 일 때만 토글.
+  //   아니면 editDisableMsg(있으면) 안내 후 토글 차단. (센차 excheckcolumn editAllowField)
+  const editAllowField = c.editAllowField as string | undefined;
+  const editDisableMsg = c.editDisableMsg as string | undefined;
   const extended = !!checkEditable || !!group;
   const isOn = (v: any) => v === "Y" || (extended && v === true);
 
@@ -254,6 +288,11 @@ function injectCheckRenderer(
                 : () => {
                     const next = checked ? "N" : "Y";
                     const row = params.node?.data;
+                    // editAllowField: 허용('Y') 아니면 안내 후 토글 차단.
+                    if (editAllowField && row?.[editAllowField] !== "Y") {
+                      if (editDisableMsg) showInfoModal(Lang.get(editDisableMsg));
+                      return;
+                    }
                     if (group && field === group.total) {
                       const patch: Record<string, any> = { [group.total]: next };
                       group.members.forEach((m) => (patch[m] = next));
@@ -327,6 +366,31 @@ function injectPasswordEditor(
             return "*".repeat(Math.min(value.length, 6));
           },
         }),
+  } as AnyCol;
+}
+
+/** type "text" + maskRe(정규식) 컬럼에 입력마스크 에디터 주입 (센차 maskRe 대응).
+ *   - maskRe 와 매칭되는 문자만 입력 허용. 이미 cellEditor 가 있으면 유지. */
+function injectMaskEditor(
+  col: AnyCol,
+  setRowData?: (updater: any) => void,
+): AnyCol {
+  const c = col as any;
+  if (!(c.maskRe instanceof RegExp)) return col;
+  if (c.type !== "text") return col;
+  if (c.cellEditor) return col;
+
+  return {
+    ...col,
+    cellEditor: MaskedTextCellEditor,
+    cellEditorParams: {
+      ...(c.cellEditorParams ?? {}),
+      maskRe: c.maskRe,
+      setRowData,
+      ...(c.validators?.max != null
+        ? { maxLength: Number(c.validators.max) }
+        : {}),
+    },
   } as AnyCol;
 }
 
@@ -645,6 +709,70 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
   } as AnyCol;
 }
 
+/**
+ * type "address" 컬럼에 "주소찾기" 액션 셀 주입 (센차 excolumnaddress 대응).
+ *   - 돋보기 노출(편집) 정책은 다른 타입과 동일 (resolveEditMode + EDIT_STS).
+ *   - 클릭 → AddressPop 오픈. 적용 시 addrFields 매핑대로 다중필드 write-back.
+ *   - field 가 없는 액션 컬럼이므로 표시값은 없고 버튼만 렌더.
+ */
+function injectAddressCell(col: AnyCol, opts: ProcessOptions): AnyCol {
+  const c = col as any;
+  if (c.type !== "address") return col;
+  if (c.cellRenderer) return col;
+  if (opts.readOnly) return col;
+  const mode = resolveEditMode(c);
+  if (mode === "none") return col;
+
+  const fields = { ...DEFAULT_ADDR_FIELDS, ...(c.addrFields ?? {}) };
+
+  return {
+    ...col,
+    insertable: false,
+    editable: false,
+    cellRenderer: (params: any) => {
+      if (!params.data || params.node?.rowPinned) return null;
+      const editStsI = params.node?.data?.EDIT_STS === "I";
+      if (!rowEditableByMode(mode, editStsI)) return null;
+
+      const { openPopup, closePopup, setRowData } = opts;
+      const row = params.node?.data;
+      const onOpen = () => {
+        if (!openPopup) return;
+        openPopup({
+          title: Lang.get("LBL_ADDR"),
+          width: c.popupWidth ?? "lg",
+          content: (
+            <React.Suspense fallback={null}>
+              <AddressPop
+                row={row}
+                fields={fields}
+                onApply={(patch: Record<string, any>) => {
+                  commitRowChanges(setRowData, row, patch);
+                  closePopup?.();
+                }}
+                onClose={() => closePopup?.()}
+              />
+            </React.Suspense>
+          ),
+        });
+      };
+
+      return (
+        <div className="flex items-center justify-center h-full">
+          <button
+            type="button"
+            onClick={onOpen}
+            className="inline-flex items-center justify-center p-0.5 text-slate-400 hover:text-[rgb(var(--primary))]"
+            aria-label={Lang.get("LBL_FIND_ADDRESS")}
+          >
+            <Search className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      );
+    },
+  } as AnyCol;
+}
+
 /** 외부 export — 우리 커스텀 키 (type, align, codeKey 등) 를 ag-grid 에
  *  그대로 노출하지 않도록 strip 한 결과를 반환. 내부 분기에서는 type 등을
  *  활용하지만 ag-grid 에는 표준 키만 전달. required:true 컬럼은 headerClass
@@ -851,20 +979,26 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
   // + type "check" 면 체크박스 cellRenderer 주입
   const prepared = applyEditPolicy(
     injectDateCell(
-      injectPopupCell(
-        injectCheckRenderer(
-          injectValidation(
-            injectPasswordEditor(
-              injectComboEditor(
-                injectCodeRenderer(col, codeMap),
-                codeMap,
+      injectAddressCell(
+        injectPopupCell(
+          injectCheckRenderer(
+            injectValidation(
+              injectMaskEditor(
+                injectPasswordEditor(
+                  injectComboEditor(
+                    injectCodeRenderer(col, codeMap),
+                    codeMap,
+                    opts.setRowData,
+                  ),
+                  opts.setRowData,
+                ),
                 opts.setRowData,
               ),
-              opts.setRowData,
             ),
+            opts.setRowData,
+            opts.readOnly,
           ),
-          opts.setRowData,
-          opts.readOnly,
+          opts,
         ),
         opts,
       ),
