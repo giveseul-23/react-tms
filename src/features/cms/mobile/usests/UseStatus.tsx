@@ -16,12 +16,11 @@ export default function UseStatus() {
   const meta = primary.meta.length > 0 ? primary.meta : fallback.meta;
   const loading = primary.loading || (!primary.meta.length && fallback.loading);
 
-  if (loading) return null;
-
   return (
     <GridOnlyPage
       searchProps={{
         meta,
+        loading,
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,

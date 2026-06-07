@@ -27,12 +27,14 @@ interface ResolvedSearchMeta {
 export function useResolvedSearchMeta(
   menuCode: string | undefined,
   fallbackMeta?: readonly SearchMeta[],
+  /** menuCode 미사용(직접 meta 로드) 화면의 로딩 신호 — 응답 전 게이트(Skeleton) 처리용. */
+  fallbackLoading?: boolean,
 ): ResolvedSearchMeta {
   const auto = useSearchMeta(menuCode ?? "");
   const useAuto = !!menuCode;
 
   const meta = useAuto ? auto.meta : (fallbackMeta ?? []);
-  const loading = useAuto ? auto.loading : false;
+  const loading = useAuto ? auto.loading : (fallbackLoading ?? false);
   const error = useAuto ? auto.error : false;
   const menuAuth: MenuAuth = useAuto
     ? auto.menuAuth

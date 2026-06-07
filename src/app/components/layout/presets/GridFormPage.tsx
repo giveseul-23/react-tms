@@ -52,7 +52,11 @@ export function GridFormPage({
   grid,
   form,
 }: GridFormPageProps) {
-  const { meta, gate } = useResolvedSearchMeta(menuCode, searchProps.meta);
+  const { meta, gate } = useResolvedSearchMeta(
+    menuCode,
+    searchProps.meta,
+    searchProps.loading,
+  );
   if (gate) return <>{gate}</>;
   const finalSearchProps: SearchProps = { menuCode, ...searchProps, meta };
 

@@ -2,7 +2,6 @@
 "use client";
 
 import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 import TreeGrid, {
@@ -108,12 +107,11 @@ export default function MenuConfig() {
     );
   };
 
-  if (loading) return <Skeleton className="h-24" />;
-
   return (
     <GridOnlyPage
       searchProps={{
         meta,
+        loading,
         fetchFn: ctrl.fetchMenuConfigList,
         onSearchCallback: ctrl.onSearchCallback,
         filtersRef,

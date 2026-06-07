@@ -90,7 +90,11 @@ export function MasterDetailPage({
   topSlot,
   outerTabs,
 }: MasterDetailPageProps) {
-  const { meta, gate, menuAuth } = useResolvedSearchMeta(menuCode, searchProps.meta);
+  const { meta, gate, menuAuth } = useResolvedSearchMeta(
+    menuCode,
+    searchProps.meta,
+    searchProps.loading,
+  );
 
   const directionKey = storageKey ? `${storageKey}-direction` : null;
   const [direction, setDirection] = useState<Direction>(() => {

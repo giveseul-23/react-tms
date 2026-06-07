@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import { useSearchMeta } from "@/hooks/useSearchMeta";
 import { Lang } from "@/app/services/common/Lang";
@@ -39,12 +38,11 @@ export default function UiResource() {
     );
   };
 
-  if (loading) return <Skeleton className="h-24" />;
-
   return (
     <GridOnlyPage
       searchProps={{
         meta,
+        loading,
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         filtersRef,

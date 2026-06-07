@@ -26,7 +26,11 @@ export function GridOnlyPage({
   searchProps,
   grid,
 }: GridOnlyPageProps) {
-  const { meta, gate } = useResolvedSearchMeta(menuCode, searchProps.meta);
+  const { meta, gate } = useResolvedSearchMeta(
+    menuCode,
+    searchProps.meta,
+    searchProps.loading,
+  );
   if (gate) return <>{gate}</>;
   const finalSearchProps: SearchProps = { menuCode, ...searchProps, meta };
 

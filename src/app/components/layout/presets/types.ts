@@ -16,4 +16,8 @@ export type SearchProps = Omit<
 > & {
   /** preset 에 menuCode 를 넘기면 자동 로드되므로 생략 가능. */
   meta?: readonly SearchMeta[];
+  /** menuCode 없이 직접 meta 를 로드하는 화면용 — 조회조건 응답 전 렌더를 막는 로딩 신호.
+   *  preset 이 이 값으로 게이트(Skeleton) 처리. menuCode 경로의 useSearchMeta.loading 과 동일 역할.
+   *  → 화면이 useSearchMeta 의 loading 을 여기로 넘기면 View 수동 게이트가 불필요. */
+  loading?: boolean;
 };
