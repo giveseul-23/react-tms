@@ -263,6 +263,9 @@ export function useTenderReceiveDispatchController({ model }: Args) {
           });
         },
       },
+      makeSaveAction({
+        onClick: () => base.saveGrid("main", api.saveTrackingNumber),
+      }),
       {
         type: "group",
         key: "BTN_CARRIER_RATE_EXCEL_MGMT",

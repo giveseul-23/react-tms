@@ -44,42 +44,56 @@ export const apDailyManagementApi = {
     );
   },
 
-  // 일일실적 생성
+  // 일일실적(비용) 생성
   createDailyResult(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apDailyManagementService/createDailyResult`,
+      `/apDailyManagementService/createDailyAp`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  // 일일실적 취소
+  // 일일실적(비용) 취소
   cancelDailyResult(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apDailyManagementService/cancelDailyResult`,
+      `/apDailyManagementService/cancelDailyAp`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  // 일마감
+  // 일정산(배차종료처리)
   closeDaily(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apDailyManagementService/closeDaily`,
+      `/departArrivalManagementService/onDispatchEndProcessing`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  // 일마감취소
+  // 일정산취소(배차종료복원)
   cancelDailyClose(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apDailyManagementService/cancelDailyClose`,
+      `/departArrivalManagementService/onDispatchEndRestore`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  // 재계산
+  // 요율 재계산
   recalculate(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apDailyManagementService/recalculate`,
+      `/apDailyManagementService/calcRate`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // 요율 취소 / 복원
+  onRateCancel(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apDailyManagementService/onRateCancel`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  onRateCancelRestore(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apDailyManagementService/onRateCancelRestore`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
@@ -92,10 +106,36 @@ export const apDailyManagementApi = {
     );
   },
 
-  // 운임 엑셀 업로드
+  // 엑셀 업로드 (운임/유가/요율) + 요율양식 다운로드
+  uploadFreight(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apDailyManagementService/uploadFreight`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  uploadFuelFare(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apDailyManagementService/uploadFuelFare`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  uploadRate(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apDailyManagementService/uploadRate`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  downloadRatePrepare(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apDailyManagementService/downloadRatePrepare`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // (구) uploadFareExcel 호환 — 운임 업로드로 위임
   uploadFareExcel(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apDailyManagementService/uploadFareExcel`,
+      `/apDailyManagementService/uploadFreight`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },

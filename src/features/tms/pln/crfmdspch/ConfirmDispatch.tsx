@@ -40,6 +40,7 @@ export default function ConfirmDispatch() {
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
+          rowSelection="multiple"
         />
       }
       detail={

@@ -8,19 +8,29 @@ import {
   makeExcelGroupAction,
   makeCommonActions,
 } from "@/app/components/grid/actions/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { TempOilPriceModel, GridKey } from "./TempOilPriceModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import { Lang } from "@/app/services/common/Lang";
+import TempOilPricePop from "./popup/TempOilPricePop";
 
 interface Args {
   model: TempOilPriceModel;
   activeTabRef: MutableRefObject<string>;
 }
 
+const stripSep = (v: any) => String(v ?? "").replace(/[\s\-:/T]/g, "");
+const todayCompact = () => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+};
+
 export function useTempOilPriceController({ model, activeTabRef }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
+  const { openPopup, closePopup } = usePopup();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => {
@@ -55,21 +65,77 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
     [model, activeTabRef, onMasterRowClicked],
   );
 
+  // ── 전체 유가 생성 ─────────────────────────────────────────
+  const onCreateOilPriceAll = useCallback(() => {
+    openPopup({
+      title: Lang.get("LBL_CF_OIL_PRICE_CREATE"),
+      width: "md",
+      content: (
+        <TempOilPricePop
+          onConfirm={(params) => {
+            closePopup();
+            base.callAjax(api.createOilPriceAll(params)).then(() => base.search());
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [openPopup, closePopup, base]);
+
   const handleOilPriceAdd = useCallback(() => {
     const main = model.grids.master.selectedRef.current;
-    if (!main) return;
+    if (!main) {
+      base.alert(Lang.get("MSG_SELECT_NO_DATA"), Lang.get("TTL_CONFIRM"));
+      return;
+    }
     base.addRow("oilPrice", {
       LGST_GRP_CD: main.LGST_GRP_CD,
       LGST_GRP_NM: main.LGST_GRP_NM,
     });
   }, [model, base]);
 
-  const handleOilPriceSave = useCallback(() => {
-    const rows = model.grids.oilPrice.ref.current?.rows ?? [];
-    const dirty = dirtyRows(rows);
-    if (dirty.length === 0) return;
-    api.save({ dsSave: dirty }).then(() => base.search());
-  }, [model, base]);
+  const handleOilPriceSave = useCallback(
+    () =>
+      base.saveGrid("oilPrice", api.saveOilPrice, {
+        beforeSave: () => {
+          const rows = model.grids.oilPrice.rows ?? [];
+          // 추가 행: FRM<=TO
+          if (
+            rows.some(
+              (r: any) =>
+                r.EDIT_STS === "I" &&
+                r.FRM_DTTM &&
+                r.TO_DTTM &&
+                stripSep(r.FRM_DTTM) > stripSep(r.TO_DTTM),
+            )
+          ) {
+            base.alert(Lang.get("MSG_INPUT_DATE_VALIDATION"), Lang.get("TTL_ERR"));
+            return false;
+          }
+          // 삭제 행: 과거(시작일<오늘) 삭제 불가
+          if (
+            rows.some(
+              (r: any) =>
+                (r.EDIT_STS === "D" || r.delStatus === true) &&
+                r.FRM_DTTM &&
+                stripSep(r.FRM_DTTM) < todayCompact(),
+            )
+          ) {
+            base.alert(
+              Lang.get("MSG_TEMP_OIL_PRICE_DELETE_VALIDATION"),
+              Lang.get("TTL_ERR"),
+            );
+            return false;
+          }
+          return true;
+        },
+        afterSave: {
+          cascadeFrom: "master",
+          fetch: (m: any) => api.getTempOilPrice({ LGST_GRP_CD: m.LGST_GRP_CD }),
+        },
+      }),
+    [base, model.grids.oilPrice],
+  );
 
   const oilPriceActions: ActionItem[] = useMemo(
     () => [
@@ -83,10 +149,20 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
         rows: model.grids.oilPrice.rows,
       }),
     ],
-    [handleOilPriceAdd, handleOilPriceSave, model],
+    [handleOilPriceAdd, handleOilPriceSave, menuName, model],
   );
 
-  const masterActions: ActionItem[] = useMemo(() => [], []);
+  const masterActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_CRE_ALL_OIL_MGMT",
+        label: "BTN_CRE_ALL_OIL_MGMT",
+        onClick: onCreateOilPriceAll,
+      },
+    ],
+    [onCreateOilPriceAll],
+  );
 
   const periodActions: ActionItem[] = useMemo(
     () =>
@@ -95,12 +171,11 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
           excelColumns: () => model.grids.period.getExcelColumns(),
           menuCode: MENU_CODE,
           menuName: menuName,
-          fetchFn: () =>
-            api.getTempOilPriceByPeriod(model.filtersRef.current),
+          fetchFn: () => api.getTempOilPriceByPeriod(model.filtersRef.current),
           rows: model.grids.period.rows,
         },
       }),
-    [model],
+    [model, menuName],
   );
 
   return {

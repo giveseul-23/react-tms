@@ -96,6 +96,14 @@ export const tenderApi = {
     );
   },
 
+  // 송장번호(TRCK_NO) 저장 — 메인 그리드 수정행
+  saveTrackingNumber(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      "/tenderReceiveDispatchService/updateTrackNo",
+      withSession(payload.dsSave),
+    );
+  },
+
   onChangeRegVeh(payload: any) {
     return apiClient.post<commonResponse>(
       "/dispatchPlanService/saveChangeVehicle",

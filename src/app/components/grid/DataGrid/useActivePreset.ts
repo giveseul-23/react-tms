@@ -55,6 +55,11 @@ export function useActivePreset<TRow>({
   readOnly?: boolean;
   model?: any;
 }) {
+  // audit 이 인라인 객체({ delete:false } 등)면 매 render 마다 새 reference →
+  // deps 에 그대로 두면 컬럼이 매번 재생성됨. 내용 기준 stable key 로 비교.
+  const auditKey =
+    audit && typeof audit === "object" ? JSON.stringify(audit) : audit;
+
   const activeColumnDefs = useMemo(() => {
     const base =
       layoutType === "tab" && activeTab && presets
@@ -69,9 +74,10 @@ export function useActivePreset<TRow>({
     // setRowData 는 model.bind() Proxy 가 매번 새 함수 reference 를 반환 →
     // deps 에 두면 finalColumnDefs 가 매 render 마다 재생성되어 ag-grid 가
     // columnEverythingChanged 를 폭주시키고 cellEditor mount 를 차단함.
-    // 함수 자체의 호출 결과는 동일하므로 deps 에서 제외 (stale closure 무해).
+    // audit 도 인라인 객체면 동일 문제 → auditKey(직렬화) 로 비교.
+    // 함수/객체의 결과는 동일하므로 deps 에서 제외 (stale closure 무해).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layoutType, activeTab, presets, columnDefs, audit]);
+  }, [layoutType, activeTab, presets, columnDefs, auditKey]);
 
   const activeRowData = useMemo(() => {
     // escape hatch: 외부 rowData 직접 주입

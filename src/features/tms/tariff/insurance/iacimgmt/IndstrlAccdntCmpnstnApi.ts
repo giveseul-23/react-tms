@@ -68,29 +68,30 @@ export const indstrlAccdntCmpnstnApi = {
   /**
    * 저장 — menuConfig/LanguagePack 와 동일한 dsSave 패턴 (URL params + body { dsSave }).
    */
-  save(payload: any) {
-    const { dsSave, ...rest } = payload ?? {};
+  // ── 저장 (그리드별 — dirty rows 배열) ─────────────────────────
+  save(rows: any[]) {
     return apiClient.post<commonResponse>(
       `/iaciService/save`,
-      { dsSave },
-      {
-        params: {
-          ...getSessionFields(),
-          MENU_CD: MENU_CODE,
-          ...rest,
-        },
-      },
+      withSession(rows),
     );
   },
-
-  // ── 삭제 ──────────────────────────────────────────────────────
-  remove(payload: any) {
+  saveRate(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/iaciService/delete`,
-      withSession({
-        MENU_CD: MENU_CODE,
-        ...payload,
-      }),
+      `/iaciService/saveRate`,
+      withSession(rows),
+    );
+  },
+  saveChg(rows: any[]) {
+    return apiClient.post<commonResponse>(
+      `/iaciService/saveChg`,
+      withSession(rows),
+    );
+  },
+  // 보험료 일괄 등록 (월대/용차)
+  saveBatch(rows: any[]) {
+    return apiClient.post<commonResponse>(
+      `/iaciService/saveBatch`,
+      withSession(rows),
     );
   },
 };

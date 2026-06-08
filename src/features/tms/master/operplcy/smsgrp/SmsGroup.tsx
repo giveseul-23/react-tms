@@ -1,14 +1,13 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useSmsGroupModel } from "./SmsGroupModel";
 import { useSmsGroupController } from "./SmsGroupController";
 import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./SmsGroupColumns";
 
-export const MENU_CODE = "MENU_VLTN_NTFCTN_CNFG";
+export const MENU_CODE = "MENU_SMS_GRP_MGMT";
 
 export default function SmsGroup() {
   const model = useSmsGroupModel(MENU_CODE);
@@ -21,19 +20,9 @@ export default function SmsGroup() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        menuCode: MENU_CODE,
+        ...model.bindSearch(),
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
+      defaultDirection={"horizontal"}
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
@@ -41,6 +30,9 @@ export default function SmsGroup() {
           columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          audit={{
+            delete: false,
+          }}
         />
       }
       detail={

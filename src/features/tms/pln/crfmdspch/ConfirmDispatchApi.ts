@@ -14,110 +14,67 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
+const post = (url: string, payload: any) =>
+  apiClient.post<commonResponse>(
+    url,
+    Array.isArray(payload)
+      ? withSession(payload)
+      : withSession({ MENU_CD: MENU_CODE, ...payload }),
+  );
+
 export const confirmDispatchApi = {
-  getList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchConfirmDispatch`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
+  // ── 조회 ──────────────────────────────────────────────────────
+  getList: (p: any) => post(`/confirmDispatchService/searchConfirmDispatch`, p),
+  getShipmentList: (p: any) =>
+    post(`/confirmDispatchService/searchConfirmDispatchShipment`, p),
+  getShipmentDetailList: (p: any) =>
+    post(`/confirmDispatchService/searchConfirmDispatchShipmentDetail`, p),
+  getPodList: (p: any) => post(`/confirmDispatchService/searchPodByDspchNo`, p),
+  getPodEventLogList: (p: any) =>
+    post(`/confirmDispatchService/searchPodEventLogByDspchNo`, p),
+  getAssignAssistList: (p: any) =>
+    post(`/confirmDispatchService/searchAssignAssist`, p),
+  getUnassignAssistList: (p: any) =>
+    post(`/confirmDispatchService/searchUnassignAssist`, p),
+  getDockList: (p: any) => post(`/confirmDispatchService/searchDock`, p),
+  searchLdngOrder: (p: any) => post(`/confirmDispatchService/searchLdngOrder`, p),
 
-  getShipmentList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchConfirmDispatchShipment`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-
-  getShipmentDetailList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchConfirmDispatchShipmentDetail`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-
-  getPodList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchPodByDspchNo`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-
-  getPodEventLogList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchPodEventLogByDspchNo`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-
-  getAssignAssistList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchAssignAssist`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-
-  getUnassignAssistList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchUnassignAssist`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-
-  getDockList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/searchDock`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-
-  // 액션 버튼
-  startArrival(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/startArrival`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  requestInbound(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/requestInbound`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  changeVehicle(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/changeVehicle`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  confirmDispatch(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/confirmDispatch`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  cancelConfirmDispatch(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/cancelConfirmDispatch`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  requestInboundDocument(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/requestInboundDocument`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  issueReceipt(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/issueReceipt`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  inputActual(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/confirmDispatchService/inputActual`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
+  // ── 액션 (서버 실제 엔드포인트) ───────────────────────────────
+  // 출발지 작업 시작
+  onStartWork: (p: any) => post(`/departArrivalManagementService/onStartWork`, p),
+  // 상차 요청 / 취소 / 완료 / 완료취소 / 추가배송
+  onRequestLoading: (p: any) => post(`/confirmDispatchService/onRequestLoading`, p),
+  onCancelLoadingRequest: (p: any) =>
+    post(`/confirmDispatchService/onCancelLoadingRequest`, p),
+  onRequestLoadingComplete: (p: any) =>
+    post(`/confirmDispatchService/onRequestLoadingComplete`, p),
+  onCancelLoadingComplete: (p: any) =>
+    post(`/confirmDispatchService/onCancelLoadingComplete`, p),
+  onRequestLoadingAddShpm: (p: any) =>
+    post(`/confirmDispatchService/onRequestLoadingAddShpm`, p),
+  // 배차확정 / 확정취소
+  onDispatchConfirm: (p: any) => post(`/confirmDispatchService/onDispatchConfirm`, p),
+  onDispatchConfirmCancel: (p: any) =>
+    post(`/confirmDispatchService/onDispatchConfirmCancel`, p),
+  // 차량 변경 (등록차량 / 임시차량)
+  onChangeRegVeh: (p: any) => post(`/dispatchPlanService/saveChangeVehicle`, p),
+  onChangeTempVeh: (p: any) => post(`/dispatchPlanVehService/saveDspchSpotVeh`, p),
+  // 조수 배정/해제/등록
+  onAssignAssist: (p: any) => post(`/confirmDispatchService/onAssignAssist`, p),
+  onUnassignAssist: (p: any) => post(`/confirmDispatchService/onUnassignAssist`, p),
+  onAssistRegister: (p: any) => post(`/confirmDispatchService/onAssistRegister`, p),
+  // 도크 배정
+  onDockAssign: (p: any) => post(`/confirmDispatchService/onDockAssign`, p),
+  // POD(인수증) 발급 / 재발급 / 발급취소
+  createPodReportOrReprint: (p: any) =>
+    post(`/confirmDispatchService/createPodReportOrReprint`, p),
+  issuePod: (p: any) => post(`/podService/issuePod`, p),
+  cancelIssuePod: (p: any) => post(`/podService/cancelIssuePod`, p),
+  // 저장
+  saveShipmentDetail: (p: { dsSave: any[] }) =>
+    post(`/confirmDispatchService/saveShipmentDetail`, p.dsSave),
+  saveShipmentPrfr: (p: { dsSave: any[] }) =>
+    post(`/confirmDispatchService/saveShipmentPrfr`, p.dsSave),
+  saveShipmentWgtPrfr: (p: { dsSave: any[] }) =>
+    post(`/confirmDispatchService/saveShipmentWgtPrfr`, p.dsSave),
 };

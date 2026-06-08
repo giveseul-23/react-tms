@@ -121,6 +121,7 @@ const CUSTOM_KEYS = new Set([
   "defaultYn",
   "dateUnit",
   "regex",
+  "regexText",
   "maskRe",
   "editAllowField",
   "editDisableMsg",
@@ -180,7 +181,11 @@ function walkChildren(
     const withPassword = injectPasswordEditor(withEditor, setRowData) as any;
     const withMask = injectMaskEditor(withPassword, setRowData) as any;
     const withText = injectValidation(withMask) as any;
-    const withCheck = injectCheckRenderer(withText, setRowData, opts.readOnly) as any;
+    const withCheck = injectCheckRenderer(
+      withText,
+      setRowData,
+      opts.readOnly,
+    ) as any;
     const withPopup = injectPopupCell(withCheck, opts) as any;
     const withAddress = injectAddressCell(withPopup, opts) as any;
     const withDate = injectDateCell(withAddress, opts) as any;
@@ -290,11 +295,14 @@ function injectCheckRenderer(
                     const row = params.node?.data;
                     // editAllowField: 허용('Y') 아니면 안내 후 토글 차단.
                     if (editAllowField && row?.[editAllowField] !== "Y") {
-                      if (editDisableMsg) showInfoModal(Lang.get(editDisableMsg));
+                      if (editDisableMsg)
+                        showInfoModal(Lang.get(editDisableMsg));
                       return;
                     }
                     if (group && field === group.total) {
-                      const patch: Record<string, any> = { [group.total]: next };
+                      const patch: Record<string, any> = {
+                        [group.total]: next,
+                      };
                       group.members.forEach((m) => (patch[m] = next));
                       commitRowChanges(setRowData, row, patch);
                     } else if (group) {
@@ -395,6 +403,8 @@ function injectMaskEditor(
 }
 
 const GCODE_REGEX = /^[a-zA-Z0-9_ ]+$/;
+const PHONE_REGEX = /^(01[016789])[-]?\d{3,4}[-]?\d{4}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const isNumberType = (col: any) =>
   col?.type === "numeric" ||
@@ -407,6 +417,8 @@ export function getColumnRegex(col: any): RegExp | undefined {
   if (col?.type !== "text") return undefined;
   if (col.regex instanceof RegExp) return col.regex;
   if (col.validators?.regexTp === "GCODE") return GCODE_REGEX;
+  if (col.validators?.regexTp === "PHONE") return PHONE_REGEX;
+  if (col.validators?.regexTp === "EMAIL") return EMAIL_REGEX;
   return undefined;
 }
 
@@ -453,7 +465,11 @@ export function getColumnError(col: any, value: any): string | null {
   if (value == null || value === "") return null;
   if (col?.type === "text") {
     const re = getColumnRegex(col);
-    return re && !re.test(String(value)) ? Lang.get("MSG_REGEX_TEXT") : null;
+    if (re && !re.test(String(value))) {
+      // regexText(컬럼에 지정한 커스텀 메시지, 이미 문자열)가 있으면 그것으로 노출.
+      return col.regexText ?? Lang.get("MSG_REGEX_TEXT");
+    }
+    return null;
   }
   if (isNumberType(col)) return getNumberError(col, value);
   return null;

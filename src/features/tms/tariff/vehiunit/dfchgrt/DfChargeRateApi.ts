@@ -95,32 +95,92 @@ export const dfChargeRateApi = {
   },
 
   // ── 저장 (추가/수정) ──────────────────────────────────────────
-  /**
-   * 저장 — menuConfig/LanguagePack 와 동일한 dsSave 패턴 (URL params + body { dsSave }).
-   */
-  save(payload: any) {
-    const { dsSave, ...rest } = payload ?? {};
+  // ── 저장 (그리드별 — dirty rows 배열) ─────────────────────────
+  save(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/dfChargeRateService/save`,
-      { dsSave },
-      {
-        params: {
-          ...getSessionFields(),
-          MENU_CD: MENU_CODE,
-          ...rest,
-        },
-      },
+      withSession(payload.dsSave),
+    );
+  },
+  saveCharge(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/saveCharge`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveCarr(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/saveCarr`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveVehTp(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/saveVehTp`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveItmVehTp(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/saveItmVehTp`,
+      withSession(payload.dsSave),
+    );
+  },
+  saveItmVeh(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/saveItmVeh`,
+      withSession(payload.dsSave),
     );
   },
 
-  // ── 삭제 ──────────────────────────────────────────────────────
-  remove(payload: any) {
+  // ── 계약서 복사 ───────────────────────────────────────────────
+  addCopy(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dfChargeRateService/delete`,
-      withSession({
-        MENU_CD: MENU_CODE,
-        ...payload,
-      }),
+      `/dfChargeRateService/addCopy`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // ── 요율 생성 (차량유형별/차량별) ─────────────────────────────
+  addChargeRate(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/addChargeRate`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // ── 팝업 검색 ─────────────────────────────────────────────────
+  // 차량유형별금액 추가 팝업 (EachAddPop)
+  searchTariffVehicleTypeList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/searchTariffVehicleTypeList`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 차량별금액 추가 팝업 (AddVehPop)
+  searchVehPop(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/searchVehPop`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 요율생성 팝업 (AddPop) — 물류그룹/운송사/차량유형
+  searchLgstPop(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/searchLgstPop`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  searchCarrPop(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dfChargeRateService/searchCarrPop`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  searchVehicleType(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/vehicleTypeService/search`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

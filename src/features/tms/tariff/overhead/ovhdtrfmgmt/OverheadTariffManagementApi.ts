@@ -65,32 +65,48 @@ export const overheadTariffManagementApi = {
   },
 
   // ── 저장 (추가/수정) ──────────────────────────────────────────
-  /**
-   * 저장 — menuConfig/LanguagePack 와 동일한 dsSave 패턴 (URL params + body { dsSave }).
-   */
-  save(payload: any) {
-    const { dsSave, ...rest } = payload ?? {};
+  // ── 저장 (그리드별 — dirty rows 배열) ─────────────────────────
+  save(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/overheadTariffMgmtService/save`,
-      { dsSave },
-      {
-        params: {
-          ...getSessionFields(),
-          MENU_CD: MENU_CODE,
-          ...rest,
-        },
-      },
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
+    );
+  },
+  // 물류그룹(sub01) 저장
+  saveOvrheadLgstGrp(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/overheadTariffMgmtService/saveOvrheadLgstGrp`,
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
+    );
+  },
+  // 간접비항목(sub02) 저장
+  saveOvrheadLgstGrpChg(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/overheadTariffMgmtService/saveOvrheadLgstGrpChg`,
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
+    );
+  },
+  // 요율 복사
+  copyTariffOverhead(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/overheadTariffMgmtService/copyTariffOverhead`,
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
+    );
+  },
+  // 요율 생성 (AddPopup) — body { LGST_GRP_CD_LIST, CHG_LIST }
+  createTariffOverhead(payload: { LGST_GRP_CD_LIST: any[]; CHG_LIST: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/overheadTariffMgmtService/createTariffOverhead`,
+      withSession(payload),
     );
   },
 
-  // ── 삭제 ──────────────────────────────────────────────────────
-  remove(payload: any) {
+  // ── 팝업 검색 ─────────────────────────────────────────────────
+  // 생성 팝업 — 디비전별 물류센터 목록
+  searchPopLgst(payload: any) {
     return apiClient.post<commonResponse>(
-      `/overheadTariffMgmtService/delete`,
-      withSession({
-        MENU_CD: MENU_CODE,
-        ...payload,
-      }),
+      `/overheadTariffMgmtService/searchPopLgst`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

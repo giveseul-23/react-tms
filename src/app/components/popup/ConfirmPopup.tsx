@@ -1,4 +1,5 @@
 "use client";
+import { Lang } from "@/app/services/common/Lang";
 import { Check, CircleAlert } from "lucide-react";
 
 type ConfirmModalProps = {
@@ -12,7 +13,7 @@ type ConfirmModalProps = {
 export default function ConfirmModal({
   title,
   description,
-  confirmText = "확인",
+  confirmText = Lang.get("BTN_OK"),
   onClose,
   type,
 }: ConfirmModalProps) {

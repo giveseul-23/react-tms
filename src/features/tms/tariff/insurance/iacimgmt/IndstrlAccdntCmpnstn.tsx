@@ -37,6 +37,7 @@ export default function IndstrlAccdntCmpnstn() {
           columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          rowSelection="multiple"
           audit={false}
         />
       }
@@ -52,14 +53,14 @@ export default function IndstrlAccdntCmpnstn() {
             {...model.bind("rate")}
             columnDefs={DETAIL01_COLUMN_DEFS}
             codeMap={model.codeMap}
-            actions={ctrl.detailActions}
+            actions={ctrl.rateActions}
             onRowClicked={ctrl.onRateRowClicked}
           />
           <DataGrid
             {...model.bind("chg")}
             columnDefs={DETAIL02_COLUMN_DEFS}
             codeMap={model.codeMap}
-            actions={ctrl.detailActions}
+            actions={ctrl.chgActions}
           />
         </SplitPane>
       }

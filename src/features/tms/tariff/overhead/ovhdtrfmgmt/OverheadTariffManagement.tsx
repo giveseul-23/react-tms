@@ -2,7 +2,6 @@
 
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useOverheadTariffManagementModel } from "./OverheadTariffManagementModel";
@@ -51,14 +50,14 @@ export default function OverheadTariffManagement() {
             {...model.bind("subChg")}
             columnDefs={DETAIL_LEFT_COLUMN_DEFS()}
             codeMap={model.codeMap}
-            actions={ctrl.detailActions}
+            actions={ctrl.subChgActions}
             onRowClicked={ctrl.onSubChgRowClicked}
           />
           <DataGrid
             {...model.bind("subChgDtl")}
             columnDefs={DETAIL_RIGHT_COLUMN_DEFS()}
             codeMap={model.codeMap}
-            actions={ctrl.detailActions}
+            actions={ctrl.subChgDtlActions}
           />
         </SplitPane>
       }

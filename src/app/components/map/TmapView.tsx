@@ -82,6 +82,8 @@ export interface TmapViewProps {
   markers?: TmapMarker[];
   className?: string;
   onReady?: () => void;
+  /** 지도 클릭 시 클릭 좌표 콜백 (위경도 편집용). 미지정 시 클릭 무시. */
+  onMapClick?: (lat: number, lon: number) => void;
 }
 
 const DEFAULT_CENTER = { lat: 37.5665, lon: 126.978 }; // 서울시청
@@ -581,10 +583,14 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
       markers = [],
       className,
       onReady,
+      onMapClick,
     },
     ref,
   ) {
     const divRef = useRef<HTMLDivElement | null>(null);
+    // 최신 onMapClick 참조 (map 리스너는 1회 등록 — 콜백만 ref 로 갱신).
+    const onMapClickRef = useRef(onMapClick);
+    onMapClickRef.current = onMapClick;
     const mapRef = useRef<any>(null);
     const markerObjsRef = useRef<Map<string, any>>(new Map());
     const tracePolylineRef = useRef<any>(null);
@@ -650,6 +656,12 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
             width: "100%",
             height: "100%",
             zoom,
+          });
+          // 지도 클릭 → 좌표 콜백 (위경도 편집). evt.latLng._lat/_lng.
+          mapRef.current.addListener("click", (evt: any) => {
+            const lat = evt?.latLng?._lat;
+            const lon = evt?.latLng?._lng;
+            if (lat != null && lon != null) onMapClickRef.current?.(lat, lon);
           });
           setLoaded(true);
           onReady?.();

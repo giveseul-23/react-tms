@@ -39,42 +39,42 @@ export const dispatchManagerCostApi = {
   // 운영자확정취소
   cancelOperatorConfirm(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostManagementService/cancelOperatorConfirm`,
+      `/dispatchManagerCostManagementService/saveRateOpConfirmCancel`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
-  // 관리자승인
+  // 관리자확정(승인)
   approveByManager(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostManagementService/approveByManager`,
+      `/dispatchManagerCostManagementService/saveRateMgConfirm`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
-  // 관리자승인취소
+  // 관리자확정취소
   cancelManagerApprove(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostManagementService/cancelManagerApprove`,
+      `/dispatchManagerCostManagementService/saveRateMgConfirmCancel`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   // 비용마감
   closeCost(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostManagementService/closeCost`,
+      `/dispatchManagerCostManagementService/saveRateClose`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   // 비용마감취소
   cancelCostClose(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostManagementService/cancelCostClose`,
+      `/dispatchManagerCostManagementService/saveRateCloseCancel`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   // 비용상세 저장
   saveCostDetail(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/dispatchManagerCostManagementService/saveCostDetail`,
+      `/dispatchManagerCostManagementService/saveDetail`,
       withSession(rows),
     );
   },

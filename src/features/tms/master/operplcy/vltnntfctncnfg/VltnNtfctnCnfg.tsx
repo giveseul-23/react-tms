@@ -37,6 +37,7 @@ export default function VltnNtfctnCnfg() {
           columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          audit={false}
         />
       }
       detail={

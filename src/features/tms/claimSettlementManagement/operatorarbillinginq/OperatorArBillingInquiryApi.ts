@@ -41,7 +41,7 @@ export const operatorArBillingInquiryApi = {
   // 증빙문서
   getAttachmentList(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/searchOperatorArBillingAttachment`,
+      `/operatorArBillingInquiryService/searchOperatorArBillingAttachmentPreview`,
       withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
@@ -69,30 +69,58 @@ export const operatorArBillingInquiryApi = {
     );
   },
 
+  // 현재계약 재계산
   recalculateSales(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/recalculateSales`,
+      `/operatorArBillingInquiryService/recalculateCurrentContract`,
       withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
+  // 일정산 / 일정산취소
   dailyClose(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/dailyClose`,
+      `/operatorArBillingInquiryService/dailySettlement`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+  cancelDailyClose(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/operatorArBillingInquiryService/cancelDailySettlement`,
       withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
+  // 청구확정 / 확정취소
   confirmSales(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/confirmSales`,
+      `/operatorArBillingInquiryService/confirmAr`,
       withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
-
   cancelSettlementDoc(payload: any) {
     return apiClient.post<commonResponse>(
-      `/operatorArBillingInquiryService/cancelSettlementDoc`,
+      `/operatorArBillingInquiryService/cancelConfirmAr`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+  // 청구(매출) 취소
+  cancelAr(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/operatorArBillingInquiryService/cancelAr`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+  // GL 코드 변경 / 확정요율·사유 저장
+  changeGeneralLedgerCode(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/operatorArBillingInquiryService/changeGeneralLedgerCode`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+  saveConfirmRateAndReason(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/operatorArBillingInquiryService/saveConfirmRateAndReason`,
       withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },

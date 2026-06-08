@@ -47,14 +47,6 @@ export const locationApi = {
     );
   },
 
-  // 일자금지
-  getDateProhibitionList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/locationService/searchDateProhibition`,
-      withSession({ MENU_CD: MENU_CD, ...payload }),
-    );
-  },
-
   // 등록권역
   getRegisteredZoneList(payload: any) {
     return apiClient.post<commonResponse>(
@@ -135,12 +127,35 @@ export const locationApi = {
     );
   },
 
+  // 권역추가 팝업 — 권역 검색 (서버 zoneSearch)
+  searchZoneForAdd(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/locationService/zoneSearch`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  // 권역추가 팝업 — 적용 저장 (서버 saveZone, jsonData = { ZONE_LIST, LOC_LIST }).
+  saveZone(payload: { ZONE_LIST: any[]; LOC_LIST: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/saveZone`,
+      {
+        ZONE_LIST: withSession(payload.ZONE_LIST),
+        LOC_LIST: withSession(payload.LOC_LIST),
+      },
+      { params: { ...getSessionFields(), MENU_CD: MENU_CD } },
+    );
+  },
+
   // ── 메인 저장 ────────────────────────────────────────────────
   // base.saveGrid 가 호출하는 시그니처: ({ dsSave }) => Promise
   save(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/save`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
 
@@ -149,73 +164,120 @@ export const locationApi = {
   saveEntryRestriction(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveVehTypeInfo`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveAssignedVehicle(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveAssignVeh`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
-  saveDateProhibition(payload: { dsSave: any[] }) {
+  // 제외차량 (서버 saveLocExcldVeh)
+  saveExcludedVehicle(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
-      `/locationService/saveDateProhibition`,
-      withSession(payload.dsSave),
+      `/locationService/saveLocExcldVeh`,
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveRegisteredZone(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
-      `/locationService/saveZoneRegist`,
-      withSession(payload.dsSave),
+      `/locationService/deleteRegion`,
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveHoliday(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveClosedDay`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   savePreferredCarrier(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/savePreferedCarr`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveArrivalRequestTime(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveDeliveryTimeWindow`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
+    );
+  },
+  // 도크 (서버 dockService/saveMain)
+  saveDock(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/dockService/saveMain`,
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveSms(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveSms`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveLocationRole(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveLocRoleTp`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveLocSales(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveLocSales`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveEtc(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveLocEtc`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
   saveOrderTypePlanId(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveLocOrdPln`,
-      withSession(payload.dsSave),
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
     );
   },
 };

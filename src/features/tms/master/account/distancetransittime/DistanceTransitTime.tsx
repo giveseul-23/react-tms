@@ -1,7 +1,6 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useDistanceTransitTimeModel } from "./DistanceTransitTimeModel";
@@ -36,7 +35,7 @@ export default function DistanceTransitTime() {
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          audit={false}
+          rowSelection="multiple"
         />
       }
       detail={
@@ -45,7 +44,7 @@ export default function DistanceTransitTime() {
           columnDefs={HISTORY_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.historyActions}
-          audit={false}
+          rowSelection="multiple"
         />
       }
     />

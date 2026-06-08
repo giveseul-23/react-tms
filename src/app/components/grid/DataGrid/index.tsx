@@ -58,6 +58,8 @@ type DataGridProps<TRow> = {
   onRowDoubleClicked?: (row: TRow) => void;
   /** 탭 전환 시 콜백 — 외부에서 activeTab 을 추적할 때 사용 */
   onTabChange?: (key: string) => void;
+  /** 외부에서 활성 탭을 제어 — 지정 시 이 값으로 탭이 전환된다(미지정 시 내부 state 로 동작). */
+  activeTab?: string;
 
   disableAutoSize?: boolean;
   rowSelection?: string;
@@ -178,6 +180,7 @@ export default function DataGrid<TRow>({
   overrideRowData,
   gridOptions,
   onTabChange,
+  activeTab: activeTabProp,
   audit,
   setRowData,
   readOnly,
@@ -193,8 +196,12 @@ export default function DataGrid<TRow>({
   const { openPopup, closePopup } = usePopup();
   const [selectedRows, setSelectedRows] = useState<TRow[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>(
-    tabs?.[0]?.key ?? null,
+    activeTabProp ?? tabs?.[0]?.key ?? null,
   );
+  // 외부 제어(activeTabProp) 가 바뀌면 내부 활성 탭 동기화 — 사용자 클릭 전환은 그대로 유지.
+  useEffect(() => {
+    if (activeTabProp != null) setActiveTab(activeTabProp);
+  }, [activeTabProp]);
   const internalGridRef = useRef<any>(null);
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRef = useRef<TRow | null>(null);

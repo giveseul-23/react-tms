@@ -61,39 +61,56 @@ export const dispatchOperatorCostApi = {
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+  // 요율 계산 (요율생성)
   calculateCost(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/calculateCost`,
+      `/tariffOperationService/makeRate`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+  // 이동거리 재계산 (일괄/단건 공통)
   adjustBulkDistance(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/adjustBulkDistance`,
+      `/dispatchOperatorCostManagementService/recalcDistance`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   recalculateMoveDistance(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/recalculateMoveDistance`,
+      `/dispatchOperatorCostManagementService/recalcDistance`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+  // 일정산 처리 / 취소
   closeDaily(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/closeDaily`,
+      `/apDailyManagementService/saveDlySetl`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+  cancelCloseDaily(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apDailyManagementService/saveDlySetlCancel`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 운영자 비용 확정 / 확정취소
   confirmCost(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/confirmCost`,
+      `/dispatchOperatorCostManagementService/saveRateOpConfirm`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+  cancelConfirmCost(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/dispatchOperatorCostManagementService/saveRateOpConfirmCancel`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 비용(정산) 삭제
   deleteSettlement(payload: any) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/deleteSettlement`,
+      `/dispatchOperatorCostManagementService/deleteAp`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },

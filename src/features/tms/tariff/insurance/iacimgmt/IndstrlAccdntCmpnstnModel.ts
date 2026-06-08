@@ -8,8 +8,8 @@ export function useIndstrlAccdntCmpnstnModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
   const { stores } = useCommonStores({
-    xxxTcd: { sqlProp: "CODE", keyParam: "XXX_TCD" },
-    yyyTcd: { sqlProp: "CODE", keyParam: "YYY_TCD" },
+    apProcTp: { sqlProp: "CODE", keyParam: "AP_PROC_TP" },
+    rdngRcd: { sqlProp: "CODE", keyParam: "RDNG_RCD" },
   });
 
   const codeMap = useMemo(() => {

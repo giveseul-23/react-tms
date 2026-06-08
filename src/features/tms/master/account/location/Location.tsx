@@ -14,6 +14,7 @@ import {
   HOLIDAY_COLUMN_DEFS,
   PREFERRED_CARRIER_COLUMN_DEFS,
   ARRIVAL_REQUEST_TIME_COLUMN_DEFS,
+  // DOCK_COLUMN_DEFS,
   SMS_COLUMN_DEFS,
   LOCATION_ROLE_COLUMN_DEFS,
   LOC_SALES_COLUMN_DEFS,
@@ -50,6 +51,8 @@ export default function Location() {
       detail={
         <DataGrid
           layoutType="tab"
+          activeTab={model.detailTab}
+          onTabChange={model.setDetailTab}
           tabs={[
             { key: "ENTRY_RESTRICTION", label: "LBL_RESTRICTED_VEHICLE_TYPE" },
             { key: "ASSIGNED_VEHICLE", label: "LBL_ASSIGNED_VEHICLE" },
@@ -58,6 +61,7 @@ export default function Location() {
             { key: "HOLIDAY", label: "LBL_CLOSED_DAY" },
             { key: "PREFERRED_CARRIER", label: "LBL_PREFERRED_CARRIER" },
             { key: "ARRIVAL_REQUEST_TIME", label: "LBL_DELIVERY_TIME_WINDOW" },
+            // { key: "DOCK", label: "MENU_DOCK_MGMT" },
             { key: "SMS", label: "LBL_SMS" },
             { key: "LOCATION_ROLE", label: "LBL_LOC_ROLE_TP" },
             { key: "LOC_SALES", label: "LBL_LOC_SALES" },
@@ -135,6 +139,16 @@ export default function Location() {
                 />
               ),
             },
+            // DOCK: {
+            //   render: () => (
+            //     <DataGrid
+            //       {...model.bind("dock")}
+            //       columnDefs={DOCK_COLUMN_DEFS}
+            //       codeMap={model.codeMap}
+            //       actions={ctrl.subActions.dock}
+            //     />
+            //   ),
+            // },
             SMS: {
               render: () => (
                 <DataGrid

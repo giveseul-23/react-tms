@@ -26,6 +26,7 @@ export default function DfChargeRate() {
       menuCode={MENU_CODE}
       defaultSizes={[40, 60]}
       searchProps={{
+        moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
@@ -61,7 +62,7 @@ export default function DfChargeRate() {
                   <DataGrid
                     {...model.bind("rtItem")}
                     columnDefs={RT_ITM_COLUMN_DEFS}
-                    actions={ctrl.detailActions}
+                    actions={ctrl.rtItemActions}
                     onRowClicked={ctrl.onRtItemRowClicked}
                     audit={{ updatePerson: false, updateTime: false }}
                   />
@@ -72,7 +73,7 @@ export default function DfChargeRate() {
                   <DataGrid
                     {...model.bind("rtCarr")}
                     columnDefs={RT_CARR_COLUMN_DEFS}
-                    actions={ctrl.detailActions}
+                    actions={ctrl.rtCarrActions}
                     audit={{ updatePerson: false, updateTime: false }}
                   />
                 ),
@@ -82,7 +83,7 @@ export default function DfChargeRate() {
                   <DataGrid
                     {...model.bind("rtVehTp")}
                     columnDefs={RT_VEH_TP_COLUMN_DEFS}
-                    actions={ctrl.detailActions}
+                    actions={ctrl.rtVehTpActions}
                     audit={{ updatePerson: false, updateTime: false }}
                   />
                 ),
@@ -102,7 +103,7 @@ export default function DfChargeRate() {
                   <DataGrid
                     {...model.bind("rtItemVehTp")}
                     columnDefs={RT_ITM_VEH_TP_COLUMN_DEFS}
-                    actions={ctrl.detailActions}
+                    actions={ctrl.rtItemVehTpActions}
                   />
                 ),
               },
@@ -111,7 +112,7 @@ export default function DfChargeRate() {
                   <DataGrid
                     {...model.bind("rtItemVeh")}
                     columnDefs={RT_ITM_VEH_COLUMN_DEFS}
-                    actions={ctrl.detailActions}
+                    actions={ctrl.rtItemVehActions}
                   />
                 ),
               },

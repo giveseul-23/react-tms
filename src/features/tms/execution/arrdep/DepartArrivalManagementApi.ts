@@ -60,45 +60,67 @@ export const departArrivalManagementApi = {
     );
   },
 
+  // 작업시작 (출발지)
   startLoading(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/startLoading`,
-      withSession({ MENU_CD: MENU_CD, ...payload }),
+      `/departArrivalManagementService/onStartWork`,
+      withSession(payload),
     );
   },
 
+  // 운송시작
   startTransport(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/startTransport`,
-      withSession({ MENU_CD: MENU_CD, ...payload }),
+      `/departArrivalManagementService/onStartTransportation`,
+      withSession(payload),
     );
   },
 
+  // 확정복귀
   cancelTransport(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/cancelTransport`,
-      withSession({ MENU_CD: MENU_CD, ...payload }),
+      `/departArrivalManagementService/onReturnToConfirm`,
+      withSession(payload),
     );
   },
 
+  // 배송확정/하차취소
   cancelDeliveryComplete(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/cancelDeliveryComplete`,
-      withSession({ MENU_CD: MENU_CD, ...payload }),
+      `/departArrivalManagementService/onDeliveredCancel`,
+      withSession(payload),
     );
   },
 
+  // 하차완료(운행종료)
   completeTransport(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/completeTransport`,
-      withSession({ MENU_CD: MENU_CD, ...payload }),
+      `/departArrivalManagementService/onDelivered`,
+      withSession(payload),
     );
   },
 
+  // 이동거리 재계산 (RE_SET)
   resetDispatch(payload: any) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/resetDispatch`,
-      withSession({ MENU_CD: MENU_CD, ...payload }),
+      `/departArrivalManagementService/recalcDistance`,
+      withSession(payload),
+    );
+  },
+
+  // 정산구분 변경 (RE_SET)
+  changeDspchApProcTp(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/departArrivalManagementService/changeDspchApProcTp`,
+      withSession(payload),
+    );
+  },
+
+  // 계획ID 변경 (RE_SET)
+  changeDspchPlnId(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/departArrivalManagementService/changeDspchPlnId`,
+      withSession(payload),
     );
   },
 
@@ -109,17 +131,11 @@ export const departArrivalManagementApi = {
     );
   },
 
-  saveStopover(rows: any[]) {
+  // 컨테이너(피박스 회수) 저장
+  confirmPBoxRecovery(rows: any[]) {
     return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/saveStopover`,
+      `/departArrivalManagementService/saveCntr`,
       withSession(rows),
-    );
-  },
-
-  confirmPBoxRecovery(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/confirmPBoxRecovery`,
-      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 };

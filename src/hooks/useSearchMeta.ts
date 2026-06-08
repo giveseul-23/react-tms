@@ -361,6 +361,7 @@ export function useSearchMeta(menuCode: string) {
             if (cancelled) return;
           } else {
             // 재시도 소진 — 빈 화면 노출 대신 error 게이트 유지
+            console.log("[SearchMeta] 재시도 소진 → error 게이트", menuCode);
             setMeta([]);
             setError(true);
             setLoading(false);

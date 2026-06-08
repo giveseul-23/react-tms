@@ -22,6 +22,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_TARIFF_CODE",
     field: "TRF_CD",
+    isPrimaryKey: true,
   },
   {
     type: "text",
@@ -79,7 +80,12 @@ export const MAIN_COLUMN_DEFS = [
 //bottom - left
 export const RT_ITM_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
+  {
+    type: "text",
+    headerName: "LBL_RATE_ITEM_CD",
+    field: "CHG_CD",
+    isPrimaryKey: true,
+  },
   {
     type: "text",
     headerName: "LBL_RATE_ITEM_NAME",
@@ -94,7 +100,12 @@ export const RT_ITM_COLUMN_DEFS = [
 
 export const RT_CARR_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_CARRIER_CODE", field: "CARR_CD" },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_CODE",
+    field: "CARR_CD",
+    isPrimaryKey: true,
+  },
   {
     type: "text",
     headerName: "LBL_CARRIER_NAME",
@@ -109,7 +120,12 @@ export const RT_CARR_COLUMN_DEFS = [
 
 export const RT_VEH_TP_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_TYPE_CODE",
+    field: "VEH_TP_CD",
+    isPrimaryKey: true,
+  },
   {
     type: "text",
     headerName: "LBL_VEHICLE_TYPE_NAME",
@@ -120,7 +136,12 @@ export const RT_VEH_TP_COLUMN_DEFS = [
 //bottom - right
 export const RT_ITM_VEH_TP_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE_CODE", field: "VEH_TP_CD" },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_TYPE_CODE",
+    field: "VEH_TP_CD",
+    isPrimaryKey: true,
+  },
   {
     type: "text",
     headerName: "LBL_VEHICLE_TYPE_NAME",
@@ -180,6 +201,7 @@ export const RT_ITM_VEH_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_VEH_NO",
     field: "VEH_NO",
+    isPrimaryKey: true,
   },
   {
     type: "text",

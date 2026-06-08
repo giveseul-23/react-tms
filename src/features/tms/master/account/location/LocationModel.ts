@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
@@ -10,6 +11,7 @@ export type GridKey =
   | "holiday"
   | "preferredCarrier"
   | "arrivalRequestTime"
+  | "dock"
   | "sms"
   | "locationRole"
   | "locSales"
@@ -33,7 +35,12 @@ export function useLocationModel(menuCode: string) {
     locPrimeTp: { sqlProp: "CODE", keyParam: "LOC_PRIME_TP" },
   });
 
-  return { ...base, codeMap };
+  // detail 탭 활성 키 — 추가(차량/권역) 후 해당 탭으로 자동 전환용.
+  const [detailTab, setDetailTab] = useState<GridKey | string>(
+    "ENTRY_RESTRICTION",
+  );
+
+  return { ...base, codeMap, detailTab, setDetailTab };
 }
 
 export type LocationModel = ReturnType<typeof useLocationModel>;

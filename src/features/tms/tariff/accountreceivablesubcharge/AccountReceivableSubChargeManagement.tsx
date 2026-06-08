@@ -28,7 +28,7 @@ export default function AccountReceivableSubChargeManagement() {
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
       }}
-      defaultDirection="horizontal"
+      defaultDirection="vertical"
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
@@ -56,7 +56,7 @@ export default function AccountReceivableSubChargeManagement() {
           <DataGrid
             {...model.bind("detail01")}
             columnDefs={DETAIL01_COLUMN_DEFS}
-            actions={ctrl.detailActions}
+            actions={ctrl.detail01Actions}
             onRowClicked={ctrl.onDetail01RowClicked}
             audit={{
               rowStatus: false,
@@ -70,7 +70,7 @@ export default function AccountReceivableSubChargeManagement() {
           <DataGrid
             {...model.bind("detail02")}
             columnDefs={DETAIL02_COLUMN_DEFS}
-            actions={ctrl.detailActions}
+            actions={ctrl.detail02Actions}
             audit={{
               rowStatus: false,
               insertPerson: false,

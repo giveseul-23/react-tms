@@ -16,6 +16,7 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
 import { MENU_CODE } from "./AccountReceivableSubChargeManagement";
+import { DsSave } from "@/app/components/grid/gridCommon";
 
 type commonResponse = {
   rows: [];
@@ -69,29 +70,32 @@ export const accountReceivableSubChargeManagementApi = {
   /**
    * 저장 — menuConfig/LanguagePack 와 동일한 dsSave 패턴 (URL params + body { dsSave }).
    */
-  save(payload: any) {
-    const { dsSave, ...rest } = payload ?? {};
+  // ── 저장 (그리드별 — dirty rows 배열) ─────────────────────────
+  save(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/accountReceivableSubChargeManagementService/save`,
-      { dsSave },
-      {
-        params: {
-          ...getSessionFields(),
-          MENU_CD: MENU_CODE,
-          ...rest,
-        },
-      },
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
     );
   },
-
-  // ── 삭제 ──────────────────────────────────────────────────────
-  remove(payload: any) {
+  // 비용(sub01) 저장
+  saveCost(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
-      `/accountReceivableSubChargeManagementService/delete`,
-      withSession({
-        MENU_CD: MENU_CODE,
-        ...payload,
-      }),
+      `/accountReceivableSubChargeManagementService/saveCost`,
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
+    );
+  },
+  // 조건(sub02) 저장
+  saveCostCond(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/accountReceivableSubChargeManagementService/saveCostCond`,
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
+    );
+  },
+  // 추가 팝업 — 청구요율 라인 검색
+  searchArTrfChgLinePopup(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/accountReceivableSubChargeManagementService/searchArTrfChgLinePopup`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

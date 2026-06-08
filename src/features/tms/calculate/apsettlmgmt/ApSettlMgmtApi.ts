@@ -86,47 +86,70 @@ export const apSettlMgmtApi = {
     );
   },
 
+  // 비용센터(GL) 저장
   addCostCenter(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apSettlMgmtService/addCostCenter`,
+      `/apSettlMgmtService/saveCostGlInfo`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   saveCostCenter({ dsSave }: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
-      `/apSettlMgmtService/saveCostCenter`,
+      `/apSettlMgmtService/saveCostGlInfo`,
       withSession(dsSave),
     );
   },
 
   // 메인 액션
+  // 마감(지급정산 생성) / 마감취소
   createClose(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apSettlMgmtService/createClose`,
+      `/apSettlMgmtService/createApSettlement`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   cancelClose(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apSettlMgmtService/cancelClose`,
+      `/apSettlMgmtService/cancelApSettlement`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+  // 확정 / 확정취소
+  confirmApSettlement(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apSettlMgmtService/confirmApSettlement`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  confirmCancelApSettlement(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apSettlMgmtService/confirmCancelApSettlement`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 월비용배분 전송 / 전송취소
   sendSap(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apSettlMgmtService/sendSap`,
+      `/apSettlMgmtService/sendMnthyCstDist`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
   cancelSapSend(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apSettlMgmtService/cancelSapSend`,
+      `/apSettlMgmtService/cancelSendMnthyCstDist`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+  // 월비용배분 실행 / 취소
   manageAllocation(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apSettlMgmtService/manageAllocation`,
+      `/apSettlMgmtService/exeMnthyCstDist`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  cancelAllocation(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/apSettlMgmtService/cancelMnthyCstDist`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
@@ -136,9 +159,10 @@ export const apSettlMgmtApi = {
       withSession(dsSave),
     );
   },
+  // 증빙 첨부 저장
   attachEvidence(payload: any) {
     return apiClient.post<commonResponse>(
-      `/apSettlMgmtService/attachEvidence`,
+      `/apSettlMgmtService/saveDoc`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
