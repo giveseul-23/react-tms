@@ -66,8 +66,8 @@ export default function TmsUserAccountPop({ onConfirm, onClose }: Props) {
   }, []);
 
   const searchFields: GridSearchField[] = [
-    { label: Lang.get("LBL_USER_ID"), value: usrId, onChange: setUsrId },
-    { label: Lang.get("LBL_USER_NAME"), value: usrNm, onChange: setUsrNm },
+    { label: "LBL_USER_ID", value: usrId, onChange: setUsrId },
+    { label: "LBL_USER_NAME", value: usrNm, onChange: setUsrNm },
   ];
 
   return (

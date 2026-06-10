@@ -42,13 +42,13 @@ export default function UserAccountSelectPopup({ onApply, onClose }: Props) {
 
   const fields: GridSearchField[] = [
     {
-      label: Lang.get("LBL_USER_ID"),
+      label: "LBL_USER_ID",
       value: userId,
       onChange: setUserId,
       placeholder: Lang.get("LBL_INPUT"),
     },
     {
-      label: Lang.get("LBL_USER_NAME"),
+      label: "LBL_USER_NAME",
       value: userName,
       onChange: setUserName,
       placeholder: Lang.get("LBL_INPUT"),

@@ -104,19 +104,19 @@ export default function DfChargeRateAddPop({ addType, onApplied, onClose }: Prop
   const searchFields: GridSearchField[] = [
     {
       type: "date",
-      label: Lang.get("LBL_FROM_DATE"),
+      label: "LBL_FROM_DATE",
       value: frm,
       onChange: setFrm,
     },
     {
       type: "date",
-      label: Lang.get("LBL_TO_DATE"),
+      label: "LBL_TO_DATE",
       value: to,
       onChange: setTo,
     },
     {
       type: "combo",
-      label: Lang.get("LBL_VEH_TRANS_TCD"),
+      label: "LBL_VEH_TRANS_TCD",
       value: transTcd,
       onChange: setTransTcd,
       options: stores.transTcd ?? [],

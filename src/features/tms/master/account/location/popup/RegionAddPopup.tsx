@@ -180,7 +180,7 @@ export default function RegionAddPopup({ locRows, onApplied, onClose }: Props) {
   const searchFields: GridSearchField[] = [
     {
       type: "popup",
-      label: Lang.get("LBL_LOGISTICS_GROUP_CODE"),
+      label: "LBL_LOGISTICS_GROUP_CODE",
       code: lgstGrpCd,
       name: lgstGrpNm,
       onChangeCode: setLgstGrpCd,
@@ -189,17 +189,17 @@ export default function RegionAddPopup({ locRows, onApplied, onClose }: Props) {
     },
     {
       type: "popup",
-      label: Lang.get("LBL_ZONE_CD"),
+      label: "LBL_ZONE_CD",
       code: znCd,
       name: znNm,
       onChangeCode: setZnCd,
       onChangeName: setZnNm,
       onClickSearch: openZnPopup,
     },
-    { label: Lang.get("LBL_ZONE_NM"), value: znName, onChange: setZnName },
+    { label: "LBL_ZONE_NM", value: znName, onChange: setZnName },
     {
       type: "popup",
-      label: Lang.get("LBL_COUNTRY_CODE"),
+      label: "LBL_COUNTRY_CODE",
       code: ctryCd,
       name: ctryNm,
       onChangeCode: setCtryCd,
@@ -207,7 +207,7 @@ export default function RegionAddPopup({ locRows, onApplied, onClose }: Props) {
       onClickSearch: openCountryPopup,
     },
     {
-      label: Lang.get("LBL_COUNTRY_NAME"),
+      label: "LBL_COUNTRY_NAME",
       value: ctryName,
       onChange: setCtryName,
     },

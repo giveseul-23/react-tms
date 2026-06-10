@@ -115,37 +115,37 @@ export default function AccountReceivableSubChargeAddPopup({
 
   const searchFields: GridSearchField[] = [
     {
-      label: Lang.get("LBL_CUSTOMER_CODE"),
+      label: "LBL_CUSTOMER_CODE",
       value: f.CUST_CD,
       onChange: (v) => set("CUST_CD", v),
     },
     {
-      label: Lang.get("LBL_CUSTOMER_NAME"),
+      label: "LBL_CUSTOMER_NAME",
       value: f.CUST_NM,
       onChange: (v) => set("CUST_NM", v),
     },
     {
-      label: Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE"),
+      label: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE",
       value: f.AR_TRF_CD,
       onChange: (v) => set("AR_TRF_CD", v),
     },
     {
-      label: Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME"),
+      label: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME",
       value: f.AR_TRF_NM,
       onChange: (v) => set("AR_TRF_CD", v),
     },
     {
-      label: Lang.get("LBL_RATE_ITEM_CODE"),
+      label: "LBL_RATE_ITEM_CODE",
       value: f.AR_CHG_CD,
       onChange: (v) => set("AR_CHG_CD", v),
     },
     {
-      label: Lang.get("LBL_RATE_ITEM_NAME"),
+      label: "LBL_RATE_ITEM_NAME",
       value: f.AR_CHG_NM,
       onChange: (v) => set("AR_CHG_CD", v),
     },
     {
-      label: Lang.get("LBL_USE_YN"),
+      label: "LBL_USE_YN",
       value: f.USE_YN,
       type: "combo",
       options: stores.useYn,

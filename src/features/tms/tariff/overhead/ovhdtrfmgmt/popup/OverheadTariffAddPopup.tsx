@@ -135,13 +135,13 @@ export default function OverheadTariffAddPopup({ onApplied, onClose }: Props) {
 
   const searchFields: GridSearchField[] = [
     {
-      label: Lang.get("LBL_CONTRACT_DESCRIPTION"),
+      label: "LBL_CONTRACT_DESCRIPTION",
       value: desc,
       onChange: setDesc,
     },
     {
       type: "popup",
-      label: Lang.get("LBL_CARRIER"),
+      label: "LBL_CARRIER",
       code: carr.cd,
       name: carr.nm,
       onChangeCode: (v) => setCarr((p) => ({ ...p, cd: v })),
@@ -150,19 +150,19 @@ export default function OverheadTariffAddPopup({ onApplied, onClose }: Props) {
     },
     {
       type: "date",
-      label: Lang.get("LBL_FROM_DTTM"),
+      label: "LBL_FROM_DTTM",
       value: frm,
       onChange: setFrm,
     },
     {
       type: "date",
-      label: Lang.get("LBL_TO_DTTM"),
+      label: "LBL_TO_DTTM",
       value: to,
       onChange: setTo,
     },
     {
       type: "combo",
-      label: Lang.get("LBL_OVRHD_CHG_TP"),
+      label: "LBL_OVRHD_CHG_TP",
       value: ovrhdTp,
       onChange: setOvrhdTp,
       options: stores.ovrhdChgTp ?? [],

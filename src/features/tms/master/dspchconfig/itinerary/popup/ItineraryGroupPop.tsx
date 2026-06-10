@@ -47,19 +47,19 @@ export function ItineraryGroupPop({ lgstGrpCd, onApply, onClose }: Props) {
 
   const fields: GridSearchField[] = [
     {
-      label: Lang.get("LBL_LOGISTICS_GROUP_CODE"),
+      label: "LBL_LOGISTICS_GROUP_CODE",
       value: lgstGrpCd,
       onChange: () => { },
       disable: true,
     },
     {
-      label: Lang.get("LBL_ITNR_GRP_CD"),
+      label: "LBL_ITNR_GRP_CD",
       value: itnrGrpCd,
       onChange: setItnrGrpCd,
       placeholder: Lang.get("LBL_INPUT"),
     },
     {
-      label: Lang.get("LBL_ITNR_GRP_NM"),
+      label: "LBL_ITNR_GRP_NM",
       value: itnrGrpNm,
       onChange: setItnrGrpNm,
       placeholder: Lang.get("LBL_INPUT"),

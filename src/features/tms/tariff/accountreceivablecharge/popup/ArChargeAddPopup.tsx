@@ -9,7 +9,6 @@ import {
 } from "@/app/components/popup/GridSearchPopupLayout";
 import { AccountReceivableChargeManagementApi as api } from "../AccountReceivableChargeManagementApi";
 import { MENU_CD } from "../AccountReceivableChargeManagement";
-import { Lang } from "@/app/services/common/Lang";
 
 export type ArChargeAddPopupProps = {
   onApply: (row: any) => void;
@@ -86,12 +85,12 @@ export default function ArChargeAddPopup({
 
   const fields: GridSearchField[] = useMemo(
     () => [
-      { label: Lang.get("LBL_CUSTOMER_CODE"), value: custCode, onChange: setCustCode },
-      { label: Lang.get("LBL_CUSTOMER_NAME"), value: custName, onChange: setCustName },
-      { label: Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE"), value: arTrfCd, onChange: setArTrfCd },
-      { label: Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME"), value: arTrfNm, onChange: setArTrfNm },
+      { label: "LBL_CUSTOMER_CODE", value: custCode, onChange: setCustCode },
+      { label: "LBL_CUSTOMER_NAME", value: custName, onChange: setCustName },
+      { label: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE", value: arTrfCd, onChange: setArTrfCd },
+      { label: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME", value: arTrfNm, onChange: setArTrfNm },
       {
-        label: Lang.get("LBL_USE_YN"),
+        label: "LBL_USE_YN",
         value: useYn,
         onChange: setUseYn,
         type: "combo",

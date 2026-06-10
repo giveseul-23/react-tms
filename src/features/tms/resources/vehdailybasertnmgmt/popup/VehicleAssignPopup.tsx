@@ -102,7 +102,7 @@ export default function VehicleAssignPopup({
     () => [
       {
         type: "popup",
-        label: Lang.get("LBL_OPARB_LGST_GRP_CD"),
+        label: "LBL_OPARB_LGST_GRP_CD",
         code: logisticGroupCode,
         name: logisticGroupName,
         disable: true,
@@ -111,7 +111,7 @@ export default function VehicleAssignPopup({
         onClickSearch: openLgstGrpPopup,
       },
       {
-        label: Lang.get("LBL_VEH_NO"),
+        label: "LBL_VEH_NO",
         value: vehicleNo,
         onChange: setVehicleNo,
       },

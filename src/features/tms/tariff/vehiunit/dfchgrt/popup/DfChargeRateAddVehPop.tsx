@@ -99,11 +99,11 @@ export default function DfChargeRateAddVehPop({
 
   const searchFields: GridSearchField[] = [
     {
-      label: Lang.get("LBL_VEHICLE_TYPE"),
+      label: "LBL_VEHICLE_TYPE",
       value: vehTpCd,
       onChange: setVehTpCd,
     },
-    { label: Lang.get("LBL_VEH_NO"), value: vehNo, onChange: setVehNo },
+    { label: "LBL_VEH_NO", value: vehNo, onChange: setVehNo },
   ];
 
   return (

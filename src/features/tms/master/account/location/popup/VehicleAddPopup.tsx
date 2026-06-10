@@ -206,7 +206,7 @@ export default function VehicleAddPopup({
   const searchFields: GridSearchField[] = [
     {
       type: "popup",
-      label: Lang.get("LBL_LOGISTICS_GROUP_CODE"),
+      label: "LBL_LOGISTICS_GROUP_CODE",
       code: lgstGrpCd,
       name: lgstGrpNm,
       onChangeCode: setLgstGrpCd,
@@ -215,7 +215,7 @@ export default function VehicleAddPopup({
     },
     {
       type: "popup",
-      label: Lang.get("LBL_CARRIER_CODE"),
+      label: "LBL_CARRIER_CODE",
       code: carrCd,
       name: carrNm,
       onChangeCode: setCarrCd,
@@ -224,17 +224,17 @@ export default function VehicleAddPopup({
     },
     {
       type: "popup",
-      label: Lang.get("LBL_VEHICLE_TYPE"),
+      label: "LBL_VEHICLE_TYPE",
       code: vehTp,
       name: vehTpNm,
       onChangeCode: setVehTp,
       onChangeName: setVehTpNm,
       onClickSearch: openVehTpPopup,
     },
-    { label: Lang.get("LBL_VEH_NO"), value: vehNo, onChange: setVehNo },
+    { label: "LBL_VEH_NO", value: vehNo, onChange: setVehNo },
     {
       type: "popup",
-      label: Lang.get("LBL_DRIVER_CODE"),
+      label: "LBL_DRIVER_CODE",
       code: drvrId,
       name: drvrNm,
       onChangeCode: setDrvrId,

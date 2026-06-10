@@ -85,25 +85,25 @@ export default function LatLonEditPopup({ row, onApply, onClose }: Props) {
 
   const searchFields: GridSearchField[] = [
     {
-      label: Lang.get("LBL_ADDR"),
+      label: "LBL_ADDR",
       value: addr1,
       onChange: setAddr1,
       disable: true,
     },
     {
-      label: Lang.get("LBL_DETAIL_ADDRESS2"),
+      label: "LBL_DETAIL_ADDRESS2",
       value: addr2,
       onChange: setAddr2,
       disable: true,
     },
     {
-      label: Lang.get("LBL_LATITUDE"),
+      label: "LBL_LATITUDE",
       value: lat,
       onChange: setLat,
       disable: true,
     },
     {
-      label: Lang.get("LBL_LONGITUDE"),
+      label: "LBL_LONGITUDE",
       value: lon,
       onChange: setLon,
       disable: true,

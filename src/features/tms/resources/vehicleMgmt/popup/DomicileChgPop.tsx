@@ -105,7 +105,7 @@ export default function DomicileChgPop({ params, onApplied, onClose }: Props) {
         fields={[
           {
             type: "popup",
-            label: Lang.get("LBL_OLD_DOMICILE"),
+            label: "LBL_OLD_DOMICILE",
             code: oldDomi.cd,
             name: oldDomi.nm,
             onChangeCode: (v) => setOldDomi((p) => ({ ...p, cd: v })),
@@ -115,7 +115,7 @@ export default function DomicileChgPop({ params, onApplied, onClose }: Props) {
           },
           {
             type: "popup",
-            label: Lang.get("LBL_CHANGED_DOMICILE"),
+            label: "LBL_CHANGED_DOMICILE",
             code: chgDomi.cd,
             name: chgDomi.nm,
             onChangeCode: (v) => setChgDomi((p) => ({ ...p, cd: v })),

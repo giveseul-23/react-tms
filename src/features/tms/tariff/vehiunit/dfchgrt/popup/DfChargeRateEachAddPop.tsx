@@ -64,12 +64,12 @@ export default function DfChargeRateEachAddPop({
 
   const searchFields: GridSearchField[] = [
     {
-      label: Lang.get("LBL_VEHICLE_TYPE_CODE"),
+      label: "LBL_VEHICLE_TYPE_CODE",
       value: code,
       onChange: setCode,
     },
     {
-      label: Lang.get("LBL_VEHICLE_TYPE_NAME"),
+      label: "LBL_VEHICLE_TYPE_NAME",
       value: name,
       onChange: setName,
     },
