@@ -254,7 +254,7 @@ export function useVehicleMgmtController({ model }: Args) {
       }
       const row = rows[0];
       openPopup({
-        title: Lang.get("LBL_TEL_CHG_POP"),
+        title: "LBL_TEL_CHG_POP",
         width: "lg",
         content: (
           <PhoneNumberChgPop
@@ -286,7 +286,7 @@ export function useVehicleMgmtController({ model }: Args) {
       if (!guardHasData(rows)) return;
       const lgstGrpCd = rows[0]?.LGST_GRP_CD;
       openPopup({
-        title: Lang.get("BTN_CHAGE_CARR"),
+        title: "BTN_CHAGE_CARR",
         width: "2xl",
         content: (
           <CommonPopup
@@ -316,7 +316,7 @@ export function useVehicleMgmtController({ model }: Args) {
   const onChangeDomicile = useCallback(() => {
     const f = (model.filtersRef.current ?? {}) as Record<string, any>;
     openPopup({
-      title: Lang.get("LBL_CHG_DOMICILE"),
+      title: "LBL_CHG_DOMICILE",
       width: "4xl",
       content: (
         <DomicileChgPop
@@ -342,7 +342,7 @@ export function useVehicleMgmtController({ model }: Args) {
       const rows = e?.data ?? [];
       if (!guardHasData(rows)) return;
       openPopup({
-        title: Lang.get("LBL_VEH_SEND_TARGET_SYS"),
+        title: "LBL_VEH_SEND_TARGET_SYS",
         width: "4xl",
         content: (
           <VehSendTargetSysPop

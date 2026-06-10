@@ -95,7 +95,7 @@ export function useAccountReceivableSubChargeManagementController({
   // ── 메인 추가 (청구요율 라인 선택 팝업) ────────────────────
   const onOpenAdd = useCallback(() => {
     openPopup({
-      title: Lang.get("MENU_ACCOUNT_RECEIVABLE_CONTRACT_CHARGE_MANAGEMENT"),
+      title: "MENU_ACCOUNT_RECEIVABLE_CONTRACT_CHARGE_MANAGEMENT",
       width: "full",
       content: (
         <AccountReceivableSubChargeAddPopup

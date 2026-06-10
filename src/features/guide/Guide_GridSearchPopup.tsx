@@ -13,7 +13,7 @@
 //
 // 이 템플릿이 보여주는 패턴
 // - GridSearchPopupLayout 한 줄로 조회바 + 선택배지 + 그리드 + 버튼 골격 다 해결
-// - fields 배열: text/combo 혼용 (콤보는 useCommonStores 로 옵션 로드)
+// - fields 배열: text / combo / date / popup 혼용 (콤보는 useCommonStores 로 옵션 로드)
 // - columnDefs 의 sendField: payload key 매핑 (RETURN_* 등)
 // - 팝업은 dumb: onConfirm 그대로 전달. 도메인 메모/플래그(CHGVEH_MEMO 등)는
 //   호출측 Controller 의 onConfirm 콜백에서 머지 (액션 책임)
@@ -50,6 +50,9 @@ export default function GuideGridSearchPopup({
   const [vehicleNo, setVehicleNo] = useState(initialValues.VEH_NO ?? "");
   const [driverName, setDriverName] = useState("");
   const [region, setRegion] = useState("");
+  const [baseDate, setBaseDate] = useState(""); // date 타입
+  const [lgstCode, setLgstCode] = useState(""); // popup 타입 — 코드
+  const [lgstName, setLgstName] = useState(""); // popup 타입 — 코드명
 
   // ── 3. 콤보 옵션 (있다면) ─────────────────────────────────
   const { stores } = useCommonStores({
@@ -94,21 +97,48 @@ export default function GuideGridSearchPopup({
       VEH_NO: vehicleNo,
       DRVR_NM: driverName,
       PRFRD_ZN_CD: region,
+      BASE_DT: baseDate,
+      LGST_GRP_CD: lgstCode,
       VEH_OP_TP: OPER_TYPE,
     });
   };
 
-  // ── 8. fields 배열 — text / combo 혼용 가능 ───────────────
+  // ── 8. fields 배열 — GridSearchField 4종 전부 (text / combo / date / popup) ──
+  //   type 생략 = "text". combo 는 options, popup 은 code/name/onClickSearch.
+  //   disable: true 면 타입 불문 값 수정 불가(조회 스코프 고정).
   const fields: GridSearchField[] = [
+    // text (기본 — type 생략 가능)
     { label: "차량번호", value: vehicleNo, onChange: setVehicleNo },
-    { label: "운전자명", value: driverName, onChange: setDriverName },
+    // text + disable (조회 스코프 고정 — 입력 잠금)
+    {
+      label: "운전자명",
+      value: driverName,
+      onChange: setDriverName,
+      disable: true,
+    },
+    // combo (options = 공통코드 배열)
     {
       label: "선호권역",
+      type: "combo",
       value: region,
       onChange: setRegion,
-      type: "combo",
       options: stores.preferredZone,
       placeholder: "선택",
+    },
+    // date (날짜 입력)
+    { label: "기준일", type: "date", value: baseDate, onChange: setBaseDate },
+    // popup (코드 + 코드명 + 돋보기) — onClickSearch 로 picker(CommonPopup 등) 오픈
+    {
+      label: "물류운영그룹",
+      type: "popup",
+      code: lgstCode,
+      name: lgstName,
+      onChangeCode: setLgstCode,
+      onChangeName: setLgstName,
+      onClickSearch: () => {
+        // 예) openPopup({ title: "BTN_SEARCH", content: <CommonPopup ... /> })
+        //     선택 시 setLgstCode(picked.CODE); setLgstName(picked.NAME);
+      },
     },
   ];
 

@@ -466,8 +466,9 @@ export function getColumnError(col: any, value: any): string | null {
   if (col?.type === "text") {
     const re = getColumnRegex(col);
     if (re && !re.test(String(value))) {
-      // regexText(컬럼에 지정한 커스텀 메시지, 이미 문자열)가 있으면 그것으로 노출.
-      return col.regexText ?? Lang.get("MSG_REGEX_TEXT");
+      // regexText(커스텀 메시지 키/문자열) — validators 안 우선, 최상위 fallback. Lang.get 으로 키 번역.
+      const msg = col.validators?.regexText ?? col.regexText;
+      return msg ? Lang.get(msg) : Lang.get("MSG_REGEX_TEXT");
     }
     return null;
   }

@@ -100,7 +100,7 @@ export function useDfChargeRateController({ model }: Args) {
       const main = requireMain();
       if (!main) return;
       openPopup({
-        title: Lang.get(title),
+        title: title,
         width: "2xl",
         content: (
           <CommonPopup
@@ -132,7 +132,7 @@ export function useDfChargeRateController({ model }: Args) {
   const onGenerate = useCallback(
     (addType: "VEH_TP" | "VEH") => {
       openPopup({
-        title: Lang.get("LBL_GEN_DF_RATE_VEH"),
+        title: "LBL_GEN_DF_RATE_VEH",
         width: "full",
         content: (
           <DfChargeRateAddPop
@@ -154,7 +154,7 @@ export function useDfChargeRateController({ model }: Args) {
     const main = requireMain();
     if (!main) return;
     openPopup({
-      title: Lang.get("LBL_TARIFF_COPY"),
+      title: "LBL_TARIFF_COPY",
       width: "xl",
       content: (
         <DfChargeRateCopyPop
@@ -178,7 +178,7 @@ export function useDfChargeRateController({ model }: Args) {
       return;
     }
     openPopup({
-      title: Lang.get("LBL_VEHICLE_TYPE"),
+      title: "LBL_VEHICLE_TYPE",
       width: "4xl",
       content: (
         <DfChargeRateEachAddPop
@@ -218,7 +218,7 @@ export function useDfChargeRateController({ model }: Args) {
       return;
     }
     openPopup({
-      title: Lang.get("LBL_ASSIGNED_VEHICLE"),
+      title: "LBL_ASSIGNED_VEHICLE",
       width: "full",
       content: (
         <DfChargeRateAddVehPop

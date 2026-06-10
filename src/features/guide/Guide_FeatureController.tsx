@@ -31,12 +31,16 @@ import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./Guide_FeatureColumns";
 import { MENU_CODE, AUTH } from "./Guide_Feature";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { FeatureModel, GridKey } from "./Guide_FeatureModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { Lang } from "@/app/services/common/Lang";
 
 interface ControllerArgs {
   model: FeatureModel;
 }
 
 export function useFeatureController({ model }: ControllerArgs) {
+  const { menuName } = useMenuMeta();
+
   const base = useBaseController<GridKey>({ model });
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
@@ -96,7 +100,7 @@ export function useFeatureController({ model }: ControllerArgs) {
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("main", api.save, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+        confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
       }),
     [base],
   );
@@ -125,7 +129,7 @@ export function useFeatureController({ model }: ControllerArgs) {
         columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "화면명",
+        menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
         // 엑셀 업로드 / 양식 다운로드를 그룹 "안"에 포함 (필요한 화면만).
@@ -135,7 +139,7 @@ export function useFeatureController({ model }: ControllerArgs) {
         templateDownload: { gridId: AUTH.grids.main },
       }),
     ],
-    [onAddMain, onSaveMain, base, model],
+    [onAddMain, onSaveMain, menuName, model.grids.main, model.filtersRef, base],
   );
 
   const detailActions: ActionItem[] = useMemo(
@@ -146,7 +150,7 @@ export function useFeatureController({ model }: ControllerArgs) {
         columns: DETAIL_COLUMN_DEFS,
         excelColumns: () => model.grids.detail.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "화면명-상세",
+        menuName: menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main
@@ -156,7 +160,13 @@ export function useFeatureController({ model }: ControllerArgs) {
         rows: model.grids.detail.rows,
       }),
     ],
-    [onAddDetail, onSaveDetail, model],
+    [
+      onAddDetail,
+      onSaveDetail,
+      menuName,
+      model.grids.detail,
+      model.grids.main.selectedRef,
+    ],
   );
 
   return {

@@ -73,7 +73,7 @@ export function useOverheadTariffManagementController({ model }: Args) {
   // ── 생성 팝업 ──────────────────────────────────────────────
   const onOpenAdd = useCallback(() => {
     openPopup({
-      title: Lang.get("BTN_ADD"),
+      title: "BTN_ADD",
       width: "full",
       content: (
         <OverheadTariffAddPopup
@@ -129,7 +129,7 @@ export function useOverheadTariffManagementController({ model }: Args) {
       buildRow: (picked: any) => Record<string, any>,
     ) => {
       openPopup({
-        title: Lang.get(title),
+        title: title,
         width: "2xl",
         content: (
           <CommonPopup

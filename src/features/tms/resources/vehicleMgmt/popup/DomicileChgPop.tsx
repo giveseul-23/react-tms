@@ -60,7 +60,7 @@ export default function DomicileChgPop({ params, onApplied, onClose }: Props) {
   // 차고지 코드 검색 팝업 (스택)
   const openDomiPicker = (onPick: (cd: string, nm: string) => void) => {
     openPopup({
-      title: Lang.get("LBL_DOMICILE"),
+      title: "LBL_DOMICILE",
       width: "2xl",
       content: (
         <CommonPopup

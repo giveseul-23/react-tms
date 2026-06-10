@@ -74,12 +74,53 @@
 | `codeKey` | 코드→라벨 + combo 옵션 |
 | `isPrimaryKey` | row 식별 컬럼 (`rowKeys`/`autoSelectFirstRow` 자동) |
 | `align` | 자동 정렬 덮어쓰기 |
-| `decimalPlaces` | `numeric` 고정 소수 자릿수 포맷 |
+| `decimalPlaces` | `numeric` 고정 소수 자릿수 포맷 + 천단위 콤마 (→ §6) |
+| `summable` | `true` 면 그 `field` 합계를 하단 고정 합계행으로 자동 생성 (→ §6) |
 | `dateUnit` | `date` 단위(`year`/`month`/`day`) |
 | `addrFields` | `type:"address"` write-back 필드 매핑 부분 오버라이드 (기본 `ctryCd:"CTRY_CD"`…`dtlAddr2:"DTL_ADDR2"`) |
 | `colId` | `field` 없는 액션 컬럼(`address` 등)의 식별자 |
 | `required` | 헤더 `*` + 저장 검증 |
-| `validators` | `{ max, min, integerLength, pointLength, regex, regexTp }` |
+| `validators` | `{ required, max, min, integerLength, pointLength, regex, regexTp }` (→ §6) |
+| `validators.regexText` | regex 위반 시 노출할 커스텀 메시지 키/문자열 — 없으면 `MSG_REGEX_TEXT` (→ §6) |
+| `editAllowField` / `editDisableMsg` | `check` 토글 조건부 허용 필드 + 차단 시 안내 메시지 (→ §6) |
 | `excelColName` | 엑셀 헤더 덮어쓰기 (→ [excel-download.md](./excel-download.md)) |
 | `excelPrint` | 엑셀 출력 포함/제외 (→ [excel-download.md](./excel-download.md)) |
 | `noLang` | `headerName` 을 리터럴로 사용 |
+
+## 6. 검증(validators) · 숫자 콤마 · 합계행 · 편집조건
+
+### 6.1 검증 (`validators`)
+
+`{ required, max, min, integerLength, pointLength, regex, regexTp }` — 타입별 동작이 다르다. 검증은 **실시간(cellRenderer "!" 마커 + 셀 밖 floating 메시지) + 저장(`saveGrid`) 차단** 양쪽 공용.
+
+| 키 | 적용 타입 | 동작 |
+|---|---|---|
+| `required` | 공통 | 헤더 `*` + 저장 시 비어있음 검증. (`required: true` 또는 `validators.required: true` 동일) |
+| `max` / `min` | `numeric` | `valueSetter` 가 범위 밖 값 **입력 자체를 거부**(메시지 없음) |
+| `max` | `text` | 입력 `maxLength` 제한 |
+| `integerLength` | `numeric` | 정수부 자릿수 초과 시 마커 + `MSG_VALID_INT_LEN_MAX` |
+| `pointLength` | `numeric` | 소수부 자릿수 초과 시 마커 + `MSG_VALID_POINT_LEN_MAX`. **`0` 이면 정수만**(`MSG_VALID_NUM_INT`) |
+| `regex` | `text` | `RegExp` 직접 지정 → 위반 시 마커 + 메시지 |
+| `regexTp` | `text` | 사전 정의 패턴 — `"GCODE"` / `"PHONE"` / `"EMAIL"`. `regex` 대신 타입명만으로 검증 |
+
+- **regex 위반 메시지**: **`validators.regexText`**(커스텀 메시지 키/문자열) 우선 → `Lang.get` 으로 번역 노출, 없으면 `MSG_REGEX_TEXT` 기본 메시지. (`regexTp` 와 같은 `validators` 안에 둘 것 — 최상위 `col.regexText` 도 fallback 으로 읽지만 권장 위치는 `validators`)
+- `regex` / `regexTp` 는 **`type:"text"` 에서만** 동작.
+
+### 6.2 숫자 천단위 콤마
+
+- `type:"numeric"` / `dataType:"number"` / `cellDataType:"number"` → **우측 정렬**.
+- **`decimalPlaces`** 지정 시 `toLocaleString` 으로 **고정 소수 자릿수 + 천단위 콤마** 포맷. (커스텀 `valueFormatter` 가 있으면 그게 우선)
+- 별도 `numberComma` 같은 키는 없다 — 콤마 포맷은 numeric + `decimalPlaces` 로 제어.
+
+### 6.3 합계행 (`summable`)
+
+- 컬럼에 **`summable: true`** → DataGrid 가 그 `field` 의 합계를 **하단 고정 합계행(ag-grid `pinnedBottomRowData`)** 으로 자동 생성.
+- 값의 콤마를 제거한 뒤 숫자로 합산하며, 숫자가 아닌 값은 무시. 그룹 컬럼의 `children` 도 재귀로 수집한다.
+- 컬럼 파일에 `summable: true` 만 달면 되고, View 에서 별도 prop 불필요.
+
+### 6.4 체크 토글 조건부 허용 (`editAllowField`)
+
+`type:"check"` 컬럼에서 행 조건에 따라 체크 토글을 막을 때 사용 (센차 `excheckcolumn editAllowField` 대응).
+
+- **`editAllowField`**: 행의 해당 필드 값이 **`"Y"` 인 행에서만** 체크 토글 허용.
+- 허용 조건이 아닌 행에서 토글 시 — `editDisableMsg`(있으면 `Lang.get` 안내 모달) 표시 후 **토글 차단**.

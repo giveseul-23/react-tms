@@ -164,7 +164,8 @@ export function useXxxModel(menuCode: string) {
 
 ## 6. Api 레이어 규칙
 
-- `MENU_CODE` 는 **View** 에서 export, Api 가 import (순환 import 안 됨 — 함수 본문에서만 사용)
+- **`MENU_CD`/`MENU_CODE` 는 오직 View(`화면.tsx`)에서 한 번만 정의·export 한다.** Controller/Api/Model/Columns 등 **그 외 파일은 재정의 금지 — 무조건 `import { MENU_CODE } from "./화면"`** 으로 가져다 쓴다(순환 import 안 됨 — Api/Controller 함수 본문에서만 사용). 여러 파일에 흩어 정의하면 값 불일치 버그가 난다(예: 한쪽 `MENU_ERROR_LOG`, 다른쪽 `MENU_EXCEPTION_LOG`).
+- **`menuName` 은 항상 `const { menuName } = useMenuMeta()`** 로 가져온다(리터럴 하드코딩 금지). 엑셀 파일명 등 메뉴명이 필요한 곳은 이 값 하나만 쓴다 (→ [excel-download.md](./excel-download.md)).
 - 객체 형태로 export: `export const featureApi = { getList, save, ... }`
 - 모든 요청에 `MENU_CD: MENU_CODE` 포함 + `withSession` 으로 세션 필드 주입
 - 저장 API 는 `dsSave` 패턴: body `{ dsSave }`, params 에 세션/MENU_CD/그 외 키

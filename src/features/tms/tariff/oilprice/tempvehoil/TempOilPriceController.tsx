@@ -68,7 +68,7 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
   // ── 전체 유가 생성 ─────────────────────────────────────────
   const onCreateOilPriceAll = useCallback(() => {
     openPopup({
-      title: Lang.get("LBL_CF_OIL_PRICE_CREATE"),
+      title: "LBL_CF_OIL_PRICE_CREATE",
       width: "md",
       content: (
         <TempOilPricePop

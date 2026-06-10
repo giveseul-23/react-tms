@@ -48,7 +48,7 @@ export default function DfChargeRateCopyPop({
 
   const pick = (sqlId: string, onPick: (cd: string, nm: string) => void) =>
     openPopup({
-      title: Lang.get("BTN_SEARCH"),
+      title: "BTN_SEARCH",
       width: "2xl",
       content: (
         <CommonPopup

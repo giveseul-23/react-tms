@@ -82,7 +82,7 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
         return;
       }
       openPopup({
-        title: Lang.get(title),
+        title: title,
         width: "lg",
         content: (
           <IaciCreatePop
@@ -175,7 +175,7 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
     const sqlId =
       rate.AP_PROC_TP === "20" ? "selectIaciChgDfCodeName" : "selectIaciChgCodeName";
     openPopup({
-      title: Lang.get("LBL_AP_CTG"),
+      title: "LBL_AP_CTG",
       width: "2xl",
       content: (
         <CommonPopup

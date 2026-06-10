@@ -64,7 +64,7 @@ export function useAccountReceivableChargeController({
   const onAddMain = useCallback(() => {
     base.resetGrids(["sub01"]);
     openPopup({
-      title: Lang.get("MENU_ACCOUNT_RECEIVABLE_CONTRACT_MANAGEMENT"),
+      title: "MENU_ACCOUNT_RECEIVABLE_CONTRACT_MANAGEMENT",
       width: "2xl",
       content: (
         <ArChargeAddPopup

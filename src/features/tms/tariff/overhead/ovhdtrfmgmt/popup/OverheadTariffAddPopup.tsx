@@ -87,7 +87,7 @@ export default function OverheadTariffAddPopup({ onApplied, onClose }: Props) {
 
   const pickCarr = () =>
     openPopup({
-      title: Lang.get("LBL_CARRIER"),
+      title: "LBL_CARRIER",
       width: "2xl",
       content: (
         <CommonPopup
