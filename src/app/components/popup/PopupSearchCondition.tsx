@@ -44,7 +44,8 @@ export type GridSearchField = GridSearchInputField | GridSearchPopupField;
 
 type PopupSearchConditionProps = {
   fields: GridSearchField[];
-  onSearch: () => void;
+  /** 미지정 시 헤더의 "조회" 버튼을 렌더하지 않는다 (검색 없는 입력 카드용). */
+  onSearch?: () => void;
   /** 한 줄에 표시할 칸 수. 기본 min(필드수, 3). */
   columns?: number;
   searchBtnDisable?: boolean;
@@ -64,20 +65,22 @@ export function PopupSearchCondition({
         <div className="flex items-center gap-1.5 leading-none">
           <SlidersHorizontal className="w-3.5 h-3.5 text-color/80 flex-shrink-0" />
           <span className="text-[12px] font-semibold text-color tracking-widest uppercase leading-none">
-            조회조건
+            {searchBtnDisable ? "조회조건" : "조건"}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="xs"
-          disabled={searchBtnDisable}
-          onClick={onSearch}
-          className="h-6 px-3 rounded-full bg-white/15 hover:bg-white border border-white/30 text-color hover:text-[rgb(var(--primary))] text-[12px] font-semibold transition-all flex items-center gap-1"
-          style={{ lineHeight: 1 }}
-        >
-          <Search className="w-3 h-3 flex-shrink-0" />
-          <span className="leading-none">조회</span>
-        </Button>
+        {onSearch && (
+          <Button
+            variant="ghost"
+            size="xs"
+            disabled={searchBtnDisable}
+            onClick={onSearch}
+            className="h-6 px-3 rounded-full bg-white/15 hover:bg-white border border-white/30 text-color hover:text-[rgb(var(--primary))] text-[12px] font-semibold transition-all flex items-center gap-1"
+            style={{ lineHeight: 1 }}
+          >
+            <Search className="w-3 h-3 flex-shrink-0" />
+            <span className="leading-none">조회</span>
+          </Button>
+        )}
       </div>
 
       <div
@@ -103,7 +106,7 @@ export function PopupSearchCondition({
                     if (e.key !== "Enter") return;
                     if (f.onEnterSubmit)
                       f.onEnterSubmit(e.currentTarget.value, "");
-                    else onSearch();
+                    else onSearch?.();
                   }}
                   disabled={f.disable}
                   className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-[80px] shrink-0 disabled:cursor-not-allowed disabled:text-slate-400"
@@ -117,7 +120,7 @@ export function PopupSearchCondition({
                     if (e.key !== "Enter") return;
                     if (f.onEnterSubmit)
                       f.onEnterSubmit("", e.currentTarget.value);
-                    else onSearch();
+                    else onSearch?.();
                   }}
                   disabled={f.disable}
                   className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 flex-1 min-w-0 disabled:cursor-not-allowed disabled:text-slate-400"
@@ -147,7 +150,7 @@ export function PopupSearchCondition({
                 type="date"
                 value={f.value}
                 onChange={(e) => f.onChange(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onSearch()}
+                onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
                 disabled={f.disable}
                 className="text-[12px] text-slate-700 bg-transparent outline-none border-none w-full disabled:cursor-not-allowed disabled:text-slate-400"
               />
@@ -155,7 +158,7 @@ export function PopupSearchCondition({
               <input
                 value={f.value}
                 onChange={(e) => f.onChange(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onSearch()}
+                onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
                 disabled={f.disable}
                 className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full disabled:cursor-not-allowed disabled:text-slate-400"
                 placeholder={f.placeholder ?? "입력"}

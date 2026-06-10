@@ -10,6 +10,10 @@ import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { vehicleMgmtApi as api } from "../vehicleMgmtApi";
 import { Lang } from "@/app/services/common/Lang";
+import {
+  PopupSearchCondition,
+  type GridSearchField,
+} from "@/app/components/popup/PopupSearchCondition";
 
 type Props = {
   vehRows: any[];
@@ -18,19 +22,38 @@ type Props = {
 };
 
 const VEH_COLUMN_DEFS = [
-  { type: "text", headerName: "LBL_VEHICLE_CODE", field: "VEH_ID", align: "center" },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_CODE",
+    field: "VEH_ID",
+    align: "center",
+  },
   { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO" },
   { type: "text", headerName: "LBL_CARRIER", field: "CARR_NM" },
 ];
 
 const INV_COLUMN_DEFS = [
-  { type: "text", headerName: "LBL_INV_SYS_ID", field: "INV_SYS_ID", align: "center" },
+  {
+    type: "text",
+    headerName: "LBL_INV_SYS_ID",
+    field: "INV_SYS_ID",
+    align: "center",
+  },
   { type: "text", headerName: "LBL_INV_SYS_NM", field: "INV_SYS_NM" },
-  { type: "text", headerName: "LBL_PLANT_CD", field: "PLANT_CD", align: "center" },
+  {
+    type: "text",
+    headerName: "LBL_PLANT_CD",
+    field: "PLANT_CD",
+    align: "center",
+  },
   { type: "text", headerName: "LBL_PLANT_NM", field: "PLANT_NM" },
 ];
 
-export default function VehSendTargetSysPop({ vehRows, onConfirm, onClose }: Props) {
+export default function VehSendTargetSysPop({
+  vehRows,
+  onConfirm,
+  onClose,
+}: Props) {
   const [invRows, setInvRows] = useState<any[]>([]);
   const [selectedInv, setSelectedInv] = useState<any[]>([]);
   const [ifTcd, setIfTcd] = useState<"I" | "U" | "">("");
@@ -51,33 +74,34 @@ export default function VehSendTargetSysPop({ vehRows, onConfirm, onClose }: Pro
 
   const canSend = !!ifTcd && selectedInv.length > 0;
 
+  // 헤더(디비전 + 전송구분) — 조회조건 카드 스타일(조회 버튼 없음).
+  const headerFields: GridSearchField[] = [
+    {
+      type: "text",
+      label: "LBL_DIV",
+      value: divLabel,
+      onChange: () => {},
+      disable: true,
+    },
+    {
+      type: "combo",
+      label: "LBL_INTERFACE_TCD",
+      value: ifTcd,
+      onChange: (v) => setIfTcd(v as "I" | "U" | ""),
+      options: [
+        { CODE: "I", NAME: Lang.get("LBL_NEW_SEND") },
+        {
+          CODE: "U",
+          NAME: `${Lang.get("LBL_UPDATE")}/${Lang.get("BTN_RESEND")}`,
+        },
+      ],
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-3 w-full h-full">
-      {/* 헤더 — 디비전 + 전송구분 */}
-      <div className="flex items-center gap-6 text-[12px] px-1">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{Lang.get("LBL_DIV")}</span>
-          <span className="text-muted-foreground">{divLabel}</span>
-        </div>
-        <label className="flex items-center gap-1.5">
-          <input
-            type="radio"
-            name="if_tcd"
-            checked={ifTcd === "I"}
-            onChange={() => setIfTcd("I")}
-          />
-          {Lang.get("LBL_NEW_SEND")}
-        </label>
-        <label className="flex items-center gap-1.5">
-          <input
-            type="radio"
-            name="if_tcd"
-            checked={ifTcd === "U"}
-            onChange={() => setIfTcd("U")}
-          />
-          {`${Lang.get("LBL_UPDATE")}/${Lang.get("BTN_RESEND")}`}
-        </label>
-      </div>
+      {/* 헤더 — 디비전 + 전송구분 (조회조건 카드, 조회 버튼 없음) */}
+      <PopupSearchCondition fields={headerFields} />
 
       {/* 차량 / 시스템 그리드 */}
       <div className="flex gap-3" style={{ height: 380 }}>
@@ -113,7 +137,9 @@ export default function VehSendTargetSysPop({ vehRows, onConfirm, onClose }: Pro
           variant="outline"
           size="xs"
           disabled={!canSend}
-          onClick={() => onConfirm({ invSystems: selectedInv, ifTcd: ifTcd as "I" | "U" })}
+          onClick={() =>
+            onConfirm({ invSystems: selectedInv, ifTcd: ifTcd as "I" | "U" })
+          }
           className="btn-primary btn-primary:hover"
         >
           <Send className="w-3 h-3" />
