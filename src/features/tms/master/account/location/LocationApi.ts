@@ -147,6 +147,44 @@ export const locationApi = {
     );
   },
 
+  //선호운송협력사 팝업 조회 api
+  // 권역추가 팝업 — 권역 검색 (서버 zoneSearch)
+  searchVehPopLgstGrp(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/vehicleService/searchVehPopLgstGrp`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  searchVehPopCarr(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/vehicleService/searchVehPopCarr`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  searchVehPopTrck(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/vehicleService/searchVehPopTrck`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  //주문유형별계획ID 조회
+  searchOrderTp(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/locationService/searchOrderTp`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  searchLgstPln(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/locationService/searchLgstPln`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
   // ── 메인 저장 ────────────────────────────────────────────────
   // base.saveGrid 가 호출하는 시그니처: ({ dsSave }) => Promise
   save(payload: { dsSave: any[] }) {
@@ -274,6 +312,16 @@ export const locationApi = {
   saveOrderTypePlanId(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/locationService/saveLocOrdPln`,
+      withSession({
+        dsSave: payload.dsSave,
+        MENU_CD: MENU_CD,
+      }),
+    );
+  },
+
+  deleteLocOrdPln(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/locationService/deleteLocOrdPln`,
       withSession({
         dsSave: payload.dsSave,
         MENU_CD: MENU_CD,

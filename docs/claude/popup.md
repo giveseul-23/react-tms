@@ -120,6 +120,7 @@ const onEditLatLon = useCallback(() => {
 ```
 
 - **위젯 타입**: `text` / `combo` / `date` / `popup`(코드+코드명+돋보기). 필드별 `disable: true` 로 개별 잠금(조회 스코프 고정 등).
+- **필드 `label` 은 언어팩 키를 그대로 넘긴다** — `PopupSearchCondition` 이 내부에서 번역한다(라벨 규칙 → [dev-workflow.md](./dev-workflow.md) §5). 단 키 형식(`LBL_*`/대문자·언더스코어)만 `Lang.get`, 이미 번역된 문자열·한글 리터럴은 그대로 통과하므로 기존 `Lang.get(...)`/리터럴 호출도 안전(권장은 키 전달).
 - 그리드 검색 팝업이면 `GridSearchPopupLayout` 을 쓰면 된다 — 조회조건 영역을 내부에서 `PopupSearchCondition` 으로 렌더한다.
 
 **`PopupSearchCondition` 이 렌더하는 DOM/className** (참고 — 직접 짤 일은 없지만 스타일 기준):

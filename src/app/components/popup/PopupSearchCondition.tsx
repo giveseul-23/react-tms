@@ -8,6 +8,11 @@
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { ComboFilter } from "@/app/components/Search/filters/ComboFilter";
+import { Lang } from "@/app/services/common/Lang";
+
+// 라벨 내부 번역 — 언어팩 키 형식(LBL_*/BTN_* 등 대문자·언더스코어)만 Lang.get.
+// 이미 번역된 문자열/한글 리터럴은 그대로 통과(이중 번역 "***" 방지).
+const tLabel = (s: string) => (/^[A-Z][A-Z0-9_]+$/.test(s) ? Lang.get(s) : s);
 
 type GridSearchFieldBase = {
   label: string;
@@ -87,7 +92,7 @@ export function PopupSearchCondition({
             className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group"
           >
             <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
-              {f.label}
+              {tLabel(f.label)}
             </label>
             {f.type === "popup" ? (
               <div className="flex items-center gap-1.5 w-full min-w-0">

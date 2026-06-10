@@ -6,7 +6,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import { locationApi as api } from "./LocationApi";
+import { locationApi as api, locationApi } from "./LocationApi";
 import { MENU_CD } from "./Location";
 import type { LocationModel, GridKey } from "./LocationModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
@@ -15,8 +15,13 @@ import VehicleAddPopup from "./popup/VehicleAddPopup";
 import RegionAddPopup from "./popup/RegionAddPopup";
 import LocationMapPopup from "./popup/LocationMapPopup";
 import LatLonEditPopup from "./popup/LatLonEditPopup";
-import { commitRowChanges } from "@/app/components/grid/gridUtils/rowStatus";
+import {
+  commitRowChanges,
+  ROW_STATUS,
+} from "@/app/components/grid/gridUtils/rowStatus";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
+import PreferedCarrAddPopup from "./popup/PreferedCarrAddPopup";
+import OrderPlanPopup from "./popup/OrderPlanPopup";
 
 const masterParam = (row: any) => ({ LOC_ID: row?.LOC_ID });
 
@@ -114,7 +119,8 @@ const SUB_CONFIG: Array<{
   {
     key: "orderTypePlanId",
     parentLabel: "LBL_LOCATION",
-    saveFn: (p) => api.saveOrderTypePlanId(p),
+    // 팝업과 동일하게 각 행을 매핑해 dsSave.PLNARRAY (List<Map>) 구성 (서버 saveMap.get("PLNARRAY"))
+    saveFn: (p) => api.deleteLocOrdPln(p),
     fetchFn: (p) => api.getOrderTypePlanIdList(p),
   },
 ];
@@ -128,6 +134,63 @@ export function useLocationController({ model }: Args) {
   const { menuName } = useMenuMeta();
   const { openPopup, closePopup } = usePopup();
   const { setDetailTab } = model; // 추가 후 해당 detail 탭으로 전환 (안정 참조)
+
+  //주문유형별계획ID 추가
+  const onAddOrderPlan = useCallback(() => {
+    const main = model.grids.main.selectedRef.current;
+    if (!base.requireParentRow(main, "LBL_LOCATION")) return;
+    openPopup({
+      title: "LBL_LOC_ORD_PLN",
+      width: "4xl",
+      content: (
+        <OrderPlanPopup
+          extraParams={{
+            LOC_ID: main.LOC_ID,
+            LOC_NM: main.LOC_NM,
+            LOC_CD: main.LOC_CD,
+          }}
+          onConfirm={(payload: any) => {
+            closePopup();
+            setDetailTab("ORDER_TYPE_PLAN_ID");
+            // 저장(PLNARRAY) → 완료 후 목록 재조회로 그리드 채움 (저장 응답엔 목록이 없음)
+            const locId = main.LOC_ID;
+            base
+              .callAjax(api.saveOrderTypePlanId({ dsSave: [payload] }))
+              .then(() =>
+                base.searchSub(
+                  "orderTypePlanId",
+                  api.getOrderTypePlanIdList({ LOC_ID: locId }),
+                ),
+              );
+          }}
+          onClose={() => closePopup()}
+        />
+      ),
+    });
+  }, [model.grids.main.selectedRef, base, openPopup, closePopup, setDetailTab]);
+
+  //선호운송협력사 추가
+  const onAddPreferedCarr = useCallback(() => {
+    const main = model.grids.main.selectedRef.current;
+    if (!base.requireParentRow(main, "LBL_LOCATION")) return;
+    openPopup({
+      title: "LBL_PREFERED_CARRIER",
+      width: "full",
+      content: (
+        <PreferedCarrAddPopup
+          onConfirm={(payload: any) => {
+            const rows = Array.isArray(payload) ? payload : [payload];
+            rows.forEach((v: any) =>
+              base.addRow("preferredCarrier", { LOC_ID: main.LOC_ID, ...v }),
+            );
+            closePopup();
+            setDetailTab("PREFERRED_CARRIER");
+          }}
+          onClose={() => closePopup()}
+        />
+      ),
+    });
+  }, [base, model.grids.main, setDetailTab, openPopup, closePopup]);
 
   // ── 지정차량 추가 (센차 onAddVeh → LocationAssignVeh 팝업) ──
   // 선택한 LBL_LOCATION에 차량검색 팝업(VehicleAddPopup)으로 고른 차량을 지정차량 그리드에 추가.
@@ -259,7 +322,22 @@ export function useLocationController({ model }: Args) {
   // TODO: 신규행 기본값은 sub 별로 더 채워야 할 수 있음 (예: 코드 기본값, 시퀀스 등).
   const subActions = useMemo(() => {
     const map = {} as Record<SubKey, ActionItem[]>;
+    // sub 그리드 엑셀 — 현재 선택 마스터 기준 전체 재조회 + 표시 컬럼
+    const subExcel = (key: SubKey, fetchFn: (p: any) => Promise<any>) =>
+      makeExcelGroupAction({
+        excelColumns: () => model.grids[key].getExcelColumns(),
+        menuCode: MENU_CD,
+        menuName,
+        fetchFn: () =>
+          fetchFn(masterParam(model.grids.main.selectedRef.current)),
+        rows: model.grids[key].rows,
+      });
     SUB_CONFIG.forEach(({ key, parentLabel, saveFn, fetchFn, addDefaults }) => {
+      // 엑셀 전용 그리드 (Add/Save 없음)
+      if (key === "locationRole" || key === "locSales") {
+        map[key] = [subExcel(key, fetchFn)];
+        return;
+      }
       map[key] = [
         makeAddAction({
           onClick: () => {
@@ -335,6 +413,10 @@ export function useLocationController({ model }: Args) {
                 LOC_NM: main.LOC_NM,
                 ...addDefaults?.(main),
               });
+            } else if (key === "preferredCarrier") {
+              onAddPreferedCarr();
+            } else if (key === "orderTypePlanId") {
+              onAddOrderPlan();
             } else {
               base.addRow(key, { LOC_ID: main.LOC_ID, ...addDefaults?.(main) });
             }
@@ -350,9 +432,23 @@ export function useLocationController({ model }: Args) {
             }),
         }),
       ];
+      // ETC: 엑셀 버튼 추가 (파일첨부 group 은 별도 — 미확정)
+      if (key === "etc") {
+        map[key].push(subExcel(key, fetchFn));
+      }
     });
     return map;
-  }, [model.grids.main.selectedRef, base, openPopup, closePopup, setDetailTab]);
+  }, [
+    menuName,
+    model.grids,
+    base,
+    onAddZone,
+    openPopup,
+    closePopup,
+    setDetailTab,
+    onAddPreferedCarr,
+    onAddOrderPlan,
+  ]);
 
   // ── 메인 actions ───────────────────────────────────────────
   // TODO: BTN_VIEW_BY_MAP / BTN_EDIT_LATLON / BTN_ADD_ASSIGNED_VEHICLE / BTN_ADD_ZONE 의 onClick 구현
