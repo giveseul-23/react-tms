@@ -5,7 +5,7 @@ export type GridKey = "main" | "sub01" | "sub02";
 
 export function useBatchManagementModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode, { pageSize: 500 });
-  const { stores, codeMap } = useCommonStores({
+  const { codeMap } = useCommonStores({
     triggerCycleType: {
       module: "ADM",
       sqlProp: "CODE",
@@ -25,7 +25,6 @@ export function useBatchManagementModel(menuCode: string) {
 
   return {
     ...base,
-    stores,
     codeMap,
   };
 }

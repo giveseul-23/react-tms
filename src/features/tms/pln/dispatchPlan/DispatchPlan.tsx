@@ -17,6 +17,18 @@ import {
 
 export const MENU_CODE = "MENU_DISPATCH_PLAN";
 
+// 서버 리소스 권한 authId (센차 grid.authId). 그리드별 authId 단일 소스.
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_DISPATCH_PLAN",
+    stop: "SUB01_GRID_DISPATCH_PLAN",
+    allocOrder: "SUB02_GRID_DISPATCH_PLAN",
+    allocSub: "SUB05_GRID_DISPATCH_PLAN",
+    unallocOrder: "SUB03_GRID_DISPATCH_PLAN",
+    unallocSub: "SUB04_GRID_DISPATCH_PLAN",
+  },
+};
+
 export default function DispatchPlan() {
   const model = useDispatchPlanModel(MENU_CODE);
   const ctrl = useDispatchPlanController({ model });
@@ -36,6 +48,7 @@ export default function DispatchPlan() {
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS()}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
@@ -55,6 +68,7 @@ export default function DispatchPlan() {
               render: () => (
                 <DataGrid
                   {...model.bind("stop")}
+                  authId={AUTH.grids.stop}
                   columnDefs={STOP_COLUMN_DEFS()}
                   codeMap={model.codeMap}
                   actions={ctrl.stopActions}
@@ -64,9 +78,10 @@ export default function DispatchPlan() {
             },
             ALLOC: {
               render: () => (
-                <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
+                <SplitPane direction="vertical" defaultSizes={[70, 30]}>
                   <DataGrid
                     {...model.bind("allocOrder")}
+                    authId={AUTH.grids.allocOrder}
                     columnDefs={ALLOC_ORDER_COLUMN_DEFS()}
                     codeMap={model.codeMap}
                     actions={ctrl.allocOrderActions}
@@ -75,6 +90,7 @@ export default function DispatchPlan() {
                   />
                   <DataGrid
                     {...model.bind("allocSub")}
+                    authId={AUTH.grids.allocSub}
                     columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS()}
                     actions={ctrl.allocSubActions}
                   />
@@ -83,9 +99,10 @@ export default function DispatchPlan() {
             },
             UNALLOC: {
               render: () => (
-                <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
+                <SplitPane direction="vertical" defaultSizes={[70, 30]}>
                   <DataGrid
                     {...model.bind("unallocOrder")}
+                    authId={AUTH.grids.unallocOrder}
                     columnDefs={UNALLOC_ORDER_COLUMN_DEFS()}
                     codeMap={model.codeMap}
                     actions={ctrl.unallocOrderActions}
@@ -94,6 +111,7 @@ export default function DispatchPlan() {
                   />
                   <DataGrid
                     {...model.bind("unallocSub")}
+                    authId={AUTH.grids.unallocSub}
                     columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS()}
                     actions={ctrl.unallocSubActions}
                   />

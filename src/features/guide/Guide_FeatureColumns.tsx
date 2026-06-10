@@ -22,6 +22,8 @@
 // → PK 컬럼은 보통 isPrimaryKey:true + insertable:true (추가 시 입력 / 수정 시 잠금)
 // ────────────────────────────────────────────────────────────────
 
+import { CommonPopup } from "@/app/components/popup/CommonPopup";
+
 // ── 메인 그리드 컬럼 — audit 자동 (model.bind 가 audit:true spread) ─
 // 키 컬럼에 isPrimaryKey:true 표시 — DataGrid 가 첫행 자동선택을 자동 활성화.
 export const MAIN_COLUMN_DEFS = [
@@ -81,6 +83,84 @@ export const SUB_DETAIL_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_XXX_CODE", field: "XXX_CD" },
   { type: "text", headerName: "LBL_XXX_NAME", field: "XXX_NM" },
+];
+
+// ── [위젯 타입 한 벌] 편집형 컬럼 타입별 예시 ──────────────────────
+// 편집 가부는 insertable/editable 로 제어 (column-rules.md §2):
+//   둘 다 미지정 → 추가행(EDIT_STS:"I")만 위젯 노출 / editable:true → 기존 행도 편집
+export const WIDGET_COLUMN_DEFS = [
+  {
+    // combo — codeKey 로 옵션·라벨 자동 (ComboCellEditor)
+    type: "combo",
+    headerName: "LBL_XXX_TCD",
+    field: "XXX_TCD",
+    codeKey: "xxxTcd",
+    insertable: true,
+    editable: true,
+  },
+  {
+    // check — Y/N 체크박스 (center 정렬 자동)
+    type: "check",
+    headerName: "LBL_USE_YN",
+    field: "USE_YN",
+    insertable: true,
+    editable: true,
+  },
+  {
+    // date — 데이트피커 (dateUnit: year/month/day)
+    type: "date",
+    headerName: "LBL_FROM_DT",
+    field: "FRM_DT",
+    dateUnit: "day",
+    insertable: true,
+    editable: true,
+  },
+  {
+    // popup — sqlId 로 코드|명 2열 CommonPopup 자동. callback 없으면 CODE 만 field 에 입력
+    type: "popup",
+    headerName: "LBL_XXX_CODE",
+    field: "XXX_CD",
+    sqlId: "selectXxxCodeName",
+    popupTitle: "LBL_XXX_CODE",
+    insertable: true,
+    editable: true,
+    // 선택 행(picked)을 여러 필드로 commit (코드+코드명 등). 생략 시 CODE 만 자동 입력
+    callback: ({ picked, commit }: any) =>
+      commit({ XXX_CD: picked.CODE, XXX_NM: picked.NAME }),
+  },
+  {
+    // popuser — 커스텀 팝업 직접 렌더(renderPopup). 의존 컬럼 파라미터 전달·다중 필드 commit
+    type: "popuser",
+    headerName: "LBL_STATE_CODE",
+    field: "STT_CD",
+    popupTitle: "LBL_STATE_CODE",
+    insertable: true,
+    editable: true,
+    renderPopup: ({ row, commit, close }: any) => (
+      <CommonPopup
+        sqlId="selectStateCodeName"
+        extraParams={{ keyParam: row?.CTRY_CD ?? "" }}
+        onApply={(picked: any) => {
+          commit({ STT_CD: picked.CODE, STT_NM: picked.NAME });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
+  },
+  {
+    // address — "주소찾기" 버튼. 클릭 시 AddressPop → addrFields 매핑대로 다중 필드 write-back.
+    // field 없는 액션 컬럼(colId 사용). 결과 필드(ZIP_CD/DTL_ADDR1·2/CTRY·STT·CTY)는 보통 별도 읽기전용 text 컬럼으로 표시.
+    type: "address",
+    headerName: "LBL_FIND_ADDRESS",
+    colId: "ADDR_SEARCH",
+    align: "center",
+    width: 90,
+    insertable: true,
+    editable: true,
+    // 기본 매핑(CTRY_CD/CTRY_NM/STT_CD/STT_NM/CTY_CD/CTY_NM/ZIP_CD/DTL_ADDR1/DTL_ADDR2)과
+    // 다르면 부분 오버라이드: addrFields: { zipCd: "POST_CD", dtlAddr1: "ADDR1" },
+  },
 ];
 
 // ────────────────────────────────────────────────────────────────

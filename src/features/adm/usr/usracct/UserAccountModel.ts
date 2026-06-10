@@ -38,11 +38,11 @@ export type RoleTreeRow = {
 export function useUserAccountModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode, { pageSize: 500 });
   const [roleTreeRows, setRoleTreeRows] = useState<RoleTreeRow[]>([]);
-  const [themeRows, setThemeRows] = useState<Array<{ CODE: string; NAME: string }>>([
-    { CODE: "DEFAULT", NAME: "DEFAULT" },
-  ]);
+  const [themeRows, setThemeRows] = useState<
+    Array<{ CODE: string; NAME: string }>
+  >([{ CODE: "DEFAULT", NAME: "DEFAULT" }]);
 
-  const { stores, codeMap } = useCommonStores({
+  const { codeMap } = useCommonStores({
     dayType: { module: "TMS", sqlProp: "CODE", keyParam: "DAY_TP" },
     dateFrmtType: { module: "TMS", sqlProp: "CODE", keyParam: "DT_FRMT_TP" },
     timeFrmtType: { module: "TMS", sqlProp: "CODE", keyParam: "TM_FRMT_TP" },
@@ -77,23 +77,12 @@ export function useUserAccountModel(menuCode: string) {
     };
   }, []);
 
-  const mergedCodeMap = useMemo(() => {
-    const themeMap = Object.fromEntries(
-      themeRows.map((item) => [item.CODE, item.NAME]),
-    );
-    return {
-      ...codeMap,
-      themeList: themeMap,
-    };
-  }, [codeMap, themeRows]);
-
   return {
     ...base,
     stores: {
-      ...stores,
       themeList: themeRows,
     },
-    codeMap: mergedCodeMap,
+    codeMap,
     roleTreeRows,
     setRoleTreeRows,
   };

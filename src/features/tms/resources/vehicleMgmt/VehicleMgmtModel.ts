@@ -35,7 +35,7 @@ export function useVehicleMgmtModel(menuCode: string) {
   }, [base.grids.main]);
 
   // ── 공통 코드 스토어 ─────────────────────────────────────────
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     apProcTp: { sqlProp: "CODE", keyParam: "AP_PROC_TP" },
     vehOpTp: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
     transTcd: { sqlProp: "CODE", keyParam: "TRANS_TCD" },
@@ -53,17 +53,6 @@ export function useVehicleMgmtModel(menuCode: string) {
     vehGrpCd: { sqlProp: "CODE", keyParam: "VEH_GRP_CD" },
     vehDspchTp: { sqlProp: "CODE", keyParam: "VEH_DISPATCH_TP" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return {
     ...base,
@@ -83,7 +72,6 @@ export function useVehicleMgmtModel(menuCode: string) {
     newFormData,
     setNewFormData,
     codeMap,
-    stores,
   };
 }
 

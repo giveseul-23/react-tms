@@ -5,14 +5,13 @@ export type GridKey = "main" | "sub01" | "sub02";
 
 export function useCommonCodeModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
-  const { stores, codeMap } = useCommonStores({
+  const { codeMap } = useCommonStores({
     codeLangList: { sqlProp: "CODE", keyParam: "LANG_TP" },
     applCodeList: { sqlProp: "SELECT_APPLICATION_CODE_NAME" },
   });
 
   return {
     ...base,
-    stores,
     codeMap,
   };
 }

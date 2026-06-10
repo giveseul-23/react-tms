@@ -52,7 +52,7 @@
 5. 검증 마커(`regex`/`integerLength`/`pointLength`) → "!" 마커 + 검증 렌더러
 6. `type:"check"` → 체크박스 렌더러
 7. `type:"popup"|"popuser"` → 돋보기 + CommonPopup
-8. `type:"address"` → "주소찾기" 버튼
+8. `type:"address"` → "주소찾기" 버튼 + `AddressPop`. `field` 없는 액션 컬럼(`colId` 사용). 선택 시 `addrFields` 매핑대로 **다중 필드 write-back**(기본 `CTRY_CD`/`CTRY_NM`/`STT_CD`/`STT_NM`/`CTY_CD`/`CTY_NM`/`ZIP_CD`/`DTL_ADDR1`/`DTL_ADDR2`). 다른 필드명이면 `addrFields` 로 부분 오버라이드. 결과 필드는 보통 별도 읽기전용 `text` 컬럼으로 표시. 편집 노출은 `insertable`/`editable` 정책.
 9. `type:"date"|"datetime"` (편집 켜진 경우) → DatePickerPopover
 10. `insertable`/`editable` + EDIT_STS → ag-grid `editable` 변환
 11. `required:true` → 헤더 필수 클래스
@@ -76,6 +76,8 @@
 | `align` | 자동 정렬 덮어쓰기 |
 | `decimalPlaces` | `numeric` 고정 소수 자릿수 포맷 |
 | `dateUnit` | `date` 단위(`year`/`month`/`day`) |
+| `addrFields` | `type:"address"` write-back 필드 매핑 부분 오버라이드 (기본 `ctryCd:"CTRY_CD"`…`dtlAddr2:"DTL_ADDR2"`) |
+| `colId` | `field` 없는 액션 컬럼(`address` 등)의 식별자 |
 | `required` | 헤더 `*` + 저장 검증 |
 | `validators` | `{ max, min, integerLength, pointLength, regex, regexTp }` |
 | `excelColName` | 엑셀 헤더 덮어쓰기 (→ [excel-download.md](./excel-download.md)) |

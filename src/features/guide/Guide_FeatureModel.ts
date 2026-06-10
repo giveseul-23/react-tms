@@ -26,8 +26,7 @@ export type GridKey = "main" | "detail";
 export function useFeatureModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  // ── 공통 코드 lookup (Cell Renderer 의 codeKey 매핑용) ─────────
-  // codeMap.xxxTcd["10"] === "라벨"
+  // 공통코드 lookup — codeMap 자동 생성 (codeMap.xxxTcd["10"] === "라벨"). 원본 행이 필요하면 { stores, codeMap }.
   const { codeMap } = useCommonStores({
     xxxTcd: { sqlProp: "CODE", keyParam: "XXX_TCD" },
     yyyTcd: { sqlProp: "CODE", keyParam: "YYY_TCD" },

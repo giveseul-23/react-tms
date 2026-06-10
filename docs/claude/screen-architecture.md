@@ -70,9 +70,20 @@
     ],
   }}
   ```
-- 레이아웃 방향/토글: preset 에 **`defaultDirection={"horizontal" | "vertical"}`** + `storageKey={model.storageKeys.outer}` 만 넘긴다. preset 이 토글 버튼·방향 state·localStorage 동기화를 **내부 처리**한다. (참조: `SmsGroup.tsx` — `defaultDirection={"horizontal"}` 한 줄) 토글 버튼을 숨기려면 `layoutToggle={false}`(boolean) 지정. **View 에서 `direction=...` 이나 `layoutToggle={{...}}` 객체를 직접 wiring 하지 말 것.**
+- 레이아웃 방향/토글: preset 에 **`defaultDirection={"horizontal" | "vertical"}`** + `storageKey={model.storageKeys.outer}` 만 넘긴다. preset 이 토글 버튼·방향 state·localStorage 동기화를 **내부 처리**한다. (참조: `SmsGroup.tsx` — `defaultDirection={"horizontal"}` 한 줄) 토글 버튼을 숨기려면 `layoutToggle={false}`(boolean) 지정 — `layoutToggle` prop 은 `MasterDetailPage` 에만 있다(`GridOnlyPage`/`GridFormPage` 는 토글 숨김 고정, `GridMapPage` 는 `defaultDirection` 만 받음). **View 에서 `direction=...` 이나 `layoutToggle={{...}}` 객체를 직접 wiring 하지 말 것.**
 - `storageKey` 는 `model.storageKeys.outer` / `top` / `bottom` 로 binding (menuCode 기반 자동 생성).
 - **`GridFormPage` 는 grid 에 `readOnly: true` 를 자동 주입**(폼이 편집 면이므로 그리드 인라인 편집을 끈다). 그리드에서 직접 `readOnly` 를 지정하면 그 값이 우선.
+- **그리드 authId 표준 (그리드 리소스 권한 + 엑셀 업로드/양식 키)**: View 가 `MENU_CD` 옆에 **그리드별 authId 단일 소스**를 export 한다.
+  ```ts
+  export const MENU_CD = "MENU_XXX_MGMT";
+  // 서버 리소스 권한 authId (센차 grid.authId). 그리드별 authId 단일 소스.
+  export const AUTH = { grids: { main: "MAIN_GRID_XXX_MGMT", detail: "DETAIL_GRID_XXX_MGMT" } };
+  ```
+  - **용도 ①** 그리드 리소스 권한 — `<DataGrid authId={AUTH.grids.main} />` → `useResourceAccess` 가 권한 매트릭스 확인, 조회(S) 권한 없으면 그리드 비활성. 매트릭스에 없으면(통제 대상 아님) 제한 없음 → `authId` 생략 가능.
+  - **용도 ②** 엑셀 업로드/양식 다운로드 키 — Controller 가 `gridId: AUTH.grids.main`(=서버 `GRID_ID`)으로 서버 컬럼 매핑/양식을 찾는다([excel-download.md](./excel-download.md) §3).
+  - **단일 소스 원칙**: DataGrid `authId` 와 Controller 엑셀 `gridId` 모두 `AUTH.grids.<key>` 만 참조 — authId 리터럴을 여러 곳에 복붙하지 말 것.
+  - **메뉴 권한 vs 리소스 권한**: 메뉴 단위 권한은 `menuCode`(=`MENU_CD`)로 preset 이 자동 처리, **그리드 단위(리소스) 권한·엑셀은 `authId`** 로 구분.
+  - (레거시) 일부 화면은 Controller 에 `const GRID_ID = "..."` 단일 상수를 둔다 — 신규 화면은 View 의 `AUTH.grids` 단일 소스를 쓴다.
 
 ---
 
@@ -111,6 +122,7 @@ base 가 제공하는 헬퍼:
 **액션**:
 - 그리드별 actions 배열은 **Controller 가 책임** (`useMemo` 로 정의, View 는 `actions={ctrl.mainActions}` binding 만)
 - `makeAddAction` / `makeSaveAction` / `makeExcelGroupAction` / `makeCommonActions` (`@/app/components/grid/actions/commonActions`)
+- **메모 등록/취소는 `makeMemoGroupAction`** (hand-roll 금지) — "메모" 그룹(등록/취소). 등록 시 `MemoInputPopup` 자동, 취소 시 (옵션) confirm 후 실행. `{ saveMemo:(rows,text)=>Promise, cancelMemo:(rows)=>Promise, onDone, validate, confirmOnCancel }` — 필드/URL 은 화면 api 가 책임, 팩토리는 플로우만.
 - 화면 고유 popup/trace 같은 액션은 Controller 에 `useCallback` 으로 정의 후 actions 배열에 포함
 
 ---
@@ -122,8 +134,9 @@ export type GridKey = "main" | "sub01" | "sub02" | "sub03";  // 화면별 그리
 
 export function useXxxModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
-  // 화면 고유: codeMap, 외부 탭 등
-  return { ...base, codeMap, ... };
+  // 공통코드 lookup — codeMap 자동 생성 (codeMap.xxxTcd["10"] === "라벨")
+  const { codeMap } = useCommonStores({ xxxTcd: { sqlProp: "...", keyParam: "XXX_TCD" } });
+  return { ...base, codeMap };
 }
 ```
 
@@ -142,7 +155,7 @@ export function useXxxModel(menuCode: string) {
 > 모든 행에는 내부 식별자 `__rid__` 가 자동 부여되어 셀 편집으로 객체 참조가 바뀌어도 selection 이 유지된다.
 
 화면 고유 추가:
-- 공통코드 lookup → `useCommonStores` + `useMemo` 로 `codeMap`
+- 공통코드 lookup → `useCommonStores` 가 `codeMap`(CODE→NAME) 자동 반환 (`useMemo` 불필요) → `{ ...base, codeMap }` 로 노출. 원본 행 배열이 필요하면 `const { stores, codeMap } = useCommonStores(...)`.
 - 외부 탭 → `useState` + `useEffect` 로 옵션 로딩
 - popup / form 패널 state → `useState`
 - 동적 컬럼 → `columnDefs` 를 state 로 보유하고 setter 를 Controller 에 전달

@@ -22,21 +22,10 @@ export function useMenuConfigModel() {
   }, []);
 
   // ── 공통 코드 스토어 (조회조건 콤보 옵션)
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     useYn: { sqlProp: "CODE", keyParam: "USE_YN" },
     leafYn: { sqlProp: "CODE", keyParam: "LEAF_YN" },
   });
-
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
 
   return {
     layout,
@@ -46,7 +35,6 @@ export function useMenuConfigModel() {
     selectedRow,
     setSelectedRow: setSelectedRowWithRef,
     selectedRowRef,
-    stores,
     codeMap,
   };
 }

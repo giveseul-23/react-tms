@@ -112,4 +112,96 @@ export const dispatchPlanApi = {
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+
+  // ── 메모 등록 / 취소 (공통 makeMemoGroupAction 연동) ────────
+  saveDispatchMemo(rows: any[], text: string) {
+    const dsSave = rows.map((r) => ({ ...r, MEMO: text }));
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveDispatchMemo",
+      withSession({ MENU_CD: MENU_CODE, dsSave }),
+    );
+  },
+
+  cancelDspchMemo(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/cancelDspchMemo",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 차량변경 (ChangeVehiclePop) ─────────────────────────────
+  // 조회: VEH_OP_TP(지입100/용차110/가상999)별 변경 가능 차량 목록
+  searchChangeVehicle(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchDispatchChangeVehiclePop",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // 적용: 선택 차량을 배차 행에 반영 (ORG_VEH_ID = 변경 전 차량)
+  saveChangeVehicle(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveChangeVehicle",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 배차생성 (CreateEmptyDispatchVehiclePop) ────────────────
+  // 조회: 운영그룹/조건 기준 배차 가능 차량 (VEH_OP_TP 100/110/999)
+  searchEmptyDispatchVehicle(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchEmptyDispatchVehiclePop",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  saveCreateEmptyDispatch(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveCreateEmptyDispatch",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 배차취소 ────────────────────────────────────────────────
+  saveCancelPlanDispatch(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveCancelPlanDispatch",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 주문할당 / 할당취소 (MIT코드 분기는 호출측 처리) ─────────
+  saveAssignedShipment(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAssignedShipment",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  saveUnAssignedShipment(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveUnAssignedShipment",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 주문 병합(합차) ─────────────────────────────────────────
+  saveMergeShipment(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/createDispatchService/saveMergeShipment",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 품목 라인분할 / 수량분할 ────────────────────────────────
+  saveSplitShipmentLine(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/createDispatchService/saveSplitShipmentLine",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  saveSplitShipmentQty(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/createDispatchService/saveSplitShipmentQty",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
 };

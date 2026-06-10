@@ -29,6 +29,15 @@ import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./Guide_FeatureColumns";
 // TODO: 실제 메뉴 코드로 교체
 export const MENU_CODE = "MENU_XXX";
 
+// 서버 리소스 권한 authId (센차 grid.authId). 그리드별 authId 단일 소스.
+// DataGrid authId(그리드 리소스 권한) + Controller 엑셀 gridId(업로드/양식) 가 이걸 참조.
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_XXX",
+    detail: "DETAIL_GRID_XXX",
+  },
+};
+
 export default function Feature() {
   // useBaseModel 이 searchRef / filtersRef / storageKeys / pageSize 자동 셋업.
   // MasterDetailPage 가 menuCode 받으면 SearchMeta 자동 로드 + loading skeleton 자동.
@@ -55,6 +64,7 @@ export default function Feature() {
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
@@ -64,6 +74,7 @@ export default function Feature() {
       detail={
         <DataGrid
           {...model.bind("detail")}
+          authId={AUTH.grids.detail}
           columnDefs={DETAIL_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.detailActions}

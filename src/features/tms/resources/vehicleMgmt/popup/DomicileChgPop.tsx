@@ -4,10 +4,11 @@
 // 조회조건 차량 목록을 띄워 다건 선택 → 변경 차고지(CHG_DOMI) 적용 후 changeDomicile 저장.
 
 import { useEffect, useState } from "react";
-import { Search, Check, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
+import { PopupSearchCondition } from "@/app/components/popup/PopupSearchCondition";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { vehicleMgmtApi as api } from "../vehicleMgmtApi";
 import { Lang } from "@/app/services/common/Lang";
@@ -99,31 +100,32 @@ export default function DomicileChgPop({ params, onApplied, onClose }: Props) {
 
   return (
     <div className="flex flex-col gap-3 w-full h-full">
-      {/* 검색 영역 */}
-      <div className="grid grid-cols-2 gap-3 text-[12px]">
-        <DomiPicker
-          label={Lang.get("LBL_OLD_DOMICILE")}
-          value={oldDomi}
-          onSearch={() => openDomiPicker((cd, nm) => setOldDomi({ cd, nm }))}
-        />
-        <DomiPicker
-          label={Lang.get("LBL_CHANGED_DOMICILE")}
-          required
-          value={chgDomi}
-          onSearch={() => openDomiPicker((cd, nm) => setChgDomi({ cd, nm }))}
-        />
-      </div>
-      <div className="flex justify-end">
-        <Button
-          variant="outline"
-          size="xs"
-          onClick={() => search(oldDomi.cd)}
-          className="btn-primary btn-primary:hover"
-        >
-          <Search className="w-3 h-3" />
-          {Lang.get("BTN_SEARCH")}
-        </Button>
-      </div>
+      {/* 조회조건 */}
+      <PopupSearchCondition
+        fields={[
+          {
+            type: "popup",
+            label: Lang.get("LBL_OLD_DOMICILE"),
+            code: oldDomi.cd,
+            name: oldDomi.nm,
+            onChangeCode: (v) => setOldDomi((p) => ({ ...p, cd: v })),
+            onChangeName: (v) => setOldDomi((p) => ({ ...p, nm: v })),
+            onClickSearch: () =>
+              openDomiPicker((cd, nm) => setOldDomi({ cd, nm })),
+          },
+          {
+            type: "popup",
+            label: Lang.get("LBL_CHANGED_DOMICILE"),
+            code: chgDomi.cd,
+            name: chgDomi.nm,
+            onChangeCode: (v) => setChgDomi((p) => ({ ...p, cd: v })),
+            onChangeName: (v) => setChgDomi((p) => ({ ...p, nm: v })),
+            onClickSearch: () =>
+              openDomiPicker((cd, nm) => setChgDomi({ cd, nm })),
+          },
+        ]}
+        onSearch={() => search(oldDomi.cd)}
+      />
 
       {/* 그리드 */}
       <div className="shrink-0" style={{ height: 380 }}>
@@ -157,46 +159,6 @@ export default function DomicileChgPop({ params, onApplied, onClose }: Props) {
           <Check className="w-3 h-3" />
           {Lang.get("BTN_CHG_DOMICILE")}
         </Button>
-      </div>
-    </div>
-  );
-}
-
-function DomiPicker({
-  label,
-  required,
-  value,
-  onSearch,
-}: {
-  label: string;
-  required?: boolean;
-  value: { cd: string; nm: string };
-  onSearch: () => void;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <label className="w-[110px] shrink-0 text-[11px] font-medium">
-        {label}
-        {required && <span className="text-red-500"> *</span>}
-      </label>
-      <div className="flex-1 flex items-center gap-1 min-w-0">
-        <input
-          readOnly
-          value={value.cd}
-          className="w-[110px] h-6 px-2 text-[11px] border border-input rounded-md bg-input-background"
-        />
-        <input
-          readOnly
-          value={value.nm}
-          className="flex-1 h-6 px-2 text-[11px] border border-input rounded-md bg-input-background min-w-0"
-        />
-        <button
-          type="button"
-          onClick={onSearch}
-          className="h-6 w-6 shrink-0 flex items-center justify-center border border-input rounded-md hover:bg-accent"
-        >
-          <Search className="w-3 h-3" />
-        </button>
       </div>
     </div>
   );

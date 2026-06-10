@@ -20,7 +20,9 @@ export type UiResourceRow = TreeRow & {
 
 export function useUiResourceModel() {
   const [source, setSource] = useState<UiResourceRow[]>([]);
-  const [selectedRow, setSelectedRowState] = useState<UiResourceRow | null>(null);
+  const [selectedRow, setSelectedRowState] = useState<UiResourceRow | null>(
+    null,
+  );
   const selectedRowRef = useRef<UiResourceRow | null>(null);
 
   const setSelectedRow = useCallback((row: UiResourceRow | null) => {
@@ -28,21 +30,9 @@ export function useUiResourceModel() {
     setSelectedRowState(row);
   }, []);
 
-  const { stores, codeMap } = useCommonStores({
+  const { codeMap } = useCommonStores({
     resourceType: { module: "TMS", sqlProp: "CODE", keyParam: "RSRC_TP" },
   });
-
-  const normalizedCodeMap = useMemo(
-    () => ({
-      ...codeMap,
-      resourceType:
-        codeMap.resourceType ??
-        Object.fromEntries(
-          (stores.resourceType ?? []).map((item: any) => [item.CODE, item.NAME]),
-        ),
-    }),
-    [codeMap, stores.resourceType],
-  );
 
   return {
     source,
@@ -50,10 +40,8 @@ export function useUiResourceModel() {
     selectedRow,
     setSelectedRow,
     selectedRowRef,
-    stores,
-    codeMap: normalizedCodeMap,
+    codeMap,
   };
 }
 
 export type UiResourceModel = ReturnType<typeof useUiResourceModel>;
-

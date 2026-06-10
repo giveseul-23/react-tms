@@ -429,10 +429,8 @@
 │       │                                                                    │
 │       ├─ &lt;<span class="t">SearchFilters</span>                                                       │
 │       │     fetchFn={<span class="t">ctrl</span>.fetchList}                <span class="c">// ← Controller</span>          │
-│       │     onSearch={<span class="t">ctrl</span>.onSearchCallback}             <span class="c">// ← Controller</span>          │
-│       │     searchRef={<span class="t">model</span>.searchRef}              <span class="c">// ← Model (ref 다리)</span>     │
-│       │     filtersRef={<span class="t">model</span>.filtersRef}            <span class="c">// ← Model</span>                │
-│       │     pageSize={<span class="t">model</span>.pageSize}                <span class="c">// ← Model</span>                │
+│       │     onSearchCallback={<span class="t">ctrl</span>.onSearchCallback} <span class="c">// ← Controller</span>         │
+│       │     {...<span class="t">model</span>.<span class="fn">bindSearch</span>()}                 <span class="c">// ← Model</span>               │
 │       │  /&gt;                                                                │
 │       │     └─ 내부에서 <span class="fn">useSearchExecute</span>             <span class="c">// handleSearch 생성</span>    │
 │       │         └─ <span class="t">searchRef</span>.current = handleSearch    <span class="c">// 외부 트리거 통로</span>     │
@@ -763,12 +761,11 @@
   [onAddMain, onSaveMain, model],        <span class="c">// ← 안의 핸들러/model 바뀌면 새 배열</span>
 );
 
-<span class="c">// 무거운 계산 → useMemo</span>
-<span class="k">const</span> codeMap = <span class="fn">useMemo</span>(() =&gt; {
-  <span class="k">const</span> map = {};
-  Object.<span class="fn">entries</span>(stores).<span class="fn">forEach</span>(...);   <span class="c">// 비싼 변환</span>
-  <span class="k">return</span> map;
-}, [stores]);</pre>
+<span class="c">// 무거운 계산 → useMemo (※ codeMap 은 이제 useCommonStores 가 자동 생성 — 직접 useMemo 불필요)</span>
+<span class="k">const</span> derived = <span class="fn">useMemo</span>(() =&gt; {
+  <span class="k">const</span> result = <span class="fn">heavyTransform</span>(rows);   <span class="c">// 비싼 변환</span>
+  <span class="k">return</span> result;
+}, [rows]);</pre>
         </div>
 
         <div class="tip">
@@ -1195,10 +1192,8 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
       menuCode={<span class="t">MENU_CODE</span>}
       searchProps={{
         fetchFn: ctrl.fetchList,
-        onSearch: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        onSearchCallback: ctrl.onSearchCallback,
+        ...model.bindSearch(),
       }}
       grid={
         &lt;<span class="t">DataGrid</span>
@@ -1239,13 +1234,10 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
   defaultSizes={[<span class="t">40</span>, <span class="t">60</span>]}
   searchProps={{
     fetchFn: ctrl.fetchList,
-    onSearch: ctrl.onSearchCallback,
-    searchRef: model.searchRef,
-    filtersRef: model.filtersRef,
-    pageSize: model.pageSize,
+    onSearchCallback: ctrl.onSearchCallback,
+    ...model.bindSearch(),
   }}
   defaultDirection=<span class="s">"horizontal"</span>
-  layoutToggle={<span class="k">true</span>}
   storageKey={model.storageKeys.outer}
   master={
     &lt;<span class="t">DataGrid</span>
@@ -1723,47 +1715,51 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
         <h3>View — <code>{화면}.tsx</code></h3>
         <p>JSX/레이아웃만. 비즈니스 로직 없음.</p>
         <ul style="padding-left: 20px">
-          <li>레이아웃은 <code>MasterDetailPage</code>(또는 그 변형)로 구성</li>
-          <li>조회 조건 영역은 <code>useSearchMeta(MENU_CODE)</code> + <code>searchProps.meta</code></li>
-          <li>조회 trigger / 조회 조건 / 검색 영역 제외 키는 <code>useRef</code>로 보관</li>
-          <li>레이아웃 토글(<code>"side" | "vertical"</code>)과 화면별 유일한 <code>storageKey</code> 지정</li>
+          <li>레이아웃은 preset(<code>MasterDetailPage</code> / <code>GridOnlyPage</code> / <code>GridFormPage</code> / <code>GridMapPage</code>)으로 구성</li>
+          <li>조회조건은 preset에 <code>menuCode</code>만 — 내부에서 <code>useResolvedSearchMeta</code> 자동 호출 + loading gate 처리 (View에서 <code>useSearchMeta</code>/<code>Skeleton</code> import 안 함)</li>
+          <li><code>searchRef</code>/<code>filtersRef</code>는 <code>useBaseModel</code>이 보유 → <code>searchProps</code>에 <code>...model.bindSearch()</code> spread로 일괄 binding (View에서 <code>useRef</code> 만들지 않음)</li>
+          <li>레이아웃 방향은 <code>defaultDirection</code> + <code>storageKey={model.storageKeys.outer}</code>만 지정 (preset이 토글·영속화 내부 처리)</li>
         </ul>
         <div class="code-block">
           <div class="code-header"><span>{화면}.tsx 골격</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
-          <pre><span class="k">import</span> { useRef } <span class="k">from</span> <span class="s">"react"</span>;
-<span class="k">import</span> { Skeleton } <span class="k">from</span> <span class="s">"@/app/components/ui/skeleton"</span>;
-<span class="k">import</span> { MasterDetailPage } <span class="k">from</span> <span class="s">"@/app/components/layout/presets/MasterDetailPage"</span>;
-<span class="k">import</span> { LayoutType } <span class="k">from</span> <span class="s">"@/app/components/layout/LayoutToggleButton"</span>;
+          <pre><span class="k">import</span> { MasterDetailPage } <span class="k">from</span> <span class="s">"@/app/components/layout/presets/MasterDetailPage"</span>;
 <span class="k">import</span> DataGrid <span class="k">from</span> <span class="s">"@/app/components/grid/DataGrid"</span>;
-<span class="k">import</span> { useSearchMeta } <span class="k">from</span> <span class="s">"@/hooks/useSearchMeta"</span>;
-<span class="k">import</span> { useSearchCondition } <span class="k">from</span> <span class="s">"@/hooks/useSearchCondition"</span>;
 <span class="k">import</span> { useFeatureModel } <span class="k">from</span> <span class="s">"./FeatureModel"</span>;
 <span class="k">import</span> { useFeatureController } <span class="k">from</span> <span class="s">"./FeatureController"</span>;
 <span class="k">import</span> { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } <span class="k">from</span> <span class="s">"./FeatureColumns"</span>;
 
-<span class="k">export const</span> <span class="t">MENU_CD</span> = <span class="s">"MENU_XXX"</span>;
+<span class="k">export const</span> <span class="t">MENU_CODE</span> = <span class="s">"MENU_XXX"</span>;
 
 <span class="k">export default function</span> <span class="fn">Feature</span>() {
-  <span class="k">const</span> { meta, loading } = <span class="fn">useSearchMeta</span>(<span class="t">MENU_CD</span>);
-  <span class="k">const</span> model = <span class="fn">useFeatureModel</span>();
-  <span class="k">const</span> searchRef = <span class="fn">useRef</span>&lt;((page?: <span class="t">number</span>) =&gt; <span class="t">void</span>) | <span class="k">null</span>&gt;(<span class="k">null</span>);
-  <span class="k">const</span> filtersRef = <span class="fn">useRef</span>&lt;<span class="t">Record</span>&lt;<span class="t">string</span>, <span class="t">unknown</span>&gt;&gt;({});
-
-  <span class="k">const</span> ctrl = <span class="fn">useFeatureController</span>({ model, searchRef, filtersRef });
-
-  <span class="k">if</span> (loading) <span class="k">return</span> &lt;<span class="t">Skeleton</span> className=<span class="s">"h-24"</span> /&gt;;
+  <span class="k">const</span> model = <span class="fn">useFeatureModel</span>(<span class="t">MENU_CODE</span>);
+  <span class="k">const</span> ctrl = <span class="fn">useFeatureController</span>({ model });
 
   <span class="k">return</span> (
     &lt;<span class="t">MasterDetailPage</span>
-      searchProps={{ meta, fetchFn: ctrl.fetchList, onSearch: ctrl.onSearchCallback,
-                     searchRef, filtersRef, pageSize: model.pageSize,
-                     excludes: [<span class="s">"BOOKING"</span>],   <span class="c">// 검색 payload 에서 제외할 키 (선택)</span>
-                     menuCode: <span class="t">MENU_CD</span> }}
-      direction={model.layout === <span class="s">"side"</span> ? <span class="s">"horizontal"</span> : <span class="s">"vertical"</span>}
-      layoutToggle={{ layout: model.layout, onToggle: () =&gt; model.<span class="fn">setLayout</span>(p =&gt; p === <span class="s">"side"</span> ? <span class="s">"vertical"</span> : <span class="s">"side"</span>) }}
-      storageKey=<span class="s">"my-feature"</span>
-      master={...}
-      detail={...}
+      menuCode={<span class="t">MENU_CODE</span>}
+      searchProps={{
+        fetchFn: ctrl.fetchList,
+        onSearchCallback: ctrl.onSearchCallback,
+        ...model.bindSearch(),
+        excludes: [<span class="s">"BOOKING"</span>],   <span class="c">// 검색 payload 에서 제외할 키 (선택)</span>
+      }}
+      defaultDirection=<span class="s">"horizontal"</span>
+      storageKey={model.storageKeys.outer}
+      master={
+        &lt;<span class="t">DataGrid</span>
+          {...model.<span class="fn">bind</span>(<span class="s">"main"</span>)}
+          columnDefs={<span class="t">MAIN_COLUMN_DEFS</span>}
+          onRowClicked={ctrl.onMainGridClick}
+          actions={ctrl.mainActions}
+        /&gt;
+      }
+      detail={
+        &lt;<span class="t">DataGrid</span>
+          {...model.<span class="fn">bind</span>(<span class="s">"detail"</span>)}
+          columnDefs={<span class="t">DETAIL_COLUMN_DEFS</span>}
+          actions={ctrl.detailActions}
+        /&gt;
+      }
     /&gt;
   );
 }</pre>
@@ -1772,38 +1768,48 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
         <!-- Controller -->
         <h3>Controller — <code>{화면}Controller.tsx</code></h3>
         <ul style="padding-left: 20px">
+          <li><code>const base = useBaseController&lt;GridKey&gt;({ model })</code> — 헬퍼(<code>callAjax</code>/<code>search</code>/<code>handleRowClick</code>/<code>addRow</code>/<code>saveGrid</code> 등) 사용</li>
           <li><code>fetchList(params)</code> — SearchFilters가 넘기는 params를 그대로 API에 전달</li>
-          <li><code>onSearchCallback(data)</code> — 조회 성공 시 <code>setGridData</code> + <code>resetSubGrids</code> + 첫 행 자동 선택</li>
-          <li><code>handleRowClicked(row)</code> — 메인 행 선택 시 상세 그리드 reload</li>
+          <li><code>onSearchCallback(data)</code> — <code>model.grids.main.setData(data)</code> + 첫 행 자동 선택(<code>onMainGridClick</code>)</li>
+          <li><code>onMainGridClick(row)</code> — <code>base.handleRowClick("main", row, cascade)</code>로 상세 그리드 cascade fetch</li>
+          <li>그리드 추가/저장은 <code>base.addRow(gridKey, newRow)</code> / <code>base.saveGrid(gridKey, api.save, opts)</code></li>
           <li>액션 버튼은 공통 팩토리 사용 (<a href="#actions">→ 액션 팩토리</a>)</li>
-          <li>그리드 추가/저장은 <code>useGridAdd</code> / <code>useGridSave</code> 훅</li>
-          <li>저장 payload는 <code>{ dsSave }</code> 형태 — <code>useGridSave</code>가 만든 payload에서 <code>dsSave</code>만 꺼내 API 전달</li>
+          <li>저장 payload는 <code>{ dsSave }</code> 형태 — <code>base.saveGrid</code>가 dirty 추출·필수/포맷 검증·저장까지 처리</li>
         </ul>
         <div class="code-block">
           <div class="code-header"><span>controller 액션 (저장 패턴)</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
-          <pre><span class="k">const</span> handleSave = <span class="fn">useGridSave</span>({
-  rows: model.detailRows,
-  setRows: model.setDetailRows,
-  saveFn: (payload) =&gt; featureApi.<span class="fn">save</span>({ dsSave: payload.dsSave }),
-  successMessage: <span class="s">"저장되었습니다."</span>,
-  onSaved: () =&gt; searchRef.current?.(),
-});
+          <pre><span class="k">const</span> base = <span class="fn">useBaseController</span>&lt;<span class="t">GridKey</span>&gt;({ model });
+<span class="k">const</span> { menuName } = <span class="fn">useMenuMeta</span>();
 
-<span class="k">const</span> mainActions = <span class="fn">makeCommonActions</span>({
-  add: { onClick: handleAdd },
-  save: { onClick: handleSave },
-  excel: { columns: <span class="fn">MAIN_COLUMN_DEFS</span>(), menuName: <span class="s">"내 화면"</span>,
-           fetchFn: () =&gt; featureApi.<span class="fn">getList</span>(filtersRef.current), rows: model.gridData.rows },
-});</pre>
+<span class="c">// 저장 — dirty 추출 + 필수/포맷 검증 + dsSave 저장 + 메인 재조회</span>
+<span class="k">const</span> handleSave = <span class="fn">useCallback</span>(
+  () =&gt; base.<span class="fn">saveGrid</span>(<span class="s">"detail"</span>, featureApi.save),
+  [base],
+);
+
+<span class="k">const</span> mainActions = <span class="fn">useMemo</span>(
+  () =&gt; <span class="fn">makeCommonActions</span>({
+    add: { onClick: () =&gt; base.<span class="fn">addRow</span>(<span class="s">"main"</span>, { <span class="c">/* 기본값 */</span> }) },
+    save: { onClick: handleSave },
+    excel: {
+      excelColumns: () =&gt; model.grids.main.<span class="fn">getExcelColumns</span>(),
+      menuCode: <span class="t">MENU_CODE</span>,
+      menuName,
+      fetchFn: () =&gt; featureApi.<span class="fn">getList</span>(model.filtersRef.current),
+      rows: model.grids.main.rows,
+    },
+  }),
+  [base, handleSave, model, menuName],
+);</pre>
         </div>
 
         <!-- Model -->
         <h3>Model — <code>{화면}Model.ts</code></h3>
         <ul style="padding-left: 20px">
-          <li>공통 state: <code>layout</code>, <code>pageSize</code>, <code>gridData</code>, <code>subDetailRowData</code>, <code>selectedHeaderRow(+Ref)</code>, <code>codeMap</code></li>
-          <li>초기값: <code>EMPTY_GRID = { rows: [], totalCount: 0, page: 1, limit: 20 }</code></li>
-          <li>메인 행 선택은 <strong>state + ref 동시 보관</strong> (Controller onClick에서 stale closure 방지)</li>
-          <li>공통코드 lookup은 <code>useCommonStores</code>로 받아 <code>codeMap[storeKey][CODE] = NAME</code> 형태로 변환</li>
+          <li><code>useBaseModel&lt;GridKey&gt;(menuCode)</code> 한 줄이 자동 제공: <code>grids[gridKey]</code>(<code>rows</code>/<code>setData</code>/<code>selected(+Ref)</code>/<code>getExcelColumns()</code>), <code>searchRef</code>/<code>filtersRef</code>/<code>rawFiltersRef</code>, <code>pageSize</code>, <code>layout</code>, <code>storageKeys</code>, <code>bind()</code>, <code>bindSearch()</code></li>
+          <li><code>GridKey</code> 타입에 그리드 이름 union 정의 (<code>"main" | "detail" | ...</code>)</li>
+          <li>행 선택은 <code>grids[gridKey].selected</code>(state) + <code>selectedRef</code>(ref) 동시 보관 — Controller onClick의 stale closure 방지. 모든 행에 <code>__rid__</code> 자동 부여</li>
+          <li>화면 고유 state(공통코드 <code>codeMap</code>, 외부 탭 등)만 추가 — <code>useCommonStores</code>로 받아 <code>codeMap[storeKey][CODE] = NAME</code> 변환</li>
         </ul>
 
         <!-- Columns -->
@@ -1815,20 +1821,20 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
           <li><code>type: "numeric"</code> → 우측 정렬</li>
           <li><code>headerName: "No"</code> → 자동 일련번호 + 고정 너비</li>
           <li>공통코드 → 라벨 치환은 컬럼에 <code>codeKey</code>만 지정 (cellRenderer는 DataGrid가 자동 주입)</li>
-          <li>audit 컬럼(삭제/상태/생성자/생성일/수정자/수정일)은 <code>...standardAudit(setGridData)</code> 한 줄로 일괄 삽입</li>
+          <li>audit 컬럼(삭제/상태/생성자·생성일/수정자·수정일)은 <code>model.bind</code>의 <code>audit</code>로 <strong>DataGrid가 자동 추가</strong> — 컬럼 파일에서 <code>standardAudit</code> 직접 호출 안 함</li>
         </ul>
 
         <div class="note">
-          <span class="note-icon">⚠️</span>
+          <span class="note-icon">ℹ️</span>
           <div>
-            <strong>setGridData 전달 컨벤션</strong>
+            <strong>audit 컬럼 토글</strong>
             <ul style="margin-top: 6px; padding-left: 20px">
-              <li><strong>삭제 컬럼 + 추가 기능(<code>useGridAdd</code>) 둘 다 있으면 필수.</strong> 신규 행(<code>EDIT_STS:"I"</code>) 삭제 시 배열에서 실제로 제거하려면 setter 필요.</li>
-              <li>기존 행만 삭제(서버에서 받은 행) → <code>markDelete</code>가 객체에 직접 <code>EDIT_STS:"D"</code>를 마킹하므로 setter 없이도 작동.</li>
-              <li>삭제 컬럼 자체를 끔(<code>standardAudit(undefined, { delete: false })</code>) → 시그니처에서 <code>setGridData</code> 인자 자체 제거 가능.</li>
+              <li>기본: <code>model.bind</code>가 <code>audit:true</code>를 자동 spread → 컬럼 끝에 삭제/상태/등록·수정 정보 자동 추가.</li>
+              <li>부분 토글: View에서 <code>audit={{ updatePerson: false }}</code> 등 명시.</li>
+              <li>전체 끄기: View에서 <code>audit={false}</code> (audit 컬럼이 중간 위치이거나 별도 처리하는 화면).</li>
             </ul>
             <p style="margin-top: 8px">
-              <strong>실무 권장</strong>: 추가 기능이 붙을 가능성이 조금이라도 있으면 항상 <code>MAIN_COLUMN_DEFS(model.setGridData)</code>로 넘기세요. setter를 줘도 추가가 없으면 호출되지 않아 부작용 없음.
+              컬럼 파일에서 <code>standardAudit</code>를 직접 호출하거나 <code>setGridData</code>/<code>setRowData</code>를 넘기지 않는다 — DataGrid가 <code>audit</code> prop으로 처리한다.
             </p>
           </div>
         </div>
@@ -1836,17 +1842,17 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
         <!-- Api -->
         <h3>Api — <code>{화면}Api.ts</code></h3>
         <ul style="padding-left: 20px">
-          <li>객체 형태로 export: <code>export const featureApi = { MENU_CD, getList, save, ... }</code></li>
-          <li>모든 요청에 <code>MENU_CD</code> 포함 + <code>withSession()</code>으로 세션 필드 주입</li>
-          <li>저장 API는 <code>dsSave</code> 패턴: body에 <code>{ dsSave }</code>, params에 세션/MENU_CD/그 외 키</li>
+          <li><code>MENU_CODE</code>는 <strong>View에서 export → Api가 import</strong> (Api가 자체 정의하지 않음)</li>
+          <li>객체 형태로 export: <code>export const featureApi = { getList, save, ... }</code></li>
+          <li>모든 요청에 <code>MENU_CD: MENU_CODE</code> 포함 + <code>withSession()</code>으로 세션 필드 주입</li>
+          <li>저장 API는 <code>dsSave</code> 패턴: body에 <code>{ dsSave }</code>, params에 세션/<code>MENU_CD</code>/그 외 키</li>
           <li>배열 페이로드일 때도 <code>withSession</code>이 각 원소에 세션 필드 자동 주입</li>
         </ul>
         <div class="code-block">
           <div class="code-header"><span>api 골격</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
           <pre><span class="k">import</span> { apiClient } <span class="k">from</span> <span class="s">"@/app/http/client"</span>;
 <span class="k">import</span> { getSessionFields } <span class="k">from</span> <span class="s">"@/app/services/auth/auth"</span>;
-
-<span class="k">const</span> <span class="t">MENU_CD</span> = <span class="s">"MENU_XXX"</span>;
+<span class="k">import</span> { <span class="t">MENU_CODE</span> } <span class="k">from</span> <span class="s">"./Feature"</span>;   <span class="c">// MENU_CODE 는 View 에서 export</span>
 
 <span class="k">const</span> <span class="fn">withSession</span> = (payload = {}) =&gt; {
   <span class="k">const</span> s = <span class="fn">getSessionFields</span>();
@@ -1856,10 +1862,9 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
 };
 
 <span class="k">export const</span> featureApi = {
-  <span class="t">MENU_CD</span>,
   <span class="fn">getList</span>(payload) {
     <span class="k">return</span> apiClient.<span class="fn">post</span>(<span class="s">"/featureService/searchList"</span>,
-      <span class="fn">withSession</span>({ <span class="t">MENU_CD</span>, ...payload }));
+      <span class="fn">withSession</span>({ <span class="t">MENU_CD</span>: <span class="t">MENU_CODE</span>, ...payload }));
   },
   <span class="fn">save</span>(payload) {
     <span class="k">return</span> apiClient.<span class="fn">post</span>(<span class="s">"/featureService/save"</span>,
@@ -1905,9 +1910,9 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
               <tr data-search="searchprops master detail 조회조건 search props"><td>searchProps</td><td><span class="tag tag-required">필수</span></td><td>조회조건 영역 설정 — <code>meta</code>, <code>fetchFn</code>, <code>onSearch</code>, <code>searchRef</code>, <code>filtersRef</code>, <code>pageSize</code>, <code>excludes</code>(선택 — payload 에서 제외/리네임할 키 선언), <code>menuCode</code> 포함<div class="td-source">@/app/components/layout/presets/MasterDetailPage</div></td></tr>
               <tr data-search="master 메인 그리드 main grid"><td>master</td><td><span class="tag tag-required">필수</span></td><td>메인(좌측 또는 상단) 그리드 — 보통 <code>&lt;DataGrid /&gt;</code><div class="td-desc">ReactNode</div></td></tr>
               <tr data-search="detail 상세 grid 상세그리드"><td>detail</td><td><span class="tag tag-required">필수</span></td><td>상세(우측 또는 하단) 그리드 — 단일 또는 탭 DataGrid<div class="td-desc">ReactNode</div></td></tr>
-              <tr data-search="direction horizontal vertical 분할 방향"><td>direction</td><td><span class="tag tag-required">필수</span></td><td>분할 방향 — <code>"horizontal"</code>(좌우) / <code>"vertical"</code>(상하)<div class="td-desc">"horizontal" | "vertical"</div></td></tr>
+              <tr data-search="defaultdirection direction horizontal vertical 분할 방향 초기값"><td>defaultDirection</td><td><span class="tag tag-optional">선택</span></td><td>초기 분할 방향 — <code>"horizontal"</code>(좌우) / <code>"vertical"</code>(상하), 기본 <code>"horizontal"</code>. 사용자 토글값은 <code>storageKey</code>로 localStorage 자동 동기화<div class="td-desc">"horizontal" | "vertical"</div></td></tr>
               <tr data-search="defaultsizes 초기 비율 master detail size"><td>defaultSizes</td><td><span class="tag tag-optional">선택</span></td><td>초기 master/detail 비율 (합 100), 기본 <code>[50, 50]</code><div class="td-desc">[number, number]</div></td></tr>
-              <tr data-search="layouttoggle 레이아웃 토글 side vertical"><td>layoutToggle</td><td><span class="tag tag-optional">선택</span></td><td>레이아웃 토글 버튼 표시 — <code>{ layout, onToggle }</code> 전달 시 토글 활성화<div class="td-desc">{ layout: LayoutType; onToggle: () =&gt; void }</div></td></tr>
+              <tr data-search="layouttoggle 레이아웃 토글 버튼 숨김 boolean"><td>layoutToggle</td><td><span class="tag tag-optional">선택</span></td><td>토글 버튼 표시 여부 (기본 <code>true</code>). 방향 state·토글 핸들러·localStorage 동기화는 <code>defaultDirection</code>+<code>storageKey</code>로 preset이 내부 처리 — 별도 wiring 불필요. 버튼을 숨기려면 <code>layoutToggle={false}</code><div class="td-desc">boolean</div></td></tr>
               <tr data-search="storagekey localstorage 저장 키 사이즈"><td>storageKey</td><td><span class="tag tag-optional">선택</span></td><td>localStorage에 사이즈/레이아웃 저장용 화면별 유일 키<div class="td-desc">string</div></td></tr>
               <tr data-search="outertabs 외부 탭 페이지 패턴 F 선언적"><td>outerTabs</td><td><span class="tag tag-optional">선택</span></td><td>페이지 외부 탭(패턴 F) — 선언적으로 전달하면 <code>OuterTabs</code> 컴포넌트가 <code>topSlot</code> 위에 자동 렌더됨<div class="td-desc">{ tabs: { key, label }[]; activeTab: string; onChange: (key: string) =&gt; void }</div></td></tr>
               <tr data-search="topslot 임의 슬롯 searchfilters 사이"><td>topSlot</td><td><span class="tag tag-optional">선택</span></td><td>SearchFilters와 그리드 사이에 들어갈 임의 ReactNode 슬롯 — 외부 탭은 <code>outerTabs</code> 사용 권장<div class="td-desc">ReactNode</div></td></tr>
@@ -1935,6 +1940,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
               <tr data-search="actions 액션 버튼 toolbar"><td>actions</td><td><span class="tag tag-required">필수</span></td><td>그리드 상단 액션바 버튼 배열 — 공통 팩토리 사용 권장<div class="td-desc">ActionItem[]</div></td></tr>
               <tr data-search="subtitle 부제목 헤더 라벨"><td>subTitle</td><td><span class="tag tag-optional">선택</span></td><td>액션바 좌측 라벨(다국어 키 가능)<div class="td-desc">string</div></td></tr>
               <tr data-search="codemap 코드맵 공통코드 라벨 변환"><td>codeMap</td><td><span class="tag tag-optional">선택</span></td><td>공통코드 → 라벨 lookup 맵. 컬럼에 <code>codeKey</code>만 주면 자동 cellRenderer 주입<div class="td-desc">Record&lt;string, Record&lt;string, string&gt;&gt;</div></td></tr>
+              <tr data-search="authid 그리드 리소스 권한 grid authid 센차 단일소스 auth grids"><td>authId</td><td><span class="tag tag-optional">선택</span></td><td>그리드 <strong>리소스 권한</strong> 식별자(센차 <code>grid.authId</code>). <code>useResourceAccess</code> 가 권한 매트릭스 확인 → 조회(S) 권한 없으면 그리드 비활성. 매트릭스에 없으면(통제 대상 아님) 제한 없음. <strong>View 가 <code>export const AUTH = { grids: { main: "MAIN_GRID_XXX" } }</code> 단일 소스로 선언</strong> → <code>authId={AUTH.grids.main}</code>. 같은 값을 Controller 엑셀 <code>upload/templateDownload</code>의 <code>gridId</code> 가 재사용. <strong>메뉴 권한은 <code>menuCode</code>, 그리드/엑셀은 <code>authId</code></strong><div class="td-desc">string</div></td></tr>
               <tr data-search="onrowclicked 행 클릭"><td>onRowClicked</td><td><span class="tag tag-optional">선택</span></td><td>행 클릭 콜백<div class="td-desc">(row: TRow) =&gt; void</div></td></tr>
               <tr data-search="onrowdoubleclicked 더블클릭"><td>onRowDoubleClicked</td><td><span class="tag tag-optional">선택</span></td><td>행 더블클릭 콜백<div class="td-desc">(row: TRow) =&gt; void</div></td></tr>
               <tr data-search="onrowselected 행 선택 변경"><td>onRowSelected</td><td><span class="tag tag-optional">선택</span></td><td>행 선택(체크) 변경 콜백<div class="td-desc">(row: TRow | null) =&gt; void</div></td></tr>
@@ -1994,7 +2000,10 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
             <tbody>
               <tr data-search="headername 헤더 라벨 다국어"><td>headerName</td><td><span class="tag tag-optional">옵션</span></td><td>헤더 라벨. <code>LBL_*</code> 형태면 <code>Lang.get</code>로 다국어 변환됨</td></tr>
               <tr data-search="field 데이터 키 필드"><td>field</td><td>—</td><td>row 데이터의 키 (예: <code>"DSPCH_NO"</code>)</td></tr>
-              <tr data-search="type numeric date text 컬럼 타입"><td>type</td><td>—</td><td><code>"text"</code> / <code>"numeric"</code> / <code>"date"</code> 등 (numeric은 자동 우측 정렬)</td></tr>
+              <tr data-search="type numeric date text combo check popup popuser 컬럼 타입 위젯"><td>type</td><td>—</td><td><code>"text"</code> / <code>"numeric"</code> / <code>"date"</code> / <code>"datetime"</code> / <code>"combo"</code> / <code>"check"</code> / <code>"popup"</code> / <code>"popuser"</code> / <code>"address"</code> — 위젯·정렬·포맷·기본 편집모드 결정 (numeric은 자동 우측 정렬)</td></tr>
+              <tr data-search="popup 돋보기 commonpopup sqlid callback 코드명 팝업 컬럼"><td>type: "popup"</td><td><span class="tag tag-blue">자동</span></td><td>돋보기 + <code>CommonPopup</code> 자동. <code>sqlId</code>(코드\|명 2열 조회) + <code>popupTitle</code> 지정. <code>callback: ({ picked, commit }) =&gt; commit({...})</code> 로 선택 행을 여러 필드로 매핑 (생략 시 CODE 만 field 입력). 편집 노출은 <code>insertable</code>/<code>editable</code> 정책 따름</td></tr>
+              <tr data-search="popuser 커스텀 팝업 renderpopup 사용자 팝업 컬럼"><td>type: "popuser"</td><td><span class="tag tag-blue">자동</span></td><td>커스텀 팝업 직접 렌더 — <code>renderPopup: ({ row, commit, close }) =&gt; &lt;CommonPopup ... /&gt;</code>. 의존 컬럼 파라미터 전달·다중 필드 commit 등 popup 으로 부족할 때. 편집 노출은 <code>insertable</code>/<code>editable</code> 정책 따름</td></tr>
+              <tr data-search="address 주소찾기 addresspop addrfields 다중필드 writeback 컬럼"><td>type: "address"</td><td><span class="tag tag-blue">자동</span></td><td>"주소찾기" 버튼 + <code>AddressPop</code> 자동. <code>field</code> 없는 액션 컬럼(<code>colId</code> 사용). 선택 시 <code>addrFields</code> 매핑대로 다중 필드 write-back (기본 <code>CTRY_CD/CTRY_NM/STT_CD/STT_NM/CTY_CD/CTY_NM/ZIP_CD/DTL_ADDR1/DTL_ADDR2</code>) — <code>addrFields</code> 로 부분 오버라이드. 결과 필드는 보통 별도 읽기전용 <code>text</code> 컬럼으로 표시. 편집 노출은 <code>insertable</code>/<code>editable</code> 정책 따름</td></tr>
               <tr data-search="datatype number 숫자 우측 정렬"><td>dataType: "number"</td><td><span class="tag tag-blue">자동</span></td><td>우측 정렬 자동 적용</td></tr>
               <tr data-search="codekey 공통코드 라벨 치환"><td>codeKey</td><td><span class="tag tag-blue">자동</span></td><td>공통코드 → 라벨 치환 — <code>codeMap[codeKey][value]</code> lookup 후 cellRenderer 자동 주입</td></tr>
               <tr data-search="dttm 일시 날짜 자동 포맷팅"><td>field 에 _DTTM 포함</td><td><span class="tag tag-blue">자동</span></td><td>날짜 포맷팅 자동 적용 (예: <code>CRE_DTTM</code>, <code>UPD_DTTM</code>)</td></tr>
@@ -2010,7 +2019,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
               <tr data-search="width 컬럼 너비 고정"><td>width</td><td>—</td><td>고정 컬럼 너비(px). 미지정 시 자동 측정</td></tr>
               <tr data-search="minwidth 최소 너비"><td>minWidth</td><td>—</td><td>컬럼 최소 너비(px)</td></tr>
               <tr data-search="hide 숨김 컬럼"><td>hide</td><td>—</td><td>컬럼 숨김</td></tr>
-              <tr data-search="standardaudit 감사 컬럼 일괄 삭제 상태 생성자 setgriddata setrowdata 신규 추가 컨벤션 usegridadd"><td>...standardAudit(setter)</td><td><span class="tag tag-blue">자동</span></td><td>삭제/상태/생성자/생성일/수정자/수정일 7컬럼 일괄 삽입. <strong>삭제 + 추가 기능(<code>useGridAdd</code>) 둘 다 있는 화면은 setter 필수</strong> — 신규 행(<code>EDIT_STS:"I"</code>) 삭제 시 배열 제거에 사용. 기존 행만 삭제하는 화면은 setter 없어도 작동(<code>markDelete</code>가 직접 마킹). <code>{ updatePerson: false }</code> 같은 override 가능.</td></tr>
+              <tr data-search="standardaudit audit 감사 컬럼 일괄 삭제 상태 생성자 자동 model bind"><td>audit (자동)</td><td><span class="tag tag-blue">자동</span></td><td>삭제/상태/생성자·생성일/수정자·수정일 7컬럼을 <code>model.bind</code>의 <code>audit</code> prop으로 <strong>DataGrid가 자동 삽입</strong> — 컬럼 파일에서 <code>standardAudit</code> 직접 호출 안 함. 부분 토글은 View에서 <code>audit={{ updatePerson: false }}</code>, 전체 끄기는 <code>audit={false}</code>.</td></tr>
             </tbody>
           </table>
           <div class="ref-empty-msg">검색 결과 없음</div>
@@ -2061,11 +2070,11 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
 
         <div class="ref-section">
           <h3>makeAddAction</h3>
-          <div class="ref-summary">"추가" 버튼 — 보통 <code>useGridAdd</code> 훅과 함께 사용</div>
+          <div class="ref-summary">"추가" 버튼 — 현 표준은 <code>base.addRow(gridKey, newRow)</code> onClick (레거시 <code>useGridAdd</code> 훅도 가능)</div>
           <table>
             <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
             <tbody>
-              <tr data-search="onclick 추가 클릭 makeaddaction"><td>onClick</td><td><span class="tag tag-optional">선택</span></td><td>클릭 핸들러 (보통 <code>useGridAdd</code> 결과)<div class="td-desc">(e?: any) =&gt; void</div></td></tr>
+              <tr data-search="onclick 추가 클릭 makeaddaction"><td>onClick</td><td><span class="tag tag-optional">선택</span></td><td>클릭 핸들러 — 보통 <code>base.addRow</code> 호출 (레거시 <code>useGridAdd</code> 결과)<div class="td-desc">(e?: any) =&gt; void</div></td></tr>
               <tr data-search="label 라벨 추가 makeaddaction"><td>label</td><td><span class="tag tag-optional">선택</span></td><td>버튼 라벨, 기본 <code>"BTN_ADD"</code></td></tr>
               <tr data-search="key 키 makeaddaction"><td>key</td><td><span class="tag tag-optional">선택</span></td><td>action key, 기본 <code>"BTN_ADD"</code></td></tr>
               <tr data-search="disabled 비활성 makeaddaction"><td>disabled</td><td><span class="tag tag-optional">선택</span></td><td>비활성화</td></tr>
@@ -2076,11 +2085,11 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
 
         <div class="ref-section">
           <h3>makeSaveAction</h3>
-          <div class="ref-summary">"저장" 버튼 — 보통 <code>useGridSave</code> 훅 결과를 <code>onClick</code>으로 전달</div>
+          <div class="ref-summary">"저장" 버튼 — 현 표준은 <code>base.saveGrid(gridKey, api.save, opts)</code> onClick (레거시 <code>useGridSave</code> 결과도 가능)</div>
           <table>
             <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
             <tbody>
-              <tr data-search="onclick 저장 클릭 makesaveaction"><td>onClick</td><td><span class="tag tag-optional">선택</span></td><td>클릭 핸들러 (보통 <code>useGridSave</code> 결과)</td></tr>
+              <tr data-search="onclick 저장 클릭 makesaveaction"><td>onClick</td><td><span class="tag tag-optional">선택</span></td><td>클릭 핸들러 — 보통 <code>base.saveGrid</code> 호출 (레거시 <code>useGridSave</code> 결과)</td></tr>
               <tr data-search="label 라벨 저장 makesaveaction"><td>label</td><td><span class="tag tag-optional">선택</span></td><td>버튼 라벨, 기본 <code>"BTN_SAVE"</code></td></tr>
               <tr data-search="key 키 makesaveaction"><td>key</td><td><span class="tag tag-optional">선택</span></td><td>action key, 기본 <code>"BTN_SAVE"</code></td></tr>
               <tr data-search="disabled 비활성 makesaveaction"><td>disabled</td><td><span class="tag tag-optional">선택</span></td><td>비활성화</td></tr>
@@ -2095,12 +2104,47 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
           <table>
             <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
             <tbody>
-              <tr data-search="columns 엑셀 컬럼 makeexcelgroupaction"><td>columns</td><td><span class="tag tag-required">필수</span></td><td>다운로드용 컬럼 정의 (<code>MAIN_COLUMN_DEFS()</code>)</td></tr>
-              <tr data-search="menuname 엑셀 파일명"><td>menuName</td><td><span class="tag tag-required">필수</span></td><td>엑셀 파일명에 사용할 메뉴명</td></tr>
+              <tr data-search="excelcolumns 엑셀 컬럼 getexcelcolumns makeexcelgroupaction"><td>excelColumns</td><td><span class="tag tag-required">필수</span></td><td>표시 중 컬럼 반환 함수 — <code>() =&gt; model.grids.&lt;key&gt;.getExcelColumns()</code> (audit·런타임 숨김/순서·codeKey 라벨 반영). 정적 <code>columns</code> 는 레거시 폴백</td></tr>
+              <tr data-search="menucode 엑셀 메뉴코드 세션 mencd"><td>menuCode</td><td><span class="tag tag-required">필수</span></td><td>서버 <code>MENU_CD</code> — 엑셀 3단계 세션 키</td></tr>
+              <tr data-search="menuname 엑셀 파일명"><td>menuName</td><td><span class="tag tag-required">필수</span></td><td>파일명에 쓸 메뉴명 — <code>useMenuMeta().menuName</code></td></tr>
               <tr data-search="fetchfn 엑셀 조회 함수"><td>fetchFn</td><td><span class="tag tag-required">필수</span></td><td>전체 데이터 조회 함수 (paging 무시)</td></tr>
-              <tr data-search="rows 엑셀 보이는 데이터"><td>rows</td><td><span class="tag tag-required">필수</span></td><td>현재 보이는 데이터 (모델의 <code>gridData.rows</code>)</td></tr>
+              <tr data-search="rows 엑셀 보이는 데이터"><td>rows</td><td><span class="tag tag-required">필수</span></td><td>현재 보이는 데이터 — <code>model.grids.&lt;key&gt;.rows</code></td></tr>
               <tr data-search="hideall 모든데이터 숨김"><td>hideAll</td><td><span class="tag tag-optional">선택</span></td><td>"조회된모든데이터다운로드" 버튼 숨김</td></tr>
               <tr data-search="hidevisible 보이는데이터 숨김"><td>hideVisible</td><td><span class="tag tag-optional">선택</span></td><td>"보이는데이터다운로드" 버튼 숨김</td></tr>
+              <tr data-search="upload 엑셀 업로드 그룹 안 포함 onuploaded"><td>upload</td><td><span class="tag tag-optional">선택</span></td><td>엑셀 <strong>업로드</strong> 버튼을 그룹 "안"에 포함 — <code>{ gridId?, onUploaded?, accept? }</code> (menuCode 는 그룹 것 재사용). 그룹 "밖" 별도 버튼은 <code>makeExcelUploadAction</code> 따로 호출</td></tr>
+              <tr data-search="templatedownload 엑셀 양식 다운로드 그룹 안 포함"><td>templateDownload</td><td><span class="tag tag-optional">선택</span></td><td>엑셀 <strong>양식 다운로드</strong> 버튼을 그룹 "안"에 포함 — <code>{ gridId?, fileName? }</code>. 그룹 "밖" 별도 버튼은 <code>makeExcelTemplateDownloadAction</code> 따로 호출</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>makeExcelUploadAction</h3>
+          <div class="ref-summary">엑셀 <strong>업로드</strong> 단일 버튼 (센차 <code>gridExcelUpload</code>). 파일 선택 → <code>commonApi.uploadCommonExcel</code> → 완료 알림. 그룹 "밖" 별도 버튼용 (그룹 "안"은 <code>makeExcelGroupAction.upload</code>)</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="menucode 업로드 메뉴코드"><td>menuCode</td><td><span class="tag tag-required">필수</span></td><td>서버 <code>MENU_CD</code> — 화면 menuCode</td></tr>
+              <tr data-search="gridid 업로드 그리드 식별자 authid 센차 auth grids 단일소스"><td>gridId</td><td><span class="tag tag-optional">선택</span></td><td>업로드 대상 그리드 식별자 (센차 <code>grid.authId</code>). 서버가 업로드 컬럼 매핑을 찾는 키. <strong>View 의 <code>AUTH.grids.&lt;key&gt;</code> 단일 소스 참조</strong> (DataGrid <code>authId</code> 와 동일 값)</td></tr>
+              <tr data-search="onuploaded 업로드 후 콜백 재조회"><td>onUploaded</td><td><span class="tag tag-optional">선택</span></td><td>업로드 성공 후 콜백 (보통 <code>() =&gt; base.search()</code>)</td></tr>
+              <tr data-search="accept 확장자 필터 xlsx xls"><td>accept</td><td><span class="tag tag-optional">선택</span></td><td>파일 확장자 필터, 기본 <code>.xlsx,.xls</code></td></tr>
+              <tr data-search="url 업로더 url 오버라이드"><td>url</td><td><span class="tag tag-optional">선택</span></td><td>업로더 URL 오버라이드, 기본 <code>/uploaderService/upload</code></td></tr>
+              <tr data-search="label key 라벨 업로드 버튼"><td>label / key</td><td><span class="tag tag-optional">선택</span></td><td>버튼 라벨/키, 기본 <code>BTN_EXCEL_UP</code></td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>makeExcelTemplateDownloadAction</h3>
+          <div class="ref-summary">엑셀 <strong>양식 다운로드</strong> 단일 버튼 (센차 <code>gridExcelTemplateDownload</code>). <code>commonApi.downloadExcelTemplate</code> → blob 저장. 그룹 "밖" 별도 버튼용 (그룹 "안"은 <code>makeExcelGroupAction.templateDownload</code>)</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="menucode 양식 메뉴코드"><td>menuCode</td><td><span class="tag tag-required">필수</span></td><td>서버 <code>MENU_CD</code> — 화면 menuCode</td></tr>
+              <tr data-search="gridid 양식 그리드 식별자 authid auth grids 단일소스"><td>gridId</td><td><span class="tag tag-optional">선택</span></td><td>양식 대상 그리드 식별자 (센차 <code>grid.authId</code>). <strong>View 의 <code>AUTH.grids.&lt;key&gt;</code> 단일 소스 참조</strong></td></tr>
+              <tr data-search="filename 양식 파일명 fallback"><td>fileName</td><td><span class="tag tag-optional">선택</span></td><td>다운로드 파일명(확장자 제외). 서버 <code>Content-Disposition</code> 없을 때만 사용</td></tr>
+              <tr data-search="label key 라벨 양식 다운로드 버튼"><td>label / key</td><td><span class="tag tag-optional">선택</span></td><td>버튼 라벨/키, 기본 <code>BTN_EXCEL_TEMPLATE_DOWNLOAD</code></td></tr>
             </tbody>
           </table>
           <div class="ref-empty-msg">검색 결과 없음</div>
@@ -2115,6 +2159,26 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
               <tr data-search="add 추가 makecommonactions"><td>add</td><td><span class="tag tag-optional">선택</span></td><td><code>true</code> 또는 <code>AddActionConfig</code> — 있으면 추가 버튼 포함</td></tr>
               <tr data-search="save 저장 makecommonactions"><td>save</td><td><span class="tag tag-optional">선택</span></td><td><code>true</code> 또는 <code>SaveActionConfig</code></td></tr>
               <tr data-search="excel 엑셀 makecommonactions"><td>excel</td><td><span class="tag tag-optional">선택</span></td><td><code>ExcelGroupActionConfig</code> — 있으면 엑셀 그룹 포함</td></tr>
+            </tbody>
+          </table>
+          <div class="ref-empty-msg">검색 결과 없음</div>
+        </div>
+
+        <div class="ref-section">
+          <h3>makeMemoGroupAction</h3>
+          <div class="ref-summary">"메모" 그룹 — 등록/취소 2버튼. 등록 시 <code>MemoInputPopup</code> 자동 표시 → <code>saveMemo</code>, 취소 시 (옵션 confirm 후) <code>cancelMemo</code> → 재조회. 선택행은 <code>e.data</code>로 주입. 센차 <code>onSaveMemo</code>/<code>onCancelMemo</code> 대응</div>
+          <table>
+            <thead><tr><th style="width: 200px">Config</th><th style="width: 80px">필수</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr data-search="savememo 메모 저장 makememogroupaction"><td>saveMemo</td><td><span class="tag tag-required">필수</span></td><td>메모 저장 — <code>(rows, text) =&gt; Promise</code>. 선택행 + 입력 text. 필드/상태/URL 은 화면 api 책임</td></tr>
+              <tr data-search="cancelmemo 메모 취소 등록취소"><td>cancelMemo</td><td><span class="tag tag-required">필수</span></td><td>메모 등록취소 — <code>(rows) =&gt; Promise</code></td></tr>
+              <tr data-search="ondone 메모 완료 콜백 재조회"><td>onDone</td><td><span class="tag tag-optional">선택</span></td><td>성공 후 콜백 (보통 <code>() =&gt; base.search()</code>)</td></tr>
+              <tr data-search="validate 메모 사전 검증 register cancel"><td>validate</td><td><span class="tag tag-optional">선택</span></td><td>사전 검증 — <code>(rows, mode:"register"|"cancel") =&gt; boolean</code>. <code>false</code> 반환 시 중단 (alert 는 내부 책임)</td></tr>
+              <tr data-search="confirmoncancel 취소 컨펌"><td>confirmOnCancel</td><td><span class="tag tag-optional">선택</span></td><td>취소 시 confirm 노출 여부</td></tr>
+              <tr data-search="confirmcancelmsg 취소 컨펌 메시지"><td>confirmCancelMsg</td><td><span class="tag tag-optional">선택</span></td><td>confirm 메시지 키, 기본 <code>MSG_MEMO_DELETE_IRREVERSIBLE_NOTICE</code></td></tr>
+              <tr data-search="noselectionmsg 선택없음 메시지"><td>noSelectionMsg</td><td><span class="tag tag-optional">선택</span></td><td>선택행 없을 때 alert 메시지 키, 기본 <code>MSG_SELECT_NO_DATA</code></td></tr>
+              <tr data-search="popupinfo 메모 입력 팝업 안내문"><td>popupInfo</td><td><span class="tag tag-optional">선택</span></td><td>메모 입력 팝업 상단 안내문 생성 — <code>(rows) =&gt; string</code></td></tr>
+              <tr data-search="라벨 키 메모 등록 취소 버튼"><td>label/key, registerLabel/Key, cancelLabel/Key</td><td><span class="tag tag-optional">선택</span></td><td>그룹/등록/취소 버튼 라벨·키. 기본 <code>BTN_MEMO</code> / <code>BTN_REGISTRATION</code> / <code>BTN_CANCEL</code></td></tr>
             </tbody>
           </table>
           <div class="ref-empty-msg">검색 결과 없음</div>
@@ -2270,6 +2334,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
             <tbody>
               <tr data-search="usecommonstores 공통코드 sqlprop keyparam"><td>params</td><td><code>Record&lt;string, { sqlProp, keyParam? } | Array&gt;</code> — 키별 공통코드 정의</td></tr>
               <tr data-search="stores 공통코드 결과"><td>반환: { stores }</td><td><code>Record&lt;string, any[]&gt;</code> — 키별 옵션 배열 (CODE/NAME)</td></tr>
+              <tr data-search="codemap 코드맵 자동 변환 usememo 불필요"><td>반환: { codeMap }</td><td><code>Record&lt;string, Record&lt;string, string&gt;&gt;</code> — <code>codeMap[storeKey][CODE] = NAME</code>. <strong>자동 생성 (<code>useMemo</code> 불필요)</strong> → Model 에서 <code>const { codeMap } = useCommonStores(...)</code> 후 <code>{ ...base, codeMap }</code> 로 노출. 원본 행 배열이 필요하면 <code>{ stores, codeMap }</code></td></tr>
             </tbody>
           </table>
           <div class="ref-empty-msg">검색 결과 없음</div>
@@ -2301,7 +2366,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
 
         <div class="ref-section">
           <h3>useGridAdd({ setRows, newRow, position })</h3>
-          <div class="ref-summary">그리드 행 추가 — 새 행을 <code>EDIT_STS:"I"</code>로 마킹하여 삽입</div>
+          <div class="ref-summary"><span class="tag tag-amber">레거시</span> 그리드 행 추가 — 새 행을 <code>EDIT_STS:"I"</code>로 마킹하여 삽입. <strong>현 표준은 <code>base.addRow</code></strong></div>
           <table>
             <thead><tr><th style="width: 200px">인자</th><th>설명</th></tr></thead>
             <tbody>
@@ -2315,7 +2380,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
 
         <div class="ref-section">
           <h3>useGridSave({ rows, setRows, saveFn, successMessage, onSaved, onEmpty })</h3>
-          <div class="ref-summary">그리드 저장 — dirty 행 추출 → <code>toDsSave</code> → API 호출 → EDIT_STS 클리어 자동 처리</div>
+          <div class="ref-summary"><span class="tag tag-amber">레거시</span> 그리드 저장 — dirty 행 추출 → <code>toDsSave</code> → API 호출 → EDIT_STS 클리어. <strong>현 표준은 <code>base.saveGrid</code></strong></div>
           <table>
             <thead><tr><th style="width: 200px">인자</th><th>설명</th></tr></thead>
             <tbody>
@@ -2416,9 +2481,9 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
             <tr><th style="width: 240px">변경하고 싶은 것</th><th>어디를 만지나</th></tr>
           </thead>
           <tbody>
-            <tr><td>좌우 분할 ↔ 상하 분할</td><td><code>MasterDetailPage.direction</code> = <code>"horizontal"</code> / <code>"vertical"</code> (사용자 토글은 <code>layoutToggle</code> + Model의 <code>layout</code> state)</td></tr>
+            <tr><td>좌우 분할 ↔ 상하 분할</td><td><code>MasterDetailPage.defaultDirection</code> = <code>"horizontal"</code> / <code>"vertical"</code> (초기값만 지정 — 사용자 토글·영속화는 <code>storageKey</code>로 preset이 자동 처리)</td></tr>
             <tr><td>master/detail 초기 비율</td><td><code>MasterDetailPage.defaultSizes={[40, 60]}</code> 처럼 합 100인 배열</td></tr>
-            <tr><td>레이아웃 토글 버튼 표시</td><td><code>layoutToggle={{ layout, onToggle }}</code> 전달 — 빠지면 토글 없음</td></tr>
+            <tr><td>레이아웃 토글 버튼 표시</td><td>기본 표시됨 — 숨기려면 <code>layoutToggle={false}</code> (방향은 <code>defaultDirection</code>+<code>storageKey</code>가 관리)</td></tr>
             <tr><td>리사이즈 비율 저장 (사용자별)</td><td><code>storageKey</code>에 화면별 유일 문자열 지정 — 미지정 시 저장 안 됨</td></tr>
             <tr><td>detail 영역을 더 분할</td><td>detail 안쪽에 <code>&lt;SplitPane&gt;</code> 직접 사용 — 자식으로 그리드 2개 배치</td></tr>
             <tr><td>detail을 탭으로</td><td>detail의 DataGrid에 <code>layoutType="tab"</code> + <code>tabs</code> + <code>presets</code> + <code>rowData={{TAB_KEY: rows}}</code></td></tr>

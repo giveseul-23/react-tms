@@ -27,25 +27,13 @@ export function useDtgDailyTemperHisModel(menuCode: string) {
   const [standard, setStandard] = useState<TemperatureStandard | null>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     vehOpTypeList: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
     temperCntrlType: { sqlProp: "CODE", keyParam: "TMPR_VLTN_PLCY_CD" },
   });
 
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
-
   return {
     ...base,
-    stores,
     codeMap,
     fridgeData,
     setFridgeData,
@@ -58,4 +46,6 @@ export function useDtgDailyTemperHisModel(menuCode: string) {
   };
 }
 
-export type DtgDailyTemperHisModel = ReturnType<typeof useDtgDailyTemperHisModel>;
+export type DtgDailyTemperHisModel = ReturnType<
+  typeof useDtgDailyTemperHisModel
+>;

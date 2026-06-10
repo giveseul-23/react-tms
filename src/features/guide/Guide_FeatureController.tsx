@@ -28,7 +28,7 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { featureApi as api } from "./Guide_FeatureApi";
 import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./Guide_FeatureColumns";
-import { MENU_CODE } from "./Guide_Feature";
+import { MENU_CODE, AUTH } from "./Guide_Feature";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { FeatureModel, GridKey } from "./Guide_FeatureModel";
 
@@ -128,9 +128,14 @@ export function useFeatureController({ model }: ControllerArgs) {
         menuName: "화면명",
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
+        // 엑셀 업로드 / 양식 다운로드를 그룹 "안"에 포함 (필요한 화면만).
+        // gridId 는 View 가 export 한 AUTH.grids 단일 소스 참조 (센차 grid.authId).
+        // 그룹 "밖" 별도 버튼은 makeExcelUploadAction / makeExcelTemplateDownloadAction 따로 호출.
+        upload: { gridId: AUTH.grids.main, onUploaded: () => base.search() },
+        templateDownload: { gridId: AUTH.grids.main },
       }),
     ],
-    [onAddMain, onSaveMain, model],
+    [onAddMain, onSaveMain, base, model],
   );
 
   const detailActions: ActionItem[] = useMemo(

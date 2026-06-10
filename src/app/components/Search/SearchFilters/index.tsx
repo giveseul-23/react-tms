@@ -36,6 +36,7 @@ import {
   useSearchCondition,
   type ExcludeSpec,
 } from "@/hooks/useSearchCondition";
+import { Lang } from "@/app/services/common/Lang";
 
 export type { SearchResult, ParamMode };
 
@@ -216,7 +217,7 @@ export function SearchFilters({
             <div className="flex items-center gap-1.5">
               <Button variant="outline" size="xs" onClick={handleReset}>
                 <RefreshCw className="w-3 h-3" />
-                초기화
+                {Lang.get("LBL_INITIALIZE")}
               </Button>
               {layoutToggle}
             </div>
@@ -233,7 +234,7 @@ export function SearchFilters({
               ) : (
                 <Search className="w-3 h-3" />
               )}
-              {searching ? "조회중..." : "조회"}
+              {searching ? Lang.get("LBL_SEARCHING") : Lang.get("LBL_SEARCH")}
             </Button>
           </div>
         </CollapsibleContent>
