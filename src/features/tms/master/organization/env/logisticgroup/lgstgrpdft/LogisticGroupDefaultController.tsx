@@ -34,24 +34,30 @@ export function useLogisticGroupDefaultController({ model }: Args) {
     [],
   );
 
-  // header 클릭 → subCnfg fetch (detail alsoReset)
+  // header 클릭 → subCnfg fetch (detail alsoReset). 연쇄 호출을 위해 subCnfg rows 반환.
   const onHeaderGridClick = useCallback(
-    (row: any) =>
-      base.handleRowClick(
-        "header",
-        row,
-        [
-          {
-            to: "subCnfg",
-            fetch: (r) =>
-              api.getLgstDefaultCnfgList({
-                LGST_GRP_CNFG_GRP_CD: r.LGST_GRP_CNFG_GRP_CD,
-              }),
-          },
-        ],
-        { alsoReset: ["detail"] },
-      ),
-    [base],
+    async (row: any): Promise<any[]> => {
+      const slot = model.grids.header;
+      const rows = slot.ref.current?.rows ?? [];
+      const hasDirty = rows.some(
+        (r: any) =>
+          r.EDIT_STS === "I" || r.EDIT_STS === "U" || r.EDIT_STS === "D",
+      );
+      if (hasDirty) return [];
+      if (row != null && slot.selectedRef.current === row) return [];
+
+      slot.setSelected(row);
+      base.resetGrids(["subCnfg", "detail"]);
+      if (!row) return [];
+
+      return base.searchSub(
+        "subCnfg",
+        api.getLgstDefaultCnfgList({
+          LGST_GRP_CNFG_GRP_CD: row.LGST_GRP_CNFG_GRP_CD,
+        }),
+      );
+    },
+    [base, model.grids.header],
   );
 
   // subCnfg 클릭 → detail fetch
@@ -60,18 +66,23 @@ export function useLogisticGroupDefaultController({ model }: Args) {
       base.handleRowClick("subCnfg", row, [
         {
           to: "detail",
-          fetch: (r) => api.getLgstDefaultDetailList({ CNFG_CD: r.CNFG_CD }),
+          fetch: (r) =>
+            api.getLgstDefaultDetailList({
+              CNFG_CD: r.CNFG_CD,
+              DIV_CD: model.rawFiltersRef.current.SRCH_DIV_CD,
+            }),
         },
       ]),
-    [base],
+    [base, model.rawFiltersRef],
   );
 
   const onSearchCallback = useCallback(
-    (data: any) => {
+    async (data: any) => {
       model.grids.header.setData(data);
-      onHeaderGridClick(data?.rows?.[0]);
+      const subRows = await onHeaderGridClick(data?.rows?.[0]);
+      onSubCnfgGridClick(subRows?.[0]);
     },
-    [model.grids.header, onHeaderGridClick],
+    [model.grids.header, onHeaderGridClick, onSubCnfgGridClick],
   );
 
   // ── Save ──────────────────────────────────────────────────────
@@ -111,7 +122,10 @@ export function useLogisticGroupDefaultController({ model }: Args) {
                 onConfirm={(payload: any) => {
                   closePopup();
                   base
-                    .callAjax(api.syncConfig(payload), Lang.get("MSG_CMPLT_SYNC"))
+                    .callAjax(
+                      api.syncConfig(payload),
+                      Lang.get("MSG_CMPLT_SYNC"),
+                    )
                     .then(() => base.search());
                 }}
                 onClose={closePopup}
