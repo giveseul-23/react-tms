@@ -79,7 +79,7 @@ export function useFeatureController({ model }: ControllerArgs) {
         rows: model.grids.main.rows,
       }),
     ],
-    [menuName, model.filtersRef, model.grids.main],
+    [menuName, model.filtersRef, model.grids.main, model.grids.main.rows],
   );
 
   const detailActions: ActionItem[] = useMemo(
@@ -97,7 +97,7 @@ export function useFeatureController({ model }: ControllerArgs) {
         rows: model.grids.detail.rows,
       }),
     ],
-    [menuName, model.grids.detail, model.grids.main.selectedRef],
+    [menuName, model.grids.detail, model.grids.detail.rows, model.grids.main.selectedRef],
   );
 
   return {
