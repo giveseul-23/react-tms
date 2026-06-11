@@ -12,7 +12,7 @@ export default function Application() {
   const model = useApplicationModel(MENU_CD);
 
   const ctrl = useApplicationController({
-    model,
+    model
   });
 
   return (
@@ -32,7 +32,7 @@ export default function Application() {
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
-          audit={false}
+          audit={true}
         />
       }
     />
