@@ -5,7 +5,7 @@
 
 import { useEffect, useRef } from "react";
 import type { SearchMeta } from "@/features/search/search.meta.types";
-import { SearchCondition } from "@/features/search/search.builder";
+import { SearchCondition, popupNameKey } from "@/features/search/search.builder";
 import { commonApi } from "@/app/services/common/commonApi";
 
 type SearchState = Record<string, SearchCondition>;
@@ -78,10 +78,10 @@ export function useModuleDefault({
           const metaKey = m.key;
 
           if (m.type === "POPUP") {
-            // POPUP: _CD = code, _NM = name
+            // POPUP: _CD = code, 코드명 = popupNameKey(충돌 시 <base>__NM)
             const baseKey = metaKey.replace("_CD", "");
             defaults[`${baseKey}_CD`] = code;
-            if (name) defaults[`${baseKey}_NM`] = name;
+            if (name) defaults[popupNameKey(metaKey, meta)] = name;
           } else {
             // COMBO / TEXT 등: code만 세팅
             defaults[metaKey] = code;
@@ -91,10 +91,15 @@ export function useModuleDefault({
         // 캐시 저장 (reset 시 재적용용)
         moduleDefaultCacheRef.current = defaults;
 
-        // state 키 → 대응 meta 찾기 (POPUP 의 _CD/_NM 쌍 포함)
+        // state 키 → 대응 meta 찾기 (POPUP 의 _CD/코드명 쌍 포함).
+        // 코드명 키는 충돌 시 `${base}__NM` 으로 분리되므로 popupNameKey 로 매칭.
         const findMetaForStateKey = (k: string): SearchMeta | undefined => {
-          if (k.endsWith("_CD") || k.endsWith("_NM")) {
-            const baseKey = k.replace(/_(CD|NM)$/, "");
+          const popupByName = meta.find(
+            (mm) => mm.type === "POPUP" && popupNameKey(mm.key, meta) === k,
+          );
+          if (popupByName) return popupByName;
+          if (k.endsWith("_CD")) {
+            const baseKey = k.replace(/_CD$/, "");
             const popup = meta.find(
               (mm) =>
                 mm.type === "POPUP" && mm.key.replace("_CD", "") === baseKey,

@@ -8,7 +8,7 @@ import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { commonApi } from "@/app/services/common/commonApi";
 import type { SearchMeta } from "@/features/search/search.meta.types";
-import { SearchCondition } from "@/features/search/search.builder";
+import { SearchCondition, popupNameKey } from "@/features/search/search.builder";
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
 
 type SearchDataType = "STRING" | "NUMBER" | "DATE";
@@ -65,7 +65,13 @@ export function SearchFieldRenderer({
       if (child.type === "POPUP") {
         const childBaseKey = child.key.replace("_CD", "");
         updateCondition(`${childBaseKey}_CD`, "", childOp, childDataType, "POPUP");
-        updateCondition(`${childBaseKey}_NM`, "", childOp, childDataType, "POPUP");
+        updateCondition(
+          popupNameKey(child.key, meta),
+          "",
+          childOp,
+          childDataType,
+          "POPUP",
+        );
       } else {
         updateCondition(child.key, "", childOp, childDataType);
       }
@@ -408,6 +414,8 @@ export function SearchFieldRenderer({
 
           case "POPUP": {
             const baseKey = m.key.replace("_CD", "");
+            // 코드명 state 키 — 같은 이름의 다른 필드와 충돌하면 <base>__NM 으로 분리.
+            const nmKey = popupNameKey(m.key, meta);
 
             // 값 세팅 시 operator 를 "equal" 로 덮지 않고 현재 선택된 operator(iconbox) 를 유지.
             // m.key(=_CD) 에 onConditionChange 가 기록한 operator 를 단일 소스로 사용.
@@ -441,7 +449,7 @@ export function SearchFieldRenderer({
                         "POPUP",
                       );
                       updateCondition(
-                        `${baseKey}_NM`,
+                        nmKey,
                         row.NAME,
                         curOp(),
                         m.dataType ?? "STRING",
@@ -486,7 +494,7 @@ export function SearchFieldRenderer({
                     "POPUP",
                   );
                   updateCondition(
-                    `${baseKey}_NM`,
+                    nmKey,
                     datas[0].NAME,
                     curOp(),
                     m.dataType ?? "STRING",
@@ -509,20 +517,28 @@ export function SearchFieldRenderer({
                 key={m.key}
                 type="POPUP"
                 code={getCondition(`${baseKey}_CD`)?.value ?? ""}
-                name={getCondition(`${baseKey}_NM`)?.value ?? ""}
+                name={getCondition(nmKey)?.value ?? ""}
                 sqlId={m.sqlId}
-                onChangeCode={(v: string) =>
+                onChangeCode={(v: string) => {
                   updateCondition(
                     `${baseKey}_CD`,
                     v,
                     curOp(),
                     m.dataType ?? "STRING",
                     "POPUP",
-                  )
-                }
+                  );
+                  // 코드 직접 변경 시 기존 코드명 초기화 (불일치 방지)
+                  updateCondition(
+                    nmKey,
+                    "",
+                    curOp(),
+                    m.dataType ?? "STRING",
+                    "POPUP",
+                  );
+                }}
                 onChangeName={(v: string) =>
                   updateCondition(
-                    `${baseKey}_NM`,
+                    nmKey,
                     v,
                     curOp(),
                     m.dataType ?? "STRING",

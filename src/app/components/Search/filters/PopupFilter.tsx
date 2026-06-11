@@ -47,15 +47,6 @@ export function PopupFilter({
     onEnterSubmit?.(codeVal, "");
   };
 
-  const onNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== "Enter") return;
-    e.preventDefault();
-    e.stopPropagation();
-    const nameVal = e.currentTarget.value;
-    onChangeCode?.("");
-    onEnterSubmit?.("", nameVal);
-  };
-
   return (
     <div
       className={cn("w-full min-w-0 flex flex-col gap-2", className)}
@@ -72,13 +63,12 @@ export function PopupFilter({
           className="w-[110px]"
         />
 
-        {/* 센터명 + 돋보기 */}
+        {/* 센터명 + 돋보기 (코드명은 읽기전용 — 돋보기 선택/코드 Enter 로만 채워짐) */}
         <div className="relative flex-1">
           <Input
             id={nameId}
             value={name}
-            onChange={(e) => onChangeName(e.target.value)}
-            onKeyDown={onNameKeyDown}
+            readOnly
             placeholder="코드명"
             className="pr-10"
           />

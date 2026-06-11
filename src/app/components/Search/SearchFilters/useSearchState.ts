@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import type { SearchMeta } from "@/features/search/search.meta.types";
-import { SearchCondition } from "@/features/search/search.builder";
+import { SearchCondition, popupNameKey } from "@/features/search/search.builder";
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
 import { getToday, getNowLocal, getTodayAt } from "./dateUtils";
 
@@ -119,10 +119,15 @@ export function useSearchState(
     }));
   };
 
-  // state 키 → 대응 meta 찾기 (POPUP 의 _CD/_NM 쌍 포함)
+  // state 키 → 대응 meta 찾기 (POPUP 의 _CD/코드명 쌍 포함).
+  // 코드명 키는 충돌 시 `${base}__NM` 으로 분리되므로 popupNameKey 로 매칭.
   const findMetaForStateKey = (k: string): SearchMeta | undefined => {
-    if (k.endsWith("_CD") || k.endsWith("_NM")) {
-      const baseKey = k.replace(/_(CD|NM)$/, "");
+    const popupByName = meta.find(
+      (m) => m.type === "POPUP" && popupNameKey(m.key, meta) === k,
+    );
+    if (popupByName) return popupByName;
+    if (k.endsWith("_CD")) {
+      const baseKey = k.replace(/_CD$/, "");
       const popup = meta.find(
         (m) => m.type === "POPUP" && m.key.replace("_CD", "") === baseKey,
       );

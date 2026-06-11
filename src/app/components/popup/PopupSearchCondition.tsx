@@ -113,15 +113,10 @@ export function PopupSearchCondition({
                   placeholder="코드"
                 />
                 <span className="text-slate-200">|</span>
+                {/* 코드명은 읽기전용 — 돋보기 선택/코드 Enter 로만 채워짐 */}
                 <input
                   value={f.name}
-                  onChange={(e) => f.onChangeName?.(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key !== "Enter") return;
-                    if (f.onEnterSubmit)
-                      f.onEnterSubmit("", e.currentTarget.value);
-                    else onSearch?.();
-                  }}
+                  readOnly
                   disabled={f.disable}
                   className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 flex-1 min-w-0 disabled:cursor-not-allowed disabled:text-slate-400"
                   placeholder="코드명"

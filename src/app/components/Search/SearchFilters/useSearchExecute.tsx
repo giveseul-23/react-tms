@@ -12,6 +12,7 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import type { SearchMeta } from "@/features/search/search.meta.types";
 import {
   buildSearchCondition,
+  popupNameKey,
   SearchCondition,
 } from "@/features/search/search.builder";
 import { usePopup } from "@/app/components/popup/PopupContext";
@@ -157,7 +158,7 @@ export function useSearchExecute({
             const baseKey = m.key.replace("_CD", "");
             return (
               !searchState[`${baseKey}_CD`]?.value ||
-              !searchState[`${baseKey}_NM`]?.value
+              !searchState[popupNameKey(m.key, meta)]?.value
             );
           }
           return !searchState[m.key]?.value;
@@ -209,32 +210,29 @@ export function useSearchExecute({
       }
 
       // ── POPUP state 키 → DBCOLUMN 치환 헬퍼 ─────────────────
-      //   SearchFieldRenderer 는 POPUP 을 `${baseKey}_CD` / `${baseKey}_NM`
+      //   SearchFieldRenderer 는 POPUP 을 `${baseKey}_CD` / 코드명(popupNameKey)
       //   쌍으로 state 에 저장하지만, SQL/서버 payload 에는 meta.key(= DBCOLUMN)
       //   를 써야 함.
-      //   예) meta.key="PLN_ID" → state 키 "PLN_ID_CD"/"PLN_ID_NM"
-      //         → SQL/payload 키 "PLN_ID"
-      //   _NM 은 null 반환 → SQL/payload 에서 제외
-      //
-      //   sourceType 에 의존하지 않고 state 키 패턴을 POPUP meta 와 대조.
-      //   (모듈 기본값 세팅 시 sourceType 이 누락되는 케이스 대응)
-      const findPopupMetaForStateKey = (stateKey: string) => {
-        let baseKey: string | null = null;
-        if (stateKey.endsWith("_CD")) baseKey = stateKey.replace(/_CD$/, "");
-        else if (stateKey.endsWith("_NM"))
-          baseKey = stateKey.replace(/_NM$/, "");
-        if (baseKey === null) return null;
-        return (
-          meta.find(
-            (m) => m.type === "POPUP" && m.key.replace("_CD", "") === baseKey,
-          ) ?? null
-        );
-      };
+      //   예) meta.key="PLN_ID_CD" → state 키 "PLN_ID_CD"/"PLN_ID_NM"
+      //         → SQL/payload 키 "PLN_ID_CD"(코드), 코드명은 제외
+      //   - 코드명 키(popupNameKey)는 null 반환 → SQL/payload 에서 제외(표시 전용)
+      //   - 코드 키(`${base}_CD`)는 meta.key(= DBCOLUMN)로 치환
+      //   ※ 코드명 키는 충돌 시 `${base}__NM` 으로 분리되므로, 단순 "_NM 접미"
+      //     판정 대신 popupNameKey 로 계산한 키 집합과 정확히 대조한다
+      //     (그래야 동명의 독립 TEXT 필드 `<base>_NM` 이 잘못 제외되지 않음).
+      const popupNameKeys = new Set(
+        meta
+          .filter((m) => m.type === "POPUP")
+          .map((m) => popupNameKey(m.key, meta)),
+      );
+      const popupCodeKeyToDb = new Map(
+        meta
+          .filter((m) => m.type === "POPUP")
+          .map((m) => [`${m.key.replace("_CD", "")}_CD`, m.key] as const),
+      );
       const resolveDbColumn = (stateKey: string): string | null => {
-        const popupMeta = findPopupMetaForStateKey(stateKey);
-        if (!popupMeta) return stateKey; // POPUP 아니면 그대로
-        if (stateKey.endsWith("_NM")) return null; // _NM 제외
-        return popupMeta.key; // _CD → meta.key(= DBCOLUMN)
+        if (popupNameKeys.has(stateKey)) return null; // POPUP 코드명 제외
+        return popupCodeKeyToDb.get(stateKey) ?? stateKey; // 코드 → DBCOLUMN, 그 외 그대로
       };
 
       // ── DYNAMIC_QUERY 빌드 ──────────────────────────────────

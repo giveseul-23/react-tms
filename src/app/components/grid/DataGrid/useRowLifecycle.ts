@@ -3,7 +3,7 @@
 //   1) controller 가 박은 selectedRow → ag-grid 시각 선택
 //   2) autoFirstRow: PK 매칭으로 이전 선택 복원
 //   3) 신규 행(EDIT_STS:"I") 추가 시 자동 스크롤
-//   4) 신규 행에 type:"check" 컬럼의 defaultYn 자동 적용
+//   4) 신규 행에 컬럼의 defaultValue 자동 적용
 
 import { useEffect, useRef } from "react";
 
@@ -120,15 +120,20 @@ export function useRowLifecycle<TRow>({
   }, [activeRowData, gridApiRef]);
 
   // ─── 신규 행 (EDIT_STS:"I") 에 컬럼 default 자동 적용 ───────────────
-  // type:"check" 컬럼의 defaultYn (없으면 "N") 을 신규 행의 해당 field 가
-  // 비어있을 때 자동으로 채움. 사용자가 토글 안 해도 저장 시 default 포함.
+  // 컬럼의 defaultValue (type 무관) 를 신규 행의 해당 field 가 비어있을 때
+  // 자동으로 채움. 사용자가 입력/토글 안 해도 저장 시 default 포함.
+  // type:"check" 는 defaultValue 미선언 시에도 "N" 을 기본 적용한다.
   // 이미 default 가 박힌 행은 setRowData 가 same prev 반환 → re-render 없음 (무한루프 가드).
   useEffect(() => {
     if (!setRowData) return;
-    const defaults: Record<string, string> = {};
+    const defaults: Record<string, any> = {};
     for (const col of activeColumnDefs as any[]) {
-      if (col?.type === "check" && col?.field) {
-        defaults[col.field] = col.defaultYn ?? "N";
+      const field = col?.field;
+      if (!field) continue;
+      if (col.defaultValue !== undefined) {
+        defaults[field] = col.defaultValue;
+      } else if (col.type === "check") {
+        defaults[field] = "N";
       }
     }
     if (Object.keys(defaults).length === 0) return;

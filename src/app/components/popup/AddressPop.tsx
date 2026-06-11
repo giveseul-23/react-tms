@@ -12,6 +12,7 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { usePopup } from "./PopupContext";
 import { CommonPopup } from "./CommonPopup";
+import { AddressSearchPop } from "./AddressSearchPop";
 import { Lang } from "@/app/services/common/Lang";
 
 export type AddressFieldMap = {
@@ -70,15 +71,51 @@ function PickerField({
 export function AddressPop({ row, fields, onApply, onClose }: Props) {
   const { openPopup, closePopup } = usePopup();
 
-  const [ctryCd, setCtryCd] = useState(String(row?.[fields.ctryCd] ?? ""));
-  const [ctryNm, setCtryNm] = useState(String(row?.[fields.ctryNm] ?? ""));
+  const region = new Intl.Locale(navigator.language).maximize().region;
+  let regionNm: string;
+  if (region) {
+    regionNm = new Intl.DisplayNames(["ko"], { type: "region" }).of(
+      new Intl.Locale(navigator.language).maximize().region,
+    );
+  }
+
+  const [ctryCd, setCtryCd] = useState(
+    String(row?.[fields.ctryCd] ?? region ?? ""),
+  );
+  const [ctryNm, setCtryNm] = useState(
+    String(row?.[fields.ctryNm] ?? regionNm ?? ""),
+  );
   const [sttCd, setSttCd] = useState(String(row?.[fields.sttCd] ?? ""));
   const [sttNm, setSttNm] = useState(String(row?.[fields.sttNm] ?? ""));
   const [ctyCd, setCtyCd] = useState(String(row?.[fields.ctyCd] ?? ""));
   const [ctyNm, setCtyNm] = useState(String(row?.[fields.ctyNm] ?? ""));
   const [zipCd, setZipCd] = useState(String(row?.[fields.zipCd] ?? ""));
-  const [dtlAddr1, setDtlAddr1] = useState(String(row?.[fields.dtlAddr1] ?? ""));
-  const [dtlAddr2, setDtlAddr2] = useState(String(row?.[fields.dtlAddr2] ?? ""));
+  const [dtlAddr1, setDtlAddr1] = useState(
+    String(row?.[fields.dtlAddr1] ?? ""),
+  );
+  const [dtlAddr2, setDtlAddr2] = useState(
+    String(row?.[fields.dtlAddr2] ?? ""),
+  );
+
+  const openZipPopup = () =>
+    openPopup({
+      title: "LBL_ADDR", // "주소" (PopupShell 이 Lang.get 적용)
+      width: "3xl",
+      content: (
+        <AddressSearchPop
+          onConfirm={(p: Record<string, any>) => {
+            setZipCd(p.ZIP_CD ?? "");
+            setSttCd(p.STT_CD ?? "");
+            setSttNm(p.STT_NM ?? "");
+            setCtyCd(p.CTY_CD ?? "");
+            setCtyNm(p.CTY_NM ?? "");
+            setDtlAddr1(p.DTL_ADDR1 ?? "");
+            closePopup();
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
 
   // 코드검색 팝업 오픈 헬퍼 — keyParam 으로 부모코드 전달(주=국가, 도시=주).
   const openLookup = (
@@ -133,10 +170,15 @@ export function AddressPop({ row, fields, onApply, onClose }: Props) {
     );
 
   const pickCity = () =>
-    openLookup("selectCityCodeName", Lang.get("LBL_CITY"), { keyParam: sttCd }, (r) => {
-      setCtyCd(r.CODE);
-      setCtyNm(r.NAME);
-    });
+    openLookup(
+      "selectCityCodeName",
+      Lang.get("LBL_CITY"),
+      { keyParam: sttCd },
+      (r) => {
+        setCtyCd(r.CODE);
+        setCtyNm(r.NAME);
+      },
+    );
 
   const buildPatch = (vals: {
     ctryCd: string;
@@ -202,11 +244,7 @@ export function AddressPop({ row, fields, onApply, onClose }: Props) {
 
       <div className={rowCls}>
         <label className={labelCls}>{Lang.get("LBL_ZIP_CODE")}</label>
-        <Input
-          value={zipCd}
-          onChange={(e) => setZipCd(e.target.value)}
-          className="flex-1 h-7 text-[12px]"
-        />
+        <PickerField code={zipCd} name={""} onSearch={openZipPopup} />
       </div>
 
       <div className={rowCls}>

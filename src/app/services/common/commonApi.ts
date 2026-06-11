@@ -23,6 +23,14 @@ export type commonResponse = {
   rows: [];
 };
 
+const withSession = (payload: any = {}) => {
+  const sessionFields = getSessionFields();
+  if (Array.isArray(payload)) {
+    return payload.map((item) => ({ ...sessionFields, ...item }));
+  }
+  return { ...sessionFields, ...payload };
+};
+
 export const commonApi = {
   /**
    * 코드 조회 — ExtJS Ext.Ajax.request 의 { params, jsonData } 분리 패턴:
@@ -93,6 +101,20 @@ export const commonApi = {
     };
     const url = (params.url as string) || urls[module];
     return apiClient.post(url, { ...getSessionFields(), ...params });
+  },
+
+  //우편번호조회
+  searchTariffVehicleTypeList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/addressSearchService/search`,
+      withSession({ MENU_CD: "MENU_ADDRESS_POP", ...payload }),
+    );
+  },
+  getAreaCode(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/addressSearchService/getAreaCode`,
+      withSession({ MENU_CD: "MENU_ADDRESS_POP", ...payload }),
+    );
   },
 
   // ── Excel Service (공통 엑셀 다운로드 3단계) ──────────────────

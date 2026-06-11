@@ -45,7 +45,7 @@ Card("shadow-sm rounded-lg")
 | `TEXT` | `TextFilter` | `Input` · `text-[11px]` · 값 있을 때 우측 X버튼(`pr-6`) |
 | `COMBO` | `ComboFilter` | `SelectTrigger("!h-6 px-2 text-[11px] [&>svg]:h-3 [&>svg]:w-3")`, placeholder "선택" |
 | `Y`/`YM`/`YMD`/`YMDT` | `DateRangeFilter` | `mode:"N"` 단일, `mode:"Y"` 범위. 범위는 `grid grid-cols-[1fr_auto_1fr] gap-x-1` + `~`(`text-xs text-muted-foreground`) |
-| `POPUP` | `PopupFilter` | 코드 input `w-[110px]` + 코드명 input(`flex-1 pr-10`) + 돋보기 버튼(absolute) |
+| `POPUP` | `PopupFilter` | 코드 input `w-[110px]` + 코드명 input(`flex-1 pr-10`, **`readOnly`** — 돋보기 선택/코드 Enter 로만 채워짐, 사용자 직접 입력 불가) + 돋보기 버튼(absolute). payload 엔 `_CD`(meta.key)만 — `_NM` 은 서버 제외(표시 전용) |
 | `CHECKBOX` | `CheckboxFilter` | `label("h-6 px-2 rounded-lg border")` + checkbox `h-3 w-3 accent-emerald-600` |
 
 - **DatePicker 트리거**: `h-7 w-full pl-2 pr-6 text-[11px] border border-input rounded-md bg-input-background` + 캘린더아이콘 `w-3.5 h-3.5`(absolute right-1.5). (본문 override 로 h-6 적용)

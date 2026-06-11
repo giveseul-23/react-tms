@@ -21,6 +21,8 @@ type GridSearchPopupLayoutProps = {
   gridHeight: number;
   selectedBadgeFields: string[];
   selectedLabel?: string;
+  /** 행 미선택 시 그리드 위 안내 문구. 기본 "그리드에서 차량을 선택하세요". */
+  selectPrompt?: string;
   /** 그리드 선택 모드 — 자식 팝업에서 지정. 기본 "single".
    *  "multiple" 이면 배지에 선택 다건을 표시하고 onConfirm 에 payload 배열을 전달. */
   rowSelection?: "single" | "multiple";
@@ -37,6 +39,7 @@ export function GridSearchPopupLayout({
   gridHeight,
   selectedBadgeFields,
   selectedLabel = "선택됨",
+  selectPrompt = "그리드에서 차량을 선택하세요",
   rowSelection = "single",
   onSearch,
   onConfirm,
@@ -110,7 +113,7 @@ export function GridSearchPopupLayout({
       ) : (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-dashed border-slate-200 text-[11px] text-slate-400">
           <Truck className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>그리드에서 차량을 선택하세요</span>
+          <span>{selectPrompt}</span>
         </div>
       )}
 

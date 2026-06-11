@@ -118,7 +118,7 @@ const CUSTOM_KEYS = new Set([
   "disableMaxWidth",
   "noLang",
   "summable",
-  "defaultYn",
+  "defaultValue",
   "dateUnit",
   "regex",
   "regexText",
@@ -234,7 +234,8 @@ function injectCodeRenderer(
  *   - 표시: row[field] === "Y" → checked, 아니면 unchecked
  *   - 클릭: "Y" ↔ "N" 토글 → commitRowChange 로 React state 갱신 + EDIT_STS 마킹
  *   - 이미 cellRenderer 가 정의돼 있으면 유지
- *   - 신규 행의 default 값 자동 주입은 DataGrid 가 column.defaultYn 으로 처리
+ *   - 신규 행의 default 값 자동 주입은 DataGrid 가 column.defaultValue 으로 처리
+ *     (check 는 defaultValue 미선언 시 "N" 기본)
  */
 function injectCheckRenderer(
   col: AnyCol,
@@ -756,7 +757,7 @@ function injectAddressCell(col: AnyCol, opts: ProcessOptions): AnyCol {
       const onOpen = () => {
         if (!openPopup) return;
         openPopup({
-          title: Lang.get("LBL_ADDR"),
+          title: "LBL_ADDR",
           width: c.popupWidth ?? "lg",
           content: (
             <React.Suspense fallback={null}>

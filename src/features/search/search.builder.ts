@@ -1,4 +1,19 @@
 import { CONDITION_ICON_MAP } from "@/app/components/Search/conditionIcons";
+import type { SearchMeta } from "@/features/search/search.meta.types";
+
+// POPUP 필드의 코드명을 저장할 searchState 키.
+//   기본: <base>_NM (기존 관례 — rawFiltersRef `SRCH_<base>_NM` 호환)
+//   같은 이름(<base>_NM)의 다른 필드가 있으면(충돌) <base>__NM 으로 분리 →
+//   TEXT 등 독립 필드와 searchState 슬롯이 겹치지 않게 한다.
+export function popupNameKey(
+  popupMetaKey: string,
+  meta: readonly SearchMeta[],
+): string {
+  const base = popupMetaKey.replace("_CD", "");
+  const conventional = `${base}_NM`;
+  const collides = meta.some((x) => x.key === conventional);
+  return collides ? `${base}__NM` : conventional;
+}
 
 export type SearchCondition = {
   key: string;

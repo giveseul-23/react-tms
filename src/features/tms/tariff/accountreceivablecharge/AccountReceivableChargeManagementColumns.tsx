@@ -53,7 +53,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "SUPERSEDE_YN",
     editable: true,
     insertable: true,
-    defaultYn: "N",
+    defaultValue: "N",
     width: 70,
     cellStyle: { textAlign: "center" },
     onCellValueChanged: (params) => {

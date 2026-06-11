@@ -818,7 +818,7 @@
             ① controller 가 <code>setSelected</code> 로 박은 <code>selectedRow</code> 를 ag-grid 시각 선택으로 반영<br>
             ② <code>effectiveAutoSelect</code> 일 때 PK 매칭으로 이전 선택을 복원<br>
             ③ 신규 행(<code>EDIT_STS:"I"</code>) 이 추가될 때 마지막 행으로 자동 스크롤<br>
-            ④ <code>type:"check"</code> 컬럼의 <code>defaultYn</code> 을 신규 행에 자동 채움
+            ④ 컬럼의 <code>defaultValue</code> 를 신규 행에 자동 채움 (<code>type:"check"</code> 는 미선언 시 "N")
           </dd>
           <dt>핵심 입력</dt><dd>gridApiRef, selectedRow, activeRowData, activeColumnDefs, effectiveAutoSelect, effectiveRowKeys, activeOnRowClicked, setRowData</dd>
           <dt>핵심 출력</dt><dd>없음 (effect 만 등록)</dd>

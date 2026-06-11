@@ -77,6 +77,7 @@
 | `decimalPlaces` | `numeric` 고정 소수 자릿수 포맷 + 천단위 콤마 (→ §6) |
 | `summable` | `true` 면 그 `field` 합계를 하단 고정 합계행으로 자동 생성 (→ §6) |
 | `dateUnit` | `date` 단위(`year`/`month`/`day`) |
+| `defaultValue` | 신규 행(`EDIT_STS:"I"`)의 해당 `field` 가 비어있을 때 자동 채움 (모든 type 공통) (→ §6) |
 | `addrFields` | `type:"address"` write-back 필드 매핑 부분 오버라이드 (기본 `ctryCd:"CTRY_CD"`…`dtlAddr2:"DTL_ADDR2"`) |
 | `colId` | `field` 없는 액션 컬럼(`address` 등)의 식별자 |
 | `required` | 헤더 `*` + 저장 검증 |
@@ -124,3 +125,13 @@
 
 - **`editAllowField`**: 행의 해당 필드 값이 **`"Y"` 인 행에서만** 체크 토글 허용.
 - 허용 조건이 아닌 행에서 토글 시 — `editDisableMsg`(있으면 `Lang.get` 안내 모달) 표시 후 **토글 차단**.
+
+### 6.5 신규 행 기본값 (`defaultValue`)
+
+신규 행(`EDIT_STS:"I"`)에 컬럼별 기본값을 자동으로 채운다. 적용은 `DataGrid` 의 `useRowLifecycle` 가 담당한다(컬럼 파일엔 `defaultValue` 만 선언).
+
+- **`defaultValue`**: **모든 type 공통** — 신규 행의 해당 `field` 가 비어있을 때(`undefined`/`null`/`""`) 그 값으로 채운다. 값은 선언한 타입 그대로(`text:"B"`, `numeric:0`, `check:"Y"`, `combo`/`popup`: 코드 등).
+- **`type:"check"`**: `defaultValue` **미선언 시에도 `"N"`** 이 기본 적용된다(체크 안 한 신규 행도 저장 시 `"N"` 포함). `"Y"` 로 시작하려면 `defaultValue: "Y"`.
+- 이미 값이 있는 필드는 덮어쓰지 않는다(빈 필드만 채움). 사용자가 입력/토글하지 않아도 저장 페이로드에 기본값이 포함된다.
+
+> (구버전) `type:"check"` 전용 `defaultYn` 키는 **폐기**되었다 — 전부 `defaultValue` 로 통합. 신규/기존 화면 모두 `defaultValue` 만 쓴다.

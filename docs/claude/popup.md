@@ -120,6 +120,7 @@ const onEditLatLon = useCallback(() => {
 ```
 
 - **위젯 타입**: `text` / `combo` / `date` / `popup`(코드+코드명+돋보기). 필드별 `disable: true` 로 개별 잠금(조회 스코프 고정 등).
+- **`popup` 필드의 코드명 input 은 `readOnly`** — 돋보기 선택(또는 코드 Enter 자동조회)으로만 채워지고 사용자가 직접 입력 못 한다. 관리/전송 값은 코드(`_CD`)만, 코드명(`_NM`)은 표시 전용. (메인 SearchFilters `PopupFilter` 도 동일)
 - **필드 `label` 은 언어팩 키만 넘긴다 — `Lang.get` 으로 감싸지 말 것.** `PopupSearchCondition` 이 내부에서 번역한다(라벨 규칙 → [dev-workflow.md](./dev-workflow.md) §5). 내부 번역은 키 형식(`LBL_*`/대문자·언더스코어)에만 적용하고, 이미 번역된 문자열·한글 리터럴은 그대로 통과(하위호환). 따라서 조회조건 필드 라벨에 `label: Lang.get("LBL_X")` 처럼 쓰지 말고 **`label: "LBL_X"`** 로 둔다. (그리드 컬럼 `headerName` 도 동일하게 키만 — DataGrid 가 번역.)
 - 그리드 검색 팝업이면 `GridSearchPopupLayout` 을 쓰면 된다 — 조회조건 영역을 내부에서 `PopupSearchCondition` 으로 렌더한다.
 
