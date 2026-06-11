@@ -21,11 +21,7 @@
 
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import {
-  makeAddAction,
-  makeSaveAction,
-  makeExcelGroupAction,
-} from "@/app/components/grid/actions/commonActions";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { featureApi as api } from "./ShipmonitorApi";
 import { MENU_CODE } from "./Shipmonitor";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -70,42 +66,6 @@ export function useFeatureController({ model }: ControllerArgs) {
     [model.grids.main, onMainGridClick],
   );
 
-  // ── 메인 행 추가 ─────────────────────────────────────────────
-  // base.addRow 가 EDIT_STS: "I" 자동 주입 + push.
-  // ── 상세 행 추가 — 부모(메인) 행 검증 ─────────────────────────
-  // requireParentRow 가 미선택/미저장 시 alert + false 반환.
-  const onAddDetail = useCallback(() => {
-    const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, "메인코드")) return;
-    base.addRow("detail", {
-      XXX_CD: main.XXX_CD,
-      XXX_DTL_CD: "",
-    });
-  }, [model, base]);
-
-  // ── 메인 저장 — 삭제행 있으면 confirm 후 저장 ─────────────────
-  // confirmOnDelete 옵션 한 줄로 처리. 후처리는 기본값 "refresh"(메인 재조회).
-  const onSaveMain = useCallback(
-    () =>
-      base.saveGrid("main", api.save, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
-      }),
-    [base],
-  );
-
-  // ── 상세 저장 — 부모 행 기반 cascade 재조회 ────────────────────
-  // afterSave: { cascadeFrom, fetch } 객체 형태 — 저장 후 자기 자신만 재조회.
-  const onSaveDetail = useCallback(
-    () =>
-      base.saveGrid("detail", api.save, {
-        afterSave: {
-          cascadeFrom: "main",
-          fetch: (main) => api.getDetailList({ XXX_CD: main.XXX_CD }),
-        },
-      }),
-    [base],
-  );
-
   // ── 그리드별 actions 배열 ─────────────────────────────────────
   // 추가/저장/사용자정의 버튼 결정은 모두 여기서. View 는 binding 만.
   // ActionItem[] 타입 명시 — 화면 고유 버튼 추가 시 type 추론 도움.
@@ -119,13 +79,11 @@ export function useFeatureController({ model }: ControllerArgs) {
         rows: model.grids.main.rows,
       }),
     ],
-    [model],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   const detailActions: ActionItem[] = useMemo(
     () => [
-      //makeAddAction({ onClick: onAddDetail }),
-      //makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
         excelColumns: () => model.grids.detail.getExcelColumns(),
         menuCode: MENU_CODE,
@@ -133,13 +91,13 @@ export function useFeatureController({ model }: ControllerArgs) {
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main
-            ? api.getDetailList({ XXX_CD: main.XXX_CD })
+            ? api.getDetailList({ SHPM_ID: main.SHPM_ID })
             : Promise.resolve({ data: { result: [] } });
         },
         rows: model.grids.detail.rows,
       }),
     ],
-    [onAddDetail, onSaveDetail, model],
+    [menuName, model.grids.detail, model.grids.main.selectedRef],
   );
 
   return {

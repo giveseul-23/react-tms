@@ -29,7 +29,13 @@ import { MAIN_COLUMN_DEFS } from "./TemperatureRangeManagementColumns.tsx";
 // TODO: 실제 메뉴 코드로 교체
 export const MENU_CODE = "MENU_TEMPERATURE_RANGE_MANAGEMENT";
 
-export default function Feature() {
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_TEMPERATURE_RANGE_MANAGEMENT",
+  },
+};
+
+export default function TemperatureRangeManagement() {
   // useBaseModel 이 searchRef / filtersRef / storageKeys / pageSize 자동 셋업.
   // MasterDetailPage 가 menuCode 받으면 SearchMeta 자동 로드 + loading skeleton 자동.
   const model = useTemperatureRangeManagementModel(MENU_CODE);
@@ -46,6 +52,7 @@ export default function Feature() {
       grid={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           actions={ctrl.mainActions}
         />

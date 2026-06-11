@@ -26,14 +26,16 @@ import {
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
-import { temperatureRangeManagementApi as api } from "./TemperatureRangeManagementApi.ts";
-import { MENU_CODE } from "./TemperatureRangeManagement";
+
+import { temperatureRangeManagementApi as api } from "./TemperatureRangeManagementApi";
+import { AUTH, MENU_CODE } from "./TemperatureRangeManagement";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   TemperatureRangeManagementModel,
   GridKey,
 } from "./TemperatureRangeManagementModel.ts";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { Lang } from "@/app/services/common/Lang";
 
 interface ControllerArgs {
   model: TemperatureRangeManagementModel;
@@ -72,7 +74,7 @@ export function useTemperatureRangeManagementController({
   const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
-      // onMainGridClick(data?.rows?.[0]);
+      model.grids.main.setSelected(null);
     },
     [model.grids.main],
   );
@@ -82,8 +84,10 @@ export function useTemperatureRangeManagementController({
   const onAddMain = useCallback(() => {
     //base.resetGrids(["detail"]);
     base.addRow("main", {
-      XXX_CD: "",
-      XXX_NM: "",
+      TMPR_RNG_CD: "",
+      TMPR_RNG_NM: "",
+      TMPR_FRM_VAL: 0,
+      TMPR_TO_VAL: 0,
       USE_YN: "Y",
     });
   }, [base]);
@@ -104,7 +108,7 @@ export function useTemperatureRangeManagementController({
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("main", api.save, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+        confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
       }),
     [base],
   );

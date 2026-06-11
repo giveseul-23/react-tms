@@ -29,7 +29,14 @@ import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./ShipmonitorColumns";
 // TODO: 실제 메뉴 코드로 교체
 export const MENU_CODE = "MENU_SHIPMENT_MONITOR";
 
-export default function Feature() {
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_SHIPMENT_MONITOR",
+    detail: "DETAIL_GRID_SHIPMENT_MONITOR",
+  },
+};
+
+export default function Shipmonitor() {
   // useBaseModel 이 searchRef / filtersRef / storageKeys / pageSize 자동 셋업.
   // MasterDetailPage 가 menuCode 받으면 SearchMeta 자동 로드 + loading skeleton 자동.
   const model = useFeatureModel(MENU_CODE);
@@ -43,9 +50,7 @@ export default function Feature() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       // 초기 분할 방향만 선언. 사용자 토글값은 localStorage 자동 동기화. (기본값 "horizontal")
       defaultDirection="vertical"
@@ -56,24 +61,20 @@ export default function Feature() {
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
-          codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
-          audit={{
-            delete: false,
-          }}
+          audit={{delete: false}}
         />
       }
       detail={
         <DataGrid
           {...model.bind("detail")}
+          authId={AUTH.grids.detail}
           columnDefs={DETAIL_COLUMN_DEFS}
-          codeMap={model.codeMap}
           actions={ctrl.detailActions}
-          audit={{
-            delete: false,
-          }}
+          audit={{delete: false}}
         />
       }
     />

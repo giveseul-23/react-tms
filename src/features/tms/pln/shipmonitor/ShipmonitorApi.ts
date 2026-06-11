@@ -48,30 +48,6 @@ export const featureApi = {
     );
   },
 
-  // ── 저장 (추가/수정/삭제 한 번에) — dsSave 패턴 ─────────────────
-  // useBaseController.saveGrid 가 { dsSave: [...] } 형태로 호출.
-  save(payload: any) {
-    const { dsSave, ...rest } = payload ?? {};
-    return apiClient.post<CommonResponse>(
-      `/featureService/save`,
-      { dsSave },
-      {
-        params: {
-          ...getSessionFields(),
-          MENU_CD: MENU_CODE,
-          ...rest,
-        },
-      },
-    );
-  },
-
-  // ── 삭제 (필요 시) ────────────────────────────────────────────
-  remove(payload: any) {
-    return apiClient.post<CommonResponse>(
-      `/featureService/delete`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
 };
 
 // ────────────────────────────────────────────────────────────────

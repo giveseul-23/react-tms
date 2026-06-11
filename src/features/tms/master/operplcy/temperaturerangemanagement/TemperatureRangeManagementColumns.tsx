@@ -22,6 +22,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_TMPR_RNG_CD",
     field: "TMPR_RNG_CD",
+    isPrimaryKey: true,
     insertable: true,
   },
   {
@@ -31,13 +32,13 @@ export const MAIN_COLUMN_DEFS = [
     editable: true, insertable: true,
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_TMPR_FRM_VAL",
     field: "TMPR_FRM_VAL",
     editable: true, insertable: true,
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_TMPR_TO_VAL",
     field: "TMPR_TO_VAL",
     editable: true, insertable: true,
