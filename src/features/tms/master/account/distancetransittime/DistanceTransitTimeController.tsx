@@ -130,7 +130,7 @@ export function useDistanceTransitTimeController({ model }: Args) {
       const dsSave = rows.map((r: any) => ({
         ...r,
         DIST: r.TMAP_DIST,
-        EDIT_STS: "U",
+        rowStatus: "U",
       }));
       base.callAjax(api.save({ dsSave })).then(() => base.search());
     },
