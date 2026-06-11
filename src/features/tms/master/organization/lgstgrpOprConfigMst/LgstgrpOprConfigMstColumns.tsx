@@ -19,8 +19,8 @@ export const CONFIG_COLUMN_DEFS = [
     field: "CNFG_CD",
     editable: true,
     insertable: true,
-    fieldType: "text",
     isPrimaryKey: true,
+    required: true,
   },
   {
     type: "text",
@@ -29,7 +29,7 @@ export const CONFIG_COLUMN_DEFS = [
     field: "CNFG_NM",
     editable: true,
     insertable: true,
-    fieldType: "text",
+    required: true,
   },
   {
     type: "combo",
@@ -72,6 +72,7 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     field: "CNFG_DTL_NM",
     editable: true,
     insertable: true,
+    required: true,
   },
   {
     type: "check",
@@ -127,6 +128,7 @@ export const CONFIG_I18N_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_CD",
     field: "CNFG_CD",
+    required: true,
   },
   {
     type: "combo",
@@ -135,6 +137,7 @@ export const CONFIG_I18N_COLUMN_DEFS = [
     codeKey: "langTp",
     editable: true,
     insertable: true,
+    required: true,
   },
   {
     type: "text",
@@ -142,6 +145,7 @@ export const CONFIG_I18N_COLUMN_DEFS = [
     field: "LANG_DESC",
     editable: true,
     insertable: true,
+    required: true,
   },
 ];
 
@@ -153,11 +157,13 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = [
     //디비전운영설정코드
     headerName: "LBL_DIV_CNFG_CD",
     field: "CNFG_CD",
+    required: true,
   },
   {
     type: "text",
     headerName: "LBL_LGST_GRP_CNFG_DTL_CD",
     field: "CNFG_DTL_CD",
+    required: true,
   },
   {
     type: "combo",
@@ -166,6 +172,7 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = [
     codeKey: "langTp",
     editable: true,
     insertable: true,
+    required: true,
   },
   {
     type: "text",
@@ -173,5 +180,6 @@ export const CONFIG_DETAIL_I18N_COLUMN_DEFS = [
     field: "LANG_DESC",
     editable: true,
     insertable: true,
+    required: true,
   },
 ];
