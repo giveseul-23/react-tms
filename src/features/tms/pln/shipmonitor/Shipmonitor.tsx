@@ -75,6 +75,7 @@ export default function Shipmonitor() {
           columnDefs={DETAIL_COLUMN_DEFS}
           actions={ctrl.detailActions}
           audit={{delete: false}}
+          pagination={false}
         />
       }
     />
