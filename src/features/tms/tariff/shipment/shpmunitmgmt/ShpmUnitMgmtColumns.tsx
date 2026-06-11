@@ -1,0 +1,86 @@
+export const MAIN_COLUMN_DEFS = [
+  { headerName: "No" },
+  {
+    type: "popup",
+    headerName: "LBL_DIVISION_CODE",
+    field: "DIV_CD",
+    nameField: "DIV_NM",
+    sqlId: "selectDivisionCodeName",
+    popupTitle: "LBL_DIVISION_CODE",
+    required: true,
+    insertable: true,
+    validators: {
+      required: true,
+      max: 60,
+    },
+    callback: ({ commit }) => {
+      commit({ LGST_GRP_CD: "", LGST_GRP_NM: "" });
+    },
+  },
+  {
+    type: "text",
+    headerName: "LBL_DIVISION_NAME",
+    field: "DIV_NM",
+    validators: {
+      max: 200,
+    },
+  },
+  {
+    type: "popup",
+    headerName: "LBL_LOGISTICS_GROUP_CODE",
+    field: "LGST_GRP_CD",
+    nameField: "LGST_GRP_NM",
+    sqlId: "selectLogisticsgroupCodeName",
+    popupTitle: "LBL_LOGISTICS_GROUP_CODE",
+    required: true,
+    insertable: true,
+    extraParams: (row) => ({ keyParam: row?.DIV_CD ?? "" }),
+  },
+  {
+    type: "text",
+    headerName: "LBL_LOGISTICS_GROUP_NAME",
+    field: "LGST_GRP_NM",
+  },
+  {
+    type: "combo",
+    headerName: "LBL_ITM_QTY_BASED_AP_MGMT",
+    field: "ITEM_CD",
+    codeKey: "itmUom",
+    align: "center",
+    required: true,
+    insertable: true,
+  },
+  {
+    type: "popup",
+    headerName: "LBL_CLASS_CODE",
+    field: "CLSS_CD",
+    nameField: "CLSS_NM",
+    sqlId: "selectClssCodeNameCostAP",
+    popupTitle: "LBL_CLASS_CODE",
+    required: true,
+    insertable: true,
+    editable: true,
+    validators: {
+      required: true,
+      max: 60,
+    },
+  },
+  {
+    type: "text",
+    headerName: "LBL_CLASS_NAME",
+    field: "CLSS_NM",
+    validators: {
+      max: 200,
+    },
+  },
+  {
+    type: "combo",
+    headerName: "LBL_QTY_RDNG_RCD",
+    field: "RDNG_RCD",
+    codeKey: "rdngRcdList",
+    align: "center",
+    required: true,
+    insertable: true,
+    editable: true,
+  },
+];
