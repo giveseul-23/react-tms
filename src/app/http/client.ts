@@ -7,7 +7,12 @@
 
 import axios from "axios";
 import { API_CONFIG } from "./config";
-import { getAccessToken, clearTokens } from "@/app/services/auth/auth";
+import {
+  getAccessToken,
+  clearTokens,
+  getSessionFields,
+  updateTokens,
+} from "@/app/services/auth/auth";
 import { Lang } from "@/app/services/common/Lang";
 import { showSessionExpiredModal } from "@/app/components/popup/showErrorModal";
 
@@ -18,6 +23,65 @@ function goLogin() {
   clearTokens();
   Lang.clearCache();
   window.location.href = "/login";
+}
+
+// ── access_token 만료(MSG_ACCESS_EXPIRED) → refreshToken 재발급 ──────────────
+// 서버가 data.msg = "MSG_ACCESS_EXPIRED" 로 응답하면 refresh 후 원요청을 재시도한다.
+const ACCESS_EXPIRED = "MSG_ACCESS_EXPIRED";
+
+// single-flight: 동시 다발 요청이 모두 만료를 받아도 refresh 는 1회만 수행하고
+// 나머지는 새 토큰을 기다렸다가 재시도한다.
+let isRefreshing = false;
+let refreshWaiters: Array<(token: string | null) => void> = [];
+const notifyWaiters = (token: string | null) => {
+  refreshWaiters.forEach((cb) => cb(token));
+  refreshWaiters = [];
+};
+
+// /sessionService/refreshToken 은 인증 화이트리스트 — 만료된 access_token 으로도 호출 가능.
+// 인터셉터 재귀를 피하려고 apiClient 가 아닌 raw axios 로 호출한다.
+async function refreshAccessToken(): Promise<string | null> {
+  const { userId, ACCESS_TOKEN, REFRESH_TOKEN } = getSessionFields();
+  if (!REFRESH_TOKEN) return null;
+  try {
+    const res = await axios.post(
+      `${API_CONFIG.baseURL}/sessionService/refreshToken`,
+      { USERID: userId, ACCESS_TOKEN, REFRESH_TOKEN },
+      { headers: { "Content-Type": "application/json" } },
+    );
+    const data = res.data?.data ?? res.data ?? {};
+    const newAccess: string | undefined = data.ACCESS_TOKEN;
+    const newRefresh: string | undefined = data.REFRESH_TOKEN;
+    if (!newAccess) return null;
+    // 응답에 새 refresh_token 이 함께 오면 같이 갱신.
+    updateTokens(newAccess, newRefresh);
+    return newAccess;
+  } catch {
+    return null;
+  }
+}
+
+// 만료 감지 시 공통 처리 — refresh 후 원요청을 새 토큰으로 재시도. 실패 시 null.
+async function retryWithRefresh(originalConfig: any): Promise<any> {
+  if (!originalConfig || originalConfig._retried) return null;
+  originalConfig._retried = true;
+
+  let token: string | null;
+  if (isRefreshing) {
+    token = await new Promise<string | null>((resolve) =>
+      refreshWaiters.push(resolve),
+    );
+  } else {
+    isRefreshing = true;
+    token = await refreshAccessToken();
+    isRefreshing = false;
+    notifyWaiters(token);
+  }
+
+  if (!token) return null;
+  originalConfig.headers = originalConfig.headers ?? {};
+  originalConfig.headers.Authorization = `Bearer ${token}`;
+  return apiClient(originalConfig);
 }
 
 // Vercel rewrites(/api/* → 백엔드) 때문에 백엔드가 발급한 세션 쿠키가
@@ -58,9 +122,23 @@ apiClient.interceptors.request.use((config) => {
  * Response Interceptor
  * ========================= */
 apiClient.interceptors.response.use(
-  (res) => res,
-  (error) => {
+  async (res) => {
+    // 정상(200) 응답이지만 body 에 access_token 만료 신호가 온 경우 → refresh 후 재시도.
+    if (res.data?.msg === ACCESS_EXPIRED) {
+      const retried = await retryWithRefresh(res.config);
+      if (retried) return retried;
+    }
+    return res;
+  },
+  async (error) => {
     const isLoginPage = window.location.pathname === "/login";
+
+    // access_token 만료(MSG_ACCESS_EXPIRED) → refresh 후 원요청 재시도. (로그아웃 분기보다 우선)
+    if (error.response?.data?.msg === ACCESS_EXPIRED) {
+      const retried = await retryWithRefresh(error.config);
+      if (retried) return retried;
+      // refresh 실패 → 세션 만료 처리로 폴백
+    }
 
     // 401(세션/토큰 만료) 또는 로그인 상태에서 서버 무응답(연결 끊김) → 만료 모달 후 로그인 페이지.
     const sessionLost =

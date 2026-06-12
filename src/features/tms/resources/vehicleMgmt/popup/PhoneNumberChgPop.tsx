@@ -30,6 +30,13 @@ export default function PhoneNumberChgPop({ row, onConfirm, onClose }: Props) {
         layout="horizontal"
         type="text"
         disabled
+        label={Lang.get("LBL_VEHICLE_CODE")}
+        value={row?.VEH_ID ?? ""}
+      />
+      <Field
+        layout="horizontal"
+        type="text"
+        disabled
         label={Lang.get("LBL_VEH_NO")}
         value={row?.VEH_NO ?? ""}
       />
@@ -39,13 +46,6 @@ export default function PhoneNumberChgPop({ row, onConfirm, onClose }: Props) {
         disabled
         label={Lang.get("LBL_DRIVER_NAME")}
         value={row?.DRVR_NM ?? ""}
-      />
-      <Field
-        layout="horizontal"
-        type="text"
-        disabled
-        label={Lang.get("LBL_HP_NO")}
-        value={row?.MBL_PHN_NO ?? ""}
       />
       <Field
         layout="horizontal"

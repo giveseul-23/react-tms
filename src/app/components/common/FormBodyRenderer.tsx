@@ -19,6 +19,8 @@ type Props = {
     nameField?: string,
     extraParams?: Record<string, any>,
   ) => void;
+  /** popuser(커스텀 팝업) 컬럼 돋보기 — col.renderPopup 을 부모가 openPopup 으로 띄운다. */
+  onPopupRender?: (col: ColumnDef) => void;
   codeMap: Record<string, Record<string, string>>;
   mode?: "new" | "edit";
   /** 특정 areaNo만 렌더링 (없으면 전체) */
@@ -30,6 +32,7 @@ export function FormBodyRenderer({
   data,
   onChange,
   onPopupSearch,
+  onPopupRender,
   codeMap,
   mode,
   areas,
@@ -66,6 +69,7 @@ export function FormBodyRenderer({
                 nameValue={col.nameValue ? data[col.nameValue] : undefined}
                 onChange={onChange}
                 onPopupSearch={onPopupSearch}
+                onPopupRender={onPopupRender}
                 options={col.codeKey ? codeMap[col.codeKey] : undefined}
                 mode={mode}
               />
@@ -84,6 +88,7 @@ function FormField({
   nameValue,
   onChange,
   onPopupSearch,
+  onPopupRender,
   options,
 }: {
   col: ColumnDef;
@@ -96,6 +101,7 @@ function FormField({
     nameField?: string,
     extraParams?: Record<string, any>,
   ) => void;
+  onPopupRender?: (col: ColumnDef) => void;
   options?: Record<string, string>;
   mode?: "new" | "edit";
 }) {
@@ -129,7 +135,9 @@ function FormField({
           nameLabel={Lang.get(nameField ? nameField : undefined)}
           nameValue={nameValue}
           onSearch={() =>
-            onPopupSearch(sqlProp!, field!, col.nameValue, col.extraParams)
+            col.renderPopup
+              ? onPopupRender?.(col)
+              : onPopupSearch(sqlProp!, field!, col.nameValue, col.extraParams)
           }
           readOnly={readOnly}
         />
@@ -173,6 +181,17 @@ function FormField({
           required={required}
           value={value}
           dateUnit={dateUnit}
+          onChange={(v) => onChange(field!, v)}
+          readOnly={readOnly}
+        />
+      );
+
+    case "time":
+      return (
+        <FormTimeField
+          label={headerNameSetLang}
+          required={required}
+          value={value}
           onChange={(v) => onChange(field!, v)}
           readOnly={readOnly}
         />
@@ -241,6 +260,56 @@ function FormDateField({
           onChange={(v) => onChange(v ? toCompact(v) : "")}
         />
       )}
+    </div>
+  );
+}
+
+/* ── 시간 입력 — 네이티브 time(HH:MM:SS) ↔ 저장값(compact HHMMSS) ── */
+function FormTimeField({
+  label,
+  required,
+  value,
+  onChange,
+  readOnly,
+}: {
+  label: string;
+  required?: boolean;
+  value: any;
+  onChange: (v: string) => void;
+  readOnly?: boolean;
+}) {
+  // 저장값(HHMMSS) → 피커값(HH:MM:SS)
+  const toPicker = (raw: any): string => {
+    if (raw == null || raw === "") return "";
+    const s = String(raw)
+      .replace(/[^0-9]/g, "")
+      .padEnd(6, "0")
+      .slice(0, 6);
+    return `${s.slice(0, 2)}:${s.slice(2, 4)}:${s.slice(4, 6)}`;
+  };
+  // 피커값(HH:MM[:SS]) → 저장값(HHMMSS)
+  const toCompact = (v: string) =>
+    v ? v.replace(/[^0-9]/g, "").padEnd(6, "0").slice(0, 6) : "";
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[11px] text-muted-foreground">
+        {label}
+        {required && <span className="text-destructive ml-0.5">*</span>}
+      </label>
+      <input
+        type="time"
+        step={1}
+        className={
+          readOnly
+            ? "h-8 rounded-md border border-input px-2.5 text-xs bg-muted text-muted-foreground cursor-default"
+            : "h-8 rounded-md border border-input px-2.5 text-xs bg-background"
+        }
+        value={toPicker(value)}
+        onChange={(e) => onChange(toCompact(e.target.value))}
+        readOnly={readOnly}
+        disabled={readOnly}
+      />
     </div>
   );
 }

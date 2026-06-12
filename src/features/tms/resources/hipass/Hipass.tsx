@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { commitRowChange, commitRowChanges } from "@/app/components/grid/gridCommon";
+import {
+  commitRowChange,
+  commitRowChanges,
+} from "@/app/components/grid/gridCommon";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { usePopup } from "@/app/components/popup/PopupContext";
 
@@ -27,7 +30,11 @@ type HipassFormBodyProps = {
 function formColumnsForRow(mode: DetailMode): ColumnDef[] {
   const isNew = mode === "new";
   return MAIN_COLUMN_DEFS.map((col) => {
-    if (col.field === "LGST_GRP_CD" || col.field === "HIPASS_CARD_NO" || col.field === "VEH_ID") {
+    if (
+      col.field === "LGST_GRP_CD" ||
+      col.field === "HIPASS_CARD_NO" ||
+      col.field === "VEH_ID"
+    ) {
       return { ...col, readOnly: !isNew };
     }
     if (col.field === "CARD_COM_NM") {
@@ -85,12 +92,16 @@ export default function Hipass() {
   ) => {
     const isVehicle = sqlId === "selectVehicleCodeNameInOperation";
     openPopup({
-      title: "코드 검색",
+      title: "LBL_CODE",
       content: (
         <CommonPopup
           sqlId={sqlId}
           filterCol={isVehicle ? "LGST_GRP_CD" : ""}
-          filterValue={isVehicle ? String(model.grids.main.selectedRef.current?.LGST_GRP_CD ?? "") : ""}
+          filterValue={
+            isVehicle
+              ? String(model.grids.main.selectedRef.current?.LGST_GRP_CD ?? "")
+              : ""
+          }
           extraParams={isVehicle ? { keyParam: "100" } : undefined}
           onApply={(row: any) => {
             closePopup();
@@ -135,8 +146,8 @@ export default function Hipass() {
         excludes: [
           {
             column: "HI.HIPASS_CARD_NO",
-            as: "HIPASS_CARD_NO"
-          }
+            as: "HIPASS_CARD_NO",
+          },
         ],
       }}
       grid={

@@ -2,6 +2,7 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { newRid } from "@/app/feature/useBaseModel";
+import { markDelete } from "@/app/components/grid/gridUtils/rowStatus";
 import { vehicleMgmtApi as api } from "./vehicleMgmtApi";
 import { useGuard } from "@/hooks/useGuard";
 import { MENU_CODE } from "./VehicleMgmt";
@@ -182,24 +183,43 @@ export function useVehicleMgmtController({ model }: Args) {
     [base],
   );
 
+  // 저장 대상(dirty I/U) 행 전체 계약일자 검증
+  const validateDirtyContracts = useCallback(
+    () =>
+      (model.grids.main.rows ?? [])
+        .filter((r: any) => r.EDIT_STS === "I" || r.EDIT_STS === "U")
+        .every((r: any) => validateContract(r)),
+    [model, validateContract],
+  );
+
   const handleSaveDetail = useCallback(() => {
-    const data = model.detailData;
-    if (!data.VEH_NO?.trim()) return;
-    if (!validateContract(data)) return;
-    base
-      .callAjax(api.save([{ ...data, rowStatus: "U" }]), "MSG_SAVE_CMPLT")
-      .then(() => base.search());
-  }, [model, base, validateContract]);
+    base.saveGrid("main", (p) => api.save(p), {
+      successMsg: "MSG_SAVE_CMPLT",
+      beforeSave: validateDirtyContracts,
+      afterSave: () => base.search(), // onSearchCallback 이 detail 닫음
+    });
+  }, [base, validateDirtyContracts]);
 
   const handleDeleteDetail = useCallback(() => {
     const data = model.detailData;
-    base.confirm(`"${data.VEH_NO}" 차량을 삭제하시겠습니까?`, () => {
-      base
-        .callAjax(api.save([{ ...data, rowStatus: "D" }]), "삭제되었습니다.")
-        .then(() => {
-          model.closeDetail();
-          base.search();
-        });
+    const rid = data.__rid__;
+    const cur = model.grids.main.data;
+    const rows = (cur.rows ?? []).map((r: any) => {
+      if (r.__rid__ !== rid) return r;
+      const next = { ...r };
+      markDelete(next);
+      return next;
+    });
+    // 객체 직접 set → allDataRef 동기 갱신(saveGrid 가 최신 D 행을 읽도록)
+    model.grids.main.setData({ ...cur, rows });
+
+    base.saveGrid("main", (p) => api.save(p), {
+      successMsg: "삭제되었습니다.",
+      confirmOnDelete: `"${data.VEH_NO}" 차량을 삭제하시겠습니까?`,
+      afterSave: () => {
+        model.closeDetail();
+        base.search();
+      },
     });
   }, [model, base]);
 
@@ -260,16 +280,15 @@ export function useVehicleMgmtController({ model }: Args) {
   }, [model]);
 
   const handleSaveNew = useCallback(() => {
-    const data = model.newFormData;
-    if (!data.VEH_NO?.trim()) return;
-    if (!validateContract(data)) return;
-    base
-      .callAjax(api.save([{ ...data, rowStatus: "I" }]), "등록되었습니다.")
-      .then(() => {
+    base.saveGrid("main", (p) => api.save(p), {
+      successMsg: "등록되었습니다.",
+      beforeSave: validateDirtyContracts,
+      afterSave: () => {
         model.setNewSlideOpen(false);
         base.search();
-      });
-  }, [model, base, validateContract]);
+      },
+    });
+  }, [model, base, validateDirtyContracts]);
 
   // ── 연락처(전화번호) 변경 — 단건만 ─────────────────────────
   const onChangeContact = useCallback(
@@ -292,9 +311,9 @@ export function useVehicleMgmtController({ model }: Args) {
               base
                 .callAjax(
                   api.saveUserPhoneNumber({
+                    USR_ID: row.DRVR_ID,
                     MBL_PHN_NO: newPhone,
                     MBL_PHN_NO_OLD: row.MBL_PHN_NO,
-                    USR_ID: row.DRVR_ID,
                   }),
                 )
                 .then(() => base.search());
@@ -342,17 +361,17 @@ export function useVehicleMgmtController({ model }: Args) {
 
   // ── 소속(차고지) 일괄변경 ──────────────────────────────────
   const onChangeDomicile = useCallback(() => {
-    const f = (model.filtersRef.current ?? {}) as Record<string, any>;
+    const selected = model.grids.main.selectedRef.current;
     openPopup({
       title: "LBL_CHG_DOMICILE",
-      width: "4xl",
+      width: "full",
       content: (
         <DomicileChgPop
           params={{
-            DIV_CD: f.DIV_CD,
-            LGST_GRP_CD: f.LGST_GRP_CD,
-            VEH_OP_TP: f.VEH_OP_TP,
-            VEH_OPER_SCD: f.VEH_OPER_SCD,
+            DIV_CD: selected.DIV_CD,
+            LGST_GRP_CD: selected.LGST_GRP_CD,
+            VEH_OP_TP: selected.VEH_OP_TP,
+            VEH_OPER_SCD: selected.VEH_OPER_SCD,
           }}
           onApplied={() => {
             closePopup();
@@ -362,7 +381,7 @@ export function useVehicleMgmtController({ model }: Args) {
         />
       ),
     });
-  }, [model.filtersRef, openPopup, closePopup, base]);
+  }, [model.grids.main.selectedRef, openPopup, closePopup, base]);
 
   // ── 차량 일괄전송(IF) ──────────────────────────────────────
   const onSendVehicle = useCallback(

@@ -32,6 +32,12 @@ export function getAccessToken() {
   return sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
+/** access/refresh 토큰만 갱신 (유저 정보 보존) — 토큰 재발급(refreshToken) 시 사용. */
+export function updateTokens(accessToken?: string, refreshToken?: string) {
+  if (accessToken) sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  if (refreshToken) sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+}
+
 export function getUserId() {
   return sessionStorage.getItem(USERID);
 }

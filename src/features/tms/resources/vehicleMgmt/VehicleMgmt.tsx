@@ -22,6 +22,7 @@ type VehicleFormBodyProps = {
   setData: (updater: (prev: any) => any) => void;
   mode: "new" | "edit";
   onPopupSearch: (sqlId: string, codeField: string, nameField: string) => void;
+  onPopupRender: (col: any) => void;
   codeMap: Record<string, Record<string, string>>;
 };
 
@@ -45,6 +46,7 @@ export function VehicleFormBody({
   setData,
   mode,
   onPopupSearch,
+  onPopupRender,
   codeMap,
 }: VehicleFormBodyProps) {
   const onChange = (field: string, value: any) =>
@@ -77,6 +79,7 @@ export function VehicleFormBody({
       data={data}
       onChange={onChange}
       onPopupSearch={onPopupSearch}
+      onPopupRender={onPopupRender}
       codeMap={codeMap}
       mode={mode}
     />
@@ -101,6 +104,14 @@ export default function VehicleMgmt() {
     commitRowChanges(model.grids.main.setData, next, next);
   };
 
+  // 수정 폼 입력을 그리드 행에 즉시 동기화 (detailData ↔ 그리드 __rid__ 행)
+  const setDetailDataSynced = (updater: (prev: any) => any) => {
+    const next =
+      typeof updater === "function" ? updater(model.detailData) : updater;
+    model.setDetailData(next);
+    commitRowChanges(model.grids.main.setData, next, next);
+  };
+
   const handlePopupSearch = (
     targetData: any,
     setTargetData: (updater: (prev: any) => any) => void,
@@ -119,7 +130,7 @@ export default function VehicleMgmt() {
         )
       : undefined;
     openPopup({
-      title: "코드 검색",
+      title: "LBL_CODE",
       content: (
         <CommonPopup
           sqlId={sqlId}
@@ -155,7 +166,7 @@ export default function VehicleMgmt() {
   ) =>
     handlePopupSearch(
       model.detailData,
-      model.setDetailData,
+      setDetailDataSynced,
       sqlId,
       codeField,
       nameField,
@@ -177,14 +188,37 @@ export default function VehicleMgmt() {
       extraParams,
     );
 
-  const detailHeaderActions = (
-    <button
-      onClick={ctrl.handleDeleteDetail}
-      className="h-[26px] px-2.5 text-[11px] rounded-md border border-destructive text-destructive bg-background hover:bg-destructive/5"
-    >
-      {Lang.get("BTN_DEL")}
-    </button>
-  );
+  // popuser(커스텀 팝업) 돋보기 — col.renderPopup 을 commit/close 와 함께 띄운다.
+  // commit 은 동기화 setter 로 → 선택값이 폼 + 그리드 행에 동시 반영.
+  const handlePopupRender = (
+    targetData: any,
+    setTargetData: (updater: (prev: any) => any) => void,
+    col: any,
+  ) => {
+    const commit = (patch: Record<string, any>) =>
+      // __rid__ 는 행 식별자 — 팝업 선택 행의 __rid__ 가 폼/그리드 행을 오염시키지 않도록 제외
+      setTargetData((prev: any) => {
+        const { __rid__, ...safe } = patch ?? {};
+        return { ...prev, ...safe };
+      });
+    openPopup({
+      title: col.popupTitle ?? col.headerName,
+      width: col.popupWidth ?? "2xl",
+      content: col.renderPopup({
+        row: targetData,
+        commit,
+        close: closePopup,
+        callback: (picked: any) =>
+          col.callback?.({ picked, row: targetData, commit }),
+      }),
+    });
+  };
+
+  const detailPopupRender = (col: any) =>
+    handlePopupRender(model.detailData, setDetailDataSynced, col);
+
+  const newPopupRender = (col: any) =>
+    handlePopupRender(model.newFormData, setNewFormDataSynced, col);
 
   const detailFooter = (
     <>
@@ -239,7 +273,7 @@ export default function VehicleMgmt() {
             actions={ctrl.mainActions}
             onRowClicked={ctrl.handleRowClicked}
             codeMap={model.codeMap}
-            audit={false}
+            audit={{ delete: false }}
           />
         }
         form={{
@@ -263,9 +297,10 @@ export default function VehicleMgmt() {
           body: (
             <VehicleFormBody
               data={model.detailData}
-              setData={model.setDetailData}
+              setData={setDetailDataSynced}
               mode="edit"
               onPopupSearch={detailPopupSearch}
+              onPopupRender={detailPopupRender}
               codeMap={model.codeMap}
             />
           ),
@@ -287,6 +322,7 @@ export default function VehicleMgmt() {
           setData={setNewFormDataSynced}
           mode="new"
           onPopupSearch={newPopupSearch}
+          onPopupRender={newPopupRender}
           codeMap={model.codeMap}
         />
       </FormSheetOverlay>

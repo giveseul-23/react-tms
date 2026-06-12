@@ -36,19 +36,19 @@ export const vehicleMgmtApi = {
   },
 
   // ── 저장 (등록/수정/삭제 공통 — dirty rows 배열 + rowStatus I/U/D) ──
-  save(rows: any[]) {
+  save(payload: { dsSave: any[] }) {
     return apiClient.post<CommonResponse>(
       "/vehicleService/save",
-      withSession(rows),
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload }),
     );
   },
 
   // ── 기능 버튼 ────────────────────────────────────────────────
   // 차량 일괄전송(IF) — 선택 차량행(VEHARRAY 포함)
-  sendVehicleIF(rows: any[]) {
+  sendVehicleIF(payload: { dsSave: any[] }) {
     return apiClient.post<CommonResponse>(
       "/vehicleService/sendVehicleIF",
-      withSession(rows),
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload }),
     );
   },
 
@@ -61,18 +61,18 @@ export const vehicleMgmtApi = {
   },
 
   // 소속(차고지) 일괄변경 — 선택 차량행에 LOC_CD 적용
-  changeDomicile(rows: any[]) {
+  changeDomicile(payload: any) {
     return apiClient.post<CommonResponse>(
       "/vehicleService/changeDomicile",
-      withSession(rows),
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload }),
     );
   },
 
   // 운송협력사 변경 — 선택 차량행에 CARR_CD 적용
-  changeLgstCarr(rows: any[]) {
+  changeLgstCarr(payload: { dsSave: any[] }) {
     return apiClient.post<CommonResponse>(
       "/vehicleService/changeLgstCarr",
-      withSession(rows),
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload }),
     );
   },
 

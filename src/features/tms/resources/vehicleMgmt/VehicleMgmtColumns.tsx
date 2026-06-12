@@ -1,10 +1,13 @@
 import type { ColumnDef } from "@/app/components/common/formColumnDef";
+import VehTpCdSearchPop from "./popup/VehTpCdSearchPop";
+import { Lang } from "@/app/services/common/Lang";
+import { CommonPopup } from "@/app/components/popup/CommonPopup";
 
 export const AREA_LABELS: Record<number, string> = {
-  0: "일반",
-  1: "차량유형",
-  2: "차고지",
-  3: "기타",
+  0: Lang.get("LBL_GENERAL"),
+  1: Lang.get("LBL_VEHICLE_TYPE"),
+  2: Lang.get("LBL_DOMICILE"),
+  3: Lang.get("LBL_ETC_SETTING"),
 };
 
 export const MAIN_COLUMN_DEFS: ColumnDef[] = [
@@ -29,12 +32,11 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     required: true,
   },
   {
-    type: "text",
+    type: "popup",
     //디비전코드
     headerName: "LBL_DIVISION_CODE",
     field: "DIV_CD",
     areaNo: 0,
-    fieldType: "popup",
     required: true,
     sqlProp: "selectDivisionCodeName",
     nameValue: "DIV_NM",
@@ -51,12 +53,11 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     formHide: true,
   },
   {
-    type: "text",
+    type: "popup",
     //물류운영그룹코드
     headerName: "LBL_LOGISTICS_GROUP",
     field: "LGST_GRP_CD",
     areaNo: 0,
-    fieldType: "popup",
     required: true,
     sqlProp: "selectLogisticsgroupCodeName",
     nameValue: "LGST_GRP_NM",
@@ -96,12 +97,11 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     formHide: true,
   },
   {
-    type: "text",
+    type: "popup",
     //지급운송협력사
     headerName: "LBL_PAY_CARRIER_CODE",
     field: "PAY_CARR_CD",
     areaNo: 0,
-    fieldType: "popup",
     sqlProp: "selectCarrList",
     nameField: "LBL_PAY_CARRIER_NAME",
     nameValue: "PAY_CARR_NM",
@@ -117,12 +117,11 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     formHide: true,
   },
   {
-    type: "text",
+    type: "popup",
     //운전자아이디
     headerName: "LBL_DRIVER_CODE",
     field: "DRVR_ID",
     areaNo: 0,
-    fieldType: "popup",
     required: true,
     sqlProp: "selectDrvrListUserCust",
     nameField: "LBL_DRIVER_NAME",
@@ -170,12 +169,11 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     codeKey: "apProcTp",
   },
   {
-    type: "text",
+    type: "popup",
     // 매입정산물류운영그룹 (코드)
     headerName: "LBL_AP_SETTL_LGST_GRP",
     field: "PAY_LGST_GRP_CD",
     areaNo: 0,
-    fieldType: "popup",
     sqlProp: "selectLogisticsgroupCodeName",
     nameField: "LBL_AP_SETTL_LGST_GRP_NM",
     nameValue: "PAY_LGST_GRP_NM",
@@ -211,103 +209,102 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     codeKey: "transTcd",
   },
   {
-    type: "text",
+    type: "combo",
     //차량온도구분
     headerName: "LBL_TEMPERATURE_CLASSIFICATION",
     field: "VEH_TEMP_TCD",
     areaNo: 0,
-    fieldType: "select",
     required: true,
     codeKey: "vehTempTcd",
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "채널A온도범위",
     field: "CHN_A_TMPR_RNG_CD",
     areaNo: 0,
-    fieldType: "select",
     codeKey: "vehicleTemperatureRange",
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "채널B온도범위",
     field: "CHN_B_TMPR_RNG_CD",
     areaNo: 0,
-    fieldType: "select",
     codeKey: "vehicleTemperatureRange",
   },
   {
-    type: "text",
+    type: "combo",
     //스케줄링모드
     headerName: "LBL_SCHED_MODE",
     field: "SCHED_TCD",
     areaNo: 0,
-    fieldType: "select",
     required: true,
     codeKey: "schedTcd",
   },
   {
-    type: "text",
+    type: "combo",
     //첫하차지기준
     headerName: "LBL_FIRST_DROP",
     field: "FIRST_DROP_TCD",
     areaNo: 0,
-    fieldType: "select",
     required: true,
     codeKey: "distTcd",
   },
   {
-    type: "text",
+    type: "check",
     //외부시스템배차차량여부
     headerName: "LBL_EXT_SYS_DSPCH_VEH_YN",
     field: "EXT_SYS_DSPCH_VEH_YN",
     areaNo: 0,
-    fieldType: "check",
   },
   {
-    type: "text",
+    type: "check",
     //보험료계산여부
     headerName: "LBL_INSRNC_RATE_CALC_YN",
     field: "INSRNC_RATE_CALC_YN",
     areaNo: 0,
-    fieldType: "check",
   },
   {
-    type: "text",
+    type: "check",
     //자동운송요청
     headerName: "LBL_AUTO_TENDER",
     field: "AUTO_TNDR_YN",
     areaNo: 0,
-    fieldType: "check",
   },
   {
-    type: "text",
+    type: "check",
     //자동운송요청수락
     headerName: "LBL_AUTO_TENDER_ACCEPTED",
     field: "AUTO_TNDR_ACPT_YN",
     areaNo: 0,
-    fieldType: "check",
   },
   {
-    type: "text",
+    type: "check",
     //차량구분
     headerName: "LBL_DSPCH_DSPLY_UI_CD",
     field: "DED_OP_YN",
     areaNo: 0,
-    fieldType: "check",
   },
 
   // ── areaNo: 1 차량 제원 ────────────────────────────────────
   {
-    type: "text",
+    type: "popuser",
     headerName: "LBL_VEHICLE_TYPE_CODE",
     field: "VEH_TP_CD",
     areaNo: 1,
-    fieldType: "popup",
     required: true,
-    sqlProp: "selectLgstGrpVehTpCd",
-    nameField: "LBL_VEHICLE_TYPE_NAME",
-    nameValue: "VEH_TP_NM",
+    nameField: "LBL_VEHICLE_TYPE_NAME", // 명칭 라벨 (표시용)
+    nameValue: "VEH_TP_NM", // 명칭 값 필드 (표시용)
+    // 조회조건+그리드 팝업 — 선택 시 차량유형 + 제원(areaNo:1) 일괄 세팅
+    renderPopup: ({ row, commit, close }) => (
+      <VehTpCdSearchPop
+        lgstGrpCd={row?.LGST_GRP_CD}
+        onConfirm={(patch) => {
+          commit(patch);
+          close();
+        }}
+        onClose={close}
+      />
+    ),
   },
   {
     type: "text",
@@ -614,16 +611,41 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
 
   // ── areaNo: 2 차고지 정보 ──────────────────────────────────
   {
-    type: "text",
+    type: "popuser",
     // 착지코드
     headerName: "LBL_LOCATION_CODE",
     field: "LOC_CD",
     areaNo: 2,
-    fieldType: "popup",
     required: true,
     sqlProp: "selectLocationCodeName",
     nameField: "LBL_LOCATION_NAME",
     nameValue: "LOC_NM",
+    renderPopup: ({ commit, close }) => (
+      <CommonPopup
+        sqlId="selectLocationCodeName"
+        onApply={(p) => {
+          commit({
+            LOC_CD: p.CODE,
+            LOC_NM: p.NAME,
+            LOC_ID: p.LOC_ID,
+            ADDR_ID: p.ADDR_ID,
+            CTRY_CD: p.CTRY_CD,
+            CTRY_NM: p.CTRY_NM,
+            STT_CD: p.STT_CD,
+            STT_NM: p.STT_NM,
+            CTY_CD: p.CTY_CD,
+            CTY_NM: p.CTY_NM,
+            DTL_ADDR1: p.DTL_ADDR1,
+            DTL_ADDR2: p.DTL_ADDR2,
+            LAT: p.LAT,
+            LON: p.LON,
+            ZIP_CD: p.ZIP_CD,
+          });
+          close();
+        }}
+        onClose={close}
+      />
+    ),
   },
   {
     type: "text",
@@ -737,27 +759,29 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
 
   // ── areaNo: 3 운영 설정 ────────────────────────────────────
   {
-    type: "text",
     //근무시작시간
+    type: "time",
     headerName: "LBL_WORK_STIME",
     field: "WORK_STIME",
     areaNo: 3,
-    fieldType: "text",
+    required: true,
+    defaultValue: "000000",
   },
   {
-    type: "text",
     //근무종료시간
+    type: "time",
     headerName: "LBL_WORK_ETIME",
     field: "WORK_ETIME",
     areaNo: 3,
-    fieldType: "text",
+    required: true,
+    defaultValue: "235959",
   },
   {
     //계약시작일
     headerName: "LBL_CONTRACT_SDATE",
     field: "CONTRACT_SDATE",
     areaNo: 3,
-    fieldType: "date",
+    type: "date",
     required: true,
   },
   {
@@ -765,35 +789,32 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     headerName: "LBL_CONTRACT_EDATE",
     field: "CONTRACT_EDATE",
     areaNo: 3,
-    fieldType: "date",
+    type: "date",
     required: true,
   },
   {
-    type: "text",
+    type: "combo",
     //운영상태구분
     headerName: "LBL_VEH_OPER_SCD",
     field: "VEH_OPER_SCD",
     areaNo: 3,
-    fieldType: "select",
     required: true,
     codeKey: "vehOperScd",
   },
   {
-    type: "text",
+    type: "combo",
     //차량그룹
     headerName: "LBL_VEH_GRP",
     field: "VEH_GRP_CD",
     areaNo: 3,
-    fieldType: "select",
     codeKey: "vehGrpCd",
   },
   {
-    type: "text",
+    type: "combo",
     //배차유형
     headerName: "LBL_VEH_DISPATCH_TP",
     field: "VEH_DISPATCH_TP",
     areaNo: 3,
-    fieldType: "select",
     codeKey: "vehDspchTp",
   },
   {
@@ -802,7 +823,6 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     headerName: "LBL_RFID",
     field: "RFID",
     areaNo: 3,
-    fieldType: "text",
   },
   {
     type: "text",
@@ -810,7 +830,6 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     headerName: "LBL_UDF1",
     field: "UDF1",
     areaNo: 3,
-    fieldType: "text",
   },
   {
     type: "text",
@@ -818,23 +837,20 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     headerName: "LBL_UDF2",
     field: "UDF2",
     areaNo: 3,
-    fieldType: "text",
   },
   {
-    type: "text",
+    type: "check",
     //서명필요여부
     headerName: "LBL_SIGNATURE_YN",
     field: "SIGNATURE_YN",
     areaNo: 3,
-    fieldType: "check",
   },
   {
-    type: "text",
+    type: "check",
     //봉인필요여부
     headerName: "LBL_SEAL_YN",
     field: "SEAL_YN",
     areaNo: 3,
-    fieldType: "check",
   },
   {
     type: "text",
@@ -842,56 +858,54 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     headerName: "LBL_LIVESTOCK_VEHICLE_NO",
     field: "LIVESTOCK_VEHICLE_NO",
     areaNo: 3,
-    fieldType: "text",
   },
   {
-    type: "text",
+    type: "check",
     //LMO운송차량여부
     headerName: "LBL_LMO_YN",
     field: "LMO_YN",
     areaNo: 3,
-    fieldType: "check",
   },
   {
-    type: "text",
+    type: "combo",
     //정기휴무일
     headerName: "LBL_OFF_DAYS",
     field: "OFF_DAYS",
     areaNo: 3,
-    fieldType: "text",
+    codeKey: "offDays",
   },
 
   // ── 등록/수정 정보 (폼에서 숨김) ──────────────────────────
-  {
-    type: "text",
-    headerName: "LBL_INSERT_PERSON_ID",
-    field: "CRE_USR_ID",
-    fieldType: "text",
-    readOnly: true,
-    formHide: true,
-  },
-  {
-    type: "text",
-    headerName: "LBL_INSERT_DATE",
-    field: "CRE_DTTM",
-    fieldType: "text",
-    readOnly: true,
-    formHide: true,
-  },
-  {
-    type: "text",
-    headerName: "LBL_UPDATE_PERSON_ID",
-    field: "UPD_USR_ID",
-    fieldType: "text",
-    readOnly: true,
-    formHide: true,
-  },
-  {
-    type: "text",
-    headerName: "LBL_UPDATE_TIME",
-    field: "UPD_DTTM",
-    fieldType: "text",
-    readOnly: true,
-    formHide: true,
-  },
+  // {
+  //   type: "text",
+  //   headerName: "LBL_INSERT_PERSON_ID",
+  //   field: "CRE_USR_ID",
+  //   fieldType: "text",
+  //   readOnly: true,
+  //   formHide: true,
+  // },
+  // {
+  //   type: "text",
+  //   headerName: "LBL_INSERT_DATE",
+  //   field: "CRE_DTTM",
+  //   fieldType: "text",
+  //   readOnly: true,
+  //   formHide: true,
+  // },
+  // {
+  //   type: "text",
+  //   headerName: "LBL_UPDATE_PERSON_ID",
+  //   field: "UPD_USR_ID",
+  //   fieldType: "text",
+  //   readOnly: true,
+  //   formHide: true,
+  // },
+  // {
+  //   type: "text",
+  //   headerName: "LBL_UPDATE_TIME",
+  //   field: "UPD_DTTM",
+  //   fieldType: "text",
+  //   readOnly: true,
+  //   formHide: true,
+  // },
 ];

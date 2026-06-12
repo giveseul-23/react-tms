@@ -117,6 +117,14 @@ export const commonApi = {
     );
   },
 
+  //차량유형조회
+  searchVehicleType(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/vehicleService/searchVehicleType`,
+      withSession({ MENU_CD: "MENU_VEHICLE_TYPE_POP", ...payload }),
+    );
+  },
+
   // ── Excel Service (공통 엑셀 다운로드 3단계) ──────────────────
   // 센차 ExGridEditor/ExTreeEditor 의 saveUserTempData → commonExcelDownPrepare
   // → commonExcelDown(iframe) 흐름을 React 로 포팅. 위젯별로 흩어져 있던 호출을

@@ -52,6 +52,7 @@ export function useVehicleMgmtModel(menuCode: string) {
     vehOperScd: { sqlProp: "CODE", keyParam: "VEH_OPER_SCD" },
     vehGrpCd: { sqlProp: "CODE", keyParam: "VEH_GRP_CD" },
     vehDspchTp: { sqlProp: "CODE", keyParam: "VEH_DISPATCH_TP" },
+    offDays: { sqlProp: "CODE", keyParam: "DAY_SHORT_TP" },
   });
 
   return {
