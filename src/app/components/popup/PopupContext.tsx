@@ -29,6 +29,14 @@ type PopupContextType = {
 
 const PopupContext = createContext<PopupContextType | null>(null);
 
+// 팝업 열림 여부만 읽는 별도 context — openPopup/closePopup 소비자(컨트롤러 등)가
+// 팝업 열림/닫힘마다 재렌더되지 않도록 분리. 외부클릭으로 닫히는 폼(FormSheet)이
+// "지금 팝업이 떠 있으니 닫지 마라" 판단에 사용.
+const PopupOpenContext = createContext(false);
+export function useHasOpenPopup(): boolean {
+  return useContext(PopupOpenContext);
+}
+
 // 모듈 레벨 imperative 핸들 — React 컴포넌트 밖(예: makeExcelGroupAction 의 onClick)에서
 // 모달을 띄울 때 사용. Provider 마운트 동안만 유효. (SearchToast 의 showSearchToast 와 동일 패턴)
 let _popupApi: PopupContextType | null = null;
@@ -63,7 +71,9 @@ export function PopupProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PopupContext.Provider value={ctxValue}>
-      {children}
+      <PopupOpenContext.Provider value={stack.length > 0}>
+        {children}
+      </PopupOpenContext.Provider>
 
       {/*
         스택의 모든 popup 을 React 트리에 유지 (각자 PopupShell 로 감싸서 렌더).

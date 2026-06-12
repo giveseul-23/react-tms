@@ -7,6 +7,7 @@ import { FormSheetOverlay } from "@/app/components/layout/FormSheet";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
+import { commitRowChanges } from "@/app/components/grid/gridUtils/rowStatus";
 
 import { useVehicleMgmtModel } from "./VehicleMgmtModel";
 import { useVehicleMgmtController } from "./VehicleMgmtController";
@@ -92,25 +93,52 @@ export default function VehicleMgmt() {
     setJumpInput(String(model.detailIndex + 1));
   }, [model.detailIndex]);
 
+  // 신규 폼 입력을 그리드 행에 즉시 동기화 (newFormData ↔ 그리드 __rid__ 행)
+  const setNewFormDataSynced = (updater: (prev: any) => any) => {
+    const next =
+      typeof updater === "function" ? updater(model.newFormData) : updater;
+    model.setNewFormData(next);
+    commitRowChanges(model.grids.main.setData, next, next);
+  };
+
   const handlePopupSearch = (
     targetData: any,
     setTargetData: (updater: (prev: any) => any) => void,
     sqlId: string,
     codeField: string,
     nameField: string,
+    extraParams?: Record<string, any>,
   ) => {
+    // extraParams 는 { 서버키: 폼필드명 } 매핑 — 현재 폼 데이터에서 실제 값으로 해석.
+    const resolvedParams = extraParams
+      ? Object.fromEntries(
+          Object.entries(extraParams).map(([serverKey, formField]) => [
+            serverKey,
+            targetData[formField as string] ?? "",
+          ]),
+        )
+      : undefined;
     openPopup({
       title: "코드 검색",
       content: (
         <CommonPopup
           sqlId={sqlId}
+          extraParams={resolvedParams}
           onApply={(row: any) => {
             closePopup();
-            setTargetData((prev: any) => ({
-              ...prev,
-              [codeField]: row.CODE,
-              [nameField]: row.NAME,
-            }));
+            setTargetData((prev: any) => {
+              const next = {
+                ...prev,
+                [codeField]: row.CODE,
+                [nameField]: row.NAME,
+              };
+              // 물류운영그룹코드 변경 시 매입정산물류운영그룹 코드/명 지움
+              if (codeField === "LGST_GRP_CD") {
+                next.PAY_LGST_GRP_CD = "";
+                next.PAY_LGST_GRP_NM = "";
+              }
+              return next;
+            });
           }}
           onClose={closePopup}
         />
@@ -123,6 +151,7 @@ export default function VehicleMgmt() {
     sqlId: string,
     codeField: string,
     nameField: string,
+    extraParams?: Record<string, any>,
   ) =>
     handlePopupSearch(
       model.detailData,
@@ -130,19 +159,22 @@ export default function VehicleMgmt() {
       sqlId,
       codeField,
       nameField,
+      extraParams,
     );
 
   const newPopupSearch = (
     sqlId: string,
     codeField: string,
     nameField: string,
+    extraParams?: Record<string, any>,
   ) =>
     handlePopupSearch(
       model.newFormData,
-      model.setNewFormData,
+      setNewFormDataSynced,
       sqlId,
       codeField,
       nameField,
+      extraParams,
     );
 
   const detailHeaderActions = (
@@ -175,7 +207,7 @@ export default function VehicleMgmt() {
   const newFormFooter = (
     <>
       <button
-        onClick={() => model.setNewSlideOpen(false)}
+        onClick={ctrl.handleCancelNew}
         className="flex-1 h-9 text-[13px] rounded-md border border-input bg-background hover:bg-accent flex items-center justify-center"
       >
         {Lang.get("BTN_CANCEL")}
@@ -243,14 +275,16 @@ export default function VehicleMgmt() {
 
       <FormSheetOverlay
         open={model.newSlideOpen}
-        onOpenChange={model.setNewSlideOpen}
+        onOpenChange={(open) => {
+          if (!open) ctrl.handleCancelNew();
+        }}
         badgeLabel={Lang.get("LBL_LCATION_CREATE_REPLACE")}
         title={Lang.get("MENU_VEHICLE_DETAIL")}
         footer={newFormFooter}
       >
         <VehicleFormBody
           data={model.newFormData}
-          setData={model.setNewFormData}
+          setData={setNewFormDataSynced}
           mode="new"
           onPopupSearch={newPopupSearch}
           codeMap={model.codeMap}

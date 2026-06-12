@@ -12,8 +12,10 @@
 "use client";
 
 import { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/app/components/ui/sheet";
+import { useHasOpenPopup } from "@/app/components/popup/PopupContext";
 
 // ───────────────────────────────────────────────────────────────────────────
 // 1) FormSidePanel — 그리드 우측 고정 슬라이드 (VehicleMgmt 상세패널 패턴)
@@ -187,9 +189,30 @@ export function FormSheetOverlay({
   children,
   footer,
 }: FormSheetOverlayProps) {
+  // 팝업이 떠 있으면 그 팝업 클릭은 Sheet 입장에서 "외부 클릭"으로 잡혀 폼이 닫힌다.
+  // 팝업 열림 동안에는 외부클릭/ESC 닫힘을 막아 폼을 유지한다(팝업 없을 땐 기존대로 닫힘).
+  const hasOpenPopup = useHasOpenPopup();
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className={contentClassName}>
+    // modal={false}: Radix 모달은 바깥 pointer-events 차단 + 포커스 가둠으로 폼 위에 뜬
+    // 팝업(body portal, 비-Radix)을 클릭/입력 불가로 만든다. 비모달로 풀어 팝업을 살린다.
+    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
+      {/* 비모달은 Radix dim 배경을 안 그리므로 동일 시각의 오버레이를 직접 렌더(기존 모달 시각 보존).
+          z-40: Sheet 콘텐츠(z-50) 아래·뒤 그리드 위. 팝업(z-9999)은 그 위라 정상 동작. */}
+      {open &&
+        createPortal(
+          <div className="fixed inset-0 z-40 bg-black/50" />,
+          document.body,
+        )}
+      <SheetContent
+        side="right"
+        className={contentClassName}
+        onInteractOutside={(e) => {
+          if (hasOpenPopup) e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          if (hasOpenPopup) e.preventDefault();
+        }}
+      >
         {/* 헤더 */}
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-border shrink-0">
           <div className="flex items-center gap-2">

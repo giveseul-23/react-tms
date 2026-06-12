@@ -35,6 +35,7 @@ export type ColumnDef = ColDef<any> & {
   sqlProp?: string;
   nameValue?: string;
   nameField?: string; // 코드에 대응하는 명칭 field
+  extraParams?: Record<string, any>; // popup 검색 시 서버로 보낼 추가 파라미터
   // select 타입일 때
   codeKey?: string; // codeMap의 key
 };

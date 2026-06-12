@@ -61,6 +61,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     sqlProp: "selectLogisticsgroupCodeName",
     nameValue: "LGST_GRP_NM",
     nameField: "LBL_LOGISTICS_GROUP_NAME",
+    extraParams: { keyParam: "DIV_CD" }, // 선택된 DIV_CD 를 팝업 검색조건으로 전달
   },
   {
     type: "text",

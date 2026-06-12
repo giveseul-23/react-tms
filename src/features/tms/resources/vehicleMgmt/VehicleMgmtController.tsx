@@ -1,6 +1,7 @@
 // src/views/vehicleMgmt/VehicleMgmtController.tsx
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
+import { newRid } from "@/app/feature/useBaseModel";
 import { vehicleMgmtApi as api } from "./vehicleMgmtApi";
 import { useGuard } from "@/hooks/useGuard";
 import { MENU_CODE } from "./VehicleMgmt";
@@ -203,12 +204,16 @@ export function useVehicleMgmtController({ model }: Args) {
   }, [model, base]);
 
   const handleOpenNew = useCallback(() => {
-    model.setNewFormData({
+    const srchObj = model.rawFiltersRef.current;
+
+    const newRow: Record<string, any> = {
       VEH_NO: "",
-      DIV_CD: "",
-      DIV_NM: "",
-      LGST_GRP_CD: "",
-      LGST_GRP_NM: "",
+      DIV_CD: srchObj.SRCH_DTL_DIV_CD ?? "",
+      DIV_NM: srchObj.SRCH_DTL_DIV_NM ?? "",
+      LGST_GRP_CD: srchObj.SRCH_DTL_LGST_GRP_CD ?? "",
+      LGST_GRP_NM: srchObj.SRCH_DTL_LGST_GRP_NM ?? "",
+      PAY_LGST_GRP_CD: srchObj.SRCH_DTL_LGST_GRP_CD ?? "",
+      PAY_LGST_GRP_NM: srchObj.SRCH_DTL_LGST_GRP_NM ?? "",
       SETL_TP: "",
       CARR_CD: "",
       CARR_NM: "",
@@ -227,8 +232,31 @@ export function useVehicleMgmtController({ model }: Args) {
       AUTO_DLVRY_REQ_YN: "N",
       AUTO_ACPT_YN: "N",
       FUEL_TCD: "DISL",
-    });
+      EDIT_STS: "I",
+      __rid__: newRid(),
+    };
+
+    // 그리드에 신규 행 push + 선택 — 폼은 이 행과 __rid__ 로 묶여 실시간 동기화된다.
+    model.grids.main.setData((prev: any) => ({
+      ...prev,
+      rows: [...(prev?.rows ?? []), newRow],
+    }));
+    model.grids.main.setSelected(newRow);
+    model.setNewFormData(newRow);
     model.setNewSlideOpen(true);
+  }, [model]);
+
+  // 신규 취소 — 추가했던 임시(I) 행을 그리드에서 제거 + 선택 해제 후 슬라이드 닫기.
+  const handleCancelNew = useCallback(() => {
+    const rid = model.newFormData?.__rid__;
+    if (rid) {
+      model.grids.main.setData((prev: any) => ({
+        ...prev,
+        rows: (prev?.rows ?? []).filter((r: any) => r.__rid__ !== rid),
+      }));
+    }
+    model.grids.main.setSelected(null);
+    model.setNewSlideOpen(false);
   }, [model]);
 
   const handleSaveNew = useCallback(() => {
@@ -437,6 +465,7 @@ export function useVehicleMgmtController({ model }: Args) {
     handleSaveDetail,
     handleDeleteDetail,
     handleOpenNew,
+    handleCancelNew,
     handleSaveNew,
     mainActions,
   };

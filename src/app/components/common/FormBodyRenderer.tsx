@@ -17,6 +17,7 @@ type Props = {
     sqlProp: string,
     codeField: string,
     nameField?: string,
+    extraParams?: Record<string, any>,
   ) => void;
   codeMap: Record<string, Record<string, string>>;
   mode?: "new" | "edit";
@@ -84,7 +85,6 @@ function FormField({
   onChange,
   onPopupSearch,
   options,
-  mode,
 }: {
   col: ColumnDef;
   value: any;
@@ -94,6 +94,7 @@ function FormField({
     sqlProp: string,
     codeField: string,
     nameField?: string,
+    extraParams?: Record<string, any>,
   ) => void;
   options?: Record<string, string>;
   mode?: "new" | "edit";
@@ -127,7 +128,9 @@ function FormField({
           codeValue={value ?? ""}
           nameLabel={Lang.get(nameField ? nameField : undefined)}
           nameValue={nameValue}
-          onSearch={() => onPopupSearch(sqlProp!, field!, nameField)}
+          onSearch={() =>
+            onPopupSearch(sqlProp!, field!, col.nameValue, col.extraParams)
+          }
           readOnly={readOnly}
         />
       );
