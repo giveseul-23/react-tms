@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
+import { usePopup } from "@/app/components/popup/PopupContext";
 import {
   makeAddAction,
   makeSaveAction,
@@ -14,6 +15,7 @@ import { Lang } from "@/app/services/common/Lang";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 import { MENU_CODE as MENU_CD } from "./Zone";
+import { ZoneAddStopPop } from "./popup/ZoneAddStopPop";
 
 // 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
 const GRID_ID = "MAIN_GRID_ZONE_MGMT";
@@ -27,6 +29,7 @@ const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 export function useZoneController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
+  const { openPopup, closePopup } = usePopup();
   const { resetGrids, searchSub } = base;
 
   const fetchList = useCallback(
@@ -157,11 +160,59 @@ export function useZoneController({ model }: Args) {
 
   const onAddSub03 = useCallback(() => {
     const sub01 = model.grids.sub01.selectedRef.current;
-    if (!base.requireParentRow(sub01, Lang.get("LBL_ZONE_CD"))) return;
-    if (String(sub01.EDIT_STS ?? "").trim() === "I") return;
+    if (
+      !base.requireParentRow(sub01, Lang.get("LBL_ZONE_CD"), {
+        notSavedMsg: Lang.get("MSG_SAVE_BEFORE_ADD"),
+      })
+    ) {
+      return;
+    }
 
-    // TODO: 팝업
-  }, [base, model.grids.sub01]);
+    const notLocLst = (model.grids.sub03.rows ?? [])
+      .filter((row) => String(row.EDIT_STS ?? "") !== "D")
+      .map((row) => String(row.LOC_CD ?? "").trim())
+      .filter(Boolean);
+
+    openPopup({
+      title: "BTN_ADD",
+      width: "full",
+      content: (
+        <ZoneAddStopPop
+          expZnCd={String(sub01.ZN_CD ?? "")}
+          divCd={String(sub01.DIV_CD ?? "")}
+          lgstGrpCd={String(sub01.LGST_GRP_CD ?? "")}
+          notLocLst={notLocLst}
+          onApply={(picked) => {
+            closePopup();
+            if (!picked.length) return;
+
+            base.addRow(
+              "sub03",
+              picked.map((row) => ({
+                ZN_CD: sub01.ZN_CD,
+                DIV_CD: sub01.DIV_CD,
+                LGST_GRP_CD: sub01.LGST_GRP_CD,
+                LOC_ID: row.LOC_ID,
+                LOC_CD: row.LOC_CD,
+                LOC_NM: row.LOC_NM,
+                DTL_ADDR1: row.DTL_ADDR1,
+                CTY_NM: row.CTY_NM,
+                STT_NM: row.STT_NM,
+                CTRY_NM: row.CTRY_NM,
+              })),
+            );
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [
+    base,
+    closePopup,
+    model.grids.sub01,
+    model.grids.sub03.rows,
+    openPopup,
+  ]);
 
   const onSaveSub01 = useCallback(
     () =>

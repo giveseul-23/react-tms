@@ -1,6 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
-import { MENU_CODE } from "./Charge";
+import { MENU_CODE } from "./OilPrice";
 
 type CommonResponse = {
   rows: [];
@@ -14,39 +14,40 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
-export const chargeApi = {
+export const oilPriceApi = {
   getList(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/chargeService/search",
+      `/oilPriceService/search`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  getCalcformulList(payload: any) {
+  getDfOil(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/chargeService/searchCalcformulInfoList",
+      `/oilPriceService/searchDfOil`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  save(payload: { dsSave: any[] }) {
+  getMonth(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/chargeService/save",
-      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
+      `/oilPriceService/searchMonth`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  saveCalcformul(payload: { dsSave: any[] }) {
+  saveDfOil(payload: { dsSave: any[] }) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      "/chargeService/saveCalcformulInfo",
-      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
-    );
-  },
-
-  searchTariffPopup(menuCode: string, payload: Record<string, unknown>) {
-    return apiClient.post<CommonResponse>(
-      "/tariffService/search",
-      withSession({ MENU_CD: menuCode, POP_FLAG: "Y", ...payload }),
+      `/oilPriceService/saveDfOil`,
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 };
