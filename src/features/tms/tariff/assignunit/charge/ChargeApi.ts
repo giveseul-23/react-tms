@@ -1,7 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
-
-const MENU_CODE = "MENU_CHARGE_MGMT";
+import { MENU_CODE } from "./Charge";
 
 type CommonResponse = {
   rows: [];

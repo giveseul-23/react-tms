@@ -13,12 +13,11 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { Lang } from "@/app/services/common/Lang";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import ChargeAddPopup from "@/features/tms/tariff/popup/ChargeAddPopup";
+import { MENU_CODE } from "./Charge";
 
 interface Args {
   model: ChargeModel;
 }
-
-const MENU_CODE = "MENU_CHARGE_MGMT";
 
 const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
