@@ -77,6 +77,12 @@ export default function Zone() {
                   {...model.bind("sub03")}
                   columnDefs={SUB03_COLUMN_DEFS}
                   actions={ctrl.subActions.sub03}
+                  audit={{
+                    insertPerson: false,
+                    insertDate: false,
+                    updatePerson: false,
+                    updateTime: false,
+                  }}
                 />
               ),
             },
