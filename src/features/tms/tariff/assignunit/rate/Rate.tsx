@@ -2,7 +2,6 @@
 
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useRateModel } from "./RateModel";
@@ -14,6 +13,14 @@ import {
 } from "./RateColumns";
 
 export const MENU_CODE = "MENU_DSPTCH_RATE";
+
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_DSPTCH_RATE",
+    costInfo: "SUB01_GRID_DSPTCH_RATE",
+    conditionInfo: "SUB02_GRID_DSPTCH_RATE",
+  },
+};
 
 export default function Rate() {
   const model = useRateModel(MENU_CODE);
@@ -34,7 +41,10 @@ export default function Rate() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS()}
+          authId={AUTH.grids.main}
+          columnDefs={MAIN_COLUMN_DEFS}
+          codeMap={model.codeMap}
+          headerCheckbox={false}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
         />
@@ -49,14 +59,22 @@ export default function Rate() {
         >
           <DataGrid
             {...model.bind("costInfo")}
-            columnDefs={DETAIL01_COLUMN_DEFS(model.codeMap)}
-            actions={ctrl.detailActions}
+            authId={AUTH.grids.costInfo}
+            columnDefs={DETAIL01_COLUMN_DEFS}
+            codeMap={model.codeMap}
+            headerCheckbox={false}
+            actions={ctrl.costInfoActions}
             onRowClicked={ctrl.onCostInfoRowClicked}
+            pagination={false}
           />
           <DataGrid
             {...model.bind("conditionInfo")}
-            columnDefs={DETAIL02_COLUMN_DEFS(model.codeMap)}
-            actions={ctrl.detailActions}
+            authId={AUTH.grids.conditionInfo}
+            columnDefs={DETAIL02_COLUMN_DEFS}
+            codeMap={model.codeMap}
+            headerCheckbox={false}
+            actions={ctrl.conditionInfoActions}
+            pagination={false}
           />
         </SplitPane>
       }
