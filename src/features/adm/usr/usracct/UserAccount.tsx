@@ -57,7 +57,7 @@ export default function UserAccount() {
       master={
         <DataGrid
           {...model.bind("main")}
-          audit={false}
+          audit={true}
           codeMap={model.codeMap}
           columnDefs={MAIN_COLUMN_DEFS}
           headerCheckbox={false}
