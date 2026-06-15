@@ -58,7 +58,8 @@ export function GridFormPage({
     searchProps.loading,
   );
   if (gate) return <>{gate}</>;
-  const finalSearchProps: SearchProps = { menuCode, ...searchProps, meta };
+  const finalSearchProps: SearchProps & { meta: NonNullable<SearchProps["meta"]> } =
+    { menuCode, ...searchProps, meta };
 
   // 폼이 편집 surface 이므로 그리드는 인라인 편집 OFF(표시 전용)로 자동 주입.
   // 화면이 readOnly 를 명시했으면 그 값을 우선 (escape hatch).
