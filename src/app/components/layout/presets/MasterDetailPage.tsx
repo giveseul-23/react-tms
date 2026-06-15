@@ -125,7 +125,8 @@ export function MasterDetailPage({
     );
   }
 
-  const finalSearchProps: SearchProps = { menuCode, ...searchProps, meta };
+  const finalSearchProps: SearchProps & { meta: NonNullable<SearchProps["meta"]> } =
+    { menuCode, ...searchProps, meta };
   const layoutToggleNode = (
     <LayoutToggleButton
       layout={direction === "horizontal" ? "side" : "vertical"}
