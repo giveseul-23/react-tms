@@ -45,7 +45,7 @@ export default function DispatchPlan() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS()}
+          columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
@@ -64,7 +64,7 @@ export default function DispatchPlan() {
               render: () => (
                 <DataGrid
                   {...model.bind("stop")}
-                  columnDefs={STOP_COLUMN_DEFS()}
+                  columnDefs={STOP_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.stopActions}
                   audit={false}
@@ -76,7 +76,7 @@ export default function DispatchPlan() {
                 <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
                   <DataGrid
                     {...model.bind("allocOrder")}
-                    columnDefs={ALLOC_ORDER_COLUMN_DEFS()}
+                    columnDefs={ALLOC_ORDER_COLUMN_DEFS}
                     codeMap={model.codeMap}
                     actions={ctrl.allocOrderActions}
                     onRowClicked={ctrl.onAllocOrderRowClicked}
@@ -84,7 +84,7 @@ export default function DispatchPlan() {
                   />
                   <DataGrid
                     {...model.bind("allocSub")}
-                    columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS()}
+                    columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS}
                     actions={ctrl.allocSubActions}
                   />
                 </SplitPane>
@@ -95,7 +95,7 @@ export default function DispatchPlan() {
                 <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
                   <DataGrid
                     {...model.bind("unallocOrder")}
-                    columnDefs={UNALLOC_ORDER_COLUMN_DEFS()}
+                    columnDefs={UNALLOC_ORDER_COLUMN_DEFS}
                     codeMap={model.codeMap}
                     actions={ctrl.unallocOrderActions}
                     onRowClicked={ctrl.onUnallocOrderRowClicked}
@@ -103,7 +103,7 @@ export default function DispatchPlan() {
                   />
                   <DataGrid
                     {...model.bind("unallocSub")}
-                    columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS()}
+                    columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS}
                     actions={ctrl.unallocSubActions}
                   />
                 </SplitPane>

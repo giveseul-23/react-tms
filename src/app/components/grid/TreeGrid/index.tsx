@@ -42,6 +42,7 @@ import {
   GRID_ROW_HEIGHT,
   DEFAULT_COL_DEF_BASE,
   useAutoSize,
+  measureTextWidth,
 } from "../gridCommon";
 import { standardAudit } from "../columns/commonColumns";
 import { Lang } from "@/app/services/common/Lang";
@@ -97,8 +98,11 @@ type TreeGridProps<TRow extends TreeRow> = {
   columnDefs: ColDef<TRow>[];
   /** 이름 컬럼 헤더명 (기본: "") */
   nameColumnHeader?: string;
-  /** 이름 컬럼 너비 (기본: 180) */
+  /** 이름 컬럼 너비 (기본: 180). getNameText 지정 시 이 값은 autosize 의 최소폭으로 쓰인다. */
   nameColumnWidth?: number;
+  /** 지정 시 이름 컬럼을 source 기준으로 autosize — 들여쓰기(level)·화살표·아이콘·라벨 폭 반영.
+   *  반환값은 측정용 라벨 텍스트. 미지정이면 nameColumnWidth 고정폭 유지(하위호환). */
+  getNameText?: (row: TRow) => string;
   getRowId?: (params: GetRowIdParams<TRow>) => string;
   headerHeight?: number;
   rowHeight?: number;
@@ -238,6 +242,7 @@ function TreeGridInner<TRow extends TreeRow>(
     columnDefs,
     nameColumnHeader = "",
     nameColumnWidth = 180,
+    getNameText,
     subTitle,
     subTitleNoLang,
     getRowId,
@@ -363,12 +368,33 @@ function TreeGridInner<TRow extends TreeRow>(
     [actions, selectedRows],
   );
 
+  // 이름 컬럼 autosize — source 전체 기준(펼침상태 무관)으로 트리 셀 실제 폭 계산.
+  // 셀 구조(TreeNameCell): paddingLeft(level*18) + 연결선(level>0:16) + 화살표/여백(16)
+  //   + 아이콘(20) + 라벨텍스트(폴더행 bold 보정) + 우측여백(16). getNameText 미지정 시 고정폭.
+  const nameColWidth = useMemo<number>(() => {
+    if (!getNameText) return nameColumnWidth;
+    const INDENT = 18;
+    const CHROME = 16 /* 화살표/여백 */ + 20 /* 아이콘 */ + 16 /* 우측여백 */;
+    let max = nameColumnWidth;
+    for (const row of source) {
+      const hasChild = hasChildSet.has(row.id);
+      const text = getNameText(row) ?? "";
+      const w =
+        row.level * INDENT +
+        (row.level > 0 ? 16 : 0) +
+        CHROME +
+        measureTextWidth(text) * (hasChild ? 1.06 : 1);
+      if (w > max) max = w;
+    }
+    return Math.min(Math.round(max), 480);
+  }, [getNameText, nameColumnWidth, source, hasChildSet]);
+
   // ── 이름 컬럼 (트리 셀) ────────────────────────────────────────────────────
   const nameColDef = useMemo<ColDef<TRow>>(
     () => ({
       headerName: nameColumnHeader,
       field: "id" as any,
-      width: nameColumnWidth,
+      width: nameColWidth,
       minWidth: nameColumnWidth,
       sortable: false,
       filter: false,
@@ -385,7 +411,7 @@ function TreeGridInner<TRow extends TreeRow>(
     }),
     // renderNameCell은 페이지에서 useMemo/useCallback 으로 안정화 권장
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [expandedIds, isLastMap, toggle, nameColumnHeader, nameColumnWidth],
+    [expandedIds, isLastMap, toggle, nameColumnHeader, nameColumnWidth, nameColWidth],
   );
 
   // commitRowChange/Changes 는 { rows } 모양을 가정 → flat source[] ↔ { rows } 어댑터.

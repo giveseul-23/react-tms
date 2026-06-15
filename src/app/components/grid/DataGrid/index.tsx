@@ -202,7 +202,6 @@ export default function DataGrid<TRow>({
   useEffect(() => {
     if (activeTabProp != null) setActiveTab(activeTabProp);
   }, [activeTabProp]);
-  const internalGridRef = useRef<any>(null);
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const prevSelectedRef = useRef<TRow | null>(null);
   // selectedRow 의 최신값을 ref 로 추적 — 첫행 자동선택이 셀 편집으로 갱신된
@@ -429,7 +428,6 @@ export default function DataGrid<TRow>({
         ) : (
           <div className={GRID_INNER_CLASS} style={GRID_CSS_VARS}>
             <AgGridReact<TRow>
-              ref={internalGridRef}
               {...commonGridProps}
               rowData={rowDataWithRid}
             />

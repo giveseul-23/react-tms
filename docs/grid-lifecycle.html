@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DataGrid 생명주기 & 훅 가이드</title>
+<style>
+  :root {
+    --primary: #00BAED;
+    --ink: #1f2933;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --bg: #f8fafc;
+    --code-bg: #f1f5f9;
+    --green: #0ea371;
+    --amber: #d97706;
+    --violet: #7c3aed;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 24px 96px; }
+  header.doc {
+    background: linear-gradient(135deg, rgb(var(--primary), 1) 0%, #0091c7 100%);
+    background: linear-gradient(135deg, #00BAED 0%, #0091c7 100%);
+    color: #fff; border-radius: 16px; padding: 28px 32px; margin-bottom: 28px;
+    box-shadow: 0 8px 24px rgba(0,140,200,.18);
+  }
+  header.doc h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: -.3px; }
+  header.doc p { margin: 0; opacity: .92; font-size: 13.5px; }
+  nav.toc {
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 32px;
+  }
+  nav.toc strong { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+  nav.toc ol { margin: 0; padding-left: 18px; columns: 2; column-gap: 32px; }
+  nav.toc a { color: var(--ink); text-decoration: none; }
+  nav.toc a:hover { color: var(--primary); text-decoration: underline; }
+  section { margin-bottom: 44px; }
+  h2 {
+    font-size: 18px; margin: 0 0 14px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary); display: inline-block;
+  }
+  h3 { font-size: 15px; margin: 24px 0 8px; color: #0f172a; }
+  p.lead { color: var(--muted); margin-top: 0; }
+  code { background: var(--code-bg); padding: 1.5px 6px; border-radius: 5px; font-family: "JetBrains Mono", Consolas, monospace; font-size: 12.5px; color: #b91c1c; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 16px 18px; border-radius: 10px; overflow-x: auto; font-size: 12.5px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); margin: 10px 0; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f1f5f9; font-weight: 600; font-size: 12px; color: #334155; }
+  tr:last-child td { border-bottom: none; }
+  td code { font-size: 12px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; vertical-align: middle; }
+  .tag-fw { background: #ecfdf5; color: var(--green); }
+  .tag-grid { background: #eff6ff; color: #2563eb; }
+  .tag-ref { background: #f5f3ff; color: var(--violet); }
+  .flow { counter-reset: step; }
+  .flow .step {
+    position: relative; background: #fff; border: 1px solid var(--line);
+    border-left: 4px solid var(--primary); border-radius: 10px;
+    padding: 14px 18px 14px 56px; margin-bottom: 12px;
+  }
+  .flow .step::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; left: 14px; top: 14px; width: 28px; height: 28px;
+    background: var(--primary); color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+  }
+  .flow .step h4 { margin: 0 0 4px; font-size: 14px; }
+  .flow .step p { margin: 0; color: var(--muted); font-size: 13px; }
+  .note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px; font-size: 13px; }
+  .note.warn { background: #fef2f2; border-color: #fecaca; }
+  .note b { color: var(--amber); }
+  .note.warn b { color: #dc2626; }
+  .muted { color: var(--muted); }
+  .arrow { color: var(--primary); font-weight: 700; }
+  ul.tight { margin: 6px 0; padding-left: 20px; }
+  ul.tight li { margin: 3px 0; }
+  .filebox { font-family: "JetBrains Mono", Consolas, monospace; font-size: 12.5px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 18px; white-space:pre; overflow-x:auto; color:#334155; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc">
+    <h1>DataGrid 생명주기 &amp; 훅 가이드</h1>
+    <p>ag-grid 기반 <code>DataGrid</code> / <code>TreeGrid</code> 가 mount → 데이터 도착 → 상호작용 → unmount 동안
+       어떤 훅이 어떤 일을 하는지 정리한 문서입니다. (<code>src/app/components/grid/</code>)</p>
+  </header>
+
+  <nav class="toc">
+    <strong>목차</strong>
+    <ol>
+      <li><a href="#overview">개요 — 그리드 컴포넌트 구성</a></li>
+      <li><a href="#hooks-map">훅 한눈에 보기</a></li>
+      <li><a href="#lifecycle">생명주기 (단계별)</a></li>
+      <li><a href="#hook-ref">훅 레퍼런스 (상세)</a></li>
+      <li><a href="#refs">ref 묶음</a></li>
+      <li><a href="#scenarios">데이터 흐름 시나리오</a></li>
+      <li><a href="#pitfalls">주의점 / 함정</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1 -->
+  <section id="overview">
+    <h2>1. 개요 — 그리드 컴포넌트 구성</h2>
+    <p class="lead"><code>DataGrid/index.tsx</code> 본체는 직접 로직을 갖지 않고, 책임별로 분리된 훅들을 순서대로 호출해
+       <code>&lt;AgGridReact&gt;</code> 에 전달할 값을 조립합니다. ag-grid 는 명령형(imperative) 이라,
+       React 의 선언형 state ↔ ag-grid 엔진 사이를 잇는 다리가 곧 이 훅들입니다.</p>
+
+    <div class="filebox">DataGrid/
+├─ index.tsx              본체. 아래 훅들을 호출 + &lt;AgGridReact&gt; 렌더
+├─ useCellRangeSelection  셀 드래그 범위 선택 + Ctrl+C 복사  → columnOrderRef 반환
+├─ useActivePreset        탭/preset 분기 + 컬럼 가공/audit/합계행 → finalColumnDefs
+├─ useRowLifecycle        rowData/selection 변화를 ag-grid 에 동기화 (4 effect)
+├─ useGridHandlers        ag-grid 이벤트 콜백 5종 (state/ref 동기화)
+├─ useGridProps           위 핸들러+설정을 commonGridProps 로 안정 조립
+├─ Pagination             페이지네이션 UI
+└─ (gridUtils/)
+   ├─ useAutoSize          onGridReady/onFirstDataRendered + 컬럼 자동너비
+   └─ autosize             텍스트 폭 측정 유틸 (calcOptimalWidths)</div>
+
+    <p class="muted">＊ 조회조건(SearchFilters)·메뉴권한은 그리드 바깥의 <b>preset</b>(MasterDetailPage 등)에서
+       <code>useResolvedSearchMeta(menuCode)</code> 로 처리됩니다. 그리드 자체의 생명주기와는 별개입니다.</p>
+  </section>
+
+  <!-- 2 -->
+  <section id="hooks-map">
+    <h2>2. 훅 한눈에 보기</h2>
+    <table>
+      <thead><tr><th style="width:190px">훅</th><th>핵심 입력</th><th>핵심 출력 / 효과</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>useActivePreset</code> <span class="tag tag-grid">조립</span></td>
+          <td>layoutType, activeTab, presets, columnDefs, rowData, audit, codeMap</td>
+          <td><code>finalColumnDefs</code>(가공 완료 컬럼) · <code>activeRowData</code> · <code>summaryRow</code>(합계행) · <code>effectiveRowKeys/AutoSelect</code>(PK 기반)</td>
+        </tr>
+        <tr>
+          <td><code>useAutoSize</code> <span class="tag tag-fw">framework</span></td>
+          <td>finalColumnDefs, activeRowData, autoSizeKey, gridApiRef, columnOrderRef</td>
+          <td><code>handleGridReady</code>/<code>handleFirstDataRendered</code> — <b>gridApiRef 캡처</b> + 컬럼 자동너비</td>
+        </tr>
+        <tr>
+          <td><code>useCellRangeSelection</code> <span class="tag tag-fw">framework</span></td>
+          <td>containerRef(=gridContainerRef), gridApiRef</td>
+          <td>드래그 범위 선택 + Ctrl+C 복사. <code>columnOrderRef</code>(열 순서 색인) 반환</td>
+        </tr>
+        <tr>
+          <td><code>useRowLifecycle</code> <span class="tag tag-grid">동기화</span></td>
+          <td>selectedRow, activeRowData, activeColumnDefs, effectiveRowKeys, prev/selectedRowRef</td>
+          <td>선택 하이라이트 동기화 · 자동 첫행 복원 · 신규행 스크롤 · <code>defaultValue</code> 자동 적용</td>
+        </tr>
+        <tr>
+          <td><code>useGridHandlers</code> <span class="tag tag-grid">이벤트</span></td>
+          <td>setSelectedRows, prevSelectedRef, onRow* 콜백</td>
+          <td>이벤트 핸들러 5종 (선택/클릭/더블클릭/셀변경/selectionChanged)</td>
+        </tr>
+        <tr>
+          <td><code>useGridProps</code> <span class="tag tag-fw">framework</span></td>
+          <td>finalColumnDefs, summaryRow, 핸들러 5종, rowSelection, treeData…</td>
+          <td><code>commonGridProps</code> — ag-grid 에 spread 할 <b>참조 안정화</b> prop 묶음</td>
+        </tr>
+        <tr>
+          <td><code>useResourceAccess</code> <span class="tag tag-fw">framework</span></td>
+          <td>authId</td>
+          <td>그리드 리소스 권한 — 조회(S) 권한 없으면 그리드 딤/비활성</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 3 -->
+  <section id="lifecycle">
+    <h2>3. 생명주기 (단계별)</h2>
+    <p class="lead">mount 부터 unmount 까지 시간순. 각 단계에서 어떤 훅/effect 가 발화하는지 표시했습니다.</p>
+
+    <div class="flow">
+      <div class="step">
+        <h4>Render — 파생값 계산</h4>
+        <p><code>useActivePreset</code> 가 현재 탭/preset 기준 <code>finalColumnDefs</code>(가공·audit·합계행 포함)와
+           <code>activeRowData</code> 를 계산. 이 시점엔 아직 ag-grid 인스턴스가 없음.</p>
+      </div>
+      <div class="step">
+        <h4>onGridReady — 엔진 핸들 캡처</h4>
+        <p>ag-grid 가 준비되면 <code>useAutoSize.handleGridReady</code> 가 <code>gridApiRef.current = e.api</code> 로
+           <b>API 를 잡고</b>, <code>columnOrderRef</code> 에 열 순서를 저장. rowData 가 이미 있으면 한 프레임 뒤 autosize 실행.</p>
+      </div>
+      <div class="step">
+        <h4>onFirstDataRendered — 최초 autosize</h4>
+        <p>첫 데이터가 그려진 직후 <code>handleFirstDataRendered</code> 가 컬럼 너비를 내용에 맞게 1차 산출.</p>
+      </div>
+      <div class="step">
+        <h4>조회 결과 도착 — 데이터 set</h4>
+        <p>Controller 가 <code>model.grids.x.setData(obj)</code> 로 <b>객체를 직접 set</b> → <code>autoSizeKey</code> +1 →
+           <code>useAutoSize</code> effect 재발화(컬럼 재사이즈). rowData 가 ag-grid 로 흘러 행이 렌더됨.</p>
+      </div>
+      <div class="step">
+        <h4>선택 동기화</h4>
+        <p>Controller 가 박은 <code>selectedRow</code> 를 <code>useRowLifecycle</code> 가 <code>__rid__</code> 로 찾아
+           ag-grid 시각 선택 + <code>ensureNodeVisible</code>. (PK 가 있으면 이전 선택을 자동 복원)</p>
+      </div>
+      <div class="step">
+        <h4>사용자 상호작용</h4>
+        <p>행 클릭 <span class="arrow">→</span> <code>handleRowClicked</code> → cascade 조회 / 셀 편집 <span class="arrow">→</span>
+           <code>handleCellValueChanged</code> → <code>EDIT_STS</code> 트래킹 / 드래그 <span class="arrow">→</span>
+           <code>useCellRangeSelection</code> 범위 선택·복사.</p>
+      </div>
+      <div class="step">
+        <h4>행 추가</h4>
+        <p><code>base.addRow</code> 로 행 수 증가 → <code>useRowLifecycle</code> 가 마지막 신규행(<code>EDIT_STS:"I"</code>)으로
+           스크롤하고 컬럼 <code>defaultValue</code> 를 자동 채움.</p>
+      </div>
+      <div class="step">
+        <h4>Unmount — 정리</h4>
+        <p><code>useCellRangeSelection</code> 의 DOM 리스너 해제 등 cleanup. 이후 API 호출은 <code>api.isDestroyed?.()</code> 가드로 차단.</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>핵심 포인트 — <code>autoSizeKey</code>.</b> autosize 재실행은 <code>activeRowData</code> 가 아니라
+      <code>autoSizeKey</code> 에 묶여 있습니다. <code>setData</code> 가 <b>객체로 직접 set 될 때만</b>(=조회 결과 도착) +1 되고,
+      셀 편집/행 추가 같은 <b>함수형 updater</b> 호출에는 변하지 않습니다. → 편집 중 가로 스크롤·수동 폭이 유지됩니다.
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="hook-ref">
+    <h2>4. 훅 레퍼런스 (상세)</h2>
+
+    <h3>useActivePreset</h3>
+    <p class="muted">"지금 활성 탭/plain 그리드" 기준으로 입력값을 골라 가공한 파생값 묶음.</p>
+    <ul class="tight">
+      <li><code>activeColumnDefs</code> — 활성 컬럼 + <b>audit 컬럼 자동 append</b>(<code>audit</code> truthy 시 standardAudit).</li>
+      <li><code>finalColumnDefs</code> — <code>processColumnDef</code> 로 가공한 최종 컬럼(Lang 번역·정렬·날짜/숫자 포맷·codeKey 렌더러·popup/date 위젯·편집모드 변환). ag-grid 에 실제 전달.</li>
+      <li><code>summaryRow</code> — <code>summable:true</code> 컬럼 합계의 하단 고정 합계행.</li>
+      <li><code>effectiveRowKeys</code> / <code>effectiveAutoSelect</code> — <code>isPrimaryKey</code> 컬럼에서 PK 추출 + 자동 첫행 선택 여부.</li>
+    </ul>
+
+    <h3>useAutoSize</h3>
+    <p class="muted">컬럼 자동 너비 + ag-grid API 캡처. <code>handleGridReady</code>/<code>handleFirstDataRendered</code> 반환.</p>
+    <ul class="tight">
+      <li><code>handleGridReady</code> 가 <code>gridApiRef</code>·<code>columnOrderRef</code> 를 채움 — <b>autosize 를 꺼도(<code>disableAutoSize</code>) 이 캡처는 유지</b>.</li>
+      <li>재실행 effect dep 은 <code>autoSizeKey</code>/<code>activeTab</code> 중심(조회 시에만 재사이즈).</li>
+      <li>너비 계산은 <code>calcOptimalWidths</code> — 헤더/셀 <b>텍스트 폭 + 패딩</b>, <code>MIN 80 ~ MAX 400</code> clamp.</li>
+    </ul>
+    <div class="note warn">
+      <b>주의.</b> 이 호출을 통째로 주석 처리하면 autosize 뿐 아니라 <code>gridApiRef</code> 가 안 잡혀
+      선택·복사·라이프사이클·엑셀이 모두 깨집니다. autosize 만 끄려면 <b><code>disableAutoSize</code> prop</b> 을 쓰세요.
+    </div>
+
+    <h3>useCellRangeSelection</h3>
+    <p class="muted">컨테이너 div 에 마우스 핸들러를 붙여 셀 드래그 범위 선택 + Ctrl+C 복사. <code>columnOrderRef</code>(열 colId 순서) 반환.</p>
+    <ul class="tight">
+      <li>셀 좌표 ↔ colId 변환표로 <code>columnOrderRef</code> 사용. 드래그 시작 시 최신 컬럼 순서로 갱신.</li>
+    </ul>
+
+    <h3>useRowLifecycle</h3>
+    <p class="muted">state(선택·데이터) 변화를 명령형 ag-grid 에 반영하는 4개 effect.</p>
+    <ul class="tight">
+      <li>① <code>selectedRow</code> → ag-grid 시각 선택(+스크롤). api 발 선택이라 핸들러가 무시 → 무한루프 없음.</li>
+      <li>② 자동 첫행 — 이전 선택을 PK 로 복원(<code>selectedRowRef</code> 우선, 없으면 <code>prevSelectedRef</code>).</li>
+      <li>③ 신규행(<code>EDIT_STS:"I"</code>) 추가 시 마지막 행으로 스크롤.</li>
+      <li>④ 신규행 빈 field 에 컬럼 <code>defaultValue</code> 자동 적용(check 는 미지정 시 "N"). 같은 prev 반환으로 무한루프 가드.</li>
+    </ul>
+
+    <h3>useGridHandlers</h3>
+    <p class="muted">ag-grid 이벤트 → 앱 state/ref 동기화 콜백 5종. 모두 메모(참조 안정).</p>
+    <ul class="tight">
+      <li><code>handleRowSelected</code> — <code>selectedRows</code> 동기화(<b>같은 선택이면 set 스킵</b> → 편집 중 cellEditor 보호) + <code>prevSelectedRef</code> 갱신.</li>
+      <li><code>handleRowClicked</code> — 행 클릭 → <code>onRowClicked</code>. <b>체크박스/INPUT/Shift 클릭은 무시</b>.</li>
+      <li><code>handleCellValueChanged</code> — <code>withRowStatusTracking</code> 으로 <code>EDIT_STS</code> 자동 갱신 후 콜백.</li>
+      <li><code>handleSelectionChanged</code> — <b>사용자 액션 source 만</b> 외부 전파(api/rowDataChanged 등 자동 이벤트 무시).</li>
+    </ul>
+
+    <h3>useGridProps</h3>
+    <p class="muted">위 핸들러 + 컬럼/선택/트리 설정을 <code>commonGridProps</code> 한 덩어리로 메모.</p>
+    <pre><code>&lt;AgGridReact {...commonGridProps} rowData={rowDataWithRid} /&gt;</code></pre>
+    <ul class="tight">
+      <li><code>getRowId: __rid__</code>(트리는 제외 — getDataPath 가 id 결정), <code>pinnedBottomRowData</code>=합계행.</li>
+      <li><code>rowSelection</code>(single/multi·헤더체크박스), <code>defaultColDef</code>, <code>treeProps</code> 각각 useMemo.</li>
+      <li>맨 끝 <code>...gridOptions</code> — 외부 오버라이드 escape hatch(최종 우선).</li>
+    </ul>
+    <div class="note">
+      <b>왜 이렇게 메모하나.</b> <code>commonGridProps</code> 참조가 매 렌더 바뀌면 ag-grid 가 <b>cellEditor 등 내부 상태를 reset</b> 합니다.
+      그래서 조각마다 useMemo 로 참조를 고정 — 편집 중 셀이 튕기지 않도록.
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="refs">
+    <h2>5. ref 묶음</h2>
+    <table>
+      <thead><tr><th style="width:170px">ref</th><th>채우는 곳</th><th>역할</th></tr></thead>
+      <tbody>
+        <tr><td><code>gridApiRef</code> <span class="tag tag-ref">ref</span></td>
+          <td><code>onGridReady</code> (<code>= e.api</code>)</td>
+          <td>ag-grid Grid API 핸들. 행 redraw/선택/표시컬럼 등 <b>모든 명령형 그리드 제어의 단일 진입점</b>.</td></tr>
+        <tr><td><code>columnOrderRef</code> <span class="tag tag-ref">ref</span></td>
+          <td>onGridReady + 드래그 시작 시</td>
+          <td>현재 컬럼 순서(colId 배열). 셀 범위선택/복사가 "열 인덱스 ↔ colId" 변환에 사용.</td></tr>
+        <tr><td><code>gridContainerRef</code> <span class="tag tag-ref">ref</span></td>
+          <td>wrapper <code>&lt;div&gt;</code> 부착</td>
+          <td>이 그리드의 최외곽 DOM. 셀 드래그 마우스 이벤트 기준 + 권한 딤 오버레이의 relative 컨테이너.</td></tr>
+        <tr><td><code>prevSelectedRef</code> <span class="tag tag-ref">ref</span></td>
+          <td>handleRowClicked/Selected</td>
+          <td>직전에 선택된 <b>행(row 데이터)</b>. 중복 선택 이벤트 거르기 + 자동 첫행 복원 비교.</td></tr>
+        <tr><td><code>selectedRowRef</code> <span class="tag tag-ref">ref</span></td>
+          <td>render 시 <code>selectedRow</code> 추적</td>
+          <td>현재 선택 행의 최신값. 자동 첫행 복원에서 <code>prevSelectedRef</code> 보다 우선.</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">＊ <code>internalGridRef</code>(AgGridReact 인스턴스)는 현재 미사용이라 제거됨 — 그리드 제어는 전부 <code>gridApiRef</code> 로.</p>
+  </section>
+
+  <!-- 6 -->
+  <section id="scenarios">
+    <h2>6. 데이터 흐름 시나리오</h2>
+
+    <h3>① 조회 (검색 → 그리드 갱신)</h3>
+    <pre><code>SearchFilters 조회
+  → Controller fetchFn → model.grids.main.setData(obj)   // 객체 직접 set
+     → autoSizeKey +1                                     // useAutoSize 재발화
+     → rowData 흐름 → ag-grid 행 렌더
+  → onSearchCallback → onMainGridClick(rows[0])           // 첫 행 선택
+     → useRowLifecycle ① selectedRow → 시각 선택</code></pre>
+
+    <h3>② 행 클릭 (master → detail cascade)</h3>
+    <pre><code>행 클릭 → handleRowClicked(e)
+  → prevSelectedRef = e.data
+  → activeOnRowClicked(e.data)                            // = Controller onMainGridClick
+     → base.handleRowClick("main", row, [{ to:"detail", fetch }])
+        → detail 그리드 setData → detail autoSizeKey +1</code></pre>
+
+    <h3>③ 셀 편집 → 저장</h3>
+    <pre><code>셀 편집 → handleCellValueChanged
+  → withRowStatusTracking: 기존행 EDIT_STS="U" / 신규행 "I" 유지
+  → (autoSizeKey 안 바뀜: 함수형 setter → 가로 스크롤·수동 폭 유지)
+저장 → base.saveGrid: dirty 추출 + required/포맷 검증 + dsSave</code></pre>
+
+    <h3>④ 행 추가</h3>
+    <pre><code>base.addRow("main", newRow)   // EDIT_STS:"I" + __rid__ 자동
+  → useRowLifecycle ③ 마지막 신규행으로 스크롤
+  → useRowLifecycle ④ 컬럼 defaultValue 자동 채움</code></pre>
+  </section>
+
+  <!-- 7 -->
+  <section id="pitfalls">
+    <h2>7. 주의점 / 함정</h2>
+    <table>
+      <thead><tr><th style="width:230px">주제</th><th>요점</th></tr></thead>
+      <tbody>
+        <tr><td>참조 안정성</td>
+          <td><code>commonGridProps</code>/<code>finalColumnDefs</code> 참조가 매 렌더 바뀌면 ag-grid 가 cellEditor·autosize 를
+              reset/재실행. deps 를 정확히 잡거나 ref 로 안정화할 것. (행 클릭 시 수동 폭이 되돌아가던 이슈가 이 계열)</td></tr>
+        <tr><td>autosize 끄기</td>
+          <td><code>useAutoSize</code> 호출을 주석 처리하지 말 것(gridApiRef 캡처까지 사라짐). autosize 만 끄려면 <code>disableAutoSize</code> prop.</td></tr>
+        <tr><td>autoSizeKey 규칙</td>
+          <td>객체 직접 set(조회) 에만 +1. 함수형 updater(편집/행추가)는 불변 → 편집 중 재사이즈 안 함.</td></tr>
+        <tr><td>selection source 필터</td>
+          <td><code>handleSelectionChanged</code> 는 사용자 액션만 전파. 자동 이벤트로 박아둔 선택을 덮어쓰지 않음.</td></tr>
+        <tr><td>TreeGrid 이름 컬럼</td>
+          <td>트리(이름) 컬럼은 기본 고정폭. 내용 맞춤이 필요하면 <code>getNameText</code> 로 autosize(들여쓰기·아이콘 반영).</td></tr>
+        <tr><td>__rid__</td>
+          <td>모든 행에 자동 부여되는 내부 식별자. <code>getRowId</code> 가 이걸 써서 셀 편집으로 객체 참조가 바뀌어도 선택 유지.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    DataGrid 생명주기 &amp; 훅 가이드 · 소스: <code>src/app/components/grid/</code> ·
+    상세 컴포넌트 문서는 <code>docs/DataGrid.html</code> 참고.
+  </footer>
+
+</div>
+</body>
+</html>

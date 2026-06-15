@@ -1,5 +1,5 @@
 // ── 메인 그리드: 배차 리스트 ─────────────────────────────────
-export const MAIN_COLUMN_DEFS = () => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "date",
@@ -190,7 +190,7 @@ export const MAIN_COLUMN_DEFS = () => [
 ];
 
 // ── 경유처 탭 ────────────────────────────────────────────────
-export const STOP_COLUMN_DEFS = () => [
+export const STOP_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_STOP_SEQUENCE", field: "STOP_SEQ" }, // 순번
   { type: "text", headerName: "LBL_LOCATION_CODE", field: "LOC_CD" }, // 착지코드
   { type: "text", headerName: "LBL_LOCATION_NAME", field: "LOC_NM" }, // 착지명
@@ -245,9 +245,7 @@ export const ALLOC_ORDER_COLUMN_DEFS = [
 ];
 
 // ── 할당주문 탭 · SUB(품목) 그리드 ───────────────────────────
-export const ALLOC_ORDER_SUB_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const ALLOC_ORDER_SUB_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_ORD_ITM_LINE_NO", field: "ORD_LINE_NO" }, // 품목라인
   { type: "text", headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD" }, // 품목코드
   { type: "text", headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
@@ -367,7 +365,7 @@ export const ALLOC_ORDER_SUB_COLUMN_DEFS = (
 ];
 
 // ── 미할당주문 탭 ────────────────────────────────────────────
-export const UNALLOC_ORDER_COLUMN_DEFS = () => [
+export const UNALLOC_ORDER_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" }, // 출발지명
   { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" }, // 도착지명

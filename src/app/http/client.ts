@@ -133,8 +133,12 @@ apiClient.interceptors.response.use(
   async (error) => {
     const isLoginPage = window.location.pathname === "/login";
 
-    // access_token 만료(MSG_ACCESS_EXPIRED) → refresh 후 원요청 재시도. (로그아웃 분기보다 우선)
-    if (error.response?.data?.msg === ACCESS_EXPIRED) {
+    // access_token 만료 → refresh 후 원요청 재시도. (로그아웃 분기보다 우선)
+    // 서버가 만료를 body msg(MSG_ACCESS_EXPIRED) 또는 순수 status 401 로 줄 수 있어 둘 다 처리.
+    if (
+      error.response?.data?.msg === ACCESS_EXPIRED ||
+      error.response?.status === 401
+    ) {
       const retried = await retryWithRefresh(error.config);
       if (retried) return retried;
       // refresh 실패 → 세션 만료 처리로 폴백

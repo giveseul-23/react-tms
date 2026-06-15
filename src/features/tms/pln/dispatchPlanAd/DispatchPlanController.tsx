@@ -209,7 +209,9 @@ export function useDispatchPlanController({ model }: Args) {
       if (!guardHasData(rows)) return;
       base
         .callAjax(
-          api.savePlannedPlanDispatch(rows.map((r) => ({ ...r, rowStatus: "U" }))),
+          api.savePlannedPlanDispatch(
+            rows.map((r) => ({ ...r, rowStatus: "U" })),
+          ),
         )
         .then(() => base.search());
     },
@@ -244,7 +246,9 @@ export function useDispatchPlanController({ model }: Args) {
     (e: any) => {
       const rows = (e?.data ?? []) as any[];
       if (rows.length === 0) {
-        showInfoModal(Lang.get("MSG_EXCEPTION_STOP_RESEQUENCE_DISPATCH_SELECT"));
+        showInfoModal(
+          Lang.get("MSG_EXCEPTION_STOP_RESEQUENCE_DISPATCH_SELECT"),
+        );
         return;
       }
       if (rows.length > 1) {
@@ -253,7 +257,9 @@ export function useDispatchPlanController({ model }: Args) {
       }
       base
         .callAjax(
-          api.saveAutoChangeStopSeq(rows.map((r) => ({ ...r, rowStatus: "U" }))),
+          api.saveAutoChangeStopSeq(
+            rows.map((r) => ({ ...r, rowStatus: "U" })),
+          ),
         )
         .then(() => base.search());
     },
@@ -314,7 +320,9 @@ export function useDispatchPlanController({ model }: Args) {
                 DLVRY_DT: dt,
                 rowStatus: "U",
               }));
-              base.callAjax(api.changeDlvryDate(payload)).then(() => base.search());
+              base
+                .callAjax(api.changeDlvryDate(payload))
+                .then(() => base.search());
             }}
             onClose={closePopup}
           />
@@ -606,7 +614,6 @@ export function useDispatchPlanController({ model }: Args) {
       menuName,
       model.grids.main,
       model.filtersRef,
-      guardHasData,
       base,
       onChangeRegVeh,
       onCreateEmptyDispatch,

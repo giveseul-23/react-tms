@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import {
-  makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
@@ -10,8 +9,8 @@ import { MENU_CODE } from "./PreferredCarrier";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { PreferredCarrierModel, GridKey } from "./PreferredCarrierModel";
 import { usePopup } from "@/app/components/popup/PopupContext";
-import VehicleAddPopup from "../location/popup/VehicleAddPopup";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import PreferedCarrAddPopup from "../location/popup/PreferedCarrAddPopup";
 
 interface ControllerArgs {
   model: PreferredCarrierModel;
@@ -35,13 +34,16 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
     },
     [model.grids.main],
   );
-  
+
   // ── 메인 행 추가 ─────────────────────────────────────────────
   // base.addRow 가 EDIT_STS: "I" 자동 주입 + push.
-  const onAddMain = useCallback((rowData: any) => {
-    // {} 대신 팝업에서 가공되어 넘어온 rowData를 넣어줌
-    base.addRow("main", rowData); 
-  }, [base]);
+  const onAddMain = useCallback(
+    (rowData: any) => {
+      // {} 대신 팝업에서 가공되어 넘어온 rowData를 넣어줌
+      base.addRow("main", rowData);
+    },
+    [base],
+  );
 
   // ── 메인 저장 — 삭제행 있으면 confirm 후 저장 ─────────────────
   // confirmOnDelete 옵션 한 줄로 처리. 후처리는 기본값 "refresh"(메인 재조회).
@@ -66,16 +68,11 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
           openPopup({
             title: "LBL_PREFERED_CARRIER",
             content: (
-              <VehicleAddPopup
+              <PreferedCarrAddPopup
                 onConfirm={(payload: any[]) => {
                   // 팝업에서 선택되어 배열로 넘어온 차량 데이터들을 루프 돌며 추가
-                  payload.forEach((data) => {
-                    const rowParam = {
-                      ...data,
-                    };
-                    onAddMain(rowParam); 
-                  });
-                  closePopup(); 
+                  onAddMain(payload);
+                  closePopup();
                 }}
                 onClose={closePopup}
               />
@@ -93,9 +90,16 @@ export function usePreferredCarrierController({ model }: ControllerArgs) {
         rows: model.grids.main.rows,
       }),
     ],
-    [onSaveMain, model],
+    [
+      onSaveMain,
+      menuName,
+      model.grids.main,
+      model.filtersRef,
+      openPopup,
+      closePopup,
+      onAddMain,
+    ],
   );
-
 
   return {
     fetchList,
