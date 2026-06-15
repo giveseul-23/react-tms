@@ -82,11 +82,33 @@ export const dispatchPlanApi = {
     );
   },
 
-  // ── 계획확정 ────────────────────────────────────────────────
-  confirmPlan(payload: any) {
+  // ── 계획확정 / 계획확정취소 ─────────────────────────────────
+  savePlannedPlanDispatch(rows: any[]) {
     return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/confirmPlan",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      "/dispatchPlanService/savePlannedPlanDispatch",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  saveCancelPlannedPlanDispatch(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveCancelPlannedPlanDispatch",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 경유순서 자동조정 ───────────────────────────────────────
+  saveAutoChangeStopSeq(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAutoChangeStopSeq",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 차량교환 (2건 차량정보 스왑) ────────────────────────────
+  saveChangeVehicleSwap(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanAdService/saveChangeVehicleSwap",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
     );
   },
 
@@ -126,6 +148,22 @@ export const dispatchPlanApi = {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/cancelDspchMemo",
       withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 운송일변경 (ChangeDlvryDatePop) ─────────────────────────
+  changeDlvryDate(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/changeDlvryDate",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 임시차량변경 / 스팟차량 등록 (RegiSpotPop) ──────────────
+  saveDspchSpotVeh(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/saveDspchSpotVeh",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 

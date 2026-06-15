@@ -187,7 +187,6 @@ export const MAIN_COLUMN_DEFS = () => [
     field: "TRIP_SEQ",
     type: "numeric",
   }, //연계배차순서
-  { type: "text", headerName: "LBL_ROW_STATUS", field: "EDIT_STS" },
 ];
 
 // ── 경유처 탭 ────────────────────────────────────────────────
@@ -209,9 +208,7 @@ export const STOP_COLUMN_DEFS = () => [
 ];
 
 // ── 할당주문 탭 ──────────────────────────────────────────────
-export const ALLOC_ORDER_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const ALLOC_ORDER_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" }, // 출발지명
   { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" }, // 도착지명
@@ -407,9 +404,7 @@ export const UNALLOC_ORDER_COLUMN_DEFS = () => [
 ];
 
 // ── 미할당주문 탭 · SUB(품목) 그리드 ─────────────────────────
-export const UNALLOC_ORDER_SUB_COLUMN_DEFS = (
-  setGridData?: (updater: any) => void,
-) => [
+export const UNALLOC_ORDER_SUB_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_ORD_ITM_LINE_NO", field: "ORD_LINE_NO" }, // 품목라인
   { type: "text", headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD" }, // 품목코드
   { type: "text", headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
