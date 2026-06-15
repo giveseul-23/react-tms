@@ -39,7 +39,7 @@ export const vehicleMgmtApi = {
   save(payload: { dsSave: any[] }) {
     return apiClient.post<CommonResponse>(
       "/vehicleService/save",
-      withSession({ MENU_CD: MENU_CODE, dsSave: payload }),
+      withSession({ MENU_CD: MENU_CODE, dsSave: payload.dsSave }),
     );
   },
 
