@@ -69,10 +69,18 @@ export const tempOilPriceApi = {
    * 저장 — menuConfig/LanguagePack 와 동일한 dsSave 패턴 (URL params + body { dsSave }).
    */
   // ── 유가(sub01) 저장 ──────────────────────────────────────────
-  saveOilPrice(rows: any[]) {
+  saveOilPrice(payload: { dsSave: any[] }) {
+    const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<commonResponse>(
       `/tempOilPriceService/saveOilPrice`,
-      withSession(rows),
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 

@@ -26,6 +26,15 @@ export default function TempOilPrice() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
+        excludes: [
+          { column: "LGST_GRP_CD", as: "LGST_GRP_CD" },
+          { column: "DIV_CD", as: "DIV_CD" },
+          {
+            column: "TO_DTTM",
+            as: { FROM: "TO_DTTM_ST", TO: "TO_DTTM_END" },
+            transform: (v) => String(v).replace(/-/g, ""),
+          },
+        ],
         ...model.bindSearch(),
       }}
       grid={
@@ -50,19 +59,17 @@ export default function TempOilPrice() {
                   storageKey={model.storageKeys.bottom}
                 >
                   <DataGrid
-                    layoutType="plain"
+                    {...model.bind("master")}
                     columnDefs={MASTER_COLUMN_DEFS}
-                    rowData={model.grids.master.rows}
                     actions={ctrl.masterActions}
                     onRowClicked={ctrl.onMasterRowClicked}
+                    audit={false}
                   />
                   <DataGrid
-                    layoutType="plain"
-                    columnDefs={OIL_PRICE_COLUMN_DEFS(
-                      model.grids.oilPrice.setData,
-                    )}
-                    rowData={model.grids.oilPrice.rows}
+                    {...model.bind("oilPrice")}
+                    columnDefs={OIL_PRICE_COLUMN_DEFS}
                     actions={ctrl.oilPriceActions}
+                    audit={{ updateTime: false }}
                   />
                 </SplitPane>
               ),
