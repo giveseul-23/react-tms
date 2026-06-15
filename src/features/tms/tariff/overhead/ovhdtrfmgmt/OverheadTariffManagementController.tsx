@@ -34,8 +34,13 @@ export function useOverheadTariffManagementController({ model }: Args) {
   );
 
   const onSubChgRowClicked = useCallback(
-    (row: any) =>
-      base.handleRowClick("subChg", row, [
+    (row: any) => {
+      if (row?.EDIT_STS === "I") {
+        model.grids.subChg.setSelected(row);
+        base.resetGrids(["subChgDtl"]);
+        return;
+      }
+      return base.handleRowClick("subChg", row, [
         {
           to: "subChgDtl",
           fetch: (r) =>
@@ -44,8 +49,9 @@ export function useOverheadTariffManagementController({ model }: Args) {
               LGST_GRP_CD: r.LGST_GRP_CD,
             }),
         },
-      ]),
-    [base],
+      ]);
+    },
+    [base, model.grids.subChg],
   );
 
   const onMainGridClick = useCallback(
@@ -53,6 +59,7 @@ export function useOverheadTariffManagementController({ model }: Args) {
       model.grids.main.setSelected(row);
       base.resetGrids(["subChg", "subChgDtl"]);
       if (!row) return;
+      if (row.EDIT_STS === "I") return;
       const subRows = await base.searchSub(
         "subChg",
         api.getSubChgList({ TRF_CD: row.TRF_CD }),
