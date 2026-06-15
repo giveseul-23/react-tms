@@ -27,8 +27,8 @@ export function useCommonCodeController({ model }: Args) {
       const srchObj = model.rawFiltersRef.current;
       return commonCodeApi.getCommonCodeList(MENU_CD, {
         ...params,
-        CMMN_DTL_CD_SQL: srchObj.CMMN_DTL_CD,
-        CMMN_DTL_NM_SQL: srchObj.LANG_DESC,
+        CMMN_DTL_CD: srchObj.CMMN_DTL_CD ?? srchObj.SRCH_CMMN_DTL_CD ?? "",
+        CMMN_DTL_NM: srchObj.LANG_DESC ?? srchObj.SRCH_LANG_DESC ?? "",
       });
     },
     [model.rawFiltersRef],

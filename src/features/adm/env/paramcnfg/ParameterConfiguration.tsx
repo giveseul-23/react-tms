@@ -16,7 +16,7 @@ export default function ParameterConfiguration() {
     <GridOnlyPage
       menuCode={MENU_CD}
       searchProps={{
-        fetchFn: ctrl.fetchList,
+        fetchFn: ctrl.fetchApplicationList,
         onSearchCallback: ctrl.onSearchCallback,
         searchRef: model.searchRef,
         filtersRef: model.filtersRef,

@@ -9,7 +9,7 @@ import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { parameterConfigurationApi } from "./ParameterConfigurationApi";
 import { MENU_CD } from "./ParameterConfiguration";
 import { MAIN_COLUMN_DEFS } from "./ParameterConfigurationColumns";
-import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 import type { ParameterConfigurationModel, GridKey } from "./ParameterConfigurationModel";
 
@@ -30,6 +30,7 @@ export function useParameterConfigurationController({ model }: ControllerProps) 
         }),
     },
   });
+  const { menuName } = useMenuMeta();
 
   const handleAdd = useCallback(() => {
     base.addRow("main", {
@@ -58,13 +59,13 @@ export function useParameterConfigurationController({ model }: ControllerProps) 
         columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
-        menuName: Lang.get("MENU_CD"),
+        menuName: menuName,
         fetchFn: () =>
           parameterConfigurationApi.getParameterConfigurationList(MENU_CD, model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [handleAdd, handleSave, model.filtersRef, model.grids.main.rows],
+    [handleAdd, handleSave, menuName, model.filtersRef, model.grids.main.rows],
   );
 
   return {

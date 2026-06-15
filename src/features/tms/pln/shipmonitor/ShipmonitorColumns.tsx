@@ -41,7 +41,7 @@ export const MAIN_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_DESTINATION_COUNTRY_NAME", field: "TO_CTRY_NM" },
   { type: "text", headerName: "LBL_ORDER_NO", field: "ORD_NO" },
   { type: "text", headerName: "LBL_SHIPMENT_NUMBER", field: "SHPM_NO" },
-  { type: "date", headerName: "LBL_REQUESTED_DELIVERY_DATE", field: "DLVRY_DT" },
+  { type: "text", headerName: "LBL_REQUESTED_DELIVERY_DATE", field: "DLVRY_DT" },
   { type: "text", headerName: "LBL_MIT_CODE_NAME", field: "MIT_CLSS_CD" },
   { type: "text", headerName: "LBL_DIVISION_CODE", field: "DIV_CD" },
   { type: "text", headerName: "LBL_DIVISION_NAME", field: "DIV_NM" },
