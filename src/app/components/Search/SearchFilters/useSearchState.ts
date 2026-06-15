@@ -29,6 +29,17 @@ export function useSearchState(
     const initial: SearchState = {};
 
     meta.forEach((m) => {
+      // COMBO 정적 기본값 (서버 DEFAULTVALUE)
+      if (m.type === "COMBO" && m.defaultValue) {
+        initial[m.key] = {
+          key: m.key,
+          operator: m.condition ?? "equal",
+          dataType: m.dataType,
+          value: m.defaultValue,
+        };
+        return;
+      }
+
       if (
         m.type !== "YMD" &&
         m.type !== "YMDT" &&
