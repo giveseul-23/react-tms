@@ -1,23 +1,5 @@
-// ────────────────────────────────────────────────────────────────
-// [가이드] 그리드 컬럼 정의 템플릿
-//
-// 사용 방법
-// 1. 이 파일을 대상 폴더로 복사 후 파일명 교체 (예: FeatureColumns.tsx)
-// 2. 각 컬럼 headerName(LBL_*) / field / cellRenderer 를 실제 스펙에 맞게 교체
-// 3. 필요한 audit 컬럼만 standardAudit 설정값으로 켜고 끌 것
-//
-// 공통 패턴
-// - headerName 은 LBL_* 다국어 키 사용 (Lang.get 자동 적용)
-// - field 에 "DTTM" 포함 시 DataGrid 가 자동 날짜 포맷팅
-// - field 가 "_STS" 로 끝나면 자동 중앙 정렬
-// - type: "numeric" / dataType: "number" → 우측 정렬
-// - "No" headerName 은 자동 일련번호 + 고정 너비
-// - standardAudit: 삭제/상태/생성자/생성일/수정자/수정일 블록 일괄 삽입
-// ────────────────────────────────────────────────────────────────
-
-// ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
-export const MAIN_COLUMN_DEFS = () => [
-  { headerName: "No" }, // 자동 일련번호
+export const MAIN_COLUMN_DEFS = [
+  { headerName: "No" },
   {
     type: "text",
     headerName: "LBL_DIVISION_CODE",
@@ -32,6 +14,7 @@ export const MAIN_COLUMN_DEFS = () => [
     type: "text",
     headerName: "LBL_DISPATCH_RATE_CD",
     field: "TRF_CD",
+    isPrimaryKey: true,
   },
   {
     type: "text",
@@ -49,75 +32,80 @@ export const MAIN_COLUMN_DEFS = () => [
     field: "PAY_CARR_NM",
   },
   {
-    type: "text",
+    type: "date",
     headerName: "LBL_FROM_DTTM",
     field: "FRM_DTTM",
+    required: true,
+    editable: true,
+    insertable: true,
   },
   {
-    type: "text",
+    type: "date",
     headerName: "LBL_TO_DTTM",
     field: "TO_DTTM",
+    required: true,
+    editable: true,
+    insertable: true,
   },
   {
-    type: "text",
+    type: "check",
     headerName: "LBL_JOB_USE_YN",
     field: "USE_YN",
+    editable: true,
   },
-
 ];
 
-// ── 상세 그리드 컬럼 ─────────────────────────────────────────
-// 공통코드 → 라벨 치환은 컬럼에 codeKey 만 지정하고,
-// DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
-export const DETAIL_LEFT_COLUMN_DEFS = () => [
+export const DETAIL_LEFT_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
+  { type: "text", field: "TRF_CD", hide: true },
   {
     type: "text",
-    // 공통코드 → 라벨 치환 예시 (codeKey 지정)
+    headerName: "LBL_LOGISTICS_GROUP_CODE",
+    field: "LGST_GRP_CD",
+  },
+  {
+    type: "text",
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
   },
 ];
 
-export const DETAIL_RIGHT_COLUMN_DEFS = () => [
+export const DETAIL_RIGHT_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_RATE_ITEM_CD", field: "CHG_CD" },
+  { type: "text", field: "TRF_CD", hide: true },
+  { type: "text", field: "LGST_GRP_CD", hide: true },
+  { type: "text", field: "ALW_RATE_UPD_YN", hide: true },
+  {
+    type: "text",
+    headerName: "LBL_RATE_ITEM_CD",
+    field: "CHG_CD",
+  },
   {
     type: "text",
     headerName: "LBL_RATE_ITEM_NAME",
     field: "CHG_NM",
   },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_OVRHD_CHG_TP",
     field: "OVRHD_CHG_TP",
+    codeKey: "ovrhdChgType",
+    required: true,
+    editable: true,
+    insertable: true,
   },
   {
-    type: "text",
+    type: "number",
     headerName: "LBL_UNIT_COST",
     field: "UNIT_RATE",
+    editable: true,
+    insertable: true,
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_APPLIED_VAL",
     field: "APPLD_VAL",
+    editable: true,
+    insertable: true,
   },
 ];
-
-// ────────────────────────────────────────────────────────────────
-// [참고] standardAudit 의 선택적 옵션
-//
-// 기본 audit 컬럼을 부분적으로만 쓰고 싶을 때 두 번째 인자로 false 지정
-//   standardAudit(setRowData, { updatePerson: false, updateTime: false });
-//
-// 삭제 체크 시 행을 실제로 제거하고 싶을 때
-//   standardAudit(setRowData); // 첫 인자가 자동으로 deleteSetRowData 역할
-//
-// audit 컬럼의 width / fieldType 등을 개별 오버라이드
-//   standardAudit(setRowData, {
-//     rowStatusOverrides: { width: 100 },
-//     insertPersonOverrides: { width: 110, fieldType: "text" },
-//     insertDateOverrides: { width: 150 },
-//   });
-// ────────────────────────────────────────────────────────────────

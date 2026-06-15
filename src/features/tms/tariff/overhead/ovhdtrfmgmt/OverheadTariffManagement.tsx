@@ -14,6 +14,14 @@ import {
 
 export const MENU_CODE = "MENU_OVERHEAD_TARIFF_MGMT";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_OVERHEAD_MANAGEMENT",
+    subChg: "SUB01_GRID_OVERHEAD_MANAGEMENT",
+    subChgDtl: "SUB02_GRID_OVERHEAD_MANAGEMENT",
+  },
+};
+
 export default function OverheadTariffManagement() {
   const model = useOverheadTariffManagementModel(MENU_CODE);
   const ctrl = useOverheadTariffManagementController({ model });
@@ -33,7 +41,9 @@ export default function OverheadTariffManagement() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS()}
+          authId={AUTH.grids.main}
+          columnDefs={MAIN_COLUMN_DEFS}
+          headerCheckbox={false}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
         />
@@ -48,16 +58,24 @@ export default function OverheadTariffManagement() {
         >
           <DataGrid
             {...model.bind("subChg")}
-            columnDefs={DETAIL_LEFT_COLUMN_DEFS()}
+            authId={AUTH.grids.subChg}
+            columnDefs={DETAIL_LEFT_COLUMN_DEFS}
             codeMap={model.codeMap}
+            headerCheckbox={false}
             actions={ctrl.subChgActions}
             onRowClicked={ctrl.onSubChgRowClicked}
+            pagination={false}
+            audit={{ updatePerson: false, updateTime: false }}
           />
           <DataGrid
             {...model.bind("subChgDtl")}
-            columnDefs={DETAIL_RIGHT_COLUMN_DEFS()}
+            authId={AUTH.grids.subChgDtl}
+            columnDefs={DETAIL_RIGHT_COLUMN_DEFS}
             codeMap={model.codeMap}
+            headerCheckbox={false}
             actions={ctrl.subChgDtlActions}
+            pagination={false}
+            audit={{ insertPerson: false }}
           />
         </SplitPane>
       }
