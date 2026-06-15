@@ -32,7 +32,8 @@ export function GridOnlyPage({
     searchProps.loading,
   );
   if (gate) return <>{gate}</>;
-  const finalSearchProps: SearchProps = { menuCode, ...searchProps, meta };
+  const finalSearchProps: SearchProps & { meta: NonNullable<SearchProps["meta"]> } =
+    { menuCode, ...searchProps, meta };
 
   return (
     <PageShell

@@ -127,11 +127,13 @@ export function SearchFieldRenderer({
           case "COMBO": {
             // filterComponent/filterRefColumn이 있으면 대상 필드에 filterCol/filterValueKey 주입
             if (m.filterComponent && m.filterRefColumn) {
-              const filterM = meta.filter(
+              const target = meta.find(
                 (x) => x.key.indexOf(m.filterComponent!) > -1,
               );
-              filterM[0].filterCol = m.filterRefColumn;
-              filterM[0].filterValueKey = m.key;
+              if (target) {
+                target.filterCol = m.filterRefColumn;
+                target.filterValueKey = m.key;
+              }
             }
 
             // filterCol/filterValueKey 가 세팅된 COMBO 는 옵션 필터링.
@@ -423,11 +425,13 @@ export function SearchFieldRenderer({
               (getCondition(m.key)?.operator ?? m.condition ?? "equal") as any;
 
             if (m.filterComponent && m.filterRefColumn) {
-              const filterM = meta.filter(
+              const target = meta.find(
                 (x) => x.key.indexOf(m.filterComponent!) > -1,
               );
-              filterM[0].filterCol = m.filterRefColumn;
-              filterM[0].filterValueKey = m.key;
+              if (target) {
+                target.filterCol = m.filterRefColumn;
+                target.filterValueKey = m.key;
+              }
             }
 
             const filterValue = m.filterValueKey

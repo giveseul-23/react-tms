@@ -1,6 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
-import { MENU_CODE } from "./Cargo.tsx";
+import { MENU_CODE } from "./IfCarrier";
 
 type CommonResponse = {
   rows: [];
@@ -14,18 +14,32 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
-export const cargoApi = {
+export const ifCarrierApi = {
   getList(payload: any) {
     return apiClient.post<CommonResponse>(
-      `/cargoService/search`,
+      "/ifCarrierService/search",
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  save(payload: any) {
+  searchBank(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/ifCarrierService/searchBank",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  searchComp(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/ifCarrierService/searchComp",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  reprocess(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
-      `/cargoService/save`,
+      "/ifCarrierService/reprocess",
       { dsSave },
       {
         params: {
@@ -34,13 +48,6 @@ export const cargoApi = {
           ...rest,
         },
       },
-    );
-  },
-
-  remove(payload: any) {
-    return apiClient.post<CommonResponse>(
-      `/cargoService/delete`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };

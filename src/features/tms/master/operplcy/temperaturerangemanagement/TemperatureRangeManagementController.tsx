@@ -106,11 +106,22 @@ export function useTemperatureRangeManagementController({
   // ── 메인 저장 — 삭제행 있으면 confirm 후 저장 ─────────────────
   // confirmOnDelete 옵션 한 줄로 처리. 후처리는 기본값 "refresh"(메인 재조회).
   const onSaveMain = useCallback(
-    () =>
-      base.saveGrid("main", api.save, {
+    () => {
+      //console.log("TemperatureRangeManagementController-onSaveMain", "main");
+
+      const rows = model.grids.main.rows;
+
+      rows.forEach((row: any) => {
+        if (row.EDIT_STS === "D") {
+          row.DEL_FLAG = "Y";
+        }
+      });
+
+      return base.saveGrid("main", api.save, {
         confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
-      }),
-    [base],
+      });
+    },
+    [base, model.grids.main],
   );
 
   // ── 그리드별 actions 배열 ─────────────────────────────────────

@@ -152,8 +152,8 @@ export default function PreferedCarrAddPopup({
       .catch((err: any) => {
         showError(
           err?.response?.data?.error?.message ??
-            err?.message ??
-            "조회에 실패했습니다.",
+          err?.message ??
+          "조회에 실패했습니다.",
         );
         return [];
       });
@@ -209,7 +209,7 @@ export default function PreferedCarrAddPopup({
 
   // 저장 — 선택된 기준/운송사/차량 행을 합쳐 반환
   const onSave = () => {
-    if (!(selectedMainRow || selectedSub01Row || selectedSub02Row)) {
+    if (!(selectedMainRow && selectedSub01Row && selectedSub02Row)) {
       showError(Lang.get("MSG_SELECT_NO_DATA"));
       return;
     }

@@ -19,6 +19,8 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import ChangeVehiclePop from "./popup/ChangeVehiclePop";
 import CreateEmptyDispatchVehiclePop from "./popup/CreateEmptyDispatchVehiclePop";
 import SplitQtyPop from "./popup/SplitQtyPop";
+import ChangeDlvryDatePop from "./popup/ChangeDlvryDatePop";
+import RegiSpotPop from "./popup/RegiSpotPop";
 
 interface Args {
   model: DispatchPlanModel;
@@ -200,25 +202,175 @@ export function useDispatchPlanController({ model }: Args) {
     });
   }, [model.grids.main, guardHasData, base]);
 
-  // 합차(주문병합) — 미할당주문 2건 이상 선택 → 최소 SHPM_NO 기준 병합
-  const onShipmentMerge = useCallback(() => {
-    const sel = model.grids.unallocOrder.selectedRef.current;
-    const rows = Array.isArray(sel) ? sel : sel ? [sel] : [];
-    if (rows.length < 2) {
-      showInfoModal(Lang.get("MSG_SHIPMENT_MERGE_CHECK"));
-      return;
-    }
-    const minShpmNo = rows
-      .map((r) => r.SHPM_NO)
-      .filter(Boolean)
-      .sort()[0];
-    const merged = rows.map((r) => ({
-      ...r,
-      MIN_SHPM_NO: minShpmNo,
-      rowStatus: "U",
-    }));
-    base.callAjax(api.saveMergeShipment(merged)).then(() => base.search());
-  }, [model.grids.unallocOrder, base]);
+  // 계획확정 — 선택 배차행
+  const onPlanned = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!guardHasData(rows)) return;
+      base
+        .callAjax(
+          api.savePlannedPlanDispatch(
+            rows.map((r) => ({ ...r, rowStatus: "U" })),
+          ),
+        )
+        .then(() => base.search());
+    },
+    [guardHasData, base],
+  );
+
+  // 계획확정취소 — 적재요청 초과(DSPCH_OP_STS >= "2070") 행은 취소 불가
+  const onCancelPlanned = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!guardHasData(rows)) return;
+      const blocked = rows.find((r) => String(r.DSPCH_OP_STS ?? "") >= "2070");
+      if (blocked) {
+        showInfoModal(
+          Lang.get("MSG_LOADING_REQUEST_OVER_CANNOT_CANCEL", blocked.DSPCH_NO),
+        );
+        return;
+      }
+      base
+        .callAjax(
+          api.saveCancelPlannedPlanDispatch(
+            rows.map((r) => ({ ...r, rowStatus: "U" })),
+          ),
+        )
+        .then(() => base.search());
+    },
+    [guardHasData, base],
+  );
+
+  // 경유순서 자동조정 — 단일 선택만 허용
+  const onAutoChangeStopSeq = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (rows.length === 0) {
+        showInfoModal(
+          Lang.get("MSG_EXCEPTION_STOP_RESEQUENCE_DISPATCH_SELECT"),
+        );
+        return;
+      }
+      if (rows.length > 1) {
+        showInfoModal(Lang.get("MSG_STOP_RE_SEQ_DISPATCH_CHK"));
+        return;
+      }
+      base
+        .callAjax(
+          api.saveAutoChangeStopSeq(
+            rows.map((r) => ({ ...r, rowStatus: "U" })),
+          ),
+        )
+        .then(() => base.search());
+    },
+    [base],
+  );
+
+  // 차량교환 — 정확히 2건 선택, 두 배차의 차량정보를 맞교환
+  const onSwapVehicle = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (rows.length !== 2) {
+        showInfoModal(Lang.get("MSG_SEL_VEH_TO_SWAP"));
+        return;
+      }
+      const SWAP_FIELDS = [
+        "VEH_ID",
+        "CARR_CD",
+        "VEH_NO",
+        "VEH_TP_CD",
+        "DRVR_ID",
+        "DRVR_NM",
+        "ASST_ID",
+        "ASST_NM",
+        "AP_PROC_TP",
+      ];
+      const swap = (dst: any, src: any) => ({
+        ...dst,
+        ORG_VEH_ID: dst.VEH_ID,
+        ORG_VEH_NO: dst.VEH_NO,
+        ORG_DRVR_ID: dst.DRVR_ID,
+        ...Object.fromEntries(SWAP_FIELDS.map((f) => [f, src[f]])),
+        rowStatus: "U",
+      });
+      const [a, b] = rows;
+      base
+        .callAjax(api.saveChangeVehicleSwap([swap(a, b), swap(b, a)]))
+        .then(() => base.search());
+    },
+    [base],
+  );
+
+  // 운송일변경 — 선택 배차행들의 운송일을 팝업에서 고른 날짜로 일괄 변경
+  const onChangeDlvryDate = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!guardHasData(rows)) return;
+      openPopup({
+        title: "BTN_DELIVERY_DATE_CHANGE",
+        width: "md",
+        content: (
+          <ChangeDlvryDatePop
+            initialValues={{ DLVRY_DT: rows[0]?.DLVRY_DT }}
+            onConfirm={(dlvryDt) => {
+              closePopup();
+              const dt = dlvryDt.replace(/-/g, "");
+              const payload = rows.map((r) => ({
+                ...r,
+                DLVRY_DT: dt,
+                rowStatus: "U",
+              }));
+              base
+                .callAjax(api.changeDlvryDate(payload))
+                .then(() => base.search());
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [guardHasData, openPopup, closePopup, base],
+  );
+
+  // 임시차량변경 — 단일 배차행 선택 → 스팟차량(차량/기사/연락처) 등록
+  const onChangeTempVeh = useCallback(() => {
+    const main = model.grids.main.selectedRef.current;
+    if (!base.requireParentRow(main, "배차")) return;
+    openPopup({
+      title: "BTN_REG_SPOT_VEH",
+      width: "sm",
+      content: (
+        <RegiSpotPop
+          initialValues={main}
+          onConfirm={(patch) => {
+            closePopup();
+            const payload = {
+              DSPCH_NO: main.DSPCH_NO,
+              LGST_GRP_CD: main.LGST_GRP_CD,
+              DIV_CD: main.DIV_CD,
+              PLN_ID: main.PLN_ID,
+              DLVRY_DT: main.DLVRY_DT,
+              VEH_ID: main.VEH_ID,
+              VEH_OP_TP: main.VEH_OP_TP,
+              VEH_TP_NM: main.VEH_TP_NM,
+              DRVR_ID: main.DRVR_ID,
+              CARR_CD: main.CARR_CD,
+              CARR_NM: main.CARR_NM,
+              AP_PROC_TP: main.AP_PROC_TP,
+              VEH_NO: patch.VEH_NO,
+              DRVR_NM: patch.DRVR_NM,
+              MBL_PHN_NO: patch.MBL_PHN_NO,
+              VEH_TP_CD: patch.VEH_TP_CD,
+            };
+            base
+              .callAjax(api.saveDspchSpotVeh(payload))
+              .then(() => base.search());
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [model.grids.main, base, openPopup, closePopup]);
 
   // 주문할당취소 (할당주문 탭 선택 행)
   const onUnassignedShipment = useCallback(() => {
@@ -307,6 +459,7 @@ export function useDispatchPlanController({ model }: Args) {
 
   const mainActions: ActionItem[] = useMemo(
     () => [
+      // 배차생성및취소
       {
         type: "group",
         key: "BTN_DISPATCH_CREATE_DELETE",
@@ -320,12 +473,25 @@ export function useDispatchPlanController({ model }: Args) {
           },
           {
             type: "button",
+            key: "BTN_CREATE_ITINERARY_PLAN",
+            label: "BTN_CREATE_ITINERARY_PLAN",
+            onClick: () => {},
+          },
+          {
+            type: "button",
+            key: "BTN_CREATE_ITINERARY_GRP_PLAN",
+            label: "BTN_CREATE_ITINERARY_GRP_PLAN",
+            onClick: () => {},
+          },
+          {
+            type: "button",
             key: "BTN_DISPATCH_CANCEL",
             label: "BTN_DISPATCH_CANCEL",
             onClick: onCancelPlanDispatch,
           },
         ],
       },
+      // 배차조정
       {
         type: "group",
         key: "BTN_PLAN_REVIEW",
@@ -333,20 +499,19 @@ export function useDispatchPlanController({ model }: Args) {
         items: [
           {
             type: "button",
-            key: "합차",
-            label: "합차",
-            noLang: true,
-            onClick: onShipmentMerge,
+            key: "BTN_STOP_RESEQUENCE",
+            label: "BTN_STOP_RESEQUENCE",
+            onClick: onAutoChangeStopSeq,
           },
           {
             type: "button",
-            key: "분차",
-            label: "분차",
-            noLang: true,
-            onClick: () => onSplitLine("unallocSub", "unallocOrder"),
+            key: "BTN_DELIVERY_DATE_CHANGE",
+            label: "BTN_DELIVERY_DATE_CHANGE",
+            onClick: onChangeDlvryDate,
           },
         ],
       },
+      // 차량변경
       {
         type: "group",
         key: "BTN_VEHICLE_CHANGE",
@@ -354,19 +519,27 @@ export function useDispatchPlanController({ model }: Args) {
         items: [
           {
             type: "button",
-            key: "BTN_CHANGE_REG_DED_VEH",
-            label: "BTN_CHANGE_REG_DED_VEH",
+            key: "BTN_CHANGE_REG_VEH",
+            label: "BTN_CHANGE_REG_VEH",
             onClick: onChangeRegVeh,
           },
           {
             type: "button",
-            key: "LBL_CONTRACTED_VEHICLE",
-            label: "LBL_CONTRACTED_VEHICLE",
-            onClick: () => {},
+            key: "BTN_REG_SPOT_VEH",
+            label: "BTN_REG_SPOT_VEH",
+            onClick: onChangeTempVeh,
+          },
+          {
+            type: "button",
+            key: "BTN_SWAP_VEH",
+            label: "BTN_SWAP_VEH",
+            onClick: onSwapVehicle,
           },
         ],
       },
+      // 메모 (등록/취소)
       makeMemoGroupAction({
+        label: "LBL_MEMO",
         saveMemo: (rows, text) => api.saveDispatchMemo(rows, text),
         cancelMemo: (rows) => api.cancelDspchMemo(rows),
         onDone: () => base.search(),
@@ -380,6 +553,14 @@ export function useDispatchPlanController({ model }: Args) {
           return true;
         },
       }),
+      // 주문/품목메모입력
+      {
+        type: "button",
+        key: "BTN_IN_SHPM_ITEM_MEMO",
+        label: "BTN_IN_SHPM_ITEM_MEMO",
+        onClick: () => {},
+      },
+      // 정보조회
       {
         type: "group",
         key: "BTN_INFO_SHOW",
@@ -387,25 +568,35 @@ export function useDispatchPlanController({ model }: Args) {
         items: [
           {
             type: "button",
-            key: "운행정보",
-            label: "운행정보",
+            key: "BTN_SHOW_VEHICLE_LOCATION",
+            label: "BTN_SHOW_VEHICLE_LOCATION",
+            onClick: () => {},
+          },
+          {
+            type: "button",
+            key: "BTN_SHOW_ROUTE",
+            label: "BTN_SHOW_ROUTE",
             onClick: () => {},
           },
         ],
       },
+      // 계획확정
       {
         type: "group",
-        key: "BTN_CONFIRM_PLANNED",
-        label: "BTN_CONFIRM_PLANNED",
+        key: "BTN_SET_TO_PLANNED",
+        label: "BTN_SET_TO_PLANNED",
         items: [
           {
             type: "button",
-            key: "BTN_CONFIRM",
-            label: "BTN_CONFIRM",
-            onClick: (e: any) => {
-              if (!guardHasData(e.data)) return;
-              base.callAjax(api.confirmPlan(e.data)).then(() => base.search());
-            },
+            key: "BTN_SET_TO_PLANNED",
+            label: "BTN_SET_TO_PLANNED",
+            onClick: onPlanned,
+          },
+          {
+            type: "button",
+            key: "BTN_RETURN_TO_OPEN",
+            label: "BTN_RETURN_TO_OPEN",
+            onClick: onCancelPlanned,
           },
         ],
       },
@@ -423,13 +614,16 @@ export function useDispatchPlanController({ model }: Args) {
       menuName,
       model.grids.main,
       model.filtersRef,
-      guardHasData,
       base,
       onChangeRegVeh,
       onCreateEmptyDispatch,
       onCancelPlanDispatch,
-      onShipmentMerge,
-      onSplitLine,
+      onPlanned,
+      onCancelPlanned,
+      onAutoChangeStopSeq,
+      onSwapVehicle,
+      onChangeDlvryDate,
+      onChangeTempVeh,
     ],
   );
 
