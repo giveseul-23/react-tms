@@ -72,6 +72,11 @@ export default function CreateEmptyDispatchVehiclePop({
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehOpTp]);
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fields: GridSearchField[] = [

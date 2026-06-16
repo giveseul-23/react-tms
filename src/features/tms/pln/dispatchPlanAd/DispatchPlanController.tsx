@@ -21,6 +21,8 @@ import CreateEmptyDispatchVehiclePop from "./popup/CreateEmptyDispatchVehiclePop
 import SplitQtyPop from "./popup/SplitQtyPop";
 import ChangeDlvryDatePop from "./popup/ChangeDlvryDatePop";
 import RegiSpotPop from "./popup/RegiSpotPop";
+import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
+import CreateItineraryGrpDispatchPop from "./popup/CreateItineraryGrpDispatchPop";
 
 interface Args {
   model: DispatchPlanModel;
@@ -183,6 +185,80 @@ export function useDispatchPlanController({ model }: Args) {
             }));
             base
               .callAjax(api.saveCreateEmptyDispatch(rows))
+              .then(() => base.search());
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [model.rawFiltersRef, openPopup, closePopup, base]);
+
+  //고정노선배차생성
+  const onCreateItineraryDispatch = useCallback(() => {
+    const f = model.rawFiltersRef.current ?? {};
+    const DIV_CD = f["SRCH_DSPCH_DIV_CD"];
+    const LGST_GRP_CD = f["SRCH_DSPCH_LGST_GRP_CD"];
+    const DLVRY_DT = f["SRCH_DSPCH_DLVRY_DT"];
+    const PLN_ID = f["SRCH_DSPCH_PLN_ID"];
+    if (!DIV_CD || !LGST_GRP_CD || !DLVRY_DT || !PLN_ID) {
+      showInfoModal(Lang.get("MSG_DUMMY_DISPATCH_BUILD_MANDATORY_CHK"));
+      return;
+    }
+    openPopup({
+      title: "TTL_CREATE_ITINERARY_PLAN",
+      width: "2xl",
+      content: (
+        <CreateItineraryDispatchPop
+          initialValues={{ DIV_CD, LGST_GRP_CD, DLVRY_DT, PLN_ID }}
+          onConfirm={(picked) => {
+            closePopup();
+            const rows = picked.map((p) => ({
+              ...p,
+              DIV_CD,
+              LGST_GRP_CD,
+              DLVRY_DT,
+              PLN_ID,
+            }));
+            base
+              .callAjax(api.saveCreateItineraryGroupDispatch(rows))
+              .then(() => base.search());
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [model.rawFiltersRef, openPopup, closePopup, base]);
+
+  //고정그룹배차생성
+  const onCreateItineraryGrpDispatch = useCallback(() => {
+    const f = model.rawFiltersRef.current ?? {};
+    const DIV_CD = f["SRCH_DSPCH_DIV_CD"];
+    const LGST_GRP_CD = f["SRCH_DSPCH_LGST_GRP_CD"];
+    const DLVRY_DT = f["SRCH_DSPCH_DLVRY_DT"];
+    const PLN_ID = f["SRCH_DSPCH_PLN_ID"];
+    const BATCH_NO = 1;
+    if (!DIV_CD || !LGST_GRP_CD || !DLVRY_DT || !PLN_ID) {
+      showInfoModal(Lang.get("MSG_DUMMY_DISPATCH_BUILD_MANDATORY_CHK"));
+      return;
+    }
+    openPopup({
+      title: "BTN_CREATE_ITINERARY_GRP_PLAN",
+      width: "2xl",
+      content: (
+        <CreateItineraryGrpDispatchPop
+          initialValues={{ DIV_CD, LGST_GRP_CD, DLVRY_DT, PLN_ID, BATCH_NO }}
+          onConfirm={(picked) => {
+            closePopup();
+            const rows = picked.map((p) => ({
+              ...p,
+              DIV_CD,
+              LGST_GRP_CD,
+              DLVRY_DT,
+              PLN_ID,
+              BATCH_NO,
+            }));
+            base
+              .callAjax(api.saveCreateItineraryGroupDispatch(rows))
               .then(() => base.search());
           }}
           onClose={closePopup}
@@ -475,13 +551,13 @@ export function useDispatchPlanController({ model }: Args) {
             type: "button",
             key: "BTN_CREATE_ITINERARY_PLAN",
             label: "BTN_CREATE_ITINERARY_PLAN",
-            onClick: () => {},
+            onClick: onCreateItineraryDispatch,
           },
           {
             type: "button",
             key: "BTN_CREATE_ITINERARY_GRP_PLAN",
             label: "BTN_CREATE_ITINERARY_GRP_PLAN",
-            onClick: () => {},
+            onClick: onCreateItineraryGrpDispatch,
           },
           {
             type: "button",
