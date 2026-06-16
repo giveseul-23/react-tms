@@ -1,6 +1,4 @@
-import { standardAudit } from "@/app/components/grid/columns/commonColumns";
-
-export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
+export const MAIN_COLUMN_DEFS = [
   {
     headerName: "No",
   }, {
@@ -37,5 +35,4 @@ export const MAIN_COLUMN_DEFS = (setGridData?: (updater: any) => void) => [
     headerName: "LBL_CLNT_IP",
     field: "CLNT_IP"
   },
-  ...standardAudit(setGridData, { delete: false }),
 ];

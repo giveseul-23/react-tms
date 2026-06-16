@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useAccessHistModel } from "./AccessHistModel";
@@ -10,10 +9,6 @@ import { MAIN_COLUMN_DEFS } from "./AccessHistColumns";
 export const MENU_CD = "MENU_ACCESS_HIST";
 export default function AccessHist() {
   const model = useAccessHistModel(MENU_CD);
-  const columnDefs = useMemo(
-    () => MAIN_COLUMN_DEFS(model.grids.main.setData),
-    [model.grids.main.setData],
-  );
 
   const ctrl = useAccessHistController({
     menuCd: MENU_CD,
@@ -36,7 +31,7 @@ export default function AccessHist() {
         <DataGrid
           {...model.bind("main")}
           layoutType="plain"
-          columnDefs={columnDefs}
+          columnDefs={MAIN_COLUMN_DEFS}
           audit={{ updatePerson: false, updateTime: false }}
         />
       }

@@ -1,5 +1,6 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
+import {MENU_CD} from "./AccessHist";
 
 type CommonResponse = {
   rows: [];
@@ -14,10 +15,10 @@ const withSession = (payload: any = {}) => {
 };
 
 export const accessHistApi = {
-  getAccessHist(menuCd: string, payload: any) {
+  getAccessHist(payload: any) {
     return apiClient.post<CommonResponse>(
       "/accessHistService/search",
-      withSession({ MENU_CD: menuCd, ...payload }),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 

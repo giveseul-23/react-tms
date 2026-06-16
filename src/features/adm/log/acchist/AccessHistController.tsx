@@ -1,13 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import {
-  makeAddAction,
-  makeSaveAction,
-  makeExcelGroupAction,
-} from "@/app/components/grid/actions/commonActions";
-import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { accessHistApi } from "./AccessHistApi";
-import { MAIN_COLUMN_DEFS } from "./AccessHistColumns";
 import type { AccessHistModel, GridKey } from "./AccessHistModel";
 
 type ControllerProps = {
@@ -22,13 +15,13 @@ export function useAccessHistController({
   const base = useBaseController<GridKey>({
     model,
     api: {
-      search: (params) => accessHistApi.getAccessHist(menuCd, { ...params }),
+      search: (params) => accessHistApi.getAccessHist({ ...params }),
     },
   });
 
     const fetchList = useCallback(
       (params: Record<string, unknown>) =>
-        accessHistApi.getAccessHist(menuCd, params),
+        accessHistApi.getAccessHist(params),
       [],
     );
   
