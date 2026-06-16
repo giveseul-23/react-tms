@@ -32,7 +32,7 @@ type FormState = {
   CUST_NM: string;
   AR_YN: string;
   AR_CNTRCT_LCD: string;
-  AR_CNTRCT_CD: string;
+  CUST_CNTRCT_CD: string;
   CUST_ORD_NO: string;
   ORD_NO: string;
   SHPM_TP: string;
@@ -83,7 +83,7 @@ const emptyForm = (): FormState => ({
   CUST_NM: "",
   AR_YN: "Y",
   AR_CNTRCT_LCD: "CUSTOMER",
-  AR_CNTRCT_CD: "",
+  CUST_CNTRCT_CD: "",
   CUST_ORD_NO: "",
   ORD_NO: "",
   SHPM_TP: "",
@@ -228,16 +228,20 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
       width: "4xl",
       content: (
         <ReceiveShipmentManagementLocationAddressPop
-          initialValues={{
-            LOC_CD: form[`${side}_LOC_CD` as keyof FormState],
-            LOC_NM: form[`REQ_${side}_LOC_NM` as keyof FormState],
-            CTRY_CD: form[`${side}_CTRY_CD` as keyof FormState],
-            CTRY_NM: form[`${side}_CTRY_NM` as keyof FormState],
-            STT_CD: form[`${side}_STT_CD` as keyof FormState],
-            STT_NM: form[`${side}_STT_NM` as keyof FormState],
-            CTY_CD: form[`${side}_CTY_CD` as keyof FormState],
-            CTY_NM: form[`${side}_CTY_NM` as keyof FormState],
-          }}
+          initialValues={
+            mode === "U"
+              ? {}
+              : {
+                  LOC_CD: form[`${side}_LOC_CD` as keyof FormState],
+                  LOC_NM: form[`REQ_${side}_LOC_NM` as keyof FormState],
+                  CTRY_CD: form[`${side}_CTRY_CD` as keyof FormState],
+                  CTRY_NM: form[`${side}_CTRY_NM` as keyof FormState],
+                  STT_CD: form[`${side}_STT_CD` as keyof FormState],
+                  STT_NM: form[`${side}_STT_NM` as keyof FormState],
+                  CTY_CD: form[`${side}_CTY_CD` as keyof FormState],
+                  CTY_NM: form[`${side}_CTY_NM` as keyof FormState],
+                }
+          }
           onApply={(row) => {
             applyLocation(side, row);
             closePopup();
@@ -327,7 +331,7 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
         <Field layout="vertical" type="combo" label={Lang.get("LBL_AR_YN")} value={form.AR_YN} onChange={(v) => setField("AR_YN", v)} options={stores.ynList ?? []} />
         <Field layout="vertical" type="combo" label={Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_LEVEL_CODE")} value={form.AR_CNTRCT_LCD} onChange={(v) => setField("AR_CNTRCT_LCD", v)} options={stores.arCntrctlcdList ?? []} />
       </div>
-      <Field layout="vertical" type="text" label={Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE")} value={form.AR_CNTRCT_CD} onChange={(v) => setField("AR_CNTRCT_CD", v)} />
+      <Field layout="vertical" type="text" label={Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE")} value={form.CUST_CNTRCT_CD} onChange={(v) => setField("CUST_CNTRCT_CD", v)} />
       <Field layout="vertical" type="text" label={Lang.get("LBL_CUSTOMER_ORDER_NO")} value={form.CUST_ORD_NO} onChange={(v) => setField("CUST_ORD_NO", v)} />
       <Field layout="vertical" type="text" label={Lang.get("LBL_ORDER_NO")} value={form.ORD_NO} onChange={(v) => setField("ORD_NO", v)} />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
