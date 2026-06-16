@@ -1,10 +1,11 @@
-import { MutableRefObject, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
+import { Lang } from "@/app/services/common/Lang";
 import { arSubChargeApi as api } from "./ArSubChargeApi";
 import { MENU_CODE } from "./ArSubCharge";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
@@ -48,7 +49,7 @@ export function useArSubChargeController({model}: ControllerArgs) {
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("main", api.save, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+        confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
       }),
     [base],
   );
