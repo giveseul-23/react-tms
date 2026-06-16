@@ -73,7 +73,7 @@ export const SUB02_COLUMN_DEFS = [
     field: "VEH_TP_NM",
   },
   {
-    type: "float",
+    type: "numeric",
     headerName: "LBL_FUEL_EFFICIENCY",
     field: "FUEL_EFFICIENCY",
     insertable: true,
