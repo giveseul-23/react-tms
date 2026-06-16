@@ -8,15 +8,13 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { AccountReceivableChargeModel, GridKey } from "./AccountReceivableChargeManagementModel";
-import { Lang } from "@/app/services/common/Lang";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ArChargeAddPopup from "./popup/ArChargeAddPopup";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
-
+import {MENU_CD} from "./AccountReceivableChargeManagement";
 interface Args {
   model: AccountReceivableChargeModel;
 }
-const MENU_CD = "MENU_ACCOUNT_RECEIVABLE_CONTRACT_MANAGEMENT";
 
 export function useAccountReceivableChargeController({
   model,

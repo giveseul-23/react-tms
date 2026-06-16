@@ -113,7 +113,7 @@ export const MAIN_COLUMN_DEFS = [
 
 export const SUB01_COLUMN_DEFS = [
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_CAL_RNK",
     field: "CALC_RNK",
   }, {

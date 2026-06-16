@@ -9,7 +9,14 @@ import {
   SUB01_COLUMN_DEFS
 } from "./AccountReceivableChargeManagementColumns";
 
-export const MENU_CD = "MENU_ACCOUNT_RECEIVABLE_CONTRACT_MANAGEMENT";
+export const MENU_CD = "MENU_ACCOUNT_RECEIVABLE_CONTRACT_CHARGE_MANAGEMENT";
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_ACCOUNT_RECEIVABLE_CONTRACT_CHARGE_MANAGEMENT",
+    sub01: "SUB01_GRID_ACCOUNT_RECEIVABLE_CONTRACT_CHARGE_MANAGEMENT",
+  },
+};
+
 export default function AccountReceivableChargeManagement() {
   const model = useAccountReceivableChargeModel(MENU_CD);
   const ctrl = useAccountReceivableChargeController({ model });
@@ -38,6 +45,7 @@ export default function AccountReceivableChargeManagement() {
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           audit={{ insertPerson: false, insertDate: false, updatePerson: false, updateTime: false }}
+          authId={AUTH.grids.main}
         />
       }
       detail={
@@ -47,6 +55,7 @@ export default function AccountReceivableChargeManagement() {
           headerCheckbox={false}
           pagination={true}
           audit={{ insertPerson: false, insertDate: false, updatePerson: false, updateTime: false, delete: false, rowStatus: false }}
+          authId={AUTH.grids.sub01}
         />
       }
     />
