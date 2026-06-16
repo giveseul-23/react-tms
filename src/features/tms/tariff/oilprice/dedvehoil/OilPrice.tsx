@@ -68,7 +68,7 @@ export default function OilPrice() {
                   />
                   <DataGrid
                     {...model.bind("dfOil")}
-                    columnDefs={DF_OIL_COLUMN_DEFS(model.grids.dfOil.setData)}
+                    columnDefs={DF_OIL_COLUMN_DEFS}
                     authId={AUTH.grids.dfOil}
                     actions={ctrl.dfOilActions}
                   />
