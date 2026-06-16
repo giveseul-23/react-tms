@@ -7,11 +7,11 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { OrganizationModel, GridKey } from "./OrganizationModel";
+import { MENU_CD } from "./Organization";
 
 interface Args {
   model: OrganizationModel;
 }
-const MENU_CD = "MENU_ORGANIZATION_STRUCT";
 
 export function useOrganizationController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
