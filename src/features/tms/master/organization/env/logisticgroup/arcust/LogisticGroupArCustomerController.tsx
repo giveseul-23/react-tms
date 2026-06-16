@@ -24,7 +24,7 @@ interface ControllerArgs {
 export function useLogisticGroupArCustomerController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
-    const { openPopup, closePopup } = usePopup();
+  const { openPopup, closePopup } = usePopup();
 
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   // 외부 탭 등 화면 고유 조건이 있으면 params 에 합쳐서 전달
@@ -32,8 +32,8 @@ export function useLogisticGroupArCustomerController({ model }: ControllerArgs) 
     const srchObj = model.rawFiltersRef.current;
 
     return api.getList({
-      DIV_CD: srchObj.SRCH_DIV_CD,
-      LGST_GRP_CD: srchObj.SRCH_LGST_GRP_CD,
+      DIV_CD: srchObj.SRCH_ULT_DIV_CD,
+      LGST_GRP_CD: srchObj.SRCH_ULT_LGST_GRP_CD,
     });
   }, [model.rawFiltersRef]);
 
@@ -90,73 +90,73 @@ export function useLogisticGroupArCustomerController({ model }: ControllerArgs) 
   );
 
   const detailActions: ActionItem[] = useMemo(
-      () => [
-        makeAddAction({
-          onClick: () => {
-            const main = model.grids.main.selectedRef.current;
-            if (!base.requireParentRow(main, "물류운영그룹코드")) return;
+    () => [
+      makeAddAction({
+        onClick: () => {
+          const main = model.grids.main.selectedRef.current;
+          if (!base.requireParentRow(main, Lang.get("LBL_LOGISTICS_GROUP_CODE"))) return;
 
-            openPopup({
-              content: (
-                <CommonPopup
-                  rowSelection="multiple"
-                  sqlId="selectCustomerCodeName"
-                  onApply={(callbackRows: any) => {
-                    closePopup();
-                    
-                    // 팝업에서 선택한 데이터를 detail 그리드에 추가
-                    model.grids.detail.setData((prev) => ({
-                      ...prev,
-                      rows: [
-                        ...prev.rows,
-                        ...callbackRows.map((element: any) => ({
-                          EDIT_STS: "I",
-                          DIV_CD: main.DIV_CD,
-                          LGST_GRP_CD: main.LGST_GRP_CD,
-                          CUST_CD: element.CODE,
-                          CUST_NM: element.NAME,
-                          DFT_YN: 'N',
-                          USE_YN: 'Y',
-                        })),
-                      ],
-                    }));
-                  }}
-                  onClose={closePopup}
-                />
-              ),
-              width: "2xl",
-            });
-          },
-        }),
-        makeSaveAction({
-          onClick: () => {
-            // delStatus가 없고, DFT_YN이 'Y'인 로우가 하나라도 있는지 확인
-            const hasDefault = model.grids.detail.rows.some(
-              (r) => !r.delStatus && r.DFT_YN === "Y",
-            );
+          openPopup({
+            content: (
+              <CommonPopup
+                rowSelection="multiple"
+                sqlId="selectCustomerCodeName"
+                onApply={(callbackRows: any) => {
+                  closePopup();
 
-            if (!hasDefault) {
-              base.alert(Lang.get('MSG_DETAIL_CODE_MUST_HAVE_DEFAULT_YES'));
-              return false;
-            }
+                  // 팝업에서 선택한 데이터를 detail 그리드에 추가
+                  model.grids.detail.setData((prev) => ({
+                    ...prev,
+                    rows: [
+                      ...prev.rows,
+                      ...callbackRows.map((element: any) => ({
+                        EDIT_STS: "I",
+                        DIV_CD: main.DIV_CD,
+                        LGST_GRP_CD: main.LGST_GRP_CD,
+                        CUST_CD: element.CODE,
+                        CUST_NM: element.NAME,
+                        DFT_YN: 'N',
+                        USE_YN: 'Y',
+                      })),
+                    ],
+                  }));
+                }}
+                onClose={closePopup}
+              />
+            ),
+            width: "2xl",
+          });
+        },
+      }),
+      makeSaveAction({
+        onClick: () => {
+          // delStatus가 없고, DFT_YN이 'Y'인 로우가 하나라도 있는지 확인
+          const hasDefault = model.grids.detail.rows.some(
+            (r) => !r.delStatus && r.DFT_YN === "Y",
+          );
 
-            onSaveDetail();
-          },
-        }),
-        makeExcelGroupAction({
-          excelColumns: () => model.grids.detail.getExcelColumns(),
-          menuCode: MENU_CODE,
-          menuName: menuName,
-          fetchFn: () => {
-            const main = model.grids.main.selectedRef.current;
-            return main
-              ? api.getDetailList({ LGST_GRP_CD: main.LGST_GRP_CD })
-              : Promise.resolve({ data: { result: [] } });
-          },
-          rows: model.grids.detail.rows,
-        }),
-      ],
-      [onSaveDetail, model],
+          if (!hasDefault) {
+            base.alert(Lang.get('MSG_DETAIL_CODE_MUST_HAVE_DEFAULT_YES'));
+            return false;
+          }
+
+          onSaveDetail();
+        },
+      }),
+      makeExcelGroupAction({
+        excelColumns: () => model.grids.detail.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
+        fetchFn: () => {
+          const main = model.grids.main.selectedRef.current;
+          return main
+            ? api.getDetailList({ LGST_GRP_CD: main.LGST_GRP_CD })
+            : Promise.resolve({ data: { result: [] } });
+        },
+        rows: model.grids.detail.rows,
+      }),
+    ],
+    [onSaveDetail, model],
   );
 
   return {

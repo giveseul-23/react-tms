@@ -15,6 +15,7 @@ import type {
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { Lang } from "@/app/services/common/Lang";
 
 interface ControllerArgs {
   model: LoadRequestExcludedOrderTypeModel;
@@ -93,7 +94,7 @@ export function useLoadRequestExcludedOrderTypeController({ model }: ControllerA
         makeAddAction({
           onClick: () => {
             const main = model.grids.main.selectedRef.current;
-            if (!base.requireParentRow(main, "물류운영그룹코드")) return;
+            if (!base.requireParentRow(main, Lang.get("LBL_LOGISTICS_GROUP_CODE"))) return;
 
             openPopup({
               content: (
