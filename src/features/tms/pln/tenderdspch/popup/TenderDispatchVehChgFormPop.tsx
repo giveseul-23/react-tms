@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
 import { Field } from "@/app/components/popup/Field";
-import { Lang } from "@/app/services/lang/lang";
+import { Lang } from "@/app/services/common/Lang";
 
 // 센차 TenderDispatchVehChgFormPop — 임시(spot) 차량 번호/운전자 편집 후 확정.
 // AP_PROC_TP != '20' 인 차량 선택 시 VehChgPop 의 onSave 에서 이 팝업을 띄운다.
