@@ -19,8 +19,8 @@ import { ROW_STATUS } from "@/app/components/grid/gridUtils/rowStatus";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import WorkdayDetailPopup from "./popup/WorkdayDetailPopup";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { MENU_CODE } from "./VehicleWorkday";
 
-const MENU_CD = "MENU_VEH_WORKDAY_MGMT";
 // 서버 메인 그리드 authId — 업로드 GRID_ID / 양식 다운로드 키 (센차 grid.authId 대응).
 const GRID_ID = "MAIN_GRID_VEH_WORKDAY_MGMT";
 
@@ -170,7 +170,7 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
       makeExcelGroupAction({
         excelColumns: () => model.grids.main.getExcelColumns(),
         columns: model.mainColumnDefs as any,
-        menuCode: MENU_CD,
+        menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(getExcelSearchParams()),
         rows: model.grids.main.rows,
