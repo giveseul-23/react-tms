@@ -370,6 +370,7 @@ export function useDriverController({ model }: ControllerArgs) {
       onInitPasswd,
       onSaveMain,
       base,
+      menuName,
     ],
   );
 
@@ -380,12 +381,12 @@ export function useDriverController({ model }: ControllerArgs) {
       makeExcelGroupAction({
         columns: SUB01_COLUMN_DEFS(),
         menuCode: MENU_CD,
-        menuName: Lang.get("MENU_DRIVER_MANAGER"),
+        menuName: menuName,
         fetchFn: () => api.getCustList(getSub01ExcelSearchParams()),
         rows: model.grids.sub01.rows,
       }),
     ],
-    [model, getSub01ExcelSearchParams, onAddSub01, onSaveSub01],
+    [model, getSub01ExcelSearchParams, onAddSub01, onSaveSub01, menuName],
   );
 
   return {
