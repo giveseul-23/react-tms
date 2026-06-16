@@ -36,7 +36,6 @@ export default function ReceiveShipmentManagement() {
           {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          headerCheckbox={false}
           rowSelection="multiple"
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}

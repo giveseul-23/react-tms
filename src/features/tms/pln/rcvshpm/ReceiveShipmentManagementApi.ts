@@ -17,6 +17,21 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
+const postDsSave = (url: string, payload: any = {}) => {
+  const { dsSave, ...rest } = payload ?? {};
+  return apiClient.post<CommonResponse>(
+    url,
+    { dsSave },
+    {
+      params: {
+        ...getSessionFields(),
+        MENU_CD: MENU_CODE,
+        ...rest,
+      },
+    },
+  );
+};
+
 export const receiveShipmentManagementApi = {
   search(payload: any) {
     return apiClient.post<CommonResponse>(
@@ -37,39 +52,36 @@ export const receiveShipmentManagementApi = {
     );
   },
   saveShipment(payload: any) {
-    return apiClient.post<CommonResponse>(
-      "/receiveShipmentManagementService/saveShipment",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
+    return postDsSave("/receiveShipmentManagementService/saveShipment", payload);
   },
   saveShipmentDetail(payload: any) {
-    return apiClient.post<CommonResponse>(
+    return postDsSave(
       "/receiveShipmentManagementService/saveShipmentDetail",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      payload,
     );
   },
   saveShipmentCancel(payload: any) {
-    return apiClient.post<CommonResponse>(
+    return postDsSave(
       "/receiveShipmentManagementService/saveShipmentCancel",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      payload,
     );
   },
   saveShipmentPlanId(payload: any) {
-    return apiClient.post<CommonResponse>(
+    return postDsSave(
       "/receiveShipmentManagementService/saveShipmentPlanId",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      payload,
     );
   },
   saveShipmentPlanIdCancel(payload: any) {
-    return apiClient.post<CommonResponse>(
+    return postDsSave(
       "/receiveShipmentManagementService/saveShipmentPlanIdCancel",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      payload,
     );
   },
   saveShipmentTransfer(payload: any) {
-    return apiClient.post<CommonResponse>(
+    return postDsSave(
       "/receiveShipmentManagementService/saveShipmentTransfer",
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      payload,
     );
   },
   saveBatchCreation(payload: any) {
