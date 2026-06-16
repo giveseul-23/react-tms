@@ -31,7 +31,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME",
     field: "AR_TRF_NM",
   }, {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_CAL_RNK",
     field: "CALC_RNK",
   }, {

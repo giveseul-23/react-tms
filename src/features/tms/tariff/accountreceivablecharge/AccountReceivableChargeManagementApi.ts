@@ -20,7 +20,7 @@ export const AccountReceivableChargeManagementApi = {
   getArChargeList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/accountReceivableChargeManagementService/search",
-      withSession({ MENU_CD: MENU_CD}),
+      withSession({ MENU_CD: MENU_CD, ...payload }),
     );
   },
 
