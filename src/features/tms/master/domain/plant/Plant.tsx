@@ -8,7 +8,7 @@ import { MAIN_COLUMN_DEFS } from "./PlantColumns";
 
 export const MENU_CD = "MENU_PLANT_MGMT";
 
-export default function Currency() {
+export default function Plant() {
   const model = usePlantModel(MENU_CD);
   const ctrl = usePlantController({ model });
 

@@ -50,8 +50,8 @@ export const MAIN_COLUMN_DEFS = [
   },{
     // 저장위치명
     type: "text",
-    headerName: "LBL_SLOC_CD",
-    field: "SLOC_CD",
+    headerName: "LBL_SLOC_NM",
+    field: "SLOC_NM",
   },{
     // 재고관리시스템
     type: "combo",
