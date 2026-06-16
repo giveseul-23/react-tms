@@ -14,8 +14,8 @@ import { fuelEfficiencyApi as api } from "./FuelEfficiencyApi";
 import { FuelEfficiencyPop } from "./popup/FuelEfficiencyPop";
 import type { FuelEfficiencyModel, GridKey } from "./FuelEfficiencyModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { MENU_CODE } from "./FuelEfficiency";
 
-const MENU_CD = "MENU_FUEL_EFFICIENCY_MGMT";
 const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
 function ymdToday(): string {
@@ -277,7 +277,7 @@ export function useFuelEfficiencyController({ model }: Args) {
     () =>
       makeExcelGroupAction({
         excelColumns: () => model.grids.main.getExcelColumns(),
-        menuCode: MENU_CD,
+        menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
@@ -305,7 +305,7 @@ export function useFuelEfficiencyController({ model }: Args) {
       sub01: [
         makeExcelGroupAction({
           excelColumns: () => model.grids.sub01.getExcelColumns(),
-          menuCode: MENU_CD,
+          menuCode: MENU_CODE,
           menuName: menuName,
           fetchFn: () => {
             const main = model.grids.main.selectedRef.current;
@@ -319,7 +319,7 @@ export function useFuelEfficiencyController({ model }: Args) {
         makeSaveAction({ onClick: onSaveSub02 }),
         makeExcelGroupAction({
           excelColumns: () => model.grids.sub02.getExcelColumns(),
-          menuCode: MENU_CD,
+          menuCode: MENU_CODE,
           menuName: menuName,
           fetchFn: () => {
             const sub01 = model.grids.sub01.selectedRef.current;
