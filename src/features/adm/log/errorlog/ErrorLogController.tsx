@@ -3,7 +3,7 @@ import { useBaseController } from "@/app/feature/useBaseController";
 import { userErrorLogApi } from "./ErrorLogApi";
 import type { ErrorLogModel, GridKey } from "./ErrorLogModel";
 
-const MENU_CD = "MENU_ERROR_LOG";
+const MENU_CD = "MENU_EXCEPTION_LOG";
 interface Args {
   model: ErrorLogModel;
 }
