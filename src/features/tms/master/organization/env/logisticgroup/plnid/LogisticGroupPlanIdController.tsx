@@ -61,7 +61,7 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
   // requireParentRow 가 미선택/미저장 시 alert + false 반환.
   const onAddDetail = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, "물류운영그룹코드")) return;
+    if (!base.requireParentRow(main, Lang.get("LBL_LOGISTICS_GROUP_CODE"))) return;
     base.addRow("detail", {
       LGST_GRP_CD: main.LGST_GRP_CD,
     });

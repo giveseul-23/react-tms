@@ -68,7 +68,7 @@ export function useDfChargeController({ model }: ControllerArgs) {
   const checkBeforeSave = useCallback(() => {
     const rows = model.grids.main.ref.current?.rows ?? [];
 
-    const modifiedRows = rows.filter((row: any) => 
+    const modifiedRows = rows.filter((row: any) =>
       row.EDIT_STS === 'I' || row.EDIT_STS === 'U'
     );
 
@@ -98,7 +98,7 @@ export function useDfChargeController({ model }: ControllerArgs) {
     () =>
       base.saveGrid("main", api.save, {
         beforeSave: checkBeforeSave,
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+        confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
       }),
     [base, checkBeforeSave],
   );
