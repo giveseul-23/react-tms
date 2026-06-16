@@ -5,14 +5,12 @@ import { useVehicleDailyBaseRtnMgmtModel } from "./VehicleDailyBaseRtnMgmtModel"
 import { useVehicleDailyBaseRtnMgmtController } from "./VehicleDailyBaseRtnMgmtController";
 import { MAIN_COLUMN_DEFS } from "./VehicleDailyBaseRtnMgmtColumns";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
-import { useRef } from "react";
 
 export const MENU_CODE = "MENU_DAILY_VEH_BSE_RTN_MGMT";
 
 export default function VehicleDailyBaseRtnMgmt() {
   const model = useVehicleDailyBaseRtnMgmtModel(MENU_CODE);
-  const rawFiltersRef = useRef<Record<string, string>>({});
-  const ctrl = useVehicleDailyBaseRtnMgmtController({ model, rawFiltersRef });
+  const ctrl = useVehicleDailyBaseRtnMgmtController({ model });
 
   return (
     <GridOnlyPage
@@ -21,15 +19,13 @@ export default function VehicleDailyBaseRtnMgmt() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        rawFiltersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid
           {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
+          codeMap={model.codeMap}
           actions={ctrl.mainActions}
         />
       }
