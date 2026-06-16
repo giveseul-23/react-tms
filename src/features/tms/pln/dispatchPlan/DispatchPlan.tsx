@@ -42,7 +42,7 @@ export default function DispatchPlan() {
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
       }}
-      defaultDirection="horizontal"
+      defaultDirection="vertical"
       defaultSizes={[65, 35]}
       storageKey={model.storageKeys.outer}
       master={

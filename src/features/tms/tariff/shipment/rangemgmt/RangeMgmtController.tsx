@@ -6,8 +6,9 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { Lang } from "@/app/services/common/Lang";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { rangeMgmtApi as api } from "./RangeMgmtApi";
-import { MAIN_COLUMN_DEFS, DETAIL_COLUMN_DEFS } from "./RangeMgmtColumns";
+import { MENU_CODE } from "./RangeMgmt";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { RangeMgmtModel, GridKey } from "./RangeMgmtModel";
 
@@ -17,6 +18,7 @@ interface ControllerArgs {
 
 export function useRangeMgmtController({ model }: ControllerArgs) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -61,7 +63,7 @@ export function useRangeMgmtController({ model }: ControllerArgs) {
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("main", api.saveMain, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
+        confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
       }),
     [base],
   );
@@ -77,20 +79,19 @@ export function useRangeMgmtController({ model }: ControllerArgs) {
     [base],
   );
 
-  const menuName = Lang.get("MENU_RNG_MGMT");
-
   const mainActions: ActionItem[] = useMemo(
     () => [
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS,
-        menuName: Lang.get("MENU_RNG_MGMT"),
+        excelColumns: () => model.grids.main.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
       }),
     ],
-    [onAddMain, onSaveMain, menuName, model],
+    [onAddMain, onSaveMain, menuName, model.grids.main, model.filtersRef],
   );
 
   const detailActions: ActionItem[] = useMemo(
@@ -98,8 +99,9 @@ export function useRangeMgmtController({ model }: ControllerArgs) {
       makeAddAction({ onClick: onAddDetail }),
       makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
-        columns: DETAIL_COLUMN_DEFS,
-        menuName: Lang.get("MENU_RNG_MGMT"),
+        excelColumns: () => model.grids.detail.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName,
         fetchFn: () => {
           const main = model.grids.main.selectedRef.current;
           return main
@@ -109,7 +111,7 @@ export function useRangeMgmtController({ model }: ControllerArgs) {
         rows: model.grids.detail.rows,
       }),
     ],
-    [onAddDetail, onSaveDetail, menuName, model],
+    [onAddDetail, onSaveDetail, menuName, model.grids.detail, model.grids.main.selectedRef],
   );
 
   return {
