@@ -35,13 +35,7 @@ export function useProcessController({ model }: ControllerArgs) {
     base.addRow("main", {});
   }, [base]);
 
-  const onSaveMain = useCallback(
-    () =>
-      base.saveGrid("main", api.save, {
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
-      }),
-    [base],
-  );
+  const onSaveMain = useCallback(() => base.saveGrid("main", api.save), [base]);
 
   const mainActions: ActionItem[] = useMemo(
     () => [

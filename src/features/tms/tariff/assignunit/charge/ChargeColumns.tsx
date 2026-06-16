@@ -82,7 +82,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "SUPERSEDE_YN",
     editable: true,
     insertable: true,
-    defaultYn: "N",
+    defaultValue: "N",
   },
   {
     type: "combo",
@@ -109,7 +109,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "USE_YN",
     editable: true,
     insertable: true,
-    defaultYn: "Y",
+    defaultValue: "Y",
   },
 ];
 

@@ -137,7 +137,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "ACCM_SUM_YN",
     editable: true,
     insertable: true,
-    defaultYn: "N",
+    defaultValue: "N",
   },
   {
     type: "check",
@@ -145,7 +145,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "USE_YN",
     editable: true,
     insertable: true,
-    defaultYn: "Y",
+    defaultValue: "Y",
   },
   {
     type: "number",

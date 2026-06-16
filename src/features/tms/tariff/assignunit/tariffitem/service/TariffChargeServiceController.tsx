@@ -56,7 +56,6 @@ export function useTariffChargeServiceController({ model }: ControllerArgs) {
     () =>
       base.saveGrid("main", api.save, {
         beforeSave: validateBeforeSave,
-        confirmOnDelete: "삭제된 항목이 있습니다. 계속 진행하시겠습니까?",
       }),
     [base, validateBeforeSave],
   );

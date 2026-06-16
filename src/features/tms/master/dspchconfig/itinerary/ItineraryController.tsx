@@ -48,7 +48,7 @@ function validateStopDirtyRows(
   alert: (msg: string) => void,
 ): boolean {
   if (!dirty.length) {
-    alert("변경된 데이터가 없습니다.");
+    alert(Lang.get("MSG_NO_CHANGE_DATA"));
     return false;
   }
   for (const row of dirty) {

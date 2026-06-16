@@ -18,9 +18,7 @@ export default function TariffChargeService() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid
