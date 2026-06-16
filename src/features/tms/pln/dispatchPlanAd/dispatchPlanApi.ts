@@ -135,12 +135,20 @@ export const dispatchPlanApi = {
     );
   },
 
-  // ── 메모 등록 / 취소 (공통 makeMemoGroupAction 연동) ────────
-  saveDispatchMemo(rows: any[], text: string) {
-    const dsSave = rows.map((r) => ({ ...r, MEMO: text }));
+  // ── 메모 (TruckDispatchConfirmMemoPop) ──────────────────────
+  // 기존 메모 조회 (배차번호 기준 4개 메모 1건)
+  searchDispatchMemo(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchDispatchMemo",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // 메모 저장 — 선택 배차행에 4개 메모 머지한 단건(dsSave 첫 행)을 전달
+  saveDispatchMemo(record: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/saveDispatchMemo",
-      withSession({ MENU_CD: MENU_CODE, dsSave }),
+      withSession({ MENU_CD: MENU_CODE, dsSave: [record] }),
     );
   },
 

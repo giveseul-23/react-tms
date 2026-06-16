@@ -23,6 +23,7 @@ import ChangeDlvryDatePop from "./popup/ChangeDlvryDatePop";
 import RegiSpotPop from "./popup/RegiSpotPop";
 import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
 import CreateItineraryGrpDispatchPop from "./popup/CreateItineraryGrpDispatchPop";
+import TruckDispatchConfirmMemoPop from "./popup/TruckDispatchConfirmMemoPop";
 
 interface Args {
   model: DispatchPlanModel;
@@ -408,13 +409,54 @@ export function useDispatchPlanController({ model }: Args) {
     [guardHasData, openPopup, closePopup, base],
   );
 
+  const validatorMemo = useCallback(
+    (rows: any[]) => {
+      if (!base.requireParentRow(rows[0], "배차")) return false;
+
+      if (rows.some((row) => row.DSPCH_OP_STS >= "2110")) {
+        base.alert(Lang.get("MSG_DISPATCH_STATUS_CMPLT_CHK_MEMO"));
+        return false;
+      }
+
+      return true;
+    },
+    [base],
+  );
+
+  // 메모 등록 — 선택 배차행(첫 행) 기준 4개 메모 등록 팝업 (메모는 배차 1건 단위)
+  const onRegisterMemo = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!validatorMemo(rows)) return;
+      openPopup({
+        title: "LBL_MEMO",
+        width: "4xl",
+        content: (
+          <TruckDispatchConfirmMemoPop
+            row={rows[0]}
+            statusLabel={
+              model.codeMap.dspchOpSts?.[rows[0].DSPCH_OP_STS] ??
+              String(rows[0].DSPCH_OP_STS ?? "")
+            }
+            onSaved={() => {
+              closePopup();
+              base.search();
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [validatorMemo, model.codeMap, base, openPopup, closePopup],
+  );
+
   // 임시차량변경 — 단일 배차행 선택 → 스팟차량(차량/기사/연락처) 등록
   const onChangeTempVeh = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
     if (!base.requireParentRow(main, "배차")) return;
     openPopup({
       title: "BTN_REG_SPOT_VEH",
-      width: "sm",
+      width: "md",
       content: (
         <RegiSpotPop
           initialValues={main}
@@ -613,29 +655,32 @@ export function useDispatchPlanController({ model }: Args) {
           },
         ],
       },
-      // 메모 (등록/취소)
-      makeMemoGroupAction({
-        label: "LBL_MEMO",
-        saveMemo: (rows, text) => api.saveDispatchMemo(rows, text),
-        cancelMemo: (rows) => api.cancelDspchMemo(rows),
-        onDone: () => base.search(),
-        confirmOnCancel: true,
-        // 배차완료(DSPCH_OP_STS >= "2110") 행은 메모 등록/취소 불가 (서버 로직 동일)
-        validate: (rows) => {
-          if (rows.some((r) => String(r.DSPCH_OP_STS ?? "") >= "2110")) {
-            showInfoModal(Lang.get("MSG_DISPATCH_STATUS_CMPLT_CHK_MEMO"));
-            return false;
-          }
-          return true;
-        },
-      }),
-      // 주문/품목메모입력
       {
-        type: "button",
-        key: "BTN_IN_SHPM_ITEM_MEMO",
-        label: "BTN_IN_SHPM_ITEM_MEMO",
-        onClick: () => {},
+        type: "group",
+        key: "LBL_MEMO",
+        label: "LBL_MEMO",
+        items: [
+          {
+            type: "button",
+            key: "BTN_REGISTRATION",
+            label: "BTN_REGISTRATION",
+            onClick: onRegisterMemo,
+          },
+          {
+            type: "button",
+            key: "BTN_IN_SHPM_ITEM_MEMO",
+            label: "BTN_IN_SHPM_ITEM_MEMO",
+            onClick: () => {},
+          },
+          {
+            type: "button",
+            key: "BTN_CANCEL",
+            label: "BTN_CANCEL",
+            onClick: () => {},
+          },
+        ],
       },
+
       // 정보조회
       {
         type: "group",
@@ -686,20 +731,23 @@ export function useDispatchPlanController({ model }: Args) {
       }),
     ],
     [
+      onCreateEmptyDispatch,
+      onCreateItineraryDispatch,
+      onCreateItineraryGrpDispatch,
+      onCancelPlanDispatch,
+      onAutoChangeStopSeq,
+      onChangeDlvryDate,
+      onRegisterMemo,
+      onChangeRegVeh,
+      onChangeTempVeh,
+      onSwapVehicle,
+      onPlanned,
+      onCancelPlanned,
       handleSave,
       menuName,
       model.grids.main,
       model.filtersRef,
       base,
-      onChangeRegVeh,
-      onCreateEmptyDispatch,
-      onCancelPlanDispatch,
-      onPlanned,
-      onCancelPlanned,
-      onAutoChangeStopSeq,
-      onSwapVehicle,
-      onChangeDlvryDate,
-      onChangeTempVeh,
     ],
   );
 

@@ -448,7 +448,7 @@ const openMemoInput = (
   const popup = getPopupApi();
   if (!popup) return;
   popup.openPopup({
-    title: Lang.get("LBL_MEMO"),
+    title: "LBL_MEMO",
     width: "lg",
     content: (
       <MemoInputPopup
