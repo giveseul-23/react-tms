@@ -1,7 +1,7 @@
 import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
 import { commonResponse } from "@/app/services/common/commonApi";
-const MENU_CD = "MENU_EXCEPTION_LOG";
+import { MENU_CD } from "./ErrorLog";
 
 const withSession = (payload: any = {}) => {
   const sessionFields = getSessionFields();

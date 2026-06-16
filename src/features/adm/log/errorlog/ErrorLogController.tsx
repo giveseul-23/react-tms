@@ -2,8 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { userErrorLogApi } from "./ErrorLogApi";
 import type { ErrorLogModel, GridKey } from "./ErrorLogModel";
-
-const MENU_CD = "MENU_EXCEPTION_LOG";
+import { MENU_CD } from "./ErrorLog";
 interface Args {
   model: ErrorLogModel;
 }
