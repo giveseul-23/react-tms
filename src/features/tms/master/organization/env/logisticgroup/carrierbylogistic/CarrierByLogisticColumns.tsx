@@ -57,16 +57,8 @@ export const LOGISTIC_CARRIER_INFO_COLUMN_DEFS = [
     width: 70,
     editable: true,
     insertable: true,
-    cellRenderer: (params: any) => (
-      <div className="flex items-center justify-center h-full">
-        <input
-          type="checkbox"
-          className="ag-input-field-input ag-checkbox-input"
-          checked={params.value === "Y"}
-          readOnly
-        />
-      </div>
-    ),
+    defaultValue: "Y",
+    align: "center",
   },
 ];
 
