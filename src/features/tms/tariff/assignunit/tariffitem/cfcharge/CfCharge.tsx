@@ -5,14 +5,12 @@ import { useCfChargeModel } from "./CfChargeModel";
 import { useCfChargeController } from "./CfChargeController";
 import { MAIN_COLUMN_DEFS } from "./CfChargeColumns";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
-import { useRef } from "react";
 
 export const MENU_CODE = "MENU_DSPTCH_BS_GHRG_MGMT";
 
 export default function CfCharge() {
   const model = useCfChargeModel(MENU_CODE);
-  const rawFiltersRef = useRef<Record<string, string>>({});
-  const ctrl = useCfChargeController({ model, rawFiltersRef });
+  const ctrl = useCfChargeController({ model });
 
   return (
     <GridOnlyPage
@@ -20,10 +18,7 @@ export default function CfCharge() {
       searchProps={{
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        rawFiltersRef,
-        pageSize: model.pageSize,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid

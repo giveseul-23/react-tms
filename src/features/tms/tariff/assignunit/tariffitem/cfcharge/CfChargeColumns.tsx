@@ -23,7 +23,7 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "check",
     headerName: "LBL_RATE_BASED_CALC_FLAG",
-    field: "RATE_BASED_CALC_FLAG",
+    field: "POST_CALC_YN",
     insertable: true,
     editable: true,
   },
