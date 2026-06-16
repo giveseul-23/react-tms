@@ -184,6 +184,30 @@ export const dispatchPlanApi = {
     );
   },
 
+  // ── 고정노선배차생성 (CreateItineraryDispatchPop) ────────────────
+  // 조회
+  searchItineraryDispatch(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/itineraryService/searchItineraryPop",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  saveCreateItineraryGroupDispatch(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanAdService/saveCreateItineraryGroupDispatch",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  // ── 고정노선그룹배차생성 (CreateItineraryDispatchPop) ────────────────
+  // 조회
+  searchGroupPop(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/itineraryService/searchGroupPop",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
   // ── 배차생성 (CreateEmptyDispatchVehiclePop) ────────────────
   // 조회: 운영그룹/조건 기준 배차 가능 차량 (VEH_OP_TP 100/110/999)
   searchEmptyDispatchVehicle(payload: any) {

@@ -8,7 +8,7 @@ import {
   DETAIL_COLUMN_DEFS,
 } from "./LogisticGroupArCustomerColumns";
 
-export const MENU_CODE = "MENU_LOAD_REQ_EXCPT_ORD_TP";
+export const MENU_CODE = "MENU_LGST_GRP_AR_CUST";
 
 export default function LogisticGroupArCustomer() {
   const model = useLogisticGroupArCustomerModel(MENU_CODE);

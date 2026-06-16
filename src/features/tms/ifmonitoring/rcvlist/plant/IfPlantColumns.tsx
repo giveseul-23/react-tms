@@ -6,7 +6,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "CRE_DTTM",
     width: 150,
     align: "center",
-    editable: true,
+    editable: false,
   },
   {
     type: "text",
@@ -14,7 +14,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "IF_ID",
     width: 110,
     align: "center",
-    editable: true,
+    editable: false,
   },
   {
     type: "combo",
@@ -23,7 +23,7 @@ export const MAIN_COLUMN_DEFS = [
     codeKey: "interfaceType",
     width: 100,
     align: "center",
-    editable: true,
+    editable: false,
   },
   {
     type: "text",
@@ -31,7 +31,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "RE_PRCS_BY_USR_YN",
     width: 120,
     align: "center",
-    editable: true,
+    editable: false,
   },
   {
     type: "text",
@@ -132,7 +132,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "SLOC_NM",
     width: 130,
     align: "left",
-    editable: true,
+    editable: false,
   },
   {
     type: "text",
@@ -140,7 +140,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "CRE_USR_ID",
     width: 150,
     align: "center",
-    editable: true,
+    editable: false,
   },
   {
     type: "text",
@@ -148,7 +148,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "UPD_USR_ID",
     width: 150,
     align: "center",
-    editable: true,
+    editable: false,
   },
   {
     type: "datetime",
@@ -156,6 +156,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "UPD_DTTM",
     width: 150,
     align: "center",
-    editable: true,
+    editable: false,
   },
 ];
