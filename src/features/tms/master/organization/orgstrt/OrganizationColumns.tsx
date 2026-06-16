@@ -1,4 +1,3 @@
-import { Lang } from "@/app/services/common/Lang";
 
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
@@ -140,7 +139,7 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: Lang.get("LBL_EXTERNAL_CODE") + "1",
+    headerName: "LBL_EXTERNAL_CODE_1",
     noLang: true,
     field: "REF1",
     width: 100,
@@ -149,7 +148,7 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: Lang.get("LBL_EXTERNAL_CODE") + "2",
+    headerName: "LBL_EXTERNAL_CODE_2",
     noLang: true,
     field: "REF2",
     width: 100,
