@@ -6,7 +6,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "CRE_DTTM",
     width: 120,
     align: "center",
-    editable: true,
   },
   {
     type: "text",
@@ -14,7 +13,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "IF_ID",
     width: 110,
     align: "center",
-    editable: true,
   },
   {
     type: "combo",
@@ -23,7 +21,6 @@ export const MAIN_COLUMN_DEFS = [
     codeKey: "interfaceType",
     width: 100,
     align: "center",
-    editable: true,
   },
   {
     type: "text",
@@ -31,7 +28,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "RE_PRCS_BY_USR_YN",
     width: 120,
     align: "center",
-    editable: true,
   },
   {
     type: "combo",
@@ -39,7 +35,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "IF_PRCS_STS",
     codeKey: "interfaceStatus",
     width: 120,
-    align: "center",
   },
   {
     type: "combo",
@@ -47,7 +42,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "IF_PRCS_MSG_CD",
     codeKey: "interfaceMessage",
     width: 150,
-    align: "left",
   },
   {
     type: "text",
@@ -62,7 +56,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "CARR_CD",
     width: 100,
     align: "center",
-    editable: true,
   },
   {
     type: "text",
@@ -70,7 +63,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "CARR_NM",
     width: 130,
     align: "left",
-    editable: true,
   },
   {
     type: "text",
@@ -78,7 +70,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "ZIP_CD",
     width: 60,
     align: "center",
-    editable: true,
   },
   {
     type: "text",
@@ -86,7 +77,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "DTL_ADDR1",
     width: 250,
     align: "left",
-    editable: false,
   },
   {
     type: "text",
@@ -94,7 +84,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "DTL_ADDR2",
     width: 250,
     align: "left",
-    editable: true,
   },
   {
     type: "text",
@@ -102,7 +91,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "REP_NM",
     width: 100,
     align: "center",
-    editable: true,
   },
   {
     type: "text",
@@ -110,7 +98,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "REP_CNTC_NO",
     width: 120,
     align: "left",
-    editable: true,
   },
   {
     type: "text",
@@ -118,7 +105,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "UPD_USR_ID",
     width: 150,
     align: "center",
-    editable: true,
   },
   {
     type: "datetime",
@@ -126,7 +112,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "UPD_DTTM",
     width: 150,
     align: "center",
-    editable: true,
   },
 ];
 
@@ -195,7 +180,6 @@ export const SUB01_COLUMN_DEFS = [
     field: "CRE_DTTM",
     width: 120,
     align: "center",
-    editable: false,
   },
   {
     type: "text",
@@ -203,7 +187,6 @@ export const SUB01_COLUMN_DEFS = [
     field: "UPD_USR_ID",
     width: 120,
     align: "center",
-    editable: false,
   },
   {
     type: "text",
@@ -211,7 +194,6 @@ export const SUB01_COLUMN_DEFS = [
     field: "UPD_DTTM",
     width: 120,
     align: "center",
-    editable: false,
   },
 ];
 
