@@ -16,12 +16,12 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CONTRACT_CODE",
-    field: "CUST_CNTRCT_CD",
+    field: "AR_CNTRCT_CD",
   },
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CONTRACT_NAME",
-    field: "CUST_CNTRCT_NM",
+    field: "AR_CNTRCT_NM",
   },{
     type: "text",
     headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE",

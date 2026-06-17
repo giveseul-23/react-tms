@@ -37,14 +37,14 @@ const COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CONTRACT_CODE",
-    field: "CUST_CNTRCT_CD",
+    field: "AR_CNTRCT_CD",
     align: "center",
     width: 105,
   },
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CONTRACT_NAME",
-    field: "CUST_CNTRCT_NM",
+    field: "AR_CNTRCT_NM",
     width: 130,
   },
   {

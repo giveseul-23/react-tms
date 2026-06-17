@@ -53,10 +53,10 @@ export default function AccountReceivableCopyPopup({
   const [custCd, setCustCd] = useState(srcRow.CUST_CD ?? "");
   const [custNm, setCustNm] = useState(srcRow.CUST_NM ?? "");
   const [custCntrctCd, setCustCntrctCd] = useState(
-    isContract ? (srcRow.CUST_CNTRCT_CD ?? "") : "",
+    isContract ? (srcRow.AR_CNTRCT_CD ?? "") : "",
   );
   const [custCntrctNm, setCustCntrctNm] = useState(
-    isContract ? (srcRow.CUST_CNTRCT_NM ?? "") : "",
+    isContract ? (srcRow.AR_CNTRCT_NM ?? "") : "",
   );
   const [arTrfCd, setArTrfCd] = useState("");
   const [arTrfNm, setArTrfNm] = useState("");
@@ -169,7 +169,7 @@ export default function AccountReceivableCopyPopup({
     const derived = {
       CUST_CD: custCd || srcRow.CUST_CD,
       AR_TRF_LCD: srcRow.AR_TRF_LCD,
-      CUST_CNTRCT_CD: custCrtCd,
+      AR_CNTRCT_CD: custCrtCd,
       AR_TRF_CD: arTrfCd,
       AR_TRF_CD_OLD: srcRow.AR_TRF_CD,
       AR_TRF_NM: finalArTrfNm,
@@ -232,8 +232,8 @@ export default function AccountReceivableCopyPopup({
             </div>
             <SrcRow label="LBL_CUSTOMER_CODE" value={srcRow.CUST_CD} />
             <SrcRow label="LBL_CUSTOMER_NAME" value={srcRow.CUST_NM} />
-            <SrcRow label="LBL_CUSTOMER_CONTRACT_CODE" value={srcRow.CUST_CNTRCT_CD} />
-            <SrcRow label="LBL_CUSTOMER_CONTRACT_NAME" value={srcRow.CUST_CNTRCT_NM} />
+            <SrcRow label="LBL_CUSTOMER_CONTRACT_CODE" value={srcRow.AR_CNTRCT_CD} />
+            <SrcRow label="LBL_CUSTOMER_CONTRACT_NAME" value={srcRow.AR_CNTRCT_NM} />
             <SrcRow label="LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE" value={srcRow.AR_TRF_CD} />
             <SrcRow label="LBL_ACCOUNTS_RECEIVABLE_TARIFF_NAME" value={srcRow.AR_TRF_NM} />
             <SrcRow label="LBL_RATE_DATE_TYPE_CODE" value={srcStlBaseDtTpName} />

@@ -52,7 +52,7 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "popuser",
     headerName: "LBL_CUSTOMER_CONTRACT_CODE",
-    field: "CUST_CNTRCT_CD",
+    field: "AR_CNTRCT_CD",
     width: 150,
     align: "center",
     insertable: true,
@@ -67,8 +67,8 @@ export const MAIN_COLUMN_DEFS = [
           extraParams={{ keyParam: row?.CUST_CD ?? "" }}
           onApply={(picked: any) => {
             commit({
-              CUST_CNTRCT_CD: picked.CODE,
-              CUST_CNTRCT_NM: picked.NAME,
+              AR_CNTRCT_CD: picked.CODE,
+              AR_CNTRCT_NM: picked.NAME,
             });
             close();
           }}
@@ -78,7 +78,7 @@ export const MAIN_COLUMN_DEFS = [
     },
     validator: (_value: any, rowData: any) => {
       if (rowData?.AR_TRF_LCD === "CONTRACT") {
-        const v = rowData?.CUST_CNTRCT_CD;
+        const v = rowData?.AR_CNTRCT_CD;
         if (v == null || String(v).trim() === "") return "MSG_VALID_REQ";
       }
       return true;
@@ -87,7 +87,7 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CONTRACT_NAME",
-    field: "CUST_CNTRCT_NM",
+    field: "AR_CNTRCT_NM",
     width: 150,
     align: "center",
     cellStyle: customerCellStyle({ textAlign: "center" }),

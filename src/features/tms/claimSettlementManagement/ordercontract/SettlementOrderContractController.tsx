@@ -51,7 +51,7 @@ export function useSettlementOrderContractController({ model }: Args) {
       return false;
     }
     // 계약단위인데 매출계약코드 미선택
-    if (tariffLevel === "CONTRACT" && !s.SRCH_CUST_CNTRCT_CD) return false;
+    if (tariffLevel === "CONTRACT" && !s.SRCH_AR_CNTRCT_CD) return false;
     return true;
   }, [getSearch]);
 
@@ -99,7 +99,7 @@ export function useSettlementOrderContractController({ model }: Args) {
             LGST_GRP_CD: s.SRCH_SHPM_LGST_GRP_CD ?? "",
             AR_TRF_LCD: s.SRCH_AR_TRF_LCD ?? "",
             CUST_CD: s.SRCH_SHPM_CUST_CD ?? "",
-            CUST_CNTRCT_CD: s.SRCH_CUST_CNTRCT_CD ?? "",
+            AR_CNTRCT_CD: s.SRCH_AR_CNTRCT_CD ?? "",
             AR_STL_BASE_DT_TP: s.SRCH_AR_STL_BASE_DT_TP ?? "",
             AR_DATE_FROM: s.SRCH_AR_DATE_FROM ?? "",
             AR_DATE_TO: s.SRCH_AR_DATE_TO ?? "",
