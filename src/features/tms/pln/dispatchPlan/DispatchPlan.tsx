@@ -42,7 +42,7 @@ export default function DispatchPlan() {
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
       }}
-      defaultDirection="vertical"
+      defaultDirection="horizontal"
       defaultSizes={[65, 35]}
       storageKey={model.storageKeys.outer}
       master={
@@ -53,6 +53,7 @@ export default function DispatchPlan() {
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
+          rowSelection="multiple"
         />
       }
       detail={

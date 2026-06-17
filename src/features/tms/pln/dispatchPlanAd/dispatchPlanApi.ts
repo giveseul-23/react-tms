@@ -151,6 +151,13 @@ export const dispatchPlanApi = {
       withSession({ MENU_CD: MENU_CODE, dsSave: [record] }),
     );
   },
+  //주문/품목메모입력
+  saveShpmItemMemo(record: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveShpmItemMemo",
+      withSession({ MENU_CD: MENU_CODE, dsSave: [record] }),
+    );
+  },
 
   cancelDspchMemo(rows: any[]) {
     return apiClient.post<CommonResponse>(

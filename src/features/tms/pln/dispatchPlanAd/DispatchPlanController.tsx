@@ -450,6 +450,20 @@ export function useDispatchPlanController({ model }: Args) {
     [validatorMemo, model.codeMap, base, openPopup, closePopup],
   );
 
+  const onSaveDspchMemoByGrid = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!validatorMemo(rows)) return;
+
+      base.confirm(Lang.get("MSG_CHECK_MEMO_CANCLE"), () => {
+        base
+          .callAjax(api.saveShpmItemMemo(rows), Lang.get("MSG_SAVE_CMPLT"))
+          .then(() => base.search());
+      });
+    },
+    [base, validatorMemo],
+  );
+
   // 임시차량변경 — 단일 배차행 선택 → 스팟차량(차량/기사/연락처) 등록
   const onChangeTempVeh = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
@@ -670,7 +684,7 @@ export function useDispatchPlanController({ model }: Args) {
             type: "button",
             key: "BTN_IN_SHPM_ITEM_MEMO",
             label: "BTN_IN_SHPM_ITEM_MEMO",
-            onClick: () => {},
+            onClick: onSaveDspchMemoByGrid,
           },
           {
             type: "button",
