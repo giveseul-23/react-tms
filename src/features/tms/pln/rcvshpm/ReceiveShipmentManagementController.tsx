@@ -5,7 +5,6 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { Lang } from "@/app/services/common/Lang";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import { toDsSave } from "@/app/components/grid/gridUtils/rowStatus";
 import { receiveShipmentManagementApi as api } from "./ReceiveShipmentManagementApi";
 import { MENU_CODE } from "./ReceiveShipmentManagement";
 import type { GridKey, ReceiveShipmentManagementModel } from "./ReceiveShipmentManagementModel";
@@ -19,6 +18,15 @@ interface Args {
 }
 
 const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
+
+const toActionDsSave = (rows: any[]) =>
+  rows.map(({ EDIT_STS, __rid__, ...row }) => ({
+    ...row,
+    rowStatus: row.rowStatus ?? EDIT_STS ?? "U",
+  }));
+
+const hasConsolidationClass = (row: any) =>
+  String(row?.CSLD_CLSS_CD ?? row?.csld_clss_cd ?? "").trim() !== "";
 
 export function useReceiveShipmentManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
@@ -73,7 +81,7 @@ export function useReceiveShipmentManagementController({ model }: Args) {
       base.alert(Lang.get("MSG_NO_SELECT_SHIPMENT"));
       return;
     }
-    await base.callAjax(apiFn({ dsSave: toDsSave(rows) }));
+    await base.callAjax(apiFn({ dsSave: toActionDsSave(rows) }));
     base.search();
   }, [base]);
 
@@ -114,7 +122,12 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     if (!rows.length) { base.alert(Lang.get("MSG_NO_SELECT_SHIPMENT")); return; }
     if (rows.some((row) => row.PLN_ID)) { base.alert(Lang.get("MSG_CHK_PLN_NULL")); return; }
     if (rows.some((row) => row.SHPM_OP_STS === "1000")) { base.alert(Lang.get("MSG_CAN_SHIPMENT_OPR_VALID")); return; }
-    base.confirm(Lang.get("MSG_SO_CONSOL_NOTICE_CANCEL_SHIPMENT"), () => void saveMainRows(rows, api.saveShipmentCancel));
+    const saveCancel = () => void saveMainRows(rows, api.saveShipmentCancel);
+    if (rows.some(hasConsolidationClass)) {
+      base.confirm(Lang.get("MSG_ASK_SO_CONSOL_NOTICE_CANCEL_SHIPMENT"), saveCancel);
+      return;
+    }
+    saveCancel();
   }, [base, saveMainRows]);
 
   const onSettingPlanId = useCallback(() => {
@@ -156,7 +169,7 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     if (rows.length > 1) { base.alert(Lang.get("MSG_CHK_SELECT_CNT")); return; }
     const row = rows[0];
     openPopup({
-      title: Lang.get("BTN_SHIPMENT_TRANSFER"),
+      title: "BTN_SHIPMENT_TRANSFER",
       width: "lg",
       content: (
         <ShipmentTransferPop

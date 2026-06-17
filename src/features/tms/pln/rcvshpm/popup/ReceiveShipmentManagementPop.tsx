@@ -202,6 +202,8 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const isArContractCodeDisabled = form.AR_CNTRCT_LCD === "CUSTOMER";
+
   const applyLocation = (side: "FRM" | "TO", row: any) => {
     if (!row) return;
     setForm((prev) => ({
@@ -331,7 +333,7 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
         <Field layout="vertical" type="combo" label={Lang.get("LBL_AR_YN")} value={form.AR_YN} onChange={(v) => setField("AR_YN", v)} options={stores.ynList ?? []} />
         <Field layout="vertical" type="combo" label={Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_LEVEL_CODE")} value={form.AR_CNTRCT_LCD} onChange={(v) => setField("AR_CNTRCT_LCD", v)} options={stores.arCntrctlcdList ?? []} />
       </div>
-      <Field layout="vertical" type="text" label={Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE")} value={form.AR_CNTRCT_CD} onChange={(v) => setField("AR_CNTRCT_CD", v)} />
+      <Field layout="vertical" type="text" label={Lang.get("LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE")} value={form.AR_CNTRCT_CD} onChange={(v) => setField("AR_CNTRCT_CD", v)} disabled={isArContractCodeDisabled} />
       <Field layout="vertical" type="text" label={Lang.get("LBL_CUSTOMER_ORDER_NO")} value={form.CUST_ORD_NO} onChange={(v) => setField("CUST_ORD_NO", v)} />
       <Field layout="vertical" type="text" label={Lang.get("LBL_ORDER_NO")} value={form.ORD_NO} onChange={(v) => setField("ORD_NO", v)} />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
