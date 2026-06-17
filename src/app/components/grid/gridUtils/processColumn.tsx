@@ -34,7 +34,11 @@ import {
 } from "@/app/components/ui/popover";
 import { DatePickerPopover } from "@/app/components/Search/filters/DatePickerPopover";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
-import { commitRowChange, commitRowChanges } from "./rowStatus";
+import {
+  commitRowChange,
+  commitRowChanges,
+  commitSingleModeCheck,
+} from "./rowStatus";
 
 // CommonPopup 은 내부에서 DataGrid 를 렌더 → 정적 import 시 순환참조.
 // lazy 로 끊고, 팝업 셀이 실제로 열릴 때만 로드한다.
@@ -263,6 +267,7 @@ function injectCheckRenderer(
   //   아니면 editDisableMsg(있으면) 안내 후 토글 차단. (센차 excheckcolumn editAllowField)
   const editAllowField = c.editAllowField as string | undefined;
   const editDisableMsg = c.editDisableMsg as string | undefined;
+  const singleMode = c.singleMode as boolean | undefined;
   const extended = !!checkEditable || !!group;
   const isOn = (v: any) => v === "Y" || (extended && v === true);
 
@@ -300,7 +305,14 @@ function injectCheckRenderer(
                         showInfoModal(Lang.get(editDisableMsg));
                       return;
                     }
-                    if (group && field === group.total) {
+                    if (singleMode) {
+                      commitSingleModeCheck(
+                        setRowData,
+                        row,
+                        field,
+                        next as "Y" | "N",
+                      );
+                    } else if (group && field === group.total) {
                       const patch: Record<string, any> = {
                         [group.total]: next,
                       };

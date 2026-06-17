@@ -47,6 +47,7 @@ export const DETAIL_COLUMN_DEFS = [
     type: "check",
     headerName: "LBL_DEFAULT",
     field: "DFT_YN",
+    singleMode: true,
     insertable: true,
     editable: true,
   },

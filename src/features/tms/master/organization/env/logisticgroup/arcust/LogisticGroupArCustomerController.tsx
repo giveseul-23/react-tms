@@ -60,17 +60,30 @@ export function useLogisticGroupArCustomerController({ model }: ControllerArgs) 
     [model.grids.main, onMainGridClick],
   );
 
-  // ── 상세 저장 — 부모 행 기반 cascade 재조회 ────────────────────
-  // afterSave: { cascadeFrom, fetch } 객체 형태 — 저장 후 자기 자신만 재조회.
+  const validateDefaultBeforeSave = useCallback((): boolean => {
+    const activeRows = model.grids.detail.rows.filter((r) => !r.delStatus);
+    if (activeRows.length === 0) return true;
+
+    const hasDefault = activeRows.some(
+      (r) => r.DFT_YN === "Y" || r.DFT_YN === true,
+    );
+    if (!hasDefault) {
+      base.alert(Lang.get("MSG_DETAIL_CODE_MUST_HAVE_DEFAULT_YES"));
+      return false;
+    }
+    return true;
+  }, [model.grids.detail.rows, base]);
+
   const onSaveDetail = useCallback(
     () =>
       base.saveGrid("detail", api.save, {
+        beforeSave: validateDefaultBeforeSave,
         afterSave: {
           cascadeFrom: "main",
           fetch: (main) => api.getDetailList({ LGST_GRP_CD: main.LGST_GRP_CD }),
         },
       }),
-    [base],
+    [base, validateDefaultBeforeSave],
   );
 
   // ── 그리드별 actions 배열 ─────────────────────────────────────
@@ -128,21 +141,7 @@ export function useLogisticGroupArCustomerController({ model }: ControllerArgs) 
           });
         },
       }),
-      makeSaveAction({
-        onClick: () => {
-          // delStatus가 없고, DFT_YN이 'Y'인 로우가 하나라도 있는지 확인
-          const hasDefault = model.grids.detail.rows.some(
-            (r) => !r.delStatus && r.DFT_YN === "Y",
-          );
-
-          if (!hasDefault) {
-            base.alert(Lang.get('MSG_DETAIL_CODE_MUST_HAVE_DEFAULT_YES'));
-            return false;
-          }
-
-          onSaveDetail();
-        },
-      }),
+      makeSaveAction({ onClick: onSaveDetail }),
       makeExcelGroupAction({
         excelColumns: () => model.grids.detail.getExcelColumns(),
         menuCode: MENU_CODE,
