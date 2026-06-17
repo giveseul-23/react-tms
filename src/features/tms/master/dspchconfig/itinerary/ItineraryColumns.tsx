@@ -84,7 +84,6 @@ export const MAIN_COLUMN_DEFS = [
         sqlId="selectUsrPlanCodeName"
         extraParams={{
           keyParam: row?.LGST_GRP_CD ?? "",
-          sqlParam1: "10",
         }}
         onApply={(picked: any) => {
           commit({

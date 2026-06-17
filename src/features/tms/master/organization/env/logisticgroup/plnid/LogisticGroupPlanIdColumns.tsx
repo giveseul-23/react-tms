@@ -37,15 +37,6 @@ export const DETAIL_COLUMN_DEFS = [
   },
   {
     type: "combo",
-    headerName: "LBL_USE_CLASSIFICATION",
-    field: "PLN_OP_DIV",
-    codeKey: "plnOpDiv",
-    insertable: true,
-    editable: true,
-    required: true,
-  },
-  {
-    type: "combo",
     headerName: "LBL_SETTOPLN_ALLWD_YN",
     field: "ALW_SET_TO_PLN_YN",
     codeKey: "ynList",
