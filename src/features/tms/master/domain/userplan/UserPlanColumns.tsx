@@ -25,11 +25,6 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: "LBL_USE_CLASSIFICATION",
-    field: "PLN_OP_DIV",
-  },
-  {
-    type: "text",
     headerName: "LBL_LOGISTICS_GROUP_CODE",
     field: "LGST_GRP_CD",
   },
