@@ -217,6 +217,7 @@ export function SearchFilters({
             }}
             className="
             p-2
+            [&:last-child]:pb-2
             text-[12px]
 
             [&_input]:h-6

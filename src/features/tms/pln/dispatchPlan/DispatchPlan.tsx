@@ -19,6 +19,8 @@ import {
   UNALLOC_ORDER_SUB_COLUMN_DEFS,
   VEH_MGMT_COLUMN_DEFS,
 } from "../dispatchPlanAd/DispatchPlanColumns";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import { CommonPopup } from "@/app/components/popup/CommonPopup";
 
 export const MENU_CODE = "MENU_DISPATCH_PLAN";
 
@@ -35,6 +37,8 @@ export const AUTH = {
 };
 
 export default function DispatchPlan() {
+  const { openPopup, closePopup } = usePopup();
+
   const model = useDispatchPlanModel(MENU_CODE);
   const ctrl = useDispatchPlanController({ model });
 
@@ -118,24 +122,53 @@ export default function DispatchPlan() {
                       fields={[
                         {
                           type: "popup",
-                          label: "품목코드",
+                          label: "LBL_ITEM_CD",
                           code: model.unallocCond.ITEM_CD ?? "",
-                          name: model.unallocCond.ITEM_NM_DISP ?? "",
+                          name: model.unallocCond.ITEM_NM_DSP ?? "",
                           onChangeCode: (v) =>
                             model.setUnallocCond((c) => ({ ...c, ITEM_CD: v })),
                           // TODO: 품목 조회 팝업 연결 (선택 시 ITEM_CD/ITEM_NM_DISP 세팅)
-                          onClickSearch: () => {},
+                          onClickSearch: () => {
+                            openPopup({
+                              title: "LBL_ITEM_CD",
+                              width: "2xl",
+                              content: (
+                                <CommonPopup
+                                  sqlId="selectUnassgnItemCodeName"
+                                  extraParams={{
+                                    sqlParam1:
+                                      model.rawFiltersRef.current
+                                        .SRCH_DSPCH_LGST_GRP_CD,
+                                    sqlParam2:
+                                      model.rawFiltersRef.current
+                                        .SRCH_DSPCH_PLN_ID,
+                                    sqlParam3:
+                                      model.grids.main.selectedRef.current
+                                        ?.DSPCH_NO,
+                                  }}
+                                  onApply={(picked: any) => {
+                                    model.setUnallocCond({
+                                      ITEM_CD: picked.CODE,
+                                      ITEM_NM_DSP: picked.NAME,
+                                    });
+                                    closePopup();
+                                  }}
+                                  onClose={closePopup}
+                                />
+                              ),
+                            });
+                          },
                         },
                         {
                           type: "text",
-                          label: "품목명",
+                          label: "LBL_ITEM_NAME",
                           value: model.unallocCond.ITEM_NM ?? "",
                           onChange: (v) =>
                             model.setUnallocCond((c) => ({ ...c, ITEM_NM: v })),
                         },
                         {
                           type: "combo",
-                          label: "배송유형",
+                          label: "LBL_DLVRY_TP",
                           value: model.unallocCond.DLVRY_TP ?? "",
                           onChange: (v) =>
                             model.setUnallocCond((c) => ({
@@ -146,7 +179,7 @@ export default function DispatchPlan() {
                         },
                         {
                           type: "popup",
-                          label: "도착지",
+                          label: "LBL_DESTINATION_EX",
                           code: model.unallocCond.TO_LOC_CD ?? "",
                           name: model.unallocCond.TO_LOC_NM ?? "",
                           onChangeCode: (v) =>
@@ -154,12 +187,44 @@ export default function DispatchPlan() {
                               ...c,
                               TO_LOC_CD: v,
                             })),
-                          // TODO: 도착지 조회 팝업 연결 (선택 시 TO_LOC_CD/TO_LOC_NM 세팅)
-                          onClickSearch: () => {},
+                          onClickSearch: () => {
+                            openPopup({
+                              title: "LBL_DESTINATION_EX",
+                              width: "2xl",
+                              content: (
+                                <CommonPopup
+                                  sqlId="selectUnassgnItemLocationCodeName"
+                                  extraParams={{
+                                    sqlParam1:
+                                      model.rawFiltersRef.current
+                                        .SRCH_DSPCH_LGST_GRP_CD,
+                                    sqlParam2:
+                                      model.rawFiltersRef.current
+                                        .SRCH_DSPCH_PLN_ID,
+                                    sqlParam3: model.unallocCond.DLVRY_TP,
+                                    sqlParam4:
+                                      model.rawFiltersRef.current
+                                        .SRCH_DSPCH_DLVRY_DT,
+                                    sqlParam5:
+                                      model.grids.main.selectedRef.current
+                                        ?.DSPCH_NO,
+                                  }}
+                                  onApply={(picked: any) => {
+                                    model.setUnallocCond({
+                                      TO_LOC_CD: picked.CODE,
+                                      TO_LOC_NM: picked.NAME,
+                                    });
+                                    closePopup();
+                                  }}
+                                  onClose={closePopup}
+                                />
+                              ),
+                            });
+                          },
                         },
                         {
                           type: "combo",
-                          label: "온도조건",
+                          label: "LBL_TEMP_CAL_OPT",
                           value: model.unallocCond.TEMP_TCD ?? "",
                           onChange: (v) =>
                             model.setUnallocCond((c) => ({
@@ -170,7 +235,7 @@ export default function DispatchPlan() {
                         },
                         {
                           type: "combo",
-                          label: "P박스/비P박스",
+                          label: "LBL_PBOX_TP",
                           value: model.unallocCond.PBOX_TP ?? "",
                           onChange: (v) =>
                             model.setUnallocCond((c) => ({ ...c, PBOX_TP: v })),
