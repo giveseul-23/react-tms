@@ -196,6 +196,7 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
                 .filter((p: any) => !existing.has(p.CODE))
                 .map((p: any) => ({
                   INSRNC_ID: rate.INSRNC_ID,
+                  AP_PROC_TP: rate.AP_PROC_TP,
                   CHG_CD: p.CODE,
                   CHG_NM: p.NAME,
                 })),

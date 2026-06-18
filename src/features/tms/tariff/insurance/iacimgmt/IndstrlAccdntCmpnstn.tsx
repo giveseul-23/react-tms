@@ -2,7 +2,6 @@
 
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useIndstrlAccdntCmpnstnModel } from "./IndstrlAccdntCmpnstnModel";
@@ -14,6 +13,14 @@ import {
 } from "./IndstrlAccdntCmpnstnColumns";
 
 export const MENU_CODE = "MENU_IACI_MGMT";
+
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_IACI",
+    rate: "SUB01_GRID_IACI",
+    chg: "SUB02_GRID_IACI",
+  },
+};
 
 export default function IndstrlAccdntCmpnstn() {
   const model = useIndstrlAccdntCmpnstnModel(MENU_CODE);
@@ -27,6 +34,7 @@ export default function IndstrlAccdntCmpnstn() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
+        excludes: ["IACI.USE_YN"],
         ...model.bindSearch(),
       }}
       defaultDirection="horizontal"
@@ -35,6 +43,7 @@ export default function IndstrlAccdntCmpnstn() {
         <DataGrid
           {...model.bind("main")}
           columnDefs={MAIN_COLUMN_DEFS}
+          authId={AUTH.grids.main}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           rowSelection="multiple"
@@ -52,15 +61,20 @@ export default function IndstrlAccdntCmpnstn() {
           <DataGrid
             {...model.bind("rate")}
             columnDefs={DETAIL01_COLUMN_DEFS}
+            authId={AUTH.grids.rate}
             codeMap={model.codeMap}
+            model={model}
             actions={ctrl.rateActions}
             onRowClicked={ctrl.onRateRowClicked}
+            audit={{ rowStatus: false }}
           />
           <DataGrid
             {...model.bind("chg")}
             columnDefs={DETAIL02_COLUMN_DEFS}
+            authId={AUTH.grids.chg}
             codeMap={model.codeMap}
             actions={ctrl.chgActions}
+            audit={{ updatePerson: false, updateTime: false }}
           />
         </SplitPane>
       }
