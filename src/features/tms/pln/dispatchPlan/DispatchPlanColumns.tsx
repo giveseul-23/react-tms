@@ -299,8 +299,8 @@ export const STOP_COLUMN_DEFS = [
   }, // 직전이동거리
 ];
 
-// ── 할당주문 탭 ──────────────────────────────────────────────
-export const ALLOC_ORDER_COLUMN_DEFS = [
+// ── 할당주문 / 미할당주문 탭 (컬럼 구성 동일 — 단일 정의 공유) ─
+const buildOrderColumns = () => [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" }, // 출발지명
   { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" }, // 도착지명
@@ -384,8 +384,8 @@ export const ALLOC_ORDER_COLUMN_DEFS = [
   { type: "check", headerName: "LBL_CUST_PICKUP_YN", field: "CUST_PICKUP_YN" }, //고객사 픽업 여부
 ];
 
-// ── 할당주문 탭 · SUB(품목) 그리드 ───────────────────────────
-export const ALLOC_ORDER_SUB_COLUMN_DEFS = [
+// ── 할당주문 / 미할당주문 SUB(품목) 그리드 (컬럼 구성 동일) ──
+const buildOrderSubColumns = () => [
   { type: "text", headerName: "LBL_ORD_ITM_LINE_NO", field: "ORD_LINE_NO" }, // 품목라인
   { type: "text", headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD" }, // 품목코드
   { type: "text", headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
@@ -582,6 +582,9 @@ export const ALLOC_ORDER_SUB_COLUMN_DEFS = [
     codeKey: "vehTempTcd",
   },
 ];
+
+export const ALLOC_ORDER_COLUMN_DEFS = buildOrderColumns();
+export const ALLOC_ORDER_SUB_COLUMN_DEFS = buildOrderSubColumns();
 
 // ── 할당주문 탭 · 품목(ITEM) 단일 그리드 ─────────────────────
 export const ALLOC_ORDER_ITEM_COLUMN_DEFS = [
@@ -707,289 +710,11 @@ export const ALLOC_ORDER_ITEM_COLUMN_DEFS = [
   }, // 품목비고사항
 ];
 
-// ── 미할당주문 탭 ────────────────────────────────────────────
-export const UNALLOC_ORDER_COLUMN_DEFS = [
-  { headerName: "No" },
-  { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" }, // 출발지명
-  { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM" }, // 도착지명
-  {
-    type: "text",
-    headerName: "LBL_TO_DETAIL_ADDRESS_1",
-    field: "TO_DTL_ADDR1",
-  }, // 도착지상세주소1
-  { type: "text", headerName: "LBL_DESTINATION_ZIP_CODE", field: "TO_ZIP_CD" }, // 도착지우편번호
-  {
-    type: "combo",
-    headerName: "LBL_ORDER_TYPE",
-    field: "ORD_TP",
-    codeKey: "ordTpList",
-    align: "center",
-  }, // 주문유형
-  { type: "numeric", headerName: "LBL_ITEM_UOM", field: "QTY" }, // 품목단위
-  {
-    headerName: "LBL_VOL",
-    field: "PLN_VOL",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  }, //계획CBM
-  {
-    headerName: "LBL_WGT",
-    field: "PLN_WGT",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  }, //계획중량
-  {
-    headerName: "LBL_FLEX_QTY1",
-    field: "PLN_FLEX_QTY1",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  }, //계획FQ1
-  {
-    headerName: "LBL_FLEX_QTY2",
-    field: "PLN_FLEX_QTY2",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  }, //계획FQ2
-  {
-    headerName: "LBL_FLEX_QTY3",
-    field: "PLN_FLEX_QTY3",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  }, //계획FQ3
-  {
-    headerName: "LBL_FLEX_QTY4",
-    field: "PLN_FLEX_QTY4",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  }, //계획FQ4
-  {
-    headerName: "LBL_FLEX_QTY5",
-    field: "PLN_FLEX_QTY5",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  }, //계획FQ5
-  { type: "text", headerName: "LBL_CUSTOMER_ORDER_NO", field: "CUST_ORD_NO" }, //고객주문번호
-  { type: "text", headerName: "LBL_ORDER_NO", field: "ORD_NO" }, //주문번호
-  { type: "text", headerName: "LBL_SHIPMENT_NUMBER", field: "SHPM_NO" }, //운송주문번호
-  { type: "text", headerName: "LBL_DESTINATION_CODE", field: "TO_LOC_CD" }, //도착지코드
-  { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD" }, //출발지코드
-  {
-    type: "text",
-    headerName: "LBL_FRM_DETAIL_ADDRESS_1",
-    field: "FRM_DTL_ADDR1",
-  }, //출발지 상세주소 1
-  { type: "text", headerName: "LBL_DEPARTURE_ZIP_CODE", field: "FRM_ZIP_CD" }, //출발지 우편번호
-  { type: "text", headerName: "LBL_SHPM_RMRK", field: "SHPM_RSN_DESC" }, //주문비고
-  { type: "text", headerName: "LBL_SOLD_TO_CD", field: "SOLD_TO_CD" }, //거래처코드
-  { type: "text", headerName: "LBL_SOLD_TO_NM", field: "SOLD_TO_NM" }, //거래처명
-  { type: "check", headerName: "LBL_CUST_PICKUP_YN", field: "CUST_PICKUP_YN" }, //고객사 픽업 여부
-];
+// ── 미할당주문 탭 (할당주문과 컬럼 구성 동일) ────────────────
+export const UNALLOC_ORDER_COLUMN_DEFS = buildOrderColumns();
 
-// ── 미할당주문 탭 · SUB(품목) 그리드 ─────────────────────────
-export const UNALLOC_ORDER_SUB_COLUMN_DEFS = [
-  { type: "text", headerName: "LBL_ORD_ITM_LINE_NO", field: "ORD_LINE_NO" }, // 품목라인
-  { type: "text", headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD" }, // 품목코드
-  { type: "text", headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
-  { headerName: "LBL_PLN_ORD_QTY", field: "PLN_ORD_QTY", type: "numeric" }, // 계획주문수량
-  {
-    type: "combo",
-    headerName: "LBL_PLN_ORD_QTY_UOM",
-    field: "PLN_ORD_QTY_UOM",
-    codeKey: "itmUomList",
-  }, // 계획주문수량UOM
-  { headerName: "LBL_PLN_INV_QTY", field: "PLN_INV_QTY", type: "numeric" }, // 계획재고수량
-  {
-    type: "combo",
-    headerName: "LBL_PLN_INV_QTY_UOM",
-    field: "PLN_INV_QTY_UOM",
-    codeKey: "itmUomList",
-  }, // 계획재고수량
-  {
-    headerName: "LBL_PLN_NET_WGT",
-    field: "PLN_NET_WGT",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLN_GRS_WGT",
-    field: "PLN_GRS_WGT",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLN_PLT_QTY",
-    field: "PLN_PLT_QTY",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLN_RTNR_QTY",
-    field: "PLN_RTNR_QTY",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLN_PBOX_QTY",
-    field: "PLN_PBOX_QTY",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLN_BOX_QTY",
-    field: "PLN_BOX_QTY",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLANNED_FLEX_QTY1",
-    field: "PLN_FLEX_QTY1",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLANNED_FLEX_QTY2",
-    field: "PLN_FLEX_QTY2",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLANNED_FLEX_QTY3",
-    field: "PLN_FLEX_QTY4",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLANNED_FLEX_QTY4",
-    field: "PLN_FLEX_QTY4",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_PLANNED_FLEX_QTY5",
-    field: "PLN_FLEX_QTY5",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CFM_ORD_QTY",
-    field: "CFM_ORD_QTY_UOM",
-    type: "numeric",
-  },
-  {
-    headerName: "LBL_CFM_INV_QTY",
-    field: "CFM_INV_QTY",
-    type: "numeric",
-  },
-  {
-    headerName: "LBL_CFM_INV_QTY_UOM",
-    field: "CFM_INV_QTY_UOM",
-    type: "combo",
-    codeKey: "itmUomList",
-  },
-  {
-    headerName: "LBL_CFM_NET_WGT",
-    field: "CFM_NET_WGT",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CFM_GRS_WGT",
-    field: "CFM_GRS_WGT",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CFM_PLT_QTY",
-    field: "CFM_PLT_QTY",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CFM_RTNR_QTY",
-    field: "CFM_RTNR_QTY",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CFM_PBOX_QTY",
-    field: "CFM_PBOX_QTY",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CFM_BOX_QTY",
-    field: "CFM_BOX_QTY",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CONFIRMED_FLEX_QTY1",
-    field: "CFM_FLEX_QTY1",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CONFIRMED_FLEX_QTY2",
-    field: "CFM_FLEX_QTY2",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CONFIRMED_FLEX_QTY3",
-    field: "CFM_FLEX_QTY3",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CONFIRMED_FLEX_QTY4",
-    field: "CFM_FLEX_QTY4",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  {
-    headerName: "LBL_CONFIRMED_FLEX_QTY5",
-    field: "CFM_FLEX_QTY5",
-    type: "numeric",
-    summable: true,
-    valueFormatter: numberValueFormatter,
-  },
-  { type: "text", headerName: "LBL_ITEM_REMARK", field: "SHPM_DTL_RSN_DESC" },
-  { type: "text", headerName: "LBL_FEED_FCD", field: "ITEM_FCD" },
-  {
-    type: "combo",
-    headerName: "LBL_TEMPER_ZONE",
-    field: "TEMP_TCD",
-    codeKey: "vehTempTcd",
-  },
-];
+// ── 미할당주문 탭 · SUB(품목) 그리드 (할당주문 SUB와 동일) ───
+export const UNALLOC_ORDER_SUB_COLUMN_DEFS = buildOrderSubColumns();
 
 //차량정보
 export const VEH_MGMT_COLUMN_DEFS = [

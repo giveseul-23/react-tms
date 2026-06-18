@@ -39,6 +39,14 @@ export const AUTH = {
   },
 };
 
+// detail 탭 정의 — 정적이므로 모듈 상수로 고정(렌더마다 재생성 방지).
+const DETAIL_TABS = [
+  { key: "STOP", label: "LBL_STOP" },
+  { key: "ALLOC", label: "LBL_ASSIGNED_SHIPMENTS" },
+  { key: "UNALLOC", label: "LBL_UNASSIGNED_SHIPMENTS" },
+  { key: "VEHMGMT", label: "LBL_VEHICLE_MANAGER" },
+];
+
 export default function DispatchPlan() {
   const { openPopup, closePopup } = usePopup();
 
@@ -268,12 +276,7 @@ export default function DispatchPlan() {
         detail={
           <DataGrid
             layoutType="tab"
-            tabs={[
-              { key: "STOP", label: "LBL_STOP" },
-              { key: "ALLOC", label: "LBL_ASSIGNED_SHIPMENTS" },
-              { key: "UNALLOC", label: "LBL_UNASSIGNED_SHIPMENTS" },
-              { key: "VEHMGMT", label: "LBL_VEHICLE_MANAGER" },
-            ]}
+            tabs={DETAIL_TABS}
             presets={{
               STOP: {
                 render: () => (
