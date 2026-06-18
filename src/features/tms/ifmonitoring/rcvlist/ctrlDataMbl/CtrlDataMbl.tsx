@@ -8,6 +8,11 @@ import { useCtrlDataMblController } from "./CtrlDataMblController";
 import { MAIN_COLUMN_DEFS } from "./CtrlDataMblColumns";
 
 export const MENU_CODE = "MENU_IF_RCV_CTRL_DATA_MBL";
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_IF_RCV_CTRL_DATA_MBL",
+  },
+};
 
 export default function CtrlDataMbl() {
   const model = useCtrlDataMblModel(MENU_CODE);
@@ -26,7 +31,7 @@ export default function CtrlDataMbl() {
         <DataGrid
           {...model.bind("main")}
           rowSelection="multiple"
-          authId="MAIN_GRID_IF_RCV_CTRL_DATA_MBL"
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}

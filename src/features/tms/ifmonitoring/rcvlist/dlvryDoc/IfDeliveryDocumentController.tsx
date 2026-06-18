@@ -103,30 +103,10 @@ export function useIfDeliveryDocumentController({ model }: Args) {
     [menuName, model.grids.main, model.filtersRef, onReProcess],
   );
 
-  const detailActions: ActionItem[] = useMemo(
-    () => [
-      makeExcelGroupAction({
-        excelColumns: () => model.grids.detail.getExcelColumns(),
-        menuCode: MENU_CODE,
-        menuName,
-        fetchFn: () => {
-          const main = model.grids.main.selectedRef.current;
-          return main
-            ? api.getDetailList({ IF_ID: main.IF_ID, ORD_NO: main.ORD_NO })
-            : Promise.resolve({ data: { result: [] } });
-        },
-        rows: model.grids.detail.rows,
-        hideAll: true,
-      }),
-    ],
-    [menuName, model.grids.detail, model.grids.main.selectedRef],
-  );
-
   return {
     fetchList,
     onSearchCallback,
     onMainGridClick,
     mainActions,
-    detailActions,
   };
 }

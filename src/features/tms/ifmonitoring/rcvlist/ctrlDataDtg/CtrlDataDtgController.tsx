@@ -64,7 +64,15 @@ export function useCtrlDataDtgController({ model }: Args) {
       }
 
       base
-        .callAjax(api.reprocess({ dsSave: selectedRows }), "MSG_SAVE_CMPLT")
+        .callAjax(
+          api.reprocess({
+            dsSave: selectedRows.map((row: any) => ({
+              ...row,
+              rowStatus: "U",
+            })),
+          }),
+          "MSG_SAVE_CMPLT",
+        )
         .then(() => base.search());
     },
     [base],

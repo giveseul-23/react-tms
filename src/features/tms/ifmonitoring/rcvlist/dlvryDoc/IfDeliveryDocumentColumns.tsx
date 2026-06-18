@@ -65,7 +65,6 @@ export const MAIN_COLUMN_DEFS = [
 
 // 납품상세
 export const DETAIL_COLUMN_DEFS = [
-  { headerName: "No" },
   { type: "text", headerName: "LBL_INTERFAE_ID", field: "IF_ID" },
   { type: "text", headerName: "LBL_ORDER_NO", field: "ORD_NO" },
   { type: "numeric", headerName: "LBL_ORD_LINE_CNT", field: "ORD_LINE_NO" },
