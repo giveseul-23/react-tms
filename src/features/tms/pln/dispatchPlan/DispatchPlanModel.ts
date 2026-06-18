@@ -16,11 +16,19 @@ export function useDispatchPlanModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
   const [unallocSearching, setUnallocSearching] = useState(false);
+  const [allocSearching, setAllocSearching] = useState(false);
   const [vehMgmtSearching, setVehMgmtSearching] = useState(false);
   const [vehLocPanelOpen, setVehLocPanelOpen] = useState(false);
   const [routePanelOpen, setRoutePanelOpen] = useState(false);
   // 미할당주문 탭 조회조건(카드형). 필드 키는 클라 기준 — 서버 파라미터명은 호출부에서 매핑.
   const [unallocCond, setUnallocCond] = useState<Record<string, string>>({});
+  // 할당주문 탭 조회조건(카드형) — 미할당과 동일 UI, 상태는 별도 관리.
+  const [allocCond, setAllocCond] = useState<Record<string, string>>({});
+  // 차량정보 탭 조회조건(카드형) — 미할당과 동일 UI, 상태는 별도 관리.
+  const [vehMgmtCond, setVehMgmtCond] = useState<Record<string, string>>({});
+  // 탭별 조회조건 접힘 상태 — 탭 본문이 같은 트리 위치라 controlled 로 분리(전환 후에도 각자 유지).
+  const [unallocCondOpen, setUnallocCondOpen] = useState(true);
+  const [allocCondOpen, setAllocCondOpen] = useState(true);
 
   const { stores, codeMap } = useCommonStores({
     dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
@@ -73,6 +81,8 @@ export function useDispatchPlanModel(menuCode: string) {
     ...base,
     unallocSearching,
     setUnallocSearching,
+    allocSearching,
+    setAllocSearching,
     vehMgmtSearching,
     setVehMgmtSearching,
     vehLocPanelOpen,
@@ -81,6 +91,14 @@ export function useDispatchPlanModel(menuCode: string) {
     setRoutePanelOpen,
     unallocCond,
     setUnallocCond,
+    allocCond,
+    setAllocCond,
+    vehMgmtCond,
+    setVehMgmtCond,
+    unallocCondOpen,
+    setUnallocCondOpen,
+    allocCondOpen,
+    setAllocCondOpen,
     stores,
     codeMap,
   };

@@ -95,7 +95,7 @@ export const DETAIL_RIGHT_COLUMN_DEFS = [
     insertable: true,
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_UNIT_COST",
     field: "UNIT_RATE",
     editable: true,

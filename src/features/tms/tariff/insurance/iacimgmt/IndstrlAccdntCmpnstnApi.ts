@@ -86,7 +86,7 @@ export const indstrlAccdntCmpnstnApi = {
   saveBatch(rows: any[]) {
     return apiClient.post<commonResponse>(
       `/iaciService/saveBatch`,
-      withSession(rows),
+      { dsSave: withSession(rows) },
       { params: { ...getSessionFields(), MENU_CD: MENU_CODE } },
     );
   },

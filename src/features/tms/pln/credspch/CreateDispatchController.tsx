@@ -14,7 +14,7 @@ import ChangeShipLocationPop, {
 } from "./popup/ChangeShipLocationPop";
 import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
 import ItineraryPlanPop from "./popup/ItineraryPlanPop";
-import CreateEmptyDispatchVehiclePop from "../dispatchPlanAd/popup/CreateEmptyDispatchVehiclePop";
+import CreateEmptyDispatchVehiclePop from "../dispatchPlan/popup/CreateEmptyDispatchVehiclePop";
 import ShipmentTransferPop from "../rcvshpm/popup/ShipmentTransferPop";
 import SplitQtyPop from "../dispatchPlanAd/popup/SplitQtyPop";
 
@@ -34,26 +34,35 @@ export function useCreateDispatchController({ model }: Args) {
   const selectedMainRowsRef = useRef<any[]>([]);
   const selectedSub01RowsRef = useRef<any[]>([]);
 
-  const toDsSave = useCallback((rows: any[]) =>
-    rows.map(({ EDIT_STS, __rid__, ...row }) => ({
-      ...row,
-      rowStatus: row.rowStatus ?? EDIT_STS ?? "U",
-    })), []);
+  const toDsSave = useCallback(
+    (rows: any[]) =>
+      rows.map(({ EDIT_STS, __rid__, ...row }) => ({
+        ...row,
+        rowStatus: row.rowStatus ?? EDIT_STS ?? "U",
+      })),
+    [],
+  );
 
-  const selectedMainRows = useCallback(() => selectedMainRowsRef.current ?? [], []);
+  const selectedMainRows = useCallback(
+    () => selectedMainRowsRef.current ?? [],
+    [],
+  );
 
-  const requireMainRows = useCallback((single = false) => {
-    const rows = selectedMainRows();
-    if (!rows.length) {
-      base.alert(Lang.get("MSG_SELECT_NO_DATA"));
-      return null;
-    }
-    if (single && rows.length !== 1) {
-      base.alert(Lang.get("MSG_CHK_SELECT_CNT"));
-      return null;
-    }
-    return rows;
-  }, [base, selectedMainRows]);
+  const requireMainRows = useCallback(
+    (single = false) => {
+      const rows = selectedMainRows();
+      if (!rows.length) {
+        base.alert(Lang.get("MSG_SELECT_NO_DATA"));
+        return null;
+      }
+      if (single && rows.length !== 1) {
+        base.alert(Lang.get("MSG_CHK_SELECT_CNT"));
+        return null;
+      }
+      return rows;
+    },
+    [base, selectedMainRows],
+  );
 
   const selectedSub01Rows = useCallback(() => selectedSub01RowsRef.current ?? [], []);
 
@@ -110,42 +119,58 @@ export function useCreateDispatchController({ model }: Args) {
     [],
   );
 
-  const loadSub01 = useCallback(async (row: any) => {
-    base.resetGrids(["sub01"]);
-    if (!row) return;
-    const subRows = await base.searchSub("sub01", fetchSub01(row));
-    const first = model.grids.sub01.ref.current?.rows?.[0] ?? subRows?.[0];
-    if (first) model.grids.sub01.setSelected(first);
-  }, [base, fetchSub01, model.grids.sub01]);
-
-  const onMainGridClick = useCallback((row: any) => {
-    model.grids.main.setSelected(row ?? null);
-    void loadSub01(row);
-  }, [loadSub01, model.grids.main]);
-
-  const onMainSelectionChanged = useCallback((rows: any[] | null) => {
-    selectedMainRowsRef.current = rows ?? [];
-    const first = rows?.[0] ?? null;
-    model.grids.main.setSelected(first);
-    void loadSub01(first);
-  }, [loadSub01, model.grids.main]);
-
-  const onSub01SelectionChanged = useCallback((rows: any[] | null) => {
-    selectedSub01RowsRef.current = rows ?? [];
-    model.grids.sub01.setSelected(rows?.[0] ?? null);
-  }, [model.grids.sub01]);
-
-  const onSearchCallback = useCallback((data: any) => {
-    model.grids.main.setData(data);
-    const firstMain = model.grids.main.ref.current?.rows?.[0] ?? data?.rows?.[0] ?? null;
-    selectedMainRowsRef.current = firstMain ? [firstMain] : [];
-    if (firstMain) {
-      model.grids.main.setSelected(firstMain);
-      void loadSub01(firstMain);
-    } else {
+  const loadSub01 = useCallback(
+    async (row: any) => {
       base.resetGrids(["sub01"]);
-    }
-  }, [base, loadSub01, model.grids.main]);
+      if (!row) return;
+      const subRows = await base.searchSub("sub01", fetchSub01(row));
+      const first = model.grids.sub01.ref.current?.rows?.[0] ?? subRows?.[0];
+      if (first) model.grids.sub01.setSelected(first);
+    },
+    [base, fetchSub01, model.grids.sub01],
+  );
+
+  const onMainGridClick = useCallback(
+    (row: any) => {
+      model.grids.main.setSelected(row ?? null);
+      void loadSub01(row);
+    },
+    [loadSub01, model.grids.main],
+  );
+
+  const onMainSelectionChanged = useCallback(
+    (rows: any[] | null) => {
+      selectedMainRowsRef.current = rows ?? [];
+      const first = rows?.[0] ?? null;
+      model.grids.main.setSelected(first);
+      void loadSub01(first);
+    },
+    [loadSub01, model.grids.main],
+  );
+
+  const onSub01SelectionChanged = useCallback(
+    (rows: any[] | null) => {
+      selectedSub01RowsRef.current = rows ?? [];
+      model.grids.sub01.setSelected(rows?.[0] ?? null);
+    },
+    [model.grids.sub01],
+  );
+
+  const onSearchCallback = useCallback(
+    (data: any) => {
+      model.grids.main.setData(data);
+      const firstMain =
+        model.grids.main.ref.current?.rows?.[0] ?? data?.rows?.[0] ?? null;
+      selectedMainRowsRef.current = firstMain ? [firstMain] : [];
+      if (firstMain) {
+        model.grids.main.setSelected(firstMain);
+        void loadSub01(firstMain);
+      } else {
+        base.resetGrids(["sub01"]);
+      }
+    },
+    [base, loadSub01, model.grids.main],
+  );
 
   const onManualPlan = useCallback(() => {
     const rows = requireMainRows();
@@ -220,15 +245,17 @@ export function useCreateDispatchController({ model }: Args) {
           initialValues={initialValues}
           onConfirm={(picked) => {
             closePopup();
-            void base.callAjax(
-              createDispatchApi.saveCreateItineraryGroupDispatch({
-                dsSave: picked.map((row) => ({
-                  ...row,
-                  ...initialValues,
-                  rowStatus: row.rowStatus ?? "I",
-                })),
-              }),
-            ).then(() => base.search());
+            void base
+              .callAjax(
+                createDispatchApi.saveCreateItineraryGroupDispatch({
+                  dsSave: picked.map((row) => ({
+                    ...row,
+                    ...initialValues,
+                    rowStatus: row.rowStatus ?? "I",
+                  })),
+                }),
+              )
+              .then(() => base.search());
           }}
           onClose={closePopup}
         />

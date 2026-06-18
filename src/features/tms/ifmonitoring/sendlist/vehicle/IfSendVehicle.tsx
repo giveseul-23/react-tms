@@ -9,6 +9,12 @@ import { MAIN_COLUMN_DEFS } from "./IfSendVehicleColumns";
 
 export const MENU_CODE = "MENU_IF_SEND_VEHICLE";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_IF_SEND_VEHICLE",
+  },
+};
+
 export default function IfSendVehicle() {
   const model = useIfSendVehicleModel(MENU_CODE);
   const ctrl = useIfSendVehicleController({ model });
@@ -26,7 +32,7 @@ export default function IfSendVehicle() {
         <DataGrid
           {...model.bind("main")}
           rowSelection="multiple"
-          authId="MAIN_GRID_IF_SEND_VEHICLE"
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}

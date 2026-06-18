@@ -1,9 +1,9 @@
 // src/views/dispatchPlan/DispatchPlanController.tsx
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import { dispatchPlanApi as api } from "./dispatchPlanApi";
+import { dispatchPlanApi as api } from "../dispatchPlanAd/dispatchPlanApi";
 import { useGuard } from "@/hooks/useGuard";
-import { MENU_CODE } from "./DispatchPlan";
+import { MENU_CODE } from "../dispatchPlanAd/DispatchPlan";
 import {
   makeSaveAction,
   makeExcelGroupAction,
@@ -96,45 +96,87 @@ export function useDispatchPlanController({ model }: Args) {
     [base],
   );
 
-  // 미할당 탭 조회 (조회조건 개별 값 기반)
-  const handleUnallocOrderSearch = useCallback(() => {
-    const srchObj = model.rawFiltersRef.current;
-    const c = model.unallocCond;
-    model.setUnallocSearching(true);
-    api
-      .getUnallocOrderList({
+  const handleUnallocAndAllocOrderSearch = useCallback(
+    (cfg: {
+      cond: Record<string, string>;
+      searching: (v: boolean) => void;
+      onSearch: (params: Record<string, unknown>) => Promise<any>;
+      setData: (d: any) => void;
+      extraParams?: Record<string, unknown>;
+    }) => {
+      const { cond, searching, onSearch, setData, extraParams } = cfg;
+      const srchObj = model.rawFiltersRef.current;
+      const c = cond;
+      searching(true);
+      onSearch({
         DIV_CD: srchObj["SRCH_DSPCH_DIV_CD"],
         LGST_GRP_CD: srchObj["SRCH_DSPCH_LGST_GRP_CD"],
         PLN_ID: srchObj["SRCH_DSPCH_PLN_ID"],
         DLVRY_DT: srchObj["SRCH_DSPCH_DLVRY_DT"],
-        // TODO(서버 파라미터명 확정 필요): 탭 조회조건 키 매핑
-        //  품목코드 → 서버는 itemList:[{CUST_ITEM_CD}] / 도착지 → SRCH_TO_LOC_CD / 배송유형 → DLVRY_TP
-        //  품목명·온도조건·P박스는 현재 서버 조회 SQL에 필터 없음 (서버 보강 후 연결)
-        ITEM_CD: c.ITEM_CD,
+        CUST_ITEM_CD: c.ITEM_CD,
         ITEM_NM: c.ITEM_NM,
-        DLVRY_TP: c.DLVRY_TP,
+        DLVRY_TP: c.DLVRY_TP === "ALL" ? "" : c.DLVRY_TP,
         TO_LOC_CD: c.TO_LOC_CD,
-        TEMP_TCD: c.TEMP_TCD,
-        PBOX_TP: c.PBOX_TP,
+        TEMP_TCD: c.TEMP_TCD === "ALL" ? "" : c.TEMP_TCD,
+        PBOX_TP: c.PBOX_TP === "ALL" ? "" : c.PBOX_TP,
+        ...extraParams,
       })
-      .then((res: any) => {
-        const rows = res.data.result ?? res.data.data?.dsOut ?? [];
-        model.grids.unallocOrder.setData({
-          rows,
-          totalCount: rows.length,
-          page: 1,
-          limit: 20,
-        });
-      })
-      .catch((err) =>
-        console.error("[DispatchPlan] unalloc search failed", err),
-      )
-      .finally(() => model.setUnallocSearching(false));
-  }, [model]);
+        .then((res: any) => {
+          const rows = res.data.result ?? res.data.data?.dsOut ?? [];
+          setData({
+            rows,
+            totalCount: rows.length,
+            page: 1,
+            limit: 20,
+          });
+        })
+        .catch((err) =>
+          console.error("[DispatchPlan] order search failed", err),
+        )
+        .finally(() => searching(false));
+    },
+    [model],
+  );
 
-  // 미할당 탭 조회 (조회조건 개별 값 기반)
+  // 미할당 탭 조회 (조회조건 개별 값 기반) — ITEM=품목 상세 / ALL=주문 단위 API 분기
+  const handleUnallocOrderSearch = useCallback(() => {
+    handleUnallocAndAllocOrderSearch({
+      cond: model.unallocCond,
+      searching: model.setUnallocSearching,
+      onSearch:
+        model.unallocCond.SRCH_FILTER === "ITEM"
+          ? api.getAllocAndUnallocOrderItemList
+          : api.getUnallocOrderList,
+      extraParams:
+        model.unallocCond.SRCH_FILTER === "" &&
+        model.unallocCond.DLVRY_TP !== "ALL"
+          ? {
+              DLVRY_TP: model.unallocCond.DLVRY_TP,
+            }
+          : {},
+      setData: model.grids.unallocOrder.setData,
+    });
+  }, [handleUnallocAndAllocOrderSearch, model]);
+
+  // 할당 탭 조회 (조회조건 개별 값 기반) — 미할당과 동일 UI, 상태는 allocCond 로 별도 관리.
+  const handleAllocOrderSearch = useCallback(() => {
+    handleUnallocAndAllocOrderSearch({
+      cond: model.allocCond,
+      searching: model.setAllocSearching,
+      onSearch:
+        model.allocCond.SRCH_FILTER === "ITEM"
+          ? api.getAllocAndUnallocOrderItemList
+          : api.getAllocOrderList,
+      setData: model.grids.allocOrder.setData,
+      extraParams: {
+        DSPCH_NO: model.grids.main.selectedRef.current?.DSPCH_NO,
+      },
+    });
+  }, [handleUnallocAndAllocOrderSearch, model]);
+
   const handleVehMgmtSearch = useCallback(() => {
     const srchObj = model.rawFiltersRef.current;
+    const c = model.vehMgmtCond;
     model.setVehMgmtSearching(true);
     api
       .searchVehInfo({
@@ -142,6 +184,7 @@ export function useDispatchPlanController({ model }: Args) {
         LGST_GRP_CD: srchObj["SRCH_DSPCH_LGST_GRP_CD"],
         PLN_ID: srchObj["SRCH_DSPCH_PLN_ID"],
         DLVRY_DT: srchObj["SRCH_DSPCH_DLVRY_DT"],
+        DRVR_NM: c.DRVR_NM,
       })
       .then((res: any) => {
         const rows = res.data.result ?? res.data.data?.dsOut ?? [];
@@ -875,7 +918,7 @@ export function useDispatchPlanController({ model }: Args) {
         onClick: onUnassignedShipment,
       },
     ],
-    [onUnassignedShipment],
+    [handleUnallocOrderSearch, model.unallocSearching, onUnassignedShipment],
   );
 
   const unallocOrderActions: ActionItem[] = useMemo(
@@ -890,24 +933,6 @@ export function useDispatchPlanController({ model }: Args) {
     ],
     [onAssignedShipment],
   );
-
-  // const allocSubActions: ActionItem[] = useMemo(
-  //   () => [
-  //     {
-  //       type: "button",
-  //       key: "BTN_ITEM_LINE_SPLIT",
-  //       label: "BTN_ITEM_LINE_SPLIT",
-  //       onClick: () => onSplitLine("allocSub", "allocOrder"),
-  //     },
-  //     {
-  //       type: "button",
-  //       key: "BTN_ITEM_QTY_SPLIT",
-  //       label: "BTN_ITEM_QTY_SPLIT",
-  //       onClick: () => onSplitQty("allocSub", "allocOrder"),
-  //     },
-  //   ],
-  //   [onSplitLine, onSplitQty],
-  // );
 
   const unallocSubActions: ActionItem[] = useMemo(
     () => [
@@ -927,19 +952,6 @@ export function useDispatchPlanController({ model }: Args) {
     [onSplitLine, onSplitQty],
   );
 
-  const vehMgmtSubActions: ActionItem[] = useMemo(
-    () => [
-      {
-        type: "button",
-        key: "BTN_SEARCH",
-        label: model.vehMgmtSearching ? "LBL_SEARCHING" : "BTN_SEARCH",
-        disabled: model.vehMgmtSearching,
-        onClick: handleVehMgmtSearch,
-      },
-    ],
-    [handleVehMgmtSearch, model.vehMgmtSearching],
-  );
-
   return {
     fetchDispatchPlanList: fetchList,
     onSearchCallback,
@@ -950,9 +962,10 @@ export function useDispatchPlanController({ model }: Args) {
     stopActions,
     allocOrderActions,
     unallocOrderActions,
-    // allocSubActions,
     unallocSubActions,
-    vehMgmtSubActions,
     handleUnallocOrderSearch,
+    handleAllocOrderSearch,
+    handleVehMgmtSearch,
+    resetGrids: base.resetGrids,
   };
 }

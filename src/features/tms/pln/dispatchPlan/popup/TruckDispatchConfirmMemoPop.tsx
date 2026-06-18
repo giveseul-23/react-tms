@@ -10,7 +10,7 @@ import { RotateCcw, SlidersHorizontal } from "lucide-react";
 import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
 import { useErrorAlert } from "@/hooks/useErrorAlert";
 import { Lang } from "@/app/services/common/Lang";
-import { dispatchPlanApi as api } from "../dispatchPlanApi";
+import { dispatchPlanApi as api } from "../../dispatchPlanAd/dispatchPlanApi";
 
 const MEMO_DESC_MAX_LEN = 1000;
 
@@ -51,7 +51,9 @@ const emptyMemos = (): MemoState => ({
 // "YYYYMMDD" → "YYYY-MM-DD" (표시용)
 function formatDate(v?: string): string {
   const d = String(v ?? "").replace(/[^0-9]/g, "");
-  return d.length >= 8 ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}` : String(v ?? "");
+  return d.length >= 8
+    ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`
+    : String(v ?? "");
 }
 
 type Props = {
@@ -82,8 +84,9 @@ export default function TruckDispatchConfirmMemoPop({
           showError(res.data?.msg ?? Lang.get("TTL_ERR"));
           return;
         }
-        const raw = res.data?.result ?? res.data?.data?.dsOut ?? res.data?.data ?? {};
-        const memo = Array.isArray(raw) ? raw[0] ?? {} : raw;
+        const raw =
+          res.data?.result ?? res.data?.data?.dsOut ?? res.data?.data ?? {};
+        const memo = Array.isArray(raw) ? (raw[0] ?? {}) : raw;
         setMemos({
           DSPCH_MNGR_MEMO: String(memo.DSPCH_MNGR_MEMO ?? ""),
           CARR_MEMO: String(memo.CARR_MEMO ?? ""),
@@ -93,7 +96,9 @@ export default function TruckDispatchConfirmMemoPop({
       })
       .catch((err: any) =>
         showError(
-          err?.response?.data?.error?.message ?? err?.message ?? Lang.get("TTL_ERR"),
+          err?.response?.data?.error?.message ??
+            err?.message ??
+            Lang.get("TTL_ERR"),
         ),
       );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,7 +127,9 @@ export default function TruckDispatchConfirmMemoPop({
       })
       .catch((err: any) =>
         showError(
-          err?.response?.data?.error?.message ?? err?.message ?? Lang.get("TTL_ERR"),
+          err?.response?.data?.error?.message ??
+            err?.message ??
+            Lang.get("TTL_ERR"),
         ),
       );
   };
@@ -165,7 +172,10 @@ export default function TruckDispatchConfirmMemoPop({
             { label: "LBL_VEHICLE_NUMBER", value: String(row.VEH_NO ?? "") },
             { label: "LBL_DRIVER_NAME", value: String(row.DRVR_NM ?? "") },
           ].map((f) => (
-            <div key={f.label} className="flex flex-col px-3 py-2 bg-white min-w-0">
+            <div
+              key={f.label}
+              className="flex flex-col px-3 py-2 bg-white min-w-0"
+            >
               <label className="text-[10px] font-medium text-slate-400 mb-0.5">
                 {Lang.get(f.label)}
               </label>

@@ -29,6 +29,7 @@ function fieldSummary(f: GridSearchField): string | null {
   const raw = f.value?.trim();
   if (!raw) return null;
   if (f.type === "combo") {
+    if (raw === "ALL") return null; // 'ALL'(전체) sentinel 은 요약에서 제외
     const opt = (f.options ?? []).find((o) => o.CODE === raw);
     return `${tLabel(f.label)}: ${opt?.NAME ?? raw}`;
   }
@@ -42,6 +43,10 @@ type InlineSearchConditionProps = {
   searchBtnDisable?: boolean;
   /** 좌측 타이틀 — 언어팩 키/리터럴. 기본 "조회조건". */
   title?: string;
+  /** 접힘 상태 controlled — open/onOpenChange 둘 다 주면 외부 제어(탭별 상태 유지 등),
+   *  없으면 내부 state 사용(하위호환). */
+  open?: boolean;
+  onOpenChange?: (next: boolean) => void;
 };
 
 export function InlineSearchCondition({
@@ -49,8 +54,13 @@ export function InlineSearchCondition({
   onSearch,
   searchBtnDisable = false,
   title = "조회조건",
+  open: openProp,
+  onOpenChange,
 }: InlineSearchConditionProps) {
-  const [open, setOpen] = useState(true);
+  const [openState, setOpenState] = useState(true);
+  const open = openProp ?? openState;
+  const toggleOpen = () =>
+    onOpenChange ? onOpenChange(!open) : setOpenState((v) => !v);
 
   const summary = fields.map(fieldSummary).filter(Boolean) as string[];
 
@@ -91,7 +101,7 @@ export function InlineSearchCondition({
             type="button"
             variant="ghost"
             size="xs"
-            onClick={() => setOpen((v) => !v)}
+            onClick={toggleOpen}
             title={open ? "접기" : "펼치기"}
             className={`${lightBtn} w-7 px-0`}
           >
@@ -107,7 +117,19 @@ export function InlineSearchCondition({
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 pb-2">
           {fields.map((f) => (
           <div key={f.label} className="flex items-center gap-1.5 min-w-0">
-            <label className="text-[12px] font-medium text-slate-600 leading-none whitespace-nowrap">
+            <label
+              onDoubleClick={() => {
+                // 조회조건과 동일 — 라벨 더블클릭 시 해당 필드 초기화
+                if (f.type === "popup") {
+                  f.onChangeCode?.("");
+                  f.onChangeName?.("");
+                } else {
+                  f.onChange("");
+                }
+              }}
+              title="더블클릭으로 초기화"
+              className="text-[12px] font-medium text-slate-600 leading-none whitespace-nowrap cursor-pointer select-none hover:text-[rgb(var(--primary))] transition-colors"
+            >
               {tLabel(f.label)}
             </label>
             {f.type === "popup" ? (
@@ -116,7 +138,11 @@ export function InlineSearchCondition({
               >
                 <input
                   value={f.code}
-                  onChange={(e) => f.onChangeCode?.(e.target.value)}
+                  onChange={(e) => {
+                    // 코드를 직접 수정하면 이전 선택 코드명은 빈값으로 재설정(동기화)
+                    f.onChangeCode?.(e.target.value);
+                    f.onChangeName?.("");
+                  }}
                   onKeyDown={(e) => {
                     if (e.key !== "Enter") return;
                     if (f.onEnterSubmit)

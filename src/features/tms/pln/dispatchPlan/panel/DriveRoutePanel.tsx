@@ -4,8 +4,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { TmapView, TmapViewHandle, StopMarker } from "@/app/components/map/TmapView";
-import { dispatchPlanApi as api } from "../dispatchPlanApi";
+import {
+  TmapView,
+  TmapViewHandle,
+  StopMarker,
+} from "@/app/components/map/TmapView";
+import { dispatchPlanApi as api } from "../../dispatchPlanAd/dispatchPlanApi";
 
 type Props = {
   /** 선택된 배차행 (= model.grids.main.selected). 바뀌면 재조회. */
@@ -33,7 +37,10 @@ export default function DriveRoutePanel({ row }: Props) {
     if (!dspchNo) return;
 
     let cancelled = false;
-    Promise.all([api.searchDispathTrace(String(dspchNo)), api.getDlvryRoute(String(dspchNo))])
+    Promise.all([
+      api.searchDispathTrace(String(dspchNo)),
+      api.getDlvryRoute(String(dspchNo)),
+    ])
       .then(([traceRes, routeRes]: any[]) => {
         if (cancelled) return;
         if (traceRes?.data?.success === false) {

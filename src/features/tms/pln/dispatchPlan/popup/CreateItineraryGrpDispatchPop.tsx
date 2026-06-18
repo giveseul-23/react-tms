@@ -3,11 +3,8 @@
 import { useEffect, useState } from "react";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import { useErrorAlert } from "@/hooks/useErrorAlert";
-import {
-  GridSearchPopupLayout,
-  type GridSearchField,
-} from "@/app/components/popup/GridSearchPopupLayout";
-import { dispatchPlanApi as api } from "../dispatchPlanApi";
+import { GridSearchPopupLayout } from "@/app/components/popup/GridSearchPopupLayout";
+import { dispatchPlanApi as api } from "../../dispatchPlanAd/dispatchPlanApi";
 
 type Props = {
   onConfirm: (payload: Record<string, any>[]) => void;
@@ -16,7 +13,7 @@ type Props = {
   initialValues?: Record<string, any>;
 };
 
-export default function CreateItineraryDispatchPop({
+export default function CreateItineraryGrpDispatchPop({
   onConfirm,
   onClose,
   initialValues = {},
@@ -25,10 +22,9 @@ export default function CreateItineraryDispatchPop({
   const DLVRY_DT = initialValues["DLVRY_DT"];
   const PLN_ID = initialValues["PLN_ID"];
   const LGST_GRP_CD = initialValues["LGST_GRP_CD"];
+  const BATCH_NO = initialValues["BATCH_NO"];
 
   const [rows, setRows] = useState<any[]>([]);
-  const [itnrId, setItnrId] = useState("");
-  const [itnrNm, setItnrNm] = useState("");
 
   const { codeMap } = useCommonStores({
     vehOpTp: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
@@ -39,13 +35,12 @@ export default function CreateItineraryDispatchPop({
 
   const fetchData = () => {
     api
-      .searchItineraryDispatch({
+      .searchGroupPop({
         DIV_CD,
         LGST_GRP_CD,
         DLVRY_DT,
         PLN_ID,
-        ITNR_ID: itnrId,
-        ITNR_NM: itnrNm,
+        BATCH_NO,
       })
       .then((res: any) => {
         if (res?.data?.success === false) {
@@ -67,61 +62,35 @@ export default function CreateItineraryDispatchPop({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fields: GridSearchField[] = [
-    { label: "LBL_ITINERARY_CODE", value: itnrId, onChange: setItnrId },
-    { label: "LBL_ITINERARY_NAME", value: itnrNm, onChange: setItnrNm },
-  ];
-
   const columnDefs = [
-    { headerName: "No", width: 30 },
-    { field: "DSPCH_TP", hide: true },
-    { field: "VEH_TP_CD", hide: true },
-    { field: "AP_PROC_TP", hide: true },
-    { field: "CARR_CD", hide: true },
-    { field: "VEH_OP_TP", hide: true },
-    { field: "DRVR_ID", hide: true },
-    { field: "DRVR_NM", hide: true },
-    { field: "ASST_ID", hide: true },
-    { field: "ASST_NM", hide: true },
-    { field: "PLN_ID", hide: true },
-    { field: "DLVRY_DT", hide: true },
-    { field: "LOC_ID", hide: true },
     {
-      headerName: "LBL_ITINERARY_CODE",
-      field: "ITNR_ID",
+      headerName: "LBL_LOGISTICS_GROUP_CODE",
+      field: "LGST_GRP_CD",
     },
     {
-      headerName: "LBL_ITINERARY_NAME",
-      field: "ITNR_NM",
+      headerName: "LBL_ITNR_GRP_CD",
+      field: "ITNR_GRP_CD",
     },
     {
-      headerName: "LBL_DEPARTURE_CODE",
-      field: "LOC_CD",
+      headerName: "LBL_ITNR_GRP_NM",
+      field: "ITNR_GRP_NM",
     },
     {
-      headerName: "LBL_DEPARTURE_NAME",
-      field: "LOC_NM",
-    },
-    {
-      headerName: "LBL_VEHICLE_CODE",
-      field: "VEH_ID",
-    },
-    {
-      headerName: "LBL_VEH_NO",
-      field: "VEH_NO",
+      headerName: "LBL_ITNR_GRP_ALIAS",
+      field: "ITNR_GRP_ALIAS",
     },
   ];
 
   return (
     <GridSearchPopupLayout
-      fields={fields}
+      fields={[]}
       columnDefs={columnDefs}
       rows={rows}
       gridHeight={400}
       codeMap={codeMap}
       rowSelection="multiple"
-      selectedBadgeFields={["ITNR_ID", "ITNR_NM"]}
-      selectPrompt="고정노선을 선택하세요"
+      selectedBadgeFields={["ITNR_GRP_CD", "ITNR_GRP_NM", "ITNR_GRP_ALIAS"]}
+      selectPrompt="고정노선그룹을 선택하세요"
       onSearch={fetchData}
       onConfirm={(payload) => onConfirm(payload as Record<string, any>[])}
       onClose={onClose}
