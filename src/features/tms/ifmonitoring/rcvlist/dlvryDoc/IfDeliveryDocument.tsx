@@ -1,7 +1,6 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useIfDeliveryDocumentModel } from "./IfDeliveryDocumentModel";
@@ -12,6 +11,13 @@ import {
 } from "./IfDeliveryDocumentColumns";
 
 export const MENU_CODE = "MENU_IF_RCV_DLVRY_DOC";
+
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_IF_RCV_DLVRY_DOC",
+    detail: "SUB02_GRID_IF_RCV_DLVRY_DOC",
+  },
+};
 
 export default function IfDeliveryDocument() {
   const model = useIfDeliveryDocumentModel(MENU_CODE);
@@ -26,12 +32,20 @@ export default function IfDeliveryDocument() {
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
+        excludes: [
+          {
+            column: "DLVRY_DT",
+            as: { FROM: "DLVRY_DT_FROM", TO: "DLVRY_DT_TO" },
+          },
+        ],
       }}
       defaultDirection="horizontal"
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
+          rowSelection="multiple"
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
@@ -48,9 +62,12 @@ export default function IfDeliveryDocument() {
               render: () => (
                 <DataGrid
                   {...model.bind("detail")}
+                  authId={AUTH.grids.detail}
                   columnDefs={DETAIL_COLUMN_DEFS}
+                  codeMap={model.codeMap}
                   actions={ctrl.detailActions}
                   audit={false}
+                  pagination={false}
                 />
               ),
             },

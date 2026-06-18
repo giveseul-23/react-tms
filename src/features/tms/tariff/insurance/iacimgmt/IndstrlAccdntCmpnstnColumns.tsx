@@ -1,23 +1,9 @@
-// ────────────────────────────────────────────────────────────────
-// [가이드] 그리드 컬럼 정의 템플릿
-//
-// 사용 방법
-// 1. 이 파일을 대상 폴더로 복사 후 파일명 교체 (예: FeatureColumns.tsx)
-// 2. 각 컬럼 headerName(LBL_*) / field / cellRenderer 를 실제 스펙에 맞게 교체
-// 3. 필요한 audit 컬럼만 standardAudit 설정값으로 켜고 끌 것
-//
-// 공통 패턴
-// - headerName 은 LBL_* 다국어 키 사용 (Lang.get 자동 적용)
-// - field 에 "DTTM" 포함 시 DataGrid 가 자동 날짜 포맷팅
-// - field 가 "_STS" 로 끝나면 자동 중앙 정렬
-// - type: "numeric" / dataType: "number" → 우측 정렬
-// - "No" headerName 은 자동 일련번호 + 고정 너비
-// - standardAudit: 삭제/상태/생성자/생성일/수정자/수정일 블록 일괄 삽입
-// ────────────────────────────────────────────────────────────────
+import { Lang } from "@/app/services/common/Lang";
 
 // ── 메인 그리드 컬럼 (정적) ────────────────────────────────────
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" }, // 자동 일련번호
+  { type: "text", field: "DIV_CD", hide: true },
   {
     type: "text",
     headerName: "LBL_LOGISTICS_GROUP_CODE",
@@ -35,16 +21,34 @@ export const MAIN_COLUMN_DEFS = [
 // DataGrid 에 codeMap prop 을 전달하면 자동으로 cellRenderer 가 주입됩니다.
 export const DETAIL01_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_TARIFF_TYPE", field: "AP_PROC_TP" },
+  { type: "text", field: "LGST_GRP_CD", hide: true },
+  {
+    type: "combo",
+    headerName: "LBL_TARIFF_TYPE",
+    field: "AP_PROC_TP",
+    codeKey: "apProcTp",
+    required: true,
+    insertable: true,
+  },
   {
     type: "text",
     headerName: "LBL_IACI_ID",
     field: "INSRNC_ID",
   },
   {
-    type: "text",
+    type: "popup",
     headerName: "LBL_IACI_CD",
     field: "CHG_CD",
+    nameField: "CHG_NM",
+    sqlId: "selectIaciApProcTpChgCodeName",
+    popupTitle: "LBL_IACI_CD",
+    required: true,
+    insertable: true,
+    extraParams: (row: any, model: any) => ({
+      sqlParam1:
+        (model?.grids?.rate?.rows?.find((r: any) => r.__rid__ === row?.__rid__) ?? row)
+          ?.AP_PROC_TP ?? "",
+    }),
   },
   {
     type: "text",
@@ -52,70 +56,100 @@ export const DETAIL01_COLUMN_DEFS = [
     field: "CHG_NM",
   },
   {
-    type: "text",
+    type: "date",
     headerName: "LBL_FROM_DTTM",
     field: "FRM_DTTM",
+    required: true,
+    insertable: true,
   },
   {
-    type: "text",
+    type: "date",
     headerName: "LBL_TO_DTTM",
     field: "TO_DTTM",
+    required: true,
+    insertable: true,
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_DEDUCTION",
     field: "DEDUCTION_RATE",
+    required: true,
+    insertable: true,
+    validators: { min: 0, max: 1 },
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_INSURANCE_RATE",
     field: "INSURANCE_RATE",
+    required: true,
+    insertable: true,
+    validators: { min: 0.0001, max: 1 },
   },
   {
-    type: "text",
-    headerName: "LBL_RDNG_RCD1",
+    type: "combo",
+    headerName: Lang.get("LBL_RDNG_RCD") + "1",
+    noLang: true,
     field: "RDNG_RCD1",
+    codeKey: "rdngRcd",
+    required: true,
+    insertable: true,
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_BUD_RATE",
     field: "BUD_RATE",
+    required: true,
+    insertable: true,
+    validators: { min: 0.0001, max: 1 },
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_SPPT_RATE",
     field: "SPPT_RATE",
+    required: true,
+    insertable: true,
+    validators: { min: 0.0001, max: 1 },
   },
   {
-    type: "text",
-    headerName: "LBL_ADD_RATE1",
+    type: "numeric",
+    headerName: Lang.get("LBL_ADD_RATE") + "1",
+    noLang: true,
     field: "EXTRA_RATE1",
+    required: true,
+    insertable: true,
+    validators: { min: 0.0001, max: 2 },
   },
   {
-    type: "text",
-    headerName: "LBL_ADD_RATE2",
+    type: "numeric",
+    headerName: Lang.get("LBL_ADD_RATE") + "2",
+    noLang: true,
     field: "EXTRA_RATE2",
+    required: true,
+    insertable: true,
+    validators: { min: 0.0001, max: 2 },
   },
   {
-    type: "text",
-    headerName: "LBL_RDNG_RCD2",
+    type: "combo",
+    headerName: Lang.get("LBL_RDNG_RCD") + "2",
+    noLang: true,
     field: "RDNG_RCD2",
+    codeKey: "rdngRcd",
+    required: true,
+    insertable: true,
   },
   {
-    type: "text",
+    type: "check",
     headerName: "LBL_USE_YN",
     field: "USE_YN",
+    insertable: true,
+    defaultValue: "Y",
   },
 ];
 
 export const DETAIL02_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_IACI_ID", field: "INSRNC_ID" },
-  {
-    type: "text",
-    headerName: "LBL_TARIFF_TYPE",
-    field: "AP_PROC_TP",
-  },
+  { type: "text", field: "INSRNC_ID", hide: true },
+  { type: "text", field: "AP_PROC_TP", hide: true },
   {
     type: "text",
     headerName: "LBL_OPER_TCD",
@@ -128,19 +162,3 @@ export const DETAIL02_COLUMN_DEFS = [
   },
 ];
 
-// ────────────────────────────────────────────────────────────────
-// [참고] standardAudit 의 선택적 옵션
-//
-// 기본 audit 컬럼을 부분적으로만 쓰고 싶을 때 두 번째 인자로 false 지정
-//   standardAudit(setRowData, { updatePerson: false, updateTime: false });
-//
-// 삭제 체크 시 행을 실제로 제거하고 싶을 때
-//   standardAudit(setRowData); // 첫 인자가 자동으로 deleteSetRowData 역할
-//
-// audit 컬럼의 width / fieldType 등을 개별 오버라이드
-//   standardAudit(setRowData, {
-//     rowStatusOverrides: { width: 100 },
-//     insertPersonOverrides: { width: 110, fieldType: "text" },
-//     insertDateOverrides: { width: 150 },
-//   });
-// ────────────────────────────────────────────────────────────────

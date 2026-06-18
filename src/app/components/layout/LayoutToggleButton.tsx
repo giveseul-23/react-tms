@@ -21,13 +21,13 @@ export function LayoutToggleButton({
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="xs"
       onClick={onToggle}
       title={
         layout === "side" ? "수직 레이아웃으로 전환" : "수평 레이아웃으로 전환"
       }
-      className="w-7 px-0"
+      className="h-6 px-2 bg-white/15 hover:bg-white border border-white/30 text-white hover:text-[rgb(var(--primary))] text-[11px] font-semibold"
     >
       <Move
         className={`w-3 h-3 transition-transform duration-300 ${

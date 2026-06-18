@@ -15,6 +15,11 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
+// 차량 현재 위치는 수송중차량관제 서비스를 재사용해 VEH_ID 기준으로 조회한다.
+const IN_TRNST_MENU = "MENU_IN_TRNST_VEH_CTRL";
+// 경로(주행경로/정차지)는 운행이력 서비스를 재사용한다.
+const DRIVE_HISTORY_MENU = "MENU_DRIVE_HISTORY";
+
 export const dispatchPlanApi = {
   // ── 조회 ─────────────────────────────────────────────────────
   getDispatchPlanList(payload: any) {
@@ -59,6 +64,15 @@ export const dispatchPlanApi = {
   getUnallocOrderItemList(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/searchUnAssignedShipmentDetail",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  //차량정보조회
+  // ── 하단 탭: 미할당주문 ─────────────────────────────────────
+  searchVehInfo(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanAdService/searchVehInfo",
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
@@ -155,7 +169,7 @@ export const dispatchPlanApi = {
   saveShpmItemMemo(record: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/saveShpmItemMemo",
-      withSession({ MENU_CD: MENU_CODE, dsSave: [record] }),
+      withSession({ MENU_CD: MENU_CODE, dsSave: record }),
     );
   },
 
@@ -279,6 +293,36 @@ export const dispatchPlanApi = {
     return apiClient.post<CommonResponse>(
       "/createDispatchService/saveSplitShipmentQty",
       withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // ── 차량 현재 위치 조회 (SidePanel 지도) ────────────────────
+  // 선택 배차행의 VEH_ID 로 수송중차량관제 서비스를 조회해 위치(LAT/LON) 반환.
+  getVehiclePosition(vehId: string) {
+    return apiClient.post<CommonResponse>(
+      "/inTransitVehicleStatusService/search",
+      withSession({
+        MENU_CD: IN_TRNST_MENU,
+        DYNAMIC_QUERY: `1=1 AND VEH.VEH_ID = '${vehId}'`,
+        page: 1,
+        limit: 100,
+      }),
+    );
+  },
+
+  // ── 경로 보기 (SidePanel 지도) — 운행이력 서비스 재사용 ──────
+  // 주행경로(trace) 좌표 목록 조회.
+  searchDispathTrace(dspchNo: string) {
+    return apiClient.post<CommonResponse>(
+      "/traceService/searchDispathTrace",
+      withSession({ MENU_CD: DRIVE_HISTORY_MENU, DSPCH_NO: dspchNo }),
+    );
+  },
+  // 정차지(route) 목록 조회.
+  getDlvryRoute(dspchNo: string) {
+    return apiClient.post<CommonResponse>(
+      "/mapService/getDlvryRoute",
+      withSession({ MENU_CD: DRIVE_HISTORY_MENU, DSPCH_NO: dspchNo }),
     );
   },
 };

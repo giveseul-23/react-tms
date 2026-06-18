@@ -7,21 +7,20 @@ export type GridKey = "main" | "rate" | "chg";
 export function useIndstrlAccdntCmpnstnModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  const { stores } = useCommonStores({
+  const { codeMap: rawCodeMap } = useCommonStores({
     apProcTp: { sqlProp: "CODE", keyParam: "AP_PROC_TP" },
     rdngRcd: { sqlProp: "CODE", keyParam: "RDNG_RCD" },
   });
 
-  const codeMap = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    Object.entries(stores).forEach(([storeKey, items]) => {
-      map[storeKey] = {};
-      (items ?? []).forEach((item: any) => {
-        map[storeKey][item.CODE] = item.NAME;
-      });
-    });
-    return map;
-  }, [stores]);
+  // apProcTp 는 10(용차/회당), 20(월대)만 사용 — 레거시 apProcTpList filters 대응
+  const codeMap = useMemo(() => ({
+    ...rawCodeMap,
+    apProcTp: Object.fromEntries(
+      Object.entries(rawCodeMap.apProcTp ?? {}).filter(
+        ([code]) => code === "10" || code === "20",
+      ),
+    ),
+  }), [rawCodeMap]);
 
   return { ...base, codeMap };
 }
