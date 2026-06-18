@@ -93,6 +93,8 @@ export interface BoundGridProps {
   onColumnDefsReady: (cols: any[]) => void;
   /** DataGrid 가 엑셀 컬럼 getter 등록 시 호출 — slot.getExcelColumns 와 연결. */
   onExcelColumnsReady: (getExcelColumns: () => any[]) => void;
+  /** 마스킹(작업 차단) 오버레이 — base.callAjax 가 자동 토글. */
+  loading?: boolean;
 }
 
 /** SearchFilters(searchProps)에 spread 용 묶음 — model 이 소유한 검색 ref/pageSize.
@@ -119,6 +121,8 @@ export type BaseModel<K extends string = string> = {
   rawFiltersRef: MutableRefObject<Record<string, string>>;
   /** DataGrid 에 spread 용 — `<DataGrid {...model.bind("main")} ... />` */
   bind: (gridKey: K) => BoundGridProps;
+  /** 그리드 마스킹(작업 차단) 토글 — base.callAjax 가 자동 호출(기본 "main"). */
+  setGridMasking: (keys: K | K[], on: boolean) => void;
   /** SearchFilters(searchProps)에 spread 용 — searchRef/filtersRef/rawFiltersRef/pageSize 묶음. */
   bindSearch: () => BoundSearchProps;
 };
@@ -227,6 +231,17 @@ export function useBaseModel<K extends string = string>(
   // ── 모든 그리드 데이터 / selection 을 단일 객체 state 로 ────
   // (Rules of Hooks 준수 + lazy 등록 — set 호출 시점에 키 추가됨)
   const [allData, setAllData] = useState<Record<string, GridData>>({});
+
+  // ── 그리드별 마스킹(작업 차단) 상태 — base.callAjax 가 자동 토글 ──
+  const [masking, setMasking] = useState<Record<string, boolean>>({});
+  const setGridMasking = useCallback((keys: K | K[], on: boolean) => {
+    const arr = (Array.isArray(keys) ? keys : [keys]) as string[];
+    setMasking((prev) => {
+      const next = { ...prev };
+      for (const k of arr) next[k] = on;
+      return next;
+    });
+  }, []);
   const allDataRef = useRef(allData);
   allDataRef.current = allData;
 
@@ -385,9 +400,10 @@ export function useBaseModel<K extends string = string>(
         onExcelColumnsReady: (getExcelColumns: () => any[]) => {
           allExcelColsFnRef.current[gridKey as string] = getExcelColumns;
         },
+        loading: masking[gridKey as string] ?? false,
       };
     },
-    [grids, pageSize, setPageSize, onPageChange],
+    [grids, pageSize, setPageSize, onPageChange, masking],
   );
 
   // searchProps spread 용 — model 소유 검색 ref/pageSize 를 한 번에.
@@ -413,6 +429,7 @@ export function useBaseModel<K extends string = string>(
     filtersRef,
     rawFiltersRef,
     bind,
+    setGridMasking,
     bindSearch,
   };
 }

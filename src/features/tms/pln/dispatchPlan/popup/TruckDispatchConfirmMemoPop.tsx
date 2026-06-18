@@ -10,7 +10,7 @@ import { RotateCcw, SlidersHorizontal } from "lucide-react";
 import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
 import { useErrorAlert } from "@/hooks/useErrorAlert";
 import { Lang } from "@/app/services/common/Lang";
-import { dispatchPlanApi as api } from "../../dispatchPlanAd/dispatchPlanApi";
+import { dispatchPlanApi as api } from "../dispatchPlanApi";
 
 const MEMO_DESC_MAX_LEN = 1000;
 

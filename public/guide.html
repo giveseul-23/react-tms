@@ -2249,7 +2249,7 @@ View 가 <span class="t">model</span>, <span class="t">ctrl</span> 을 preset / 
           <table>
             <thead><tr><th style="width: 240px">헬퍼</th><th>설명</th></tr></thead>
             <tbody>
-              <tr data-search="callajax handleapi 토스트 promise 한번"><td>base.callAjax(promise, msg?)</td><td>API Promise 한 번 감쌈 (성공/에러 토스트 자동). 기본 메시지 <code>"처리되었습니다."</code>. <code>useApiHandler.handleApi</code> 와 동일 — 일관성 위해 base.callAjax 권장.</td></tr>
+              <tr data-search="callajax handleapi 토스트 promise 한번 mask 마스킹 그리드 작업차단 오버레이"><td>base.callAjax(promise, msgOrOpts?)</td><td>API Promise 한 번 감쌈 (성공/에러 토스트 자동). 기본 메시지 <code>"처리되었습니다."</code>. 2번째 인자 = <code>successMsg</code>(문자열) <strong>또는</strong> <code>{ successMsg?, mask? }</code>. <strong><code>mask</code>(GridKey | GridKey[]) 지정 시 처리 중 해당 그리드를 마스킹(작업 차단 오버레이) → 완료 시 자동 해제.</strong> 미지정이면 마스킹 없음. 예: <code>base.callAjax(api.predictEta(...), { mask: "stop" })</code>.</td></tr>
               <tr data-search="alert confirm 다이얼로그"><td>base.alert(msg) / base.confirm(msg, onYes)</td><td>ConfirmModal 다이얼로그. confirm 은 "확인" 클릭 시 onYes 실행 (취소는 모달 외부 클릭/ESC).</td></tr>
               <tr data-search="search 재조회 트리거 searchref"><td>base.search(page?)</td><td>메인 그리드 재조회 — <code>model.searchRef.current?.(page)</code> 호출. <strong>액션/저장 후 재조회는 이것 사용</strong> (직접 searchRef 호출 금지).</td></tr>
               <tr data-search="searchsub 임의 그리드 결과 셋"><td>base.searchSub(gridKey, promise)</td><td>임의 그리드에 결과 set. 응답에서 <code>dsOut</code> / <code>result</code> 자동 추출 → rows 반환.</td></tr>

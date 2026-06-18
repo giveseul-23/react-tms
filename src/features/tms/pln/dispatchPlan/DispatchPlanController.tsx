@@ -1,9 +1,9 @@
 // src/views/dispatchPlan/DispatchPlanController.tsx
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
-import { dispatchPlanApi as api } from "../dispatchPlanAd/dispatchPlanApi";
+import { dispatchPlanApi as api } from "./dispatchPlanApi";
 import { useGuard } from "@/hooks/useGuard";
-import { MENU_CODE } from "../dispatchPlanAd/DispatchPlan";
+import { MENU_CODE } from "./DispatchPlan";
 import {
   makeSaveAction,
   makeExcelGroupAction,
@@ -23,6 +23,7 @@ import RegiSpotPop from "./popup/RegiSpotPop";
 import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
 import CreateItineraryGrpDispatchPop from "./popup/CreateItineraryGrpDispatchPop";
 import TruckDispatchConfirmMemoPop from "./popup/TruckDispatchConfirmMemoPop";
+import PredictEstimateTimetoArrivalPop from "./popup/PredictEstimateTimetoArrivalPop";
 
 interface Args {
   model: DispatchPlanModel;
@@ -501,6 +502,58 @@ export function useDispatchPlanController({ model }: Args) {
     [base],
   );
 
+  const validatorPredictEta = useCallback(
+    (row: Record<string, string>) => {
+      if (!base.requireParentRow(row, "배차")) return false;
+
+      if (row.DSPCH_OP_STS >= "2090") {
+        base.alert(Lang.get("MSG_PRIDICT_ETA_EXCEPTION_WHEN_IN_TRANSIT"));
+        return false;
+      }
+      if (row.DSPCH_OP_STS >= "2110") {
+        base.alert(Lang.get("MSG_PRIDICT_ETA_EXCEPTION_WHEN_DELIVERED"));
+        return false;
+      }
+
+      return true;
+    },
+    [base],
+  );
+
+  const validatorCalctEta = useCallback(
+    (row: Record<string, string>) => {
+      if (!base.requireParentRow(row, "배차")) return false;
+
+      if (row.DSPCH_OP_STS < "2090") {
+        base.alert(
+          Lang.get("MSG_CAL_ETA_EXCEPTION_BEFORE_TRANSIT_PARTIALLY_DELIVERED"),
+        );
+        return false;
+      }
+      if (row.DSPCH_OP_STS == "2110") {
+        base.alert(Lang.get("MSG_CAL_ETA_EXCEPTION_DELIVERED"));
+        return false;
+      }
+
+      if (row.DSPCH_OP_STS == "2090" || row.DSPCH_OP_STS == "2100") {
+        model.grids.stop.rows.map((data) => {
+          if (data.ATA_DTTM != null && data.ATD_DTTM == null) {
+            base.alert(
+              Lang.get("MSG_CAL_ETA_EXCEPTION_IN_TRANSIT", [
+                row.VEH_NO,
+                data.LOC_NM,
+              ]),
+            );
+            return false;
+          }
+        });
+      }
+
+      return true;
+    },
+    [base],
+  );
+
   // 메모 등록 — 선택 배차행(첫 행) 기준 4개 메모 등록 팝업 (메모는 배차 1건 단위)
   const onRegisterMemo = useCallback(
     (e: any) => {
@@ -608,6 +661,46 @@ export function useDispatchPlanController({ model }: Args) {
         });
     },
     [model.grids, guardHasData, base],
+  );
+
+  // 착지 ETA 계산
+  const onPredictETA = useCallback(
+    (row: Record<string, string>) => {
+      const s = model.rawFiltersRef.current;
+      openPopup({
+        title: "BTN_PREDICT_ETA",
+        width: "sm",
+        content: (
+          <PredictEstimateTimetoArrivalPop
+            onConfirm={(data: any) => {
+              closePopup();
+
+              base
+                .callAjax(
+                  api.predictEta({
+                    ATD_DTTM: data.TRNS_STDT_DATE,
+                    DSPCH_NO: row.DSPCH_NO,
+                    TRIP_ID: row.TRIP_ID,
+                    TRIP_SEQ: row.TRIP_SEQ,
+                    MENU_CD: MENU_CODE,
+                    DIV_CD: s.SRCH_DSPCH_DIV_CD,
+                    LGST_GRP_CD: s.SRCH_DSPCH_LGST_GRP_CD,
+                  }),
+                  { mask: "stop" },
+                )
+                .then(() =>
+                  base.searchSub(
+                    "stop",
+                    api.getStopList({ DSPCH_NO: row.DSPCH_NO }),
+                  ),
+                );
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [model.rawFiltersRef, openPopup, closePopup, base],
   );
 
   // 품목 수량분할 — 상세 그리드 단일 선택 → SplitQtyPop
@@ -761,7 +854,7 @@ export function useDispatchPlanController({ model }: Args) {
             onClick: (e: any) => {
               const rows = (e?.data ?? []) as any[];
               if (!validatorMemo(rows)) return;
-              base.callAjax(api.cancelDspchMemo(rows));
+              base.callAjax(api.cancelDspchMemo(rows)).then(() => {});
             },
           },
         ],
@@ -847,10 +940,12 @@ export function useDispatchPlanController({ model }: Args) {
         type: "button",
         key: "BTN_PREDICT_ETA",
         label: "BTN_PREDICT_ETA",
+        authId: "BTN_PREDICT_ETA_SUB01_GRID_RVDSPCH",
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          base.callAjax(api.predictEta({ DSPCH_NO: row.DSPCH_NO }));
+          if (!validatorPredictEta(row)) return;
+          onPredictETA(row);
         },
       },
       {
@@ -860,7 +955,17 @@ export function useDispatchPlanController({ model }: Args) {
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
-          base.callAjax(api.calcEta({ DSPCH_NO: row.DSPCH_NO }));
+          if (!validatorCalctEta(row)) return;
+          base
+            .callAjax(api.calcEta({ DSPCH_NO: row.DSPCH_NO }), {
+              mask: "stop",
+            })
+            .then(() => {
+              base.searchSub(
+                "stop",
+                api.getStopList({ DSPCH_NO: row.DSPCH_NO }),
+              );
+            });
         },
       },
       {

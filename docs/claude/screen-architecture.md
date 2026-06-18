@@ -99,7 +99,7 @@ base 가 제공하는 헬퍼:
 
 | 헬퍼 | 시그니처 / 용도 |
 |---|---|
-| `base.callAjax(promise, msg?)` | API Promise 한 번 감쌈 (성공/에러 토스트). `msg` 기본값 `"MSG_SAVE_CMPLT"`. |
+| `base.callAjax(promise, msgOrOpts?)` | API Promise 한 번 감쌈 (성공/에러 토스트). 2번째 인자 = `successMsg`(문자열, 기본 `"MSG_SAVE_CMPLT"`) **또는** `{ successMsg?, mask? }`. **`mask`(`GridKey`\|`GridKey[]`) 지정 시 처리 중 해당 그리드에 마스킹(작업 차단 오버레이) → settle 시 자동 해제.** 미지정이면 마스킹 없음. 예: `base.callAjax(api.predictEta(...), { mask: "stop" })`. |
 | `base.alert(msg, title?)` / `base.confirm(msg, onYes, title?)` | 다이얼로그 |
 | `base.search(page?)` | 메인 그리드 재조회 (`model.searchRef.current?.(page)`) |
 | `base.searchSub(gridKey, promise)` | 임의 그리드에 결과 set (응답 rows 추출 후 반환) |
@@ -149,7 +149,8 @@ export function useXxxModel(menuCode: string) {
 - `pageSize` / `setPageSize`
 - `layout` / `setLayout` (localStorage 자동 동기화)
 - `storageKeys: { outer, top, bottom, layout }`
-- `bind(gridKey)` — DataGrid spread props 묶음
+- `bind(gridKey)` — DataGrid spread props 묶음 (마스킹 `loading` 포함 — `setGridMasking` 상태 자동 반영)
+- `setGridMasking(keys, on)` — 그리드별 마스킹(작업 차단 오버레이) 토글. 보통 직접 호출하지 않고 **`base.callAjax(..., { mask })` 가 자동 호출**(처리 중 ON, settle 시 OFF). `bind` 가 `loading` 으로 DataGrid 에 전달 → DataGrid 가 차단 오버레이 렌더.
 - `bindSearch()` — SearchFilters spread props 묶음(`searchRef`/`filtersRef`/`rawFiltersRef`/`pageSize`)
 
 > 모든 행에는 내부 식별자 `__rid__` 가 자동 부여되어 셀 편집으로 객체 참조가 바뀌어도 selection 이 유지된다.

@@ -12,7 +12,7 @@ import {
   GridSearchPopupLayout,
   type GridSearchField,
 } from "@/app/components/popup/GridSearchPopupLayout";
-import { dispatchPlanApi as api } from "../../dispatchPlanAd/dispatchPlanApi";
+import { dispatchPlanApi as api } from "../dispatchPlanApi";
 
 type Props = {
   onConfirm: (payload: Record<string, any>) => void;

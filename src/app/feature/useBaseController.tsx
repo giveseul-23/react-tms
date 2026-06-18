@@ -41,10 +41,33 @@ export function useBaseController<K extends string>({
   const { openPopup, closePopup } = usePopup();
 
   // 센차: me.callAjax — API Promise 한 번 감쌈 (성공/에러 토스트)
+  //   마스킹(작업 차단)은 `mask` 를 명시한 경우에만 한다(기본 없음).
+  //   - 2번째 인자 문자열 → 기존처럼 successMsg (마스킹 안 함)
+  //   - 2번째 인자 객체   → { successMsg?, mask? }
+  //     mask 미지정 → 마스킹 없음, 키/키배열 지정 시 해당 그리드 마스킹
   const callAjax = useCallback(
-    <T,>(apiCall: Promise<T>, successMsg = "MSG_SAVE_CMPLT") =>
-      handleApi(apiCall, successMsg),
-    [handleApi],
+    <T,>(
+      apiCall: Promise<T>,
+      msgOrOpts?: string | { successMsg?: string; mask?: K | K[] },
+    ) => {
+      const opts =
+        typeof msgOrOpts === "string"
+          ? { successMsg: msgOrOpts }
+          : (msgOrOpts ?? {});
+      const successMsg = opts.successMsg ?? "MSG_SAVE_CMPLT";
+      const keys = opts.mask
+        ? Array.isArray(opts.mask)
+          ? opts.mask
+          : [opts.mask]
+        : [];
+
+      if (keys.length) model.setGridMasking(keys, true);
+      const p = handleApi(apiCall, successMsg);
+      return keys.length
+        ? p.finally(() => model.setGridMasking(keys, false))
+        : p;
+    },
+    [handleApi, model],
   );
 
   // 센차: Ext.Msg.alert
