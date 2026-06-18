@@ -2,7 +2,7 @@ import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
 import { MENU_CODE } from "./IfDeliveryDocument";
 
-type commonResponse = {
+type CommonResponse = {
   rows: [];
 };
 
@@ -16,23 +16,31 @@ const withSession = (payload: any = {}) => {
 
 export const ifDeliveryDocumentApi = {
   getList(payload: any) {
-    return apiClient.post<commonResponse>(
+    return apiClient.post<CommonResponse>(
       `/ifDeliveryDocumentService/search`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   getDetailList(payload: any) {
-    return apiClient.post<commonResponse>(
+    return apiClient.post<CommonResponse>(
       `/ifDeliveryDocumentService/searchInterfaceDetail`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   reprocess(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/ifDeliveryDocumentService/reprocess`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    const { dsSave, ...rest } = payload ?? {};
+    return apiClient.post<CommonResponse>(
+      "/ifDeliveryDocumentService/reprocess",
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 };
