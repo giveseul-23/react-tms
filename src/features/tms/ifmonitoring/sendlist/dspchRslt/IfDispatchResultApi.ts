@@ -2,7 +2,7 @@ import { apiClient } from "@/app/http/client";
 import { getSessionFields } from "@/app/services/auth/auth";
 import { MENU_CODE } from "./IfDispatchResult";
 
-type commonResponse = {
+type CommonResponse = {
   rows: [];
 };
 
@@ -16,16 +16,24 @@ const withSession = (payload: any = {}) => {
 
 export const ifDispatchResultApi = {
   getList(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/ifDispatchResultService/search`,
+    return apiClient.post<CommonResponse>(
+      "/ifDispatchResultService/search",
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   reprocess(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/ifDispatchResultService/reprocess`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    const { dsSave, ...rest } = payload ?? {};
+    return apiClient.post<CommonResponse>(
+      "/ifDispatchResultService/reprocess",
+      { dsSave },
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          ...rest,
+        },
+      },
     );
   },
 };
