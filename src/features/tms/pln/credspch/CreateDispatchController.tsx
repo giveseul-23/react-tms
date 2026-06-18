@@ -16,7 +16,7 @@ import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
 import ItineraryPlanPop from "./popup/ItineraryPlanPop";
 import CreateEmptyDispatchVehiclePop from "../dispatchPlan/popup/CreateEmptyDispatchVehiclePop";
 import ShipmentTransferPop from "../rcvshpm/popup/ShipmentTransferPop";
-import SplitQtyPop from "../dispatchPlanAd/popup/SplitQtyPop";
+import SplitQtyPop from "../dispatchPlan/popup/SplitQtyPop";
 
 interface Args {
   model: CreateDispatchModel;
