@@ -8,6 +8,12 @@ import { MAIN_COLUMN_DEFS } from "./SmsMonitorColumns";
 
 export const MENU_CODE = "MENU_SEND_MONITORING";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_SMS_MONITOR",
+  },
+};
+
 export default function SmsMonitor() {
   const model = useSmsMonitorModel(MENU_CODE);
   const ctrl = useSmsMonitorController({ model });
@@ -24,8 +30,11 @@ export default function SmsMonitor() {
       grid={
         <DataGrid
           {...model.bind("main")}
+          rowSelection="multiple"
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
+          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           audit={false}
         />

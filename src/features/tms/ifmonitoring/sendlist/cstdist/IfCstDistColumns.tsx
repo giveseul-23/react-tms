@@ -1,3 +1,17 @@
+const ifPrcsStsCellStyle = (p: any): Record<string, string> => {
+  const base = { textAlign: "center" as const };
+  switch (String(p?.data?.IF_PRCS_STS ?? "").trim()) {
+    case "S":
+      return { ...base, backgroundColor: "#D9F0A6", fontWeight: "bold" };
+    case "R":
+      return { ...base, backgroundColor: "#F0CFA6" };
+    case "E":
+      return { ...base, backgroundColor: "red", color: "#FFFF00" };
+    default:
+      return base;
+  }
+};
+
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
@@ -13,7 +27,8 @@ export const MAIN_COLUMN_DEFS = [
     field: "IF_PRCS_STS",
     codeKey: "interfaceStatus",
     width: 70,
-    align: "center",
+    headerClass: "ag-header-center",
+    cellStyle: ifPrcsStsCellStyle,
   },
   {
     type: "combo",
@@ -77,6 +92,20 @@ export const MAIN_COLUMN_DEFS = [
     width: 150,
     align: "center",
   },
+  {
+    type: "text",
+    headerName: "LBL_UPDATE_PERSON_ID",
+    field: "UPD_USR_ID",
+    width: 150,
+    align: "center",
+  },
+  {
+    type: "datetime",
+    headerName: "LBL_UPDATE_TIME",
+    field: "UPD_DTTM",
+    width: 150,
+    align: "center",
+  },
 ];
 
 export const SUB01_COLUMN_DEFS = [
@@ -96,7 +125,7 @@ export const SUB01_COLUMN_DEFS = [
     align: "center",
   },
   {
-    type: "datetime",
+    type: "date",
     headerName: "LBL_POSTING_DT",
     field: "POSTING_DT",
     width: 100,

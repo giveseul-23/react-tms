@@ -22,6 +22,7 @@ export default function IfCstDist() {
     <MasterDetailPage
       menuCode={MENU_CODE}
       defaultDirection="vertical"
+      defaultSizes={[50, 50]}
       storageKey={model.storageKeys.outer}
       searchProps={{
         moduleDefault: "TMS",
