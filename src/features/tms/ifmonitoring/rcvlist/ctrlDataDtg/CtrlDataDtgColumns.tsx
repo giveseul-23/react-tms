@@ -1,7 +1,7 @@
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
-    type: "datetime",
+    type: "text",
     headerName: "LBL_RECEIVE_DATE",
     field: "CRE_DTTM",
     width: 150,
@@ -44,14 +44,14 @@ export const MAIN_COLUMN_DEFS = [
     align: "center",
   },
   {
-    type: "datetime",
+    type: "text",
     headerName: "LBL_TMS_IF_PRCS_START_DTTM",
     field: "TMS_IF_PRCS_START_DTTM",
     width: 160,
     align: "center",
   },
   {
-    type: "datetime",
+    type: "text",
     headerName: "LBL_TMS_IF_PRCS_END_DTTM",
     field: "TMS_IF_PRCS_END_DTTM",
     width: 160,
@@ -72,7 +72,7 @@ export const MAIN_COLUMN_DEFS = [
     align: "center",
   },
   {
-    type: "datetime",
+    type: "text",
     headerName: "LBL_PSTN_DTTM",
     field: "PSTN_DTTM",
     width: 150,
@@ -118,6 +118,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "DLY_TRVL_DIST",
     width: 150,
     align: "right",
+    decimalPlaces: 0,
   },
   {
     type: "numeric",
@@ -125,6 +126,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "CMLTV_TRVL_DIST",
     width: 150,
     align: "right",
+    decimalPlaces: 0,
   },
   {
     type: "text",
@@ -134,7 +136,7 @@ export const MAIN_COLUMN_DEFS = [
     align: "center",
   },
   {
-    type: "datetime",
+    type: "text",
     headerName: "LBL_INSERT_DATE",
     field: "CRE_DTTM",
     width: 150,

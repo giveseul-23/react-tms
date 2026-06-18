@@ -8,6 +8,11 @@ import { useCtrlDataDtgController } from "./CtrlDataDtgController";
 import { MAIN_COLUMN_DEFS } from "./CtrlDataDtgColumns";
 
 export const MENU_CODE = "MENU_IF_RCV_CTRL_DATA_DTG";
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_IF_RCV_CTRL_DATA_MBL",
+  },
+};
 
 export default function CtrlDataDtg() {
   const model = useCtrlDataDtgModel(MENU_CODE);
@@ -26,7 +31,7 @@ export default function CtrlDataDtg() {
         <DataGrid
           {...model.bind("main")}
           rowSelection="multiple"
-          authId="MAIN_GRID_IF_RCV_CTRL_DATA_MBL"
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}

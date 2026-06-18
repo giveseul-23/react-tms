@@ -26,7 +26,7 @@ export default function IfDeliveryDocument() {
   return (
     <MasterDetailPage
       menuCode={MENU_CODE}
-      defaultSizes={[55, 45]}
+      defaultSizes={[50, 50]}
       searchProps={{
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
@@ -39,8 +39,9 @@ export default function IfDeliveryDocument() {
           },
         ],
       }}
-      defaultDirection="horizontal"
-      storageKey={model.storageKeys.outer}
+      defaultDirection="vertical"
+      layoutToggle={false}
+      storageKey={`${model.storageKeys.outer}-sencha`}
       master={
         <DataGrid
           {...model.bind("main")}
@@ -65,7 +66,7 @@ export default function IfDeliveryDocument() {
                   authId={AUTH.grids.detail}
                   columnDefs={DETAIL_COLUMN_DEFS}
                   codeMap={model.codeMap}
-                  actions={ctrl.detailActions}
+                  actions={[]}
                   audit={false}
                   pagination={false}
                 />

@@ -92,4 +92,32 @@ export const MAIN_COLUMN_DEFS = [
     width: 150,
     align: "center",
   },
+  {
+    type: "text",
+    headerName: "LBL_INSERT_PERSON_ID",
+    field: "CRE_USR_ID",
+    width: 150,
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_INSERT_DATE",
+    field: "CRE_DTTM",
+    width: 150,
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_UPDATE_PERSON_ID",
+    field: "UPD_USR_ID",
+    width: 150,
+    align: "center",
+  },
+  {
+    type: "datetime",
+    headerName: "LBL_UPDATE_TIME",
+    field: "UPD_DTTM",
+    width: 150,
+    align: "center",
+  },
 ];
