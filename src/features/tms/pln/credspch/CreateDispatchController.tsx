@@ -9,6 +9,9 @@ import { createDispatchApi } from "./CreateDispatchApi";
 import { MENU_CODE } from "./CreateDispatch";
 import type { CreateDispatchModel, GridKey } from "./CreateDispatchModel";
 import ChangeDeliveryDatePop from "./popup/ChangeDeliveryDatePop";
+import ChangeShipLocationPop, {
+  type ShipLocationPayload,
+} from "./popup/ChangeShipLocationPop";
 import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
 import ItineraryPlanPop from "./popup/ItineraryPlanPop";
 import CreateEmptyDispatchVehiclePop from "../dispatchPlanAd/popup/CreateEmptyDispatchVehiclePop";
@@ -58,6 +61,34 @@ export function useCreateDispatchController({ model }: Args) {
     await base.callAjax(apiFn({ dsSave: toDsSave(rows) }));
     base.search();
   }, [base, toDsSave]);
+
+  const applyShipLocation = useCallback((
+    rows: any[],
+    side: "FRM" | "TO",
+    payload: ShipLocationPayload,
+  ) =>
+    rows.map((row) => ({
+      ...row,
+      [`OLD_${side}_LOC_ID`]: row?.[`${side}_LOC_ID`],
+      [`OLD_${side}_LOC_CD`]: row?.[`${side}_LOC_CD`],
+      [`OLD_${side}_LOC_NM`]: row?.[`${side}_LOC_NM`],
+      [`${side}_LOC_ID`]: payload.LOC_ID,
+      [`${side}_LOC_CD`]: payload.LOC_CD,
+      [`${side}_LOC_NM`]: payload.LOC_NM,
+      [`${side}_ADDR_ID`]: payload.ADDR_ID,
+      [`${side}_CTRY_CD`]: payload.CTRY_CD,
+      [`${side}_CTRY_NM`]: payload.CTRY_NM,
+      [`${side}_STT_CD`]: payload.STT_CD,
+      [`${side}_STT_NM`]: payload.STT_NM,
+      [`${side}_CTY_CD`]: payload.CTY_CD,
+      [`${side}_CTY_NM`]: payload.CTY_NM,
+      [`${side}_DTL_ADDR1`]: payload.DTL_ADDR1,
+      [`${side}_DTL_ADDR2`]: payload.DTL_ADDR2,
+      [`${side}_ZIP_CD`]: payload.ZIP_CD,
+      [`${side}_LAT`]: payload.LAT,
+      [`${side}_LON`]: payload.LON,
+      rowStatus: "U",
+    })), []);
 
   const fetchSub01 = useCallback(
     (row: any) =>
@@ -287,12 +318,50 @@ export function useCreateDispatchController({ model }: Args) {
   }, [closePopup, openPopup, requireMainRows, saveRows]);
 
   const onChangeShipFrom = useCallback(() => {
-    base.alert(`${Lang.get("BTN_SHIP_FROM_CHANGE")} popup is not implemented.`);
-  }, [base]);
+    const rows = requireMainRows();
+    if (!rows) return;
+    openPopup({
+      title: "BTN_SHIP_FROM_CHANGE",
+      width: "xl",
+      content: (
+        <ChangeShipLocationPop
+          side="FRM"
+          record={rows[0]}
+          onApply={(payload) => {
+            closePopup();
+            void saveRows(
+              applyShipLocation(rows, "FRM", payload),
+              createDispatchApi.saveChangeShipFrom,
+            );
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [applyShipLocation, closePopup, openPopup, requireMainRows, saveRows]);
 
   const onChangeShipTo = useCallback(() => {
-    base.alert(`${Lang.get("BTN_SHIP_TO_CHANGE")} popup is not implemented.`);
-  }, [base]);
+    const rows = requireMainRows();
+    if (!rows) return;
+    openPopup({
+      title: "BTN_SHIP_TO_CHANGE",
+      width: "xl",
+      content: (
+        <ChangeShipLocationPop
+          side="TO"
+          record={rows[0]}
+          onApply={(payload) => {
+            closePopup();
+            void saveRows(
+              applyShipLocation(rows, "TO", payload),
+              createDispatchApi.saveChangeShipTo,
+            );
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [applyShipLocation, closePopup, openPopup, requireMainRows, saveRows]);
 
   const mainActions: ActionItem[] = useMemo(() => [
     { type: "button", key: "BTN_MANUAL_PLAN", label: "BTN_MANUAL_PLAN", onClick: onManualPlan },

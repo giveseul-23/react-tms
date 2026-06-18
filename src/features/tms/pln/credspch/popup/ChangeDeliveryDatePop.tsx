@@ -16,6 +16,11 @@ type Props = {
   onClose: () => void;
 };
 
+const toCompactDate = (value: string) =>
+  String(value ?? "")
+    .replace(/[^\d]/g, "")
+    .slice(0, 8);
+
 export default function ChangeDeliveryDatePop({
   initialValues,
   onConfirm,
@@ -50,7 +55,7 @@ export default function ChangeDeliveryDatePop({
       confirmLabel={Lang.get("BTN_SAVE")}
       isValid={isValid}
       onCancel={onClose}
-      onConfirm={() => onConfirm({ DLVRY_DT: dlvryDt, PLN_ID: planId })}
+      onConfirm={() => onConfirm({ DLVRY_DT: toCompactDate(dlvryDt), PLN_ID: planId })}
     >
       <Field
         layout="vertical"
