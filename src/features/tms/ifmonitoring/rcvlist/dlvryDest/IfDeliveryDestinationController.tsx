@@ -50,8 +50,17 @@ export function useFeatureController({ model }: ControllerArgs) {
   // ── 메인 행 클릭 — selection + 자식(detail) cascade reset/fetch ─
   // handleRowClick 한 줄로 selection set / reset / fetch 모두 처리.
   const onMainGridClick = useCallback(
-    (row: any) =>
-      base.handleRowClick("main", row, [
+    (row: any) => {
+      if (
+        row == null ||
+        [row.IF_ID, row.LOC_CD, row.CRE_DTTM].some(
+          (value) => value == null || String(value).trim() === "",
+        )
+      ) {
+        return;
+      }
+
+      return base.handleRowClick("main", row, [
         {
           to: "role_type",
           fetch: (r) => api.getRoleList(getSubParams(r)),
@@ -72,7 +81,8 @@ export function useFeatureController({ model }: ControllerArgs) {
           to: "company",
           fetch: (r) => api.getCompanyList(getSubParams(r)),
         },
-      ]),
+      ]);
+    },
     [base],
   );
 

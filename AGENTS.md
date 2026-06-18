@@ -5,7 +5,7 @@
 - 기존 Sencha 소스:
   - C:\DEV_TMS\git\olympusboot3\olympusboot3\src\main\webapp\resource\app\vc\view
 - 신규 React TypeScript 소스:
-  - C:\tms-react-ts-main\tms-react-ts\src\features\tms
+  - .\src\features\tms
 
 ## 외부 참조 소스
 기존 Sencha 소스는 아래 경로를 우선 참조합니다.

@@ -1,10 +1,9 @@
 import { useCallback, useMemo } from "react";
-import { useBaseController } from "@/app/feature/useBaseController";
 import { smsMonitorApi as api } from "./SmsMonitorApi";
 import { MENU_CODE } from "./SmsMonitor";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { SmsMonitorModel, GridKey } from "./SmsMonitorModel";
+import type { SmsMonitorModel } from "./SmsMonitorModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
@@ -12,7 +11,6 @@ interface Args {
 }
 
 export function useSmsMonitorController({ model }: Args) {
-  const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
@@ -20,9 +18,12 @@ export function useSmsMonitorController({ model }: Args) {
     [],
   );
 
+  const onMainGridClick = useCallback(() => {}, []);
+
   const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
+      model.grids.main.setSelected(null);
     },
     [model.grids.main],
   );
@@ -43,6 +44,7 @@ export function useSmsMonitorController({ model }: Args) {
   return {
     fetchList,
     onSearchCallback,
+    onMainGridClick,
     mainActions,
   };
 }
