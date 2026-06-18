@@ -1,6 +1,10 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
+import { SidePanel } from "@/app/components/layout/SidePanel";
+import VehicleLocationPanel from "../dispatchPlanAd/panel/VehicleLocationPanel";
+import DriveRoutePanel from "../dispatchPlanAd/panel/DriveRoutePanel";
+import { PopupSearchCondition } from "@/app/components/popup/PopupSearchCondition";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import DataGrid from "@/app/components/grid/DataGrid";
 
@@ -13,6 +17,7 @@ import {
   UNALLOC_ORDER_COLUMN_DEFS,
   ALLOC_ORDER_SUB_COLUMN_DEFS,
   UNALLOC_ORDER_SUB_COLUMN_DEFS,
+  VEH_MGMT_COLUMN_DEFS,
 } from "../dispatchPlanAd/DispatchPlanColumns";
 
 export const MENU_CODE = "MENU_DISPATCH_PLAN";
@@ -34,6 +39,7 @@ export default function DispatchPlan() {
   const ctrl = useDispatchPlanController({ model });
 
   return (
+    <>
     <MasterDetailPage
       menuCode={MENU_CODE}
       searchProps={{
@@ -54,6 +60,7 @@ export default function DispatchPlan() {
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
           rowSelection="multiple"
+          audit={{ delete: false }}
         />
       }
       detail={
@@ -63,6 +70,7 @@ export default function DispatchPlan() {
             { key: "STOP", label: "LBL_STOP" },
             { key: "ALLOC", label: "LBL_ASSIGNED_SHIPMENTS" },
             { key: "UNALLOC", label: "LBL_UNASSIGNED_SHIPMENTS" },
+            { key: "VEHMGMT", label: "LBL_VEHICLE_MANAGER" },
           ]}
           presets={{
             STOP: {
@@ -93,30 +101,108 @@ export default function DispatchPlan() {
                     {...model.bind("allocSub")}
                     authId={AUTH.grids.allocSub}
                     columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS}
-                    actions={ctrl.allocSubActions}
+                    actions={[]}
+                    audit={{ delete: false }}
                   />
                 </SplitPane>
               ),
             },
             UNALLOC: {
               render: () => (
-                <SplitPane direction="vertical" defaultSizes={[70, 30]}>
-                  <DataGrid
-                    {...model.bind("unallocOrder")}
-                    authId={AUTH.grids.unallocOrder}
-                    columnDefs={UNALLOC_ORDER_COLUMN_DEFS}
-                    codeMap={model.codeMap}
-                    actions={ctrl.unallocOrderActions}
-                    onRowClicked={ctrl.onUnallocOrderRowClicked}
-                    audit={false}
+                <div className="flex flex-col h-full min-h-0 gap-2">
+                  {/* 미할당주문 탭 조회조건 (카드형) — 라벨은 리터럴, LBL_* 키로 교체 가능.
+                      payload 키/popup 픽커는 서버에 맞춰 사용자가 연결(TODO). */}
+                  <PopupSearchCondition
+                    columns={3}
+                    onSearch={ctrl.handleUnallocOrderSearch}
+                    searchBtnDisable={model.unallocSearching}
+                    fields={[
+                      {
+                        type: "popup",
+                        label: "품목코드",
+                        code: model.unallocCond.ITEM_CD ?? "",
+                        name: model.unallocCond.ITEM_NM_DISP ?? "",
+                        onChangeCode: (v) =>
+                          model.setUnallocCond((c) => ({ ...c, ITEM_CD: v })),
+                        // TODO: 품목 조회 팝업 연결 (선택 시 ITEM_CD/ITEM_NM_DISP 세팅)
+                        onClickSearch: () => {},
+                      },
+                      {
+                        type: "text",
+                        label: "품목명",
+                        value: model.unallocCond.ITEM_NM ?? "",
+                        onChange: (v) =>
+                          model.setUnallocCond((c) => ({ ...c, ITEM_NM: v })),
+                      },
+                      {
+                        type: "combo",
+                        label: "배송유형",
+                        value: model.unallocCond.DLVRY_TP ?? "",
+                        onChange: (v) =>
+                          model.setUnallocCond((c) => ({ ...c, DLVRY_TP: v })),
+                        options: model.stores.dlvryTpList ?? [],
+                      },
+                      {
+                        type: "popup",
+                        label: "도착지",
+                        code: model.unallocCond.TO_LOC_CD ?? "",
+                        name: model.unallocCond.TO_LOC_NM ?? "",
+                        onChangeCode: (v) =>
+                          model.setUnallocCond((c) => ({ ...c, TO_LOC_CD: v })),
+                        // TODO: 도착지 조회 팝업 연결 (선택 시 TO_LOC_CD/TO_LOC_NM 세팅)
+                        onClickSearch: () => {},
+                      },
+                      {
+                        type: "combo",
+                        label: "온도조건",
+                        value: model.unallocCond.TEMP_TCD ?? "",
+                        onChange: (v) =>
+                          model.setUnallocCond((c) => ({ ...c, TEMP_TCD: v })),
+                        options: model.stores.vehTempTcd ?? [],
+                      },
+                      {
+                        type: "combo",
+                        label: "P박스/비P박스",
+                        value: model.unallocCond.PBOX_TP ?? "",
+                        onChange: (v) =>
+                          model.setUnallocCond((c) => ({ ...c, PBOX_TP: v })),
+                        options: model.stores.pboxTpList ?? [],
+                      },
+                    ]}
                   />
-                  <DataGrid
-                    {...model.bind("unallocSub")}
-                    authId={AUTH.grids.unallocSub}
-                    columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS}
-                    actions={ctrl.unallocSubActions}
-                  />
-                </SplitPane>
+                  <div className="flex-1 min-h-0">
+                    <SplitPane direction="vertical" defaultSizes={[70, 30]}>
+                      <DataGrid
+                        {...model.bind("unallocOrder")}
+                        authId={AUTH.grids.unallocOrder}
+                        columnDefs={UNALLOC_ORDER_COLUMN_DEFS}
+                        codeMap={model.codeMap}
+                        actions={ctrl.unallocOrderActions}
+                        onRowClicked={ctrl.onUnallocOrderRowClicked}
+                        audit={false}
+                      />
+                      <DataGrid
+                        {...model.bind("unallocSub")}
+                        authId={AUTH.grids.unallocSub}
+                        columnDefs={UNALLOC_ORDER_SUB_COLUMN_DEFS}
+                        actions={ctrl.unallocSubActions}
+                        audit={{ delete: false }}
+                      />
+                    </SplitPane>
+                  </div>
+                </div>
+              ),
+            },
+            VEHMGMT: {
+              render: () => (
+                <DataGrid
+                  {...model.bind("vehMgmt")}
+                  columnDefs={VEH_MGMT_COLUMN_DEFS}
+                  codeMap={model.codeMap}
+                  actions={ctrl.vehMgmtSubActions}
+                  // onRowClicked={ctrl.onUnallocOrderRowClicked}
+                  audit={false}
+                />
               ),
             },
           }}
@@ -124,5 +210,24 @@ export default function DispatchPlan() {
         />
       }
     />
+
+    <SidePanel
+      open={model.vehLocPanelOpen}
+      onClose={() => model.setVehLocPanelOpen(false)}
+      title="BTN_SHOW_VEHICLE_LOCATION"
+      width={520}
+    >
+      <VehicleLocationPanel row={model.grids.main.selected} />
+    </SidePanel>
+
+    <SidePanel
+      open={model.routePanelOpen}
+      onClose={() => model.setRoutePanelOpen(false)}
+      title="BTN_SHOW_ROUTE"
+      width={520}
+    >
+      <DriveRoutePanel row={model.grids.main.selected} />
+    </SidePanel>
+    </>
   );
 }

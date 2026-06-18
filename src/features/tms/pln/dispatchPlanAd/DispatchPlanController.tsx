@@ -7,7 +7,6 @@ import { MENU_CODE } from "./DispatchPlan";
 import {
   makeSaveAction,
   makeExcelGroupAction,
-  makeMemoGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { showInfoModal } from "@/app/components/popup/showInfoModal";
 import { dirtyRows } from "@/app/components/grid/gridCommon";
@@ -100,6 +99,7 @@ export function useDispatchPlanController({ model }: Args) {
   // 미할당 탭 조회 (조회조건 개별 값 기반)
   const handleUnallocOrderSearch = useCallback(() => {
     const srchObj = model.rawFiltersRef.current;
+    const c = model.unallocCond;
     model.setUnallocSearching(true);
     api
       .getUnallocOrderList({
@@ -107,6 +107,15 @@ export function useDispatchPlanController({ model }: Args) {
         LGST_GRP_CD: srchObj["SRCH_DSPCH_LGST_GRP_CD"],
         PLN_ID: srchObj["SRCH_DSPCH_PLN_ID"],
         DLVRY_DT: srchObj["SRCH_DSPCH_DLVRY_DT"],
+        // TODO(서버 파라미터명 확정 필요): 탭 조회조건 키 매핑
+        //  품목코드 → 서버는 itemList:[{CUST_ITEM_CD}] / 도착지 → SRCH_TO_LOC_CD / 배송유형 → DLVRY_TP
+        //  품목명·온도조건·P박스는 현재 서버 조회 SQL에 필터 없음 (서버 보강 후 연결)
+        ITEM_CD: c.ITEM_CD,
+        ITEM_NM: c.ITEM_NM,
+        DLVRY_TP: c.DLVRY_TP,
+        TO_LOC_CD: c.TO_LOC_CD,
+        TEMP_TCD: c.TEMP_TCD,
+        PBOX_TP: c.PBOX_TP,
       })
       .then((res: any) => {
         const rows = res.data.result ?? res.data.data?.dsOut ?? [];
@@ -121,6 +130,32 @@ export function useDispatchPlanController({ model }: Args) {
         console.error("[DispatchPlan] unalloc search failed", err),
       )
       .finally(() => model.setUnallocSearching(false));
+  }, [model]);
+
+  // 미할당 탭 조회 (조회조건 개별 값 기반)
+  const handleVehMgmtSearch = useCallback(() => {
+    const srchObj = model.rawFiltersRef.current;
+    model.setVehMgmtSearching(true);
+    api
+      .searchVehInfo({
+        DIV_CD: srchObj["SRCH_DSPCH_DIV_CD"],
+        LGST_GRP_CD: srchObj["SRCH_DSPCH_LGST_GRP_CD"],
+        PLN_ID: srchObj["SRCH_DSPCH_PLN_ID"],
+        DLVRY_DT: srchObj["SRCH_DSPCH_DLVRY_DT"],
+      })
+      .then((res: any) => {
+        const rows = res.data.result ?? res.data.data?.dsOut ?? [];
+        model.grids.vehMgmt.setData({
+          rows,
+          totalCount: rows.length,
+          page: 1,
+          limit: 20,
+        });
+      })
+      .catch((err) =>
+        console.error("[DispatchPlan] vehMgmt search failed", err),
+      )
+      .finally(() => model.setVehMgmtSearching(false));
   }, [model]);
 
   // 등록차량(지입) 변경 — 단일선택 검증 후 ChangeVehiclePop → 선택 차량 머지 → 저장 → 재조회
@@ -450,20 +485,6 @@ export function useDispatchPlanController({ model }: Args) {
     [validatorMemo, model.codeMap, base, openPopup, closePopup],
   );
 
-  const onSaveDspchMemoByGrid = useCallback(
-    (e: any) => {
-      const rows = (e?.data ?? []) as any[];
-      if (!validatorMemo(rows)) return;
-
-      base.confirm(Lang.get("MSG_CHECK_MEMO_CANCLE"), () => {
-        base
-          .callAjax(api.saveShpmItemMemo(rows), Lang.get("MSG_SAVE_CMPLT"))
-          .then(() => base.search());
-      });
-    },
-    [base, validatorMemo],
-  );
-
   // 임시차량변경 — 단일 배차행 선택 → 스팟차량(차량/기사/연락처) 등록
   const onChangeTempVeh = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
@@ -589,6 +610,16 @@ export function useDispatchPlanController({ model }: Args) {
     api.saveDispatchPlan({ dsSave: dirty }).then(() => base.search());
   }, [model, base]);
 
+  const onShowVehicleLocation = useCallback(() => {
+    model.setRoutePanelOpen(false);
+    model.setVehLocPanelOpen(true);
+  }, [model]);
+
+  const onShowRoute = useCallback(() => {
+    model.setVehLocPanelOpen(false);
+    model.setRoutePanelOpen(true);
+  }, [model]);
+
   const mainActions: ActionItem[] = useMemo(
     () => [
       // 배차생성및취소
@@ -682,15 +713,13 @@ export function useDispatchPlanController({ model }: Args) {
           },
           {
             type: "button",
-            key: "BTN_IN_SHPM_ITEM_MEMO",
-            label: "BTN_IN_SHPM_ITEM_MEMO",
-            onClick: onSaveDspchMemoByGrid,
-          },
-          {
-            type: "button",
             key: "BTN_CANCEL",
             label: "BTN_CANCEL",
-            onClick: () => {},
+            onClick: (e: any) => {
+              const rows = (e?.data ?? []) as any[];
+              if (!validatorMemo(rows)) return;
+              base.callAjax(api.cancelDspchMemo(rows));
+            },
           },
         ],
       },
@@ -705,13 +734,13 @@ export function useDispatchPlanController({ model }: Args) {
             type: "button",
             key: "BTN_SHOW_VEHICLE_LOCATION",
             label: "BTN_SHOW_VEHICLE_LOCATION",
-            onClick: () => {},
+            onClick: onShowVehicleLocation, //todo
           },
           {
             type: "button",
             key: "BTN_SHOW_ROUTE",
             label: "BTN_SHOW_ROUTE",
-            onClick: () => {},
+            onClick: onShowRoute,
           },
         ],
       },
@@ -737,6 +766,7 @@ export function useDispatchPlanController({ model }: Args) {
       },
       makeSaveAction({ onClick: handleSave }),
       makeExcelGroupAction({
+        hideAll: true,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName: menuName,
@@ -751,16 +781,19 @@ export function useDispatchPlanController({ model }: Args) {
       onCancelPlanDispatch,
       onAutoChangeStopSeq,
       onChangeDlvryDate,
-      onRegisterMemo,
       onChangeRegVeh,
       onChangeTempVeh,
       onSwapVehicle,
+      onRegisterMemo,
+      onShowVehicleLocation,
+      onShowRoute,
       onPlanned,
       onCancelPlanned,
       handleSave,
       menuName,
       model.grids.main,
       model.filtersRef,
+      validatorMemo,
       base,
     ],
   );
@@ -828,6 +861,14 @@ export function useDispatchPlanController({ model }: Args) {
   const allocOrderActions: ActionItem[] = useMemo(
     () => [
       {
+        //todo: 변경
+        type: "button",
+        key: "BTN_SEARCH",
+        label: model.unallocSearching ? "LBL_SEARCHING" : "BTN_SEARCH",
+        disabled: model.unallocSearching,
+        onClick: handleUnallocOrderSearch,
+      },
+      {
         type: "button",
         key: "BTN_UNASSIGNED_SHIPMENT",
         label: "BTN_UNASSIGNED_SHIPMENT",
@@ -839,13 +880,7 @@ export function useDispatchPlanController({ model }: Args) {
 
   const unallocOrderActions: ActionItem[] = useMemo(
     () => [
-      {
-        type: "button",
-        key: "BTN_SEARCH",
-        label: model.unallocSearching ? "LBL_SEARCHING" : "BTN_SEARCH",
-        disabled: model.unallocSearching,
-        onClick: handleUnallocOrderSearch,
-      },
+      // 조회는 탭 상단 조회조건 카드(PopupSearchCondition) 의 "조회" 버튼으로 일원화.
       {
         type: "button",
         key: "BTN_ASSIGN_SHIPMENT",
@@ -853,26 +888,26 @@ export function useDispatchPlanController({ model }: Args) {
         onClick: onAssignedShipment,
       },
     ],
-    [model.unallocSearching, handleUnallocOrderSearch, onAssignedShipment],
+    [onAssignedShipment],
   );
 
-  const allocSubActions: ActionItem[] = useMemo(
-    () => [
-      {
-        type: "button",
-        key: "BTN_ITEM_LINE_SPLIT",
-        label: "BTN_ITEM_LINE_SPLIT",
-        onClick: () => onSplitLine("allocSub", "allocOrder"),
-      },
-      {
-        type: "button",
-        key: "BTN_ITEM_QTY_SPLIT",
-        label: "BTN_ITEM_QTY_SPLIT",
-        onClick: () => onSplitQty("allocSub", "allocOrder"),
-      },
-    ],
-    [onSplitLine, onSplitQty],
-  );
+  // const allocSubActions: ActionItem[] = useMemo(
+  //   () => [
+  //     {
+  //       type: "button",
+  //       key: "BTN_ITEM_LINE_SPLIT",
+  //       label: "BTN_ITEM_LINE_SPLIT",
+  //       onClick: () => onSplitLine("allocSub", "allocOrder"),
+  //     },
+  //     {
+  //       type: "button",
+  //       key: "BTN_ITEM_QTY_SPLIT",
+  //       label: "BTN_ITEM_QTY_SPLIT",
+  //       onClick: () => onSplitQty("allocSub", "allocOrder"),
+  //     },
+  //   ],
+  //   [onSplitLine, onSplitQty],
+  // );
 
   const unallocSubActions: ActionItem[] = useMemo(
     () => [
@@ -892,6 +927,19 @@ export function useDispatchPlanController({ model }: Args) {
     [onSplitLine, onSplitQty],
   );
 
+  const vehMgmtSubActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_SEARCH",
+        label: model.vehMgmtSearching ? "LBL_SEARCHING" : "BTN_SEARCH",
+        disabled: model.vehMgmtSearching,
+        onClick: handleVehMgmtSearch,
+      },
+    ],
+    [handleVehMgmtSearch, model.vehMgmtSearching],
+  );
+
   return {
     fetchDispatchPlanList: fetchList,
     onSearchCallback,
@@ -902,7 +950,9 @@ export function useDispatchPlanController({ model }: Args) {
     stopActions,
     allocOrderActions,
     unallocOrderActions,
-    allocSubActions,
+    // allocSubActions,
     unallocSubActions,
+    vehMgmtSubActions,
+    handleUnallocOrderSearch,
   };
 }
