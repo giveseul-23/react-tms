@@ -3,7 +3,7 @@
 // 처리상태(IF_PRCS_STS) 셀 색상 — 서버 setInterfaceProcessStatusColor 대응
 const STATUS_CELL_STYLE = (params: any) => {
   const base = { textAlign: "center" as const };
-  switch (String(params.value ?? "").trim()) {
+  switch (String(params?.data?.IF_PRCS_STS ?? "").trim()) {
     case "S":
       return { ...base, backgroundColor: "#D9F0A6", fontWeight: "bold" };
     case "R":
@@ -16,10 +16,13 @@ const STATUS_CELL_STYLE = (params: any) => {
 };
 
 // 사용자재처리여부(RE_PRCS_BY_USR_YN) 셀 색상 — 서버 setInterfaceRePrcsColor 대응
-const REPRCS_YN_CELL_STYLE = (params: any) =>
-  String(params.value ?? "").trim() === "Y"
-    ? { textAlign: "center" as const, backgroundColor: "#BBE6F6" }
-    : { textAlign: "center" as const };
+const REPRCS_YN_CELL_STYLE = (params: any) => {
+  const base = { textAlign: "center" as const };
+  if (String(params?.data?.RE_PRCS_BY_USR_YN ?? "").trim() === "Y") {
+    return { ...base, backgroundColor: "#BBE6F6" };
+  }
+  return base;
+};
 
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
@@ -49,7 +52,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_USR_RE_PRCS_YN",
     field: "RE_PRCS_BY_USR_YN",
     width: 130,
-    align: "center",
+    headerClass: "ag-header-center",
     cellStyle: REPRCS_YN_CELL_STYLE,
   },
   {
@@ -58,7 +61,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "IF_PRCS_STS",
     codeKey: "interfaceStatus",
     width: 70,
-    align: "center",
+    headerClass: "ag-header-center",
     cellStyle: STATUS_CELL_STYLE,
   },
   {
