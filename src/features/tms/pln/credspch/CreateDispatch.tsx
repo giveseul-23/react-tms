@@ -55,7 +55,7 @@ export default function CreateDispatch() {
           authId={AUTH.grids.sub01}
           columnDefs={SUB01_COLUMN_DEFS}
           codeMap={model.codeMap}
-          headerCheckbox={false}
+          headerCheckbox={true}
           rowSelection="multiple"
           actions={ctrl.sub01Actions}
           gridOptions={{

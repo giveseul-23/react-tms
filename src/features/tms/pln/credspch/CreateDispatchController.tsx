@@ -16,6 +16,7 @@ import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
 import ItineraryPlanPop from "./popup/ItineraryPlanPop";
 import CreateEmptyDispatchVehiclePop from "../dispatchPlanAd/popup/CreateEmptyDispatchVehiclePop";
 import ShipmentTransferPop from "../rcvshpm/popup/ShipmentTransferPop";
+import SplitQtyPop from "../dispatchPlanAd/popup/SplitQtyPop";
 
 interface Args {
   model: CreateDispatchModel;
@@ -53,6 +54,17 @@ export function useCreateDispatchController({ model }: Args) {
     }
     return rows;
   }, [base, selectedMainRows]);
+
+  const selectedSub01Rows = useCallback(() => selectedSub01RowsRef.current ?? [], []);
+
+  const requireSub01Rows = useCallback(() => {
+    const rows = selectedSub01Rows();
+    if (!rows.length) {
+      base.alert(Lang.get("MSG_SELECT_NO_DATA"));
+      return null;
+    }
+    return rows;
+  }, [base, selectedSub01Rows]);
 
   const saveRows = useCallback(async (
     rows: any[],
@@ -363,6 +375,88 @@ export function useCreateDispatchController({ model }: Args) {
     });
   }, [applyShipLocation, closePopup, openPopup, requireMainRows, saveRows]);
 
+  const checkSplitCond = useCallback((subRows: any[], splitTypeMsg: string) => {
+    const mainRows = requireMainRows(true);
+    if (!mainRows) return null;
+    if (!subRows.length) {
+      base.alert(Lang.get("MSG_SELECT_ITEM_CHECK", Lang.get(splitTypeMsg)));
+      return null;
+    }
+    if (mainRows.some((row) => row?.PPT_SHPM_SPLIT_YN === "N" || row?.ALLOW_SHIPMENT_SPLIT === "N")) {
+      base.alert(Lang.get("MSG_SHIPMENT_SPLIT_MRG_LGST_VLD_CHK", mainRows[0]?.LGST_GRP_CD ?? ""));
+      return null;
+    }
+    if (mainRows.some((row) => String(row?.MIT_CLSS_CD ?? "") !== "")) {
+      base.alert(Lang.get("MSG_SHIPMENT_MIT_CHK"));
+      return null;
+    }
+    return mainRows[0];
+  }, [base, requireMainRows]);
+
+  const onSplitShipmentQty = useCallback(() => {
+    const subRows = requireSub01Rows();
+    if (!subRows) return;
+    const main = checkSplitCond(subRows, "BTN_ITEM_QTY_SPLIT");
+    if (!main) return;
+    if (subRows.length !== 1) {
+      base.alert(Lang.get("MSG_ITEM_QTY_SPLIT_ONE_SHIPMENT"));
+      return;
+    }
+    const sub = subRows[0];
+    const planQty = Number(sub?.PLN_QTY ?? sub?.PLN_ORD_QTY ?? 0);
+    if (planQty <= 1) {
+      base.alert(Lang.get("MSG_ITEM_QTY_SPLIT_QTY_CHK"));
+      return;
+    }
+
+    openPopup({
+      title: "TTL_ITEM_QTY_SPLIT",
+      width: "2xl",
+      content: (
+        <SplitQtyPop
+          record={{ ...sub, PLN_QTY: planQty }}
+          onConfirm={(payload) => {
+            closePopup();
+            void base
+              .callAjax(createDispatchApi.saveSplitShipmentQty({ dsSave: [payload] }))
+              .then(() => {
+                base.search();
+              });
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [base, checkSplitCond, closePopup, openPopup, requireSub01Rows]);
+
+  const onSplitShipmentLine = useCallback(() => {
+    const subRows = requireSub01Rows();
+    if (!subRows) return;
+    const main = checkSplitCond(subRows, "BTN_ITEM_LINE_SPLIT");
+    if (!main) return;
+
+    const subGridAllCnt = model.grids.sub01.ref.current?.rows?.length ?? model.grids.sub01.rows?.length ?? 0;
+    if (subGridAllCnt === 1) {
+      base.alert(Lang.get("MSG_SHIPMENT_SPLIT_CHECK"));
+      return;
+    }
+    if (subGridAllCnt <= subRows.length) {
+      base.alert(Lang.get("MSG_SHIPMENT_SPLIT_ALL_ITEM_CHK"));
+      return;
+    }
+
+    const dsSave = [
+      main,
+      ...subRows.map((row) => ({ ...row, rowStatus: "U" })),
+    ].map(({ EDIT_STS, __rid__, ...row }) => row);
+
+    void base
+      .callAjax(createDispatchApi.saveSplitShipmentLine({ dsSave }))
+      .then(() => {
+        base.search();
+      });
+  }, [base, checkSplitCond, model.grids.sub01, requireSub01Rows]);
+
   const mainActions: ActionItem[] = useMemo(() => [
     { type: "button", key: "BTN_MANUAL_PLAN", label: "BTN_MANUAL_PLAN", onClick: onManualPlan },
     { type: "button", key: "BTN_CREATE_ITINERARY_PLAN", label: "BTN_CREATE_ITINERARY_PLAN", onClick: onCreateItineraryPlanDispatch },
@@ -392,6 +486,8 @@ export function useCreateDispatchController({ model }: Args) {
   ]);
 
   const sub01Actions: ActionItem[] = useMemo(() => [
+    { type: "button", key: "BTN_ITEM_QTY_SPLIT", label: "BTN_ITEM_QTY_SPLIT", onClick: onSplitShipmentQty },
+    { type: "button", key: "BTN_ITEM_LINE_SPLIT", label: "BTN_ITEM_LINE_SPLIT", onClick: onSplitShipmentLine },
     makeExcelGroupAction({
       excelColumns: () => model.grids.sub01.getExcelColumns(),
       menuCode: MENU_CODE,
@@ -402,7 +498,7 @@ export function useCreateDispatchController({ model }: Args) {
       },
       rows: model.grids.sub01.rows,
     }),
-  ], [fetchSub01, menuName, model.grids.main, model.grids.sub01]);
+  ], [fetchSub01, menuName, model.grids.main, model.grids.sub01, onSplitShipmentLine, onSplitShipmentQty]);
 
   return {
     ...base,
