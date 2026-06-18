@@ -9,6 +9,12 @@ import { MAIN_COLUMN_DEFS } from "./IfVehicleDspchColumns";
 
 export const MENU_CODE = "MENU_IF_VEHICLE_DSPCH";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_IF_VEHICLE_DSPCH",
+  },
+};
+
 export default function IfVehicleDspch() {
   const model = useIfVehicleDspchModel(MENU_CODE);
   const ctrl = useIfVehicleDspchController({ model });
@@ -26,6 +32,7 @@ export default function IfVehicleDspch() {
         <DataGrid
           {...model.bind("main")}
           rowSelection="multiple"
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}

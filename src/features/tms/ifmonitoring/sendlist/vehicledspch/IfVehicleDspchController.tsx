@@ -22,21 +22,16 @@ export function useIfVehicleDspchController({ model }: Args) {
     [],
   );
 
-  const onMainGridClick = useCallback(
-    (row: any) => {
-      base.handleRowClick("main", row);
-    },
-    [base],
-  );
+  const onMainGridClick = useCallback(() => {}, []);
 
   const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
+      model.grids.main.setSelected(null);
     },
     [model.grids.main],
   );
 
-  // 재처리 — 선택된 행 중 처리상태(E:오류)만 재처리. 그 외엔 안내 후 중단. (서버 onReprocess 대응)
   const onReprocess = useCallback(
     (e?: any) => {
       const selectedRows = Array.isArray(e?.data)
@@ -46,12 +41,15 @@ export function useIfVehicleDspchController({ model }: Args) {
           : [];
 
       if (selectedRows.length === 0) {
+        showInfoModal(Lang.get("MSG_SELECT_NO_DATA"));
         return;
       }
 
       for (const row of selectedRows) {
         if (row.IF_PRCS_STS !== "E") {
-          showInfoModal(Lang.get("MSG_ALREADY_SUCCESS", String(row.IF_ID ?? "")));
+          showInfoModal(
+            Lang.get("MSG_ALREADY_SUCCESS", String(row.IF_ID ?? "")),
+          );
           return;
         }
       }
@@ -59,7 +57,10 @@ export function useIfVehicleDspchController({ model }: Args) {
       base
         .callAjax(
           api.reprocess({
-            dsSave: selectedRows.map((row: any) => ({ ...row, rowStatus: "U" })),
+            dsSave: selectedRows.map((row: any) => ({
+              ...row,
+              rowStatus: "U",
+            })),
           }),
           "MSG_SAVE_CMPLT",
         )
