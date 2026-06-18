@@ -9,7 +9,7 @@ import {
   TmapMarker,
   TmapViewHandle,
 } from "@/app/components/map/TmapView";
-import { dispatchPlanApi as api } from "../dispatchPlanApi";
+import { dispatchPlanApi as api } from "../../dispatchPlanAd/dispatchPlanApi";
 
 type Props = {
   /** 선택된 배차행 (= model.grids.main.selected). 바뀌면 재조회. */

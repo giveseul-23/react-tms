@@ -583,6 +583,130 @@ export const ALLOC_ORDER_SUB_COLUMN_DEFS = [
   },
 ];
 
+// ── 할당주문 탭 · 품목(ITEM) 단일 그리드 ─────────────────────
+export const ALLOC_ORDER_ITEM_COLUMN_DEFS = [
+  { headerName: "No" },
+  {
+    type: "text",
+    headerName: "LBL_ITEM_CD",
+    field: "CUST_ITEM_CD",
+    align: "center",
+  }, // 품목코드
+  { type: "text", headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM" }, // 품목명
+  {
+    type: "combo",
+    headerName: "LBL_ORDER_TYPE",
+    field: "ORD_TP",
+    codeKey: "ordTpList",
+    align: "center",
+  }, // 주문유형
+  { type: "numeric", headerName: "LBL_PLN_ORD_QTY", field: "PLN_ORD_QTY" }, // 계획주문수량
+  {
+    type: "combo",
+    headerName: "LBL_PLN_ORD_QTY_UOM",
+    field: "PLN_ORD_QTY_UOM",
+    codeKey: "itmUomList",
+    align: "center",
+  }, // 계획주문수량UOM
+  { type: "numeric", headerName: "LBL_PLN_INV_QTY", field: "PLN_INV_QTY" }, // 계획재고수량
+  {
+    type: "combo",
+    headerName: "LBL_PLN_INV_QTY_UOM",
+    field: "PLN_INV_QTY_UOM",
+    codeKey: "itmUomList",
+    align: "center",
+  }, // 계획재고수량UOM
+  {
+    headerName: "LBL_PLN_NET_WGT",
+    field: "PLN_NET_WGT",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획순중량
+  {
+    headerName: "LBL_PLN_GRS_WGT",
+    field: "PLN_GRS_WGT",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획총중량
+  {
+    headerName: "LBL_PLN_PLT_QTY",
+    field: "PLN_PLT_QTY",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획팔레트수량
+  {
+    headerName: "LBL_PLN_RTNR_QTY",
+    field: "PLN_RTNR_QTY",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획롤테이너수량
+  {
+    headerName: "LBL_PLN_PBOX_QTY",
+    field: "PLN_PBOX_QTY",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획PBOX수량
+  {
+    headerName: "LBL_PLN_BOX_QTY",
+    field: "PLN_BOX_QTY",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획BOX수량
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY1",
+    field: "PLN_FLEX_QTY1",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획FQ1
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY2",
+    field: "PLN_FLEX_QTY2",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획FQ2
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY3",
+    field: "PLN_FLEX_QTY3",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획FQ3
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY4",
+    field: "PLN_FLEX_QTY4",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획FQ4
+  {
+    headerName: "LBL_PLANNED_FLEX_QTY5",
+    field: "PLN_FLEX_QTY5",
+    type: "numeric",
+    summable: true,
+    valueFormatter: numberValueFormatter,
+  }, // 계획FQ5
+  {
+    type: "combo",
+    headerName: "LBL_TEMP_CAL_OPT",
+    field: "TEMP_TCD",
+    codeKey: "vehTempTcd",
+    align: "center",
+  }, // 온도조건
+  {
+    type: "text",
+    headerName: "LBL_ITEM_REMARK",
+    field: "SHPM_DTL_RSN_DESC",
+  }, // 품목비고사항
+];
+
 // ── 미할당주문 탭 ────────────────────────────────────────────
 export const UNALLOC_ORDER_COLUMN_DEFS = [
   { headerName: "No" },

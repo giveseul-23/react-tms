@@ -2,14 +2,14 @@
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { SidePanel } from "@/app/components/layout/SidePanel";
-import VehicleLocationPanel from "./panel/VehicleLocationPanel";
-import DriveRoutePanel from "./panel/DriveRoutePanel";
+import VehicleLocationPanel from "../dispatchPlan/panel/VehicleLocationPanel";
+import DriveRoutePanel from "../dispatchPlan/panel/DriveRoutePanel";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
-import { useDispatchPlanModel } from "./DispatchPlanModel";
-import { useDispatchPlanController } from "./DispatchPlanController";
+import { useDispatchPlanModel } from "../dispatchPlan/DispatchPlanModel";
+import { useDispatchPlanController } from "../dispatchPlan/DispatchPlanController";
 import {
   MAIN_COLUMN_DEFS,
   STOP_COLUMN_DEFS,
@@ -17,7 +17,7 @@ import {
   UNALLOC_ORDER_COLUMN_DEFS,
   ALLOC_ORDER_SUB_COLUMN_DEFS,
   UNALLOC_ORDER_SUB_COLUMN_DEFS,
-} from "./DispatchPlanColumns";
+} from "../dispatchPlan/DispatchPlanColumns";
 
 export const MENU_CODE = "MENU_DISPATCH_PLAN_AD";
 
@@ -36,15 +36,8 @@ export default function DispatchPlan() {
           ...model.bindSearch(),
           menuCode: MENU_CODE,
         }}
-        direction={model.layout === "side" ? "horizontal" : "vertical"}
+        defaultDirection="horizontal"
         defaultSizes={[55, 45]}
-        layoutToggle={{
-          layout: model.layout,
-          onToggle: () =>
-            model.setLayout((prev: LayoutType) =>
-              prev === "side" ? "vertical" : "side",
-            ),
-        }}
         storageKey={model.storageKeys.outer}
         master={
           <DataGrid
@@ -89,7 +82,6 @@ export default function DispatchPlan() {
                     <DataGrid
                       {...model.bind("allocSub")}
                       columnDefs={ALLOC_ORDER_SUB_COLUMN_DEFS}
-                      actions={ctrl.allocSubActions}
                     />
                   </SplitPane>
                 ),

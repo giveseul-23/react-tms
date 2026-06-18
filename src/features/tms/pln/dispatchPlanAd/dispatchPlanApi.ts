@@ -68,6 +68,13 @@ export const dispatchPlanApi = {
     );
   },
 
+  getAllocAndUnallocOrderItemList(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "dispatchPlanService/searchUnAssignedShipmentItem",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
   //차량정보조회
   // ── 하단 탭: 미할당주문 ─────────────────────────────────────
   searchVehInfo(payload: any) {
