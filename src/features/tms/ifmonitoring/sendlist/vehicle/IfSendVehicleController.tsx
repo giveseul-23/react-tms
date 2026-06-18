@@ -22,22 +22,14 @@ export function useIfSendVehicleController({ model }: Args) {
     [],
   );
 
-  const onMainGridClick = useCallback(
-    (row: any) => {
-      if (!row || String(row.rowStatus ?? "").trim() === "I") {
-        return;
-      }
-      base.handleRowClick("main", row);
-    },
-    [base],
-  );
+  const onMainGridClick = useCallback(() => {}, []);
 
   const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
-      onMainGridClick(data?.rows?.[0]);
+      model.grids.main.setSelected(null);
     },
-    [model.grids.main, onMainGridClick],
+    [model.grids.main],
   );
 
   const onReprocess = useCallback(
@@ -49,12 +41,15 @@ export function useIfSendVehicleController({ model }: Args) {
           : [];
 
       if (selectedRows.length === 0) {
+        showInfoModal(Lang.get("MSG_SELECT_NO_DATA"));
         return;
       }
 
       for (const row of selectedRows) {
         if (row.IF_PRCS_STS !== "E") {
-          showInfoModal(Lang.get("MSG_ALREADY_SUCCESS", String(row.IF_ID ?? "")));
+          showInfoModal(
+            Lang.get("MSG_ALREADY_SUCCESS", String(row.IF_ID ?? "")),
+          );
           return;
         }
       }
@@ -62,7 +57,10 @@ export function useIfSendVehicleController({ model }: Args) {
       base
         .callAjax(
           api.reprocess({
-            dsSave: selectedRows.map((row: any) => ({ ...row, rowStatus: "U" })),
+            dsSave: selectedRows.map((row: any) => ({
+              ...row,
+              rowStatus: "U",
+            })),
           }),
           "MSG_SAVE_CMPLT",
         )
