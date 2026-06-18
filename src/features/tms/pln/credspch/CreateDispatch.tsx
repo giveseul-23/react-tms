@@ -38,7 +38,7 @@ export default function CreateDispatch() {
           authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          headerCheckbox={false}
+          headerCheckbox={true}
           rowSelection="multiple"
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}

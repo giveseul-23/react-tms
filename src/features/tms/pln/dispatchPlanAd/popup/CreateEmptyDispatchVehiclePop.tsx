@@ -18,12 +18,14 @@ type Props = {
   onClose: () => void;
   // 본 화면 조회조건: DIV_CD / LGST_GRP_CD / DLVRY_DT / DSPCH_TP / PLN_ID
   initialValues?: Record<string, any>;
+  rowSelection?: "single" | "multiple";
 };
 
 export default function CreateEmptyDispatchVehiclePop({
   onConfirm,
   onClose,
   initialValues = {},
+  rowSelection = "multiple",
 }: Props) {
   const LGST_GRP_CD = initialValues.LGST_GRP_CD ?? "";
 
@@ -81,18 +83,18 @@ export default function CreateEmptyDispatchVehiclePop({
 
   const fields: GridSearchField[] = [
     {
-      label: "차량운영유형",
+      label: "LBL_VEHICLE_OPERATION_TYPE",
       value: vehOpTp,
       onChange: setVehOpTp,
       type: "combo",
       options: stores.vehOpTp,
       placeholder: "선택",
     },
-    { label: "운송사코드", value: carrCd, onChange: setCarrCd },
-    { label: "운송사명", value: carrNm, onChange: setCarrNm },
-    { label: "차량코드", value: vehId, onChange: setVehId },
-    { label: "차량유형코드", value: vehTpCd, onChange: setVehTpCd },
-    { label: "차량번호", value: vehNo, onChange: setVehNo },
+    { label: "LBL_CARR_CD", value: carrCd, onChange: setCarrCd },
+    { label: "LBL_CARR_NM", value: carrNm, onChange: setCarrNm },
+    { label: "LBL_VEHICLE_CODE", value: vehId, onChange: setVehId },
+    { label: "LBL_VEH_TP_CD", value: vehTpCd, onChange: setVehTpCd },
+    { label: "LBL_VEH_NO", value: vehNo, onChange: setVehNo },
   ];
 
   const columnDefs = [
@@ -161,6 +163,7 @@ export default function CreateEmptyDispatchVehiclePop({
       sendField: "ASST_NM",
       width: 100,
     },
+    { field: "PAY_CARR_CD", sendField: "PAY_CARR_CD", hide: true }    
   ];
 
   return (
@@ -170,10 +173,16 @@ export default function CreateEmptyDispatchVehiclePop({
       rows={rows}
       gridHeight={400}
       codeMap={codeMap}
-      rowSelection="multiple"
+      rowSelection={rowSelection}
       selectedBadgeFields={["VEH_NO", "VEH_TP_NM", "CARR_NM"]}
       onSearch={fetchData}
-      onConfirm={(payload) => onConfirm(payload as Record<string, any>[])}
+      onConfirm={(payload) =>
+        onConfirm(
+          Array.isArray(payload)
+            ? (payload as Record<string, any>[])
+            : [payload as Record<string, any>],
+        )
+      }
       onClose={onClose}
     />
   );
