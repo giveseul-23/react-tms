@@ -55,7 +55,7 @@ export default function ChangeDeliveryDatePop({
       <Field
         layout="vertical"
         type="combo"
-        label="LBL_PLAN_ID"
+        label={Lang.get("LBL_PLAN_ID")}
         required
         value={planId}
         onChange={setPlanId}

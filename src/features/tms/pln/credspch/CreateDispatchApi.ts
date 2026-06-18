@@ -34,6 +34,9 @@ export const createDispatchApi = {
   saveItineraryPlan(payload: any) {
     return post("/createDispatchService/saveItineraryPlan", payload);
   },
+  saveCreateItineraryGroupDispatch(payload: any) {
+    return post("/dispatchPlanAdService/saveCreateItineraryGroupDispatch", payload);
+  },
   saveParcelPlan(payload: any) {
     return post("/createDispatchService/saveParcelPlan", payload);
   },

@@ -9,6 +9,8 @@ import { createDispatchApi } from "./CreateDispatchApi";
 import { MENU_CODE } from "./CreateDispatch";
 import type { CreateDispatchModel, GridKey } from "./CreateDispatchModel";
 import ChangeDeliveryDatePop from "./popup/ChangeDeliveryDatePop";
+import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
+import ItineraryPlanPop from "./popup/ItineraryPlanPop";
 import CreateEmptyDispatchVehiclePop from "../dispatchPlanAd/popup/CreateEmptyDispatchVehiclePop";
 import ShipmentTransferPop from "../rcvshpm/popup/ShipmentTransferPop";
 
@@ -149,16 +151,90 @@ export function useCreateDispatchController({ model }: Args) {
   }, [base, closePopup, openPopup, requireMainRows, saveRows]);
 
   const onCreateItineraryPlanDispatch = useCallback(() => {
-    const rows = requireMainRows();
-    if (!rows) return;
-    void saveRows(rows, createDispatchApi.saveItineraryPlan);
-  }, [requireMainRows, saveRows]);
+    const f = model.rawFiltersRef.current ?? {};
+    const initialValues = {
+      DIV_CD: f.SRCH_SHPM_DIV_CD ?? "",
+      LGST_GRP_CD: f.SRCH_SHPM_LGST_GRP_CD ?? "",
+      PLN_ID: f.SRCH_SHPM_PLN_ID ?? "",
+      DLVRY_DT: f.SRCH_SHPM_DLVRY_DT ?? "",
+      BATCH_NO: 1,
+    };
+    if (
+      !initialValues.DIV_CD ||
+      !initialValues.LGST_GRP_CD ||
+      !initialValues.PLN_ID ||
+      !initialValues.DLVRY_DT
+    ) {
+      base.alert(Lang.get("MSG_DUMMY_DISPATCH_BUILD_MANDATORY_CHK"));
+      return;
+    }
+
+    openPopup({
+      title: "TTL_CREATE_ITINERARY_PLAN",
+      width: "2xl",
+      content: (
+        <CreateItineraryDispatchPop
+          initialValues={initialValues}
+          onConfirm={(picked) => {
+            closePopup();
+            void base.callAjax(
+              createDispatchApi.saveCreateItineraryGroupDispatch({
+                dsSave: picked.map((row) => ({
+                  ...row,
+                  ...initialValues,
+                  rowStatus: row.rowStatus ?? "I",
+                })),
+              }),
+            ).then(() => base.search());
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [base, closePopup, model.rawFiltersRef, openPopup]);
 
   const onItineraryPlan = useCallback(() => {
     const rows = requireMainRows();
     if (!rows) return;
-    void saveRows(rows, createDispatchApi.saveItineraryPlan);
-  }, [requireMainRows, saveRows]);
+    const first = rows[0];
+    openPopup({
+      title: "BTN_CREATE_ITINERARY_GRP_PLAN",
+      width: "2xl",
+      content: (
+        <ItineraryPlanPop
+          initialValues={{
+            DIV_CD: first?.DIV_CD ?? "",
+            LGST_GRP_CD: first?.LGST_GRP_CD ?? "",
+            DLVRY_DT: first?.DLVRY_DT ?? "",
+            PLN_ID: first?.PLN_ID ?? "",
+            BATCH_NO: first?.BATCH_NO ?? 1,
+          }}
+          onConfirm={(itinerary) => {
+            closePopup();
+            void saveRows(
+              rows.map((row) => ({
+                ...row,
+                ITNR_ID: itinerary.ITNR_ID,
+                CARR_CD: itinerary.CARR_CD,
+                PAY_CARR_CD: itinerary.PAY_CARR_CD,
+                VEH_ID: itinerary.VEH_ID,
+                VEH_TP_CD: itinerary.VEH_TP_CD,
+                VEH_NO: itinerary.VEH_NO,
+                DRVR_ID: itinerary.DRVR_ID,
+                DRVR_NM: itinerary.DRVR_NM,
+                ASST_ID: itinerary.ASST_ID,
+                ASST_NM: itinerary.ASST_NM,
+                AP_PROC_TP: itinerary.AP_PROC_TP,
+                rowStatus: "U",
+              })),
+              createDispatchApi.saveItineraryPlan,
+            );
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [closePopup, openPopup, requireMainRows, saveRows]);
 
   const onChangeDeliveryDate = useCallback(() => {
     const rows = requireMainRows(true);
