@@ -54,7 +54,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_USR_RE_PRCS_YN",
     field: "RE_PRCS_BY_USR_YN",
     width: 130,
-    align: "center",
+    headerClass: "ag-header-center",
     cellStyle: rePrcsCellStyle,
   },
   {
@@ -63,7 +63,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "IF_PRCS_STS",
     codeKey: "interfaceStatus",
     width: 70,
-    align: "center",
+    headerClass: "ag-header-center",
     cellStyle: ifPrcsStsCellStyle,
   },
   {

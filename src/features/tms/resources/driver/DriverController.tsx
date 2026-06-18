@@ -13,7 +13,6 @@ import {
   toDsSave,
 } from "@/app/components/grid/gridCommon";
 import { driverApi as api } from "./DriverApi";
-import { MAIN_COLUMN_DEFS, SUB01_COLUMN_DEFS } from "./DriverColumns";
 import type { DriverModel, GridKey } from "./DriverModel";
 
 import { MENU_CODE as MENU_CD } from "./Driver";
@@ -257,7 +256,7 @@ export function useDriverController({ model }: ControllerArgs) {
       .join(",");
 
     for (const row of mainDirty) {
-      row.MENU_CD = "MENU_DRVR_MGMT";
+      row.MENU_CD = MENU_CD;
       row.CUST_CD_LIST = custCdList;
       if (row.EDIT_STS === ROW_STATUS.INSERT) {
         const subDirty = dirtyRows(subRows);
@@ -346,7 +345,7 @@ export function useDriverController({ model }: ControllerArgs) {
       makeAddAction({ onClick: onAddMain }),
       makeSaveAction({ onClick: onSaveMain }),
       makeExcelGroupAction({
-        columns: MAIN_COLUMN_DEFS(),
+        excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => fetchList(getExcelSearchParams()),
@@ -379,7 +378,7 @@ export function useDriverController({ model }: ControllerArgs) {
       makeAddAction({ onClick: onAddSub01 }),
       makeSaveAction({ onClick: onSaveSub01 }),
       makeExcelGroupAction({
-        columns: SUB01_COLUMN_DEFS(),
+        excelColumns: () => model.grids.sub01.getExcelColumns(),
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => api.getCustList(getSub01ExcelSearchParams()),
