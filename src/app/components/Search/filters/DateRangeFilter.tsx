@@ -45,6 +45,8 @@ export function DateRangeFilter({
 
   onChangeFrom = () => {},
   onChangeTo,
+
+  required,
 }: DateFilterProps) {
   const isDatetime = granularity === "datetime";
 
@@ -72,6 +74,7 @@ export function DateRangeFilter({
         onChange={onChangeFrom}
         withTime={isDatetime}
         precision={precision}
+        allowClear={!required}
       />
     );
   }
@@ -85,6 +88,7 @@ export function DateRangeFilter({
         onChange={handleFromChange}
         withTime={isDatetime}
         precision={precision}
+        allowClear={!required}
       />
 
       <span className="text-xs text-muted-foreground select-none">~</span>
@@ -95,6 +99,7 @@ export function DateRangeFilter({
         onChange={handleToChange}
         withTime={isDatetime}
         precision={precision}
+        allowClear={!required}
       />
     </div>
   );
