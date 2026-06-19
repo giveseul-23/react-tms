@@ -78,12 +78,8 @@ export default function UiResource() {
           columnDefs={MAIN_COLUMN_DEFS}
           nameColumnHeader={Lang.get("LBL_RSRC_ID")}
           nameColumnWidth={300}
-          nameColumnField="RSRC_ID"
-          nameColumnEditable={false}
-          nameColumnInsertable={true}
           defaultExpandLevel={-1}
           getRowId={(p) => String(p.data.id)}
-          headerCheckbox={false}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.handleRowClicked}
           onCellValueChanged={ctrl.onCellValueChanged}

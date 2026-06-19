@@ -3,7 +3,6 @@
 
 import { useMemo } from "react";
 import { GridMapPage } from "@/app/components/layout/presets/GridMapPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { TmapView, TmapMarker } from "@/app/components/map/TmapView";
 
@@ -64,15 +63,8 @@ export default function DriveHistory() {
         pageSize: model.pageSize,
         menuCode: MENU_CODE,
       }}
-      direction={model.layout === "side" ? "horizontal" : "vertical"}
+      defaultDirection={model.layout === "side" ? "horizontal" : "vertical"}
       defaultSizes={[45, 55]}
-      layoutToggle={{
-        layout: model.layout,
-        onToggle: () =>
-          model.setLayout((prev: LayoutType) =>
-            prev === "side" ? "vertical" : "side",
-          ),
-      }}
       storageKey={model.storageKeys.outer}
       grid={gridPane}
       map={mapPane}

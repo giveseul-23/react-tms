@@ -209,7 +209,7 @@ export function useUiResourceController({
 
             model.setSource((prev) =>
               syncLeafFlag([
-                ...prev.map((row) =>
+                ...prev.map((row): UiResourceRow =>
                   row.__rid__ === selected.__rid__
                     ? { ...row, LEAFYN: "N" }
                     : row,
