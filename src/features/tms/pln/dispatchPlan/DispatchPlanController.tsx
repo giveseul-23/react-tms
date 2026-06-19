@@ -233,8 +233,8 @@ export function useDispatchPlanController({ model }: Args) {
     });
   }, [model.grids.main, guardHasData, openPopup, closePopup, base]);
 
-  // 배차생성 — 본 화면 조회조건(부서/운영그룹/배송일/계획ID) 필수 확인 후 차량 선택 팝업
-  const onCreateEmptyDispatch = useCallback(() => {
+  // 배차생성 공통 — 본 화면 조회조건의 필수값(부서/운영그룹/배송일/계획ID) 추출 + 검증
+  const requireDispatchMandatory = useCallback(() => {
     const f = model.rawFiltersRef.current ?? {};
     const DIV_CD = f["SRCH_DSPCH_DIV_CD"];
     const LGST_GRP_CD = f["SRCH_DSPCH_LGST_GRP_CD"];
@@ -243,8 +243,16 @@ export function useDispatchPlanController({ model }: Args) {
     const DSPCH_TP = f["SRCH_DSPCH_TP"];
     if (!DIV_CD || !LGST_GRP_CD || !DLVRY_DT || !PLN_ID) {
       showInfoModal(Lang.get("MSG_DUMMY_DISPATCH_BUILD_MANDATORY_CHK"));
-      return;
+      return null;
     }
+    return { DIV_CD, LGST_GRP_CD, DLVRY_DT, PLN_ID, DSPCH_TP };
+  }, [model.rawFiltersRef]);
+
+  // 배차생성 — 본 화면 조회조건(부서/운영그룹/배송일/계획ID) 필수 확인 후 차량 선택 팝업
+  const onCreateEmptyDispatch = useCallback(() => {
+    const m = requireDispatchMandatory();
+    if (!m) return;
+    const { DIV_CD, LGST_GRP_CD, DLVRY_DT, PLN_ID, DSPCH_TP } = m;
     openPopup({
       title: "BTN_DISPATCH_CREATE",
       width: "4xl",
@@ -271,19 +279,13 @@ export function useDispatchPlanController({ model }: Args) {
         />
       ),
     });
-  }, [model.rawFiltersRef, openPopup, closePopup, base]);
+  }, [requireDispatchMandatory, openPopup, closePopup, base]);
 
   //고정노선배차생성
   const onCreateItineraryDispatch = useCallback(() => {
-    const f = model.rawFiltersRef.current ?? {};
-    const DIV_CD = f["SRCH_DSPCH_DIV_CD"];
-    const LGST_GRP_CD = f["SRCH_DSPCH_LGST_GRP_CD"];
-    const DLVRY_DT = f["SRCH_DSPCH_DLVRY_DT"];
-    const PLN_ID = f["SRCH_DSPCH_PLN_ID"];
-    if (!DIV_CD || !LGST_GRP_CD || !DLVRY_DT || !PLN_ID) {
-      showInfoModal(Lang.get("MSG_DUMMY_DISPATCH_BUILD_MANDATORY_CHK"));
-      return;
-    }
+    const m = requireDispatchMandatory();
+    if (!m) return;
+    const { DIV_CD, LGST_GRP_CD, DLVRY_DT, PLN_ID } = m;
     openPopup({
       title: "TTL_CREATE_ITINERARY_PLAN",
       width: "2xl",
@@ -307,20 +309,14 @@ export function useDispatchPlanController({ model }: Args) {
         />
       ),
     });
-  }, [model.rawFiltersRef, openPopup, closePopup, base]);
+  }, [requireDispatchMandatory, openPopup, closePopup, base]);
 
   //고정그룹배차생성
   const onCreateItineraryGrpDispatch = useCallback(() => {
-    const f = model.rawFiltersRef.current ?? {};
-    const DIV_CD = f["SRCH_DSPCH_DIV_CD"];
-    const LGST_GRP_CD = f["SRCH_DSPCH_LGST_GRP_CD"];
-    const DLVRY_DT = f["SRCH_DSPCH_DLVRY_DT"];
-    const PLN_ID = f["SRCH_DSPCH_PLN_ID"];
+    const m = requireDispatchMandatory();
+    if (!m) return;
+    const { DIV_CD, LGST_GRP_CD, DLVRY_DT, PLN_ID } = m;
     const BATCH_NO = 1;
-    if (!DIV_CD || !LGST_GRP_CD || !DLVRY_DT || !PLN_ID) {
-      showInfoModal(Lang.get("MSG_DUMMY_DISPATCH_BUILD_MANDATORY_CHK"));
-      return;
-    }
     openPopup({
       title: "BTN_CREATE_ITINERARY_GRP_PLAN",
       width: "2xl",
@@ -345,7 +341,7 @@ export function useDispatchPlanController({ model }: Args) {
         />
       ),
     });
-  }, [model.rawFiltersRef, openPopup, closePopup, base]);
+  }, [requireDispatchMandatory, openPopup, closePopup, base]);
 
   // 배차취소 — 선택 배차 행 confirm 후 취소
   const onCancelPlanDispatch = useCallback(
@@ -539,17 +535,18 @@ export function useDispatchPlanController({ model }: Args) {
       }
 
       if (row.DSPCH_OP_STS == "2090" || row.DSPCH_OP_STS == "2100") {
-        model.grids.stop.rows.map((data) => {
-          if (data.ATA_DTTM != null && data.ATD_DTTM == null) {
-            base.alert(
-              Lang.get("MSG_CAL_ETA_EXCEPTION_IN_TRANSIT", [
-                row.VEH_NO,
-                data.LOC_NM,
-              ]),
-            );
-            return false;
-          }
-        });
+        const blocked = model.grids.stop.rows.find(
+          (data) => data.ATA_DTTM != null && data.ATD_DTTM == null,
+        );
+        if (blocked) {
+          base.alert(
+            Lang.get("MSG_CAL_ETA_EXCEPTION_IN_TRANSIT", [
+              row.VEH_NO,
+              blocked.LOC_NM,
+            ]),
+          );
+          return false;
+        }
       }
 
       return true;
@@ -727,7 +724,7 @@ export function useDispatchPlanController({ model }: Args) {
       if (!guardHasData(sub ? [sub] : [])) return;
       openPopup({
         title: "BTN_ITEM_QTY_SPLIT",
-        width: "2xl",
+        width: "xl",
         content: (
           <SplitQtyPop
             record={{ ...sub, DSPCH_NO: main?.DSPCH_NO }}
@@ -769,23 +766,20 @@ export function useDispatchPlanController({ model }: Args) {
       const rows = (e?.data ?? []) as any[];
       if (!requireSelected(rows, "MSG_EMPTY_DISPATCH_VEH_SELECT_CHK")) return;
 
-      const vehIds = [];
-      const params = [];
+      const vehIds: any[] = [];
+      const params: any[] = [];
       const s = model.rawFiltersRef.current;
-      rows.map((row) => {
+      rows.forEach((row) => {
         const vehId = row.VEH_ID;
         if (vehId !== null && vehIds.indexOf(vehId) < 0) {
           vehIds.push(vehId);
-
-          row = {
+          params.push({
             ...row,
             DLVRY_DT: s.SRCH_DSPCH_DLVRY_DT,
             DSPCH_TP: "10",
             PLN_ID: s.SRCH_DSPCH_PLN_ID,
             rowStatus: "U",
-          };
-
-          params.push(row);
+          });
         }
       });
 
@@ -1091,12 +1085,11 @@ export function useDispatchPlanController({ model }: Args) {
   const allocOrderActions: ActionItem[] = useMemo(
     () => [
       {
-        //todo: 변경
         type: "button",
         key: "BTN_SEARCH",
-        label: model.unallocSearching ? "LBL_SEARCHING" : "BTN_SEARCH",
-        disabled: model.unallocSearching,
-        onClick: handleUnallocOrderSearch,
+        label: model.allocSearching ? "LBL_SEARCHING" : "BTN_SEARCH",
+        disabled: model.allocSearching,
+        onClick: handleAllocOrderSearch,
       },
       {
         type: "button",
@@ -1105,7 +1098,7 @@ export function useDispatchPlanController({ model }: Args) {
         onClick: onUnassignedShipment,
       },
     ],
-    [handleUnallocOrderSearch, model.unallocSearching, onUnassignedShipment],
+    [handleAllocOrderSearch, model.allocSearching, onUnassignedShipment],
   );
 
   const unallocOrderActions: ActionItem[] = useMemo(
