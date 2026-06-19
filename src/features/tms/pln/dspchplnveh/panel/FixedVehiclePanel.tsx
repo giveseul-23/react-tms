@@ -58,6 +58,30 @@ export default function FixedVehiclePanel({ onOpenDetail }: Props) {
   const [selVeh, setSelVeh] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
 
+  // 체크박스 선택 상태(전체선택 지원)
+  const [vehChecked, setVehChecked] = useState<Set<string>>(new Set());
+  const [rtnChecked, setRtnChecked] = useState<Set<number>>(new Set());
+  const allVeh = VEHICLES.length > 0 && vehChecked.size === VEHICLES.length;
+  const allRtn = ROTATIONS.length > 0 && rtnChecked.size === ROTATIONS.length;
+  const toggleVeh = (k: string) =>
+    setVehChecked((p) => {
+      const n = new Set(p);
+      if (n.has(k)) n.delete(k);
+      else n.add(k);
+      return n;
+    });
+  const toggleRtn = (k: number) =>
+    setRtnChecked((p) => {
+      const n = new Set(p);
+      if (n.has(k)) n.delete(k);
+      else n.add(k);
+      return n;
+    });
+  const toggleAllVeh = () =>
+    setVehChecked(allVeh ? new Set() : new Set(VEHICLES.map((v) => v.vehNo)));
+  const toggleAllRtn = () =>
+    setRtnChecked(allRtn ? new Set() : new Set(ROTATIONS.map((r) => r.no)));
+
   return (
     <div className="flex h-full min-h-0 gap-2">
       {/* ── 좌: 운전자 정보 (접기 가능 · subtitle) ── */}
@@ -82,9 +106,17 @@ export default function FixedVehiclePanel({ onOpenDetail }: Props) {
         <div className="w-[300px] shrink-0 flex flex-col min-h-0 rounded-lg border border-gray-200 bg-white overflow-hidden">
           {/* subtitle 헤더 + 접기 */}
           <div className="flex items-center justify-between px-2 py-1.5 bg-slate-50 border-b shrink-0">
-            <span className="text-[11px] font-semibold text-[rgb(var(--primary))]">
-              운전자 정보
-            </span>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={allVeh}
+                onChange={toggleAllVeh}
+                className="h-3.5 w-3.5 accent-[rgb(var(--primary))]"
+              />
+              <span className="text-[11px] font-semibold text-[rgb(var(--primary))]">
+                운전자 정보
+              </span>
+            </label>
             <button
               type="button"
               onClick={() => setCollapsed(true)}
@@ -133,6 +165,8 @@ export default function FixedVehiclePanel({ onOpenDetail }: Props) {
                   <div className="flex items-center gap-1.5 min-w-0">
                     <input
                       type="checkbox"
+                      checked={vehChecked.has(v.vehNo)}
+                      onChange={() => toggleVeh(v.vehNo)}
                       onClick={(e) => e.stopPropagation()}
                       className="h-3.5 w-3.5 accent-[rgb(var(--primary))]"
                     />
@@ -173,7 +207,15 @@ export default function FixedVehiclePanel({ onOpenDetail }: Props) {
 
         {/* 회전 영역 헤더 (메모 · 계획확정 그룹) */}
         <div className="flex items-center justify-between px-2 py-1 bg-slate-50 border-b shrink-0">
-          <span className="text-[11px] font-semibold text-slate-600">회전</span>
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={allRtn}
+              onChange={toggleAllRtn}
+              className="h-3.5 w-3.5 accent-[rgb(var(--primary))]"
+            />
+            <span className="text-[11px] font-semibold text-slate-600">회전</span>
+          </label>
           <div className="flex items-center gap-1.5">
             <Btn title="메모 등록 · 취소">메모 ▾</Btn>
             <Btn title="계획확정 · 계획확정취소">계획확정 ▾</Btn>
@@ -192,6 +234,8 @@ export default function FixedVehiclePanel({ onOpenDetail }: Props) {
               <div className="flex items-center gap-1.5 mb-1">
                 <input
                   type="checkbox"
+                  checked={rtnChecked.has(r.no)}
+                  onChange={() => toggleRtn(r.no)}
                   onClick={(e) => e.stopPropagation()}
                   className="h-3.5 w-3.5 accent-[rgb(var(--primary))]"
                 />
