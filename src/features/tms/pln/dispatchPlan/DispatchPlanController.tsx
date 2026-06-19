@@ -551,7 +551,7 @@ export function useDispatchPlanController({ model }: Args) {
 
       return true;
     },
-    [base],
+    [base, model.grids.stop.rows],
   );
 
   // 메모 등록 — 선택 배차행(첫 행) 기준 4개 메모 등록 팝업 (메모는 배차 1건 단위)
