@@ -78,6 +78,7 @@ export default function TenderReceiveDispatch() {
                   authId={AUTH.grids.stop}
                   columnDefs={STOP_COLUMN_DEFS}
                   codeMap={model.codeMap}
+                  headerCheckbox={false}
                   audit={false}
                 />
               ),
@@ -89,6 +90,7 @@ export default function TenderReceiveDispatch() {
                   authId={AUTH.grids.sms}
                   columnDefs={SMS_COLUMN_DEFS}
                   codeMap={model.codeMap}
+                  headerCheckbox={false}
                   audit={{
                     delete: false,
                     rowStatus: false,
@@ -107,6 +109,7 @@ export default function TenderReceiveDispatch() {
                   authId={AUTH.grids.apSetl}
                   columnDefs={AP_SETL_COLUMN_DEFS}
                   codeMap={model.codeMap}
+                  rowSelection="multiple"
                   actions={ctrl.apSetlActions}
                   audit={{ delete: false }}
                 />
