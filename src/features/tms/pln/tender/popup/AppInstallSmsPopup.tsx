@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
 import { Field } from "@/app/components/popup/Field";
+import { Lang } from "@/app/services/common/Lang";
 
 type AppInstallSmsContentProps = {
   defaultPhone?: string;
@@ -19,11 +20,12 @@ export default function AppInstallSmsPopup({
 
   const onlyNumber = (value: string) => value.replace(/[^0-9]/g, "");
 
-  const isValid = phone.length >= 10; // 기본 유효성 (10~11자리 가정)
+  const isValid = phone.length > 10 && phone.length < 16;
 
   return (
     <FormPopupLayout
-      confirmLabel="전송"
+      cancelLabel={Lang.get("BTN_CANCEL")}
+      confirmLabel={Lang.get("BTN_SEND")}
       isValid={isValid}
       onCancel={onClose}
       onConfirm={() => onConfirm({ phone })}
@@ -31,7 +33,7 @@ export default function AppInstallSmsPopup({
       <Field
         layout="horizontal"
         type="text"
-        label="전화번호"
+        label={Lang.get("LBL_TEL_NO")}
         required
         value={phone}
         onChange={(v) => setPhone(onlyNumber(v))}

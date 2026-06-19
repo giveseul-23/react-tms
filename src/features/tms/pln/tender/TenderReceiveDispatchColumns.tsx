@@ -1,13 +1,49 @@
+// 배차진행상태 색상 — 레거시 ViewController.setDispatchOperationStatusColor 대응
+// (DspchContainerColumns 패턴 — cellStyle + hex)
+const DSPCH_OP_STS_STYLE: Record<string, { backgroundColor: string; color?: string }> = {
+  "2000": { backgroundColor: "#4D4D4D" },
+  "2010": { backgroundColor: "#ffffff" },
+  "2020": { backgroundColor: "#edeff4", color: "#000" },
+  "2030": { backgroundColor: "#dbdfe8", color: "#000" },
+  "2040": { backgroundColor: "#FFD85D", color: "#000" },
+  "2050": { backgroundColor: "#b6bfd2", color: "#000" },
+  "2060": { backgroundColor: "#FFD85D", color: "#000" },
+  "2070": { backgroundColor: "#929fbb", color: "#fff" },
+  "2073": { backgroundColor: "#8090b0", color: "#fff" },
+  "2075": { backgroundColor: "#6d80a4", color: "#fff" },
+  "2080": { backgroundColor: "#5b7099", color: "#fff" },
+  "2090": { backgroundColor: "#49608d", color: "#fff" },
+  "2100": { backgroundColor: "#375082", color: "#fff" },
+  "2103": { backgroundColor: "#244077", color: "#fff" },
+  "2105": { backgroundColor: "#12306b", color: "#fff" },
+  "2110": { backgroundColor: "#002060", color: "#fff" },
+  "2001": { backgroundColor: "#000000", color: "#fff" },
+};
+
+const dispatchStatusCellStyle = (p: any) => {
+  const code = String(parseInt(p?.data?.DSPCH_OP_STS ?? p?.value ?? "", 10));
+  const color = DSPCH_OP_STS_STYLE[code];
+  return { textAlign: "center" as const, fontWeight: "bold" as const, ...(color ?? {}) };
+};
+
+const carrierBookingCellStyle = (p: any): Record<string, string> => {
+  const base = { textAlign: "center" as const };
+  if (p?.data?.CARR_BOOKING_YN === "N") {
+    return { ...base, backgroundColor: "red", color: "#FFFF00", fontWeight: "bold" };
+  }
+  return base;
+};
+
+const tripIdCellStyle = (p: any): Record<string, string> => {
+  const base = { textAlign: "center" as const };
+  if (p?.data?.TRIP_ID != null && p?.data?.TRIP_ID !== "") {
+    return { ...base, color: "#282c34", backgroundColor: "#99CCFF" };
+  }
+  return base;
+};
+
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
-  {
-    type: "text",
-    headerName: "LBL_FINANCIAL_STATUS",
-    field: "AP_FI_STS",
-    codeKey: "apFiSts",
-    align: "center",
-  },
-  { type: "text", headerName: "LBL_LOGISTICS_GROUP", field: "LGST_GRP_CD" },
   {
     type: "date",
     headerName: "LBL_REQUESTED_DELIVERY_DATE",
@@ -15,71 +51,111 @@ export const MAIN_COLUMN_DEFS = [
   },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpSts",
+    cellStyle: dispatchStatusCellStyle,
   },
-  { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM" },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM" },
-  { type: "text", headerName: "입차순서", field: "ETRNC_SEQ" },
-  { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO" },
-  { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM" },
-  { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM" },
-  { headerName: "LBL_TRCK_NO", field: "TRCK_NO", type: "numeric" },
   {
-    type: "date",
-    headerName: "LBL_SEND_SMS_DTTM",
-    field: "SMS_APP_INST_DTTM",
+    type: "text",
+    headerName: "LBL_CARRIER_NAME",
+    field: "CARR_NM",
   },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_TYPE_NAME",
+    field: "VEH_TP_NM",
+  },
+  { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO" },
+  {
+    type: "text",
+    headerName: "LBL_DRIVER_NAME",
+    field: "DRVR_NM",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DEPARTURE_NAME",
+    field: "FRM_LOC_NM",
+  },
+  {
+    headerName: "LBL_TRCK_NO",
+    field: "TRCK_NO",
+    type: "text",
+    editable: true,
+    insertable: false,
+    validators: { max: 30 },
+  },
+  { type: "datetime", headerName: "LBL_SEND_SMS_DTTM", field: "SMS_APP_INST_DTTM", editable: false },
   { type: "text", headerName: "LBL_SEND_NO", field: "SEND_NO" },
-  { type: "text", headerName: "LBL_MEMO", field: "MEMO" },
-  { headerName: "LBL_STOP_CNT", field: "STOP_CNT", type: "numeric" },
+  {
+    type: "text",
+    headerName: "LBL_MEMO",
+    field: "MEMO",
+    maxWidth: 100,
+  },
+  {
+    headerName: "LBL_STOP_CNT",
+    field: "STOP_CNT",
+    type: "numeric",
+  },
   {
     type: "text",
     headerName: "LBL_CARR_RATE_BKNG_ALLWD_YN",
     field: "CARR_BOOKING_YN",
+    cellStyle: carrierBookingCellStyle,
   },
   {
     headerName: "LBL_REG_RATE",
     field: "RATE",
     type: "numeric",
-    editable: true,
-    insertable: true,
-    valueSetter: (params: any) => {
-      params.data.RATE = params.newValue;
-      return true;
-    },
   },
-  { headerName: "LBL_CONFIRM_COST", field: "CFM_COST", type: "numeric" },
+  {
+    headerName: "LBL_CONFIRM_COST",
+    field: "CFM_COST",
+    type: "numeric",
+  },
   { type: "text", headerName: "LBL_DIVISION", field: "DIV_CD" },
-  { type: "text", headerName: "LBL_LOGISTICS_GROUP", field: "LGST_GRP_CD" },
+  { type: "text", headerName: "LBL_LOGISTICS_GROUP_CODE", field: "LGST_GRP_CD" },
   { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD" },
-  { type: "text", headerName: "LBL_TRIP_NO", field: "TRIP_ID" },
+  {
+    type: "text",
+    headerName: "LBL_TRIP_NO",
+    field: "TRIP_ID",
+    cellStyle: tripIdCellStyle,
+  },
   { headerName: "LBL_TRIP_SEQ", field: "TRIP_SEQ", type: "numeric" },
+  { field: "DROP_LOC_NM", hide: true },
+  { field: "BL_NO", hide: true },
+  { field: "DSPCH_TP", hide: true },
   { type: "text", headerName: "LBL_VEHICLE_CODE", field: "VEH_ID" },
+  { field: "VEH_TP_CD", hide: true },
   { type: "text", headerName: "LBL_DRIVER_CODE", field: "DRVR_ID" },
   { headerName: "LBL_BATCH", field: "BATCH_NO", type: "numeric" },
   {
-    type: "text",
+    type: "datetime",
     headerName: "LBL_REQUEST_DATETIME",
     field: "REQ_ETRNC_DTTM",
   },
   {
-    type: "text",
+    type: "datetime",
     headerName: "LBL_EXPECTED_DATETIME",
     field: "EXPCT_ETRNC_DTTM",
   },
-  {
-    type: "text",
-    headerName: "LBL_ETRNC_RSN_DESC",
-    field: "DLYD_ETRNC_RSN_DESC",
-  },
-  { type: "text", headerName: "LBL_CHK_TON_TYPE", field: "CARR_CFM_VEH_TCD" },
+  { type: "text", headerName: "LBL_ETRNC_RSN_DESC", field: "DLYD_ETRNC_RSN_DESC" },
+  { type: "combo", headerName: "LBL_CHK_TON_TYPE", field: "CARR_CFM_VEH_TCD", codeKey: "carrCfmVehTcd" },
+  { field: "PLN_ID", hide: true },
+  { field: "CARR_CD", hide: true },
+  { field: "AP_FI_STS", hide: true },
+  { field: "AP_PROC_TP", hide: true },
+  { field: "TNDR_REQ_ID", hide: true },
+  { field: "TNDR_REQ_USR_ID", hide: true },
+  { field: "TNDR_REQ_DTTM", hide: true },
+  { field: "ASST_ID", hide: true },
+  { field: "ASST_NM", hide: true },
 ];
 
-// ── 경유처 서브그리드 컬럼 (센차: TenderReceiveDispatchSub01 columns) ──
-export const STOP_COLUMN_DEFS = () => [
+export const STOP_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
   { type: "numeric", headerName: "LBL_STOP_SEQUENCE", field: "STOP_SEQ" },
@@ -93,20 +169,17 @@ export const STOP_COLUMN_DEFS = () => [
   { type: "text", headerName: "LBL_DETAIL_ADDRESS", field: "DTL_ADDR1" },
 ];
 
-// ── SMS 전송이력 서브그리드 컬럼 (센차: TenderReceiveDispatchSub04 columns) ──
-export const SMS_COLUMN_DEFS = () => [
+export const SMS_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_SMS_SEND_ID", field: "SMS_SEND_ID" },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
   { type: "text", headerName: "LBL_SEND_NO", field: "SEND_NO" },
 ];
 
-// ── 운송비내역 서브그리드 컬럼 (센차: TenderReceiveDispatchCarrRate columns) ──
-// setRowData: 삭제 체크박스 클릭 시 행 제거용 (센차에는 없던 UX, React 방식 추가)
-export const AP_SETL_COLUMN_DEFS = () => [
+export const AP_SETL_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "배차번호", field: "DSPCH_NO", hide: true },
-  { type: "text", headerName: "항목코드", field: "CHG_CD", hide: true },
+  { field: "DSPCH_NO", hide: true },
+  { field: "CHG_CD", hide: true },
   { type: "text", headerName: "LBL_AP_CTG", field: "CHG_NM" },
   {
     type: "numeric",
@@ -129,5 +202,29 @@ export const AP_SETL_COLUMN_DEFS = () => [
     insertable: true,
     editable: true,
   },
-  { type: "text", headerName: "비고", field: "RMK", hide: true },
+  { field: "RMK", hide: true },
 ];
+
+// 운송비 엑셀 양식 — 센차 TenderReceiveDispatchCarrRateExcel + 동적 요율항목
+export const CARRIER_RATE_EXCEL_HEAD = [
+  { headerName: "No" },
+  { type: "date", headerName: "LBL_REQUESTED_DELIVERY_DATE", field: "DLVRY_DT" },
+  { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },
+  { type: "text", headerName: "LBL_LDNG_SITE", field: "FRM_LOC_NM" },
+  { type: "text", headerName: "LBL_UNLDNG_SITE", field: "TO_LOC_NM" },
+  { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO" },
+  { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM" },
+  { type: "text", headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM" },
+];
+
+type ChgMeta = { CHG_CD: string; EXCEL_DSPL_COL?: string; CHG_NM?: string };
+
+export function buildCarrierRateExcelColumns(chgList: ChgMeta[]) {
+  const body = chgList.map((c) => ({
+    type: "numeric",
+    noLang: true,
+    headerName: c.EXCEL_DSPL_COL ?? c.CHG_NM ?? c.CHG_CD,
+    field: c.CHG_CD,
+  }));
+  return [...CARRIER_RATE_EXCEL_HEAD, ...body];
+}
