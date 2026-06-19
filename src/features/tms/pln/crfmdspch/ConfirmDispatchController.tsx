@@ -15,6 +15,10 @@ import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ConfirmDispatchModel, GridKey } from "./ConfirmDispatchModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { Lang } from "@/app/services/common/Lang";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import StartWorkPopup from "./popup/StartWorkPopup";
+import ChangeVehiclePop from "../dispatchPlan/popup/ChangeVehiclePop";
+import RegiSpotPop from "../dispatchPlan/popup/RegiSpotPop";
 
 const masterChildParamMap = (row: any) => ({
   DSPCH_NO: row?.DSPCH_NO,
@@ -28,6 +32,7 @@ interface Args {
 export function useConfirmDispatchController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
+  const { openPopup, closePopup } = usePopup();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -95,13 +100,134 @@ export function useConfirmDispatchController({ model }: Args) {
     [base],
   );
 
+  const onStartWork = useCallback(
+    (e: any) => {
+      const rows = e?.data ?? [];
+      if (rows.length === 0) {
+        base.alert(Lang.get("MSG_SELECT_NO_DATA"), Lang.get("TTL_CONFIRM"));
+        return;
+      }
+
+      openPopup({
+        title: "LBL_WORK_START_DATETIME_POPUP",
+        width: "md",
+        content: (
+          <StartWorkPopup
+            onClose={closePopup}
+            onConfirm={(trnsStdtDate) => {
+              const payload = rows.map((row: any) => ({
+                ...row,
+                ATA_DTTM: trnsStdtDate,
+                rowStatus: "U",
+              }));
+              closePopup();
+              base.callAjax(api.onStartWork(payload)).then(() => base.search());
+            }}
+          />
+        ),
+      });
+    },
+    [base, closePopup, openPopup],
+  );
+
+  const onChangeRegVeh = useCallback(
+    (e: any) => {
+      const rows = e?.data ?? [];
+      if (rows.length === 0) {
+        base.alert(Lang.get("MSG_SELECT_NO_DATA"), Lang.get("TTL_CONFIRM"));
+        return;
+      }
+
+      const target = rows[0];
+      openPopup({
+        title: "BTN_VEHICLE_CHANGE",
+        width: "4xl",
+        content: (
+          <ChangeVehiclePop
+            initialValues={{
+              LGST_GRP_CD: target.LGST_GRP_CD,
+              DSPCH_NO: target.DSPCH_NO,
+              ORG_VEH_ID: target.VEH_ID,
+              showType: "100",
+            }}
+            onConfirm={(picked) => {
+              closePopup();
+              base
+                .callAjax(
+                  api.onChangeRegVeh([
+                    {
+                      ...target,
+                      ...picked,
+                      ORG_VEH_ID: target.VEH_ID,
+                      rowStatus: "U",
+                    },
+                  ]),
+                )
+                .then(() => base.search());
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, closePopup, openPopup],
+  );
+
+  const onChangeTempVeh = useCallback(
+    (e: any) => {
+      const rows = e?.data ?? [];
+      if (rows.length === 0) {
+        base.alert(Lang.get("MSG_SELECT_NO_DATA"), Lang.get("TTL_CONFIRM"));
+        return;
+      }
+
+      const target = rows[0];
+      openPopup({
+        title: "BTN_REG_SPOT_VEH",
+        width: "md",
+        content: (
+          <RegiSpotPop
+            initialValues={target}
+            onConfirm={(patch) => {
+              closePopup();
+              base
+                .callAjax(
+                  api.onChangeTempVeh({
+                    DSPCH_NO: target.DSPCH_NO,
+                    LGST_GRP_CD: target.LGST_GRP_CD,
+                    DIV_CD: target.DIV_CD,
+                    PLN_ID: target.PLN_ID,
+                    DLVRY_DT: target.DLVRY_DT,
+                    VEH_ID: target.VEH_ID,
+                    VEH_OP_TP: target.VEH_OP_TP,
+                    VEH_TP_NM: target.VEH_TP_NM,
+                    DRVR_ID: target.DRVR_ID,
+                    CARR_CD: target.CARR_CD,
+                    CARR_NM: target.CARR_NM,
+                    AP_PROC_TP: target.AP_PROC_TP,
+                    VEH_NO: patch.VEH_NO,
+                    DRVR_NM: patch.DRVR_NM,
+                    MBL_PHN_NO: patch.MBL_PHN_NO,
+                    VEH_TP_CD: patch.VEH_TP_CD,
+                  }),
+                )
+                .then(() => base.search());
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, closePopup, openPopup],
+  );
+
   const mainActions: ActionItem[] = useMemo(
     () => [
       {
         type: "button",
         key: "BTN_SP_START_WORK",
         label: "BTN_SP_START_WORK",
-        onClick: (e: any) => act(api.onStartWork, e),
+        onClick: onStartWork,
       },
       {
         type: "dropdown",
@@ -120,8 +246,8 @@ export function useConfirmDispatchController({ model }: Args) {
         key: "BTN_VEHICLE_CHANGE",
         label: "BTN_VEHICLE_CHANGE",
         items: [
-          { type: "button", key: "REG", label: "BTN_CHANGE_REG_VEH", onClick: (e: any) => act(api.onChangeRegVeh, e) },
-          { type: "button", key: "SPOT", label: "BTN_REG_SPOT_VEH", onClick: (e: any) => act(api.onChangeTempVeh, e) },
+          { type: "button", key: "REG", label: "BTN_CHANGE_REG_VEH", onClick: onChangeRegVeh },
+          { type: "button", key: "SPOT", label: "BTN_REG_SPOT_VEH", onClick: onChangeTempVeh },
         ],
       },
       {
@@ -168,7 +294,7 @@ export function useConfirmDispatchController({ model }: Args) {
         rows: model.grids.config.rows,
       }),
     ],
-    [act, menuName, model.filtersRef, model.grids.config],
+    [act, menuName, model.filtersRef, model.grids.config, onChangeRegVeh, onChangeTempVeh, onStartWork],
   );
 
   // 주문 상세(sub01) 저장

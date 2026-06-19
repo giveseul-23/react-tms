@@ -1,5 +1,7 @@
 //todo : 추가작업(컴포넌트)
 
+export const MENU_CODE = "MENU_DOCK_CMMT_MGMT";
+
 // "use client";
 
 // // 도크확약관리 (서버 vc.view.mdl.tms.pln.dockcmmt.DockCommitment)
@@ -14,8 +16,6 @@
 // import { useDockCommitmentController } from "./DockCommitmentController";
 // import { MAIN_COLUMN_DEFS } from "./DockCommitmentColumns";
 // import { DockScheduler } from "./DockScheduler";
-
-// export const MENU_CODE = "MENU_DOCK_CMMT_MGMT";
 
 // // 서버 리소스 권한 authId (센차 grid.authId). 그리드별 authId 단일 소스.
 // export const AUTH = {

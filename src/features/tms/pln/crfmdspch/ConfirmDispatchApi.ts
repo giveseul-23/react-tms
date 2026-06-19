@@ -14,12 +14,35 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
-const post = (url: string, payload: any) =>
+const post = (url: string, payload: any) => {
+  if (Array.isArray(payload)) {
+    return apiClient.post<commonResponse>(
+      url,
+      withSession({ MENU_CD: MENU_CODE, dsSave: withSession(payload) }),
+    );
+  }
+
+  if (Array.isArray(payload?.dsSave)) {
+    return apiClient.post<commonResponse>(
+      url,
+      withSession({
+        MENU_CD: MENU_CODE,
+        ...payload,
+        dsSave: withSession(payload.dsSave),
+      }),
+    );
+  }
+
+  return apiClient.post<commonResponse>(
+    url,
+    withSession({ MENU_CD: MENU_CODE, ...payload }),
+  );
+};
+
+const postFlat = (url: string, payload: any) =>
   apiClient.post<commonResponse>(
     url,
-    Array.isArray(payload)
-      ? withSession(payload)
-      : withSession({ MENU_CD: MENU_CODE, ...payload }),
+    withSession({ MENU_CD: MENU_CODE, ...payload }),
   );
 
 export const confirmDispatchApi = {
@@ -58,7 +81,8 @@ export const confirmDispatchApi = {
     post(`/confirmDispatchService/onDispatchConfirmCancel`, p),
   // 차량 변경 (등록차량 / 임시차량)
   onChangeRegVeh: (p: any) => post(`/dispatchPlanService/saveChangeVehicle`, p),
-  onChangeTempVeh: (p: any) => post(`/dispatchPlanVehService/saveDspchSpotVeh`, p),
+  onChangeTempVeh: (p: any) =>
+    postFlat(`/dispatchPlanVehService/saveDspchSpotVeh`, p),
   // 조수 배정/해제/등록
   onAssignAssist: (p: any) => post(`/confirmDispatchService/onAssignAssist`, p),
   onUnassignAssist: (p: any) => post(`/confirmDispatchService/onUnassignAssist`, p),
