@@ -16,6 +16,10 @@ export type MenuNode =
       label: string;
       menuName?: string;
       url?: string;
+      /** 소속 애플리케이션 코드(APPL_CD) — 즐겨찾기 저장 키 */
+      applCode?: string;
+      /** 즐겨찾기 여부(서버 FAV_YN) */
+      favorite?: boolean;
     }
   | {
       type: "group";

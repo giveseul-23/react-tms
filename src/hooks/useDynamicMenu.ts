@@ -52,7 +52,7 @@ function getIcon(applCode: string) {
 
 // 서버 node → MenuNode 재귀 변환
 // 메뉴조회(사이드바)에서는 USE_YN="Y" 인 메뉴/폴더만 노출 — 구성 화면(MenuConfig)은 미적용.
-function toMenuNode(node: any): MenuNode | null {
+function toMenuNode(node: any, applCode: string): MenuNode | null {
   if (node.USE_YN !== "Y") return null;
   if (node.LEAFYN === "Y") {
     return {
@@ -61,11 +61,13 @@ function toMenuNode(node: any): MenuNode | null {
       label: node.MSG_DESC || node.MENUNAME || node.MENUCODE,
       menuName: node.MENUNAME || node.MENUCODE,
       url: node.URL,
+      applCode,
+      favorite: node.FAV_YN === "Y",
     };
   }
   if (node.LEAFYN === "N") {
     const children: MenuNode[] = (node.data ?? [])
-      .map(toMenuNode)
+      .map((c: any) => toMenuNode(c, applCode))
       .filter(Boolean) as MenuNode[];
     if (children.length === 0) return null;
     return {
@@ -99,7 +101,7 @@ function buildSections(serverData: any[]): MenuSection[] {
     const applCode = rootNode.APPLCODE ?? "";
     const children: any[] = rootNode.data ?? [];
     const nodes: MenuNode[] = children
-      .map(toMenuNode)
+      .map((c) => toMenuNode(c, applCode))
       .filter(Boolean) as MenuNode[];
     if (nodes.length === 0) return;
 
@@ -119,6 +121,30 @@ function buildSections(serverData: any[]): MenuSection[] {
     });
   });
   return sections;
+}
+
+// 즐겨찾기 토글 — 트리에서 해당 리프의 favorite 플래그만 교체한 새 배열 반환
+function setFavoriteInNodes(
+  nodes: MenuNode[],
+  menuCode: string,
+  next: boolean,
+): MenuNode[] {
+  return nodes.map((n) => {
+    if (n.type === "item")
+      return n.menuCode === menuCode ? { ...n, favorite: next } : n;
+    return { ...n, children: setFavoriteInNodes(n.children, menuCode, next) };
+  });
+}
+
+function setFavoriteInSections(
+  sections: MenuSection[],
+  menuCode: string,
+  next: boolean,
+): MenuSection[] {
+  return sections.map((s) => ({
+    ...s,
+    nodes: s.nodes ? setFavoriteInNodes(s.nodes, menuCode, next) : s.nodes,
+  }));
 }
 
 // 모듈 캐시 — 사이드바/페이지가 메뉴 데이터를 공유해 재조회(추가 fetch)를 막는다.
@@ -172,6 +198,23 @@ export function useDynamicMenu() {
   // 사이드바 수동 새로고침용 — 캐시 무시하고 강제 재조회.
   const refetch = useCallback(() => load(true), [load]);
 
+  // 메뉴 즐겨찾기 토글 — 낙관적 업데이트 후 서버 저장/해제, 실패 시 롤백.
+  const toggleFavorite = useCallback(
+    (menuCode: string, applCode: string, next: boolean) => {
+      const apply = (n: boolean) => {
+        if (cachedSections)
+          cachedSections = setFavoriteInSections(cachedSections, menuCode, n);
+        setSections((prev) => setFavoriteInSections(prev, menuCode, n));
+      };
+      apply(next);
+      const req = next
+        ? menuApi.saveUserFavorMenu({ APPL_CD: applCode, MENU_CD: menuCode })
+        : menuApi.removeUserFavorMenu({ APPL_CD: applCode, MENU_CD: menuCode });
+      req.catch(() => apply(!next));
+    },
+    [],
+  );
+
   useEffect(() => {
     load(false);
   }, [load]);
@@ -192,5 +235,6 @@ export function useDynamicMenu() {
     menuUrlMap,
     loading,
     refetch,
+    toggleFavorite,
   };
 }
