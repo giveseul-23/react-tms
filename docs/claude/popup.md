@@ -34,6 +34,8 @@ closePopup();                   // 최상단 팝업 닫기
 | `CommonPopup` | `popup/CommonPopup.tsx` | 코드\|명 2열 검색(레거시 `sqlId` 또는 `fetchFn`). 그리드 `popup` 셀에서 자동 사용. |
 | `Field` | `popup/Field.tsx` | 폼 필드 단위. `layout`(horizontal/vertical), `type`(text/textarea/combo), `required`, `disabled`. |
 
+- **폼 팝업의 날짜**: `Field` 는 date 타입을 지원하지 않으므로 `DatePickerPopover` 를 직접 쓰되, **`size="lg"`** 로 `Field`(콤보/텍스트)와 글자 크기·높이·여백을 맞춘다. 라벨은 `Field` 세로형과 동일하게 `block text-sm font-medium text-gray-700 mb-2`. (날짜 위젯 동작 → [search-style.md](./search-style.md) §3)
+
 ## 3. 표준 작성 규칙
 
 - **위치**: 화면 폴더 하위 `popup/` 에 둔다 — 예: `master/account/location/popup/LatLonEditPopup.tsx`.
