@@ -107,12 +107,14 @@ export default function DfChargeRateAddPop({ addType, onApplied, onClose }: Prop
       label: "LBL_FROM_DATE",
       value: frm,
       onChange: setFrm,
+      max: to,
     },
     {
       type: "date",
       label: "LBL_TO_DATE",
       value: to,
       onChange: setTo,
+      min: frm,
     },
     {
       type: "combo",

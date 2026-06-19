@@ -166,6 +166,9 @@ type Props = {
   allowClear?: boolean;
   /** 입력 크기 프리셋 — "sm"(기본, 조회조건/그리드) / "lg"(폼 팝업 Field 와 동일: text-sm·rounded-lg·h-10). */
   size?: "sm" | "lg";
+  /** from-to 범위 하한/상한 — value 와 같은 형식(YYYY-MM-DD 등). 벗어난 값은 경계로 클램프. */
+  min?: string;
+  max?: string;
 };
 
 // value → { date, time } 분해
@@ -330,8 +333,18 @@ export function DatePickerPopover({
   iconOnly = false,
   allowClear = false,
   size = "sm",
+  min,
+  max,
 }: Props) {
   const isLg = size === "lg";
+  // from-to 범위 클램프 — 같은 형식이라 문자열 비교로 충분(YYYY-MM-DD…). 빈값은 통과.
+  const clampValue = (v: string) => {
+    if (!v) return v;
+    if (min && v < min) return min;
+    if (max && v > max) return max;
+    return v;
+  };
+  const commit = (v: string) => onChange(clampValue(v));
   // 입력/오버레이/아이콘 크기 프리셋 — 셋을 함께 맞춰 마스크 정렬 유지
   const inputSizeCls = isLg
     ? "h-10 pl-3 !pr-9 text-sm rounded-lg border-gray-300"
@@ -386,7 +399,7 @@ export function DatePickerPopover({
           : format(d, "yyyy-MM-dd");
 
   const handleToday = () => {
-    onChange(formatResult(new Date()));
+    commit(formatResult(new Date()));
     setOpen(false);
   };
 
@@ -394,7 +407,7 @@ export function DatePickerPopover({
   const handleSelectDate = (d?: Date) => {
     setDraftDate(d);
     if (d) {
-      onChange(formatResult(d));
+      commit(formatResult(d));
       if (!withTime) setOpen(false);
     }
   };
@@ -414,7 +427,7 @@ export function DatePickerPopover({
     if (digits.length === inputMaxDigits) {
       const parsed = parseInput(maskedText, withTime, precision);
       if (parsed !== null) {
-        onChange(parsed);
+        commit(parsed);
         return;
       }
     }
@@ -582,7 +595,7 @@ export function DatePickerPopover({
                 setDraftTime(t);
                 // 날짜가 선택돼 있으면 시간 변경도 즉시 적용
                 if (draftDate) {
-                  onChange(
+                  commit(
                     `${format(draftDate, "yyyy-MM-dd")}T${t || "00:00:00"}`,
                   );
                 }

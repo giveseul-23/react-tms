@@ -26,6 +26,9 @@ export type GridSearchInputField = GridSearchFieldBase & {
   value: string;
   onChange: (v: string) => void;
   options?: { CODE: string; NAME: string }[];
+  /** date 전용 — from-to 범위 하한/상한(YYYY-MM-DD). 브라우저가 범위 밖 선택을 막는다. */
+  min?: string;
+  max?: string;
 };
 
 /** 메인 조회조건 popup 타입처럼 코드+코드명 둘 다 표시 + 돋보기.
@@ -144,6 +147,8 @@ export function PopupSearchCondition({
               <input
                 type="date"
                 value={f.value}
+                min={f.min}
+                max={f.max}
                 onChange={(e) => f.onChange(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
                 disabled={f.disable}

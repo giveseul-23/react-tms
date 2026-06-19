@@ -356,6 +356,7 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
             value={form.PICK_FRM_DTTM}
             onChange={(v) => setField("PICK_FRM_DTTM", v)}
             withTime
+            max={form.PICK_TO_DTTM}
             className="h-10 w-full"
             placeholder="YYYY-MM-DD HH:MM:SS"
           />
@@ -366,6 +367,7 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
             value={form.PICK_TO_DTTM}
             onChange={(v) => setField("PICK_TO_DTTM", v)}
             withTime
+            min={form.PICK_FRM_DTTM}
             className="h-10 w-full"
             placeholder="YYYY-MM-DD HH:MM:SS"
           />
@@ -376,6 +378,7 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
             value={form.DROP_FRM_DTTM}
             onChange={(v) => setField("DROP_FRM_DTTM", v)}
             withTime
+            max={form.DROP_TO_DTTM}
             className="h-10 w-full"
             placeholder="YYYY-MM-DD HH:MM:SS"
           />
@@ -386,6 +389,7 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
             value={form.DROP_TO_DTTM}
             onChange={(v) => setField("DROP_TO_DTTM", v)}
             withTime
+            min={form.DROP_FRM_DTTM}
             className="h-10 w-full"
             placeholder="YYYY-MM-DD HH:MM:SS"
           />
