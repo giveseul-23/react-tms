@@ -33,12 +33,5 @@ export const MAIN_COLUMN_DEFS = [
     field: "ALW_CARR_RATE_BKNG_YN",
     insertable: true,
     editable: true,
-  },
-  {
-    type: "check",
-    headerName: "LBL_INSRNC_CHG_YN",
-    field: "INSRNC_CHG_YN",
-    insertable: true,
-    editable: true,
-  },
+  }
 ]
