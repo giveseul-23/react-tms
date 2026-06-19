@@ -184,8 +184,7 @@ export default function DispatchPlan() {
                       ...c,
                       TO_LOC_CD: v,
                     })),
-                  onChangeName: (v) =>
-                    setCond((c) => ({ ...c, TO_LOC_NM: v })),
+                  onChangeName: (v) => setCond((c) => ({ ...c, TO_LOC_NM: v })),
                   onClickSearch: () => {
                     openPopup({
                       title: "LBL_DESTINATION_EX",
@@ -324,6 +323,7 @@ export default function DispatchPlan() {
                             codeMap={model.codeMap}
                             actions={ctrl.allocOrderActions}
                             onRowClicked={ctrl.onAllocOrderRowClicked}
+                            rowSelection="multiple"
                             audit={false}
                           />
                           <DataGrid
@@ -373,6 +373,7 @@ export default function DispatchPlan() {
                             codeMap={model.codeMap}
                             actions={ctrl.unallocOrderActions}
                             onRowClicked={ctrl.onUnallocOrderRowClicked}
+                            rowSelection="multiple"
                             audit={false}
                           />
                           <DataGrid
@@ -409,6 +410,8 @@ export default function DispatchPlan() {
                         {...model.bind("vehMgmt")}
                         columnDefs={VEH_MGMT_COLUMN_DEFS}
                         codeMap={model.codeMap}
+                        actions={ctrl.vehMgmtActions}
+                        rowSelection="multiple"
                         audit={false}
                       />
                     </div>

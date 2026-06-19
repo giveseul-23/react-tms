@@ -4,16 +4,17 @@ import { useState } from "react";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
 import { Field } from "@/app/components/popup/Field";
+import { Lang } from "@/app/services/common/Lang";
 
-type RejectReasonContentProps = {
+type TenderRejectPopupProps = {
   onConfirm: (data: { reasonCode: string; detail: string }) => void;
   onClose: () => void;
 };
 
-export default function RejectReasonContent({
+export default function TenderRejectPopup({
   onConfirm,
   onClose,
-}: RejectReasonContentProps) {
+}: TenderRejectPopupProps) {
   const [reasonCode, setReasonCode] = useState("");
   const [detail, setDetail] = useState("");
 
@@ -24,6 +25,8 @@ export default function RejectReasonContent({
   return (
     <FormPopupLayout
       cardClassName="space-y-4"
+      cancelLabel={Lang.get("BTN_CANCEL")}
+      confirmLabel={Lang.get("BTN_SAVE")}
       isValid={!!reasonCode}
       onCancel={onClose}
       onConfirm={() => onConfirm({ reasonCode, detail })}
@@ -31,7 +34,7 @@ export default function RejectReasonContent({
       <Field
         layout="vertical"
         type="combo"
-        label="운송요청 거절이유"
+        label={Lang.get("LBL_TNDR_RJT_RSN_CD")}
         value={reasonCode}
         onChange={setReasonCode}
         options={stores.reasonOptions ?? []}
@@ -41,7 +44,7 @@ export default function RejectReasonContent({
       <Field
         layout="vertical"
         type="textarea"
-        label="운송요청 거절이유 상세내용"
+        label={Lang.get("LBL_TNDR_RJT_RSN_DTL_DESC")}
         rows={5}
         value={detail}
         onChange={setDetail}

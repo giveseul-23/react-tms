@@ -144,6 +144,9 @@ type DataGridProps<TRow> = {
   /** 화면 model — popup 컬럼의 extraParams(row, model) 2번째 인자로 전달.
    *  다른 그리드 선택행 공유 등에 사용 (View 에서 model={model} 로 명시 전달). */
   model?: any;
+  /** 마스킹(작업 차단) 오버레이 — true 면 그리드 위에 반투명 스피너 오버레이로 클릭/편집 차단.
+   *  model.bind() 가 자동 주입(base.callAjax 가 토글). */
+  loading?: boolean;
 };
 
 export default function DataGrid<TRow>({
@@ -187,6 +190,7 @@ export default function DataGrid<TRow>({
   onColumnDefsReady,
   onExcelColumnsReady,
   model,
+  loading,
 }: DataGridProps<TRow>) {
   // columnDefs 가 바뀔 때마다 외부(useBaseModel slot)에 알린다.
   // saveGrid 의 required 검증이 columnDefsRef 로 메타 read.
@@ -399,6 +403,15 @@ export default function DataGrid<TRow>({
           className="absolute inset-0 z-[5] cursor-not-allowed bg-white/50"
           aria-hidden
         />
+      )}
+      {/* 마스킹(작업 차단) 오버레이 — base.callAjax 진행 중 클릭/편집 차단 + 스피너. */}
+      {loading && (
+        <div
+          className="absolute inset-0 z-[6] flex items-center justify-center cursor-wait bg-white/50"
+          aria-busy
+        >
+          <div className="h-6 w-6 rounded-full border-2 border-[rgb(var(--primary))] border-t-transparent animate-spin" />
+        </div>
       )}
       {layoutType === "tab" && tabs && activeTab && (
         <div className="px-3 shrink-0">

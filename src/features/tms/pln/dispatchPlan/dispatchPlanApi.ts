@@ -136,14 +136,14 @@ export const dispatchPlanApi = {
   // ── ETA 예측 / 계산 ────────────────────────────────────────
   predictEta(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/predictEta",
+      "/mapService/updateStopEstAndCalDTTM",
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
   calcEta(payload: any) {
     return apiClient.post<CommonResponse>(
-      "/dispatchPlanService/calcEta",
+      "/mapService/updateCalDTTM",
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
