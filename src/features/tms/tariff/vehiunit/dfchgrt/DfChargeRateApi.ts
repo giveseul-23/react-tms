@@ -31,6 +31,15 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
+// 표준 dsSave 저장 — body { dsSave: rows }, 세션/MENU_CD 는 쿼리 params.
+// (서버 RequestDataReader 가 named dataset "dsSave" 를 읽으므로 배열 body 직접 전송 금지)
+const dsSavePost = (url: string, rows: any[]) =>
+  apiClient.post<commonResponse>(
+    url,
+    { dsSave: rows },
+    { params: { ...getSessionFields(), MENU_CD: MENU_CODE } },
+  );
+
 export const dfChargeRateApi = {
   // ── 메인 조회 ─────────────────────────────────────────────────
   getList(payload: any) {
@@ -97,40 +106,22 @@ export const dfChargeRateApi = {
   // ── 저장 (추가/수정) ──────────────────────────────────────────
   // ── 저장 (그리드별 — dirty rows 배열) ─────────────────────────
   save(payload: { dsSave: any[] }) {
-    return apiClient.post<commonResponse>(
-      `/dfChargeRateService/save`,
-      withSession(payload.dsSave),
-    );
+    return dsSavePost(`/dfChargeRateService/save`, payload.dsSave);
   },
   saveCharge(payload: { dsSave: any[] }) {
-    return apiClient.post<commonResponse>(
-      `/dfChargeRateService/saveCharge`,
-      withSession(payload.dsSave),
-    );
+    return dsSavePost(`/dfChargeRateService/saveCharge`, payload.dsSave);
   },
   saveCarr(payload: { dsSave: any[] }) {
-    return apiClient.post<commonResponse>(
-      `/dfChargeRateService/saveCarr`,
-      withSession(payload.dsSave),
-    );
+    return dsSavePost(`/dfChargeRateService/saveCarr`, payload.dsSave);
   },
   saveVehTp(payload: { dsSave: any[] }) {
-    return apiClient.post<commonResponse>(
-      `/dfChargeRateService/saveVehTp`,
-      withSession(payload.dsSave),
-    );
+    return dsSavePost(`/dfChargeRateService/saveVehTp`, payload.dsSave);
   },
   saveItmVehTp(payload: { dsSave: any[] }) {
-    return apiClient.post<commonResponse>(
-      `/dfChargeRateService/saveItmVehTp`,
-      withSession(payload.dsSave),
-    );
+    return dsSavePost(`/dfChargeRateService/saveItmVehTp`, payload.dsSave);
   },
   saveItmVeh(payload: { dsSave: any[] }) {
-    return apiClient.post<commonResponse>(
-      `/dfChargeRateService/saveItmVeh`,
-      withSession(payload.dsSave),
-    );
+    return dsSavePost(`/dfChargeRateService/saveItmVeh`, payload.dsSave);
   },
 
   // ── 계약서 복사 ───────────────────────────────────────────────

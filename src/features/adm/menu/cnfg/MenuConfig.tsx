@@ -142,6 +142,7 @@ export default function MenuConfig() {
           columnDefs={MAIN_COLUMN_DEFS}
           nameColumnHeader=""
           nameColumnWidth={160}
+          nameColumnFilter
           getNameText={(r) => r.MSG_DESC || r.MENUNAME || ""}
           sortField="DSPLY_SEQ"
           defaultExpandLevel={1}

@@ -11,6 +11,8 @@ import { useCommonStores } from "@/hooks/useCommonStores";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { dfChargeRateApi as api } from "../DfChargeRateApi";
 import { Lang } from "@/app/services/common/Lang";
+import { showInfoModal } from "@/app/components/popup/showInfoModal";
+import { showErrorModal } from "@/app/components/popup/showErrorModal";
 import {
   PopupSearchCondition,
   type GridSearchField,
@@ -81,8 +83,27 @@ export default function DfChargeRateAddPop({ addType, onApplied, onClose }: Prop
   };
 
   const onAdd = () => {
-    if (!frm || !to || !selLgst || selCarr.length === 0 || !transTcd) return;
-    if (addType === "VEH_TP" && selVehTp.length === 0) return;
+    // 항목별 검증 (센차 onAdd 동일 — 누락 시 안내 후 중단)
+    if (!frm || !to) {
+      showInfoModal(Lang.get("MSG_ENTER_DTTM"));
+      return;
+    }
+    if (!selLgst) {
+      showInfoModal(Lang.get("MSG_LOGISTICSGROUP_SELECT_CHK"));
+      return;
+    }
+    if (selCarr.length === 0) {
+      showInfoModal(Lang.get("MSG_CARR_SELECT_CHK"));
+      return;
+    }
+    if (!transTcd) {
+      showInfoModal(Lang.get("MSG_TRANS_TCD_SELECT_CHK"));
+      return;
+    }
+    if (addType === "VEH_TP" && selVehTp.length === 0) {
+      showInfoModal(Lang.get("MSG_VEHTP_SELECT_CHK"));
+      return;
+    }
     const params = {
       FRM_DTTM: frm.replace(/-/g, ""),
       TO_DTTM: to.replace(/-/g, ""),
@@ -95,11 +116,20 @@ export default function DfChargeRateAddPop({ addType, onApplied, onClose }: Prop
       DF_TRF_CRE_TCD: "VEH_TP_BASED",
       ADD_TYPE: addType,
     };
-    api.addChargeRate(params).then(() => onApplied()).catch(console.error);
+    api
+      .addChargeRate(params)
+      .then((res: any) => {
+        if (res?.data?.success === false) {
+          showErrorModal(res.data?.msg ?? Lang.get("TTL_ERR"));
+          return;
+        }
+        // AddPop 을 먼저 닫고(onApplied=closePopup+재조회) → 성공 모달을 띄운다.
+        // 순서가 반대면 closePopup 이 방금 연 성공 모달(최상단)을 닫아버린다.
+        onApplied();
+        showInfoModal(Lang.get("MSG_SAVE_CMPLT"));
+      })
+      .catch((err: any) => showErrorModal(err?.message ?? Lang.get("TTL_ERR")));
   };
-
-  const canAdd =
-    !!frm && !!to && !!selLgst && selCarr.length > 0 && !!transTcd && (addType === "VEH" || selVehTp.length > 0);
 
   const searchFields: GridSearchField[] = [
     {
@@ -162,7 +192,7 @@ export default function DfChargeRateAddPop({ addType, onApplied, onClose }: Prop
           <X className="w-3 h-3" />
           {Lang.get("BTN_CANCEL")}
         </Button>
-        <Button variant="outline" size="xs" disabled={!canAdd} onClick={onAdd} className="btn-primary btn-primary:hover">
+        <Button variant="outline" size="xs" onClick={onAdd} className="btn-primary btn-primary:hover">
           <Check className="w-3 h-3" />
           {Lang.get("BTN_ADD")}
         </Button>

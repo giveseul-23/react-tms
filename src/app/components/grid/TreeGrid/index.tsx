@@ -100,6 +100,8 @@ type TreeGridProps<TRow extends TreeRow> = {
   nameColumnHeader?: string;
   /** 이름 컬럼 너비 (기본: 180). getNameText 지정 시 이 값은 autosize 의 최소폭으로 쓰인다. */
   nameColumnWidth?: number;
+  /** 이름 컬럼에 floating filter(검색 트리거) 노출 — 표시 이름(getNameText) 기준 클라이언트 필터. */
+  nameColumnFilter?: boolean;
   /** 지정 시 이름 컬럼을 source 기준으로 autosize — 들여쓰기(level)·화살표·아이콘·라벨 폭 반영.
    *  반환값은 측정용 라벨 텍스트. 미지정이면 nameColumnWidth 고정폭 유지(하위호환). */
   getNameText?: (row: TRow) => string;
@@ -242,6 +244,7 @@ function TreeGridInner<TRow extends TreeRow>(
     columnDefs,
     nameColumnHeader = "",
     nameColumnWidth = 180,
+    nameColumnFilter = false,
     getNameText,
     subTitle,
     subTitleNoLang,
@@ -397,8 +400,12 @@ function TreeGridInner<TRow extends TreeRow>(
       width: nameColWidth,
       minWidth: nameColumnWidth,
       sortable: false,
-      filter: false,
-      floatingFilter: false,
+      filter: nameColumnFilter,
+      floatingFilter: nameColumnFilter,
+      // 필터는 표시 이름(getNameText) 기준 — field 가 "id" 라 valueGetter 로 보정.
+      valueGetter: nameColumnFilter
+        ? (p: any) => (getNameText ? getNameText(p.data) : (p.data?.id ?? ""))
+        : undefined,
       cellRenderer: (params: any) => {
         const row: TRow = params.data;
         const ctx: TreeCellContext = {
@@ -411,7 +418,16 @@ function TreeGridInner<TRow extends TreeRow>(
     }),
     // renderNameCell은 페이지에서 useMemo/useCallback 으로 안정화 권장
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [expandedIds, isLastMap, toggle, nameColumnHeader, nameColumnWidth, nameColWidth],
+    [
+      expandedIds,
+      isLastMap,
+      toggle,
+      nameColumnHeader,
+      nameColumnWidth,
+      nameColWidth,
+      nameColumnFilter,
+      getNameText,
+    ],
   );
 
   // commitRowChange/Changes 는 { rows } 모양을 가정 → flat source[] ↔ { rows } 어댑터.
