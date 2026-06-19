@@ -19,6 +19,8 @@ export function useDispatchPlanModel(menuCode: string) {
   const [allocSearching, setAllocSearching] = useState(false);
   const [vehMgmtSearching, setVehMgmtSearching] = useState(false);
   const [vehLocPanelOpen, setVehLocPanelOpen] = useState(false);
+  // 차량위치보기 대상 — 선택된 배차행 전체(다중)
+  const [vehLocRows, setVehLocRows] = useState<any[]>([]);
   const [routePanelOpen, setRoutePanelOpen] = useState(false);
   // 미할당주문 탭 조회조건(카드형). 필드 키는 클라 기준 — 서버 파라미터명은 호출부에서 매핑.
   const [unallocCond, setUnallocCond] = useState<Record<string, string>>({});
@@ -87,6 +89,8 @@ export function useDispatchPlanModel(menuCode: string) {
     setVehMgmtSearching,
     vehLocPanelOpen,
     setVehLocPanelOpen,
+    vehLocRows,
+    setVehLocRows,
     routePanelOpen,
     setRoutePanelOpen,
     unallocCond,

@@ -9,7 +9,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { showInfoModal } from "@/app/components/popup/showInfoModal";
-import { dirtyRows, ROW_STATUS } from "@/app/components/grid/gridCommon";
+import { dirtyRows } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DispatchPlanModel, GridKey } from "./DispatchPlanModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
@@ -24,6 +24,8 @@ import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
 import CreateItineraryGrpDispatchPop from "./popup/CreateItineraryGrpDispatchPop";
 import TruckDispatchConfirmMemoPop from "./popup/TruckDispatchConfirmMemoPop";
 import PredictEstimateTimetoArrivalPop from "./popup/PredictEstimateTimetoArrivalPop";
+import CreateQtyDispatchPop from "./popup/CreateQtyDispatchPop";
+import { showErrorModal } from "@/app/components/popup/showErrorModal";
 
 interface Args {
   model: DispatchPlanModel;
@@ -202,36 +204,62 @@ export function useDispatchPlanController({ model }: Args) {
       .finally(() => model.setVehMgmtSearching(false));
   }, [model]);
 
+  const isCheckOnlySingleSelectRecord = useCallback(
+    (rows: any[], msg: string) => {
+      if (rows.length > 1) {
+        showErrorModal(Lang.get(msg));
+        return false;
+      }
+
+      return true;
+    },
+    [],
+  );
+
   // 등록차량(지입) 변경 — 단일선택 검증 후 ChangeVehiclePop → 선택 차량 머지 → 저장 → 재조회
-  const onChangeRegVeh = useCallback(() => {
-    const main = model.grids.main.selectedRef.current;
-    if (!guardHasData(main ? [main] : [])) return;
-    openPopup({
-      title: "BTN_VEHICLE_CHANGE",
-      width: "4xl",
-      content: (
-        <ChangeVehiclePop
-          initialValues={{
-            LGST_GRP_CD: main.LGST_GRP_CD,
-            DSPCH_NO: main.DSPCH_NO,
-            ORG_VEH_ID: main.VEH_ID,
-            showType: "100",
-          }}
-          onConfirm={(picked) => {
-            closePopup();
-            base
-              .callAjax(
-                api.saveChangeVehicle([
-                  { ...main, ...picked, ORG_VEH_ID: main.VEH_ID },
-                ]),
-              )
-              .then(() => base.search());
-          }}
-          onClose={closePopup}
-        />
-      ),
-    });
-  }, [model.grids.main, guardHasData, openPopup, closePopup, base]);
+  const onChangeRegVeh = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (
+        !isCheckOnlySingleSelectRecord(
+          rows,
+          "MSG_EXCEPTION_ONE_VEHICLE_REPLACE",
+        )
+      )
+        return;
+
+      const main = rows[0];
+      if (!guardHasData(main)) return;
+
+      openPopup({
+        title: "BTN_VEHICLE_CHANGE",
+        width: "4xl",
+        content: (
+          <ChangeVehiclePop
+            initialValues={{
+              LGST_GRP_CD: main.LGST_GRP_CD,
+              DSPCH_NO: main.DSPCH_NO,
+              ORG_VEH_ID: main.VEH_ID,
+              showType: "100",
+            }}
+            onConfirm={(picked) => {
+              closePopup();
+              base
+                .callAjax(
+                  api.saveChangeVehicle([
+                    { ...main, ...picked, ORG_VEH_ID: main.VEH_ID },
+                  ]),
+                  { mask: "main" },
+                )
+                .then(() => base.search());
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [isCheckOnlySingleSelectRecord, guardHasData, openPopup, closePopup, base],
+  );
 
   // 배차생성 공통 — 본 화면 조회조건의 필수값(부서/운영그룹/배송일/계획ID) 추출 + 검증
   const requireDispatchMandatory = useCallback(() => {
@@ -421,6 +449,32 @@ export function useDispatchPlanController({ model }: Args) {
     [base],
   );
 
+  // 물동량 배차생성 — 본 화면 조회조건 필수값 확인 후 CreateQtyDispatchPop
+  const onQtyDispatch = useCallback(() => {
+    const m = requireDispatchMandatory();
+    if (!m) return;
+    openPopup({
+      title: "LBL_CREATE_DSPCH_QTY",
+      width: "full",
+      content: (
+        <CreateQtyDispatchPop
+          initial={{
+            DIV_CD: m.DIV_CD,
+            LGST_GRP_CD: m.LGST_GRP_CD,
+            DLVRY_DT: m.DLVRY_DT,
+            PLN_ID: m.PLN_ID,
+            BATCH_NO: 1,
+          }}
+          onApplied={() => {
+            closePopup();
+            base.search();
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [requireDispatchMandatory, openPopup, closePopup, base]);
+
   // 차량교환 — 정확히 2건 선택, 두 배차의 차량정보를 맞교환
   const onSwapVehicle = useCallback(
     (e: any) => {
@@ -558,6 +612,8 @@ export function useDispatchPlanController({ model }: Args) {
   const onRegisterMemo = useCallback(
     (e: any) => {
       const rows = (e?.data ?? []) as any[];
+      if (!isCheckOnlySingleSelectRecord(rows, "MSG_CHECK_SINGLE_RECORD"))
+        return;
       if (!validatorMemo(rows)) return;
       openPopup({
         title: "LBL_MEMO",
@@ -578,48 +634,67 @@ export function useDispatchPlanController({ model }: Args) {
         ),
       });
     },
-    [validatorMemo, model.codeMap, base, openPopup, closePopup],
+    [
+      isCheckOnlySingleSelectRecord,
+      validatorMemo,
+      openPopup,
+      model.codeMap.dspchOpSts,
+      closePopup,
+      base,
+    ],
   );
 
   // 임시차량변경 — 단일 배차행 선택 → 스팟차량(차량/기사/연락처) 등록
-  const onChangeTempVeh = useCallback(() => {
-    const main = model.grids.main.selectedRef.current;
-    if (!base.requireParentRow(main, "배차")) return;
-    openPopup({
-      title: "BTN_REG_SPOT_VEH",
-      width: "md",
-      content: (
-        <RegiSpotPop
-          initialValues={main}
-          onConfirm={(patch) => {
-            closePopup();
-            const payload = {
-              DSPCH_NO: main.DSPCH_NO,
-              LGST_GRP_CD: main.LGST_GRP_CD,
-              DIV_CD: main.DIV_CD,
-              PLN_ID: main.PLN_ID,
-              DLVRY_DT: main.DLVRY_DT,
-              VEH_ID: main.VEH_ID,
-              VEH_OP_TP: main.VEH_OP_TP,
-              VEH_TP_NM: main.VEH_TP_NM,
-              DRVR_ID: main.DRVR_ID,
-              CARR_CD: main.CARR_CD,
-              CARR_NM: main.CARR_NM,
-              AP_PROC_TP: main.AP_PROC_TP,
-              VEH_NO: patch.VEH_NO,
-              DRVR_NM: patch.DRVR_NM,
-              MBL_PHN_NO: patch.MBL_PHN_NO,
-              VEH_TP_CD: patch.VEH_TP_CD,
-            };
-            base
-              .callAjax(api.saveDspchSpotVeh(payload))
-              .then(() => base.search());
-          }}
-          onClose={closePopup}
-        />
-      ),
-    });
-  }, [model.grids.main, base, openPopup, closePopup]);
+  const onChangeTempVeh = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (
+        !isCheckOnlySingleSelectRecord(
+          rows,
+          "MSG_EXCEPTION_ONE_VEHICLE_REPLACE",
+        )
+      )
+        return;
+
+      const main = rows[0];
+
+      openPopup({
+        title: "BTN_REG_SPOT_VEH",
+        width: "md",
+        content: (
+          <RegiSpotPop
+            initialValues={main}
+            onConfirm={(patch) => {
+              closePopup();
+              const payload = {
+                DSPCH_NO: main.DSPCH_NO,
+                LGST_GRP_CD: main.LGST_GRP_CD,
+                DIV_CD: main.DIV_CD,
+                PLN_ID: main.PLN_ID,
+                DLVRY_DT: main.DLVRY_DT,
+                VEH_ID: main.VEH_ID,
+                VEH_OP_TP: main.VEH_OP_TP,
+                VEH_TP_NM: main.VEH_TP_NM,
+                DRVR_ID: main.DRVR_ID,
+                CARR_CD: main.CARR_CD,
+                CARR_NM: main.CARR_NM,
+                AP_PROC_TP: main.AP_PROC_TP,
+                VEH_NO: patch.VEH_NO,
+                DRVR_NM: patch.DRVR_NM,
+                MBL_PHN_NO: patch.MBL_PHN_NO,
+                VEH_TP_CD: patch.VEH_TP_CD,
+              };
+              base
+                .callAjax(api.saveDspchSpotVeh(payload), { mask: "main" })
+                .then(() => base.search());
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [isCheckOnlySingleSelectRecord, openPopup, closePopup, base],
+  );
 
   // 주문할당취소 (할당주문 탭 선택 행들)
   const onUnassignedShipment = useCallback(
@@ -802,15 +877,27 @@ export function useDispatchPlanController({ model }: Args) {
     api.saveDispatchPlan({ dsSave: dirty }).then(() => base.search());
   }, [model, base]);
 
-  const onShowVehicleLocation = useCallback(() => {
-    model.setRoutePanelOpen(false);
-    model.setVehLocPanelOpen(true);
-  }, [model]);
+  const onShowVehicleLocation = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      model.setVehLocRows(rows);
+      model.setRoutePanelOpen(false);
+      model.setVehLocPanelOpen(true);
+    },
+    [model],
+  );
 
-  const onShowRoute = useCallback(() => {
-    model.setVehLocPanelOpen(false);
-    model.setRoutePanelOpen(true);
-  }, [model]);
+  const onShowRoute = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!isCheckOnlySingleSelectRecord(rows, "MSG_CHECK_SINGLE_RECORD"))
+        return;
+
+      model.setVehLocPanelOpen(false);
+      model.setRoutePanelOpen(true);
+    },
+    [isCheckOnlySingleSelectRecord, model],
+  );
 
   const mainActions: ActionItem[] = useMemo(
     () => [
@@ -891,6 +978,12 @@ export function useDispatchPlanController({ model }: Args) {
             onClick: onSwapVehicle,
           },
         ],
+      },
+      {
+        type: "button",
+        key: "BTN_PROC_QTY_DSPCH",
+        label: "BTN_PROC_QTY_DSPCH",
+        onClick: onQtyDispatch,
       },
       {
         type: "group",
@@ -976,6 +1069,7 @@ export function useDispatchPlanController({ model }: Args) {
       onChangeRegVeh,
       onChangeTempVeh,
       onSwapVehicle,
+      onQtyDispatch,
       onRegisterMemo,
       onShowVehicleLocation,
       onShowRoute,

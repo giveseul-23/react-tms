@@ -12,36 +12,52 @@ import {
 import { dispatchPlanApi as api } from "../dispatchPlanApi";
 
 type Props = {
-  /** 선택된 배차행 (= model.grids.main.selected). 바뀌면 재조회. */
-  row: any;
+  /** 선택된 배차행들 (= model.vehLocRows). 바뀌면 각 차량 위치를 모두 재조회. */
+  rows: any[];
 };
 
-export default function VehicleLocationPanel({ row }: Props) {
+export default function VehicleLocationPanel({ rows: selRows }: Props) {
   const mapRef = useRef<TmapViewHandle | null>(null);
   const [rows, setRows] = useState<any[]>([]);
 
-  const vehId = row?.VEH_ID;
+  // 선택행들의 고유 VEH_ID 목록
+  const vehIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (selRows ?? [])
+            .map((r: any) => r?.VEH_ID)
+            .filter(Boolean)
+            .map(String),
+        ),
+      ),
+    [selRows],
+  );
+  const vehKey = vehIds.join(",");
 
   useEffect(() => {
-    if (!vehId) {
+    if (vehIds.length === 0) {
       setRows([]);
       return;
     }
     let cancelled = false;
-    api
-      .getVehiclePosition(String(vehId))
-      .then((res: any) => {
-        if (cancelled) return;
-        const result = res.data?.result ?? res.data?.data?.dsOut ?? [];
-        setRows(result);
-      })
-      .catch(() => {
-        if (!cancelled) setRows([]);
-      });
+    Promise.all(
+      vehIds.map((id) =>
+        api
+          .getVehiclePosition(id)
+          .then(
+            (res: any) => res.data?.result ?? res.data?.data?.dsOut ?? [],
+          )
+          .catch(() => []),
+      ),
+    ).then((lists) => {
+      if (!cancelled) setRows(lists.flat());
+    });
     return () => {
       cancelled = true;
     };
-  }, [vehId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehKey]);
 
   const markers = useMemo<TmapMarker[]>(() => {
     return rows
@@ -67,7 +83,7 @@ export default function VehicleLocationPanel({ row }: Props) {
     requestAnimationFrame(() => mapRef.current?.fitMarkers());
   }, [markers]);
 
-  if (!vehId) {
+  if (vehIds.length === 0) {
     return (
       <div className="h-full w-full flex items-center justify-center text-[12px] text-slate-400">
         배차를 선택하세요.

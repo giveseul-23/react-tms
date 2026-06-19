@@ -430,7 +430,7 @@ export default function DispatchPlan() {
         title="BTN_SHOW_VEHICLE_LOCATION"
         width={520}
       >
-        <VehicleLocationPanel row={model.grids.main.selected} />
+        <VehicleLocationPanel rows={model.vehLocRows} />
       </SidePanel>
 
       <SidePanel

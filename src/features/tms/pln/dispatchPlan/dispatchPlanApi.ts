@@ -281,6 +281,21 @@ export const dispatchPlanApi = {
     );
   },
 
+  // ── 물동량 배차생성 (CreateQtyDispatchPop) ──────────────────
+  // 메인: 물동배차노선/차량 후보 (sub 미할당주문은 getUnallocOrderList 재사용)
+  searchQtyItinerary(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/quantityItineraryService/search",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  saveCreateQtyDispatch(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanAdService/saveCreateQtyDispatch",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
   // ── 주문 병합(합차) ─────────────────────────────────────────
   saveMergeShipment(rows: any[]) {
     return apiClient.post<CommonResponse>(
