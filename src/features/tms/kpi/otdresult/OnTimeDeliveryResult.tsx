@@ -11,8 +11,11 @@ import { MAIN_COLUMN_DEFS } from "./OnTimeDeliveryResultColumns";
 
 export const MENU_CODE = "MENU_OTD_MGMT";
 
-// 그리드 리소스 권한 authId (센차 grid.authId 단일 소스)
-export const AUTH = { grids: { main: "MAIN_GRID_OTD_MGMT" } };
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_OTD_MGMT",
+  },
+};
 
 export default function OnTimeDeliveryResult() {
   const model = useOnTimeDeliveryResultModel(MENU_CODE);
@@ -25,6 +28,7 @@ export default function OnTimeDeliveryResult() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
+        menuCode: MENU_CODE,
         ...model.bindSearch(),
       }}
       grid={
@@ -33,8 +37,8 @@ export default function OnTimeDeliveryResult() {
           authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
-          onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          headerCheckbox={false}
           audit={false}
         />
       }
