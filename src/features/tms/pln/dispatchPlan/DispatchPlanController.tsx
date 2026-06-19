@@ -9,7 +9,7 @@ import {
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { showInfoModal } from "@/app/components/popup/showInfoModal";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { dirtyRows, ROW_STATUS } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DispatchPlanModel, GridKey } from "./DispatchPlanModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
@@ -348,15 +348,18 @@ export function useDispatchPlanController({ model }: Args) {
   }, [model.rawFiltersRef, openPopup, closePopup, base]);
 
   // 배차취소 — 선택 배차 행 confirm 후 취소
-  const onCancelPlanDispatch = useCallback(() => {
-    const main = model.grids.main.selectedRef.current;
-    if (!guardHasData(main ? [main] : [])) return;
-    base.confirm("MSG_CHK_DELETE", () => {
-      base
-        .callAjax(api.saveCancelPlanDispatch([main]))
-        .then(() => base.search());
-    });
-  }, [model.grids.main, guardHasData, base]);
+  const onCancelPlanDispatch = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!guardHasData(rows)) return;
+      base.confirm("MSG_CHK_DELETE", () => {
+        base
+          .callAjax(api.saveCancelPlanDispatch(rows))
+          .then(() => base.search());
+      });
+    },
+    [guardHasData, base],
+  );
 
   // 계획확정 — 선택 배차행
   const onPlanned = useCallback(
@@ -621,23 +624,33 @@ export function useDispatchPlanController({ model }: Args) {
     });
   }, [model.grids.main, base, openPopup, closePopup]);
 
-  // 주문할당취소 (할당주문 탭 선택 행)
-  const onUnassignedShipment = useCallback(() => {
-    const sel = model.grids.allocOrder.selectedRef.current;
-    if (!guardHasData(sel ? [sel] : [])) return;
-    base.callAjax(api.saveUnAssignedShipment([sel])).then(() => base.search());
-  }, [model.grids.allocOrder, guardHasData, base]);
+  // 주문할당취소 (할당주문 탭 선택 행들)
+  const onUnassignedShipment = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!guardHasData(rows)) return;
+      base.callAjax(api.saveUnAssignedShipment(rows)).then(() => base.search());
+    },
+    [guardHasData, base],
+  );
 
-  // 주문할당 (미할당주문 탭 선택 행 → 선택 배차에 할당)
-  const onAssignedShipment = useCallback(() => {
-    const main = model.grids.main.selectedRef.current;
-    const sel = model.grids.unallocOrder.selectedRef.current;
-    if (!guardHasData(main ? [main] : [])) return;
-    if (!guardHasData(sel ? [sel] : [])) return;
-    base
-      .callAjax(api.saveAssignedShipment([{ ...sel, DSPCH_NO: main.DSPCH_NO }]))
-      .then(() => base.search());
-  }, [model.grids.main, model.grids.unallocOrder, guardHasData, base]);
+  // 주문할당 (미할당주문 탭 선택 행들 → 선택 배차에 할당)
+  const onAssignedShipment = useCallback(
+    (e: any) => {
+      const main = model.grids.main.selectedRef.current;
+      const rows = (e?.data ?? []) as any[];
+      if (!guardHasData(main ? [main] : [])) return;
+      if (!guardHasData(rows)) return;
+      base
+        .callAjax(
+          api.saveAssignedShipment(
+            rows.map((r) => ({ ...r, DSPCH_NO: main.DSPCH_NO })),
+          ),
+        )
+        .then(() => base.search());
+    },
+    [model.grids.main, guardHasData, base],
+  );
 
   // 품목 라인분할 — 상세 그리드 선택 행
   const onSplitLine = useCallback(
@@ -737,6 +750,55 @@ export function useDispatchPlanController({ model }: Args) {
       });
     },
     [model.grids, guardHasData, openPopup, closePopup, base],
+  );
+
+  // 선택행 검증 — 비어있으면 안내 후 false
+  const requireSelected = useCallback(
+    (rows: any[], msg = "MSG_SELECT_NO_DATA") => {
+      if (!rows || rows.length === 0) {
+        base.alert(Lang.get(msg));
+        return false;
+      }
+      return true;
+    },
+    [base],
+  );
+
+  const onCreateNewDspch = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!requireSelected(rows, "MSG_EMPTY_DISPATCH_VEH_SELECT_CHK")) return;
+
+      const vehIds = [];
+      const params = [];
+      const s = model.rawFiltersRef.current;
+      rows.map((row) => {
+        const vehId = row.VEH_ID;
+        if (vehId !== null && vehIds.indexOf(vehId) < 0) {
+          vehIds.push(vehId);
+
+          row = {
+            ...row,
+            DLVRY_DT: s.SRCH_DSPCH_DLVRY_DT,
+            DSPCH_TP: "10",
+            PLN_ID: s.SRCH_DSPCH_PLN_ID,
+            rowStatus: "U",
+          };
+
+          params.push(row);
+        }
+      });
+
+      base
+        .callAjax(api.saveCreateEmptyDispatch(params), {
+          mask: "vehMgmt",
+        })
+        .then(() => {
+          base.search();
+          handleVehMgmtSearch();
+        });
+    },
+    [base, handleVehMgmtSearch, model.rawFiltersRef, requireSelected],
   );
 
   const handleSave = useCallback(() => {
@@ -952,6 +1014,7 @@ export function useDispatchPlanController({ model }: Args) {
         type: "button",
         key: "BTN_CALCULATE_ETA",
         label: "BTN_CALCULATE_ETA",
+        authId: "BTN_CALCULATE_ETA_SUB01_GRID_RVDSPCH",
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
           if (!row) return;
@@ -972,24 +1035,28 @@ export function useDispatchPlanController({ model }: Args) {
         type: "button",
         key: "BTN_SPLIT_STOP",
         label: "BTN_SPLIT_STOP",
+        authId: "BTN_SPLIT_STOP_SUB01_GRID_RVDSPCH",
         onClick: () => {},
       },
       {
         type: "button",
         key: "BTN_ADJUST_STOP_SEQ_PLUS",
         label: "BTN_ADJUST_STOP_SEQ_PLUS",
+        authId: "BTN_ADJ_STOP_SEQ_PLUS_SUB01_GRID_RVDSPCH",
         onClick: () => {},
       },
       {
         type: "button",
         key: "BTN_ADJUST_STOP_SEQ_MINUS",
         label: "BTN_ADJUST_STOP_SEQ_MINUS",
+        authId: "BTN_ADJ_STOP_SEQ_MINUS_SUB01_GRID_RVDSPCH",
         onClick: () => {},
       },
       {
         type: "button",
-        key: "BTN_ORDER_SAVE",
-        label: "BTN_ORDER_SAVE",
+        key: "BTN_ADJUST_STOP_SEQ",
+        label: "BTN_ADJUST_STOP_SEQ",
+        authId: "BTN_ADJ_STOP_SEQ_GRID_RVDSPCH",
         noLang: true,
         onClick: () => {
           const row = model.grids.main.selectedRef.current;
@@ -1002,8 +1069,23 @@ export function useDispatchPlanController({ model }: Args) {
           );
         },
       },
+      {
+        type: "button",
+        key: "BTN_ADJ_STOP_SEQ_GRID_RVDSPCH",
+        label: "BTN_ADJ_STOP_SEQ_GRID_RVDSPCH",
+        authId: "BTN_ADJ_STOP_SEQ_GRID_RVDSPCH",
+        noLang: true,
+        onClick: () => {},
+      },
     ],
-    [base, model],
+    [
+      base,
+      model.grids.main.selectedRef,
+      model.grids.stop.rows,
+      onPredictETA,
+      validatorCalctEta,
+      validatorPredictEta,
+    ],
   );
 
   const allocOrderActions: ActionItem[] = useMemo(
@@ -1057,6 +1139,18 @@ export function useDispatchPlanController({ model }: Args) {
     [onSplitLine, onSplitQty],
   );
 
+  const vehMgmtActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "LBL_CREATE_NEW_DSPCH",
+        label: "LBL_CREATE_NEW_DSPCH",
+        onClick: onCreateNewDspch,
+      },
+    ],
+    [onCreateNewDspch],
+  );
+
   return {
     fetchDispatchPlanList: fetchList,
     onSearchCallback,
@@ -1068,6 +1162,7 @@ export function useDispatchPlanController({ model }: Args) {
     allocOrderActions,
     unallocOrderActions,
     unallocSubActions,
+    vehMgmtActions,
     handleUnallocOrderSearch,
     handleAllocOrderSearch,
     handleVehMgmtSearch,
