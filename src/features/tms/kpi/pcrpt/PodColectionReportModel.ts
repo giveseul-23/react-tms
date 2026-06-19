@@ -9,11 +9,13 @@ export function usePodColectionReportModel(menuCode: string) {
 
   // 공통코드 — 주문진행상태 / 인수증진행상태
   const { codeMap } = useCommonStores({
-    shpmOpStsList: { sqlProp: "CODE", keyParam: "SHPM_OP_STS" },
-    podOpStatus: { sqlProp: "CODE", keyParam: "POD_STATUS" },
+    shpmOpStsList: { module: "TMS", sqlProp: "CODE", keyParam: "SHPM_OP_STS" },
+    podOpStatus: { module: "TMS", sqlProp: "CODE", keyParam: "POD_STATUS" },
   });
 
   return { ...base, codeMap };
 }
 
-export type PodColectionReportModel = ReturnType<typeof usePodColectionReportModel>;
+export type PodColectionReportModel = ReturnType<
+  typeof usePodColectionReportModel
+>;
