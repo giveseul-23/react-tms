@@ -7,7 +7,7 @@ import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useDispatchPlanVehModel } from "./DispatchPlanVehModel";
 import { useDispatchPlanVehController } from "./DispatchPlanVehController";
-import { MAIN_COLUMN_DEFS } from "./DispatchPlanVehColumns";
+import { LOCATION_SHPM_VOLUME_COLUMN_DEFS } from "./DispatchPlanVehColumns";
 
 export const MENU_CODE = "MENU_DISPATCH_PLAN_VEH";
 
@@ -25,8 +25,8 @@ export default function DispatchPlanVeh() {
       }}
       grid={
         <DataGrid
-          {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS}
+          {...model.bind("locationShpmVolume")}
+          columnDefs={LOCATION_SHPM_VOLUME_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
         />

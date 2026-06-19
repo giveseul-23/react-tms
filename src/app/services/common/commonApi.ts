@@ -20,7 +20,10 @@ export type comboOptRequest = {
 };
 
 export type commonResponse = {
-  rows: [];
+  rows?: any[];
+  data?: any;
+  result?: any;
+  [key: string]: any;
 };
 
 const withSession = (payload: any = {}) => {
@@ -50,7 +53,7 @@ export const commonApi = {
     );
   },
 
-  fetchComboOptions(payload: commonRequest[]) {
+  fetchComboOptions(payload: comboOptRequest[]) {
     return apiClient.post<commonResponse>("/appService/getCodesAndNames", {
       dsCode: payload,
     });

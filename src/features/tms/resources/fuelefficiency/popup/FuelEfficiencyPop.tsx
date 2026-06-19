@@ -32,7 +32,8 @@ export function FuelEfficiencyPop({
     () =>
       String(feId).trim() !== "" &&
       String(frmDttm).trim() !== "" &&
-      String(toDttm).trim() !== "",
+      String(toDttm).trim() !== "" &&
+      frmDttm <= toDttm,
     [feId, frmDttm, toDttm],
   );
 

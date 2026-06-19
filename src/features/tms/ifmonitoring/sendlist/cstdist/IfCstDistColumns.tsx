@@ -154,8 +154,8 @@ export const SUB01_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: "LBL_CURRENCY",
-    field: "CURRENCY",
+    headerName: "LBL_CURR_CODE",
+    field: "CURR_CD",
     width: 100,
     align: "center",
   },

@@ -36,6 +36,22 @@ export const menuApi = {
     );
   },
 
+  // 메뉴 즐겨찾기 등록 (AD_USR_FAVOR_MENU MERGE)
+  saveUserFavorMenu(payload: { APPL_CD: string; MENU_CD: string }) {
+    return apiClient.post(
+      `/appService/saveUserFavorMenu`,
+      withSession(payload),
+    );
+  },
+
+  // 메뉴 즐겨찾기 해제
+  removeUserFavorMenu(payload: { APPL_CD: string; MENU_CD: string }) {
+    return apiClient.post(
+      `/appService/removeUserFavorMenu`,
+      withSession(payload),
+    );
+  },
+
   getMsgCodeName(payload: any) {
     return apiClient.post<commonResponse>(
       `/menuService/selectMsgCodeName`,

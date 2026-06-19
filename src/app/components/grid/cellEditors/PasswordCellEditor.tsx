@@ -29,7 +29,6 @@ export function PasswordCellEditor(props: PasswordCellEditorProps) {
   };
 
   useGridCellEditor({
-    getValue: () => valueRef.current,
     isCancelBeforeStart: () => false,
     isCancelAfterEnd: () => false,
   });

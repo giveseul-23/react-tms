@@ -169,5 +169,14 @@ export function useXxxModel(menuCode: string) {
 - **`menuName` 은 항상 `const { menuName } = useMenuMeta()`** 로 가져온다(리터럴 하드코딩 금지). 엑셀 파일명 등 메뉴명이 필요한 곳은 이 값 하나만 쓴다 (→ [excel-download.md](./excel-download.md)).
 - 객체 형태로 export: `export const featureApi = { getList, save, ... }`
 - 모든 요청에 `MENU_CD: MENU_CODE` 포함 + `withSession` 으로 세션 필드 주입
-- 저장 API 는 `dsSave` 패턴: body `{ dsSave }`, params 에 세션/MENU_CD/그 외 키
-- 배열 페이로드도 `withSession` 이 각 원소에 세션 필드 자동 주입
+- **저장 API 는 `dsSave` 패턴**: body 는 반드시 **`{ dsSave: rows }`(객체)**, 세션/`MENU_CD`/그 외 키는 **쿼리 `params`**. 서버 VC `RequestDataReader` 가 named dataset `dsSave` 를 읽기 때문(`listMap.getDataList("dsSave")`).
+  ```ts
+  // 표준 헬퍼 (DispatchPlanVehApi.dsSavePost 동일)
+  const dsSavePost = (url: string, rows: any[]) =>
+    apiClient.post<commonResponse>(url, { dsSave: rows }, {
+      params: { ...getSessionFields(), MENU_CD: MENU_CODE },
+    });
+  save(payload: { dsSave: any[] }) { return dsSavePost("/xxxService/save", payload.dsSave); }
+  ```
+  - ❌ **금지**: `apiClient.post(url, withSession(payload.dsSave))` 처럼 **배열을 body 로 직접** 보내지 말 것. 서버가 배열을 "데이터셋들의 배열(`[[...]]`)"로 해석해 `Expected BEGIN_ARRAY but was BEGIN_OBJECT at $[0]`(Gson) 에러가 난다.
+- 조회/액션(단건) API 는 `withSession({ MENU_CD: MENU_CODE, ...payload })`(객체 body) — 배열 페이로드도 `withSession` 이 각 원소에 세션 필드 자동 주입(이때만 배열 허용).

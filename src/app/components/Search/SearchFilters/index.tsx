@@ -56,7 +56,7 @@ interface SearchFiltersProps {
    *  지정 시 SearchFilters 가 내부에서 useSearchCondition 호출 + fetchFn 자동 wrap.
    *  Controller 에서 transformParams 직접 호출 불필요. */
   excludes?: readonly ExcludeSpec[];
-  computeTotalCount?: (rows: any[]) => number;
+  computeTotalCount?: (rows: any) => number;
   /** 모듈 기본값 조회 — 모듈명 (예: "TMS"). falsy면 비활성 */
   moduleDefault?: string;
   moduleDefaultParams?: Record<string, unknown>;

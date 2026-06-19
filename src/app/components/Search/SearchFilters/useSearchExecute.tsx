@@ -64,7 +64,7 @@ interface UseSearchExecuteParams {
   filtersRef?: React.MutableRefObject<Record<string, unknown>>;
   rawFiltersRef?: React.MutableRefObject<Record<string, string>>;
   excludeKeysRef?: React.MutableRefObject<Set<string>>;
-  computeTotalCount?: (rows: any[]) => number;
+  computeTotalCount?: (rows: any) => number;
   searchRef?: React.MutableRefObject<((page?: number) => void) | null>;
   /** 메뉴 코드 — DYNAMIC_QUERY / DS_SEARCH_CONDITION 모드 payload 의 MENU_CD 로 전송 */
   menuCode?: string;
@@ -225,10 +225,10 @@ export function useSearchExecute({
           .filter((m) => m.type === "POPUP")
           .map((m) => popupNameKey(m.key, meta)),
       );
-      const popupCodeKeyToDb = new Map(
+      const popupCodeKeyToDb = new Map<string, string>(
         meta
           .filter((m) => m.type === "POPUP")
-          .map((m) => [`${m.key.replace("_CD", "")}_CD`, m.key] as const),
+          .map((m) => [`${m.key.replace("_CD", "")}_CD`, m.key]),
       );
       const resolveDbColumn = (stateKey: string): string | null => {
         if (popupNameKeys.has(stateKey)) return null; // POPUP 코드명 제외

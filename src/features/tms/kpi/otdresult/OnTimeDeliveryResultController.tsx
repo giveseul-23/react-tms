@@ -1,11 +1,10 @@
 import { useCallback, useMemo } from "react";
-import { useBaseController } from "@/app/feature/useBaseController";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { onTimeDeliveryResultApi as api } from "./OnTimeDeliveryResultApi";
 import { MENU_CODE } from "./OnTimeDeliveryResult";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { OnTimeDeliveryResultModel, GridKey } from "./OnTimeDeliveryResultModel";
+import type { OnTimeDeliveryResultModel } from "./OnTimeDeliveryResultModel";
 
 interface Args {
   model: OnTimeDeliveryResultModel;
@@ -13,7 +12,6 @@ interface Args {
 
 // 납기준수실적 — 조회 전용 단일 그리드 (저장/추가 없음)
 export function useOnTimeDeliveryResultController({ model }: Args) {
-  const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
@@ -22,13 +20,11 @@ export function useOnTimeDeliveryResultController({ model }: Args) {
   );
 
   const onSearchCallback = useCallback(
-    (data: any) => model.grids.main.setData(data),
+    (data: any) => {
+      model.grids.main.setData(data);
+      model.grids.main.setSelected(null);
+    },
     [model.grids.main],
-  );
-
-  const onMainGridClick = useCallback(
-    (row: any) => base.handleRowClick("main", row),
-    [base],
   );
 
   const mainActions: ActionItem[] = useMemo(
@@ -41,13 +37,12 @@ export function useOnTimeDeliveryResultController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [menuName, model.grids.main, model.filtersRef],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   return {
     fetchList,
     onSearchCallback,
-    onMainGridClick,
     mainActions,
   };
 }

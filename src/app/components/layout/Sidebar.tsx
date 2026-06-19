@@ -11,6 +11,7 @@ import {
   Minus,
   RefreshCw,
   BookOpen,
+  Star,
 } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -33,6 +34,8 @@ interface SidebarProps {
   sections?: MenuSection[];
   /** 메뉴 새로고침 — "전체" 컨트롤의 리프레시 버튼 클릭 시 호출 */
   onRefresh?: () => void;
+  /** 메뉴 즐겨찾기 토글 (리프 메뉴만) */
+  onToggleFavorite?: (menuCode: string, applCode: string, next: boolean) => void;
 }
 
 // ── 유틸 ──────────────────────────────────────────────────────────────────────
@@ -82,6 +85,17 @@ function filterNodes(nodes: MenuNode[], q: string): MenuNode[] {
   return result;
 }
 
+// 트리 전체에서 즐겨찾기(favorite) 리프만 평면 수집
+function collectFavoriteItems(nodes: MenuNode[]): MenuNode[] {
+  const result: MenuNode[] = [];
+  nodes.forEach((n) => {
+    if (n.type === "item") {
+      if (n.favorite) result.push(n);
+    } else result.push(...collectFavoriteItems(n.children));
+  });
+  return result;
+}
+
 // ── 재귀 노드 렌더러 ──────────────────────────────────────────────────────────
 
 function MenuNodeRenderer({
@@ -91,6 +105,7 @@ function MenuNodeRenderer({
   onSelectMenu,
   expandedGroups,
   onToggleGroup,
+  onToggleFavorite,
 }: {
   node: MenuNode;
   depth: number;
@@ -98,6 +113,7 @@ function MenuNodeRenderer({
   onSelectMenu: (code: string) => void;
   expandedGroups: Set<string>;
   onToggleGroup: (code: string) => void;
+  onToggleFavorite?: (menuCode: string, applCode: string, next: boolean) => void;
 }) {
   if (node.type === "item") {
     const isActive = node.menuCode === activeMenuCode;
@@ -115,9 +131,33 @@ function MenuNodeRenderer({
           }
         `}
       >
-        <div className="flex items-center gap-1.5">
-          <div className="w-0.5 h-3 bg-slate-200 rounded-full shrink-0" />
-          <span>{node.label}</span>
+        <div className="flex items-center justify-between gap-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="w-0.5 h-3 bg-slate-200 rounded-full shrink-0" />
+            <span>{node.label}</span>
+          </div>
+          <span
+            role="button"
+            tabIndex={-1}
+            title="즐겨찾기"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite?.(
+                node.menuCode,
+                node.applCode ?? "",
+                !node.favorite,
+              );
+            }}
+            className="shrink-0 p-0.5 rounded hover:bg-black/5"
+          >
+            <Star
+              className={`w-3.5 h-3.5 ${
+                node.favorite
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "text-slate-300 hover:text-yellow-400"
+              }`}
+            />
+          </span>
         </div>
       </button>
     );
@@ -150,6 +190,7 @@ function MenuNodeRenderer({
               onSelectMenu={onSelectMenu}
               expandedGroups={expandedGroups}
               onToggleGroup={onToggleGroup}
+              onToggleFavorite={onToggleFavorite}
             />
           ))}
         </div>
@@ -167,6 +208,7 @@ export function Sidebar({
   onSelectMenu,
   sections: sectionsProp,
   onRefresh,
+  onToggleFavorite,
 }: SidebarProps) {
   const sections: MenuSection[] = sectionsProp ?? [];
 
@@ -175,15 +217,30 @@ export function Sidebar({
   );
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  // 즐겨찾기 섹션 펼침 (기본 펼침)
+  const [favorOpen, setFavorOpen] = useState(true);
 
   // nav 스크롤용 ref
   const navRef = useRef<HTMLDivElement>(null);
+  // 직전 선택이 즐겨찾기에서 왔는지 — true 면 아래 섹션 자동 펼침/스크롤 skip
+  const fromFavoriteRef = useRef(false);
 
   const { openPopup } = usePopup();
   const navigate = useNavigate();
 
+  // 메뉴 선택 — fromFavorite 면 자동 펼침 useEffect 를 건너뛰도록 표시
+  const selectMenu = (code: string, fromFavorite = false) => {
+    fromFavoriteRef.current = fromFavorite;
+    onSelectMenu(code);
+  };
+
   // activeMenuCode 변경 시 해당 섹션/그룹 자동 펼침 + 스크롤
   useEffect(() => {
+    // 즐겨찾기에서 선택한 경우 아래 섹션 자동 펼침/스크롤 안 함
+    if (fromFavoriteRef.current) {
+      fromFavoriteRef.current = false;
+      return;
+    }
     const codes = findActiveSectionCodes(activeMenuCode, sections);
     if (codes.length > 0) {
       setExpandedSections((prev) => new Set([...prev, ...codes, "TMS"]));
@@ -286,6 +343,19 @@ export function Sidebar({
   }, [sections, searchQuery]);
 
   const isSearching = searchQuery.length > 0;
+
+  // 즐겨찾기 — 전 섹션의 favorite 리프를 모은 별도 섹션(항상 펼침)
+  const favoriteItems = useMemo(() => {
+    const all = sections.flatMap((s) => collectFavoriteItems(s.nodes ?? []));
+    if (!searchQuery) return all;
+    const lower = searchQuery.toLowerCase();
+    return all.filter(
+      (n) =>
+        n.type === "item" &&
+        (n.label.toLowerCase().includes(lower) ||
+          n.menuCode.toLowerCase().includes(lower)),
+    );
+  }, [sections, searchQuery]);
 
   function logOut() {
     clearTokens();
@@ -397,6 +467,60 @@ export function Sidebar({
 
         {/* ── Menu ── */}
         <nav ref={navRef} className="flex-1 overflow-y-auto p-2">
+          {/* 즐겨찾기 섹션 — 접기/펼치기 가능(기본 펼침) */}
+          {favoriteItems.length > 0 && (
+            <div className="mb-1 pb-1 border-b border-gray-100">
+              <div className="flex items-center group px-1">
+                {!isOpen ? (
+                  <button
+                    onClick={() => onToggle()}
+                    title="즐겨찾기"
+                    className="flex items-center justify-center w-full py-1.5 rounded-lg hover:bg-gray-100 hover:text-[rgb(var(--hover))] transition-colors"
+                  >
+                    <Star className="w-5 h-5 shrink-0 fill-yellow-400 text-yellow-400" />
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setFavorOpen((o) => !o)}
+                      className="flex items-center gap-2 flex-1 py-1.7 pl-2 text-[13px] font-medium hover:bg-gray-100 hover:text-[rgb(var(--hover))] rounded-lg transition-colors min-w-0"
+                    >
+                      <Star className="w-5 h-5 shrink-0 fill-yellow-400 text-yellow-400" />
+                      <span className="truncate">즐겨찾기</span>
+                    </button>
+                    <button
+                      onClick={() => setFavorOpen((o) => !o)}
+                      className="p-1 shrink-0 hover:bg-gray-100 rounded transition-colors"
+                    >
+                      <ChevronRight
+                        className={`w-4 h-4 transition-transform ${favorOpen ? "rotate-90" : ""}`}
+                      />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {isOpen && favorOpen && (
+                <div className="mt-0.5">
+                  {favoriteItems.map((node) => (
+                    <MenuNodeRenderer
+                      key={
+                        "fav_" + (node.type === "item" ? node.menuCode : "")
+                      }
+                      node={node}
+                      depth={0}
+                      activeMenuCode={activeMenuCode}
+                      onSelectMenu={(c) => selectMenu(c, true)}
+                      expandedGroups={expandedGroups}
+                      onToggleGroup={toggleGroup}
+                      onToggleFavorite={onToggleFavorite}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {filteredSections.map((section) => {
             const Icon = section.icon;
             const isSectionExpanded =
@@ -486,20 +610,21 @@ export function Sidebar({
                             node={node}
                             depth={0}
                             activeMenuCode={activeMenuCode}
-                            onSelectMenu={onSelectMenu}
+                            onSelectMenu={selectMenu}
                             expandedGroups={
                               isSearching
                                 ? new Set(collectGroupCodes(nodes!))
                                 : expandedGroups
                             }
                             onToggleGroup={toggleGroup}
+                            onToggleFavorite={onToggleFavorite}
                           />
                         ))
                       : section.items.map((item) => (
                           <button
                             key={item.menuCode}
                             data-menu-code={item.menuCode}
-                            onClick={() => onSelectMenu(item.menuCode)}
+                            onClick={() => selectMenu(item.menuCode)}
                             style={{ paddingLeft: "16px" }}
                             className={`
                               w-full text-left py-1 pr-3 text-[13px] rounded-lg
@@ -524,7 +649,7 @@ export function Sidebar({
         </nav>
 
         {/* ── Footer ── */}
-        <div className="p-4 border-t shrink-0">
+        <div className="px-4 py-2 border-t shrink-0">
           {isOpen ? (
             <div className="flex items-center gap-3 px-3 py-2">
               <div className="flex-1 min-w-0">

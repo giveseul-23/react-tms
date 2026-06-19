@@ -16,7 +16,7 @@ type Props = {
 };
 
 export default function SplitQtyPop({ record, onConfirm, onClose }: Props) {
-  const planQty = Number(record.PLN_QTY ?? 0);
+  const planQty = Number(record.PLN_INV_QTY ?? 0);
   const [splitQty, setSplitQty] = useState("");
 
   const qtyNum = Number(splitQty);
