@@ -1068,20 +1068,24 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
     } as AnyCol;
   }
 
+  const translatedChildren = walkChildren((prepared as any).children, opts);
+  const isGroup = !!translatedChildren;
+
   const alignProp = (prepared as any).align as
     | "left"
     | "center"
     | "right"
     | undefined;
-  const alignBlock = alignProp
+  // 레벨2 그룹 헤더(children 보유)의 상단 headerName 은 기본 center 정렬 (align 명시 시 우선).
+  const effAlign = alignProp ?? (isGroup ? "center" : undefined);
+  const alignBlock = effAlign
     ? {
-        cellStyle: { textAlign: alignProp },
-        headerClass: `ag-header-${alignProp}`,
+        // 그룹 def 는 셀이 없으므로 cellStyle 미적용(헤더 정렬만).
+        ...(isGroup ? {} : { cellStyle: { textAlign: effAlign } }),
+        headerClass: `ag-header-${effAlign}`,
       }
     : null;
   const typeBlock = (prepared as any).type ? {} : { type: "text" };
-
-  const translatedChildren = walkChildren((prepared as any).children, opts);
 
   if ((prepared as any).disableMaxWidth === true) {
     return {

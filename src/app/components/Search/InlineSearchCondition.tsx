@@ -16,7 +16,7 @@ import type { GridSearchField } from "@/app/components/popup/PopupSearchConditio
 // 이미 번역된 문자열/한글 리터럴은 그대로 통과(이중 번역 "***" 방지).
 const tLabel = (s: string) => (/^[A-Z][A-Z0-9_]+$/.test(s) ? Lang.get(s) : s);
 
-// 위젯 크기 통일 토큰 — 모든 입력은 h-7, 단일 입력 150px / popup 190px.
+// 위젯 크기 통일 토큰 — 모든 입력은 h-6, 단일 입력 150px / popup 190px.
 const W_SINGLE = "w-[150px]";
 const W_POPUP = "w-[190px]";
 
@@ -66,19 +66,19 @@ export function InlineSearchCondition({
 
   // 라이트 버튼(조회·토글 공통) — 흰 배경 + 테두리, hover 시 primary.
   const lightBtn =
-    "h-7 rounded-md border border-slate-200 bg-white text-slate-500 hover:text-[rgb(var(--primary))] text-[12px] font-semibold";
+    "h-6 rounded-md border border-slate-200 bg-white text-slate-500 hover:text-[rgb(var(--primary))] text-[11px] font-semibold";
 
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-lg">
       {/* 타이틀 라인 — 좌측 타이틀(+접힘 시 요약), 우측 조회·접기 */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2">
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
           <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-          <span className="text-[12px] font-semibold text-slate-600 whitespace-nowrap">
+          <span className="text-[11px] font-semibold text-slate-600 whitespace-nowrap">
             {tLabel(title)}
           </span>
           {!open && summary.length > 0 && (
-            <span className="ml-2 text-[12px] text-slate-500 truncate min-w-0">
+            <span className="ml-2 text-[11px] text-slate-500 truncate min-w-0">
               {summary.join(" · ")}
             </span>
           )}
@@ -128,13 +128,13 @@ export function InlineSearchCondition({
                 }
               }}
               title="더블클릭으로 초기화"
-              className="text-[12px] font-medium text-slate-600 leading-none whitespace-nowrap cursor-pointer select-none hover:text-[rgb(var(--primary))] transition-colors"
+              className="text-[11px] font-medium text-slate-600 leading-none whitespace-nowrap cursor-pointer select-none hover:text-[rgb(var(--primary))] transition-colors"
             >
               {tLabel(f.label)}
             </label>
             {f.type === "popup" ? (
               <div
-                className={`${W_POPUP} flex items-center gap-1 h-7 px-2 box-border border border-slate-200 rounded-md bg-white`}
+                className={`${W_POPUP} flex items-center gap-1 h-6 px-2 box-border border border-slate-200 rounded-md bg-white`}
               >
                 <input
                   value={f.code}
@@ -150,7 +150,7 @@ export function InlineSearchCondition({
                     else onSearch?.();
                   }}
                   disabled={f.disable}
-                  className="w-[60px] shrink-0 text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 disabled:cursor-not-allowed disabled:text-slate-400"
+                  className="w-[60px] shrink-0 text-[11px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 disabled:cursor-not-allowed disabled:text-slate-400"
                   placeholder="코드"
                 />
                 <span className="text-slate-200">|</span>
@@ -159,7 +159,7 @@ export function InlineSearchCondition({
                   value={f.name}
                   readOnly
                   disabled={f.disable}
-                  className="flex-1 min-w-0 text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 disabled:cursor-not-allowed disabled:text-slate-400"
+                  className="flex-1 min-w-0 text-[11px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 disabled:cursor-not-allowed disabled:text-slate-400"
                   placeholder="코드명"
                 />
                 <button
@@ -180,7 +180,7 @@ export function InlineSearchCondition({
                   value={f.value}
                   onChange={f.onChange}
                   disabled={f.disable}
-                  inputClassName="!h-7 box-border border border-slate-200 rounded-md bg-white text-[12px]"
+                  inputClassName="!h-6 box-border border border-slate-200 rounded-md bg-white text-[11px]"
                 />
               </div>
             ) : f.type === "date" ? (
@@ -190,7 +190,7 @@ export function InlineSearchCondition({
                 onChange={(e) => f.onChange(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
                 disabled={f.disable}
-                className={`${W_SINGLE} h-7 px-2 box-border text-[12px] text-slate-700 border border-slate-200 rounded-md bg-white outline-none focus:border-[rgb(var(--primary))] disabled:bg-slate-50 disabled:cursor-not-allowed`}
+                className={`${W_SINGLE} h-6 px-2 box-border text-[11px] text-slate-700 border border-slate-200 rounded-md bg-white outline-none focus:border-[rgb(var(--primary))] disabled:bg-slate-50 disabled:cursor-not-allowed`}
               />
             ) : (
               <input
@@ -198,7 +198,7 @@ export function InlineSearchCondition({
                 onChange={(e) => f.onChange(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
                 disabled={f.disable}
-                className={`${W_SINGLE} h-7 px-2 box-border text-[12px] text-slate-700 border border-slate-200 rounded-md bg-white outline-none focus:border-[rgb(var(--primary))] placeholder:text-slate-300 disabled:bg-slate-50 disabled:cursor-not-allowed`}
+                className={`${W_SINGLE} h-6 px-2 box-border text-[11px] text-slate-700 border border-slate-200 rounded-md bg-white outline-none focus:border-[rgb(var(--primary))] placeholder:text-slate-300 disabled:bg-slate-50 disabled:cursor-not-allowed`}
                 placeholder={f.placeholder ?? "입력"}
               />
             )}
