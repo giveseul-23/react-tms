@@ -43,6 +43,7 @@ export default function PodColectionReport() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
+        menuCode: MENU_CODE,
         ...model.bindSearch(),
       }}
       master={
@@ -58,6 +59,8 @@ export default function PodColectionReport() {
               columnDefs={MAIN_COLUMN_DEFS}
               onRowClicked={ctrl.onMainGridClick}
               actions={ctrl.mainActions}
+              headerCheckbox={false}
+              audit={false}
             />
           </Pane>
           <Pane>
@@ -67,6 +70,8 @@ export default function PodColectionReport() {
               columnDefs={SUB01_COLUMN_DEFS}
               onRowClicked={ctrl.onSub01GridClick}
               actions={ctrl.sub01Actions}
+              headerCheckbox={false}
+              audit={false}
             />
           </Pane>
         </SplitPane>
@@ -78,6 +83,8 @@ export default function PodColectionReport() {
           columnDefs={SUB02_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.sub02Actions}
+          headerCheckbox={false}
+          audit={false}
         />
       }
     />
