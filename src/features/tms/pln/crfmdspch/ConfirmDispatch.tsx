@@ -31,7 +31,7 @@ export default function ConfirmDispatch() {
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
       }}
-      defaultDirection="horizontal"
+      defaultDirection="vertical"
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
