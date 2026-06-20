@@ -262,6 +262,7 @@ export function useConfirmDispatchController({ model }: Args) {
         label: "BTN_DISPATCH_CONFIRM_CANCEL",
         onClick: (e: any) => act(api.onDispatchConfirmCancel, e),
       },
+      /*
       {
         type: "dropdown",
         key: "LBL_LOADING_ORDER",
@@ -269,7 +270,7 @@ export function useConfirmDispatchController({ model }: Args) {
         items: [
           { type: "button", key: "ORDR", label: "LBL_LOADING_ORDER", onClick: (e: any) => act((rows) => api.searchLdngOrder({ dsSave: rows }), e) },
         ],
-      },
+      },*/
       {
         type: "dropdown",
         key: "LBL_POD_PRINT",
@@ -279,12 +280,6 @@ export function useConfirmDispatchController({ model }: Args) {
           { type: "button", key: "REISSUE", label: "BTN_POD_REISSUE", onClick: (e: any) => act(api.createPodReportOrReprint, e) },
           { type: "button", key: "CANCEL", label: "BTN_CANCEL_POD_ISSUE", onClick: (e: any) => act(api.cancelIssuePod, e, { confirm: "TTL_CONFIRM" }) },
         ],
-      },
-      {
-        type: "button",
-        key: "BTN_HELPER_ASSIGNMENT",
-        label: "BTN_HELPER_ASSIGNMENT",
-        onClick: (e: any) => act(api.onAssistRegister, e),
       },
       makeExcelGroupAction({
         excelColumns: () => model.grids.config.getExcelColumns(),
