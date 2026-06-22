@@ -11,7 +11,7 @@ export const MAIN_COLUMN_DEFS = [
     areaNo: 0,
     areaLabel: "기본 정보",
     fieldType: "text",
-    required: true,
+    validators: { required: true, max: 60 },
   },
   {
     type: "text",
@@ -22,7 +22,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 150,
     areaNo: 0,
     fieldType: "text",
-    required: true,
+    validators: { required: true, max: 200 },
   },
   {
     type: "combo",
@@ -34,6 +34,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 130,
     areaNo: 0,
     fieldType: "select",
+    validators: { required: true, max: 20 },
   },
   {
     type: "combo",
@@ -55,6 +56,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 80,
     areaNo: 0,
     fieldType: "number",
+    validators: { required: true, min: 0.01, max: 999, pointLength: 2 },
   },
   {
     type: "numeric",
@@ -97,6 +99,7 @@ export const MAIN_COLUMN_DEFS = [
     areaNo: 1,
     areaLabel: "적재 정보",
     fieldType: "number",
+    validators: { required: true, min: 0.001, max: 999999999999, pointLength: 2 },
   },
   {
     type: "numeric",
@@ -107,6 +110,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 0.001, max: 999999999999, pointLength: 2 },
   },
   {
     type: "numeric",
@@ -117,6 +121,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 1, max: 999999999999 },
   },
   {
     type: "numeric",
@@ -127,6 +132,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 1, max: 999999999999 },
   },
   {
     type: "numeric",
@@ -137,6 +143,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 1, max: 999999999999 },
   },
   {
     type: "numeric",
@@ -147,6 +154,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 1, max: 999999999999 },
   },
   {
     type: "numeric",
@@ -157,6 +165,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 0.001, max: 999999999999, pointLength: 2 },
   },
   {
     type: "numeric",
@@ -167,6 +176,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 0.001, max: 999999999999, pointLength: 2 },
   },
   {
     type: "numeric",
@@ -177,6 +187,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 0.001, max: 999999999999, pointLength: 2 },
   },
   {
     type: "numeric",
@@ -187,6 +198,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 0.001, max: 999999999999, pointLength: 2 },
   },
   {
     type: "numeric",
@@ -197,6 +209,7 @@ export const MAIN_COLUMN_DEFS = [
     width: 100,
     areaNo: 1,
     fieldType: "number",
+    validators: { required: true, min: 0.001, max: 999999999999, pointLength: 2 },
   },
 
   {
