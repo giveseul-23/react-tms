@@ -47,6 +47,14 @@ export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
+    headerName: "LBL_DIV_CD",
+    field: "DIV_CD",
+    align: "center",
+    width: 120,
+    hide: true,
+  },  
+  {
+    type: "text",
     headerName: "LBL_SHIPMENT_NO",
     field: "SHPM_NO",
     align: "center",

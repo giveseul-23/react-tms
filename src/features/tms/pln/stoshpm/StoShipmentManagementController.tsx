@@ -41,13 +41,13 @@ export function useStoShipmentManagementController({ model }: Args) {
   );
 
   const onAddMain = useCallback(() => {
-    const filters = model.filtersRef.current ?? {};
+    const filters = model.rawFiltersRef.current ?? {};
     const lastModified = model.grids.main.rows
       .filter((row: any) => row.EDIT_STS)
       .at(-1);
     const row = {
-      DIV_CD: filters.DIV_CD,
-      LGST_GRP_CD: filters.LGST_GRP_CD,
+      DIV_CD: filters.SRCH_SHPM_DIV_CD,
+      LGST_GRP_CD: filters.SRCH_SHPM_LGST_GRP_CD,
       DLVRY_DT: lastModified?.DLVRY_DT ?? todayYmd(),
     };
 
@@ -57,7 +57,7 @@ export function useStoShipmentManagementController({ model }: Args) {
     }
 
     base.addRow("main", row);
-  }, [base, model.filtersRef, model.grids.main.rows]);
+  }, [base, model.grids.main.rows, model.rawFiltersRef]);
 
   const onSaveMain = useCallback(
     () => base.saveGrid("main", stoShipmentManagementApi.save),

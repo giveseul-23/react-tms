@@ -24,6 +24,7 @@ export default function StoShipmentManagement() {
     <GridOnlyPage
       menuCode={MENU_CODE}
       searchProps={{
+        moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
@@ -35,6 +36,7 @@ export default function StoShipmentManagement() {
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           authId={AUTH.grids.main}
+          headerCheckbox={false}
         />
       }
     />
