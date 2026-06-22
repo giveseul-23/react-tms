@@ -5,15 +5,20 @@
 
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { useEgoShipmentManagementModel } from "./EgoShipmentManagementModel";
-import { useEgoShipmentManagementController } from "./EgoShipmentManagementController";
-import { MAIN_COLUMN_DEFS } from "./EgoShipmentManagementColumns";
+import { useStoShipmentManagementModel } from "./StoShipmentManagementModel";
+import { useStoShipmentManagementController } from "./StoShipmentManagementController";
+import { MAIN_COLUMN_DEFS } from "./StoShipmentManagementColumns";
 
-export const MENU_CODE = "MENU_EGO_SHPM_MGMT";
+export const MENU_CODE = "MENU_STO_SHPM_MGMT";
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_STO_SHPM",
+  },
+};
 
-export default function EgoShipmentManagement() {
-  const model = useEgoShipmentManagementModel(MENU_CODE);
-  const ctrl = useEgoShipmentManagementController({ model });
+export default function StoShipmentManagement() {
+  const model = useStoShipmentManagementModel(MENU_CODE);
+  const ctrl = useStoShipmentManagementController({ model });
 
   return (
     <GridOnlyPage
@@ -29,6 +34,7 @@ export default function EgoShipmentManagement() {
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
+          authId={AUTH.grids.main}
         />
       }
     />
