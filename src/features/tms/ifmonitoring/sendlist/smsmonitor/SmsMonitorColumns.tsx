@@ -1,3 +1,5 @@
+import { Lang } from "@/app/services/common/Lang";
+
 const interfaceStatusCellStyle = (p: any): Record<string, string> => {
   const base = { textAlign: "center" as const };
   switch (String(p?.data?.TRGT_SYS_SND_STTS ?? "").trim()) {
@@ -23,7 +25,8 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: "LBL_TXTMSG_ID",
+    headerName: Lang.get("LBL_SMS") + Lang.get("LBL_ID"),
+    noLang: true,
     field: "TXTMSG_ID",
     align: "center",
     editable: false,
@@ -47,7 +50,8 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: "LBL_RCV_TEL_NO",
+    headerName: Lang.get("LBL_RCV") + Lang.get("LBL_TEL_NO"),
+    noLang: true,
     field: "DRVR_HP",
     align: "center",
     editable: false,
