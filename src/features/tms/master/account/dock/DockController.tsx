@@ -79,7 +79,7 @@ export function useDockController({ model }: Args) {
       rows.map((r: any) => ({ ...r, EDIT_STS: ROW_STATUS.UPDATE })),
     );
     void base
-      .callAjax(api.deleteOpSlot({ dsSave }))
+      .callAjax(api.deleteOpSlot({ dsSave }), { mask: "sub01" })
       .then(() => onMainGridClick(main));
   }, [base, model.grids.main, model.grids.sub01, onMainGridClick]);
 

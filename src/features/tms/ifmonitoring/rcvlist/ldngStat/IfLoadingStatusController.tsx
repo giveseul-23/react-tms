@@ -62,7 +62,7 @@ export function useIfLoadingStatusController({ model }: Args) {
       }));
 
       base
-        .callAjax(api.reprocess({ dsSave }), "MSG_SAVE_CMPLT")
+        .callAjax(api.reprocess({ dsSave }), { successMsg: "MSG_SAVE_CMPLT", mask: "main" })
         .then(() => base.search());
     },
     [base],

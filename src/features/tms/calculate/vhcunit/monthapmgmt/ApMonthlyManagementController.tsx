@@ -78,7 +78,9 @@ export function useApMonthlyManagementController({ model }: Args) {
 
   const doAction = useCallback(
     (apiCall: () => Promise<any>, msg = "처리되었습니다.") =>
-      base.callAjax(apiCall(), msg).then(() => base.search()),
+      base
+        .callAjax(apiCall(), { successMsg: msg, mask: "main" })
+        .then(() => base.search()),
     [base],
   );
 

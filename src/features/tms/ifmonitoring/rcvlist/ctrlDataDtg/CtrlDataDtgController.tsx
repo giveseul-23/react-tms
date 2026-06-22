@@ -71,7 +71,7 @@ export function useCtrlDataDtgController({ model }: Args) {
               rowStatus: "U",
             })),
           }),
-          "MSG_SAVE_CMPLT",
+          { successMsg: "MSG_SAVE_CMPLT", mask: "main" },
         )
         .then(() => base.search());
     },

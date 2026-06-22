@@ -123,7 +123,7 @@ export function useItmQtyCfmMgmtController({ model }: Args) {
       const dsSave = toDsSave(
         rows.map((r) => ({ ...r, EDIT_STS: ROW_STATUS.UPDATE })),
       );
-      void base.callAjax(apiFn({ dsSave })).then(() => base.search());
+      void base.callAjax(apiFn({ dsSave }), { mask: "main" }).then(() => base.search());
     },
     [base],
   );
@@ -147,7 +147,7 @@ export function useItmQtyCfmMgmtController({ model }: Args) {
               const apiFn = isCancel
                 ? api.onDateItemQtyConfirmCancel
                 : api.onDateItemQtyConfirm;
-              void base.callAjax(apiFn(p)).then(() => base.search());
+              void base.callAjax(apiFn(p), { mask: "main" }).then(() => base.search());
             }}
             onClose={closePopup}
           />
@@ -232,7 +232,7 @@ export function useItmQtyCfmMgmtController({ model }: Args) {
           }}
           onConfirm={(p) => {
             closePopup();
-            void base.callAjax(api.createApSettlQty(p)).then(() => base.search());
+            void base.callAjax(api.createApSettlQty(p), { mask: "main" }).then(() => base.search());
           }}
           onClose={closePopup}
         />
@@ -250,6 +250,7 @@ export function useItmQtyCfmMgmtController({ model }: Args) {
           DLVRY_DT_FROM: s.SRCH_DLVRY_DT_FROM ?? "",
           DLVRY_DT_TO: s.SRCH_DLVRY_DT_TO ?? "",
         }),
+        { mask: "main" },
       )
       .then(() => base.search());
   }, [base, getSearch]);

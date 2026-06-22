@@ -101,7 +101,7 @@ export function useLogisticGroupDefaultController({ model }: Args) {
   const syncConfig = useCallback(
     () =>
       base
-        .callAjax(api.syncConfig({}), Lang.get("MSG_CMPLT_SYNC"))
+        .callAjax(api.syncConfig({}), { successMsg: Lang.get("MSG_CMPLT_SYNC"), mask: "header" })
         .then(() => base.search()),
     [base],
   );
@@ -124,7 +124,7 @@ export function useLogisticGroupDefaultController({ model }: Args) {
                   base
                     .callAjax(
                       api.syncConfig(payload),
-                      Lang.get("MSG_CMPLT_SYNC"),
+                      { successMsg: Lang.get("MSG_CMPLT_SYNC"), mask: "header" },
                     )
                     .then(() => base.search());
                 }}

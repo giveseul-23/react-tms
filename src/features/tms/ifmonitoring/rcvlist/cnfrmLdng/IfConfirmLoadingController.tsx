@@ -55,7 +55,7 @@ export function useIfConfirmLoadingController({ model }: Args) {
       base
         .callAjax(
           api.reprocess({ dsSave: selectedRows.map((r: any) => ({ ...r, rowStatus: "U" })) }),
-          "MSG_SAVE_CMPLT",
+          { successMsg: "MSG_SAVE_CMPLT", mask: "main" },
         )
         .then(() => base.search());
     },

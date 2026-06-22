@@ -110,7 +110,7 @@ export function useAssistController({ model }: Args) {
                 LOGIARRAY: logiArray,
               }));
               const apiFn = cancel ? api.onRegiAffiCancle : api.onRegiAffi;
-              void base.callAjax(apiFn(dsSave)).then(() => base.search());
+              void base.callAjax(apiFn(dsSave), { mask: "main" }).then(() => base.search());
             }}
             onClose={closePopup}
           />

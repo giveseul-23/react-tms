@@ -109,6 +109,7 @@ export function useOilPriceByGasStationController({ model }: Args) {
             void base
               .callAjax(
                 api.registerGasStation({ OPINET_GSSTTN_CD, FLAG: "I" }),
+                { mask: "main" },
               )
               .then(() => base.search());
           }}

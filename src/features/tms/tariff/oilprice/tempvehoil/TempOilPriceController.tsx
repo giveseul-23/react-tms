@@ -74,7 +74,7 @@ export function useTempOilPriceController({ model, activeTabRef }: Args) {
         <TempOilPricePop
           onConfirm={(params) => {
             closePopup();
-            base.callAjax(api.createOilPriceAll(params)).then(() => base.search());
+            base.callAjax(api.createOilPriceAll(params), { mask: "master" }).then(() => base.search());
           }}
           onClose={closePopup}
         />

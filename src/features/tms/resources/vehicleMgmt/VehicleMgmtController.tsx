@@ -315,6 +315,7 @@ export function useVehicleMgmtController({ model }: Args) {
                     MBL_PHN_NO: newPhone,
                     MBL_PHN_NO_OLD: row.MBL_PHN_NO,
                   }),
+                  { mask: "main" },
                 )
                 .then(() => base.search());
             }}
@@ -348,7 +349,7 @@ export function useVehicleMgmtController({ model }: Args) {
                 rowStatus: "I",
               }));
               base
-                .callAjax(api.changeLgstCarr(saveRows))
+                .callAjax(api.changeLgstCarr(saveRows), { mask: "main" })
                 .then(() => base.search());
             }}
             onClose={closePopup}
@@ -408,7 +409,7 @@ export function useVehicleMgmtController({ model }: Args) {
                 })),
               }));
               base
-                .callAjax(api.sendVehicleIF(payload))
+                .callAjax(api.sendVehicleIF(payload), { mask: "main" })
                 .then(() => base.search());
             }}
             onClose={closePopup}

@@ -161,7 +161,7 @@ export function useDfChargeRateController({ model }: Args) {
           initial={main}
           onConfirm={(params) => {
             closePopup();
-            base.callAjax(api.addCopy(params)).then(() => base.search());
+            base.callAjax(api.addCopy(params), { mask: "main" }).then(() => base.search());
           }}
           onClose={closePopup}
         />

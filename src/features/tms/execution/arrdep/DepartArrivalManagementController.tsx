@@ -64,7 +64,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
         base.alert(Lang.get("MSG_SELECT_NO_DATA"), Lang.get("TTL_CONFIRM"));
         return;
       }
-      base.callAjax(apiFn(rows)).then(() => base.search());
+      base.callAjax(apiFn(rows), { mask: "main" }).then(() => base.search());
     },
     [base],
   );
@@ -93,7 +93,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
         onClick: (e: any) => {
           const saveRows = dirtyRows(model.grids.main.rows);
           if (saveRows.length === 0) return;
-          base.callAjax(api.save(saveRows)).then(() => base.search());
+          base.callAjax(api.save(saveRows), { mask: "main" }).then(() => base.search());
         },
       }),
       makeExcelGroupAction({
@@ -118,7 +118,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
         onClick: () => {
           const dirty = dirtyRows(model.grids.stopover.rows);
           if (dirty.length === 0) return;
-          base.callAjax(api.confirmPBoxRecovery(dirty)).then(() => refetchSubTabs());
+          base.callAjax(api.confirmPBoxRecovery(dirty), { mask: "stopover" }).then(() => refetchSubTabs());
         },
       },
     ],

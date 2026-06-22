@@ -113,7 +113,7 @@ export function useApSettlMgmtController({ model }: Args) {
   const onCreateClose = useCallback(
     () =>
       base
-        .callAjax(api.createClose(model.filtersRef.current))
+        .callAjax(api.createClose(model.filtersRef.current), { mask: "config" })
         .then(() => base.search()),
     [base, model.filtersRef],
   );
@@ -121,7 +121,7 @@ export function useApSettlMgmtController({ model }: Args) {
   const onCancelClose = useCallback(
     () =>
       base
-        .callAjax(api.cancelClose(model.filtersRef.current))
+        .callAjax(api.cancelClose(model.filtersRef.current), { mask: "config" })
         .then(() => base.search()),
     [base, model.filtersRef],
   );

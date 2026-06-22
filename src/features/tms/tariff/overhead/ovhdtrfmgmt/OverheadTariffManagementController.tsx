@@ -117,7 +117,7 @@ export function useOverheadTariffManagementController({ model }: Args) {
               },
             ];
             base
-              .callAjax(api.copyTariffOverhead({ dsSave: row }))
+              .callAjax(api.copyTariffOverhead({ dsSave: row }), { mask: "main" })
               .then(() => base.search());
           }}
           onClose={closePopup}

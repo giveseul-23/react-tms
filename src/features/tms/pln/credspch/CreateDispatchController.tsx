@@ -79,7 +79,7 @@ export function useCreateDispatchController({ model }: Args) {
     rows: any[],
     apiFn: (payload: any) => Promise<any>,
   ) => {
-    await base.callAjax(apiFn({ dsSave: toDsSave(rows) }));
+    await base.callAjax(apiFn({ dsSave: toDsSave(rows) }), { mask: "main" });
     base.search();
   }, [base, toDsSave]);
 
@@ -254,6 +254,7 @@ export function useCreateDispatchController({ model }: Args) {
                     rowStatus: row.rowStatus ?? "I",
                   })),
                 }),
+                { mask: "main" },
               )
               .then(() => base.search());
           }}
@@ -445,7 +446,7 @@ export function useCreateDispatchController({ model }: Args) {
           onConfirm={(payload) => {
             closePopup();
             void base
-              .callAjax(createDispatchApi.saveSplitShipmentQty({ dsSave: [payload] }))
+              .callAjax(createDispatchApi.saveSplitShipmentQty({ dsSave: [payload] }), { mask: "main" })
               .then(() => {
                 base.search();
               });
@@ -478,7 +479,7 @@ export function useCreateDispatchController({ model }: Args) {
     ].map(({ EDIT_STS, __rid__, ...row }) => row);
 
     void base
-      .callAjax(createDispatchApi.saveSplitShipmentLine({ dsSave }))
+      .callAjax(createDispatchApi.saveSplitShipmentLine({ dsSave }), { mask: "main" })
       .then(() => {
         base.search();
       });

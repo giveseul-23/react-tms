@@ -102,7 +102,7 @@ export function useContractController({ model }: Args) {
     const doSave = (confirmOtherYn: string) => {
       const payload = dsSave.map((r) => ({ ...r, CONFIRM_OTHER_YN: confirmOtherYn }));
       void base
-        .callAjax(api.saveCustCntrct({ dsSave: payload }))
+        .callAjax(api.saveCustCntrct({ dsSave: payload }), { mask: "sub02" })
         .then(() => refetch());
     };
 

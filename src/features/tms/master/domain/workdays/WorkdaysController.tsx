@@ -62,7 +62,7 @@ export function useWorkdaysController({ model }: Args) {
             base
               .callAjax(
                 WorkdaysApi.saveWorkdays(requestPayload),
-                "MSG_SAVE_CMPLT",
+                { successMsg: "MSG_SAVE_CMPLT", mask: "main" },
               )
               .then(() => {
                 closePopup();

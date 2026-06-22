@@ -81,7 +81,7 @@ export function useReceiveShipmentManagementController({ model }: Args) {
       base.alert(Lang.get("MSG_NO_SELECT_SHIPMENT"));
       return;
     }
-    await base.callAjax(apiFn({ dsSave: toActionDsSave(rows) }));
+    await base.callAjax(apiFn({ dsSave: toActionDsSave(rows) }), { mask: "main" });
     base.search();
   }, [base]);
 
@@ -191,7 +191,7 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     const lgstGrp = srchObj.SHPM_LGST_GRP_CD ?? srchObj.SRCH_SHPM_LGST_GRP_CD ?? ""; 
     const delivDt = srchObj.SHPM_DLVRY_DT_TO?? srchObj.SRCH_SHPM_DLVRY_DT_TO ?? "";
     if (!division || !lgstGrp) { base.alert(Lang.get("LBL_SHPM_SRCH_COND_CHK")); return; }
-    void base.callAjax(api.saveBatchCreation({ DIV_CD: division, LGST_GRP_CD: lgstGrp, DLVRY_DT: delivDt ?? "" }))
+    void base.callAjax(api.saveBatchCreation({ DIV_CD: division, LGST_GRP_CD: lgstGrp, DLVRY_DT: delivDt ?? "" }), { mask: "main" })
             .then(() => base.search()
     );
   }, [base, model.rawFiltersRef]);

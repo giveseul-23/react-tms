@@ -155,7 +155,7 @@ export function useLocationController({ model }: Args) {
             // 저장(PLNARRAY) → 완료 후 목록 재조회로 그리드 채움 (저장 응답엔 목록이 없음)
             const locId = main.LOC_ID;
             base
-              .callAjax(api.saveOrderTypePlanId({ dsSave: [payload] }))
+              .callAjax(api.saveOrderTypePlanId({ dsSave: [payload] }), { mask: "orderTypePlanId" })
               .then(() =>
                 base.searchSub(
                   "orderTypePlanId",
