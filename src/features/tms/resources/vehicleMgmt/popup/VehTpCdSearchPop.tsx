@@ -208,6 +208,7 @@ export default function VehTpCdSearchPop({
       selectedBadgeFields={["VEH_TP_CD", "VEH_TP_NM"]}
       selectPrompt="그리드에서 차량유형을 선택하세요"
       onSearch={onSearch}
+      confirmOnRowDoubleClick
       onConfirm={handleConfirm}
       onClose={onClose}
     />
