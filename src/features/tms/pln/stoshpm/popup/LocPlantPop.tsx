@@ -94,6 +94,7 @@ export default function LocPlantPop({ divCd, onConfirm, onClose }: Props) {
       gridHeight={340}
       selectedBadgeFields={["PLANT_CD", "PLANT_NM", "BP_CD"]}
       onSearch={fetchData}
+      confirmOnRowDoubleClick
       onConfirm={(payload) => {
         const picked = payload as Record<string, any>;
         if (!picked.BP_CD) {
