@@ -30,6 +30,9 @@ export default function StoShipmentDispatch() {
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
+          authId="MAIN_GRID_STO_SHPM_DSPCH"
+          rowSelection="multiple"
+          onRowClicked={ctrl.onMainGridClick}
         />
       }
     />

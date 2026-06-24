@@ -176,6 +176,7 @@ export default function CreateEmptyDispatchVehiclePop({
       rowSelection={rowSelection}
       selectedBadgeFields={["VEH_NO", "VEH_TP_NM", "CARR_NM"]}
       onSearch={fetchData}
+      confirmOnRowDoubleClick
       onConfirm={(payload) =>
         onConfirm(
           Array.isArray(payload)

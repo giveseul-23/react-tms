@@ -3,7 +3,7 @@ import { getSessionFields } from "@/app/services/auth/auth";
 import { MENU_CODE } from "./StoShipmentDispatch";
 
 type CommonResponse = {
-  rows: [];
+  rows: any[];
 };
 
 const withSession = (payload: any = {}) => {
@@ -14,27 +14,28 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
-// TODO: 서비스 경로(/stoShipmentDispatchService) 를 실제 백엔드 스펙에 맞춰 교체.
+const dsSavePost = (url: string, rows: any[], params: Record<string, any> = {}) =>
+  apiClient.post<CommonResponse>(
+    url,
+    { dsSave: rows },
+    {
+      params: {
+        ...getSessionFields(),
+        MENU_CD: MENU_CODE,
+        ...params,
+      },
+    },
+  );
+
 export const stoShipmentDispatchApi = {
-  getList(menuCd: string, payload: any) {
+  getList(payload: any) {
     return apiClient.post<CommonResponse>(
-      `/stoShipmentDispatchService/search`,
-      withSession({ MENU_CD: menuCd, ...payload }),
+      "/stoShipmentDispatchService/search",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 
-  save(payload: any) {
-    const { dsSave, ...rest } = payload ?? {};
-    return apiClient.post<CommonResponse>(
-      `/stoShipmentDispatchService/save`,
-      { dsSave },
-      {
-        params: {
-          ...getSessionFields(),
-          MENU_CD: MENU_CODE,
-          ...rest,
-        },
-      },
-    );
+  save(payload: { dsSave: any[] }) {
+    return dsSavePost("/stoShipmentDispatchService/save", payload.dsSave ?? []);
   },
 };
