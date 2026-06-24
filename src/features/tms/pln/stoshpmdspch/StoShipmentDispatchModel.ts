@@ -1,15 +1,19 @@
 import { useBaseModel } from "@/app/feature/useBaseModel";
+import { useCommonStores } from "@/hooks/useCommonStores";
 
-// 그리드 이름 union — 그리드 추가 시 여기 확장. TODO
 export type GridKey = "main";
 
 export function useStoShipmentDispatchModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  // 공통코드 lookup 이 필요하면 useCommonStores 로 codeMap 추가. TODO
-  const codeMap = {} as Record<string, Record<string, string>>;
+  const { codeMap } = useCommonStores({
+    dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
+    orderTp: { sqlProp: "CODE", keyParam: "ORD_TP" },
+  });
 
   return { ...base, codeMap };
 }
 
-export type StoShipmentDispatchModel = ReturnType<typeof useStoShipmentDispatchModel>;
+export type StoShipmentDispatchModel = ReturnType<
+  typeof useStoShipmentDispatchModel
+>;
