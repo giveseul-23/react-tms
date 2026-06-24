@@ -72,15 +72,16 @@ export const MONTHLY_MAIN_HEAD = [
     editable: false,
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_REAL_RTN_CNT",
     field: "TTL_RTN_CNT",
     width: 100,
     cellStyle: negativeRedRightCellStyle,
+    valueFormatter: numberValueFormatter,
     editable: false,
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_FI_DIST_KM",
     field: "TTL_FI_DIST",
     width: 100,
@@ -103,12 +104,16 @@ export const MONTHLY_MAIN_TAIL = [
     editable: false,
   },
   ...makeAuditColumns({
-    delete: true,
+    delete: false,
     rowStatus: true,
     insertPerson: true,
+    insertPersonOverrides: { width: 150, cellStyle: CENTER },
     insertDate: true,
+    insertDateOverrides: { width: 120, cellStyle: CENTER, excelPrint: false },
     updatePerson: true,
+    updatePersonOverrides: { width: 150, cellStyle: CENTER, excelPrint: false },
     updateTime: true,
+    updateTimeOverrides: { width: 120, cellStyle: CENTER, excelPrint: false },
   }),
 ];
 
@@ -151,7 +156,7 @@ export function buildMonthlyColumns(
         headerClass: "ag-header-center",
         children: [
           {
-            type: "text",
+            type: "numeric",
             headerName: "LBL_RATE",
             field: rateField,
             width: 90,
@@ -175,7 +180,7 @@ export function buildMonthlyColumns(
     }
 
     return {
-      type: "text",
+      type: "numeric",
       headerName: c.CHG_NM,
       noLang: true,
       field: rateField,

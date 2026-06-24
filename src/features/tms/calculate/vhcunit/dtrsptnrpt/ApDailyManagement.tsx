@@ -7,6 +7,21 @@ import { useApDailyManagementModel } from "./ApDailyManagementModel";
 import { useApDailyManagementController } from "./ApDailyManagementController";
 
 export const MENU_CODE = "MENU_AP_DAILY_MGMT";
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_AP_DAILY_MGMT",
+    detail: "SUB01_GRID_AP_DAILY_MGMT",
+  },
+};
+
+const MAIN_SELECTION_COLUMN_DEF = {
+  headerClass: "ag-selection-header-center",
+  width: 30,
+  minWidth: 30,
+  maxWidth: 30,
+  pinned: "left",
+  lockPosition: "left",
+};
 
 export default function ApDailyManagement() {
   const model = useApDailyManagementModel(MENU_CODE);
@@ -33,10 +48,13 @@ export default function ApDailyManagement() {
               render: () => (
                 <DataGrid
                   {...model.bind("main")}
+                  authId={AUTH.grids.main}
                   columnDefs={model.mainColumnDefs}
                   codeMap={model.codeMap}
                   actions={ctrl.mainActions}
                   onRowClicked={ctrl.onMainGridClick}
+                  rowSelection="multiple"
+                  gridOptions={{ selectionColumnDef: MAIN_SELECTION_COLUMN_DEF }}
                   audit={false}
                 />
               ),
@@ -45,6 +63,7 @@ export default function ApDailyManagement() {
               render: () => (
                 <DataGrid
                   {...model.bind("detail")}
+                  authId={AUTH.grids.detail}
                   columnDefs={model.detailColumnDefs}
                   codeMap={model.codeMap}
                   actions={ctrl.detailActions}

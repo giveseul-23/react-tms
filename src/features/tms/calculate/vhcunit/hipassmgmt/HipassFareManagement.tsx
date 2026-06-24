@@ -20,6 +20,22 @@ export const AUTH = {
   },
 };
 
+const MAIN_SELECTION_COLUMN_DEF = {
+  headerClass: "ag-selection-header-center",
+  width: 30,
+  minWidth: 30,
+  maxWidth: 30,
+  pinned: "left",
+  lockPosition: "left",
+};
+
+const READ_ONLY_AUDIT = {
+  delete: false,
+  rowStatus: false,
+  insertDateOverrides: { width: 120 },
+  updateTimeOverrides: { width: 120 },
+};
+
 export default function HipassFareManagement() {
   const model = useHipassFareManagementModel(MENU_CODE);
   const ctrl = useHipassFareManagementController({ model });
@@ -45,6 +61,8 @@ export default function HipassFareManagement() {
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           rowSelection="multiple"
+          gridOptions={{ selectionColumnDef: MAIN_SELECTION_COLUMN_DEF }}
+          audit={READ_ONLY_AUDIT}
         />
       }
       detail={
@@ -53,6 +71,8 @@ export default function HipassFareManagement() {
           authId={AUTH.grids.sub01}
           columnDefs={SUB01_COLUMN_DEFS}
           codeMap={model.codeMap}
+          pagination={false}
+          audit={READ_ONLY_AUDIT}
         />
       }
     />

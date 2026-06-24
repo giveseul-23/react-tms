@@ -294,7 +294,7 @@ export const DAILY_MAIN_TAIL = [
     cellStyle: CENTER,
   },
   ...makeAuditColumns({
-    delete: true,
+    delete: false,
     rowStatus: true,
     insertPerson: true,
     insertDate: true,
@@ -409,7 +409,240 @@ export const DAILY_DETAIL_HEAD = [
     width: 450,
     cellStyle: RIGHT,
     editable: false,
-    hide: true,
+  },
+  {
+    headerName: "KPP",
+    noLang: true,
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "P1_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_P1_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "P1_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_P1_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_AJU PLT",
+    noLang: true,
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "P2_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_P2_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "P2_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_P2_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_ETC_SETTING PLT",
+    noLang: true,
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "P3_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_P3_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "P3_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_P3_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_SLV_BOGIE",
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "R1_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_R1_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "R1_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_R1_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_BLU_BOGIE",
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "R2_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_R2_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "R2_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_R2_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_PICK_BOGIE",
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "R3_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_R3_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "R3_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_R3_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_TRANSFER_BOGIE",
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "O1_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O1_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "O1_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O1_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_LENDING_BORROWING",
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "O2_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O2_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "O2_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O2_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_TRANSPORTATION",
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "O3_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O3_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "O3_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O3_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_PICK_BOX_LENDING_BORROWING",
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "O4_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O4_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "O4_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O4_OUTBOUND",
+      },
+    ],
+  },
+  {
+    headerName: "LBL_PICK_BOX_TRANSPORTATION",
+    children: [
+      {
+        type: "text",
+        headerName: "LBL_OUTBOUND",
+        field: "O5_INBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O5_INBOUND",
+      },
+      {
+        type: "text",
+        headerName: "LBL_INBOUND",
+        field: "O5_OUTBOUND",
+        width: 38,
+        cellStyle: RIGHT,
+        excelColName: "LBL_O5_OUTBOUND",
+      },
+    ],
   },
   {
     type: "text",
@@ -548,7 +781,7 @@ export const DAILY_DETAIL_HEAD = [
 
 export const DAILY_DETAIL_TAIL = [
   ...makeAuditColumns({
-    delete: true,
+    delete: false,
     rowStatus: true,
     insertPerson: true,
     insertDate: true,
