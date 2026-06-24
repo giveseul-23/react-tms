@@ -14,6 +14,8 @@ export const MAIN_COLUMN_DEFS = [
     align: "center",
     locked: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     regex: /^[a-zA-Z0-9_]+$/,
     validators: {
       required: true,
@@ -29,6 +31,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { required: true, max: 200 },
   },
   {
@@ -39,7 +43,9 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
-    validators: { required: true, max: 60 },
+    areaNo: 0,
+    fieldType: "text",
+    validators: { required: true, max: 4 },
   },
   {
     type: "text",
@@ -48,6 +54,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { max: 200 },
   },
   {
@@ -57,6 +65,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { max: 200 },
   },
   {
@@ -66,6 +76,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { max: 200 },
   },
   {
@@ -75,6 +87,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { max: 60 },
   },
   {
@@ -84,6 +98,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { max: 60 },
   },
   {
@@ -96,6 +112,7 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     validators: { min: 1, max: 50 },
+    formHide: true,
   },
   {
     // 주소찾기 — 선택 시 CTRY/STT/CTY/ZIP/DTL_ADDR1·2 다중 write-back.
@@ -113,6 +130,9 @@ export const MAIN_COLUMN_DEFS = [
     field: "CTRY_CD",
     align: "center",
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
     validators: { max: 2 },
   },
   {
@@ -120,6 +140,9 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_COUNTRY_NAME",
     field: "CTRY_NM",
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
     validators: { required: true, max: 200 },
   },
   {
@@ -128,6 +151,9 @@ export const MAIN_COLUMN_DEFS = [
     field: "STT_CD",
     align: "center",
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
     validators: { required: true, max: 20 },
   },
   {
@@ -135,6 +161,9 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_STATE_NAME",
     field: "STT_NM",
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
     validators: { required: true, max: 200 },
   },
   {
@@ -143,6 +172,9 @@ export const MAIN_COLUMN_DEFS = [
     field: "CTY_CD",
     align: "center",
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
     validators: { required: true, max: 20 },
   },
   {
@@ -150,6 +182,9 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_CITY_NAME",
     field: "CTY_NM",
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
+    readOnly: true,
     validators: { required: true, max: 200 },
   },
   {
@@ -159,6 +194,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { required: true, max: 200 },
   },
   {
@@ -168,6 +205,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { max: 1000 },
   },
   {
@@ -177,6 +216,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 150,
+    areaNo: 0,
+    fieldType: "text",
     validators: { max: 20 },
   },
   {
@@ -187,6 +228,7 @@ export const MAIN_COLUMN_DEFS = [
     align: "center",
     width: 150,
     hide: true,
+    formHide: true,
   },
   {
     // 식별코드 — 대문자 1글자. (서버 userValidator: 한 글자/대문자/중복체크)
@@ -197,6 +239,8 @@ export const MAIN_COLUMN_DEFS = [
     editable: true,
     insertable: true,
     width: 100,
+    areaNo: 0,
+    fieldType: "text",
     regex: /^[A-Z]$/,
     validators: {
       required: true,

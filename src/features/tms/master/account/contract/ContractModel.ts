@@ -5,7 +5,8 @@ export type GridKey = "main" | "sub01" | "sub02";
 
 export function useContractModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
-  return { ...base };
+
+  return base;
 }
 
 export type ContractModel = ReturnType<typeof useContractModel>;
