@@ -25,6 +25,20 @@ export const userPlanApi = {
     );
   },
 
+  searchApprovedUser(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/userplanService/searchApprovedUser`,
+      withSession({ MENU_CD, ...payload }),
+    );
+  },
+
+  searchPlanId(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/userplanService/searchPlanId`,
+      withSession({ MENU_CD, ...payload }),
+    );
+  },
+
   ////// SAVE
   save(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
