@@ -14,6 +14,36 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
+const sessionParams = (params: Record<string, any> = {}) => ({
+  ...getSessionFields(),
+  MENU_CD: MENU_CODE,
+  ...params,
+});
+
+const dsSavePost = (url: string, rows: any[], params: Record<string, any> = {}) =>
+  apiClient.post<commonResponse>(
+    url,
+    { dsSave: rows },
+    { params: sessionParams(params) },
+  );
+
+const postUpload = (
+  url: string,
+  file: File,
+  params: Record<string, any> = {},
+) => {
+  const form = new FormData();
+  form.append("UPLOAD_FILE", file);
+  form.append("MENU_CD", MENU_CODE);
+  form.append("JSON_READ_PASS", "Y");
+  Object.entries({ ...getSessionFields(), ...params }).forEach(([key, value]) =>
+    form.append(key, String(value ?? "")),
+  );
+  return apiClient.post<commonResponse>(url, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
 export const apDailyManagementApi = {
   // 일일실적 메인 조회
   getDailyList(payload: any) {
@@ -62,26 +92,24 @@ export const apDailyManagementApi = {
 
   // 일정산(배차종료처리)
   closeDaily(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/onDispatchEndProcessing`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
+    return dsSavePost(`/apDailyManagementService/saveDlySetl`, payload.dsSave);
   },
 
   // 일정산취소(배차종료복원)
   cancelDailyClose(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/departArrivalManagementService/onDispatchEndRestore`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    return dsSavePost(
+      `/apDailyManagementService/saveDlySetlCancel`,
+      payload.dsSave,
     );
   },
 
   // 요율 재계산
   recalculate(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/apDailyManagementService/calcRate`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
+    return dsSavePost(`/apDailyManagementService/calcRate`, payload.dsSave);
+  },
+
+  calcDistance(payload: any) {
+    return dsSavePost(`/apDailyManagementService/calcDistance`, payload.dsSave);
   },
 
   // 요율 취소 / 복원
@@ -100,30 +128,30 @@ export const apDailyManagementApi = {
 
   // 저장
   save(rows: any[]) {
-    return apiClient.post<commonResponse>(
-      `/apDailyManagementService/save`,
-      withSession(rows),
-    );
+    return dsSavePost(`/apDailyManagementService/save`, rows);
   },
 
   // 엑셀 업로드 (운임/유가/요율) + 요율양식 다운로드
-  uploadFreight(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/apDailyManagementService/uploadFreight`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
+  downloadFuelFareTemplate() {
+    return apiClient.get(`/apDailyManagementService/downloadFuelFareTemplate`, {
+      params: sessionParams({ MENU_CD: "MAIN_GRID_AP_DAILY_MGMT" }),
+      responseType: "blob",
+    });
   },
-  uploadFuelFare(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/apDailyManagementService/uploadFuelFare`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
+  uploadFreight(file: File, params: any) {
+    return postUpload(`/apDailyManagementService/uploadFreight`, file, params);
   },
-  uploadRate(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/apDailyManagementService/uploadRate`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
+  downloadFreightTemplate() {
+    return apiClient.get(`/apDailyManagementService/downloadFreightTemplate`, {
+      params: sessionParams(),
+      responseType: "blob",
+    });
+  },
+  uploadFuelFare(file: File, params: any) {
+    return postUpload(`/apDailyManagementService/uploadFuelFare`, file, params);
+  },
+  uploadRate(file: File, params: any) {
+    return postUpload(`/apDailyManagementService/uploadRate`, file, params);
   },
   downloadRatePrepare(payload: any) {
     return apiClient.post<commonResponse>(
@@ -131,35 +159,42 @@ export const apDailyManagementApi = {
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
+  downloadRate() {
+    return apiClient.get(`/apDailyManagementService/downloadRate`, {
+      params: sessionParams({ MENU_CD: "MAIN_GRID_AP_DAILY_MGMT" }),
+      responseType: "blob",
+    });
+  },
 
   // (구) uploadFareExcel 호환 — 운임 업로드로 위임
-  uploadFareExcel(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/apDailyManagementService/uploadFreight`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
+  uploadFareExcel(file: File, params: any) {
+    return postUpload(`/apDailyManagementService/uploadFreight`, file, params);
   },
 
   // 메모 등록 — 선택행에 MEMO_DESC 세팅 후 저장. (센차 onSaveApplnMemo, rowStatus 'I')
   saveMemo(rows: any[], text: string) {
-    return apiClient.post<commonResponse>(
+    return dsSavePost(
       `/apDailyManagementService/saveApplnMemo`,
-      withSession(
-        rows.map((r) => ({
-          ...r,
+      rows.map((r) => {
+        const { __rid__, EDIT_STS: _EDIT_STS, ...rest } = r;
+        return {
+          ...rest,
           MEMO_DESC: text,
-          EDIT_STS: "I",
+          rowStatus: "I",
           MENU_CD: MENU_CODE,
-        })),
-      ),
+        };
+      }),
     );
   },
 
   // 메모 등록취소. (센차 onCancelApplnMemo)
   cancelMemo(rows: any[]) {
-    return apiClient.post<commonResponse>(
+    return dsSavePost(
       `/apDailyManagementService/cancelApplnMemo`,
-      withSession(rows.map((r) => ({ ...r, EDIT_STS: "I", MENU_CD: MENU_CODE }))),
+      rows.map((r) => {
+        const { __rid__, EDIT_STS: _EDIT_STS, ...rest } = r;
+        return { ...rest, rowStatus: "I", MENU_CD: MENU_CODE };
+      }),
     );
   },
 };

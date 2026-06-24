@@ -3,7 +3,7 @@ import { getSessionFields } from "@/app/services/auth/auth";
 import { MENU_CODE } from "./ApDailyReportResult";
 
 type CommonResponse = {
-  rows: [];
+  rows: any[];
 };
 
 const withSession = (payload: any = {}) => {
@@ -18,7 +18,7 @@ const withSession = (payload: any = {}) => {
 const saveRecord = (url: string, dsSave: any[], params: any = {}) =>
   apiClient.post<CommonResponse>(
     url,
-    { dsSave: withSession(dsSave) },
+    { dsSave },
     {
       params: {
         ...getSessionFields(),
