@@ -243,9 +243,7 @@ export function CommonPopup({
                 }
               : undefined
           }
-          onRowDoubleClicked={() =>
-            onApply(isMultiple ? selectedRows : selectedRows[0])
-          }
+          onRowDoubleClicked={(row: any) => onApply(isMultiple ? [row] : row)}
           disableAutoSize={true}
         />
       </div>

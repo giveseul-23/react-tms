@@ -104,20 +104,39 @@ export function useUserGroupController({ model }: Args) {
           onApply={(callbackRows: any) => {
             closePopup();
             if (!callbackRows) return;
-            base.addRow(
-              "sub01",
-              callbackRows.map((element: any) => ({
-                USR_GRP_CD: main.USR_GRP_CD,
-                APPL_CD: element.CODE,
-                APPL_NM: element.NAME,
-              })),
+
+            const rows = Array.isArray(callbackRows)
+              ? callbackRows
+              : [callbackRows];
+            const existingApplicationCodes = new Set(
+              (model.grids.sub01.ref.current?.rows ?? [])
+                .filter(
+                  (row: any) => row.EDIT_STS !== "D" && row.delStatus !== true,
+                )
+                .map((row: any) => row.APPL_CD),
             );
+            const newRows = rows
+              .filter((element: any) => {
+                const applicationCode = element.CODE ?? element.APPL_CD;
+                return (
+                  applicationCode && !existingApplicationCodes.has(applicationCode)
+                );
+              })
+              .map((element: any) => ({
+                USR_GRP_CD: main.USR_GRP_CD,
+                APPL_CD: element.CODE ?? element.APPL_CD,
+                APPL_NM: element.NAME ?? element.APPL_NM,
+              }));
+
+            if (newRows.length > 0) {
+              base.addRow("sub01", newRows);
+            }
           }}
           onClose={closePopup}
         />
       ),
     });
-  }, [base, closePopup, model.grids.main, openPopup]);
+  }, [base, closePopup, model.grids.main, model.grids.sub01, openPopup]);
 
   const onAddSub02 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
