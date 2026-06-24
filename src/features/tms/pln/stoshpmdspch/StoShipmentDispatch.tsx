@@ -19,6 +19,7 @@ export default function StoShipmentDispatch() {
     <GridOnlyPage
       menuCode={MENU_CODE}
       searchProps={{
+        moduleDefault: "TMS",        
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
