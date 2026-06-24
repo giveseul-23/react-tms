@@ -80,6 +80,9 @@ export const confirmDispatchApi = {
   onDispatchConfirmCancel: (p: any) =>
     post(`/confirmDispatchService/onDispatchConfirmCancel`, p),
   // 차량 변경 (등록차량 / 임시차량)
+  // 변경 가능 차량 목록 조회 (공통 ChangeVehiclePopup 주입용)
+  searchChangeVehicle: (p: any) =>
+    post(`/dispatchPlanService/searchDispatchChangeVehiclePop`, p),
   onChangeRegVeh: (p: any) => post(`/dispatchPlanService/saveChangeVehicle`, p),
   onChangeTempVeh: (p: any) =>
     postFlat(`/dispatchPlanVehService/saveDspchSpotVeh`, p),

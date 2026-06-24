@@ -17,7 +17,7 @@ import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { Lang } from "@/app/services/common/Lang";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import StartWorkPopup from "./popup/StartWorkPopup";
-import ChangeVehiclePop from "../dispatchPlan/popup/ChangeVehiclePop";
+import ChangeVehiclePopup from "@/app/components/popup/ChangeVehiclePopup";
 import RegiSpotPop from "../dispatchPlan/popup/RegiSpotPop";
 
 const masterChildParamMap = (row: any) => ({
@@ -146,7 +146,8 @@ export function useConfirmDispatchController({ model }: Args) {
         title: "BTN_VEHICLE_CHANGE",
         width: "4xl",
         content: (
-          <ChangeVehiclePop
+          <ChangeVehiclePopup
+            fetchVehicles={(p) => api.searchChangeVehicle(p)}
             initialValues={{
               LGST_GRP_CD: target.LGST_GRP_CD,
               DSPCH_NO: target.DSPCH_NO,

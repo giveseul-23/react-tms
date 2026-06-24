@@ -1,16 +1,16 @@
 "use client";
 
-// 배차확정 메모 팝업 — 선택 배차행의 4개 메모(배차관리자/운송사제공/상차요청/고객사제공)를 일괄 등록.
-// 서버 dspchplnveh.pop.memo.TruckDispatchConfirmMemoPop2 대응.
-//   진입 시 searchDispatchMemo 로 기존 메모 로드 → 저장 시 saveDispatchMemo(단건 dsSave).
-//   상단 정보(배차번호/운송일/상태/운송사/차량/운전자)는 조회조건 카드(PopupSearchCondition) 스타일로 표시.
+// 배차메모 공통 팝업 — 선택 배차행의 4개 메모(배차관리자/운송사제공/상차요청/고객사제공)를 일괄 등록.
+//  (그냥 단일 메모는 MemoInputPopup/ makeMemoGroupAction 사용. 이건 "배차메모" 전용.)
+//  서버 호출은 화면마다 다르므로 fetchMemo / saveMemo 를 주입받는다(여러 화면 공용).
+//   - fetchMemo(dspchNo) : 기존 4메모 조회
+//   - saveMemo(record)   : 선택행 + 4메모 머지 단건 저장
 
 import { useEffect, useState } from "react";
 import { RotateCcw, SlidersHorizontal } from "lucide-react";
 import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
 import { useErrorAlert } from "@/hooks/useErrorAlert";
 import { Lang } from "@/app/services/common/Lang";
-import { dispatchPlanApi as api } from "../dispatchPlanApi";
 
 const MEMO_DESC_MAX_LEN = 1000;
 
@@ -57,18 +57,24 @@ function formatDate(v?: string): string {
 }
 
 type Props = {
-  // 선택 배차행 (DSPCH_NO / TRCK_NO / 헤더 정보 포함)
+  /** 선택 배차행 (DSPCH_NO / TRCK_NO / 헤더 정보 포함) */
   row: Record<string, any>;
-  // 배차운영상태 라벨 (Controller 가 codeMap 으로 변환해 전달)
+  /** 배차운영상태 라벨 (호출자가 codeMap 으로 변환해 전달) */
   statusLabel: string;
-  // 저장 성공 후 콜백 (보통 재조회)
+  /** 기존 4메모 조회 (DSPCH_NO 기준) — 화면 api 주입 */
+  fetchMemo: (dspchNo: any) => Promise<any>;
+  /** 4메모 머지 단건 저장 — 화면 api 주입 */
+  saveMemo: (record: any) => Promise<any>;
+  /** 저장 성공 후 콜백 (보통 재조회) */
   onSaved: () => void;
   onClose: () => void;
 };
 
-export default function TruckDispatchConfirmMemoPop({
+export default function DispatchMemoPopup({
   row,
   statusLabel,
+  fetchMemo,
+  saveMemo,
   onSaved,
   onClose,
 }: Props) {
@@ -77,8 +83,7 @@ export default function TruckDispatchConfirmMemoPop({
 
   // 진입 시 기존 메모 로드
   useEffect(() => {
-    api
-      .searchDispatchMemo({ DSPCH_NO: row.DSPCH_NO })
+    fetchMemo(row.DSPCH_NO)
       .then((res: any) => {
         if (res?.data?.success === false) {
           showError(res.data?.msg ?? Lang.get("TTL_ERR"));
@@ -116,8 +121,7 @@ export default function TruckDispatchConfirmMemoPop({
       DSPCH_NO: row.DSPCH_NO,
       TRCK_NO: row.TRCK_NO,
     };
-    api
-      .saveDispatchMemo(merged)
+    saveMemo(merged)
       .then((res: any) => {
         if (res?.data?.success === false) {
           showError(res.data?.msg ?? Lang.get("TTL_ERR"));
@@ -141,7 +145,7 @@ export default function TruckDispatchConfirmMemoPop({
       onCancel={onClose}
       onConfirm={onConfirm}
     >
-      {/* 배차 정보 — 조회조건(조건) 카드 스타일 직접 구성: 타이틀(안내문) + 헤더 우측 초기화 */}
+      {/* 배차 정보 — 조회조건(조건) 카드 스타일: 안내문 + 헤더 우측 초기화 */}
       <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         <div className="flex items-center justify-between px-3 py-2 bg-[var(--grid-header-bg)]">
           <div className="flex items-center gap-1.5 leading-none min-w-0">

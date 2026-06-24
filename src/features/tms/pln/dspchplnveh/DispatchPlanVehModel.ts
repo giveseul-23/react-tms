@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
@@ -23,7 +24,18 @@ export function useDispatchPlanVehModel(menuCode: string) {
     vehTp: { sqlProp: "selectVehTpList" },
   });
 
-  return { ...base, codeMap };
+  // 차량위치 우측 슬라이드 패널 상태 (선택 차량행 + 열림 여부)
+  const [vehLocRows, setVehLocRows] = useState<any[]>([]);
+  const [vehLocPanelOpen, setVehLocPanelOpen] = useState(false);
+
+  return {
+    ...base,
+    codeMap,
+    vehLocRows,
+    setVehLocRows,
+    vehLocPanelOpen,
+    setVehLocPanelOpen,
+  };
 }
 
 export type DispatchPlanVehModel = ReturnType<typeof useDispatchPlanVehModel>;

@@ -10,6 +10,10 @@ import { Search, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 type Props = {
   rows?: any[];
   onOpenDetail?: () => void;
+  /** 운전자(체크 또는 선택) 행으로 차량위치 우측 패널 열기 */
+  onShowVehLocation?: (rows: any[]) => void;
+  /** 패널이 열려 있을 때 체크/선택 변경 시 선택 차량으로 리프레시 (열려있지 않으면 no-op) */
+  onVehLocRefresh?: (rows: any[]) => void;
 };
 
 // 구조용 툴바 버튼 (no-op). title 로 그룹 하위 항목 안내.
@@ -37,12 +41,38 @@ function Btn({
   );
 }
 
-export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
+export default function FixedVehiclePanel({
+  rows,
+  onOpenDetail,
+  onShowVehLocation,
+  onVehLocRefresh,
+}: Props) {
   const vehicles = rows ?? [];
   const [selVeh, setSelVeh] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
+  // 운전자명/차량번호 클라이언트 검색
+  const [query, setQuery] = useState("");
 
-  const selRow = vehicles[selVeh];
+  const filtered = (() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return vehicles;
+    return vehicles.filter(
+      (v) =>
+        String(v.DRVR_NM ?? "").toLowerCase().includes(q) ||
+        String(v.VEH_NO ?? "").toLowerCase().includes(q),
+    );
+  })();
+
+  const selRow = filtered[selVeh];
+
+  // 위치조회 대상 — 체크된 운전자(여러건), 없으면 현재 선택 카드 1건
+  const selectionRows = (checkedSet: Set<string>, selectedRow: any) => {
+    const checked = vehicles.filter((v) => checkedSet.has(v.VEH_ID));
+    return checked.length > 0 ? checked : selectedRow ? [selectedRow] : [];
+  };
+  // 차량위치조회 — 우측 패널 열기
+  const onClickVehLocation = () =>
+    onShowVehLocation?.(selectionRows(vehChecked, selRow));
 
   // 선택 운전자의 1~8회전 (RTN_PATH_B1_Rn / DRVR_RESEQ_B1_Rn)
   const rotations = Array.from({ length: 8 }, (_, i) => {
@@ -65,15 +95,21 @@ export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
     setRtnChecked(new Set());
   }, [rows]);
 
-  const allVeh = vehicles.length > 0 && vehChecked.size === vehicles.length;
+  // 검색어 변경 시 선택 인덱스 초기화 (필터 결과 기준)
+  useEffect(() => {
+    setSelVeh(0);
+  }, [query]);
+
+  const allVeh =
+    filtered.length > 0 && filtered.every((v) => vehChecked.has(v.VEH_ID));
   const allRtn = rotations.length > 0 && rtnChecked.size === rotations.length;
-  const toggleVeh = (k: string) =>
-    setVehChecked((p) => {
-      const n = new Set(p);
-      if (n.has(k)) n.delete(k);
-      else n.add(k);
-      return n;
-    });
+  const toggleVeh = (k: string) => {
+    const n = new Set(vehChecked);
+    if (n.has(k)) n.delete(k);
+    else n.add(k);
+    setVehChecked(n);
+    onVehLocRefresh?.(selectionRows(n, selRow));
+  };
   const toggleRtn = (k: number) =>
     setRtnChecked((p) => {
       const n = new Set(p);
@@ -81,10 +117,13 @@ export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
       else n.add(k);
       return n;
     });
-  const toggleAllVeh = () =>
-    setVehChecked(
-      allVeh ? new Set() : new Set(vehicles.map((v) => v.VEH_ID)),
-    );
+  const toggleAllVeh = () => {
+    const n = new Set(vehChecked);
+    if (allVeh) filtered.forEach((v) => n.delete(v.VEH_ID));
+    else filtered.forEach((v) => n.add(v.VEH_ID));
+    setVehChecked(n);
+    onVehLocRefresh?.(selectionRows(n, selRow));
+  };
   const toggleAllRtn = () =>
     setRtnChecked(allRtn ? new Set() : new Set(rotations.map((r) => r.no)));
 
@@ -138,16 +177,16 @@ export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
               <div className="relative flex-1 min-w-0">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                 <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
                   placeholder="운전자명, 차량번호 검색"
                   className="h-7 w-full pl-7 pr-2 text-[11px] border border-input rounded-md bg-input-background outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                 />
               </div>
-              <select className="h-7 px-2 text-[11px] border border-input rounded-md bg-input-background outline-none">
-                <option>전체</option>
-              </select>
             </div>
             <button
               type="button"
+              onClick={onClickVehLocation}
               className="h-7 w-full inline-flex items-center justify-center gap-1 rounded-md border border-gray-300 text-[11px] text-slate-600 hover:bg-slate-50"
             >
               <MapPin className="w-3 h-3" />
@@ -156,11 +195,14 @@ export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
           </div>
           {/* 카드 리스트 (체크박스 포함, 위아래 스크롤) */}
           <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 flex flex-col gap-1.5">
-            {vehicles.map((v, i) => (
+            {filtered.map((v, i) => (
               <button
                 key={v.VEH_ID ?? i}
                 type="button"
-                onClick={() => setSelVeh(i)}
+                onClick={() => {
+                  setSelVeh(i);
+                  onVehLocRefresh?.(selectionRows(vehChecked, filtered[i]));
+                }}
                 className={`text-left rounded-lg border p-2 transition-colors ${
                   selVeh === i
                     ? "border-[rgb(var(--primary))] bg-[var(--grid-header-bg)]"
@@ -180,11 +222,17 @@ export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
                       {v.VEH_NO}
                     </span>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-700 shrink-0">{v.VEH_TP_NM}</span>
+                  <span className="text-[11px] font-semibold text-slate-700 shrink-0">
+                    {v.VEH_TP_NM}
+                  </span>
                 </div>
                 <div className="mt-1 flex items-center justify-between gap-1">
-                  <span className="text-[11px] text-slate-600 truncate">{v.DRVR_NM} (기사)</span>
-                  <span className="text-[10px] text-slate-400 shrink-0">{v.WORK_STS}</span>
+                  <span className="text-[11px] text-slate-600 truncate">
+                    {v.DRVR_NM} (기사)
+                  </span>
+                  <span className="text-[10px] text-slate-400 shrink-0">
+                    {v.WORK_STS}
+                  </span>
                 </div>
               </button>
             ))}
@@ -194,20 +242,12 @@ export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
 
       {/* ── 우: 액션 툴바 + 선택 차량 회전 ── */}
       <div className="flex-1 min-w-0 flex flex-col min-h-0 rounded-lg border border-gray-200 bg-white overflow-hidden">
-        {/* 큰 액션 툴바 (배차생성/취소 그룹 · 리포트 출력 · 엑셀) */}
-        <div className="flex items-center gap-1.5 px-2 py-1.5 bg-slate-50 border-b shrink-0 flex-wrap">
-          <Btn primary title="배차취소 · 엑셀업로드 · 엑셀양식다운로드 · 복수상차양식다운로드">
-            배차생성/취소 ▾
-          </Btn>
-          <Btn>리포트 출력</Btn>
-          <Btn title="조회된 모든 데이터 · 보이는 데이터">엑셀 ▾</Btn>
-        </div>
-
         {/* 선택 차량 헤더 */}
         <div className="flex items-center gap-2 px-3 py-2 border-b shrink-0 text-[12px] min-w-0">
           <span className="font-semibold text-slate-800">{selRow?.VEH_NO}</span>
           <span className="text-slate-500 truncate">
-            {selRow?.DRVR_NM ? `${selRow.DRVR_NM} (기사)` : ""} · {selRow?.VEH_TP_NM}
+            {selRow?.DRVR_NM ? `${selRow.DRVR_NM} (기사)` : ""} ·{" "}
+            {selRow?.VEH_TP_NM}
           </span>
         </div>
 
@@ -220,7 +260,9 @@ export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
               onChange={toggleAllRtn}
               className="h-3.5 w-3.5 accent-[rgb(var(--primary))]"
             />
-            <span className="text-[11px] font-semibold text-slate-600">회전</span>
+            <span className="text-[11px] font-semibold text-slate-600">
+              회전
+            </span>
           </label>
           <div className="flex items-center gap-1.5">
             <Btn title="메모 등록 · 취소">메모 ▾</Btn>
@@ -245,7 +287,9 @@ export default function FixedVehiclePanel({ rows, onOpenDetail }: Props) {
                   onClick={(e) => e.stopPropagation()}
                   className="h-3.5 w-3.5 accent-[rgb(var(--primary))]"
                 />
-                <span className="text-[12px] font-semibold text-slate-800">{r.no}회전</span>
+                <span className="text-[12px] font-semibold text-slate-800">
+                  {r.no}회전
+                </span>
               </div>
               {r.path ? (
                 <div className="flex flex-wrap items-center gap-1 text-[11px] text-slate-600">

@@ -73,6 +73,8 @@ type DataGridProps<TRow> = {
   /** ag-grid 의 selection 이 사용자 액션으로 변경될 때 호출 — model 측 selectedRef 동기화용.
    *  rowDataChanged/api/gridInitializing 등 자동 이벤트는 발화 안 함. */
   onSelectionChanged?: (row: any | null) => void;
+  /** 사용자 선택 변경 시 선택된 행 "전체 배열" 전달 (다중 선택 추적용). */
+  onSelectionRowsChanged?: (rows: any[]) => void;
   /** controller 가 setSelected(row) 로 박은 행을 ag-grid 시각 선택으로 자동 반영.
    *  model.bind() 가 자동 spread — view 에서 따로 줄 필요 없음. */
   selectedRow?: any;
@@ -170,6 +172,7 @@ export default function DataGrid<TRow>({
   autoSizeKey,
   onCellValueChanged,
   onSelectionChanged,
+  onSelectionRowsChanged,
   selectedRow,
   totalCount,
   currentPage,
@@ -357,6 +360,7 @@ export default function DataGrid<TRow>({
     onRowDoubleClicked,
     activeOnCellValueChanged,
     onSelectionChanged,
+    onSelectionRowsChanged,
   });
 
   const { commonGridProps } = useGridProps<TRow>({

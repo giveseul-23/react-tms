@@ -2,13 +2,43 @@ import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchPlanVehApi as api } from "./DispatchPlanVehApi";
 import type { DispatchPlanVehModel, GridKey } from "./DispatchPlanVehModel";
+import { ActionItem } from "@/app/components/ui/GridActionsBar";
+import { MENU_CODE } from "./DispatchPlanVeh";
+import { getFirstDispatchTripKey } from "./DispatchPlanVehColumns";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import {
+  makeExcelGroupAction,
+  makeExcelUploadAction,
+  makeExcelTemplateDownloadAction,
+} from "@/app/components/grid/actions/commonActions";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import { commonApi } from "@/app/services/common/commonApi";
+import { Lang } from "@/app/services/common/Lang";
+import DispatchMemoPopup from "@/app/components/popup/DispatchMemoPopup";
+import DspchCountPop from "./popup/DspchCountPop";
+import DispatchPrintPop from "./popup/DispatchPrintPop";
+import RegiSpotPop from "./popup/RegiSpotPop";
+import SendSmsPopCarr from "./popup/SendSmsPopCarr";
+import SendSmsAppInstallPop from "./popup/SendSmsAppInstallPop";
+import ContinuousMovePop from "./popup/ContinuousMovePop";
+import CarrierChangePop from "./popup/CarrierChangePop";
+import TonGroupChangePop from "./popup/TonGroupChangePop";
+import ContractVehPop from "./popup/ContractVehPop";
+import ChangeVehiclePopup from "@/app/components/popup/ChangeVehiclePopup";
+import DtoDTrckChangePop from "./popup/DtoDTrckChangePop";
+import TtoDTrckChangePop from "./popup/TtoDTrckChangePop";
 
 interface Args {
   model: DispatchPlanVehModel;
 }
 
+// 다중 그리드 행을 저장(dsSave)용으로 EDIT_STS:"U" 부여 (센차 rowStatus='U' 대응)
+const markU = (rows: any[]) => rows.map((r) => ({ ...r, EDIT_STS: "U" }));
+
 export function useDispatchPlanVehController({ model }: Args) {
+  const { menuName } = useMenuMeta();
   const base = useBaseController<GridKey>({ model });
+  const { openPopup, closePopup } = usePopup();
 
   // 상단 SearchFilters 가 넘기는 공통 검색 파라미터(부서/운영그룹/배송일/계획ID 등)
   const baseParams = useCallback(() => {
@@ -30,7 +60,6 @@ export function useDispatchPlanVehController({ model }: Args) {
     (data: any) => {
       model.grids.locationShpmVolume.setData(data);
       const p = baseParams();
-      // locationDspch 는 다이나믹 검색 파람 제외, 4개 키만 직접 전달
       base.searchSub("locationDspch", api.searchDspchPerLocation(p));
       base.searchSub("dedicatedTruck", api.searchDedicatedTruckDispatchList(p));
       base.searchSub("tempTruck", api.searchTempTruckDispatchList(p));
@@ -39,7 +68,7 @@ export function useDispatchPlanVehController({ model }: Args) {
     [model.grids.locationShpmVolume, base],
   );
 
-  // ── 좌측 탭별 재조회 (물동형 / 배차내역) — 카드 내 조회필드 합침 ──
+  // ── 좌측 탭별 재조회 (물동형 / 배차내역) ──────────────────────
   const loadVolume = useCallback(
     (extra: Record<string, unknown> = {}) =>
       base.searchSub(
@@ -60,10 +89,946 @@ export function useDispatchPlanVehController({ model }: Args) {
     [base],
   );
 
+  // 전체 재조회 (센차 searchAll) — 저장/처리 후 호출
+  const refresh = useCallback(() => base.search(), [base]);
+
+  // 선택 검증 헬퍼
+  const need = useCallback(
+    (rows: any[], msgKey: string) => {
+      if (!rows || rows.length === 0) {
+        base.alert(Lang.get(msgKey));
+        return false;
+      }
+      return true;
+    },
+    [base],
+  );
+  const needSingle = useCallback(
+    (rows: any[], msgKey: string) => {
+      if (rows.length > 1) {
+        base.alert(Lang.get(msgKey));
+        return false;
+      }
+      return true;
+    },
+    [base],
+  );
+
+  // ════════════════ 자차(dedicatedTruck) 핸들러 ════════════════
+
+  // 차량교환/이동 — 2건 선택 → DtoD 교환 팝업
+  const onVehicleSwapDed = useCallback(
+    (rows: any[]) => {
+      if (rows.length !== 2) {
+        base.alert(Lang.get("MSG_SEL_VEH_TO_SWAP"));
+        return;
+      }
+      const p = baseParams();
+      openPopup({
+        title: "BTN_VEHICLE_SWAP",
+        width: "3xl",
+        content: (
+          <DtoDTrckChangePop
+            source={rows[0]}
+            target={rows[1]}
+            conditions={{
+              DLVRY_DT: p.DLVRY_DT,
+              LGST_GRP_CD: p.LGST_GRP_CD,
+              PLN_ID: p.PLN_ID,
+            }}
+            onConfirm={(payload) => {
+              closePopup();
+              base
+                .callAjax(api.dedicatedTrckChange(payload), {
+                  mask: "dedicatedTruck",
+                })
+                .then(refresh);
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, baseParams, openPopup, closePopup, refresh],
+  );
+
+  // 차량위치조회
+  // 차량위치조회 — 우측 슬라이드 패널로 표시 (View 가 model.vehLocPanelOpen 을 구독)
+  const onShowVehLocation = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_EXCEPTION_SHOW_VEHICLE_NO_SELECT_CHK")) return;
+      model.setVehLocRows(rows);
+      model.setVehLocPanelOpen(true);
+    },
+    [need, model],
+  );
+
+  // 패널이 열려 있을 때 체크/선택 변경 시 선택 차량으로 리프레시 (검증/오픈 없음)
+  const refreshVehLoc = useCallback(
+    (rows: any[]) => {
+      if (model.vehLocPanelOpen) model.setVehLocRows(rows ?? []);
+    },
+    [model],
+  );
+
+  // 자차 배차취소
+  const onCancelDspchDed = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      base.confirm(Lang.get("MSG_CANCEL_DSPCH_OPEN_STATUS"), () => {
+        base
+          .callAjax(api.saveCancelPlanDedDispatch(markU(rows)), {
+            mask: "dedicatedTruck",
+          })
+          .then(refresh);
+      });
+    },
+    [base, need, refresh],
+  );
+
+  // 자차 계획확정
+  const onSetPlannedDed = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_EXCEPTION_DISPATCH_SET_TO_PLAN_SELECT")) return;
+      base.confirm(Lang.get("MSG_CONFIRM_DSPCH_OPEN_ONLY"), () => {
+        base
+          .callAjax(api.savePlannedPlanDispatch(markU(rows)), {
+            mask: "dedicatedTruck",
+          })
+          .then(refresh);
+      });
+    },
+    [base, need, refresh],
+  );
+
+  // 자차 계획확정취소
+  const onReturnOpenDed = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_EXCEPTION_DISPATCH_RTN_TO_OPEN_SELECT")) return;
+      base
+        .callAjax(api.saveCancelPlannedPlanDispatch(markU(rows)), {
+          mask: "dedicatedTruck",
+        })
+        .then(refresh);
+    },
+    [base, need, refresh],
+  );
+
+  // 메모 등록(자차) — 공통 배차메모 팝업 (단건만)
+  const onMemoRegDed = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      if (!needSingle(rows, "MSG_CHECK_SINGLE_RECORD")) return;
+      const row = rows[0];
+
+      // 자차 행은 DSPCH_NO 가 없고 회전별 배차키(TRIP_KEY_B1_Rn)로 들어옴 → 첫 배차키를 DSPCH_NO 로
+      const dspchNo = getFirstDispatchTripKey(row);
+      if (!dspchNo) {
+        base.alert("배차된 회전이 없어 메모를 등록할 수 없습니다.");
+        return;
+      }
+      const setRow = { ...row, DSPCH_NO: dspchNo };
+      openPopup({
+        title: "LBL_MEMO",
+        width: "4xl",
+        content: (
+          <DispatchMemoPopup
+            row={setRow}
+            statusLabel={
+              model.codeMap.dspchOpSts?.[row.DSPCH_OP_STS] ??
+              String(row.DSPCH_OP_STS ?? "")
+            }
+            fetchMemo={(dspchNo) =>
+              api.searchDispatchMemo({ DSPCH_NO: dspchNo })
+            }
+            saveMemo={(record) => api.saveDispatchMemo(record)}
+            onSaved={() => {
+              closePopup();
+              refresh();
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [
+      base,
+      need,
+      needSingle,
+      openPopup,
+      closePopup,
+      refresh,
+      model.codeMap.dspchOpSts,
+    ],
+  );
+
+  // 메모 취소(자차) — 선택행 배차메모 등록취소 (단건만)
+  const onMemoCancelDed = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      if (!needSingle(rows, "MSG_CHECK_SINGLE_RECORD")) return;
+      base.confirm("메모를 취소하시겠습니까?", () => {
+        base
+          .callAjax(api.cancelDspchMemo(rows), { mask: "dedicatedTruck" })
+          .then(refresh);
+      });
+    },
+    [base, need, needSingle, refresh],
+  );
+
+  // 레포트 출력 — 옵션 팝업 (OZ 리포트 연동은 TODO)
+  const onReport = useCallback(() => {
+    openPopup({
+      title: "BTN_REPORT",
+      width: "md",
+      content: (
+        <DispatchPrintPop
+          onConfirm={() => {
+            closePopup();
+            // TODO: OZ 리포트 호출 (PRINT_TYPE/PRINT_RANGE + baseParams)
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [openPopup, closePopup]);
+
+  // ════════════════ 용차(tempTruck) 핸들러 ════════════════
+
+  // 임시차량 등록
+  const onRegSpotVeh = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_DEDICATED_DSPCH")) return;
+      if (!needSingle(rows, "MSG_SELECT_DEDICATED_DSPCH")) return;
+      const row = rows[0];
+      openPopup({
+        title: "BTN_REG_SPOT_VEH",
+        width: "lg",
+        content: (
+          <RegiSpotPop
+            initialValues={row}
+            onConfirm={(patch) => {
+              closePopup();
+              base
+                .callAjax(
+                  api.saveDspchSpotVeh({
+                    DSPCH_NO: row.DSPCH_NO,
+                    LGST_GRP_CD: row.LGST_GRP_CD,
+                    DIV_CD: row.DIV_CD,
+                    PLN_ID: row.PLN_ID,
+                    DLVRY_DT: row.DLVRY_DT,
+                    VEH_ID: row.VEH_ID,
+                    VEH_TP_CD: row.VEH_TP_CD,
+                    VEH_TP_NM: row.VEH_TP_NM,
+                    DRVR_ID: row.DRVR_ID,
+                    VEH_NO: patch.VEH_NO,
+                    DRVR_NM: patch.DRVR_NM,
+                  }),
+                )
+                .then(refresh);
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, need, needSingle, openPopup, closePopup, refresh],
+  );
+
+  // 고정차량변경(용차→자차) — 차량선택 → TtoD 확정
+  const onChangeToDedVeh = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SEL_VEH_TO_CHANGE")) return;
+      if (!needSingle(rows, "MSG_SEL_VEH_TO_CHANGE")) return;
+      const src = rows[0];
+      const p = baseParams();
+      openPopup({
+        title: "BTN_CHANGE_TO_DED_VEH",
+        width: "4xl",
+        content: (
+          <ChangeVehiclePopup
+            fetchVehicles={(p) => api.searchDispatchChangeVehiclePop(p)}
+            lockVehOpTp="100"
+            initialValues={{
+              LGST_GRP_CD: src.LGST_GRP_CD,
+              DSPCH_NO: src.DSPCH_NO,
+              ORG_VEH_ID: src.VEH_ID,
+            }}
+            onConfirm={(veh) => {
+              closePopup();
+              openPopup({
+                title: "BTN_CHANGE_TO_DED_VEH",
+                width: "xl",
+                content: (
+                  <TtoDTrckChangePop
+                    source={src}
+                    target={veh}
+                    conditions={{
+                      DLVRY_DT: p.DLVRY_DT,
+                      LGST_GRP_CD: p.LGST_GRP_CD,
+                      DIV_CD: p.DIV_CD,
+                      PLN_ID: p.PLN_ID,
+                    }}
+                    onConfirm={(payload) => {
+                      closePopup();
+                      base
+                        .callAjax(api.saveTempDspchToDedicatedTrck(payload), {
+                          mask: "tempTruck",
+                        })
+                        .then(refresh);
+                    }}
+                    onClose={closePopup}
+                  />
+                ),
+              });
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, need, needSingle, baseParams, openPopup, closePopup, refresh],
+  );
+
+  // 계약차 신규배차
+  const onCreateNewDspch = useCallback(() => {
+    const p = baseParams();
+    openPopup({
+      title: "LBL_CREATE_NEW_DSPCH",
+      width: "4xl",
+      content: (
+        <ContractVehPop
+          initialValues={{ LGST_GRP_CD: p.LGST_GRP_CD }}
+          onConfirm={(veh) => {
+            closePopup();
+            base
+              .callAjax(
+                api.saveCreateEmptyDispatchCntrVeh([
+                  {
+                    ...veh,
+                    DLVRY_DT: p.DLVRY_DT,
+                    PLN_ID: p.PLN_ID,
+                    LGST_GRP_CD: p.LGST_GRP_CD,
+                    DIV_CD: p.DIV_CD,
+                    DSPCH_TP: "10",
+                    BATCH_NO: 1,
+                    EDIT_STS: "U",
+                  },
+                ]),
+                { mask: "tempTruck" },
+              )
+              .then(refresh);
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [base, baseParams, openPopup, closePopup, refresh]);
+
+  // 복화운송 생성
+  const onCreateItinerary = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_EXCEPTION_CONTINUOUS_MOVE_NO_SELECT_CHK")) return;
+      if (!needSingle(rows, "MSG_EXCEPTION_CONTINUOUS_MOVE_SELECT_CHK")) return;
+      if (rows[0].DSPCH_OP_STS === "2110") {
+        base.alert(Lang.get("MSG_NOT_VALID_TRIP_STATUS"));
+        return;
+      }
+      if (Number(rows[0].PLN_STOP_CNT) < 1) {
+        base.alert(Lang.get("MSG_TRIP_BUILD_DUMMY_DISPATCH_CHK"));
+        return;
+      }
+      openPopup({
+        title: "BTN_CREATE_ITINERARY_PLAN",
+        width: "xl",
+        content: (
+          <ContinuousMovePop
+            onConfirm={(loc) => {
+              closePopup();
+              const saveRows = rows.map((r) => ({
+                ...r,
+                BATCH_NO: 1,
+                NEW_FRM_LOC_ID: loc.FRM_LOC_ID,
+                NEW_FRM_LOC_CD: loc.FRM_LOC_CD,
+                NEW_FRM_LOC_NM: loc.FRM_LOC_NM,
+                NEW_FROM_ADDR_ID: loc.FROM_ADDR_ID,
+                NEW_TO_LOC_ID: loc.TO_LOC_ID,
+                NEW_TO_LOC_CD: loc.TO_LOC_CD,
+                NEW_TO_LOC_NM: loc.TO_LOC_NM,
+                NEW_TO_ADDR_ID: loc.TO_ADDR_ID,
+                EDIT_STS: "I",
+              }));
+              base
+                .callAjax(api.saveCreateContinuousMove(saveRows), {
+                  mask: "tempTruck",
+                })
+                .then(refresh);
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, need, needSingle, openPopup, closePopup, refresh],
+  );
+
+  // 복화운송 그룹생성 — TODO: 서버 분기(그룹) 확인 필요. 우선 단건 복화와 동일 플로우.
+  const onCreateItineraryGrp = useCallback(
+    (rows: any[]) => {
+      // TODO: BTN_CREATE_ITINERARY_GRP_PLAN — 그룹 복화 전용 서버 흐름 확인 후 분기.
+      onCreateItinerary(rows);
+    },
+    [onCreateItinerary],
+  );
+
+  // 용차 배차취소 — 전부 신규(2010)만 가능
+  const onCancelDspchTemp = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      if (rows.some((r) => r.DSPCH_OP_STS !== "2010")) {
+        base.alert(Lang.get("MSG_CANCEL_DSPCH_OPEN_STATUS"));
+        return;
+      }
+      base
+        .callAjax(api.saveCancelPlanDispatchTemp(markU(rows)), {
+          mask: "tempTruck",
+        })
+        .then(refresh);
+    },
+    [base, need, refresh],
+  );
+
+  // 용차 배차복사
+  const onCopyDspch = useCallback(
+    (rows: any[]) => {
+      if (rows.length !== 1) {
+        base.alert(Lang.get("MSG_SEL_VEH_TO_COPY"));
+        return;
+      }
+      const row = rows[0];
+      openPopup({
+        title: "BTN_COPY_DSPCH",
+        width: "md",
+        content: (
+          <DspchCountPop
+            onConfirm={({ DSPCH_CNT }) => {
+              closePopup();
+              base
+                .callAjax(
+                  api.copyTempDispatch({
+                    OLD_DSPCH_NO: row.DSPCH_NO,
+                    LGST_GRP_CD: row.LGST_GRP_CD,
+                    DSPCH_CNT,
+                  }),
+                  { mask: "tempTruck" },
+                )
+                .then(refresh);
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, openPopup, closePopup, refresh],
+  );
+
+  // 운수사 변경 — 상태(2010/2060) 검증 → 운수사변경 팝업
+  const onChangeCarrier = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      if (
+        rows.some((r) => r.DSPCH_OP_STS !== "2010" && r.DSPCH_OP_STS !== "2060")
+      ) {
+        base.alert(Lang.get("MSG_ERR_CHANGE_CARRIER_STATUS"));
+        return;
+      }
+      openPopup({
+        title: "BTN_CHANGE_CARRIER",
+        width: "3xl",
+        content: (
+          <CarrierChangePop
+            initialValues={{ LGST_GRP_CD: rows[0].LGST_GRP_CD }}
+            onConfirm={({ CARR_CD, VEH_ID }) => {
+              closePopup();
+              const saveRows = markU(rows).map((r) => ({
+                ...r,
+                CARR_CD,
+                CHANGE_VEH_ID: VEH_ID,
+              }));
+              base
+                .callAjax(api.saveChangeCarrier(saveRows), {
+                  mask: "tempTruck",
+                })
+                .then(refresh);
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, need, openPopup, closePopup, refresh],
+  );
+
+  // 톤급 변경 — 상태(AP_FI_STS < 4010) 검증 → 톤급변경 팝업
+  const onChangeTonType = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      if (rows.some((r) => String(r.AP_FI_STS ?? "") >= "4010")) {
+        base.alert(Lang.get("MSG_ERR_CHANGE_TON_GROUP_STATUS"));
+        return;
+      }
+      openPopup({
+        title: "BTN_CHANGE_TON_TYPE",
+        width: "2xl",
+        content: (
+          <TonGroupChangePop
+            onConfirm={({ VEH_TP_CD }) => {
+              closePopup();
+              const saveRows = markU(rows).map((r) => ({
+                ...r,
+                TRG_VEH_TP_CD: VEH_TP_CD,
+              }));
+              base
+                .callAjax(api.saveChangeTonType(saveRows), {
+                  mask: "tempTruck",
+                })
+                .then(refresh);
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, need, openPopup, closePopup, refresh],
+  );
+
+  // 메모 등록(용차) — 공통 배차메모 팝업 (단건만)
+  const onMemoRegTemp = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      if (!needSingle(rows, "MSG_CHECK_SINGLE_RECORD")) return;
+      const row = rows[0];
+      if (!row?.DSPCH_NO) {
+        base.alert("배차가 없어 메모를 등록할 수 없습니다.");
+        return;
+      }
+      openPopup({
+        title: "LBL_MEMO",
+        width: "4xl",
+        content: (
+          <DispatchMemoPopup
+            row={row}
+            statusLabel={
+              model.codeMap.dspchOpSts?.[row.DSPCH_OP_STS] ??
+              String(row.DSPCH_OP_STS ?? "")
+            }
+            fetchMemo={(dspchNo) =>
+              api.searchDispatchMemo({ DSPCH_NO: dspchNo })
+            }
+            saveMemo={(record) => api.saveDispatchMemo(record)}
+            onSaved={() => {
+              closePopup();
+              refresh();
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [
+      base,
+      need,
+      needSingle,
+      openPopup,
+      closePopup,
+      refresh,
+      model.codeMap.dspchOpSts,
+    ],
+  );
+
+  // 메모 취소(용차) — 선택행 배차메모 등록취소 (단건만)
+  const onMemoCancelTemp = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      if (!needSingle(rows, "MSG_CHECK_SINGLE_RECORD")) return;
+      base.confirm("메모를 취소하시겠습니까?", () => {
+        base
+          .callAjax(api.cancelDspchMemo(rows), { mask: "tempTruck" })
+          .then(refresh);
+      });
+    },
+    [base, need, needSingle, refresh],
+  );
+
+  // 용차 계획확정
+  const onSetPlannedTemp = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_EXCEPTION_DISPATCH_SET_TO_PLAN_SELECT")) return;
+      base
+        .callAjax(api.savePlannedPlanDispatchTemp(markU(rows)), {
+          mask: "tempTruck",
+        })
+        .then(refresh);
+    },
+    [base, need, refresh],
+  );
+
+  // 용차 계획확정취소 — 신규(2010)는 불가
+  const onReturnOpenTemp = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      if (rows.some((r) => r.DSPCH_OP_STS === "2010")) {
+        base.alert("배차 확정 취소할 수 없는 상태입니다.");
+        return;
+      }
+      base
+        .callAjax(api.saveCancelTender(markU(rows)), { mask: "tempTruck" })
+        .then(refresh);
+    },
+    [base, need, refresh],
+  );
+
+  // 앱설치 SMS 발송
+  const onSendSmsAppInstall = useCallback(
+    (rows: any[]) => {
+      if (!need(rows, "MSG_SELECT_NO_DATA")) return;
+      const row = rows[0];
+      openPopup({
+        title: "BTN_SEND_SMS_FOR_INSTALL",
+        width: "lg",
+        content: (
+          <SendSmsAppInstallPop
+            initialValues={{ DSPCH_NO: row.DSPCH_NO }}
+            onConfirm={({ MBL_PHN_NO }) => {
+              closePopup();
+              base.callAjax(
+                api.sendSmsForAppInstall({
+                  DSPCH_NO: row.DSPCH_NO,
+                  DIV_CD: row.DIV_CD,
+                  LGST_GRP_CD: row.LGST_GRP_CD,
+                  DRVR_ID: row.DRVR_ID,
+                  MBL_PHN_NO,
+                }),
+              );
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, need, openPopup, closePopup],
+  );
+
+  // 배송요청 확인문자 발송(운수사) — 운수사 콤보 로드 후 팝업
+  const onSendSmsToCarr = useCallback(() => {
+    const lgstGrpCd = baseParams().LGST_GRP_CD;
+    commonApi
+      .getCodesAndNames({
+        key: "dsOut",
+        sqlProp: "selectCarrierFromLogisticsGroup",
+        keyParam: "LGST_GRP_CD",
+        LGST_GRP_CD: lgstGrpCd,
+      } as any)
+      .then((res: any) => {
+        const opts = res?.data?.data?.dsOut ?? [];
+        openPopup({
+          title: "BTN_SEND_SMS_TO_CARR",
+          width: "lg",
+          content: (
+            <SendSmsPopCarr
+              initialValues={{ LGST_GRP_CD: lgstGrpCd }}
+              carrOptions={opts}
+              onConfirm={({ LGST_GRP_CD, CARR_CD }) => {
+                closePopup();
+                base.callAjax(api.sendSmsToCarr({ LGST_GRP_CD, CARR_CD }));
+              }}
+              onClose={closePopup}
+            />
+          ),
+        });
+      })
+      .catch(console.error);
+  }, [base, baseParams, openPopup, closePopup]);
+
+  // ════════════════ 액션 배열 ════════════════
+
+  const dedActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_VEHICLE_SWAP",
+        label: "BTN_VEHICLE_SWAP",
+        onClick: (e: any) => onVehicleSwapDed(e?.data ?? []),
+      },
+      {
+        type: "button",
+        key: "BTN_SHOW_VEHICLE_LOCATION",
+        label: "BTN_SHOW_VEHICLE_LOCATION",
+        onClick: (e: any) => onShowVehLocation(e?.data ?? []),
+      },
+      {
+        type: "group",
+        key: "BTN_DISPATCH_CREATE_DELETE",
+        label: "BTN_DISPATCH_CREATE_DELETE",
+        items: [
+          {
+            type: "button",
+            key: "BTN_DISPATCH_CANCEL",
+            label: "BTN_DISPATCH_CANCEL",
+            onClick: (e: any) => onCancelDspchDed(e?.data ?? []),
+          },
+          makeExcelUploadAction({ menuCode: MENU_CODE, onUploaded: refresh }),
+          makeExcelTemplateDownloadAction({
+            menuCode: MENU_CODE,
+            fileName: menuName,
+          }),
+          makeExcelTemplateDownloadAction({
+            menuCode: MENU_CODE,
+            gridId: "DED_MULTI_PICK",
+            fileName: menuName,
+            key: "BTN_MULTI_PICK_EXCEL_TEMPLATE_DOWNLOAD",
+            label: "BTN_MULTI_PICK_EXCEL_TEMPLATE_DOWNLOAD",
+          }),
+        ],
+      },
+      {
+        type: "group",
+        key: "LBL_MEMO",
+        label: "LBL_MEMO",
+        items: [
+          {
+            type: "button",
+            key: "BTN_REGISTRATION",
+            label: "BTN_REGISTRATION",
+            onClick: (e: any) => onMemoRegDed(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_CANCEL",
+            label: "BTN_CANCEL",
+            onClick: (e: any) => onMemoCancelDed(e?.data ?? []),
+          },
+        ],
+      },
+      {
+        type: "group",
+        key: "BTN_SET_TO_PLANNED",
+        label: "BTN_SET_TO_PLANNED",
+        items: [
+          {
+            type: "button",
+            key: "BTN_SET_TO_PLANNED",
+            label: "BTN_SET_TO_PLANNED",
+            onClick: (e: any) => onSetPlannedDed(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_RETURN_TO_OPEN",
+            label: "BTN_RETURN_TO_OPEN",
+            onClick: (e: any) => onReturnOpenDed(e?.data ?? []),
+          },
+        ],
+      },
+      {
+        type: "button",
+        key: "BTN_REPORT",
+        label: "BTN_REPORT",
+        onClick: onReport,
+      },
+      makeExcelGroupAction({
+        hideAll: true,
+        excelColumns: () => model.grids.dedicatedTruck.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
+        fetchFn: () => api.searchDedicatedTruckDispatchList(baseParams()),
+        rows: model.grids.dedicatedTruck.rows,
+      }),
+    ],
+    [
+      baseParams,
+      menuName,
+      model.grids.dedicatedTruck,
+      refresh,
+      onVehicleSwapDed,
+      onShowVehLocation,
+      onCancelDspchDed,
+      onMemoRegDed,
+      onMemoCancelDed,
+      onSetPlannedDed,
+      onReturnOpenDed,
+      onReport,
+    ],
+  );
+
+  const conActions: ActionItem[] = useMemo(
+    () => [
+      {
+        type: "button",
+        key: "BTN_REG_SPOT_VEH",
+        label: "BTN_REG_SPOT_VEH",
+        onClick: (e: any) => onRegSpotVeh(e?.data ?? []),
+      },
+      {
+        type: "button",
+        key: "BTN_CHANGE_TO_DED_VEH",
+        label: "BTN_CHANGE_TO_DED_VEH",
+        onClick: (e: any) => onChangeToDedVeh(e?.data ?? []),
+      },
+      {
+        type: "button",
+        key: "BTN_SHOW_VEHICLE_LOCATION",
+        label: "BTN_SHOW_VEHICLE_LOCATION",
+        onClick: (e: any) => onShowVehLocation(e?.data ?? []),
+      },
+      {
+        type: "group",
+        key: "BTN_MANAGE_DSPCH",
+        label: "BTN_MANAGE_DSPCH",
+        items: [
+          {
+            type: "button",
+            key: "LBL_CREATE_NEW_DSPCH",
+            label: "LBL_CREATE_NEW_DSPCH",
+            onClick: onCreateNewDspch,
+          },
+          {
+            type: "button",
+            key: "BTN_CREATE_ITINERARY_PLAN",
+            label: "BTN_CREATE_ITINERARY_PLAN",
+            onClick: (e: any) => onCreateItinerary(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_CREATE_ITINERARY_GRP_PLAN",
+            label: "BTN_CREATE_ITINERARY_GRP_PLAN",
+            onClick: (e: any) => onCreateItineraryGrp(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_DISPATCH_CANCEL",
+            label: "BTN_DISPATCH_CANCEL",
+            onClick: (e: any) => onCancelDspchTemp(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_COPY_DSPCH",
+            label: "BTN_COPY_DSPCH",
+            onClick: (e: any) => onCopyDspch(e?.data ?? []),
+          },
+          makeExcelUploadAction({ menuCode: MENU_CODE, onUploaded: refresh }),
+          makeExcelTemplateDownloadAction({
+            menuCode: MENU_CODE,
+            fileName: menuName,
+          }),
+          makeExcelTemplateDownloadAction({
+            menuCode: MENU_CODE,
+            gridId: "DED_MULTI_PICK",
+            fileName: menuName,
+            key: "BTN_MULTI_PICK_EXCEL_TEMPLATE_DOWNLOAD",
+            label: "BTN_MULTI_PICK_EXCEL_TEMPLATE_DOWNLOAD",
+          }),
+        ],
+      },
+      {
+        type: "group",
+        key: "BTN_CHANGE",
+        label: "BTN_CHANGE",
+        items: [
+          {
+            type: "button",
+            key: "BTN_CHANGE_CARRIER",
+            label: "BTN_CHANGE_CARRIER",
+            onClick: (e: any) => onChangeCarrier(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_CHANGE_TON_TYPE",
+            label: "BTN_CHANGE_TON_TYPE",
+            onClick: (e: any) => onChangeTonType(e?.data ?? []),
+          },
+        ],
+      },
+      {
+        type: "group",
+        key: "LBL_MEMO",
+        label: "LBL_MEMO",
+        items: [
+          {
+            type: "button",
+            key: "BTN_REGISTRATION",
+            label: "BTN_REGISTRATION",
+            onClick: (e: any) => onMemoRegTemp(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_CANCEL",
+            label: "BTN_CANCEL",
+            onClick: (e: any) => onMemoCancelTemp(e?.data ?? []),
+          },
+        ],
+      },
+      {
+        type: "group",
+        key: "BTN_SET_TO_PLANNED",
+        label: "BTN_SET_TO_PLANNED",
+        items: [
+          {
+            type: "button",
+            key: "BTN_SET_TO_PLANNED",
+            label: "BTN_SET_TO_PLANNED",
+            onClick: (e: any) => onSetPlannedTemp(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_RETURN_TO_OPEN",
+            label: "BTN_RETURN_TO_OPEN",
+            onClick: (e: any) => onReturnOpenTemp(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_SEND_SMS_FOR_INSTALL",
+            label: "BTN_SEND_SMS_FOR_INSTALL",
+            onClick: (e: any) => onSendSmsAppInstall(e?.data ?? []),
+          },
+          {
+            type: "button",
+            key: "BTN_SEND_SMS_TO_CARR",
+            label: "BTN_SEND_SMS_TO_CARR",
+            onClick: onSendSmsToCarr,
+          },
+        ],
+      },
+    ],
+    [
+      menuName,
+      refresh,
+      onRegSpotVeh,
+      onChangeToDedVeh,
+      onShowVehLocation,
+      onCreateNewDspch,
+      onCreateItinerary,
+      onCreateItineraryGrp,
+      onCancelDspchTemp,
+      onCopyDspch,
+      onChangeCarrier,
+      onChangeTonType,
+      onMemoRegTemp,
+      onMemoCancelTemp,
+      onSetPlannedTemp,
+      onReturnOpenTemp,
+      onSendSmsAppInstall,
+      onSendSmsToCarr,
+    ],
+  );
+
   return {
     fetchList,
     onSearchCallback,
     loadVolume,
     loadDspch,
+    dedActions,
+    conActions,
+    onShowVehLocation,
+    refreshVehLoc,
   };
 }
