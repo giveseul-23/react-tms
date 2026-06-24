@@ -104,7 +104,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         onClick: (e: any) => {
           if (!guardHasData(e.data)) return;
           void base
-            .callAjax(api.onTenderAccepted({ dsSave: e.data }))
+            .callAjax(api.onTenderAccepted({ dsSave: e.data }), { mask: "main" })
             .then(() => base.search());
         },
       },
@@ -129,6 +129,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                           TNDR_RJT_RSN_DESC: detail,
                         })),
                       }),
+                      { mask: "main" },
                     )
                     .then(() => base.search());
                 }}
@@ -177,6 +178,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                                 CHGVEH_MEMO: "운송사협력사 요청건",
                               })),
                             }),
+                            { mask: "main" },
                           )
                           .then(() => base.search());
                       }}
@@ -226,6 +228,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                             ...patch,
                             MENU_CD: MENU_CD,
                           }),
+                          { mask: "main" },
                         )
                         .then(() => base.search());
                     }}
@@ -272,6 +275,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                               CHGVEH_MEMO: "운송협력사 요청",
                             })),
                           }),
+                          { mask: "main" },
                         )
                         .then(() => base.search());
                     }}
@@ -300,7 +304,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
             return;
           }
           void base
-            .callAjax(api.onVehicleCancel({ dsSave: e.data }))
+            .callAjax(api.onVehicleCancel({ dsSave: e.data }), { mask: "main" })
             .then(() => base.search());
         },
       },
@@ -326,6 +330,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
                         LGST_GRP_CD: row.LGST_GRP_CD,
                         DRVR_ID: row.DRVR_ID,
                       }),
+                      { mask: "main" },
                     )
                     .then(() => base.search());
                 }}

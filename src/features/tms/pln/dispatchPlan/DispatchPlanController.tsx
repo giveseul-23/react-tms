@@ -300,7 +300,7 @@ export function useDispatchPlanController({ model }: Args) {
               DSPCH_TP,
             }));
             base
-              .callAjax(api.saveCreateEmptyDispatch(rows))
+              .callAjax(api.saveCreateEmptyDispatch(rows), { mask: "main" })
               .then(() => base.search());
           }}
           onClose={closePopup}
@@ -330,7 +330,9 @@ export function useDispatchPlanController({ model }: Args) {
               PLN_ID,
             }));
             base
-              .callAjax(api.saveCreateItineraryGroupDispatch(rows))
+              .callAjax(api.saveCreateItineraryGroupDispatch(rows), {
+                mask: "main",
+              })
               .then(() => base.search());
           }}
           onClose={closePopup}
@@ -362,7 +364,9 @@ export function useDispatchPlanController({ model }: Args) {
               BATCH_NO,
             }));
             base
-              .callAjax(api.saveCreateItineraryGroupDispatch(rows))
+              .callAjax(api.saveCreateItineraryGroupDispatch(rows), {
+                mask: "main",
+              })
               .then(() => base.search());
           }}
           onClose={closePopup}
@@ -378,7 +382,7 @@ export function useDispatchPlanController({ model }: Args) {
       if (!guardHasData(rows)) return;
       base.confirm("MSG_CHK_DELETE", () => {
         base
-          .callAjax(api.saveCancelPlanDispatch(rows))
+          .callAjax(api.saveCancelPlanDispatch(rows), { mask: "main" })
           .then(() => base.search());
       });
     },
@@ -395,6 +399,7 @@ export function useDispatchPlanController({ model }: Args) {
           api.savePlannedPlanDispatch(
             rows.map((r) => ({ ...r, rowStatus: "U" })),
           ),
+          { mask: "main" },
         )
         .then(() => base.search());
     },
@@ -418,6 +423,7 @@ export function useDispatchPlanController({ model }: Args) {
           api.saveCancelPlannedPlanDispatch(
             rows.map((r) => ({ ...r, rowStatus: "U" })),
           ),
+          { mask: "main" },
         )
         .then(() => base.search());
     },
@@ -443,6 +449,7 @@ export function useDispatchPlanController({ model }: Args) {
           api.saveAutoChangeStopSeq(
             rows.map((r) => ({ ...r, rowStatus: "U" })),
           ),
+          { mask: "main" },
         )
         .then(() => base.search());
     },
@@ -504,7 +511,9 @@ export function useDispatchPlanController({ model }: Args) {
       });
       const [a, b] = rows;
       base
-        .callAjax(api.saveChangeVehicleSwap([swap(a, b), swap(b, a)]))
+        .callAjax(api.saveChangeVehicleSwap([swap(a, b), swap(b, a)]), {
+          mask: "main",
+        })
         .then(() => base.search());
     },
     [base],
@@ -530,7 +539,7 @@ export function useDispatchPlanController({ model }: Args) {
                 rowStatus: "U",
               }));
               base
-                .callAjax(api.changeDlvryDate(payload))
+                .callAjax(api.changeDlvryDate(payload), { mask: "main" })
                 .then(() => base.search());
             }}
             onClose={closePopup}
@@ -701,7 +710,9 @@ export function useDispatchPlanController({ model }: Args) {
     (e: any) => {
       const rows = (e?.data ?? []) as any[];
       if (!guardHasData(rows)) return;
-      base.callAjax(api.saveUnAssignedShipment(rows)).then(() => base.search());
+      base
+        .callAjax(api.saveUnAssignedShipment(rows), { mask: "main" })
+        .then(() => base.search());
     },
     [guardHasData, base],
   );
@@ -733,7 +744,9 @@ export function useDispatchPlanController({ model }: Args) {
       const sub = model.grids[subKey].selectedRef.current;
       if (!guardHasData(sub ? [sub] : [])) return;
       base
-        .callAjax(api.saveSplitShipmentLine([{ ...sub, rowStatus: "U" }]))
+        .callAjax(api.saveSplitShipmentLine([{ ...sub, rowStatus: "U" }]), {
+          mask: subKey,
+        })
         .then(() => {
           const parent = model.grids[parentKey].selectedRef.current;
           if (parent?.ORD_NO) {
@@ -805,16 +818,18 @@ export function useDispatchPlanController({ model }: Args) {
             record={{ ...sub, DSPCH_NO: main?.DSPCH_NO }}
             onConfirm={(payload) => {
               closePopup();
-              base.callAjax(api.saveSplitShipmentQty(payload)).then(() => {
-                const parent = model.grids[parentKey].selectedRef.current;
-                if (parent?.ORD_NO) {
-                  const fetch =
-                    subKey === "allocSub"
-                      ? api.getAllocOrderItemList
-                      : api.getUnallocOrderItemList;
-                  base.searchSub(subKey, fetch({ ORD_NO: parent.ORD_NO }));
-                }
-              });
+              base
+                .callAjax(api.saveSplitShipmentQty(payload), { mask: subKey })
+                .then(() => {
+                  const parent = model.grids[parentKey].selectedRef.current;
+                  if (parent?.ORD_NO) {
+                    const fetch =
+                      subKey === "allocSub"
+                        ? api.getAllocOrderItemList
+                        : api.getUnallocOrderItemList;
+                    base.searchSub(subKey, fetch({ ORD_NO: parent.ORD_NO }));
+                  }
+                });
             }}
             onClose={closePopup}
           />
@@ -1154,6 +1169,7 @@ export function useDispatchPlanController({ model }: Args) {
               DSPCH_NO: row.DSPCH_NO,
               stops: model.grids.stop.rows,
             }),
+            { mask: "stop" },
           );
         },
       },

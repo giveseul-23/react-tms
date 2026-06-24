@@ -211,6 +211,7 @@ export function useFuelEfficiencyController({ model }: Args) {
                 FRM_DTTM: values.FRM_DTTM,
                 TO_DTTM: values.TO_DTTM,
               }),
+              { mask: "main" },
             ).then(() => base.search());
           }}
         />

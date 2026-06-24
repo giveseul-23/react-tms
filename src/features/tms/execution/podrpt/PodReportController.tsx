@@ -152,7 +152,7 @@ export function usePodReportController({ model }: Args) {
       const dsSave = toDsSave(
         rows.map((r) => ({ ...r, EDIT_STS: ROW_STATUS.UPDATE })),
       );
-      void base.callAjax(api.confirmPod({ dsSave })).then(() => base.search());
+      void base.callAjax(api.confirmPod({ dsSave }), { mask: "main" }).then(() => base.search());
     },
     [base],
   );
@@ -190,7 +190,7 @@ export function usePodReportController({ model }: Args) {
             fd.append("JSON_READ_PASS", "Y");
             fd.append("POD_ID", String(main.POD_ID ?? ""));
             void base
-              .callAjax(api.uploadPodFile(fd), Lang.get("MSG_FILE_UPLOAD_CMPLT"))
+              .callAjax(api.uploadPodFile(fd), { successMsg: Lang.get("MSG_FILE_UPLOAD_CMPLT"), mask: "main" })
               .then(() => base.search());
           }}
         />
@@ -211,7 +211,7 @@ export function usePodReportController({ model }: Args) {
           { POD_ID: main.POD_ID, FILE_ID: sel.FILE_ID, DEL_YN: "Y" },
         ];
         void base
-          .callAjax(api.deletePodFile({ dsSave }))
+          .callAjax(api.deletePodFile({ dsSave }), { mask: "main" })
           .then(() => base.search());
       });
     },

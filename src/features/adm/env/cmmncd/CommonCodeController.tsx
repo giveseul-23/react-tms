@@ -214,7 +214,10 @@ export function useCommonCodeController({ model }: Args) {
 
   const reorderDisplaySequence = useCallback(() => {
     base
-      .callAjax(commonCodeApi.reorderDisplaySequence(MENU_CD), "MSG_SAVE_CMPLT")
+      .callAjax(commonCodeApi.reorderDisplaySequence(MENU_CD), {
+        successMsg: "MSG_SAVE_CMPLT",
+        mask: "sub01",
+      })
       .then(async () => {
         const main = model.grids.main.selectedRef.current;
         if (main) {

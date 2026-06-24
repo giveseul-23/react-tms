@@ -87,7 +87,7 @@ export function useDistanceTransitTimeController({ model }: Args) {
                 EDIT_STS: "U",
               }));
               base
-                .callAjax(api.saveCalcDtto({ dsSave }))
+                .callAjax(api.saveCalcDtto({ dsSave }), { mask: "main" })
                 .then(() => base.search());
             }}
             onClose={closePopup}
@@ -132,7 +132,7 @@ export function useDistanceTransitTimeController({ model }: Args) {
         DIST: r.TMAP_DIST,
         rowStatus: "U",
       }));
-      base.callAjax(api.save({ dsSave })).then(() => base.search());
+      base.callAjax(api.save({ dsSave }), { mask: "main" }).then(() => base.search());
     },
     [base, requireSel],
   );
@@ -156,7 +156,7 @@ export function useDistanceTransitTimeController({ model }: Args) {
                 EDIT_STS: "U",
               }));
               base
-                .callAjax(api.saveMapSearchOption({ dsSave }))
+                .callAjax(api.saveMapSearchOption({ dsSave }), { mask: "main" })
                 .then(() => base.search());
             }}
             onClose={closePopup}

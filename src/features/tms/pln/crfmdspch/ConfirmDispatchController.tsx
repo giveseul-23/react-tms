@@ -93,7 +93,8 @@ export function useConfirmDispatchController({ model }: Args) {
         base.alert(Lang.get("MSG_SELECT_NO_DATA"), Lang.get("TTL_CONFIRM"));
         return;
       }
-      const run = () => base.callAjax(apiFn(rows)).then(() => base.search());
+      const run = () =>
+        base.callAjax(apiFn(rows), { mask: "config" }).then(() => base.search());
       if (opts?.confirm) base.confirm(Lang.get(opts.confirm), run);
       else run();
     },
@@ -121,7 +122,9 @@ export function useConfirmDispatchController({ model }: Args) {
                 rowStatus: "U",
               }));
               closePopup();
-              base.callAjax(api.onStartWork(payload)).then(() => base.search());
+              base
+                .callAjax(api.onStartWork(payload), { mask: "config" })
+                .then(() => base.search());
             }}
           />
         ),
@@ -162,6 +165,7 @@ export function useConfirmDispatchController({ model }: Args) {
                       rowStatus: "U",
                     },
                   ]),
+                  { mask: "config" },
                 )
                 .then(() => base.search());
             }}
@@ -210,6 +214,7 @@ export function useConfirmDispatchController({ model }: Args) {
                     MBL_PHN_NO: patch.MBL_PHN_NO,
                     VEH_TP_CD: patch.VEH_TP_CD,
                   }),
+                  { mask: "config" },
                 )
                 .then(() => base.search());
             }}

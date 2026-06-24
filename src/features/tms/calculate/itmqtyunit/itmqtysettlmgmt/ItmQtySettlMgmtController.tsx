@@ -170,7 +170,7 @@ export function useItmQtySettlMgmtController({ model }: Args) {
           EDIT_STS: ROW_STATUS.UPDATE,
         })),
       );
-      void base.callAjax(apiFn({ dsSave })).then(() => base.search());
+      void base.callAjax(apiFn({ dsSave }), { mask: "main" }).then(() => base.search());
     },
     [base, getCommonParams],
   );
@@ -195,7 +195,7 @@ export function useItmQtySettlMgmtController({ model }: Args) {
           onPublish={(payload) => {
             closePopup();
             void base
-              .callAjax(api.publishApDoc(payload))
+              .callAjax(api.publishApDoc(payload), { mask: "main" })
               .then(() => base.search());
           }}
           onClose={closePopup}

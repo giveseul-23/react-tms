@@ -68,7 +68,7 @@ export function useRegisterSettlProductQtyController({ model }: Args) {
     const params = settingCondition();
     if (params == null) return;
     void base
-      .callAjax(api.registerDeliveryDate(params))
+      .callAjax(api.registerDeliveryDate(params), { mask: "main" })
       .then(() => base.search());
   }, [base, settingCondition]);
 
@@ -93,7 +93,7 @@ export function useRegisterSettlProductQtyController({ model }: Args) {
         rows.map((r) => ({ ...r, EDIT_STS: ROW_STATUS.UPDATE })),
       );
       void base
-        .callAjax(api.cancelRegisterDeliveryDate({ dsSave }))
+        .callAjax(api.cancelRegisterDeliveryDate({ dsSave }), { mask: "main" })
         .then(() => base.search());
     },
     [base],
@@ -125,7 +125,7 @@ export function useRegisterSettlProductQtyController({ model }: Args) {
         ITEMQTY_DLVRY_DT: String(r.ITEMQTY_DLVRY_DT).substring(0, 10).replace(/-/g, ""),
       })),
     );
-    void base.callAjax(api.saveItmUomValue({ dsSave })).then(() => base.search());
+    void base.callAjax(api.saveItmUomValue({ dsSave }), { mask: "main" }).then(() => base.search());
   }, [base, model.grids.main]);
 
   // ── 그리드 액션 ─────────────────────────────────────────────────────

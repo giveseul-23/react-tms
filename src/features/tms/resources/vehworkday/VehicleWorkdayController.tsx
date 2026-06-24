@@ -87,7 +87,7 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
               base
                 .callAjax(
                   api.saveWorkday({ ...updatedRow, WRK_DAY: field }),
-                  "MSG_SAVE_CMPLT",
+                  { successMsg: "MSG_SAVE_CMPLT", mask: "main" },
                 )
                 .then(() => {
                   base.search();
@@ -147,7 +147,7 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
       }));
 
       base
-        .callAjax(api.initWorkday({ dsSave }), "MSG_SAVE_CMPLT")
+        .callAjax(api.initWorkday({ dsSave }), { successMsg: "MSG_SAVE_CMPLT", mask: "main" })
         .then(() => base.search());
     },
     [base, getSearchDateRange],

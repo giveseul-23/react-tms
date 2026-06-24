@@ -96,7 +96,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
           EDIT_STS: ROW_STATUS.UPDATE,
         })),
       );
-      void base.callAjax(apiFn({ dsSave })).then(() => base.search());
+      void base.callAjax(apiFn({ dsSave }), { mask: "main" }).then(() => base.search());
     },
     [base, getDateRange],
   );
@@ -151,6 +151,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
                   TO_DTTM: p.TO_DTTM,
                   TERM_TP: p.TERM_TP,
                 }),
+                { mask: "main" },
               )
               .then(() => base.search());
           }}

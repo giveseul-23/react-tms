@@ -89,7 +89,7 @@ export function useApDailyReportResultController({ model }: Args) {
       const { dsSave, valid } = buildSaveRows(selected, veh.vehId, veh.vehNo);
       const doSave = () =>
         base
-          .callAjax(api.createDailyApVehUnit(dsSave))
+          .callAjax(api.createDailyApVehUnit(dsSave), { mask: "main" })
           .then(() => base.search());
       if (valid) {
         void doSave();
@@ -109,7 +109,7 @@ export function useApDailyReportResultController({ model }: Args) {
       if (!veh) return;
       const { dsSave } = buildSaveRows(selected, veh.vehId, veh.vehNo);
       void base
-        .callAjax(api.cancelDailyApVehUnit(dsSave))
+        .callAjax(api.cancelDailyApVehUnit(dsSave), { mask: "main" })
         .then(() => base.search());
     },
     [base, buildSaveRows, validateVehAndSelection],

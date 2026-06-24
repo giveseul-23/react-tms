@@ -59,6 +59,13 @@ export const MAIN_COLUMN_DEFS = [
   },
   {
     type: "text",
+    headerName: "LBL_VEH_NO",
+    field: "VEH_NO",
+    width: 150,
+    align: "center",
+  },
+  {
+    type: "text",
     headerName: "LBL_DTG_NO",
     field: "DTG_NO",
     width: 150,

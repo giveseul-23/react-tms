@@ -71,7 +71,7 @@ export function useSettlementOrderContractController({ model }: Args) {
         })),
       );
       void base
-        .callAjax(api.createSettlementPerShipment({ dsSave }))
+        .callAjax(api.createSettlementPerShipment({ dsSave }), { mask: "main" })
         .then(() => base.search());
     },
     [base],
@@ -106,7 +106,7 @@ export function useSettlementOrderContractController({ model }: Args) {
             AR_CALC_TCD: "PERIOD",
           };
           void base
-            .callAjax(api.createSettlementPerPeriodByCondition(params))
+            .callAjax(api.createSettlementPerPeriodByCondition(params), { mask: "main" })
             .then(() => base.search());
         });
         return;
@@ -120,7 +120,7 @@ export function useSettlementOrderContractController({ model }: Args) {
         })),
       );
       void base
-        .callAjax(api.createSettlementPerPeriodBySelection({ dsSave }))
+        .callAjax(api.createSettlementPerPeriodBySelection({ dsSave }), { mask: "main" })
         .then(() => base.search());
     },
     [base, getSearch, validSearchCondition],

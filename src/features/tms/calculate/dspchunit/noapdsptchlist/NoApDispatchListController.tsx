@@ -84,7 +84,7 @@ export function useNoApDispatchListController({ model }: Args) {
       if (!requireSelected(data, "MSG_PAY_CARR_DSPCH_SELECT")) return;
       base.confirm(Lang.get("MSG_CHANGE_TO_VEH_PAY_CARR_CONFIRM"), () => {
         void base
-          .callAjax(api.saveDspchPayCarrReSet(data))
+          .callAjax(api.saveDspchPayCarrReSet(data), { mask: "main" })
           .then(() => base.search());
       });
     },
@@ -113,7 +113,7 @@ export function useNoApDispatchListController({ model }: Args) {
                 PAY_CARR_NM: payload.PAY_CARR_NM,
               }));
               void base
-                .callAjax(api.saveDspchPayCarrChange(rows))
+                .callAjax(api.saveDspchPayCarrChange(rows), { mask: "main" })
                 .then(() => base.search());
             }}
             onClose={closePopup}
@@ -191,6 +191,7 @@ export function useNoApDispatchListController({ model }: Args) {
             DLVRY_DT_FROM: s.SRCH_PD_DLVRY_DT_FROM,
             DLVRY_DT_TO: s.SRCH_PD_DLVRY_DT_TO,
           }),
+          { mask: "main" },
         )
         .then(() => base.search());
     },

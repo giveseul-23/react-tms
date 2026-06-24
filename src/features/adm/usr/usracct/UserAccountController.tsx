@@ -315,6 +315,7 @@ export function useUserAccountController({ model, activeTabRef }: Args) {
                   MBL_PHN_NO: value,
                   MBL_PHN_NO_OLD: userRow.MBL_PHN_NO,
                 }),
+                { mask: "main" },
               )
               .then(() => {
                 closePopup();

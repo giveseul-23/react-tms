@@ -109,7 +109,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
               rowStatus: "I",
               COPYARRAY: list.map((p: any) => ({ LGST_GRP_CD_COPY: p.CODE })),
             };
-            base.callAjax(api.onCopyAll([row])).then(() => base.search());
+            base.callAjax(api.onCopyAll([row]), { mask: "main" }).then(() => base.search());
           }}
           onClose={closePopup}
         />
@@ -129,7 +129,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
           onConfirm={(tmpltArray) => {
             closePopup();
             const row = { ...main, rowStatus: "I", TMPLTARRAY: tmpltArray };
-            base.callAjax(api.onVltnTmpltRgstr([row])).then(() => base.search());
+            base.callAjax(api.onVltnTmpltRgstr([row]), { mask: "main" }).then(() => base.search());
           }}
           onClose={closePopup}
         />
@@ -160,7 +160,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
                 rowStatus: "I",
                 COPYARRAY: list.map((p: any) => ({ LGST_GRP_CD_COPY: p.CODE })),
               }));
-              base.callAjax(api.onCopyAll(saveRows)).then(() => base.search());
+              base.callAjax(api.onCopyAll(saveRows), { mask: "main" }).then(() => base.search());
             }}
             onClose={closePopup}
           />
@@ -228,7 +228,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
             initial={target}
             onConfirm={(params) => {
               closePopup();
-              base.callAjax(api.onTmpltUpd(params)).then(() => {
+              base.callAjax(api.onTmpltUpd(params), { mask: "channel" }).then(() => {
                 const detail = model.grids.detail.selectedRef.current;
                 if (detail) {
                   base.searchSub(
@@ -297,7 +297,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
               VLTN_NTFCTN_CNFG_ID: configId,
               RCVR_NM: u.USR_NM,
             }));
-            base.callAjax(api.saveRcvr({ dsSave: saveRows })).then(() => {
+            base.callAjax(api.saveRcvr({ dsSave: saveRows }), { mask: "target" }).then(() => {
               base.searchSub(
                 "target",
                 api.getVltnNtfctnCnfgTargetList({ VLTN_NTFCTN_CNFG_ID: configId }),

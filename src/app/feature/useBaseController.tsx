@@ -164,6 +164,8 @@ export function useBaseController<K extends string>({
       apiFn: (p: { dsSave: any[] }) => Promise<any>,
       opts?: {
         successMsg?: string;
+        /** 저장 중 마스킹(작업 차단). 미지정=저장 대상 그리드 자동 마스킹, false=끔, true=저장 그리드, 키/배열=지정 그리드. */
+        mask?: boolean | K | K[];
         beforeSave?: () => boolean;
         confirmOnDelete?: string;
         afterSave?:
@@ -239,10 +241,17 @@ export function useBaseController<K extends string>({
 
       // ── 본 저장 + 후처리 ──────────────────────────────────
       const doSave = async () => {
-        await callAjax(
-          apiFn({ dsSave: toDsSave(dirty) }),
-          opts?.successMsg ?? "MSG_SAVE_CMPLT",
-        );
+        // mask 미지정 → 저장 대상 gridKey, false → 없음, true → gridKey, 키/배열 → 그대로
+        const maskKeys =
+          opts?.mask === false
+            ? undefined
+            : opts?.mask == null || opts?.mask === true
+              ? gridKey
+              : opts.mask;
+        await callAjax(apiFn({ dsSave: toDsSave(dirty) }), {
+          successMsg: opts?.successMsg ?? "MSG_SAVE_CMPLT",
+          ...(maskKeys ? { mask: maskKeys } : {}),
+        });
         const after = opts?.afterSave ?? "refresh";
         if (after === "refresh") {
           searchRef.current?.();

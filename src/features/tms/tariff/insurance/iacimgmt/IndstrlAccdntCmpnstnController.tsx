@@ -91,7 +91,7 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
             onConfirm={(params) => {
               closePopup();
               const saveRows = rows.map((r: any) => ({ ...r, ...params, rowStatus: "I" }));
-              base.callAjax(api.saveBatch(saveRows)).then(() => base.search());
+              base.callAjax(api.saveBatch(saveRows), { mask: "main" }).then(() => base.search());
             }}
             onClose={closePopup}
           />

@@ -83,7 +83,7 @@ export function useHipassFareManagementController({ model }: Args) {
       const dsSave = toDsSave(
         list.map((r) => ({ ...r, EDIT_STS: ROW_STATUS.UPDATE })),
       );
-      void base.callAjax(apiFn({ dsSave })).then(() => base.search());
+      void base.callAjax(apiFn({ dsSave }), { mask: "main" }).then(() => base.search());
     },
     [base, checkValidStatus],
   );
