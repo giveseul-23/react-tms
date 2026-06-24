@@ -24,6 +24,8 @@
 | 팝업(모달) 규칙 | `docs/claude/popup.md` |
 | **조회조건 스타일 표준 ★** | `docs/claude/search-style.md` |
 | 복잡도별 참조 화면 | `docs/claude/reference-screens.md` |
+| 프론트 화면별 작업 기록/오디트 | `docs/claude/frontend-audit.md` |
+| 로컬 경로/환경 프로퍼티 | `docs/claude/local-environment.md` |
 
 ---
 
@@ -34,3 +36,5 @@
 @docs/claude/popup.md
 @docs/claude/search-style.md
 @docs/claude/reference-screens.md
+@docs/claude/frontend-audit.md
+@docs/claude/local-environment.md
