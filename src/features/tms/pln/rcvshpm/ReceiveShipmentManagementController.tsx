@@ -202,7 +202,7 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     const main = model.grids.main.selectedRef.current;
     if (!base.requireParentRow(main, Lang.get("LBL_SHIPMENT_NUMBER"))) return;
     openPopup({
-      title: Lang.get("BTN_ADD"),
+      title: "BTN_ADD",
       width: "4xl",
       content: (
         <ReceiveShipmentDetailAddPop

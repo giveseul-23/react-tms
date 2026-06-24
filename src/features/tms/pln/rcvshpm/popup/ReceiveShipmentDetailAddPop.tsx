@@ -122,8 +122,8 @@ export default function ReceiveShipmentDetailAddPop({ onApply, onClose }: Props)
   return (
     <FormPopupLayout
       cardClassName="space-y-4"
-      confirmLabel="BTN_ADD"
-      isValid={!!(form.ORD_LINE_NO && form.CUST_ITEM_CD)}
+      confirmLabel={Lang.get("BTN_ADD")}
+      isValid={!!(form.ORD_LINE_NO && form.CUST_ITEM_CD && form.CUST_ITEM_NM)}
       onCancel={onClose}
       onConfirm={() => onApply(toPayload(form))}
     >
