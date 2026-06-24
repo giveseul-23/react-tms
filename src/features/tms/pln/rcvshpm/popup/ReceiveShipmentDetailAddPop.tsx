@@ -134,7 +134,7 @@ export default function ReceiveShipmentDetailAddPop({ onApply, onClose }: Props)
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
         <Field layout="vertical" type="text" label={Lang.get("LBL_ORD_LINE_NO")} required value={form.ORD_LINE_NO} onChange={(v) => setField("ORD_LINE_NO", v)} />
         <Field layout="vertical" type="text" label={Lang.get("LBL_ITEM_CD")} required value={form.CUST_ITEM_CD} onChange={(v) => setField("CUST_ITEM_CD", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_ITEM_NM")} value={form.CUST_ITEM_NM} onChange={(v) => setField("CUST_ITEM_NM", v)} />
+        <Field layout="vertical" type="text" label={Lang.get("LBL_ITEM_NM")} required value={form.CUST_ITEM_NM} onChange={(v) => setField("CUST_ITEM_NM", v)} />
         <Field layout="vertical" type="combo" label={Lang.get("LBL_COMMODITY_CODE")} value={form.CMDT_CD} onChange={(v) => setField("CMDT_CD", v)} options={stores.cmdtTpList ?? []} />
       </div>
 
