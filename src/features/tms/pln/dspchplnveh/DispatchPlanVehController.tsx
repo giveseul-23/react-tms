@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchPlanVehApi as api } from "./DispatchPlanVehApi";
 import type { DispatchPlanVehModel, GridKey } from "./DispatchPlanVehModel";
@@ -11,19 +11,27 @@ export function useDispatchPlanVehController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
 
   // 상단 SearchFilters 가 넘기는 공통 검색 파라미터(부서/운영그룹/배송일/계획ID 등)
-  const baseParams = () => model.filtersRef.current ?? {};
+  const baseParams = useCallback(() => {
+    const r = model.rawFiltersRef.current;
+    return {
+      DIV_CD: r.SRCH_DSPCH_DIV_CD,
+      LGST_GRP_CD: r.SRCH_DSPCH_LGST_GRP_CD,
+      DLVRY_DT: r.SRCH_DSPCH_DLVRY_DT,
+      PLN_ID: r.SRCH_DSPCH_PLN_ID,
+    };
+  }, [model.rawFiltersRef]);
 
   // ── 상단 조회 → 좌측(물동형) + 우측(고정/임시) 동시 로드 ────────
-  const fetchList = useCallback(
-    (params: Record<string, unknown>) =>
-      api.searchShpmVolumePerLocation(params),
-    [],
-  );
+  const fetchList = useCallback(() => {
+    return api.searchShpmVolumePerLocation(baseParams());
+  }, [baseParams]);
 
   const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.locationShpmVolume.setData(data);
       const p = baseParams();
+      // locationDspch 는 다이나믹 검색 파람 제외, 4개 키만 직접 전달
+      base.searchSub("locationDspch", api.searchDspchPerLocation(p));
       base.searchSub("dedicatedTruck", api.searchDedicatedTruckDispatchList(p));
       base.searchSub("tempTruck", api.searchTempTruckDispatchList(p));
     },

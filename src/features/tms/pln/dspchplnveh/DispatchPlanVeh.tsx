@@ -13,7 +13,6 @@ import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { OuterTabs } from "@/app/components/layout/OuterTabs";
-import { InlineSearchCondition } from "@/app/components/Search/InlineSearchCondition";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import FixedVehiclePanel from "./panel/FixedVehiclePanel";
 import DispatchDetailPop from "./popup/DispatchDetailPop";
@@ -24,12 +23,13 @@ import {
   LOCATION_DSPCH_COLUMN_DEFS,
   TEMP_TRUCK_COLUMN_DEFS,
 } from "./DispatchPlanVehColumns";
+import { Lang } from "@/app/services/common/Lang";
 
 export const MENU_CODE = "MENU_DISPATCH_PLAN_VEH";
 
 const LEFT_TABS = [
-  { key: "VOLUME", label: "물동형" },
-  { key: "DSPCH", label: "배차내역" },
+  { key: "VOLUME", label: Lang.get("LBL_SHPM_VOLUME") },
+  { key: "DSPCH", label: Lang.get("LBL_DISPATCH_DETAILS") },
 ];
 const RIGHT_TABS = [
   { key: "FIXED", label: "고정차량" },
@@ -89,23 +89,19 @@ export default function DispatchPlanVeh() {
 
   // 회전 클릭 / 임시용차 로우 클릭 → 배차상세정보 팝업
   const openDetail = () =>
-    openPopup({ width: "full", content: <DispatchDetailPop onClose={closePopup} /> });
+    openPopup({
+      width: "full",
+      content: <DispatchDetailPop onClose={closePopup} />,
+    });
 
   const [leftTab, setLeftTab] = useState("VOLUME");
   const [rightTab, setRightTab] = useState("FIXED");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [splitView, setSplitView] = useState(false);
-  const [frmLoc, setFrmLoc] = useState("");
-  const [toLoc, setToLoc] = useState("");
   const [leftOpen, setLeftOpen] = useState(true);
 
-  const leftExtra = () => ({ FRM_LOC_NM: frmLoc, TO_LOC_NM: toLoc });
-  const onLeftSearch = () =>
-    leftTab === "VOLUME" ? ctrl.loadVolume(leftExtra()) : ctrl.loadDspch(leftExtra());
   const onLeftTabChange = (key: string) => {
     setLeftTab(key);
-    if (key === "VOLUME") ctrl.loadVolume(leftExtra());
-    else ctrl.loadDspch(leftExtra());
   };
 
   const tempGrid = (
@@ -160,15 +156,10 @@ export default function DispatchPlanVeh() {
         </button>
       }
     >
-      <OuterTabs tabs={LEFT_TABS} activeTab={leftTab} onChange={onLeftTabChange} />
-      <InlineSearchCondition
-        open={leftOpen}
-        onOpenChange={setLeftOpen}
-        onSearch={onLeftSearch}
-        fields={[
-          { type: "text", label: "물동지", value: frmLoc, onChange: setFrmLoc },
-          { type: "text", label: "도착지", value: toLoc, onChange: setToLoc },
-        ]}
+      <OuterTabs
+        tabs={LEFT_TABS}
+        activeTab={leftTab}
+        onChange={onLeftTabChange}
       />
       <div className="flex-1 min-h-0">{leftGrid}</div>
     </Card>
@@ -198,7 +189,11 @@ export default function DispatchPlanVeh() {
       {/* 탭 + 분할 토글 버튼 */}
       <div className="flex items-center">
         <div className="flex-1 min-w-0">
-          <OuterTabs tabs={RIGHT_TABS} activeTab={rightTab} onChange={setRightTab} />
+          <OuterTabs
+            tabs={RIGHT_TABS}
+            activeTab={rightTab}
+            onChange={setRightTab}
+          />
         </div>
         <button
           type="button"
@@ -223,11 +218,17 @@ export default function DispatchPlanVeh() {
             minSizes={[25, 20]}
             storageKey="DSPCH_PLAN_VEH_RIGHT_SPLIT"
           >
-            <FixedVehiclePanel onOpenDetail={openDetail} />
+            <FixedVehiclePanel
+              rows={model.grids.dedicatedTruck.rows}
+              onOpenDetail={openDetail}
+            />
             {tempGrid}
           </SplitPane>
         ) : rightTab === "FIXED" ? (
-          <FixedVehiclePanel onOpenDetail={openDetail} />
+          <FixedVehiclePanel
+            rows={model.grids.dedicatedTruck.rows}
+            onOpenDetail={openDetail}
+          />
         ) : (
           tempGrid
         )}
@@ -239,6 +240,7 @@ export default function DispatchPlanVeh() {
     <GridOnlyPage
       menuCode={MENU_CODE}
       searchProps={{
+        moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),

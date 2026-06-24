@@ -15,7 +15,11 @@ const withSession = (payload: any = {}) => {
 };
 
 // dsSave 저장 공통 (URL params + body { dsSave })
-const dsSavePost = (url: string, rows: any[], extra: Record<string, any> = {}) =>
+const dsSavePost = (
+  url: string,
+  rows: any[],
+  extra: Record<string, any> = {},
+) =>
   apiClient.post<CommonResponse>(
     url,
     { dsSave: rows },
@@ -78,7 +82,10 @@ export const dispatchPlanVehApi = {
   // ── 배차취소 ──────────────────────────────────────────────────
   // 자차 배차 취소
   saveCancelPlanDedDispatch(rows: any[]) {
-    return dsSavePost("/dispatchPlanVehService/saveCancelPlanDedDispatch", rows);
+    return dsSavePost(
+      "/dispatchPlanVehService/saveCancelPlanDedDispatch",
+      rows,
+    );
   },
   // 용차 배차 취소 — 서버는 /dispatchPlanService 사용
   saveCancelPlanDispatchTemp(rows: any[]) {
