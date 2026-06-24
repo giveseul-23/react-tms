@@ -20,8 +20,6 @@ export const MENU_CODE = "MENU_CONTRACT_MGMT";
 export const AUTH = {
   grids: {
     main: "MAIN_GRID_CONTRACT_MGMT",
-    sub01: "SUB01_GRID_CONTRACT_MGMT",
-    sub02: "SUB02_GRID_CONTRACT_MGMT",
   },
 };
 
@@ -61,7 +59,6 @@ export default function Contract() {
               render: () => (
                 <DataGrid
                   {...model.bind("sub01")}
-                  authId={AUTH.grids.sub01}
                   columnDefs={SUB01_COLUMN_DEFS}
                   actions={ctrl.sub01Actions}
                 />
@@ -71,7 +68,6 @@ export default function Contract() {
               render: () => (
                 <DataGrid
                   {...model.bind("sub02")}
-                  authId={AUTH.grids.sub02}
                   columnDefs={SUB02_COLUMN_DEFS}
                   actions={ctrl.sub02Actions}
                 />

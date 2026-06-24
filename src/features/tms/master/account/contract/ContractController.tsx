@@ -1,14 +1,17 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
+import { newRid } from "@/app/feature/useBaseModel";
 import {
   makeAddAction,
   makeSaveAction,
   makeExcelGroupAction,
 } from "@/app/components/grid/actions/commonActions";
 import { dirtyRows, toDsSave } from "@/app/components/grid/gridUtils/rowStatus";
+import { getColumnError } from "@/app/components/grid/gridUtils/processColumn";
 import { Lang } from "@/app/services/common/Lang";
 import { contractApi as api } from "./ContractApi";
 import { MENU_CODE } from "./Contract";
+import { SUB02_COLUMN_DEFS } from "./ContractColumns";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { ContractModel, GridKey } from "./ContractModel";
@@ -21,6 +24,47 @@ export function useContractController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
 
+  const validateRows = useCallback(
+    (rows: any[], columns: any[]) => {
+      const targets = rows.filter(
+        (row) => row.EDIT_STS !== "D" && row.delStatus !== true,
+      );
+      const requiredMissing: string[] = [];
+      const formatErrors: string[] = [];
+
+      for (const row of targets) {
+        for (const col of columns) {
+          const field = col.field ?? col.colId;
+          if (!field) continue;
+
+          const label = col.noLang ? col.headerName : Lang.get(col.headerName);
+          const value = row[field];
+          const required =
+            col.required === true || col.validators?.required === true;
+
+          if (required && (value == null || value === "")) {
+            if (!requiredMissing.includes(label)) requiredMissing.push(label);
+            continue;
+          }
+
+          const error = getColumnError(col, value);
+          if (error && !formatErrors.includes(error)) formatErrors.push(error);
+        }
+      }
+
+      if (requiredMissing.length > 0) {
+        base.alert(`필수 입력 항목을 확인해주세요: ${requiredMissing.join(", ")}`);
+        return false;
+      }
+      if (formatErrors.length > 0) {
+        base.alert(formatErrors.join("\n"));
+        return false;
+      }
+      return true;
+    },
+    [base],
+  );
+
   // ── 메인 fetch (SearchFilters 의 fetchFn) ─────────────────────
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -29,12 +73,42 @@ export function useContractController({ model }: Args) {
 
   // ── 메인 행 클릭 — 사업장/매출계약 cascade reset/fetch ─────────
   const onMainGridClick = useCallback(
-    (row: any) =>
+    async (row: any) => {
+      const rows = model.grids.main.ref.current?.rows ?? [];
+      const hasDirty = rows.some(
+        (r: any) =>
+          r.EDIT_STS === "I" || r.EDIT_STS === "U" || r.EDIT_STS === "D",
+      );
+      if (hasDirty) return;
+
+      if (!row) {
+        base.resetGrids(["sub01", "sub02"]);
+        return;
+      }
+
       base.handleRowClick("main", row, [
         { to: "sub01", fetch: (r) => api.getBuplaList({ CUST_CD: r.CUST_CD }) },
         { to: "sub02", fetch: (r) => api.getCustCntrctList({ CUST_CD: r.CUST_CD }) },
-      ]),
-    [base],
+      ]);
+
+      if (row.EDIT_STS === "I" || !row.CUST_CD) return;
+
+      try {
+        const res: any = await api.searchOne({ CUST_CD: row.CUST_CD });
+        const detail = res?.data?.data?.dsOut;
+        if (!detail) return;
+        const patched = { ...row, ...detail };
+        model.grids.main.setData((prev: any) => ({
+          ...prev,
+          rows: (prev?.rows ?? []).map((r: any) =>
+            r.__rid__ === row.__rid__ ? { ...r, ...detail } : r,
+          ),
+        }));
+      } catch (e) {
+        console.error("[Contract.searchOne]", e);
+      }
+    },
+    [base, model],
   );
 
   // ── 메인 조회 콜백 — 첫 행 자동 선택 + cascade ───────────────
@@ -47,7 +121,15 @@ export function useContractController({ model }: Args) {
   );
 
   // ── 메인 추가/저장 ───────────────────────────────────────────
-  const onAddMain = useCallback(() => base.addRow("main", {}), [base]);
+  const onAddMain = useCallback(() => {
+    const row = { EDIT_STS: "I", __rid__: newRid() };
+    model.grids.main.setData((prev: any) => ({
+      ...prev,
+      rows: [...(prev?.rows ?? []), row],
+    }));
+    model.grids.main.setSelected(row);
+    base.resetGrids(["sub01", "sub02"]);
+  }, [base, model]);
   const onSaveMain = useCallback(
     () => base.saveGrid("main", api.save),
     [base],
@@ -89,6 +171,7 @@ export function useContractController({ model }: Args) {
       base.alert(Lang.get("MSG_SELECT_NO_DATA"));
       return;
     }
+    if (!validateRows(dirty, SUB02_COLUMN_DEFS)) return;
 
     const dsSave = toDsSave(dirty);
 
@@ -122,7 +205,7 @@ export function useContractController({ model }: Args) {
       return;
     }
     doSave("N");
-  }, [base, model.grids.sub02, model.grids.main]);
+  }, [base, model.grids.sub02, model.grids.main, validateRows]);
 
   // ── 그리드별 액션 ────────────────────────────────────────────
   const mainActions: ActionItem[] = useMemo(
@@ -142,7 +225,7 @@ export function useContractController({ model }: Args) {
 
   const sub01Actions: ActionItem[] = useMemo(
     () => [
-      makeAddAction({ onClick: onAddBupla }),
+      makeAddAction({ onClick: onAddBupla}),
       makeSaveAction({ onClick: onSaveBupla }),
       makeExcelGroupAction({
         excelColumns: () => model.grids.sub01.getExcelColumns(),
@@ -180,6 +263,7 @@ export function useContractController({ model }: Args) {
     fetchList,
     onSearchCallback,
     onMainGridClick,
+    onSaveMain,
     mainActions,
     sub01Actions,
     sub02Actions,
