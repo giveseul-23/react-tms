@@ -25,6 +25,7 @@ import {
   LOCATION_DSPCH_COLUMN_DEFS,
   DEDICATED_TRUCK_COLUMN_DEFS,
   TEMP_TRUCK_COLUMN_DEFS,
+  getFirstDispatchTripKey,
 } from "./DispatchPlanVehColumns";
 import { Lang } from "@/app/services/common/Lang";
 
@@ -90,12 +91,29 @@ export default function DispatchPlanVeh() {
   const ctrl = useDispatchPlanVehController({ model });
   const { openPopup, closePopup } = usePopup();
 
-  // 회전 클릭 / 임시용차 로우 클릭 → 배차상세정보 팝업
-  const openDetail = () =>
+  // 회전 클릭 / 임시용차 로우 클릭 → 배차상세정보 팝업 (배차번호 전달)
+  const openDetail = (row: Record<string, string>) => {
+    const srch = model.rawFiltersRef.current;
     openPopup({
       width: "full",
-      content: <DispatchDetailPop onClose={closePopup} />,
+      content: (
+        <DispatchDetailPop
+          initValue={{
+            VEH_ID: row.VEH_ID,
+            VEH_NO: row.VEH_NO,
+            DRVR_NM: row.DRVR_NM,
+            VEH_TP_CD: row.VEH_TP_CD,
+            DIV_CD: srch.SRCH_DSPCH_DIV_CD,
+            LGST_GRP_CD: srch.SRCH_DSPCH_LGST_GRP_CD,
+            PLN_ID: srch.SRCH_DSPCH_PLN_ID,
+            DLVRY_DT: srch.SRCH_DSPCH_DLVRY_DT,
+            DSPCH_NO: row.DSPCH_NO,
+          }}
+          onClose={closePopup}
+        />
+      ),
     });
+  };
 
   const [leftTab, setLeftTab] = useState("VOLUME");
   const [rightTab, setRightTab] = useState("FIXED");
@@ -131,7 +149,7 @@ export default function DispatchPlanVeh() {
           rowSelection="multiple"
           actions={ctrl.conActions}
           audit={false}
-          onRowDoubleClicked={openDetail}
+          onRowDoubleClicked={(row: any) => openDetail(row)}
           gridOptions={{ defaultColDef: NO_FILTER_COLDEF }}
         />
       </div>
@@ -149,7 +167,9 @@ export default function DispatchPlanVeh() {
           rowSelection="multiple"
           actions={ctrl.dedActions}
           audit={false}
-          onRowDoubleClicked={openDetail}
+          onRowDoubleClicked={(row: any) =>
+            openDetail({ ...row, DSPCH_NO: getFirstDispatchTripKey(row) })
+          }
           gridOptions={{ defaultColDef: NO_FILTER_COLDEF }}
         />
       </div>

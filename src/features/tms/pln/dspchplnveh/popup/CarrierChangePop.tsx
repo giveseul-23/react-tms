@@ -7,11 +7,16 @@
 import { useEffect, useState } from "react";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { Button } from "@/app/components/ui/button";
-import { Search } from "lucide-react";
+import { PopupSearchCondition } from "@/app/components/popup/PopupSearchCondition";
 import { dispatchPlanVehApi as api } from "../DispatchPlanVehApi";
 
 type Props = {
-  initialValues: { LGST_GRP_CD?: string };
+  initialValues: {
+    LGST_GRP_CD?: string;
+    DSPCH_NO?: string;
+    PLN_WGT?: string | number;
+    VEH_TP_NM?: string;
+  };
   onConfirm: (data: { CARR_CD: string; VEH_ID: string }) => void;
   onClose: () => void;
 };
@@ -35,6 +40,10 @@ export default function CarrierChangePop({
   onClose,
 }: Props) {
   const lgstGrpCd = initialValues.LGST_GRP_CD ?? "";
+  const dspchNo = String(initialValues.DSPCH_NO ?? "");
+  const plnWgt = String(initialValues.PLN_WGT ?? "");
+  const tonType = String(initialValues.VEH_TP_NM ?? "");
+  const [carrCd, setCarrCd] = useState("");
   const [carrNm, setCarrNm] = useState("");
   const [carriers, setCarriers] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -44,7 +53,11 @@ export default function CarrierChangePop({
     setVehicles([]);
     setSel(null);
     api
-      .searchTempCarrierToChange({ LGST_GRP_CD: lgstGrpCd, CARR_NM: carrNm })
+      .searchTempCarrierToChange({
+        LGST_GRP_CD: lgstGrpCd,
+        CARR_CD: carrCd,
+        CARR_NM: carrNm,
+      })
       .then((res) => setCarriers(rowsOf(res)));
   };
 
@@ -64,19 +77,18 @@ export default function CarrierChangePop({
 
   return (
     <div className="flex flex-col gap-2 w-full" style={{ height: "60vh" }}>
-      {/* 검색 */}
-      <div className="flex items-center gap-2 px-1">
-        <span className="text-[11px] text-slate-500">운수사명</span>
-        <input
-          value={carrNm}
-          onChange={(e) => setCarrNm(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && searchCarriers()}
-          className="h-7 px-2 text-[11px] border border-input rounded-md bg-input-background outline-none"
-        />
-        <Button size="sm" variant="outline" onClick={searchCarriers} className="h-7 px-3 text-xs gap-1">
-          <Search className="w-3 h-3" /> 조회
-        </Button>
-      </div>
+      {/* 검색조건 — 표준 카드형 (PopupSearchCondition) */}
+      <PopupSearchCondition
+        columns={3}
+        fields={[
+          { label: "LBL_CARR_CD", type: "text", value: carrCd, onChange: setCarrCd },
+          { label: "LBL_CARR_NM", type: "text", value: carrNm, onChange: setCarrNm },
+          { label: "LBL_DISPATCH_NO", type: "text", value: dspchNo, onChange: () => {}, disable: true },
+          { label: "LBL_WGT", type: "text", value: plnWgt, onChange: () => {}, disable: true },
+          { label: "LBL_TON_TYPE", type: "text", value: tonType, onChange: () => {}, disable: true },
+        ]}
+        onSearch={searchCarriers}
+      />
       <div className="flex-1 min-h-0 flex gap-2">
         <div className="w-[45%] min-h-0">
           <DataGrid

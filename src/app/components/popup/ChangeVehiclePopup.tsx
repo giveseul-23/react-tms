@@ -111,6 +111,11 @@ export default function ChangeVehiclePopup({
     { field: "VEH_TP_CD", sendField: "VEH_TP_CD", hide: true },
     { field: "DRVR_ID", sendField: "DRVR_ID", hide: true },
     {
+      field: "PAY_CARR_CD",
+      sendField: "PAY_CARR_CD",
+      hide: true,
+    },
+    {
       headerName: "LBL_CARRIER_CODE",
       field: "CARR_CD",
       sendField: "CARR_CD",

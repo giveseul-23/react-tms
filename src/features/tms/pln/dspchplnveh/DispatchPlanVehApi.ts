@@ -125,8 +125,11 @@ export const dispatchPlanVehApi = {
 
   // ── 배차생성/복화/복사 ──────────────────────────────────────
   // 복화운송생성 — 서버 /dispatchPlanService
-  saveCreateContinuousMove(rows: any[]) {
-    return dsSavePost("/dispatchPlanService/saveCreateContinuousMove", rows);
+  saveCreateItineraryGroupDispatch(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanAdService/saveCreateItineraryGroupDispatch",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
   },
   // 용차 배차복사
   copyTempDispatch(payload: any) {
@@ -281,6 +284,77 @@ export const dispatchPlanVehApi = {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/cancelDspchMemo",
       withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
+  //디테일 팝업 조회
+  searchDispatchPop(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/searchDispatch",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 할당 주문 조회
+  searchAssignedShipment(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchAssignedShipment",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 배송경로(경유지) 조회
+  searchPlanStop(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/searchPlanStop",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 미할당 주문조회
+  getUnallocOrderList(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchUnAssignedShipment",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 할당 주문 품목 조회
+  searchAssignedShipmentDetail(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchAssignedShipmentDetail",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 미할당 주문 품목 조회
+  searchUnAssignedShipmentDetail(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchUnAssignedShipmentDetail",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 주문할당 (미할당 → 선택 배차)
+  saveAssignedShipment(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAssignedShipment",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  //디테일 배송경로 ETA 예측
+  predictEta(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/mapService/updateStopEstAndCalDTTM",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 배송경로 ETA 계산
+  calcEta(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/mapService/updateCalDTTM",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 배송경로 경유순서 저장
+  saveStopOrder(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveStopOrder",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 };
