@@ -50,10 +50,8 @@ export default function TenderDispatch() {
           onRowClicked={ctrl.onMainGridClick}
           rowSelection="multiple"
           audit={{
-            insertPerson: true,
-            insertDate: true,
-            updatePerson: true,
-            updateTime: true,
+            delete: false,
+            rowStatus: false,
           }}
         />
       }

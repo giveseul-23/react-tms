@@ -18,20 +18,15 @@ const DSPCH_OP_STS_STYLE: Record<string, { backgroundColor: string; color?: stri
   "2001": { backgroundColor: "#000000", color: "#fff" },
 };
 
-// 센차 setDispatchOperationStatusColor 대응 — 배차진행상태 셀 배경/글자색.
-// 매핑이 비어있으면 기본 스타일(영향 없음).
+// Sencha setDispatchOperationStatusColor 대응 — 배차진행상태 셀 배경/글자색.
 const dispatchStatusCellStyle = (p: any) => {
-  const cls = DISPATCH_STATUS_COLOR_MAP[p.value];
-  if (!cls) return undefined;
-  // TODO: 색상 클래스명만 정해지면 cellClass 로 전환. 현재는 매핑 미정으로 미적용.
-  return undefined;
   const code = String(parseInt(p?.data?.DSPCH_OP_STS ?? p?.value ?? "", 10));
   const color = DSPCH_OP_STS_STYLE[code];
   return { textAlign: "center" as const, fontWeight: "bold" as const, ...(color ?? {}) };
 };
 
 // ── 메인 그리드 (센차 TenderDispatchMain) ──
-// audit 컬럼(CRE_USR_ID/CRE_DTTM/UPD_USR_ID/UPD_DTTM)은 DataGrid audit 으로 자동 처리 → 생략.
+// audit: 레거시는 CRE/UPD 4컬럼만 있고 삭제·행상태(EDIT_STS) 없음 → View audit 옵션 참고.
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
@@ -46,7 +41,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpSts",
-    align: "center",
+    width: 80,
     cellStyle: dispatchStatusCellStyle,
   },
   { field: "CARR_CD", hide: true },
