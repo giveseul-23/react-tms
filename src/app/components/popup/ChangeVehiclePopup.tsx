@@ -1,9 +1,9 @@
 "use client";
 
-// 차량변경 팝업 — 등록차량(지입)/용차/가상차량 중 선택해 배차 차량을 교체.
-// 서버 DispatchPlanController.popChangeVeh + ChangeVehiclePop 대응.
-//   조회: /dispatchPlanService/searchDispatchChangeVehiclePop (VEH_OP_TP 별)
-//   선택 차량 필드를 onConfirm payload 로 반환 → 부모가 saveChangeVehicle 호출.
+// 차량변경 공통 팝업 — 등록차량(지입)/용차/가상차량 중 선택해 배차 차량을 교체.
+//  서버 조회: /dispatchPlanService/searchDispatchChangeVehiclePop (VEH_OP_TP 별).
+//  조회 호출은 화면마다 다르므로 fetchVehicles 를 주입받는다(여러 화면 공용).
+//  선택 차량 필드를 onConfirm payload 로 반환 → 부모가 후처리(저장/다음 팝업).
 
 import { useEffect, useState } from "react";
 import { useCommonStores } from "@/hooks/useCommonStores";
@@ -12,22 +12,28 @@ import {
   GridSearchPopupLayout,
   type GridSearchField,
 } from "@/app/components/popup/GridSearchPopupLayout";
-import { dispatchPlanApi as api } from "../dispatchPlanApi";
 
 type Props = {
   onConfirm: (payload: Record<string, any>) => void;
   onClose: () => void;
-  // popChangeVeh 가 넘기는 값: LGST_GRP_CD / DSPCH_NO / ORG_VEH_ID(변경 전 차량) / showType
+  /** 변경 가능 차량 목록 조회 (화면 api 주입) */
+  fetchVehicles: (params: Record<string, any>) => Promise<any>;
+  // LGST_GRP_CD / DSPCH_NO / ORG_VEH_ID(변경 전 차량) / showType
   initialValues?: Record<string, any>;
+  /** 지정 시 차량운영유형을 이 값으로 고정(잠금) — 다른 유형 조회 불가. 예: "100"(지입차). */
+  lockVehOpTp?: string;
 };
 
-export default function ChangeVehiclePop({
+export default function ChangeVehiclePopup({
   onConfirm,
   onClose,
+  fetchVehicles,
   initialValues = {},
+  lockVehOpTp,
 }: Props) {
   const LGST_GRP_CD = initialValues.LGST_GRP_CD ?? "";
   const DSPCH_NO = initialValues.DSPCH_NO ?? "";
+  const ORG_VEH_ID = initialValues.ORG_VEH_ID ?? "";
 
   const [rows, setRows] = useState<any[]>([]);
   const [carrCd, setCarrCd] = useState("");
@@ -35,9 +41,9 @@ export default function ChangeVehiclePop({
   const [vehId, setVehId] = useState("");
   const [vehTpCd, setVehTpCd] = useState("");
   const [vehNo, setVehNo] = useState("");
-  // 차량운영유형 — 지입(100)/용차(110)/가상(999). 기본은 호출측 showType 또는 지입.
+  // 차량운영유형 — 지입(100)/용차(110)/가상(999). lockVehOpTp 지정 시 그 값으로 고정.
   const [vehOpTp, setVehOpTp] = useState<string>(
-    initialValues.showType ?? "100",
+    lockVehOpTp ?? initialValues.showType ?? "100",
   );
 
   const { stores, codeMap } = useCommonStores({
@@ -48,17 +54,17 @@ export default function ChangeVehiclePop({
   const showError = useErrorAlert();
 
   const fetchData = () => {
-    api
-      .searchChangeVehicle({
-        LGST_GRP_CD,
-        DSPCH_NO,
-        CARR_CD: carrCd,
-        CARR_NM: carrNm,
-        VEH_ID: vehId,
-        VEH_TP_CD: vehTpCd,
-        VEH_NO: vehNo,
-        VEH_OP_TP: vehOpTp,
-      })
+    fetchVehicles({
+      LGST_GRP_CD,
+      DSPCH_NO,
+      ORG_VEH_ID,
+      CARR_CD: carrCd,
+      CARR_NM: carrNm,
+      VEH_ID: vehId,
+      VEH_TP_CD: vehTpCd,
+      VEH_NO: vehNo,
+      VEH_OP_TP: vehOpTp,
+    })
       .then((res: any) => {
         if (res?.data?.success === false) {
           showError(res.data?.msg ?? "조회에 실패했습니다.");
@@ -89,6 +95,8 @@ export default function ChangeVehiclePop({
       type: "combo",
       options: stores.vehOpTp,
       placeholder: "선택",
+      // 잠금 시 지정 유형만 조회 (변경 불가)
+      disable: !!lockVehOpTp,
     },
     { label: "운송사코드", value: carrCd, onChange: setCarrCd },
     { label: "운송사명", value: carrNm, onChange: setCarrNm },

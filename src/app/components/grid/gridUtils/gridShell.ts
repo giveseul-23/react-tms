@@ -34,12 +34,13 @@ export const GRID_HEADER_HEIGHT = 28;
 /** AG-Grid rowHeight prop 기본값 */
 export const GRID_ROW_HEIGHT = 22;
 
-/** 선택 컬럼(체크박스) 정의 — DataGrid/TreeGrid 동일 */
+/** 선택 컬럼(체크박스) 정의 — DataGrid/TreeGrid 동일. 좌측 고정(pinned 데이터 컬럼 앞 유지) */
 export const SELECTION_COLUMN_DEF = {
   headerClass: "ag-selection-header-center",
   width: 30,
   minWidth: 30,
   maxWidth: 30,
+  pinned: "left",
 } as const;
 
 /** defaultColDef 공통 부분 — sortable 은 그리드별로 override (TreeGrid 는 false) */

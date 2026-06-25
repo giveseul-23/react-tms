@@ -1,9 +1,10 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { SidePanel } from "@/app/components/layout/SidePanel";
-import VehicleLocationPanel from "./panel/VehicleLocationPanel";
+import { ContentSidePanel } from "@/app/components/layout/ContentSidePanel";
+import VehicleLocationSidePanel from "@/app/components/map/VehicleLocationSidePanel";
 import DriveRoutePanel from "./panel/DriveRoutePanel";
+import { dispatchPlanApi as locApi } from "./dispatchPlanApi";
 import { InlineSearchCondition } from "@/app/components/Search/InlineSearchCondition";
 import type { GridSearchField } from "@/app/components/popup/PopupSearchCondition";
 import { SplitPane } from "@/app/components/layout/SplitPane";
@@ -26,6 +27,17 @@ import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import { Lang } from "@/app/services/common/Lang";
 
 export const MENU_CODE = "MENU_DISPATCH_PLAN";
+
+// 차량위치 패널 위치 조회 — 차량별 getVehiclePosition 을 모아서 수행
+const fetchVehPositions = (ids: string[]) =>
+  Promise.all(
+    ids.map((id) =>
+      locApi
+        .getVehiclePosition(id)
+        .then((res: any) => res.data?.result ?? res.data?.data?.dsOut ?? [])
+        .catch(() => []),
+    ),
+  ).then((lists) => lists.flat());
 
 // 서버 리소스 권한 authId (센차 grid.authId). 그리드별 authId 단일 소스.
 export const AUTH = {
@@ -268,6 +280,7 @@ export default function DispatchPlan() {
             codeMap={model.codeMap}
             actions={ctrl.mainActions}
             onRowClicked={ctrl.onMainGridClick}
+            onSelectionRowsChanged={ctrl.onMainSelectionForVehLoc}
             rowSelection="multiple"
             audit={{ delete: false }}
           />
@@ -424,23 +437,25 @@ export default function DispatchPlan() {
         }
       />
 
-      <SidePanel
+      <VehicleLocationSidePanel
         open={model.vehLocPanelOpen}
         onClose={() => model.setVehLocPanelOpen(false)}
-        title="BTN_SHOW_VEHICLE_LOCATION"
-        width={520}
-      >
-        <VehicleLocationPanel rows={model.vehLocRows} />
-      </SidePanel>
+        vehIds={(model.vehLocRows ?? [])
+          .map((r: any) => r?.VEH_ID)
+          .filter(Boolean)
+          .map(String)}
+        fetchPositions={fetchVehPositions}
+        emptyText="배차를 선택하세요."
+      />
 
-      <SidePanel
+      <ContentSidePanel
         open={model.routePanelOpen}
         onClose={() => model.setRoutePanelOpen(false)}
         title="BTN_SHOW_ROUTE"
         width={520}
       >
         <DriveRoutePanel row={model.grids.main.selected} />
-      </SidePanel>
+      </ContentSidePanel>
     </>
   );
 }

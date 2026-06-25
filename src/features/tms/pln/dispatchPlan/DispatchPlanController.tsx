@@ -15,14 +15,14 @@ import type { DispatchPlanModel, GridKey } from "./DispatchPlanModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { Lang } from "@/app/services/common/Lang";
 import { usePopup } from "@/app/components/popup/PopupContext";
-import ChangeVehiclePop from "./popup/ChangeVehiclePop";
+import ChangeVehiclePopup from "@/app/components/popup/ChangeVehiclePopup";
 import CreateEmptyDispatchVehiclePop from "./popup/CreateEmptyDispatchVehiclePop";
 import SplitQtyPop from "./popup/SplitQtyPop";
 import ChangeDlvryDatePop from "./popup/ChangeDlvryDatePop";
 import RegiSpotPop from "./popup/RegiSpotPop";
 import CreateItineraryDispatchPop from "./popup/CreateItineraryDispatchPop";
 import CreateItineraryGrpDispatchPop from "./popup/CreateItineraryGrpDispatchPop";
-import TruckDispatchConfirmMemoPop from "./popup/TruckDispatchConfirmMemoPop";
+import DispatchMemoPopup from "@/app/components/popup/DispatchMemoPopup";
 import PredictEstimateTimetoArrivalPop from "./popup/PredictEstimateTimetoArrivalPop";
 import CreateQtyDispatchPop from "./popup/CreateQtyDispatchPop";
 import { showErrorModal } from "@/app/components/popup/showErrorModal";
@@ -44,7 +44,7 @@ export function useDispatchPlanController({ model }: Args) {
 
   // master 클릭 → stop, allocOrder cascade (unalloc 은 별도 조회)
   const onMainGridClick = useCallback(
-    (row: any) =>
+    (row: any) => {
       base.handleRowClick(
         "main",
         row,
@@ -59,8 +59,11 @@ export function useDispatchPlanController({ model }: Args) {
           },
         ],
         { alsoReset: ["unallocOrder", "allocSub", "unallocSub"] },
-      ),
-    [base],
+      );
+      // 차량위치 패널이 열려 있으면 클릭한 차량으로 패널 리프레시
+      if (model.vehLocPanelOpen && row) model.setVehLocRows([row]);
+    },
+    [base, model],
   );
 
   const onSearchCallback = useCallback(
@@ -235,7 +238,8 @@ export function useDispatchPlanController({ model }: Args) {
         title: "BTN_VEHICLE_CHANGE",
         width: "4xl",
         content: (
-          <ChangeVehiclePop
+          <ChangeVehiclePopup
+            fetchVehicles={(p) => api.searchChangeVehicle(p)}
             initialValues={{
               LGST_GRP_CD: main.LGST_GRP_CD,
               DSPCH_NO: main.DSPCH_NO,
@@ -628,12 +632,14 @@ export function useDispatchPlanController({ model }: Args) {
         title: "LBL_MEMO",
         width: "4xl",
         content: (
-          <TruckDispatchConfirmMemoPop
+          <DispatchMemoPopup
             row={rows[0]}
             statusLabel={
               model.codeMap.dspchOpSts?.[rows[0].DSPCH_OP_STS] ??
               String(rows[0].DSPCH_OP_STS ?? "")
             }
+            fetchMemo={(dspchNo) => api.searchDispatchMemo({ DSPCH_NO: dspchNo })}
+            saveMemo={(record) => api.saveDispatchMemo(record)}
             onSaved={() => {
               closePopup();
               base.search();
@@ -892,12 +898,21 @@ export function useDispatchPlanController({ model }: Args) {
     api.saveDispatchPlan({ dsSave: dirty }).then(() => base.search());
   }, [model, base]);
 
+  // 이 화면은 팝업이 아니라 우측 사이드패널(VehicleLocationSidePanel)로 차량위치를 표시
   const onShowVehicleLocation = useCallback(
     (e: any) => {
       const rows = (e?.data ?? []) as any[];
       model.setVehLocRows(rows);
       model.setRoutePanelOpen(false);
       model.setVehLocPanelOpen(true);
+    },
+    [model],
+  );
+
+  // 차량위치 패널이 열려 있을 때 체크(다중 선택) 변경 시 선택 차량으로 리프레시
+  const onMainSelectionForVehLoc = useCallback(
+    (rows: any[]) => {
+      if (model.vehLocPanelOpen) model.setVehLocRows(rows ?? []);
     },
     [model],
   );
@@ -1258,6 +1273,7 @@ export function useDispatchPlanController({ model }: Args) {
     fetchDispatchPlanList: fetchList,
     onSearchCallback,
     onMainGridClick,
+    onMainSelectionForVehLoc,
     onAllocOrderRowClicked,
     onUnallocOrderRowClicked,
     mainActions,

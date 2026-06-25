@@ -76,6 +76,7 @@ declare module "ag-grid-community" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface AbstractColDef<TData = any, TValue = any> {
     insertable?: boolean;
+    pinned?: boolean | "left" | "right" | null; // 컬럼 좌/우 고정 (ColDef 동일 타입)
   }
 }
 

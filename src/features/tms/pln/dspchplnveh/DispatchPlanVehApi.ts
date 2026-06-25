@@ -15,7 +15,11 @@ const withSession = (payload: any = {}) => {
 };
 
 // dsSave 저장 공통 (URL params + body { dsSave })
-const dsSavePost = (url: string, rows: any[], extra: Record<string, any> = {}) =>
+const dsSavePost = (
+  url: string,
+  rows: any[],
+  extra: Record<string, any> = {},
+) =>
   apiClient.post<CommonResponse>(
     url,
     { dsSave: rows },
@@ -78,7 +82,10 @@ export const dispatchPlanVehApi = {
   // ── 배차취소 ──────────────────────────────────────────────────
   // 자차 배차 취소
   saveCancelPlanDedDispatch(rows: any[]) {
-    return dsSavePost("/dispatchPlanVehService/saveCancelPlanDedDispatch", rows);
+    return dsSavePost(
+      "/dispatchPlanVehService/saveCancelPlanDedDispatch",
+      rows,
+    );
   },
   // 용차 배차 취소 — 서버는 /dispatchPlanService 사용
   saveCancelPlanDispatchTemp(rows: any[]) {
@@ -169,6 +176,111 @@ export const dispatchPlanVehApi = {
     return apiClient.post<CommonResponse>(
       "/tenderReceiveDispatchService/sendSmsPop",
       withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
+  // ── 팝업 조회 ────────────────────────────────────────────────
+  // 운수사변경 — 운수사 목록(master)
+  searchTempCarrierToChange(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/searchTempCarrierToChange",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 운수사변경 — 운수사별 차량(sub)
+  searchTempCarrierVehicleToChange(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/searchTempCarrierVehicleToChange",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 톤급변경 — 톤그룹 목록(master)
+  searchTempTonGroupToChange(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/searchTempTonGroupToChange",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 톤급변경 — 그룹별 톤급(sub)
+  searchVehicleTypeToChange(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/searchVehicleTypeToChange",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 차량변경(용차→자차) — 차량 목록(지입/용차/택배, VEH_OP_TP 구분)
+  searchDispatchChangeVehiclePop(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchDispatchChangeVehiclePop",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 계약차 신규배차 — 차량 목록
+  searchVehiclePop(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/vehicleService/searchVehiclePop",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 차량위치(GPS) 최신 위치.
+  //  서버가 listMap.getParameterMap().get("VEH_ID") 로 읽으므로 body 가 아닌 query params 로 보낸다.
+  //  VEH_ID 배열은 반복 파라미터(VEH_ID=a&VEH_ID=b, 대괄호 없음)로 직렬화해야 서버가 List 로 인식.
+  getLatestVehicleLocation(
+    payload: { VEH_ID: string[] } & Record<string, any>,
+  ) {
+    return apiClient.post<CommonResponse>(
+      "/mapService/getLatestVehicleLocation",
+      {},
+      {
+        params: { ...getSessionFields(), MENU_CD: MENU_CODE, ...payload },
+        paramsSerializer: { indexes: null },
+      },
+    );
+  },
+
+  // ── 팝업 저장/처리 ──────────────────────────────────────────
+  // 자차↔자차 차량교환(DtoD)
+  dedicatedTrckChange(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/dedicatedTrckChange",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 용차→자차 변경(TtoD)
+  saveTempDspchToDedicatedTrck(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/saveTempDspchToDedicatedTrck",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 계약차 신규배차 생성 (dsSave)
+  saveCreateEmptyDispatchCntrVeh(rows: any[]) {
+    return dsSavePost(
+      "/dispatchPlanVehService/saveCreateEmptyDispatchCntrVeh",
+      rows,
+    );
+  },
+
+  // ── 배차메모 (공통 DispatchMemoPopup) — 서버 /dispatchPlanService ──
+  // 기존 4메모 조회 (배차번호 기준)
+  searchDispatchMemo(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/searchDispatchMemo",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 4메모 머지 단건 저장
+  saveDispatchMemo(record: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveDispatchMemo",
+      withSession({ MENU_CD: MENU_CODE, dsSave: [record] }),
+    );
+  },
+  // 메모 등록취소 (선택행)
+  cancelDspchMemo(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/cancelDspchMemo",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
     );
   },
 };
