@@ -35,6 +35,7 @@ export default function DspchContainer2() {
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           rowSelection="multiple"
+          audit={{ insertPerson: false, insertDate: false, updatePerson: false, updateTime: false, delete: false }}
         />
       }
     />
