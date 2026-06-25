@@ -1,4 +1,22 @@
-import { DISPATCH_STATUS_COLOR_MAP } from "./TenderDispatchModel";
+const DSPCH_OP_STS_STYLE: Record<string, { backgroundColor: string; color?: string }> = {
+  "2000": { backgroundColor: "#4D4D4D", color: "#fff" },
+  "2010": { backgroundColor: "#ffffff" },
+  "2020": { backgroundColor: "#edeff4", color: "#000" },
+  "2030": { backgroundColor: "#dbdfe8", color: "#000" },
+  "2040": { backgroundColor: "#FFD85D", color: "#000" },
+  "2050": { backgroundColor: "#b6bfd2", color: "#000" },
+  "2060": { backgroundColor: "#FFD85D", color: "#000" },
+  "2070": { backgroundColor: "#929fbb", color: "#fff" },
+  "2073": { backgroundColor: "#8090b0", color: "#fff" },
+  "2075": { backgroundColor: "#6d80a4", color: "#fff" },
+  "2080": { backgroundColor: "#5b7099", color: "#fff" },
+  "2090": { backgroundColor: "#49608d", color: "#fff" },
+  "2100": { backgroundColor: "#375082", color: "#fff" },
+  "2103": { backgroundColor: "#244077", color: "#fff" },
+  "2105": { backgroundColor: "#12306b", color: "#fff" },
+  "2110": { backgroundColor: "#002060", color: "#fff" },
+  "2001": { backgroundColor: "#000000", color: "#fff" },
+};
 
 // 센차 setDispatchOperationStatusColor 대응 — 배차진행상태 셀 배경/글자색.
 // 매핑이 비어있으면 기본 스타일(영향 없음).
@@ -7,6 +25,9 @@ const dispatchStatusCellStyle = (p: any) => {
   if (!cls) return undefined;
   // TODO: 색상 클래스명만 정해지면 cellClass 로 전환. 현재는 매핑 미정으로 미적용.
   return undefined;
+  const code = String(parseInt(p?.data?.DSPCH_OP_STS ?? p?.value ?? "", 10));
+  const color = DSPCH_OP_STS_STYLE[code];
+  return { textAlign: "center" as const, fontWeight: "bold" as const, ...(color ?? {}) };
 };
 
 // ── 메인 그리드 (센차 TenderDispatchMain) ──
@@ -28,13 +49,7 @@ export const MAIN_COLUMN_DEFS = [
     align: "center",
     cellStyle: dispatchStatusCellStyle,
   },
-  {
-    type: "text",
-    headerName: "LBL_CARRIER_CODE",
-    field: "CARR_CD",
-    align: "center",
-    hide: true,
-  },
+  { field: "CARR_CD", hide: true },
   {
     type: "text",
     headerName: "LBL_CARRIER_NAME",
@@ -42,7 +57,7 @@ export const MAIN_COLUMN_DEFS = [
     align: "left",
   },
   {
-    type: "popup",
+    type: "text",
     headerName: "LBL_DEPARTURE_CODE",
     field: "FRM_LOC_CD",
     align: "center",
@@ -82,7 +97,6 @@ export const MAIN_COLUMN_DEFS = [
     field: "PLN_FLEX_QTY2_RT",
   },
   { type: "numeric", headerName: "LBL_FLEX_QTY3", field: "PLN_FLEX_QTY3" },
-  // 센차 원본은 FQ3 적재율 dataIndex 가 PLN_FLEX_QTY1_RT 로 오기재 → PLN_FLEX_QTY3_RT 로 보정.
   {
     type: "numeric",
     headerName: "LBL_LOADING_RATE_FLEX_QTY3",
@@ -101,13 +115,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "PLN_FLEX_QTY5_RT",
   },
   { type: "numeric", headerName: "LBL_STOP_CNT", field: "STOP_CNT" },
-  {
-    type: "text",
-    headerName: "LBL_DISPATCH_PLAN_TYPE",
-    field: "DSPCH_TP",
-    align: "center",
-    hide: true,
-  },
+  { field: "DSPCH_TP", hide: true },
   {
     type: "date",
     headerName: "LBL_REQUESTED_DELIVERY_DATE",
@@ -122,13 +130,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "LGST_GRP_CD",
     align: "center",
   },
-  {
-    type: "text",
-    headerName: "LBL_VEHICLE_TYPE_CODE",
-    field: "VEH_TP_CD",
-    align: "center",
-    hide: true,
-  },
+  { field: "VEH_TP_CD", hide: true },
   {
     type: "text",
     headerName: "LBL_VEHICLE_TYPE_NAME",
@@ -155,74 +157,18 @@ export const MAIN_COLUMN_DEFS = [
   },
   { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO", align: "center" },
   // hidden (운송요청/매입정산/연계배차/보조원)
-  {
-    type: "text",
-    headerName: "운송요청ID",
-    field: "TNDR_REQ_ID",
-    noLang: true,
-    align: "center",
-    hide: true,
-  },
-  {
-    type: "text",
-    headerName: "운송요청자",
-    field: "TNDR_REQ_USR_ID",
-    noLang: true,
-    align: "center",
-    hide: true,
-  },
-  {
-    type: "text",
-    headerName: "운송요청일시",
-    field: "TNDR_REQ_DTTM",
-    noLang: true,
-    align: "center",
-    hide: true,
-  },
-  {
-    type: "text",
-    headerName: "매입정산진행상태",
-    field: "AP_FI_STS",
-    noLang: true,
-    align: "center",
-    hide: true,
-  },
-  {
-    type: "text",
-    headerName: "매입정산처리유형",
-    field: "AP_PROC_TP",
-    noLang: true,
-    align: "center",
-    hide: true,
-  },
-  {
-    type: "text",
-    headerName: "연계배차ID",
-    field: "TRIP_ID",
-    noLang: true,
-    align: "center",
-    hide: true,
-  },
-  {
-    type: "text",
-    headerName: "보조원ID",
-    field: "ASST_ID",
-    noLang: true,
-    align: "center",
-    hide: true,
-  },
-  {
-    type: "text",
-    headerName: "보조원명",
-    field: "ASST_NM",
-    noLang: true,
-    align: "center",
-    hide: true,
-  },
+  { field: "TNDR_REQ_ID", hide: true },
+  { field: "TNDR_REQ_USR_ID", hide: true },
+  { field: "TNDR_REQ_DTTM", hide: true },
+  { field: "AP_FI_STS", hide: true },
+  { field: "AP_PROC_TP", hide: true },
+  { field: "TRIP_ID", hide: true },
+  { field: "ASST_ID", hide: true },
+  { field: "ASST_NM", hide: true },
 ];
 
 // ── sub01: 경유지/착지 (센차 TenderDispatchSub01) — summaryType:sum → summable ──
-export const SUB01_COLUMN_DEFS = () => [
+export const SUB01_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -344,7 +290,7 @@ export const SUB01_COLUMN_DEFS = () => [
 ];
 
 // ── sub02: 배차된 운송지시 (센차 TenderDispatchSub02) ──
-export const SUB02_COLUMN_DEFS = () => [
+export const SUB02_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_ORDER_NO", field: "ORD_NO", align: "center", width: 150 },
   {
@@ -353,14 +299,7 @@ export const SUB02_COLUMN_DEFS = () => [
     field: "CUST_ORD_NO",
     align: "center",
   },
-  {
-    type: "text",
-    headerName: "LBL_DESTINATION_CODE",
-    field: "TO_LOC_ID",
-    align: "center",
-    width: 160,
-    hide: true,
-  },
+  { field: "TO_LOC_ID", hide: true },
   {
     type: "text",
     headerName: "LBL_DESTINATION_CODE",
@@ -406,13 +345,7 @@ export const SUB02_COLUMN_DEFS = () => [
   },
   { type: "text", headerName: "LBL_CUSTOMER_CODE", field: "CUST_CD", align: "center" },
   { type: "text", headerName: "LBL_CUSTOMER_NAME", field: "CUST_NM", align: "left" },
-  {
-    type: "text",
-    headerName: "LBL_DEPARTURE_CODE",
-    field: "FRM_LOC_ID",
-    width: 160,
-    hide: true,
-  },
+  { field: "FRM_LOC_ID", hide: true },
   {
     type: "text",
     headerName: "LBL_DEPARTURE_CODE",
@@ -459,22 +392,10 @@ export const SUB02_COLUMN_DEFS = () => [
 ];
 
 // ── sub03: 운송지시 상세/품목 (센차 TenderDispatchSub03) — summaryType:sum → summable ──
-export const SUB03_COLUMN_DEFS = () => [
+export const SUB03_COLUMN_DEFS = [
   { headerName: "No" },
-  {
-    type: "text",
-    headerName: "LBL_ITEM_CODE",
-    field: "CUST_ITEM_CD",
-    align: "left",
-    width: 160,
-  },
-  {
-    type: "text",
-    headerName: "LBL_ITEM_NAME",
-    field: "CUST_ITEM_NM",
-    align: "left",
-    width: 160,
-  },
+  { type: "text", headerName: "LBL_ITEM_CODE", field: "CUST_ITEM_CD" },
+  { type: "text", headerName: "LBL_ITEM_NAME", field: "CUST_ITEM_NM" },
   { type: "numeric", headerName: "LBL_VOL", field: "PLN_VOL", summable: true },
   { type: "numeric", headerName: "LBL_WGT", field: "PLN_WGT", summable: true },
   {
