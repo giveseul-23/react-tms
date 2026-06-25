@@ -26,7 +26,7 @@ export function useDspchContainerController({ model }: Args) {
     return {
       LGST_GRP_CD: s.SRCH_DSPCH_LGST_GRP_CD ?? "",
       DIV_CD: s.SRCH_DSPCH_DIV_CD ?? "",
-      DLVRY_DT_FROM: s.SRCH_DSPCH_DLVRY_DT_FROM ?? "",
+      DLVRY_DT_FROM: s.SRCH_DSPCH_DLVRY_DT_FRM ?? "",
       DLVRY_DT_TO: s.SRCH_DSPCH_DLVRY_DT_TO ?? "",
     };
   }, [model.rawFiltersRef]);
