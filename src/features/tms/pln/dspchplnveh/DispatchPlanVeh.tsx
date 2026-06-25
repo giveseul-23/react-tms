@@ -92,7 +92,7 @@ export default function DispatchPlanVeh() {
   const { openPopup, closePopup } = usePopup();
 
   // 회전 클릭 / 임시용차 로우 클릭 → 배차상세정보 팝업 (배차번호 전달)
-  const openDetail = (row: Record<string, string>) => {
+  const openDetail = (row: Record<string, string>, cntrVeh = false) => {
     const srch = model.rawFiltersRef.current;
     openPopup({
       width: "full",
@@ -109,6 +109,7 @@ export default function DispatchPlanVeh() {
             DLVRY_DT: srch.SRCH_DSPCH_DLVRY_DT,
             DSPCH_NO: row.DSPCH_NO,
           }}
+          cntrVeh={cntrVeh}
           onClose={closePopup}
         />
       ),
@@ -149,7 +150,7 @@ export default function DispatchPlanVeh() {
           rowSelection="multiple"
           actions={ctrl.conActions}
           audit={false}
-          onRowDoubleClicked={(row: any) => openDetail(row)}
+          onRowDoubleClicked={(row: any) => openDetail(row, true)}
           gridOptions={{ defaultColDef: NO_FILTER_COLDEF }}
         />
       </div>

@@ -336,6 +336,20 @@ export const dispatchPlanVehApi = {
       withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
     );
   },
+  //디테일 주문할당취소 (할당 → 미할당)
+  saveUnAssignedShipment(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveUnAssignedShipment",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  //디테일 경유순서 자동조정
+  saveAutoChangeStopSeq(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAutoChangeStopSeq",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
   //디테일 배송경로 ETA 예측
   predictEta(payload: any) {
     return apiClient.post<CommonResponse>(

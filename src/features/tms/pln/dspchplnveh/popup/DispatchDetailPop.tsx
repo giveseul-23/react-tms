@@ -28,6 +28,8 @@ type Props = {
   onClose: () => void;
   /** 더블클릭한 행의 배차번호 — 고정차량은 첫 회전 배차키, 용차는 DSPCH_NO. */
   initValue?: Record<string, string>;
+  /** 임시용차(계약차)에서 열렸는지 — true 면 배차생성/저장 버튼 숨김(센차 cntrVeh). */
+  cntrVeh?: boolean;
 };
 
 // API 응답 rows 추출 (dsOut / result 양쪽 지원)
@@ -793,21 +795,17 @@ const ITEM_COLS = [
   },
 ];
 
-const ORDER_ACTIONS: ActionItem[] = [
-  {
-    type: "button",
-    key: "BTN_UNASSIGNED_SHIPMENT",
-    label: "BTN_UNASSIGNED_SHIPMENT",
-  },
-];
-
 // 주문 그리드 탭 — 할당/미할당
 const ORDER_TABS = [
   { key: "ALLOC", label: "LBL_ASSIGNED_SHIPMENTS" },
   { key: "UNALLOC", label: "LBL_UNASSIGNED_SHIPMENTS" },
 ];
 
-export default function DispatchDetailPop({ onClose, initValue }: Props) {
+export default function DispatchDetailPop({
+  onClose,
+  initValue,
+  cntrVeh = false,
+}: Props) {
   const [vehNo, setVehNo] = useState(initValue.VEH_NO);
   const [drvrNm, setDrvrNm] = useState(initValue.DRVR_NM);
   const [vehTpCd, setVehTpCd] = useState(initValue.VEH_TP_CD);
@@ -839,6 +837,17 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
   const showError = useErrorAlert();
   const { openPopup, closePopup } = usePopup();
   const [selDspch, setSelDspch] = useState<any>(null); // 선택된 배차행
+
+  // 그리드별 마스킹(작업 차단 오버레이) — 처리 중 ON, settle 시 자동 OFF.
+  // base.callAjax({ mask }) 와 동일 효과 (DataGrid loading prop).
+  const [dspchMasking, setDspchMasking] = useState(false);
+  const [routeMasking, setRouteMasking] = useState(false);
+  const [allocMasking, setAllocMasking] = useState(false);
+  const [unallocMasking, setUnallocMasking] = useState(false);
+  const runMask = <T,>(setMask: (b: boolean) => void, p: Promise<T>) => {
+    setMask(true);
+    return p.finally(() => setMask(false));
+  };
 
   // 확인 다이얼로그 (base.confirm 동일 패턴) — "확인" 시 onYes 실행
   const confirmMsg = (msg: string, onYes: () => void, title = "확인") => {
@@ -881,36 +890,45 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
       .then((res) => setUnAssignItemRow(rowsOf(res)));
   };
 
-  // 배송경로(경유지) 조회
+  const subParams = (record: any) => ({
+    DSPCH_NO: record.DSPCH_NO,
+    TRIP_ID: record.TRIP_ID,
+    PLN_ID: record.PLN_ID,
+    TTL_FI_DIST: record.TTL_FI_DIST,
+  });
+
+  // 배송경로(경유지) 조회 — 처리 중 배송경로 그리드 마스킹
   const loadRoute = (record: any) => {
-    if (!record) return;
-    api
-      .searchPlanStop({
-        DSPCH_NO: record.DSPCH_NO,
-        TRIP_ID: record.TRIP_ID,
-        PLN_ID: record.PLN_ID,
-        TTL_FI_DIST: record.TTL_FI_DIST,
-      })
-      .then((res) => setRouteRowData(rowsOf(res)));
+    if (!record) {
+      setRouteRowData([]);
+      return Promise.resolve();
+    }
+    return runMask(setRouteMasking, api.searchPlanStop(subParams(record))).then(
+      (res) => setRouteRowData(rowsOf(res)),
+    );
   };
 
-  // 배차행 선택 → 배송경로 + 할당주문 조회 (할당주문 첫 행 품목까지)
+  // 할당주문 조회 (첫 행 품목까지) — 처리 중 할당주문 그리드 마스킹
+  const loadAssigned = (record: any) => {
+    if (!record) {
+      setAssignShpmRow([]);
+      setAssignItemRow([]);
+      return Promise.resolve();
+    }
+    return runMask(
+      setAllocMasking,
+      api.searchAssignedShipment(subParams(record)),
+    ).then((res) => {
+      const rows = rowsOf(res);
+      setAssignShpmRow(rows);
+      loadAssignItems(rows[0]);
+    });
+  };
+
+  // 배차행 선택 → 배송경로 + 할당주문 동시 재조회 (record 없으면 서브 비움)
   const loadSub = (record: any) => {
-    if (!record) return;
-    setSelDspch(record);
-    loadRoute(record);
-    api
-      .searchAssignedShipment({
-        DSPCH_NO: record.DSPCH_NO,
-        TRIP_ID: record.TRIP_ID,
-        PLN_ID: record.PLN_ID,
-        TTL_FI_DIST: record.TTL_FI_DIST,
-      })
-      .then((res) => {
-        const rows = rowsOf(res);
-        setAssignShpmRow(rows);
-        loadAssignItems(rows[0]);
-      });
+    setSelDspch(record ?? null);
+    return Promise.all([loadRoute(record), loadAssigned(record)]);
   };
 
   // 미할당주문 조회 (배송유형 조건) → 첫 행 품목까지
@@ -943,15 +961,39 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
       showError(Lang.get("MSG_SELECT_NO_DATA"));
       return;
     }
-    api
-      .saveAssignedShipment(
+    runMask(
+      setUnallocMasking,
+      api.saveAssignedShipment(
         rows.map((r) => ({ ...r, DSPCH_NO: selDspch.DSPCH_NO })),
-      )
-      .then(() => {
-        handleUnallocOrderSearch();
-        loadSub(selDspch);
-      });
+      ),
+    ).then(() => {
+      handleUnallocOrderSearch();
+      loadSub(selDspch);
+    });
   };
+
+  // 주문할당취소 — 선택 할당주문 행을 미할당으로 → 할당/배송경로/미할당 재조회
+  const onUnassignedShipment = (e: any) => {
+    const rows = (e?.data ?? []) as any[];
+    if (!rows.length) {
+      showError(Lang.get("MSG_SELECT_NO_DATA"));
+      return;
+    }
+    runMask(setAllocMasking, api.saveUnAssignedShipment(rows)).then(() => {
+      loadSub(selDspch);
+      handleUnallocOrderSearch();
+    });
+  };
+
+  // 할당주문 그리드 액션 — 주문할당취소 (dispatchPlan 할당주문 탭 동일 기능)
+  const allocActions: ActionItem[] = [
+    {
+      type: "button",
+      key: "BTN_UNASSIGNED_SHIPMENT",
+      label: "BTN_UNASSIGNED_SHIPMENT",
+      onClick: onUnassignedShipment,
+    },
+  ];
 
   // 미할당주문 그리드 액션 — 주문할당 + 엑셀(dispatchPlan 미할당탭 동일 기능)
   const unallocActions: ActionItem[] = [
@@ -978,8 +1020,8 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
     }),
   ];
 
-  // 배차목록 재조회 → 첫 배차행 기준 하위 자동 조회 (저장/처리 후 호출)
-  const refreshDspch = () => {
+  // 배차목록 재조회 → 첫 배차행 기준 하위(할당주문/배송경로) 자동 재조회 (저장/처리 후 호출)
+  const refreshDspch = () =>
     api
       .searchDispatchPop({
         DSPCH_NO: initValue.DSPCH_NO,
@@ -992,9 +1034,8 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
       .then((res) => {
         const rows = rowsOf(res);
         setDspchRowData(rows);
-        loadSub(rows[0]);
+        return loadSub(rows[0]);
       });
-  };
 
   // ── 배차목록 액션 (dspchplnveh dedActions 동일 기능, 팝업 행=DSPCH_NO 보유) ──
   // 배차취소(자차)
@@ -1005,7 +1046,10 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
       return;
     }
     confirmMsg(Lang.get("MSG_CANCEL_DSPCH_OPEN_STATUS"), () => {
-      api.saveCancelPlanDedDispatch(markU(rows)).then(refreshDspch);
+      runMask(
+        setDspchMasking,
+        api.saveCancelPlanDedDispatch(markU(rows)).then(refreshDspch),
+      );
     });
   };
   // 계획확정
@@ -1016,7 +1060,10 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
       return;
     }
     confirmMsg(Lang.get("MSG_CONFIRM_DSPCH_OPEN_ONLY"), () => {
-      api.savePlannedPlanDispatch(markU(rows)).then(refreshDspch);
+      runMask(
+        setDspchMasking,
+        api.savePlannedPlanDispatch(markU(rows)).then(refreshDspch),
+      );
     });
   };
   // 계획확정취소
@@ -1026,7 +1073,10 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
       showError(Lang.get("MSG_EXCEPTION_DISPATCH_RTN_TO_OPEN_SELECT"));
       return;
     }
-    api.saveCancelPlannedPlanDispatch(markU(rows)).then(refreshDspch);
+    runMask(
+      setDspchMasking,
+      api.saveCancelPlannedPlanDispatch(markU(rows)).then(refreshDspch),
+    );
   };
   // 메모 등록 (단건)
   const onMemoReg = (e: any) => {
@@ -1077,27 +1127,58 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
       return;
     }
     confirmMsg("메모를 취소하시겠습니까?", () => {
-      api.cancelDspchMemo(rows).then(refreshDspch);
+      runMask(
+        setDspchMasking,
+        api.cancelDspchMemo(rows).then(refreshDspch),
+      );
     });
+  };
+  // 경유순서 자동조정 (단건) — saveAutoChangeStopSeq
+  const onAutoChangeStopSeq = (e: any) => {
+    const rows = (e?.data ?? []) as any[];
+    if (!rows.length) {
+      showError(Lang.get("MSG_EXCEPTION_STOP_RESEQUENCE_DISPATCH_SELECT"));
+      return;
+    }
+    if (rows.length > 1) {
+      showError(Lang.get("MSG_STOP_RE_SEQ_DISPATCH_CHK"));
+      return;
+    }
+    runMask(
+      setDspchMasking,
+      api
+        .saveAutoChangeStopSeq(rows.map((r) => ({ ...r, rowStatus: "U" })))
+        .then(refreshDspch),
+    );
   };
 
   // 배차목록 그리드 액션 — dedActions 와 라벨 동일 버튼은 동일 기능 연결.
-  // (LBL_CREATE_NEW_DSPCH / BTN_SAVE / BTN_STOP_RESEQUENCE 는 dedActions 미해당 → 미연동)
+  // (LBL_CREATE_NEW_DSPCH / BTN_SAVE 는 dedActions 미해당 → 미연동)
+  // 임시용차(cntrVeh)면 배차생성(BTN_MANAGE_DSPCH)·저장(BTN_SAVE) 숨김
+  //  → 메모 / 계획확정 / 경유순서자동조정 3개만 노출 (센차 cntrVeh 동일).
   const dspchActions: ActionItem[] = [
-    {
-      type: "group",
-      key: "BTN_MANAGE_DSPCH",
-      label: "BTN_MANAGE_DSPCH",
-      items: [
-        { type: "button", key: "LBL_CREATE_NEW_DSPCH", label: "LBL_CREATE_NEW_DSPCH" },
-        {
-          type: "button",
-          key: "BTN_DISPATCH_CANCEL",
-          label: "BTN_DISPATCH_CANCEL",
-          onClick: onCancelDspch,
-        },
-      ],
-    },
+    ...(cntrVeh
+      ? []
+      : ([
+          {
+            type: "group",
+            key: "BTN_MANAGE_DSPCH",
+            label: "BTN_MANAGE_DSPCH",
+            items: [
+              {
+                type: "button",
+                key: "LBL_CREATE_NEW_DSPCH",
+                label: "LBL_CREATE_NEW_DSPCH",
+              },
+              {
+                type: "button",
+                key: "BTN_DISPATCH_CANCEL",
+                label: "BTN_DISPATCH_CANCEL",
+                onClick: onCancelDspch,
+              },
+            ],
+          },
+        ] as ActionItem[])),
     {
       type: "group",
       key: "LBL_MEMO",
@@ -1136,8 +1217,17 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
         },
       ],
     },
-    { type: "button", key: "BTN_SAVE", label: "BTN_SAVE" },
-    { type: "button", key: "BTN_STOP_RESEQUENCE", label: "BTN_STOP_RESEQUENCE" },
+    ...(cntrVeh
+      ? []
+      : ([
+          { type: "button", key: "BTN_SAVE", label: "BTN_SAVE" },
+        ] as ActionItem[])),
+    {
+      type: "button",
+      key: "BTN_STOP_RESEQUENCE",
+      label: "BTN_STOP_RESEQUENCE",
+      onClick: onAutoChangeStopSeq,
+    },
   ];
 
   // ── 배송경로 액션 (dispatchPlan stopActions 동일 기능) ──
@@ -1199,16 +1289,17 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
         <PredictEstimateTimetoArrivalPop
           onConfirm={(data) => {
             closePopup();
-            api
-              .predictEta({
+            runMask(
+              setRouteMasking,
+              api.predictEta({
                 ATD_DTTM: data.TRNS_STDT_DATE,
                 DSPCH_NO: selDspch.DSPCH_NO,
                 TRIP_ID: selDspch.TRIP_ID,
                 TRIP_SEQ: selDspch.TRIP_SEQ,
                 DIV_CD: initValue.DIV_CD,
                 LGST_GRP_CD: initValue.LGST_GRP_CD,
-              })
-              .then(() => loadRoute(selDspch));
+              }),
+            ).then(() => loadRoute(selDspch));
           }}
           onClose={closePopup}
         />
@@ -1218,9 +1309,9 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
   // ETA 계산 → 배송경로 재조회
   const onCalcEta = () => {
     if (!validatorCalcEta(selDspch)) return;
-    api
-      .calcEta({ DSPCH_NO: selDspch.DSPCH_NO })
-      .then(() => loadRoute(selDspch));
+    runMask(setRouteMasking, api.calcEta({ DSPCH_NO: selDspch.DSPCH_NO })).then(
+      () => loadRoute(selDspch),
+    );
   };
   // 경유순서 저장
   const onSaveStopOrder = () => {
@@ -1228,9 +1319,10 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
       showError(Lang.get("MSG_SELECT_NO_DATA"));
       return;
     }
-    api
-      .saveStopOrder({ DSPCH_NO: selDspch.DSPCH_NO, stops: routeRowData })
-      .then(() => loadRoute(selDspch));
+    runMask(
+      setRouteMasking,
+      api.saveStopOrder({ DSPCH_NO: selDspch.DSPCH_NO, stops: routeRowData }),
+    ).then(() => loadRoute(selDspch));
   };
 
   // 배송경로 그리드 액션 — stopActions 와 라벨 동일 버튼은 동일 기능 연결.
@@ -1329,6 +1421,7 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
                 codeMap={codeMap}
                 rowSelection="single"
                 onRowClicked={loadSub}
+                loading={dspchMasking}
                 audit={false}
               />
               <DataGrid
@@ -1339,6 +1432,7 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
                 codeMap={codeMap}
                 rowData={routeRowData}
                 setRowData={setRouteRowData}
+                loading={routeMasking}
                 audit={false}
               />
             </SplitPane>
@@ -1357,12 +1451,14 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
                       <DataGrid
                         layoutType="plain"
                         subTitle="LBL_ASSIGNED_SHIPMENTS"
-                        actions={ORDER_ACTIONS}
+                        actions={allocActions}
                         columnDefs={ORDER_COLS}
                         codeMap={codeMap}
                         rowData={assignShpmRow}
                         setRowData={setAssignShpmRow}
+                        rowSelection="multiple"
                         onRowClicked={loadAssignItems}
+                        loading={allocMasking}
                         audit={false}
                       />
                       <DataGrid
@@ -1414,6 +1510,7 @@ export default function DispatchDetailPop({ onClose, initValue }: Props) {
                             setRowData={setUnAssignShpmRow}
                             rowSelection="multiple"
                             onRowClicked={loadUnAssignItems}
+                            loading={unallocMasking}
                             audit={false}
                           />
                           <DataGrid
