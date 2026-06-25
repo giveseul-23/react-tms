@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { X, Check } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
+import { Lang } from "@/app/services/common/Lang";
 import { dspchContainer2Api as api } from "../DspchContainer2Api";
 
 type Props = {
@@ -16,11 +17,11 @@ type Props = {
 };
 
 const MAIN_COLS = [
-  { type: "text", headerName: "LBL_VEH_TP_GRP", field: "VEH_TP_GRP", width: 150 },
+  { type: "text", headerName: "LBL_VEH_TP_GRP", field: "VEH_TP_GRP", align: "left", flex: 1, minWidth: 100 },
 ];
 const SUB_COLS = [
   { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_CD", align: "center", hide: true },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM", width: 190 },
+  { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM", align: "left", flex: 1, minWidth: 120 },
 ];
 
 function extractRows(res: any): any[] {
@@ -63,23 +64,24 @@ export function TempTonGroupChangePop({ onConfirm, onClose }: Props) {
   }, [onConfirm]);
 
   return (
-    <div className="flex flex-col gap-3 w-full" style={{ height: 380 }}>
-      <div className="flex flex-1 gap-3 min-h-0">
-        <div className="w-[42%] min-h-0">
+    <div className="flex flex-col gap-3 w-full min-w-0" style={{ height: 400 }}>
+      <div className="flex flex-1 gap-3 min-h-0 min-w-0">
+        <div className="w-[42%] min-h-0 min-w-0">
           <DataGrid
             layoutType="plain"
             actions={[]}
+            audit={false}
             columnDefs={MAIN_COLS}
             rowData={groupRows}
             rowSelection="single"
             onRowClicked={onGroupClick}
-            disableAutoSize
           />
         </div>
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 min-w-0">
           <DataGrid
             layoutType="plain"
             actions={[]}
+            audit={false}
             columnDefs={SUB_COLS}
             rowData={typeRows}
             rowSelection="single"
@@ -87,7 +89,6 @@ export function TempTonGroupChangePop({ onConfirm, onClose }: Props) {
               selectedType.current = row;
             }}
             onRowDoubleClicked={onApply}
-            disableAutoSize
           />
         </div>
       </div>
@@ -99,7 +100,7 @@ export function TempTonGroupChangePop({ onConfirm, onClose }: Props) {
           className="h-7 px-4 text-xs border-slate-200 text-slate-500 hover:bg-slate-50 gap-1.5"
         >
           <X className="w-3 h-3" />
-          취소
+          {Lang.get("BTN_CANCEL")}
         </Button>
         <Button
           size="sm"
@@ -107,7 +108,7 @@ export function TempTonGroupChangePop({ onConfirm, onClose }: Props) {
           className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white gap-1.5"
         >
           <Check className="w-3 h-3" />
-          적용
+          {Lang.get("BTN_TMS_SELECT")}
         </Button>
       </div>
     </div>
