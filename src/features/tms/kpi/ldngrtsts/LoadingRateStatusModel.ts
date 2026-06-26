@@ -16,7 +16,7 @@ export function useLoadingRateStatusModel(menuCode: string) {
 
   // 공통코드 — 차량운영유형 (sub02 combo: VEH_OP_TP)
   const { codeMap } = useCommonStores({
-    vehOpTypeList: { sqlProp: "CODE", keyParam: "VEH_OP_TP" },
+    vehOpTypeList: { module: "TMS", sqlProp: "CODE", keyParam: "VEH_OP_TP" },
   });
 
   return {

@@ -92,7 +92,7 @@ export function buildDescText(vehTpList: VehTpMeta[]): string {
 }
 
 // ── sub01: 차량유형별 요약 ─────────────────────────────────────────
-export const SUB01_COLUMN_DEFS = [
+export const SUB01_COLUMN_DEFS: any[] = [
   { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM", align: "left" },
   { type: "numeric", headerName: "LBL_DSPCH_CNT", field: "TTL_QTY", align: "right" },
   { type: "numeric", headerName: "LBL_VOL", field: "PLN_NET_VOL", align: "right" },
@@ -116,12 +116,20 @@ export const SUB01_COLUMN_DEFS = [
 ];
 
 // ── sub02: 차량단위 상세 ───────────────────────────────────────────
-export const SUB02_COLUMN_DEFS = [
+export const SUB02_COLUMN_DEFS: any[] = [
   { type: "text", headerName: "LBL_DLVRY_DATE", field: "DLVRY_DT", align: "center", hide: true, excelPrint: true },
   { type: "text", headerName: "LBL_DAYS", field: "DAY", align: "center", hide: true, excelPrint: true },
   { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM", align: "left", hide: true, excelPrint: true },
   { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO", align: "left" },
-  { type: "combo", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "VEH_OP_TP", codeKey: "vehOpTypeList", align: "center" },
+  {
+    type: "combo",
+    headerName: "LBL_VEHICLE_OPERATION_TYPE",
+    field: "VEH_OP_TP",
+    codeKey: "vehOpTypeList",
+    headerClass: "ag-header-center",
+    width: 120,
+    cellStyle: { textAlign: "center" },
+  },
   { type: "numeric", headerName: "LBL_DSPCH_CNT", field: "TTL_QTY", align: "right" },
   ...QTY_RATE_COLUMNS,
   ...COST_COLUMNS,

@@ -14,6 +14,15 @@ import { SUB01_COLUMN_DEFS, SUB02_COLUMN_DEFS } from "./LoadingRateStatusColumns
 
 export const MENU_CODE = "MENU_LOADING_RATE_STS";
 
+// 서버 리소스 권한 authId (센차 grid.authId). 그리드별 authId 단일 소스.
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_LOADING_RATE_STS",
+    sub01: "SUB01_GRID_LOADING_RATE_STS",
+    sub02: "SUB02_GRID_LOADING_RATE_STS",
+  },
+};
+
 export default function LoadingRateStatus() {
   const model = useLoadingRateStatusModel(MENU_CODE);
   const ctrl = useLoadingRateStatusController({ model });
@@ -28,6 +37,7 @@ export default function LoadingRateStatus() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
+        menuCode: MENU_CODE,
         ...model.bindSearch(),
       }}
       topSlot={
@@ -38,10 +48,12 @@ export default function LoadingRateStatus() {
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={model.mainColumnDefs}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          headerCheckbox={false}
           audit={false}
         />
       }
@@ -53,17 +65,21 @@ export default function LoadingRateStatus() {
         >
           <DataGrid
             {...model.bind("sub01")}
+            authId={AUTH.grids.sub01}
             columnDefs={SUB01_COLUMN_DEFS}
             codeMap={model.codeMap}
             onRowClicked={ctrl.onSub01GridClick}
             actions={ctrl.sub01Actions}
+            headerCheckbox={false}
             audit={false}
           />
           <DataGrid
             {...model.bind("sub02")}
+            authId={AUTH.grids.sub02}
             columnDefs={SUB02_COLUMN_DEFS}
             codeMap={model.codeMap}
             actions={ctrl.sub02Actions}
+            headerCheckbox={false}
             audit={false}
           />
         </SplitPane>
