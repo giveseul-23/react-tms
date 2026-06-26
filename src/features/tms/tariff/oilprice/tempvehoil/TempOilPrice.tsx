@@ -13,7 +13,7 @@ import {
   PERIOD_COLUMN_DEFS,
 } from "./TempOilPriceColumns";
 
-export const MENU_CODE = "MENU_TEMP_VEH_OIL_PRICE_MGMT";
+export const MENU_CODE = "MENU_OIL_PRICE_CF";
 
 export default function TempOilPrice() {
   const model = useTempOilPriceModel(MENU_CODE);

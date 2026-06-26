@@ -37,7 +37,7 @@ export const DF_OIL_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_DF_OIL_PRICE_ID",
-    field: "DF_OIL_PRICE_ID",
+    field: "OIL_PRICE_ID",
     align: "center",
     width: 160,
   },
@@ -67,15 +67,7 @@ export const DF_OIL_COLUMN_DEFS = [
     required: true,
     insertable: true,
     editable: true,
-  },
-  {
-    type: "text",
-    headerName: "LBL_AREA_DESCR",
-    field: "AREA_DESCR",
-    align: "center",
-    insertable: true,
-    editable: true,
-  },
+  }
 ];
 
 // ── 탭2: 월별 유가 조회 ────────────────────────────────────────
@@ -98,7 +90,7 @@ export const MONTH_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_DF_OIL_PRICE_ID",
-    field: "DF_OIL_PRICE_ID",
+    field: "OIL_PRICE_ID",
     align: "center",
   },
   {
@@ -118,11 +110,5 @@ export const MONTH_COLUMN_DEFS = [
     headerName: "LBL_OIL_PRICE",
     field: "OIL_PRICE",
     align: "right",
-  },
-  {
-    type: "text",
-    headerName: "LBL_AREA_DESCR",
-    field: "AREA_DESCR",
-    align: "center",
-  },
+  }
 ];
