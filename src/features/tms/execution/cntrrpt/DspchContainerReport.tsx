@@ -15,6 +15,15 @@ import {
 
 export const MENU_CODE = "MENU_CONTAINER_REPORT";
 
+// 서버 리소스 권한 authId (센차 grid.authId). 그리드별 authId 단일 소스.
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_CONTRINER_REPORT",
+    sub01: "SUB01_GRID_CONTRINER_REPORT",
+    sub02: "SUB02_GRID_CONTRINER_REPORT",
+  },
+};
+
 export default function DspchContainerReport() {
   const model = useDspchContainerReportModel(MENU_CODE);
   const ctrl = useDspchContainerReportController({ model });
@@ -36,14 +45,17 @@ export default function DspchContainerReport() {
             { key: "LOC", label: "LBL_BY_LOC" },
             { key: "VEH", label: "LBL_BY_VEH" },
           ]}
+          onTabChange={ctrl.onTabChange}
           presets={{
             DAY: {
               render: () => (
                 <DataGrid
                   {...model.bind("main")}
+                  authId={AUTH.grids.main}
                   columnDefs={MAIN_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.mainActions}
+                  rowSelection="multiple"
                   audit={false}
                 />
               ),
@@ -52,9 +64,11 @@ export default function DspchContainerReport() {
               render: () => (
                 <DataGrid
                   {...model.bind("sub01")}
+                  authId={AUTH.grids.sub01}
                   columnDefs={SUB01_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.sub01Actions}
+                  rowSelection="multiple"
                   audit={false}
                 />
               ),
@@ -63,9 +77,11 @@ export default function DspchContainerReport() {
               render: () => (
                 <DataGrid
                   {...model.bind("sub02")}
+                  authId={AUTH.grids.sub02}
                   columnDefs={SUB02_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.sub02Actions}
+                  rowSelection="multiple"
                   audit={false}
                 />
               ),

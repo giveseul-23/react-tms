@@ -72,9 +72,25 @@ export function useDspchContainerReportController({ model }: Args) {
     [menuName, model.grids.sub02, model.filtersRef],
   );
 
+  // ── 탭 변경 — 해당 탭 그리드만 재조회 (서버 onTabChange) ─────────
+  const onTabChange = useCallback(
+    (key: string) => {
+      const filters = model.filtersRef.current;
+      if (key === "DAY") {
+        void base.searchSub("main", api.getMainList(filters));
+      } else if (key === "LOC") {
+        void base.searchSub("sub01", api.getSub01List(filters));
+      } else if (key === "VEH") {
+        void base.searchSub("sub02", api.getSub02List(filters));
+      }
+    },
+    [base, model.filtersRef],
+  );
+
   return {
     fetchList,
     onSearchCallback,
+    onTabChange,
     mainActions,
     sub01Actions,
     sub02Actions,
