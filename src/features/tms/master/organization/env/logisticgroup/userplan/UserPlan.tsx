@@ -31,7 +31,6 @@ export default function UserPlan() {
         meta: model.searchMeta,
         loading: model.searchMetaLoading,
         moduleDefault: "TMS",
-        moduleDefaultRemove: ["PLN_ID"],
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         menuCode: MENU_CD,
