@@ -12,6 +12,35 @@ interface Args {
   model: LoadingRateStatusModel;
 }
 
+// 서버 getParamsForSubGridSelect / onMainGridClick·onSub01GridClick 대응
+const sub01Params = (
+  s: Record<string, any>,
+  mainRow: any,
+  pbox: string,
+  dynamicColumns: any[],
+) => ({
+  DLVRY_DT: mainRow?.DLVRY_DT ?? "",
+  DIV_CD: s.SRCH_A_DIV_CD ?? "",
+  LGST_GRP_CD: s.SRCH_A_LGST_GRP_CD ?? "",
+  PBOX_WGT_YN: pbox,
+  dynamicColumns,
+  VEH_OP_TP: s.SRCH_VEH_OP_TP ?? "",
+});
+
+const sub02Params = (
+  s: Record<string, any>,
+  sub01Row: any,
+  mainRow: any,
+  pbox: string,
+) => ({
+  DLVRY_DT: sub01Row?.DLVRY_DT ?? mainRow?.DLVRY_DT ?? "",
+  DIV_CD: s.SRCH_A_DIV_CD ?? "",
+  LGST_GRP_CD: s.SRCH_A_LGST_GRP_CD ?? "",
+  VEH_TP_CD: sub01Row?.VEH_TP_CD ?? "",
+  PBOX_WGT_YN: pbox,
+  VEH_OP_TP: s.SRCH_VEH_OP_TP ?? "",
+});
+
 export function useLoadingRateStatusController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
@@ -77,20 +106,23 @@ export function useLoadingRateStatusController({ model }: Args) {
   // ── 메인 클릭 → 차량유형별 요약(sub01) 조회 ───────────────────────
   const onMainGridClick = useCallback(
     (row: any) => {
+      if (!row) {
+        base.resetGrids(["sub01", "sub02"]);
+        return;
+      }
+      const s = getSearch();
       base.handleRowClick("main", row, [
         {
           to: "sub01",
-          fetch: () => {
-            const s = getSearch();
-            return api.getSub01List({
-              DLVRY_DT: row?.DLVRY_DT,
-              DIV_CD: s.SRCH_A_DIV_CD ?? "",
-              LGST_GRP_CD: s.SRCH_A_LGST_GRP_CD ?? "",
-              PBOX_WGT_YN: getPboxCond(),
-              dynamicColumns: vehTpCacheRef.current.list,
-              VEH_OP_TP: s.SRCH_VEH_OP_TP ?? "",
-            });
-          },
+          fetch: () =>
+            api.getSub01List(
+              sub01Params(
+                s,
+                row,
+                getPboxCond(),
+                vehTpCacheRef.current.list,
+              ),
+            ),
         },
       ]);
     },
@@ -100,24 +132,21 @@ export function useLoadingRateStatusController({ model }: Args) {
   // ── sub01 클릭 → 차량단위 상세(sub02) 조회 ────────────────────────
   const onSub01GridClick = useCallback(
     (row: any) => {
+      if (!row) {
+        base.resetGrids(["sub02"]);
+        return;
+      }
+      const s = getSearch();
+      const mainRow = model.grids.main.selectedRef.current;
       base.handleRowClick("sub01", row, [
         {
           to: "sub02",
-          fetch: () => {
-            const s = getSearch();
-            return api.getSub02List({
-              DLVRY_DT: row?.DLVRY_DT,
-              DIV_CD: s.SRCH_A_DIV_CD ?? "",
-              LGST_GRP_CD: s.SRCH_A_LGST_GRP_CD ?? "",
-              VEH_TP_CD: row?.VEH_TP_CD,
-              PBOX_WGT_YN: getPboxCond(),
-              VEH_OP_TP: s.SRCH_VEH_OP_TP ?? "",
-            });
-          },
+          fetch: () =>
+            api.getSub02List(sub02Params(s, row, mainRow, getPboxCond())),
         },
       ]);
     },
-    [base, getSearch, getPboxCond],
+    [base, getSearch, getPboxCond, model.grids.main.selectedRef],
   );
 
   // ── 그리드별 액션 (엑셀) ──────────────────────────────────────────
@@ -140,11 +169,21 @@ export function useLoadingRateStatusController({ model }: Args) {
         excelColumns: () => model.grids.sub01.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
-        fetchFn: () => api.getSub01List(model.filtersRef.current),
+        fetchFn: () => {
+          const s = getSearch();
+          return api.getSub01List(
+            sub01Params(
+              s,
+              model.grids.main.selectedRef.current,
+              getPboxCond(),
+              vehTpCacheRef.current.list,
+            ),
+          );
+        },
         rows: model.grids.sub01.rows,
       }),
     ],
-    [menuName, model.grids.sub01, model.filtersRef],
+    [getPboxCond, getSearch, menuName, model.grids.main.selectedRef, model.grids.sub01],
   );
 
   // sub02 엑셀 — 보이는/조회데이터 + 전체데이터(searchAllData)
@@ -154,11 +193,15 @@ export function useLoadingRateStatusController({ model }: Args) {
         excelColumns: () => model.grids.sub02.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
-        fetchFn: () => api.getAllData(model.filtersRef.current),
+        fetchFn: () =>
+          api.getAllData({
+            ...model.filtersRef.current,
+            PBOX_WGT_YN: getPboxCond(),
+          }),
         rows: model.grids.sub02.rows,
       }),
     ],
-    [menuName, model.grids.sub02, model.filtersRef],
+    [getPboxCond, menuName, model.filtersRef, model.grids.sub02],
   );
 
   return {

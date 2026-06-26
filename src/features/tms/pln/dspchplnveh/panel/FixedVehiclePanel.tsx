@@ -9,7 +9,7 @@ import { Search, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 type Props = {
   rows?: any[];
-  onOpenDetail?: () => void;
+  onOpenDetail?: (row: Record<string, string>) => void;
   /** 운전자(체크 또는 선택) 행으로 차량위치 우측 패널 열기 */
   onShowVehLocation?: (rows: any[]) => void;
   /** 패널이 열려 있을 때 체크/선택 변경 시 선택 차량으로 리프레시 (열려있지 않으면 no-op) */
@@ -58,8 +58,12 @@ export default function FixedVehiclePanel({
     if (!q) return vehicles;
     return vehicles.filter(
       (v) =>
-        String(v.DRVR_NM ?? "").toLowerCase().includes(q) ||
-        String(v.VEH_NO ?? "").toLowerCase().includes(q),
+        String(v.DRVR_NM ?? "")
+          .toLowerCase()
+          .includes(q) ||
+        String(v.VEH_NO ?? "")
+          .toLowerCase()
+          .includes(q),
     );
   })();
 
@@ -275,7 +279,9 @@ export default function FixedVehiclePanel({
           {rotations.map((r) => (
             <div
               key={r.no}
-              onDoubleClick={onOpenDetail}
+              onDoubleClick={() =>
+                onOpenDetail?.(selRow?.[`TRIP_KEY_B1_R${r.no}`])
+              }
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 cursor-pointer hover:bg-slate-50 transition-colors"
             >
               {/* 회전수 타이틀 옆 체크박스 */}

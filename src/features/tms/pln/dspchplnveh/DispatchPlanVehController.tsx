@@ -20,13 +20,13 @@ import DispatchPrintPop from "./popup/DispatchPrintPop";
 import RegiSpotPop from "./popup/RegiSpotPop";
 import SendSmsPopCarr from "./popup/SendSmsPopCarr";
 import SendSmsAppInstallPop from "./popup/SendSmsAppInstallPop";
-import ContinuousMovePop from "./popup/ContinuousMovePop";
 import CarrierChangePop from "./popup/CarrierChangePop";
 import TonGroupChangePop from "./popup/TonGroupChangePop";
-import ContractVehPop from "./popup/ContractVehPop";
 import ChangeVehiclePopup from "@/app/components/popup/ChangeVehiclePopup";
 import DtoDTrckChangePop from "./popup/DtoDTrckChangePop";
 import TtoDTrckChangePop from "./popup/TtoDTrckChangePop";
+import CreateItineraryDispatchPop from "../dispatchPlan/popup/CreateItineraryDispatchPop";
+import CreateItineraryGrpDispatchPop from "../dispatchPlan/popup/CreateItineraryGrpDispatchPop";
 
 interface Args {
   model: DispatchPlanVehModel;
@@ -397,7 +397,19 @@ export function useDispatchPlanVehController({ model }: Args) {
       title: "LBL_CREATE_NEW_DSPCH",
       width: "4xl",
       content: (
-        <ContractVehPop
+        <ChangeVehiclePopup
+          fetchVehicles={(q) =>
+            api.searchVehiclePop({
+              lgstGrpCd: q.LGST_GRP_CD,
+              carrCd: q.CARR_CD,
+              carrNm: q.CARR_NM,
+              vehId: q.VEH_ID,
+              vehTpCd: q.VEH_TP_CD,
+              vehNo: q.VEH_NO,
+              vehOpTp: q.VEH_OP_TP,
+            })
+          }
+          lockVehOpTp="110"
           initialValues={{ LGST_GRP_CD: p.LGST_GRP_CD }}
           onConfirm={(veh) => {
             closePopup();
@@ -425,61 +437,80 @@ export function useDispatchPlanVehController({ model }: Args) {
     });
   }, [base, baseParams, openPopup, closePopup, refresh]);
 
-  // 복화운송 생성
-  const onCreateItinerary = useCallback(
-    (rows: any[]) => {
-      if (!need(rows, "MSG_EXCEPTION_CONTINUOUS_MOVE_NO_SELECT_CHK")) return;
-      if (!needSingle(rows, "MSG_EXCEPTION_CONTINUOUS_MOVE_SELECT_CHK")) return;
-      if (rows[0].DSPCH_OP_STS === "2110") {
-        base.alert(Lang.get("MSG_NOT_VALID_TRIP_STATUS"));
-        return;
-      }
-      if (Number(rows[0].PLN_STOP_CNT) < 1) {
-        base.alert(Lang.get("MSG_TRIP_BUILD_DUMMY_DISPATCH_CHK"));
-        return;
-      }
-      openPopup({
-        title: "BTN_CREATE_ITINERARY_PLAN",
-        width: "xl",
-        content: (
-          <ContinuousMovePop
-            onConfirm={(loc) => {
-              closePopup();
-              const saveRows = rows.map((r) => ({
-                ...r,
-                BATCH_NO: 1,
-                NEW_FRM_LOC_ID: loc.FRM_LOC_ID,
-                NEW_FRM_LOC_CD: loc.FRM_LOC_CD,
-                NEW_FRM_LOC_NM: loc.FRM_LOC_NM,
-                NEW_FROM_ADDR_ID: loc.FROM_ADDR_ID,
-                NEW_TO_LOC_ID: loc.TO_LOC_ID,
-                NEW_TO_LOC_CD: loc.TO_LOC_CD,
-                NEW_TO_LOC_NM: loc.TO_LOC_NM,
-                NEW_TO_ADDR_ID: loc.TO_ADDR_ID,
-                EDIT_STS: "I",
-              }));
-              base
-                .callAjax(api.saveCreateContinuousMove(saveRows), {
-                  mask: "tempTruck",
-                })
-                .then(refresh);
-            }}
-            onClose={closePopup}
-          />
-        ),
-      });
-    },
-    [base, need, needSingle, openPopup, closePopup, refresh],
-  );
+  // 고정노선배차생성
+  const onCreateItinerary = useCallback(() => {
+    const bp = baseParams();
+    const DIV_CD = bp.DIV_CD;
+    const LGST_GRP_CD = bp.LGST_GRP_CD;
+    const DLVRY_DT = bp.DLVRY_DT;
+    const PLN_ID = bp.PLN_ID;
+    openPopup({
+      title: "BTN_CREATE_ITINERARY_PLAN",
+      width: "xl",
+      content: (
+        <CreateItineraryDispatchPop
+          initialValues={{ DIV_CD, LGST_GRP_CD, DLVRY_DT, PLN_ID }}
+          onConfirm={(picked) => {
+            closePopup();
+            const rows = picked.map((p) => ({
+              ...p,
+              DIV_CD,
+              LGST_GRP_CD,
+              DLVRY_DT,
+              PLN_ID,
+            }));
+            base
+              .callAjax(api.saveCreateItineraryGroupDispatch(rows), {
+                mask: "tempTruck",
+              })
+              .then(() =>
+                base.searchSub("tempTruck", api.searchTempCarrierToChange(bp)),
+              );
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [baseParams, openPopup, closePopup, base]);
 
-  // 복화운송 그룹생성 — TODO: 서버 분기(그룹) 확인 필요. 우선 단건 복화와 동일 플로우.
-  const onCreateItineraryGrp = useCallback(
-    (rows: any[]) => {
-      // TODO: BTN_CREATE_ITINERARY_GRP_PLAN — 그룹 복화 전용 서버 흐름 확인 후 분기.
-      onCreateItinerary(rows);
-    },
-    [onCreateItinerary],
-  );
+  //고정그룹배차생성
+  const onCreateItineraryGrpDispatch = useCallback(() => {
+    const bp = baseParams();
+    const DIV_CD = bp.DIV_CD;
+    const LGST_GRP_CD = bp.LGST_GRP_CD;
+    const DLVRY_DT = bp.DLVRY_DT;
+    const PLN_ID = bp.PLN_ID;
+    const BATCH_NO = 1;
+
+    openPopup({
+      title: "BTN_CREATE_ITINERARY_GRP_PLAN",
+      width: "2xl",
+      content: (
+        <CreateItineraryGrpDispatchPop
+          initialValues={{ DIV_CD, LGST_GRP_CD, DLVRY_DT, PLN_ID, BATCH_NO }}
+          onConfirm={(picked) => {
+            closePopup();
+            const rows = picked.map((p) => ({
+              ...p,
+              DIV_CD,
+              LGST_GRP_CD,
+              DLVRY_DT,
+              PLN_ID,
+              BATCH_NO,
+            }));
+            base
+              .callAjax(api.saveCreateItineraryGroupDispatch(rows), {
+                mask: "tempTruck",
+              })
+              .then(() =>
+                base.searchSub("tempTruck", api.searchTempCarrierToChange(bp)),
+              );
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [baseParams, openPopup, closePopup, base]);
 
   // 용차 배차취소 — 전부 신규(2010)만 가능
   const onCancelDspchTemp = useCallback(
@@ -547,7 +578,14 @@ export function useDispatchPlanVehController({ model }: Args) {
         width: "3xl",
         content: (
           <CarrierChangePop
-            initialValues={{ LGST_GRP_CD: rows[0].LGST_GRP_CD }}
+            initialValues={{
+              LGST_GRP_CD: rows[0].LGST_GRP_CD,
+              ...(rows.length === 1 && {
+                DSPCH_NO: rows[0].DSPCH_NO,
+                PLN_WGT: rows[0].PLN_NET_WGT,
+                VEH_TP_NM: rows[0].VEH_TP_NM,
+              }),
+            }}
             onConfirm={({ CARR_CD, VEH_ID }) => {
               closePopup();
               const saveRows = markU(rows).map((r) => ({
@@ -895,13 +933,13 @@ export function useDispatchPlanVehController({ model }: Args) {
             type: "button",
             key: "BTN_CREATE_ITINERARY_PLAN",
             label: "BTN_CREATE_ITINERARY_PLAN",
-            onClick: (e: any) => onCreateItinerary(e?.data ?? []),
+            onClick: (e: any) => onCreateItinerary(),
           },
           {
             type: "button",
             key: "BTN_CREATE_ITINERARY_GRP_PLAN",
             label: "BTN_CREATE_ITINERARY_GRP_PLAN",
-            onClick: (e: any) => onCreateItineraryGrp(e?.data ?? []),
+            onClick: (e: any) => onCreateItineraryGrpDispatch(),
           },
           {
             type: "button",
@@ -1000,14 +1038,15 @@ export function useDispatchPlanVehController({ model }: Args) {
       },
     ],
     [
-      menuName,
+      onCreateNewDspch,
       refresh,
+      menuName,
+      onSendSmsToCarr,
       onRegSpotVeh,
       onChangeToDedVeh,
       onShowVehLocation,
-      onCreateNewDspch,
       onCreateItinerary,
-      onCreateItineraryGrp,
+      onCreateItineraryGrpDispatch,
       onCancelDspchTemp,
       onCopyDspch,
       onChangeCarrier,
@@ -1017,7 +1056,6 @@ export function useDispatchPlanVehController({ model }: Args) {
       onSetPlannedTemp,
       onReturnOpenTemp,
       onSendSmsAppInstall,
-      onSendSmsToCarr,
     ],
   );
 

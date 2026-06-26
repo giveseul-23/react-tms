@@ -15,11 +15,36 @@ type Props = {
 
 const GRP_COLS = [
   { headerName: "No", width: 50 },
-  { type: "text", headerName: "LBL_VEH_TP_GRP", field: "VEH_TP_GRP", align: "left", flex: 1 },
+  {
+    type: "text",
+    headerName: "LBL_VEH_TP_GRP",
+    field: "VEH_TP_GRP",
+    align: "left",
+    flex: 1,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEH_TP_GRP_NM",
+    field: "VEH_TP_GRP_NM",
+    align: "left",
+    flex: 1,
+  },
 ];
 const TYPE_COLS = [
-  { type: "text", headerName: "VEH_TP_CD", noLang: true, field: "VEH_TP_CD", hide: true },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM", align: "left", flex: 1 },
+  {
+    type: "text",
+    headerName: "VEH_TP_CD",
+    noLang: true,
+    field: "VEH_TP_CD",
+    hide: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_TYPE",
+    field: "VEH_TP_NM",
+    align: "left",
+    flex: 1,
+  },
 ];
 
 const rowsOf = (res: any) => res?.data?.data?.dsOut ?? res?.data?.result ?? [];
@@ -69,13 +94,20 @@ export default function TonGroupChangePop({ onConfirm, onClose }: Props) {
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-2 border-t">
-        <Button size="sm" variant="outline" onClick={onClose} className="h-7 px-4 text-xs">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onClose}
+          className="h-7 px-4 text-xs"
+        >
           취소
         </Button>
         <Button
           size="sm"
           disabled={!sel}
-          onClick={() => onConfirm({ VEH_TP_CD: sel.VEH_TP_CD, VEH_TP_NM: sel.VEH_TP_NM })}
+          onClick={() =>
+            onConfirm({ VEH_TP_CD: sel.VEH_TP_CD, VEH_TP_NM: sel.VEH_TP_NM })
+          }
           className="h-7 px-4 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30"
         >
           적용
