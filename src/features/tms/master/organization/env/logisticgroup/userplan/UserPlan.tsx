@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useUserPlanModel } from "./UserPlanModel";
@@ -19,23 +20,30 @@ export default function UserPlan() {
   const model = useUserPlanModel(MENU_CD);
   const ctrl = useUserPlanController({ model });
 
+  const mainColumnDefs = useMemo(
+    () => MAIN_COLUMN_DEFS(ctrl.getLgstGrpCd),
+    [ctrl.getLgstGrpCd],
+  );
+
   return (
     <GridOnlyPage
-      menuCode={MENU_CD}
       searchProps={{
+        meta: model.searchMeta,
+        loading: model.searchMetaLoading,
         moduleDefault: "TMS",
+        moduleDefaultRemove: ["PLN_ID"],
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
+        menuCode: MENU_CD,
         ...model.bindSearch(),
       }}
       grid={
         <DataGrid
           {...model.bind("main")}
           authId={AUTH.grids.main}
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={mainColumnDefs}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
-          audit={{ delete: false }}
         />
       }
     />
