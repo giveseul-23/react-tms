@@ -54,19 +54,32 @@ const qtyPair = (
 });
 
 // 13개 수량 그룹 (3개 그리드 공통)
-const QTY_GROUPS = [
-  qtyPair("KPP", "P1_IN_COUNT", "LBL_P1_INBOUND", "P1_OUT_COUNT", "LBL_P1_OUTBOUND", { noLang: true }),
-  qtyPair(Lang.get("LBL_AJU") + " PLT", "P2_IN_COUNT", "LBL_P2_INBOUND", "P2_OUT_COUNT", "LBL_P2_OUTBOUND", { noLang: true }),
-  qtyPair(Lang.get("LBL_ETC_SETTING") + " PLT", "P3_IN_COUNT", "LBL_P3_INBOUND", "P3_OUT_COUNT", "LBL_P3_OUTBOUND", { noLang: true }),
-  qtyPair("LBL_SLV_BOGIE", "R1_IN_COUNT", "LBL_R1_INBOUND", "R1_OUT_COUNT", "LBL_R1_OUTBOUND"),
-  qtyPair("LBL_BLU_BOGIE", "R2_IN_COUNT", "LBL_R2_INBOUND", "R2_OUT_COUNT", "LBL_R2_OUTBOUND"),
-  qtyPair("LBL_PICK_BOGIE", "R3_IN_COUNT", "LBL_R3_INBOUND", "R3_OUT_COUNT", "LBL_R3_OUTBOUND"),
-  qtyPair("LBL_TRANSFER_BOGIE", "O1_IN_COUNT", "LBL_O1_INBOUND", "O1_OUT_COUNT", "LBL_O1_OUTBOUND"),
-  qtyPair("LBL_LENDING_BORROWING", "O2_IN_COUNT", "LBL_O2_INBOUND", "O2_OUT_COUNT", "LBL_O2_OUTBOUND"),
-  qtyPair("LBL_TRANSPORTATION", "O3_IN_COUNT", "LBL_O3_INBOUND", "O3_OUT_COUNT", "LBL_O3_OUTBOUND"),
-  qtyPair("LBL_PICK_BOX_LENDING_BORROWING", "O4_IN_COUNT", "LBL_O4_INBOUND", "O4_OUT_COUNT", "LBL_O4_OUTBOUND"),
-  qtyPair("LBL_PICK_BOX_TRANSPORTATION", "O5_IN_COUNT", "LBL_O5_INBOUND", "O5_OUT_COUNT", "LBL_O5_OUTBOUND"),
-];
+export type ContainerColumnMeta = {
+  CNTR_CD?: string;
+  CNTR_NM?: string;
+  D_CNTR_CD?: string;
+};
+
+const normalizeContainerQtyCode = (container: ContainerColumnMeta, index: number) => {
+  const rawCode = String(container.D_CNTR_CD || container.CNTR_CD || `C${index + 1}`);
+  return rawCode.replace(/^CD_/i, "");
+};
+
+export const buildContainerQtyColumnDefs = (containers: ContainerColumnMeta[] = []) => {
+  const sorted = [...containers].sort((a, b) => String(a.CNTR_CD ?? "").localeCompare(String(b.CNTR_CD ?? "")));
+  return sorted.map((container, index) => {
+    const dynamicCode = normalizeContainerQtyCode(container, index);
+    const cntrName = String(container.CNTR_NM || container.CNTR_CD || dynamicCode);
+    return qtyPair(
+      cntrName,
+      `${dynamicCode}_IN_COUNT`,
+      `LBL_${dynamicCode}_INBOUND`,
+      `${dynamicCode}_OUT_COUNT`,
+      `LBL_${dynamicCode}_OUTBOUND`,
+      { noLang: true },
+    );
+  });
+};
 
 // 차량관리자 그룹 — Main: TRCK_TYPE 은 VEH_OP_TP==100 만 강조(값 그대로)
 const VEHICLE_MANAGER_MAIN = {
@@ -122,7 +135,7 @@ const DLVRY_DT_COL = { type: "date", headerName: "LBL_DLVRY_DATE", field: "DLVRY
 const BATCH_NO_COL = { type: "text", headerName: "LBL_BATCH", field: "BATCH_NO", align: "center", width: 40, hide: true };
 
 // ── byDay (메인): 물류센터 / 배송일 / 배치 / 회전수(우) / 차량관리자 / 출발지 / 점포 / 수량 ──
-export const MAIN_COLUMN_DEFS = [
+export const buildMainColumnDefs = (containers: ContainerColumnMeta[] = []) => [
   { headerName: "No" },
   LGST_GRP_CD_COL,
   DLVRY_DT_COL,
@@ -131,11 +144,11 @@ export const MAIN_COLUMN_DEFS = [
   VEHICLE_MANAGER_MAIN,
   DEPARTURE_INFO,
   LOC_INFO,
-  ...QTY_GROUPS,
+  ...buildContainerQtyColumnDefs(containers),
 ];
 
 // ── byLoc (Sub01): 물류센터 / 출발지 / 점포 / 배송일 / 배치 / 회전수(중) / 차량관리자 / 수량 ──
-export const SUB01_COLUMN_DEFS = [
+export const buildSub01ColumnDefs = (containers: ContainerColumnMeta[] = []) => [
   { headerName: "No" },
   LGST_GRP_CD_COL,
   DEPARTURE_INFO,
@@ -144,11 +157,11 @@ export const SUB01_COLUMN_DEFS = [
   BATCH_NO_COL,
   { type: "numeric", headerName: "LBL_TRIP_COUNT", field: "RTN_NO", align: "center", width: 50 },
   VEHICLE_MANAGER_SUB,
-  ...QTY_GROUPS,
+  ...buildContainerQtyColumnDefs(containers),
 ];
 
 // ── byVeh (Sub02): 물류센터 / 배송일 / 배치 / 회전수(중) / 차량관리자 / 출발지 / 점포 / 수량 ──
-export const SUB02_COLUMN_DEFS = [
+export const buildSub02ColumnDefs = (containers: ContainerColumnMeta[] = []) => [
   { headerName: "No" },
   LGST_GRP_CD_COL,
   DLVRY_DT_COL,
@@ -157,5 +170,9 @@ export const SUB02_COLUMN_DEFS = [
   VEHICLE_MANAGER_SUB,
   DEPARTURE_INFO,
   LOC_INFO,
-  ...QTY_GROUPS,
+  ...buildContainerQtyColumnDefs(containers),
 ];
+
+export const MAIN_COLUMN_DEFS = buildMainColumnDefs();
+export const SUB01_COLUMN_DEFS = buildSub01ColumnDefs();
+export const SUB02_COLUMN_DEFS = buildSub02ColumnDefs();

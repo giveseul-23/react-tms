@@ -7,11 +7,6 @@ import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useDspchContainerReportModel } from "./DspchContainerReportModel";
 import { useDspchContainerReportController } from "./DspchContainerReportController";
-import {
-  MAIN_COLUMN_DEFS,
-  SUB01_COLUMN_DEFS,
-  SUB02_COLUMN_DEFS,
-} from "./DspchContainerReportColumns";
 
 export const MENU_CODE = "MENU_CONTAINER_REPORT";
 
@@ -52,7 +47,7 @@ export default function DspchContainerReport() {
                 <DataGrid
                   {...model.bind("main")}
                   authId={AUTH.grids.main}
-                  columnDefs={MAIN_COLUMN_DEFS}
+                  columnDefs={ctrl.mainColumnDefs}
                   codeMap={model.codeMap}
                   actions={ctrl.mainActions}
                   rowSelection="multiple"
@@ -65,7 +60,7 @@ export default function DspchContainerReport() {
                 <DataGrid
                   {...model.bind("sub01")}
                   authId={AUTH.grids.sub01}
-                  columnDefs={SUB01_COLUMN_DEFS}
+                  columnDefs={ctrl.sub01ColumnDefs}
                   codeMap={model.codeMap}
                   actions={ctrl.sub01Actions}
                   rowSelection="multiple"
@@ -78,7 +73,7 @@ export default function DspchContainerReport() {
                 <DataGrid
                   {...model.bind("sub02")}
                   authId={AUTH.grids.sub02}
-                  columnDefs={SUB02_COLUMN_DEFS}
+                  columnDefs={ctrl.sub02ColumnDefs}
                   codeMap={model.codeMap}
                   actions={ctrl.sub02Actions}
                   rowSelection="multiple"

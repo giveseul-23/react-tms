@@ -17,6 +17,13 @@ const withSession = (payload: any = {}) => {
 // 조회 전용 리포트 — 저장 없음. 탭별 3개 조회 엔드포인트.
 export const dspchContainerReportApi = {
   // 일자별(byDay)
+  searchLgstGrpCntr(payload: any) {
+    return apiClient.post<CommonResponse>(
+      `/dspchContainer2Service/searchLgstGrpCntr`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
   getMainList(payload: any) {
     return apiClient.post<CommonResponse>(
       `/dspchContainerReportService/searchByDay`,
