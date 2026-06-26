@@ -49,14 +49,7 @@ export const OIL_PRICE_COLUMN_DEFS = [
     field: "OIL_PRICE",
     required: true,
     insertable: true,
-  },
-  {
-    type: "text",
-    headerName: "LBL_AREA_DESCR",
-    field: "AREA_DESCR",
-    insertable: true,
-    editable: true,
-  },
+  }
 ];
 
 // ── 탭 B: 기간별 조회 ──────────────────────────────────────────
@@ -90,10 +83,5 @@ export const PERIOD_COLUMN_DEFS = [
     type: "numeric",
     headerName: "LBL_CF_OIL_PRICE",
     field: "OIL_PRICE",
-  },
-  {
-    type: "text",
-    headerName: "LBL_AREA_DESCR",
-    field: "AREA_DESCR",
-  },
+  }
 ];
