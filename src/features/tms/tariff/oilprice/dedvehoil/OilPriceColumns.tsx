@@ -37,7 +37,7 @@ export const DF_OIL_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_DF_OIL_PRICE_ID",
-    field: "DF_OIL_PRICE_ID",
+    field: "OIL_PRICE_ID",
     align: "center",
     width: 160,
   },
@@ -98,7 +98,7 @@ export const MONTH_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_DF_OIL_PRICE_ID",
-    field: "DF_OIL_PRICE_ID",
+    field: "OIL_PRICE_ID",
     align: "center",
   },
   {

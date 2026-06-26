@@ -27,7 +27,7 @@ export const OIL_PRICE_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_CF_OIL_PRICE_ID",
-    field: "CF_OIL_PRICE_ID",
+    field: "OIL_PRICE_ID",
   },
   {
     type: "date",
@@ -74,7 +74,7 @@ export const PERIOD_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_CF_OIL_PRICE_ID",
-    field: "CF_OIL_PRICE_ID",
+    field: "OIL_PRICE_ID",
   },
   {
     type: "date",
