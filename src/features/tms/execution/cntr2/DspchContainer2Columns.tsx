@@ -1,8 +1,18 @@
 // 그리드 컬럼 정의 (서버 DspchContainer2Main 기준)
 // audit 컬럼(등록자/등록일시/수정자/수정일시)·EDIT_STS 는 DataGrid 가 자동 추가(model.bind).
 
-import { Lang } from "@/app/services/common/Lang";
 import { TempTonGroupChangePop } from "./popup/TempTonGroupChangePop";
+
+export type ContainerColumnMeta = {
+  CNTR_CD?: string;
+  CNTR_NM?: string;
+  D_CNTR_CD?: string;
+};
+
+const normalizeContainerQtyCode = (container: ContainerColumnMeta, index: number) => {
+  const rawCode = String(container.D_CNTR_CD || container.CNTR_CD || `C${index + 1}`);
+  return rawCode.replace(/^CD_/i, "");
+};
 
 // 배차진행상태 색상 — 서버 ViewController.setDispatchOperationStatusColor 대응 (DspchContainerColumns 와 동일)
 const DSPCH_OP_STS_STYLE: Record<string, { backgroundColor: string; color?: string }> = {
@@ -38,7 +48,7 @@ const qtyCellStyle = (p: any) => {
   const field = String(p?.colDef?.field ?? "");
   const n = parseInt(String(p?.value ?? ""), 10);
   if (!n || n === 0) return null;
-  if (field.includes("IN_COUNT")) {
+  if (field.includes("_IN_")) {
     return { backgroundColor: "#FBE4E4", color: "#D9534F", fontWeight: "bold" };
   }
   return { backgroundColor: "#E4F7E4", color: "#3C9A3C", fontWeight: "bold" };
@@ -47,10 +57,8 @@ const qtyCellStyle = (p: any) => {
 // 입/출고 수량 쌍 그룹 생성 헬퍼 — In(출고)/Out(입고) 컬럼은 editType:number, 셀 편집(editable), 하이라이트.
 const qtyPair = (
   headerName: string,
-  inField: string,
-  inExcel: string,
-  outField: string,
-  outExcel: string,
+  dlvryField: string,
+  rtrnField: string,
   groupOpts: Record<string, any> = {},
 ) => ({
   headerName,
@@ -58,28 +66,26 @@ const qtyPair = (
   children: [
     {
       type: "numeric",
-      headerName: "LBL_OUTBOUND",
-      field: inField,
+      headerName: "LBL_INBOUND_COUNT",
+      field: dlvryField,
       editable: true,
       validators: { min: 0 },
       width: 50,
-      excelColName: inExcel,
       cellStyle: qtyCellStyle,
     },
     {
       type: "numeric",
-      headerName: "LBL_INBOUND",
-      field: outField,
+      headerName: "LBL_OUTBOUND_COUNT",
+      field: rtrnField,
       editable: true,
       validators: { min: 0 },
       width: 50,
-      excelColName: outExcel,
       cellStyle: qtyCellStyle,
     },
   ],
 });
 
-export const MAIN_COLUMN_DEFS = [
+export const BASE_MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "date", headerName: "LBL_DLVRY_DATE", field: "DLVRY_DT", align: "center", width: 70 },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO", align: "center", width: 80 },
@@ -150,15 +156,25 @@ export const MAIN_COLUMN_DEFS = [
     ],
   },
   { type: "text", headerName: "LBL_CNTR_WEB_UPD_YN", field: "CNTR_WEB_UPD_YN", align: "center", width: 65 },
-  qtyPair("KPP", "P1_IN_COUNT", "LBL_P1_OUTCOUNT", "P1_OUT_COUNT", "LBL_P1_OUTBOUND", { noLang: true }),
-  qtyPair(Lang.get("LBL_AJU") + " PLT", "P2_IN_COUNT", "LBL_P2_INBOUND", "P2_OUT_COUNT", "LBL_P2_OUTBOUND", { noLang: true }),
-  qtyPair(Lang.get("LBL_ETC_SETTING") + " PLT", "P3_IN_COUNT", "LBL_P3_INBOUND", "P3_OUT_COUNT", "LBL_P3_OUTBOUND", { noLang: true }),
-  qtyPair("LBL_SLV_BOGIE", "R1_IN_COUNT", "LBL_R1_INBOUND", "R1_OUT_COUNT", "LBL_R1_OUTBOUND"),
-  qtyPair("LBL_BLU_BOGIE", "R2_IN_COUNT", "LBL_R2_INBOUND", "R2_OUT_COUNT", "LBL_R2_OUTBOUND"),
-  qtyPair("LBL_PICK_BOGIE", "R3_IN_COUNT", "LBL_R3_INBOUND", "R3_OUT_COUNT", "LBL_R3_OUTBOUND"),
-  qtyPair("LBL_TRANSFER_BOGIE", "O1_IN_COUNT", "LBL_O1_INBOUND", "O1_OUT_COUNT", "LBL_O1_OUTBOUND"),
-  qtyPair("LBL_LENDING_BORROWING", "O2_IN_COUNT", "LBL_O2_INBOUND", "O2_OUT_COUNT", "LBL_O2_OUTBOUND"),
-  qtyPair("LBL_TRANSPORTATION", "O3_IN_COUNT", "LBL_O3_INBOUND", "O3_OUT_COUNT", "LBL_O3_OUTBOUND"),
-  qtyPair("LBL_PICK_BOX_LENDING_BORROWING", "O4_IN_COUNT", "LBL_O4_INBOUND", "O4_OUT_COUNT", "LBL_O4_OUTBOUND"),
-  qtyPair("LBL_PICK_BOX_TRANSPORTATION", "O5_IN_COUNT", "LBL_O5_INBOUND", "O5_OUT_COUNT", "LBL_O5_OUTBOUND"),
 ];
+
+export const buildContainerQtyColumnDefs = (containers: ContainerColumnMeta[] = []) => {
+  const sorted = [...containers].sort((a, b) => String(a.CNTR_CD ?? "").localeCompare(String(b.CNTR_CD ?? "")));
+  return sorted.map((container, index) => {
+    const dynamicCode = normalizeContainerQtyCode(container, index);
+    const cntrName = String(container.CNTR_NM || container.CNTR_CD || dynamicCode);
+    return qtyPair(
+      cntrName,
+      `CD_${dynamicCode}_DLVRY_QTY`,
+      `CD_${dynamicCode}_RTRN_QTY`,
+      { noLang: true },
+    );
+  });
+};
+
+export const buildDspchContainer2ColumnDefs = (containers: ContainerColumnMeta[] = []) => [
+  ...BASE_MAIN_COLUMN_DEFS,
+  ...buildContainerQtyColumnDefs(containers),
+];
+
+export const MAIN_COLUMN_DEFS = buildDspchContainer2ColumnDefs();

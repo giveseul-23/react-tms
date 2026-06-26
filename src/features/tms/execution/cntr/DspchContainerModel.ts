@@ -10,7 +10,7 @@ export function useDspchContainerModel(menuCode: string) {
   // 공통코드 — 배차진행상태 / 운송단위 / 착지구분
   const { codeMap } = useCommonStores({
     dspchOpSts: { sqlProp: "CODE", keyParam: "DSPCH_OP_STS" },
-    cntrTcd: { sqlProp: "CODE", keyParam: "CNTR_TCD" },
+    cntrCd: { sqlProp: "selectCntrCodeName" },
     stopTp: { sqlProp: "CODE", keyParam: "STOP_TP" },
   });
 

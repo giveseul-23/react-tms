@@ -15,7 +15,6 @@ const withSession = (payload: any = {}) => {
 };
 
 export const dspchContainer2Api = {
-  // 조회 (서버 mainInfo proxy /dspchContainer2Service/search)
   getList(payload: any) {
     return apiClient.post<CommonResponse>(
       `/dspchContainer2Service/search`,
@@ -23,7 +22,13 @@ export const dspchContainer2Api = {
     );
   },
 
-  // 저장 (서버 saveUrl /dspchContainer2Service/save, dsSave 패턴)
+  searchLgstGrpCntr(payload: any) {
+    return apiClient.post<CommonResponse>(
+      `/dspchContainer2Service/searchLgstGrpCntr`,
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
   save(payload: any) {
     const { dsSave, ...rest } = payload ?? {};
     return apiClient.post<CommonResponse>(
@@ -39,7 +44,6 @@ export const dspchContainer2Api = {
     );
   },
 
-  // 톤급변경 팝업 — 차량 톤그룹 조회 (서버 /dispatchPlanVehService/searchTempTonGroupToChange)
   searchTempTonGroupToChange(payload: any) {
     return apiClient.post<CommonResponse>(
       `/dispatchPlanVehService/searchTempTonGroupToChange`,
@@ -47,7 +51,6 @@ export const dspchContainer2Api = {
     );
   },
 
-  // 톤급변경 팝업 — 톤급 조회 (서버 /dispatchPlanVehService/searchVehicleTypeToChange)
   searchVehicleTypeToChange(payload: any) {
     return apiClient.post<CommonResponse>(
       `/dispatchPlanVehService/searchVehicleTypeToChange`,

@@ -7,7 +7,6 @@ import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useDspchContainer2Model } from "./DspchContainer2Model";
 import { useDspchContainer2Controller } from "./DspchContainer2Controller";
-import { MAIN_COLUMN_DEFS } from "./DspchContainer2Columns";
 
 export const MENU_CODE = "MENU_CONTAINER_MGMT2";
 
@@ -31,7 +30,7 @@ export default function DspchContainer2() {
         <DataGrid
           {...model.bind("main")}
           authId={AUTH.grids.main}
-          columnDefs={MAIN_COLUMN_DEFS}
+          columnDefs={ctrl.columnDefs}
           codeMap={model.codeMap}
           actions={ctrl.mainActions}
           rowSelection="multiple"

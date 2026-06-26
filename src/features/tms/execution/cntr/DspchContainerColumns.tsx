@@ -61,12 +61,21 @@ export const MAIN_COLUMN_DEFS = [
 export const SUB01_COLUMN_DEFS = [
   { headerName: "No" },
   // 운송단위
-  { type: "combo", headerName: "LBL_TRANSPORT_UNIT", field: "CNTR_TCD", codeKey: "cntrTcd", align: "center", width: 140, editable: false },
+  {
+    type: "combo",
+    headerName: "LBL_TRANSPORT_UNIT",
+    field: "CNTR_CD",
+    codeKey: "cntrCd",
+    valueGetter: (params: any) => params.data?.CNTR_CD || params.data?.CNTR_TCD,
+    align: "center",
+    width: 140,
+    editable: false,
+  },
   // 입고수량
   {
     type: "numeric",
     headerName: "LBL_INBOUND_COUNT",
-    field: "IN_COUNT",
+    field: "DLVRY_QTY",
     align: "right",
     editable: true,
     required: true,
@@ -76,7 +85,7 @@ export const SUB01_COLUMN_DEFS = [
   {
     type: "numeric",
     headerName: "LBL_OUTBOUND_COUNT",
-    field: "OUT_COUNT",
+    field: "RTRN_QTY",
     align: "right",
     editable: true,
     required: true,

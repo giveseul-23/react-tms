@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import {
   makeSaveAction,
@@ -11,6 +11,10 @@ import { MENU_CODE } from "./DspchContainer2";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { DspchContainer2Model, GridKey } from "./DspchContainer2Model";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import {
+  MAIN_COLUMN_DEFS,
+  buildDspchContainer2ColumnDefs,
+} from "./DspchContainer2Columns";
 
 interface Args {
   model: DspchContainer2Model;
@@ -19,6 +23,7 @@ interface Args {
 export function useDspchContainer2Controller({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
+  const [columnDefs, setColumnDefs] = useState<any[]>(MAIN_COLUMN_DEFS);
 
   // 조회조건 raw 값 (SearchMeta 필드 id = 센차 comp 이름)
   const getSearch = useCallback(
@@ -28,11 +33,20 @@ export function useDspchContainer2Controller({ model }: Args) {
 
   // 메인 조회 — 배송일(SRCH_A_DLVRY_DT) 단일값을 From/To 로 동시 전달 (서버 onSaveAfterSearch 대응)
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => {
+    async (params: Record<string, unknown>) => {
       const s = getSearch();
       const dlvryDt = String(s.SRCH_A_DLVRY_DT ?? "");
+      const lgstGrpCd = String(s.SRCH_A_LGST_GRP_CD ?? s.LGST_GRP_CD ?? "");
+
+      const cntrRes = lgstGrpCd
+        ? await api.searchLgstGrpCntr({ LGST_GRP_CD: lgstGrpCd })
+        : null;
+      const containers = cntrRes?.data?.data?.dsOut ?? cntrRes?.data?.result ?? [];
+      setColumnDefs(buildDspchContainer2ColumnDefs(containers));
+
       return api.getList({
         ...params,
+        LGST_GRP_CD: lgstGrpCd,
         DLVRY_DT_FROM: dlvryDt,
         DLVRY_DT_TO: dlvryDt,
       });
@@ -86,5 +100,6 @@ export function useDspchContainer2Controller({ model }: Args) {
     fetchList,
     onSearchCallback,
     mainActions,
+    columnDefs,
   };
 }

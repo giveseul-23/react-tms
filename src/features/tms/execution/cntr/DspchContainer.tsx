@@ -49,6 +49,7 @@ export default function DspchContainer() {
           authId={AUTH.grids.sub01}
           columnDefs={SUB01_COLUMN_DEFS}
           codeMap={model.codeMap}
+          audit={{ delete: false }}
           actions={ctrl.sub01Actions}
         />
       }

@@ -26,7 +26,7 @@ export const dspchContainerApi = {
   // sub01: 운송단위 입출고 수량 조회 (서버 sub01Info proxy /search)
   getSub01List(payload: any) {
     return apiClient.post<CommonResponse>(
-      `/dspchContainerService/search`,
+      `/dspchContainerService/searchStopCntr`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
