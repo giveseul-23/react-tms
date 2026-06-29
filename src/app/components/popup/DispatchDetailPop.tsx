@@ -29,12 +29,12 @@ import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import DispatchMemoPopup from "@/app/components/popup/DispatchMemoPopup";
-import PredictEstimateTimetoArrivalPop from "../../dispatchPlan/popup/PredictEstimateTimetoArrivalPop";
-import SplitQtyPop from "../../dispatchPlan/popup/SplitQtyPop";
+import PredictEstimateTimetoArrivalPop from "@/features/tms/pln/dispatchPlan/popup/PredictEstimateTimetoArrivalPop";
+import SplitQtyPop from "@/features/tms/pln/dispatchPlan/popup/SplitQtyPop";
 import { Lang } from "@/app/services/common/Lang";
 import { DSPCH_OP_STS } from "@/app/components/grid/status/statusEnums";
-import { dispatchPlanVehApi as api } from "../DispatchPlanVehApi";
-import { MENU_CODE } from "../DispatchPlanVeh";
+import { dispatchPlanVehApi as api } from "@/features/tms/pln/dspchplnveh/DispatchPlanVehApi";
+import { MENU_CODE } from "@/features/tms/pln/dspchplnveh/DispatchPlanVeh";
 
 type Props = {
   onClose: () => void;
