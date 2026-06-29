@@ -121,64 +121,80 @@ export default function ReceiveShipmentDetailAddPop({ onApply, onClose }: Props)
 
   return (
     <FormPopupLayout
-      cardClassName="space-y-4"
+      cardClassName="space-y-4 !p-4 [&_label]:!text-[11px] [&_label]:!mb-1 [&_input]:!h-8 [&_input]:!text-xs [&_input]:!px-2.5 [&_textarea]:!text-xs [&_textarea]:!p-2 [&_[role=combobox]]:!h-8 [&_[role=combobox]]:!text-xs [&_[role=combobox]]:!px-2.5"
       confirmLabel={Lang.get("BTN_ADD")}
       isValid={!!(form.ORD_LINE_NO && form.CUST_ITEM_CD && form.CUST_ITEM_NM)}
       onCancel={onClose}
       onConfirm={() => onApply(toPayload(form))}
     >
-      <div className="text-base font-semibold text-slate-800">
-        {Lang.get("BTN_ADD")}
-      </div>
+      {/* 묶음1: 품목 정보 (주문라인번호 ~ 상품군코드) */}
+      <section>
+        <h3 className="text-sm font-semibold text-gray-500 border-b pb-1 mb-2">
+          품목 정보
+        </h3>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field layout="vertical" type="text" label={Lang.get("LBL_ORD_LINE_NO")} required value={form.ORD_LINE_NO} onChange={(v) => setField("ORD_LINE_NO", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_ITEM_CD")} required value={form.CUST_ITEM_CD} onChange={(v) => setField("CUST_ITEM_CD", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_ITEM_NM")} required value={form.CUST_ITEM_NM} onChange={(v) => setField("CUST_ITEM_NM", v)} />
+          <Field layout="vertical" type="combo" label={Lang.get("LBL_COMMODITY_CODE")} value={form.CMDT_CD} onChange={(v) => setField("CMDT_CD", v)} options={stores.cmdtTpList ?? []} />
+        </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-        <Field layout="vertical" type="text" label={Lang.get("LBL_ORD_LINE_NO")} required value={form.ORD_LINE_NO} onChange={(v) => setField("ORD_LINE_NO", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_ITEM_CD")} required value={form.CUST_ITEM_CD} onChange={(v) => setField("CUST_ITEM_CD", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_ITEM_NM")} required value={form.CUST_ITEM_NM} onChange={(v) => setField("CUST_ITEM_NM", v)} />
-        <Field layout="vertical" type="combo" label={Lang.get("LBL_COMMODITY_CODE")} value={form.CMDT_CD} onChange={(v) => setField("CMDT_CD", v)} options={stores.cmdtTpList ?? []} />
-      </div>
+      {/* 묶음2: 수량 정보 (계획주문수량 ~ 계획확정수량5) */}
+      <section className="space-y-3">
+        <h3 className="text-sm font-semibold text-gray-500 border-b pb-1 mb-2">
+          수량 정보
+        </h3>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_ORD_QTY")} value={form.PLN_ORD_QTY} onChange={(v) => setField("PLN_ORD_QTY", v)} />
+          <Field layout="vertical" type="combo" label={Lang.get("LBL_PLN_ORD_QTY_UOM")} value={form.PLN_ORD_QTY_UOM} onChange={(v) => setField("PLN_ORD_QTY_UOM", v)} options={stores.itmUomList ?? []} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_INV_QTY")} value={form.PLN_INV_QTY} onChange={(v) => setField("PLN_INV_QTY", v)} />
+          <Field layout="vertical" type="combo" label={Lang.get("LBL_PLN_INV_QTY_UOM")} value={form.PLN_INV_QTY_UOM} onChange={(v) => setField("PLN_INV_QTY_UOM", v)} options={stores.itmUomList ?? []} />
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_NET_VOL")} value={form.PLN_NET_VOL} onChange={(v) => setField("PLN_NET_VOL", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_GRS_VOL")} value={form.PLN_GRS_VOL} onChange={(v) => setField("PLN_GRS_VOL", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_NET_WGT")} value={form.PLN_NET_WGT} onChange={(v) => setField("PLN_NET_WGT", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_GRS_WGT")} value={form.PLN_GRS_WGT} onChange={(v) => setField("PLN_GRS_WGT", v)} />
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_PLT_QTY")} value={form.PLN_PLT_QTY} onChange={(v) => setField("PLN_PLT_QTY", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_RTNR_QTY")} value={form.PLN_RTNR_QTY} onChange={(v) => setField("PLN_RTNR_QTY", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_PBOX_QTY")} value={form.PLN_PBOX_QTY} onChange={(v) => setField("PLN_PBOX_QTY", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_BOX_QTY")} value={form.PLN_BOX_QTY} onChange={(v) => setField("PLN_BOX_QTY", v)} />
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY1")} value={form.PLN_FLEX_QTY1} onChange={(v) => setField("PLN_FLEX_QTY1", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY2")} value={form.PLN_FLEX_QTY2} onChange={(v) => setField("PLN_FLEX_QTY2", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY3")} value={form.PLN_FLEX_QTY3} onChange={(v) => setField("PLN_FLEX_QTY3", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY4")} value={form.PLN_FLEX_QTY4} onChange={(v) => setField("PLN_FLEX_QTY4", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY5")} value={form.PLN_FLEX_QTY5} onChange={(v) => setField("PLN_FLEX_QTY5", v)} />
+        </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_ORD_QTY")} value={form.PLN_ORD_QTY} onChange={(v) => setField("PLN_ORD_QTY", v)} />
-        <Field layout="vertical" type="combo" label={Lang.get("LBL_PLN_ORD_QTY_UOM")} value={form.PLN_ORD_QTY_UOM} onChange={(v) => setField("PLN_ORD_QTY_UOM", v)} options={stores.itmUomList ?? []} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_INV_QTY")} value={form.PLN_INV_QTY} onChange={(v) => setField("PLN_INV_QTY", v)} />
-        <Field layout="vertical" type="combo" label={Lang.get("LBL_PLN_INV_QTY_UOM")} value={form.PLN_INV_QTY_UOM} onChange={(v) => setField("PLN_INV_QTY_UOM", v)} options={stores.itmUomList ?? []} />
-      </div>
+      {/* 묶음3: 품목비고사항 */}
+      <section>
+        <h3 className="text-sm font-semibold text-gray-500 border-b pb-1 mb-2">
+          {Lang.get("LBL_ITEM_REMARK")}
+        </h3>
+        <Field layout="vertical" type="textarea" label={Lang.get("LBL_ITEM_REMARK")} value={form.SHPM_DTL_RSN_DESC} onChange={(v) => setField("SHPM_DTL_RSN_DESC", v)} rows={3} />
+      </section>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_NET_VOL")} value={form.PLN_NET_VOL} onChange={(v) => setField("PLN_NET_VOL", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_GRS_VOL")} value={form.PLN_GRS_VOL} onChange={(v) => setField("PLN_GRS_VOL", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_NET_WGT")} value={form.PLN_NET_WGT} onChange={(v) => setField("PLN_NET_WGT", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_GRS_WGT")} value={form.PLN_GRS_WGT} onChange={(v) => setField("PLN_GRS_WGT", v)} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_PLT_QTY")} value={form.PLN_PLT_QTY} onChange={(v) => setField("PLN_PLT_QTY", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_RTNR_QTY")} value={form.PLN_RTNR_QTY} onChange={(v) => setField("PLN_RTNR_QTY", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_PBOX_QTY")} value={form.PLN_PBOX_QTY} onChange={(v) => setField("PLN_PBOX_QTY", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLN_BOX_QTY")} value={form.PLN_BOX_QTY} onChange={(v) => setField("PLN_BOX_QTY", v)} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY1")} value={form.PLN_FLEX_QTY1} onChange={(v) => setField("PLN_FLEX_QTY1", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY2")} value={form.PLN_FLEX_QTY2} onChange={(v) => setField("PLN_FLEX_QTY2", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY3")} value={form.PLN_FLEX_QTY3} onChange={(v) => setField("PLN_FLEX_QTY3", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY4")} value={form.PLN_FLEX_QTY4} onChange={(v) => setField("PLN_FLEX_QTY4", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_PLANNED_FLEX_QTY5")} value={form.PLN_FLEX_QTY5} onChange={(v) => setField("PLN_FLEX_QTY5", v)} />
-      </div>
-
-      <Field layout="vertical" type="textarea" label={Lang.get("LBL_ITEM_REMARK")} value={form.SHPM_DTL_RSN_DESC} onChange={(v) => setField("SHPM_DTL_RSN_DESC", v)} rows={3} />
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <Field layout="vertical" type="text" label={Lang.get("LBL_REFER_ORD_NO")} value={form.REFER_ORD_NO} onChange={(v) => setField("REFER_ORD_NO", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_REFER_ORD_LINE_NO")} value={form.REFER_ORD_LINE_NO} onChange={(v) => setField("REFER_ORD_LINE_NO", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_DISTR_CHNL")} value={form.DIST_CHANNEL} onChange={(v) => setField("DIST_CHANNEL", v)} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <Field layout="vertical" type="text" label={Lang.get("LBL_SALES_OFC_CD")} value={form.SALES_OFC} onChange={(v) => setField("SALES_OFC", v)} />
-        <Field layout="vertical" type="text" label={Lang.get("LBL_SALES_ORG_CD")} value={form.SALES_GRP} onChange={(v) => setField("SALES_GRP", v)} />
-      </div>
+      {/* 묶음4: 참조/영업 정보 (나머지) */}
+      <section className="space-y-3">
+        <h3 className="text-sm font-semibold text-gray-500 border-b pb-1 mb-2">
+          참조 정보
+        </h3>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field layout="vertical" type="text" label={Lang.get("LBL_REFER_ORD_NO")} value={form.REFER_ORD_NO} onChange={(v) => setField("REFER_ORD_NO", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_REFER_ORD_LINE_NO")} value={form.REFER_ORD_LINE_NO} onChange={(v) => setField("REFER_ORD_LINE_NO", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_DISTR_CHNL")} value={form.DIST_CHANNEL} onChange={(v) => setField("DIST_CHANNEL", v)} />
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field layout="vertical" type="text" label={Lang.get("LBL_SALES_OFC_CD")} value={form.SALES_OFC} onChange={(v) => setField("SALES_OFC", v)} />
+          <Field layout="vertical" type="text" label={Lang.get("LBL_SALES_ORG_CD")} value={form.SALES_GRP} onChange={(v) => setField("SALES_GRP", v)} />
+        </div>
+      </section>
     </FormPopupLayout>
   );
 }

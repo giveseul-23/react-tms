@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { usePopup } from "@/app/components/popup/PopupContext";
@@ -8,8 +8,6 @@ import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { receiveShipmentManagementApi as api } from "./ReceiveShipmentManagementApi";
 import { MENU_CODE } from "./ReceiveShipmentManagement";
 import type { GridKey, ReceiveShipmentManagementModel } from "./ReceiveShipmentManagementModel";
-import ReceiveShipmentManagementPop from "./popup/ReceiveShipmentManagementPop";
-import ReceiveShipmentDetailAddPop from "./popup/ReceiveShipmentDetailAddPop";
 import ShipmentTransferPop from "./popup/ShipmentTransferPop";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 
@@ -85,20 +83,22 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     base.search();
   }, [base]);
 
+  // 출하 등록/수정 — 팝업 대신 우측 슬라이드 폼(FormSheetOverlay)으로 처리 (View 가 렌더).
+  const [shipmentSlide, setShipmentSlide] = useState<{ open: boolean; mode: "I" | "U"; initialValues: any }>({ open: false, mode: "I", initialValues: {} });
+
   const openShipmentPop = useCallback((mode: "I" | "U", record?: any) => {
-    openPopup({
-      title: mode === "I" ? "LBL_SHIPMENT_INSERT_POP": "LBL_SHIPMENT_UPDATE_POP",
-      width: "4xl",
-      content: (
-        <ReceiveShipmentManagementPop
-          mode={mode}
-          initialValues={mode === "I" ? { DIV_CD: model.rawFiltersRef.current.SRCH_SHPM_DIV_CD ?? "", LGST_GRP_CD: model.rawFiltersRef.current.SRCH_SHPM_LGST_GRP_CD ?? "" } : record}
-          onSaved={() => { closePopup(); base.search(); }}
-          onClose={closePopup}
-        />
-      ),
-    });
-  }, [base, closePopup, model.rawFiltersRef, openPopup]);
+    const initialValues = mode === "I"
+      ? { DIV_CD: model.rawFiltersRef.current.SRCH_SHPM_DIV_CD ?? "", LGST_GRP_CD: model.rawFiltersRef.current.SRCH_SHPM_LGST_GRP_CD ?? "" }
+      : record;
+    setShipmentSlide({ open: true, mode, initialValues });
+  }, [model.rawFiltersRef]);
+
+  const onShipmentSaved = useCallback(() => {
+    setShipmentSlide((s) => ({ ...s, open: false }));
+    base.search();
+  }, [base]);
+
+  const closeShipmentSlide = useCallback(() => setShipmentSlide((s) => ({ ...s, open: false })), []);
 
   const onShipmentIns = useCallback(() => {
     const division = model.rawFiltersRef.current.SRCH_SHPM_DIV_CD;
@@ -198,27 +198,33 @@ export function useReceiveShipmentManagementController({ model }: Args) {
 
   const onSaveSub01 = useCallback(() => base.saveGrid("sub01", (payload) => api.saveShipmentDetail(payload), { afterSave: { cascadeFrom: "main", fetch: (main) => fetchSub01(main) } }), [base, fetchSub01]);
 
+  // 상세 추가 — 팝업 대신 우측 슬라이드 폼(FormSheetOverlay)으로 처리 (View 가 렌더).
+  const [addSub01Open, setAddSub01Open] = useState(false);
+  const addSub01MainRef = useRef<any>(null);
+
   const onAddSub01 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
     if (!base.requireParentRow(main, Lang.get("LBL_SHIPMENT_NUMBER"))) return;
-    openPopup({
-      title: "BTN_ADD",
-      width: "4xl",
-      content: (
-        <ReceiveShipmentDetailAddPop
-          onApply={(row) => {
-            closePopup();
-            base.addRow("sub01", {
-              SHPM_ID: main.SHPM_ID,
-              CUST_CD: main.CUST_CD,
-              ...row,
-            });
-          }}
-          onClose={closePopup}
-        />
-      ),
-    });
-  }, [base, closePopup, model.grids.main, openPopup]);
+    addSub01MainRef.current = main;
+    setAddSub01Open(true);
+  }, [base, model.grids.main]);
+
+  const onApplyAddSub01 = useCallback(
+    (row: Record<string, any>) => {
+      const main = addSub01MainRef.current;
+      if (main) {
+        base.addRow("sub01", {
+          SHPM_ID: main.SHPM_ID,
+          CUST_CD: main.CUST_CD,
+          ...row,
+        });
+      }
+      setAddSub01Open(false);
+    },
+    [base],
+  );
+
+  const closeAddSub01 = useCallback(() => setAddSub01Open(false), []);
 
   const mainActions: ActionItem[] = useMemo(() => [
     { type: "button", key: "BTN_CRT_ORD_BTC", label: "BTN_CRT_ORD_BTC", onClick: onBatchInsert },
@@ -237,5 +243,5 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     makeExcelGroupAction({ excelColumns: () => model.grids.sub01.getExcelColumns(), menuCode: MENU_CODE, menuName, fetchFn: () => { const main = model.grids.main.selectedRef.current; return main ? fetchSub01(main) : EMPTY_RESULT; }, rows: () => model.grids.sub01.rows }),
   ], [fetchSub01, menuName, model.grids.main, model.grids.sub01, onAddSub01, onSaveSub01]);
 
-  return { fetchList, onSearchCallback, onMainGridClick, onMainSelectionChanged, mainActions, sub01Actions };
+  return { fetchList, onSearchCallback, onMainGridClick, onMainSelectionChanged, mainActions, sub01Actions, addSub01Open, onApplyAddSub01, closeAddSub01, shipmentSlide, onShipmentSaved, closeShipmentSlide };
 }

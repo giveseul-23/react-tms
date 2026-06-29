@@ -290,39 +290,33 @@ export default function ReceiveShipmentManagementPop({ mode, initialValues = {},
 
   return (
     <FormPopupLayout
-      cardClassName="space-y-4"
+      cardClassName="space-y-4 !p-4 [&_label]:!text-[11px] [&_label]:!mb-1 [&_input]:!h-8 [&_input]:!text-xs [&_input]:!px-2.5 [&_textarea]:!text-xs [&_textarea]:!p-2 [&_[role=combobox]]:!h-8 [&_[role=combobox]]:!text-xs [&_[role=combobox]]:!px-2.5"
       confirmLabel={mode === "I" ? Lang.get("BTN_SHIPMENT_INSERT") : Lang.get("BTN_SHIPMENT_UPDATE")}
       isValid={!!(form.DIV_CD && form.LGST_GRP_CD && form.CUST_CD && form.CUST_ORD_NO && form.SHPM_TP && form.ORD_TP && form.DLVRY_DT)}
       onCancel={onClose}
       onConfirm={() => void save(true)}
     >
-      <div className="flex items-center justify-between gap-3 pb-2 border-b">
-        <div className="text-base font-semibold text-slate-800">{mode === "I" ? Lang.get("LBL_SHIPMENT_INSERT_POP") : Lang.get("LBL_SHIPMENT_UPDATE_POP")}</div>
-        <div className="flex gap-2">
-          <button type="button" className="h-9 px-3 rounded-lg border" onClick={() => void save(false)}>{Lang.get("BTN_SAVE")}</button>
-          <button type="button" className="h-9 px-3 rounded-lg border" onClick={() => void save(true)}>{Lang.get("BTN_SAVE_CLOSE")}</button>
-        </div>
-      </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <Field layout="vertical" type="text" label={Lang.get("LBL_DIVISION")} value={`${form.DIV_CD}${form.DIV_NM ? ` [${form.DIV_NM}]` : ""}`} disabled />
         <Field layout="vertical" type="text" label={Lang.get("LBL_LOGISTICS_GROUP")} value={`${form.LGST_GRP_CD}${form.LGST_GRP_NM ? ` [${form.LGST_GRP_NM}]` : ""}`} disabled />
       </div>
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700 mb-2">{Lang.get("LBL_CUSTOMER_CODE")}</label>
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+        {/* 조회조건(PopupFilter) 식 배열 — 코드(좁게) + 코드명(넓게, readOnly) + 돋보기 */}
+        <div className="grid grid-cols-[120px_1fr_auto] gap-2">
           <input
             value={form.CUST_CD}
             disabled
-            className="h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm"
+            className="h-8 rounded-md border border-gray-300 bg-gray-200 px-2.5 text-xs"
           />
           <input
             value={form.CUST_NM}
             disabled
-            className="h-10 rounded-lg border border-gray-300 bg-gray-200 px-3 text-sm"
+            className="h-8 rounded-md border border-gray-300 bg-gray-200 px-2.5 text-xs"
           />
           <button
             type="button"
-            className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm"
+            className="h-8 rounded-md border border-gray-300 bg-white px-3 text-xs"
             onClick={openCustomerPopup}
           >
             {Lang.get("BTN_SEARCH")}

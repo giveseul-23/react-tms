@@ -2,11 +2,15 @@
 
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
+import { FormSheetOverlay } from "@/app/components/layout/FormSheet";
 import DataGrid from "@/app/components/grid/DataGrid";
 import type { SearchMeta } from "@/features/search/search.meta.types";
+import { Lang } from "@/app/services/common/Lang";
 import { useReceiveShipmentManagementModel } from "./ReceiveShipmentManagementModel";
 import { useReceiveShipmentManagementController } from "./ReceiveShipmentManagementController";
 import { MAIN_COLUMN_DEFS, SUB01_COLUMN_DEFS } from "./ReceiveShipmentManagementColumns";
+import ReceiveShipmentDetailAddPop from "./popup/ReceiveShipmentDetailAddPop";
+import ReceiveShipmentManagementPop from "./popup/ReceiveShipmentManagementPop";
 
 export const MENU_CODE = "MENU_RCV_SHPM_MGMT";
 
@@ -15,6 +19,7 @@ export default function ReceiveShipmentManagement() {
   const ctrl = useReceiveShipmentManagementController({ model });
 
   return (
+    <>
     <MasterDetailPage
       menuCode={MENU_CODE}
       defaultSizes={[60, 40]}
@@ -55,5 +60,41 @@ export default function ReceiveShipmentManagement() {
         </SplitPane>
       }
     />
+
+      {/* 상세 추가 — 우측 슬라이드 폼 (팝업 대신) */}
+      <FormSheetOverlay
+        open={ctrl.addSub01Open}
+        onOpenChange={(o) => {
+          if (!o) ctrl.closeAddSub01();
+        }}
+        title={Lang.get("BTN_ADD")}
+      >
+        <ReceiveShipmentDetailAddPop
+          onApply={ctrl.onApplyAddSub01}
+          onClose={ctrl.closeAddSub01}
+        />
+      </FormSheetOverlay>
+
+      {/* 출하 등록/수정 — 우측 슬라이드 폼 (팝업 대신) */}
+      <FormSheetOverlay
+        open={ctrl.shipmentSlide.open}
+        onOpenChange={(o) => {
+          if (!o) ctrl.closeShipmentSlide();
+        }}
+        contentClassName="w-[680px] sm:max-w-[680px] p-0 gap-0 flex flex-col"
+        title={Lang.get(
+          ctrl.shipmentSlide.mode === "I"
+            ? "LBL_SHIPMENT_INSERT_POP"
+            : "LBL_SHIPMENT_UPDATE_POP",
+        )}
+      >
+        <ReceiveShipmentManagementPop
+          mode={ctrl.shipmentSlide.mode}
+          initialValues={ctrl.shipmentSlide.initialValues}
+          onSaved={ctrl.onShipmentSaved}
+          onClose={ctrl.closeShipmentSlide}
+        />
+      </FormSheetOverlay>
+    </>
   );
 }
