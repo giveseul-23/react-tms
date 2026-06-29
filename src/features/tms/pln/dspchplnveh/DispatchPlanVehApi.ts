@@ -109,6 +109,10 @@ export const dispatchPlanVehApi = {
   saveChangeTonType(rows: any[]) {
     return dsSavePost("/dispatchPlanVehService/saveChangeTonType", rows);
   },
+  // 배차상세 — 회전수/제약무시 저장 (센차 onSave → saveDispatchRtnNo)
+  saveDispatchRtnNo(rows: any[]) {
+    return dsSavePost("/dispatchPlanVehService/saveDispatchRtnNo", rows);
+  },
 
   // ── 자차 ↔ 용차 전환 ─────────────────────────────────────────
   changeDedicatedTruckToTemp(payload: any) {

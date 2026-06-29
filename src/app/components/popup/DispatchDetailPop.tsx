@@ -25,6 +25,7 @@ import { ActionItem } from "@/app/components/ui/GridActionsBar";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import { useCommonStores } from "@/hooks/useCommonStores";
 import { useErrorAlert } from "@/hooks/useErrorAlert";
+import { useApiHandler } from "@/hooks/useApiHandler";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
@@ -1110,6 +1111,7 @@ export default function DispatchDetailPop({
 
   const { menuName } = useMenuMeta();
   const showError = useErrorAlert();
+  const { handleApi } = useApiHandler();
   const { openPopup, closePopup } = usePopup();
   const [selDspch, setSelDspch] = useState<any>(null); // 선택된 배차행
 
@@ -1482,6 +1484,25 @@ export default function DispatchDetailPop({
         return loadSub(rows[0]);
       });
 
+  // 저장 (센차 onSave) — 수정행(EDIT_STS:"U")만 saveDispatchRtnNo 저장.
+  //  제약무시(CONSTRAINT_OVRD_YN:"Y") 인데 사유(CONSTRAINT_OVRD_RSN_CD) 미입력이면 저장 불가.
+  const onSaveDispatchRtnNo = () => {
+    const dirty = dspchRowData.filter((r) => r.EDIT_STS === "U");
+    const invalidRsn = dirty.some(
+      (r) =>
+        (r.CONSTRAINT_OVRD_YN === "Y" || r.CONSTRAINT_OVRD_YN === true) &&
+        !r.CONSTRAINT_OVRD_RSN_CD,
+    );
+    if (invalidRsn) {
+      showError(Lang.get("MSG_REQ_CONSTRAINT_OVRD_RSN"));
+      return;
+    }
+    runMask(
+      setDspchMasking,
+      handleApi(api.saveDispatchRtnNo(dirty)).then(refreshDspch),
+    ).catch(() => {});
+  };
+
   // ── 배차목록 액션 (dspchplnveh dedActions 동일 기능, 팝업 행=DSPCH_NO 보유) ──
   // 신규배차 생성 (Sencha onCreateNewDspch) — 선택 차량 행으로 빈 배차 생성
   const onCreateNewDspch = () => {
@@ -1616,7 +1637,7 @@ export default function DispatchDetailPop({
   };
 
   // 배차목록 그리드 액션 — dedActions 와 라벨 동일 버튼은 동일 기능 연결.
-  // (BTN_SAVE 는 dedActions 미해당 → 미연동)
+  // (BTN_SAVE → onSaveDispatchRtnNo: 회전수/제약무시 저장)
   // 임시용차(cntrVeh)면 배차생성(BTN_MANAGE_DSPCH)·저장(BTN_SAVE) 숨김
   //  → 메모 / 계획확정 / 경유순서자동조정 3개만 노출 (센차 cntrVeh 동일).
   const dspchActions: ActionItem[] = [
@@ -1684,7 +1705,12 @@ export default function DispatchDetailPop({
     ...(cntrVeh
       ? []
       : ([
-          { type: "button", key: "BTN_SAVE", label: "BTN_SAVE" },
+          {
+            type: "button",
+            key: "BTN_SAVE",
+            label: "BTN_SAVE",
+            onClick: onSaveDispatchRtnNo,
+          },
         ] as ActionItem[])),
     {
       type: "button",
