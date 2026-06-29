@@ -97,7 +97,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("divCd", api.saveConfig, {
-        confirmOnDelete: "MSG_CHK_DELETE",
+        confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
       }),
     [base],
   );
@@ -224,7 +224,10 @@ export function useDivisionConfigMasterController({ model }: Args) {
   const syncConfig = useCallback(
     () =>
       base
-        .callAjax(api.syncConfig({}), { successMsg: Lang.get("MSG_CMPLT_SYNC"), mask: "divCd" })
+        .callAjax(api.syncConfig({}), {
+          successMsg: Lang.get("MSG_CMPLT_SYNC"),
+          mask: "divCd",
+        })
         .then(() => base.search()),
     [base],
   );

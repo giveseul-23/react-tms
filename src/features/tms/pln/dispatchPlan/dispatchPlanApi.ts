@@ -37,6 +37,20 @@ export const dispatchPlanApi = {
     );
   },
 
+  // 경유처 순서 조정 (+/-) — dsSave 패턴 (디테일팝업 동일 엔드포인트)
+  saveAdjustPlanStopSeqPlus(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAdjustPlanStopSeqPlus",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  saveAdjustPlanStopSeqMinus(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAdjustPlanStopSeqMinus",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
   // ── 하단 탭: 할당주문 ───────────────────────────────────────
   getAllocOrderList(payload: any) {
     return apiClient.post<CommonResponse>(

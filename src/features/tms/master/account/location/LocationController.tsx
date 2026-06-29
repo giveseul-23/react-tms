@@ -22,6 +22,7 @@ import {
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 import PreferedCarrAddPopup from "./popup/PreferedCarrAddPopup";
 import OrderPlanPopup from "./popup/OrderPlanPopup";
+import { Lang } from "@/app/services/common/Lang";
 
 const masterParam = (row: any) => ({ LOC_ID: row?.LOC_ID });
 
@@ -155,7 +156,9 @@ export function useLocationController({ model }: Args) {
             // 저장(PLNARRAY) → 완료 후 목록 재조회로 그리드 채움 (저장 응답엔 목록이 없음)
             const locId = main.LOC_ID;
             base
-              .callAjax(api.saveOrderTypePlanId({ dsSave: [payload] }), { mask: "orderTypePlanId" })
+              .callAjax(api.saveOrderTypePlanId({ dsSave: [payload] }), {
+                mask: "orderTypePlanId",
+              })
               .then(() =>
                 base.searchSub(
                   "orderTypePlanId",
@@ -312,7 +315,7 @@ export function useLocationController({ model }: Args) {
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("main", api.save, {
-        confirmOnDelete: "MSG_CHK_DELETE",
+        confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
       }),
     [base],
   );

@@ -1,5 +1,5 @@
 // src/views/dispatchPlan/DispatchPlanController.tsx
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchPlanApi as api } from "./dispatchPlanApi";
 import { useGuard } from "@/hooks/useGuard";
@@ -42,24 +42,24 @@ export function useDispatchPlanController({ model }: Args) {
     [],
   );
 
-  // master 클릭 → stop, allocOrder cascade (unalloc 은 별도 조회)
+  // detail 탭은 "활성 탭만" lazy 조회 — main 클릭/탭 전환 시 현재 탭만 조회.
+  const activeDetailTabRef = useRef<string>("STOP");
+  const loadDetailTabRef = useRef<((key: string, row?: any) => void) | null>(
+    null,
+  );
+
+  // master 클릭 → 선택 + 모든 하위 그리드 reset 후, 현재 활성 detail 탭만 조회.
   const onMainGridClick = useCallback(
     (row: any) => {
-      base.handleRowClick(
-        "main",
-        row,
-        [
-          {
-            to: "stop",
-            fetch: (r) => api.getStopList({ DSPCH_NO: r.DSPCH_NO }),
-          },
-          {
-            to: "allocOrder",
-            fetch: (r) => api.getAllocOrderList({ DSPCH_NO: r.DSPCH_NO }),
-          },
-        ],
-        { alsoReset: ["unallocOrder", "allocSub", "unallocSub"] },
-      );
+      // UNALLOC(미할당주문)은 main 행과 무관 → main 클릭 시 reset/재조회 안 함(데이터 유지).
+      //  (UNALLOC 은 탭 선택 또는 조회버튼으로만 갱신)
+      base.handleRowClick("main", row, [], {
+        alsoReset: ["stop", "allocOrder", "allocSub", "vehMgmt"],
+      });
+      // row 가 있을 때만 활성 탭 조회. 빈 선택(빈 결과)이면 위 alsoReset 으로 하위가 비워진 상태 유지.
+      // (undefined 를 loadDetailTab 에 넘기면 row ?? selectedRef 가 직전 선택으로 빠져 옛 데이터를 다시 불러옴)
+      if (row && activeDetailTabRef.current !== "UNALLOC")
+        loadDetailTabRef.current?.(activeDetailTabRef.current, row);
       // 차량위치 패널이 열려 있으면 클릭한 차량으로 패널 리프레시
       if (model.vehLocPanelOpen && row) model.setVehLocRows([row]);
     },
@@ -165,20 +165,23 @@ export function useDispatchPlanController({ model }: Args) {
   }, [handleUnallocAndAllocOrderSearch, model]);
 
   // 할당 탭 조회 (조회조건 개별 값 기반) — 미할당과 동일 UI, 상태는 allocCond 로 별도 관리.
-  const handleAllocOrderSearch = useCallback(() => {
-    handleUnallocAndAllocOrderSearch({
-      cond: model.allocCond,
-      searching: model.setAllocSearching,
-      onSearch:
-        model.allocCond.SRCH_FILTER === "ITEM"
-          ? api.getAllocAndUnallocOrderItemList
-          : api.getAllocOrderList,
-      setData: model.grids.allocOrder.setData,
-      extraParams: {
-        DSPCH_NO: model.grids.main.selectedRef.current?.DSPCH_NO,
-      },
-    });
-  }, [handleUnallocAndAllocOrderSearch, model]);
+  const handleAllocOrderSearch = useCallback(
+    (dspchNo?: string) => {
+      handleUnallocAndAllocOrderSearch({
+        cond: model.allocCond,
+        searching: model.setAllocSearching,
+        onSearch:
+          model.allocCond.SRCH_FILTER === "ITEM"
+            ? api.getAllocAndUnallocOrderItemList
+            : api.getAllocOrderList,
+        setData: model.grids.allocOrder.setData,
+        extraParams: {
+          DSPCH_NO: dspchNo ?? model.grids.main.selectedRef.current?.DSPCH_NO,
+        },
+      });
+    },
+    [handleUnallocAndAllocOrderSearch, model],
+  );
 
   const handleVehMgmtSearch = useCallback(() => {
     const srchObj = model.rawFiltersRef.current;
@@ -206,6 +209,50 @@ export function useDispatchPlanController({ model }: Args) {
       )
       .finally(() => model.setVehMgmtSearching(false));
   }, [model]);
+
+  // 활성 detail 탭 1개만 조회 (row 미지정 시 현재 선택 main 사용).
+  const loadDetailTab = useCallback(
+    (tabKey: string, row?: any) => {
+      const main = row ?? model.grids.main.selectedRef.current;
+      switch (tabKey) {
+        case "STOP":
+          if (main?.DSPCH_NO)
+            base.searchSub(
+              "stop",
+              api.getStopList({ DSPCH_NO: main.DSPCH_NO }),
+            );
+          else base.resetGrids(["stop"]);
+          break;
+        case "ALLOC":
+          if (main?.DSPCH_NO) handleAllocOrderSearch(main.DSPCH_NO);
+          else base.resetGrids(["allocOrder", "allocSub"]);
+          break;
+        case "UNALLOC":
+          handleUnallocOrderSearch();
+          break;
+        case "VEHMGMT":
+          handleVehMgmtSearch();
+          break;
+      }
+    },
+    [
+      base,
+      model.grids.main,
+      handleAllocOrderSearch,
+      handleUnallocOrderSearch,
+      handleVehMgmtSearch,
+    ],
+  );
+  loadDetailTabRef.current = loadDetailTab;
+
+  // detail 탭 전환 → 그 탭만 조회 (현재 선택 main 기준).
+  const onDetailTabChange = useCallback(
+    (key: string) => {
+      activeDetailTabRef.current = key;
+      loadDetailTab(key);
+    },
+    [loadDetailTab],
+  );
 
   const isCheckOnlySingleSelectRecord = useCallback(
     (rows: any[], msg: string) => {
@@ -384,10 +431,12 @@ export function useDispatchPlanController({ model }: Args) {
     (e: any) => {
       const rows = (e?.data ?? []) as any[];
       if (!guardHasData(rows)) return;
-      base.confirm("MSG_CHK_DELETE", () => {
+      base.confirm(Lang.get("MSG_CHK_DELETE"), () => {
         base
           .callAjax(api.saveCancelPlanDispatch(rows), { mask: "main" })
-          .then(() => base.search());
+          .then(() => {
+            base.search();
+          });
       });
     },
     [guardHasData, base],
@@ -638,7 +687,9 @@ export function useDispatchPlanController({ model }: Args) {
               model.codeMap.dspchOpSts?.[rows[0].DSPCH_OP_STS] ??
               String(rows[0].DSPCH_OP_STS ?? "")
             }
-            fetchMemo={(dspchNo) => api.searchDispatchMemo({ DSPCH_NO: dspchNo })}
+            fetchMemo={(dspchNo) =>
+              api.searchDispatchMemo({ DSPCH_NO: dspchNo })
+            }
             saveMemo={(record) => api.saveDispatchMemo(record)}
             onSaved={() => {
               closePopup();
@@ -739,6 +790,22 @@ export function useDispatchPlanController({ model }: Args) {
         .then(() => base.search());
     },
     [model.grids.main, guardHasData, base],
+  );
+
+  // 미할당주문(unallocOrder) → 메인 드래그드랍 → 드롭한 타겟 배차행에 할당.
+  //  메인 타겟 행(DSPCH_NO)이 있어야만 동작. 다중선택 시 드롭된 모든 주문 일괄 할당.
+  const onUnallocDropToMain = useCallback(
+    (rows: any[], target: any) => {
+      if (!target?.DSPCH_NO || !rows?.length) return; // 메인 타겟 배차행 필수
+      base
+        .callAjax(
+          api.saveAssignedShipment(
+            rows.map((r) => ({ ...r, DSPCH_NO: target.DSPCH_NO })),
+          ),
+        )
+        .then(() => base.search());
+    },
+    [base],
   );
 
   // 품목 라인분할 — 상세 그리드 선택 행
@@ -889,6 +956,16 @@ export function useDispatchPlanController({ model }: Args) {
         });
     },
     [base, handleVehMgmtSearch, model.rawFiltersRef, requireSelected],
+  );
+
+  // 차량정보(vehMgmt) → 메인 드래그드랍 → 신규배차생성 로직 동일 처리.
+  //  다중선택 시 드롭된 모든 차량(rows) 일괄 생성 (ag-grid rowDragMultiRow 로 선택행 전체 전달).
+  const onVehMgmtDropToMain = useCallback(
+    (rows: any[]) => {
+      if (!rows?.length) return;
+      onCreateNewDspch({ data: rows });
+    },
+    [onCreateNewDspch],
   );
 
   const handleSave = useCallback(() => {
@@ -1114,6 +1191,97 @@ export function useDispatchPlanController({ model }: Args) {
     ],
   );
 
+  // 경유처 순서 조정(+/-) — 디테일팝업 onAdjustStopSeq* 동일 로직.
+  //  선택 배차(main) + 경유처(stop) 그리드 단건 선택, 같은 STOP_TP 인접행과만 교환.
+  const checkAdjustStopSeq = useCallback(
+    (rows: any[], dir: "plus" | "minus"): boolean => {
+      const main = model.grids.main.selectedRef.current;
+      if (!main?.DSPCH_NO) {
+        showErrorModal(Lang.get("MSG_SELECT_NO_DATA"));
+        return false;
+      }
+      if (!rows.length) {
+        showErrorModal(Lang.get("MSG_SELECT_STOP_CHK"));
+        return false;
+      }
+      if (rows.length > 1) {
+        showErrorModal(Lang.get("MSG_STOP_SEQUENCE_ADJUST_ONE_STOP"));
+        return false;
+      }
+      const present = rows[0];
+      if (present.STOP_TP === "99") {
+        showErrorModal(Lang.get("MSG_ERR_MOVE_GARAGE_STOP"));
+        return false;
+      }
+      const stopRows = model.grids.stop.rows;
+      const idx = stopRows.findIndex(
+        (r: any) => String(r.STOP_SEQ) === String(present.STOP_SEQ),
+      );
+      if (dir === "plus") {
+        if (Number(present.STOP_SEQ) === 1) {
+          showErrorModal(Lang.get("MSG_STOP_SEQUENCE_PREVIOUS_STOP_VALID_CHK"));
+          return false;
+        }
+        const prev = stopRows[idx - 1];
+        if (!prev || present.STOP_TP !== prev.STOP_TP) {
+          showErrorModal(Lang.get("MSG_STOP_SEQUENCE_VALID_CHK"));
+          return false;
+        }
+      } else {
+        if (idx === stopRows.length - 1) {
+          showErrorModal(Lang.get("MSG_LAST_STOP_SEQ"));
+          return false;
+        }
+        const next = stopRows[idx + 1];
+        if (!next || present.STOP_TP !== next.STOP_TP) {
+          showErrorModal(Lang.get("MSG_STOP_SEQUENCE_VALID_CHK"));
+          return false;
+        }
+      }
+      return true;
+    },
+    [model.grids.main, model.grids.stop],
+  );
+
+  const adjustStopSeq = useCallback(
+    (rows: any[], apiFn: (r: any[]) => Promise<any>) => {
+      const main = model.grids.main.selectedRef.current;
+      const payload = rows.map((r) => ({ ...r, EDIT_STS: "U" }));
+      const reload = () => {
+        if (main?.DSPCH_NO)
+          base.searchSub("stop", api.getStopList({ DSPCH_NO: main.DSPCH_NO }));
+      };
+      const doSave = () =>
+        base.callAjax(apiFn(payload), { mask: "stop" }).then(reload);
+      if (rows.some((r) => r.DOCK_CMMT_YN === "Y")) {
+        base.confirm(Lang.get("MSG_ASK_SAVE_STOP_SEQ_DOCK_CMMT"), doSave);
+      } else {
+        doSave();
+      }
+    },
+    [base, model.grids.main],
+  );
+
+  const onAdjustStopSeqPlus = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!rows.length) return;
+      if (!checkAdjustStopSeq(rows, "plus")) return;
+      adjustStopSeq(rows, api.saveAdjustPlanStopSeqPlus);
+    },
+    [checkAdjustStopSeq, adjustStopSeq],
+  );
+
+  const onAdjustStopSeqMinus = useCallback(
+    (e: any) => {
+      const rows = (e?.data ?? []) as any[];
+      if (!rows.length) return;
+      if (!checkAdjustStopSeq(rows, "minus")) return;
+      adjustStopSeq(rows, api.saveAdjustPlanStopSeqMinus);
+    },
+    [checkAdjustStopSeq, adjustStopSeq],
+  );
+
   const stopActions: ActionItem[] = useMemo(
     () => [
       {
@@ -1161,14 +1329,14 @@ export function useDispatchPlanController({ model }: Args) {
         key: "BTN_ADJUST_STOP_SEQ_PLUS",
         label: "BTN_ADJUST_STOP_SEQ_PLUS",
         authId: "BTN_ADJ_STOP_SEQ_PLUS_SUB01_GRID_RVDSPCH",
-        onClick: () => {},
+        onClick: (e: any) => onAdjustStopSeqPlus(e),
       },
       {
         type: "button",
         key: "BTN_ADJUST_STOP_SEQ_MINUS",
         label: "BTN_ADJUST_STOP_SEQ_MINUS",
         authId: "BTN_ADJ_STOP_SEQ_MINUS_SUB01_GRID_RVDSPCH",
-        onClick: () => {},
+        onClick: (e: any) => onAdjustStopSeqMinus(e),
       },
       {
         type: "button",
@@ -1204,6 +1372,8 @@ export function useDispatchPlanController({ model }: Args) {
       onPredictETA,
       validatorCalctEta,
       validatorPredictEta,
+      onAdjustStopSeqPlus,
+      onAdjustStopSeqMinus,
     ],
   );
 
@@ -1214,7 +1384,7 @@ export function useDispatchPlanController({ model }: Args) {
         key: "BTN_SEARCH",
         label: model.allocSearching ? "LBL_SEARCHING" : "BTN_SEARCH",
         disabled: model.allocSearching,
-        onClick: handleAllocOrderSearch,
+        onClick: () => handleAllocOrderSearch(),
       },
       {
         type: "button",
@@ -1273,6 +1443,9 @@ export function useDispatchPlanController({ model }: Args) {
     fetchDispatchPlanList: fetchList,
     onSearchCallback,
     onMainGridClick,
+    onDetailTabChange,
+    onVehMgmtDropToMain,
+    onUnallocDropToMain,
     onMainSelectionForVehLoc,
     onAllocOrderRowClicked,
     onUnallocOrderRowClicked,
