@@ -105,6 +105,7 @@ export default function DfChargeRateCopyPop({
         <input
           type="date"
           value={frm}
+          max={to}
           onChange={(e) => setFrm(e.target.value)}
           className="col-span-2 h-10 rounded-lg border border-gray-300 px-3 text-sm"
         />
@@ -116,6 +117,7 @@ export default function DfChargeRateCopyPop({
         <input
           type="date"
           value={to}
+          min={frm}
           onChange={(e) => setTo(e.target.value)}
           className="col-span-2 h-10 rounded-lg border border-gray-300 px-3 text-sm"
         />

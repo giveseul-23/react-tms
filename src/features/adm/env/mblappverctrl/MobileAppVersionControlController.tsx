@@ -71,7 +71,7 @@ export function useMobileAppVersionControlController({
           PLATFORM: row?.PLATFORM ?? "",
           PCKG_NM: row?.PCKG_NM ?? "",
         }),
-        "MSG_FILE_UPLOAD_CMPLT",
+        { successMsg: "MSG_FILE_UPLOAD_CMPLT", mask: "main" },
       );
 
       closePopup();

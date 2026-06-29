@@ -12,7 +12,6 @@ export function useGuard() {
             title="확인"
             description={message}
             onClose={closePopup}
-            onConfirm={closePopup}
             type="check"
           />
         ),

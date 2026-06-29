@@ -89,7 +89,7 @@ export function useIfCarrierController({ model }: Args) {
           api.reprocess({
             dsSave: selectedRows,
           }),
-          "MSG_SAVE_CMPLT",
+          { successMsg: "MSG_SAVE_CMPLT", mask: "main" },
         )
         .then(() => base.search());
     },

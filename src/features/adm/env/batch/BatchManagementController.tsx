@@ -250,7 +250,7 @@ export function useBatchManagementController({ model }: Args) {
           JOB_ID: main.JOB_ID,
           JOB_CLS: main.JOB_CLS,
         }),
-        "MSG_SAVE_CMPLT",
+        { successMsg: "MSG_SAVE_CMPLT", mask: "main" },
       )
       .then(() => base.search());
   }, [base, model.grids.main]);

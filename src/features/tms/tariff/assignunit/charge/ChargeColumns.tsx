@@ -56,7 +56,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "TRF_NM",
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_CHG_CAL_RNK",
     field: "CALC_RNK",
     valueFormatter: numberValueFormatter,
@@ -128,7 +128,7 @@ export const SUB01_COLUMN_DEFS = [
     hide: true
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_CAL_RNK",
     field: "CALC_RNK",
     required: true,

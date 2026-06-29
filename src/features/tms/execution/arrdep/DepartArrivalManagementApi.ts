@@ -14,6 +14,14 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
+const withSessionRows = (rows: any[]) => {
+  const sessionFields = getSessionFields();
+  return rows.map((item) => ({ ...sessionFields, MENU_CD, ...item }));
+};
+
+const withDsSave = (rows: any[]) =>
+  withSession({ MENU_CD: MENU_CD, dsSave: withSessionRows(rows) });
+
 export const departArrivalManagementApi = {
   getList(payload: any) {
     return apiClient.post<commonResponse>(
@@ -53,6 +61,82 @@ export const departArrivalManagementApi = {
     );
   },
 
+  getPodPopupList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/podService/searchPodPop`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  getPodPopupDetail(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/podService/searchPodPopDetail`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  getInterStopEta(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/departArrivalManagementService/searchInterStopETA`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  getDlvryRoute(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/mapService/getDlvryRoute`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  getExpectedRoute(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/mapService/getExpectedRoute`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  searchDispatchTrace(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/traceService/searchDispathTrace`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  downloadPodFile(payload: { KEY_ID: string; FILE_ID: string }) {
+    return apiClient.post(
+      `/fileService/downloadFile`,
+      withSession({ MENU_CD: MENU_CD, FILE_DMN_TCD: "POD", ...payload }),
+      { responseType: "blob" },
+    );
+  },
+
+  getServiceActivityList(payload: any) {
+    return apiClient.post<commonResponse>(
+      `/departArrivalManagementService/searchSrvcAtvt`,
+      withSession({ MENU_CD: MENU_CD, ...payload }),
+    );
+  },
+
+  saveServiceActivities(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/departArrivalManagementService/saveSrvcAtvt`,
+      withDsSave(payload.dsSave),
+    );
+  },
+
+  downloadServiceActivityFile(payload: { KEY_ID: string; FILE_ID: string }) {
+    return apiClient.post(
+      `/fileService/downloadFile`,
+      withSession({
+        MENU_CD: MENU_CD,
+        FILE_DMN_TCD: "SERVICE_ACTIVITIES",
+        ...payload,
+      }),
+      { responseType: "blob" },
+    );
+  },
+
   controlRoute(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/controlRoute`,
@@ -64,7 +148,7 @@ export const departArrivalManagementApi = {
   startLoading(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/onStartWork`,
-      withSession(payload),
+      withDsSave(payload),
     );
   },
 
@@ -72,7 +156,7 @@ export const departArrivalManagementApi = {
   startTransport(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/onStartTransportation`,
-      withSession(payload),
+      withDsSave(payload),
     );
   },
 
@@ -80,7 +164,7 @@ export const departArrivalManagementApi = {
   cancelTransport(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/onReturnToConfirm`,
-      withSession(payload),
+      withDsSave(payload),
     );
   },
 
@@ -88,7 +172,7 @@ export const departArrivalManagementApi = {
   cancelDeliveryComplete(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/onDeliveredCancel`,
-      withSession(payload),
+      withDsSave(payload),
     );
   },
 
@@ -96,7 +180,7 @@ export const departArrivalManagementApi = {
   completeTransport(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/onDelivered`,
-      withSession(payload),
+      withDsSave(payload),
     );
   },
 
@@ -104,7 +188,7 @@ export const departArrivalManagementApi = {
   resetDispatch(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/recalcDistance`,
-      withSession(payload),
+      withDsSave(payload),
     );
   },
 
@@ -112,7 +196,7 @@ export const departArrivalManagementApi = {
   changeDspchApProcTp(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/changeDspchApProcTp`,
-      withSession(payload),
+      withDsSave(payload),
     );
   },
 
@@ -120,14 +204,21 @@ export const departArrivalManagementApi = {
   changeDspchPlnId(payload: any) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/changeDspchPlnId`,
-      withSession(payload),
+      withDsSave(payload),
     );
   },
 
-  save(rows: any[]) {
+  save(payload: { dsSave: any[] }) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/save`,
-      withSession(rows),
+      withDsSave(payload.dsSave),
+    );
+  },
+
+  saveStopover(payload: { dsSave: any[] }) {
+    return apiClient.post<commonResponse>(
+      `/departArrivalManagementService/saveDepartArrivalManagementStop`,
+      withDsSave(payload.dsSave),
     );
   },
 
@@ -135,7 +226,7 @@ export const departArrivalManagementApi = {
   confirmPBoxRecovery(rows: any[]) {
     return apiClient.post<commonResponse>(
       `/departArrivalManagementService/saveCntr`,
-      withSession(rows),
+      withDsSave(rows),
     );
   },
 };

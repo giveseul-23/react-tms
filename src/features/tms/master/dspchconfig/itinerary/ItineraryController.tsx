@@ -161,7 +161,7 @@ export function useItineraryController({ model }: ControllerArgs) {
                 })),
               );
               void base
-                .callAjax(api.setItineraryGroup({ dsSave }))
+                .callAjax(api.setItineraryGroup({ dsSave }), { mask: "main" })
                 .then(() => base.search());
             }}
             onClose={closePopup}
@@ -185,7 +185,7 @@ export function useItineraryController({ model }: ControllerArgs) {
         })),
       );
       void base
-        .callAjax(api.setItineraryGroup({ dsSave }))
+        .callAjax(api.setItineraryGroup({ dsSave }), { mask: "main" })
         .then(() => base.search());
     },
     [base],
@@ -216,7 +216,9 @@ export function useItineraryController({ model }: ControllerArgs) {
 
             closePopup();
             void base
-              .callAjax(api.saveDetail({ dsSave: toDsSave(dirty) }))
+              .callAjax(api.saveDetail({ dsSave: toDsSave(dirty) }), {
+                mask: "sub01",
+              })
               .then(() => searchSub("sub01", fetchSub01(main)));
           }}
           onClose={closePopup}

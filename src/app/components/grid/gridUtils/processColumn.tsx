@@ -34,7 +34,11 @@ import {
 } from "@/app/components/ui/popover";
 import { DatePickerPopover } from "@/app/components/Search/filters/DatePickerPopover";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
-import { commitRowChange, commitRowChanges } from "./rowStatus";
+import {
+  commitRowChange,
+  commitRowChanges,
+  commitSingleModeCheck,
+} from "./rowStatus";
 
 // CommonPopup 은 내부에서 DataGrid 를 렌더 → 정적 import 시 순환참조.
 // lazy 로 끊고, 팝업 셀이 실제로 열릴 때만 로드한다.
@@ -72,6 +76,7 @@ declare module "ag-grid-community" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface AbstractColDef<TData = any, TValue = any> {
     insertable?: boolean;
+    pinned?: boolean | "left" | "right" | null; // 컬럼 좌/우 고정 (ColDef 동일 타입)
   }
 }
 
@@ -263,6 +268,7 @@ function injectCheckRenderer(
   //   아니면 editDisableMsg(있으면) 안내 후 토글 차단. (센차 excheckcolumn editAllowField)
   const editAllowField = c.editAllowField as string | undefined;
   const editDisableMsg = c.editDisableMsg as string | undefined;
+  const singleMode = c.singleMode as boolean | undefined;
   const extended = !!checkEditable || !!group;
   const isOn = (v: any) => v === "Y" || (extended && v === true);
 
@@ -300,7 +306,14 @@ function injectCheckRenderer(
                         showInfoModal(Lang.get(editDisableMsg));
                       return;
                     }
-                    if (group && field === group.total) {
+                    if (singleMode) {
+                      commitSingleModeCheck(
+                        setRowData,
+                        row,
+                        field,
+                        next as "Y" | "N",
+                      );
+                    } else if (group && field === group.total) {
                       const patch: Record<string, any> = {
                         [group.total]: next,
                       };
@@ -1056,20 +1069,24 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
     } as AnyCol;
   }
 
+  const translatedChildren = walkChildren((prepared as any).children, opts);
+  const isGroup = !!translatedChildren;
+
   const alignProp = (prepared as any).align as
     | "left"
     | "center"
     | "right"
     | undefined;
-  const alignBlock = alignProp
+  // 레벨2 그룹 헤더(children 보유)의 상단 headerName 은 기본 center 정렬 (align 명시 시 우선).
+  const effAlign = alignProp ?? (isGroup ? "center" : undefined);
+  const alignBlock = effAlign
     ? {
-        cellStyle: { textAlign: alignProp },
-        headerClass: `ag-header-${alignProp}`,
+        // 그룹 def 는 셀이 없으므로 cellStyle 미적용(헤더 정렬만).
+        ...(isGroup ? {} : { cellStyle: { textAlign: effAlign } }),
+        headerClass: `ag-header-${effAlign}`,
       }
     : null;
   const typeBlock = (prepared as any).type ? {} : { type: "text" };
-
-  const translatedChildren = walkChildren((prepared as any).children, opts);
 
   if ((prepared as any).disableMaxWidth === true) {
     return {

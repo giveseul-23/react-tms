@@ -196,7 +196,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
     base
       .callAjax(
         api.syncConfig({ LGST_GRP_CNFG_GRP_CD: model.activeType }),
-        "MSG_CMPLT_SYNC",
+        { successMsg: "MSG_CMPLT_SYNC", mask: "main" },
       )
       .then(() => base.search());
   }, [model.activeType, base]);

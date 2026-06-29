@@ -41,10 +41,33 @@ export function useBaseController<K extends string>({
   const { openPopup, closePopup } = usePopup();
 
   // 센차: me.callAjax — API Promise 한 번 감쌈 (성공/에러 토스트)
+  //   마스킹(작업 차단)은 `mask` 를 명시한 경우에만 한다(기본 없음).
+  //   - 2번째 인자 문자열 → 기존처럼 successMsg (마스킹 안 함)
+  //   - 2번째 인자 객체   → { successMsg?, mask? }
+  //     mask 미지정 → 마스킹 없음, 키/키배열 지정 시 해당 그리드 마스킹
   const callAjax = useCallback(
-    <T,>(apiCall: Promise<T>, successMsg = "MSG_SAVE_CMPLT") =>
-      handleApi(apiCall, successMsg),
-    [handleApi],
+    <T,>(
+      apiCall: Promise<T>,
+      msgOrOpts?: string | { successMsg?: string; mask?: K | K[] },
+    ) => {
+      const opts =
+        typeof msgOrOpts === "string"
+          ? { successMsg: msgOrOpts }
+          : (msgOrOpts ?? {});
+      const successMsg = opts.successMsg ?? "MSG_SAVE_CMPLT";
+      const keys = opts.mask
+        ? Array.isArray(opts.mask)
+          ? opts.mask
+          : [opts.mask]
+        : [];
+
+      if (keys.length) model.setGridMasking(keys, true);
+      const p = handleApi(apiCall, successMsg);
+      return keys.length
+        ? p.finally(() => model.setGridMasking(keys, false))
+        : p;
+    },
+    [handleApi, model],
   );
 
   // 센차: Ext.Msg.alert
@@ -141,6 +164,8 @@ export function useBaseController<K extends string>({
       apiFn: (p: { dsSave: any[] }) => Promise<any>,
       opts?: {
         successMsg?: string;
+        /** 저장 중 마스킹(작업 차단). 미지정=저장 대상 그리드 자동 마스킹, false=끔, true=저장 그리드, 키/배열=지정 그리드. */
+        mask?: boolean | K | K[];
         beforeSave?: () => boolean;
         confirmOnDelete?: string;
         afterSave?:
@@ -216,10 +241,17 @@ export function useBaseController<K extends string>({
 
       // ── 본 저장 + 후처리 ──────────────────────────────────
       const doSave = async () => {
-        await callAjax(
-          apiFn({ dsSave: toDsSave(dirty) }),
-          opts?.successMsg ?? "MSG_SAVE_CMPLT",
-        );
+        // mask 미지정 → 저장 대상 gridKey, false → 없음, true → gridKey, 키/배열 → 그대로
+        const maskKeys =
+          opts?.mask === false
+            ? undefined
+            : opts?.mask == null || opts?.mask === true
+              ? gridKey
+              : opts.mask;
+        await callAjax(apiFn({ dsSave: toDsSave(dirty) }), {
+          successMsg: opts?.successMsg ?? "MSG_SAVE_CMPLT",
+          ...(maskKeys ? { mask: maskKeys } : {}),
+        });
         const after = opts?.afterSave ?? "refresh";
         if (after === "refresh") {
           searchRef.current?.();

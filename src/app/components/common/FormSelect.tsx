@@ -13,12 +13,14 @@ export default function FormSelect({
   value,
   options,
   onChange,
+  disabled,
 }: {
   label: string;
   required?: boolean;
   value: string;
   options: { value: string; label: string }[];
   onChange?: (v: string) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-1">
@@ -26,7 +28,11 @@ export default function FormSelect({
         {label}
         {required && <span className="text-destructive ml-0.5">*</span>}
       </label>
-      <Select value={value ?? ""} onValueChange={(v) => onChange?.(v)}>
+      <Select
+        value={value ?? ""}
+        onValueChange={(v) => onChange?.(v)}
+        disabled={disabled}
+      >
         <SelectTrigger className="h-8 px-2 text-xs [&>svg]:h-3 [&>svg]:w-3">
           <SelectValue placeholder="선택" />
         </SelectTrigger>

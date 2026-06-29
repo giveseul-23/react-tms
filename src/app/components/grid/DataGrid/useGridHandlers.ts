@@ -13,6 +13,7 @@ export function useGridHandlers<TRow>({
   onRowDoubleClicked,
   activeOnCellValueChanged,
   onSelectionChanged,
+  onSelectionRowsChanged,
 }: {
   setSelectedRows: React.Dispatch<React.SetStateAction<TRow[]>>;
   prevSelectedRef: React.MutableRefObject<TRow | null>;
@@ -21,6 +22,7 @@ export function useGridHandlers<TRow>({
   onRowDoubleClicked?: (row: TRow) => void;
   activeOnCellValueChanged?: (params: any) => void;
   onSelectionChanged?: (row: any | null) => void;
+  onSelectionRowsChanged?: (rows: any[]) => void;
 }) {
   const handleRowSelected = useCallback(
     (e: any) => {
@@ -100,12 +102,13 @@ export function useGridHandlers<TRow>({
 
   const handleSelectionChanged = useCallback(
     (e: any) => {
-      if (!onSelectionChanged) return;
+      if (!onSelectionChanged && !onSelectionRowsChanged) return;
       if (!USER_SELECTION_SOURCES.has(e.source)) return;
       const rows = e.api.getSelectedRows();
-      onSelectionChanged(rows.length === 0 ? null : rows[0]);
+      onSelectionChanged?.(rows.length === 0 ? null : rows[0]);
+      onSelectionRowsChanged?.(rows);
     },
-    [onSelectionChanged, USER_SELECTION_SOURCES],
+    [onSelectionChanged, onSelectionRowsChanged, USER_SELECTION_SOURCES],
   );
 
   return {

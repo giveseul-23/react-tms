@@ -9,6 +9,8 @@ import type {
   GridKey,
 } from "./IfDeliveryDocumentModel";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { Lang } from "@/app/services/common/Lang";
+import { showInfoModal } from "@/app/components/popup/showInfoModal";
 
 interface Args {
   model: IfDeliveryDocumentModel;
@@ -19,18 +21,24 @@ export function useIfDeliveryDocumentController({ model }: Args) {
   const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => api.getList({ ...params }),
+    (params: Record<string, unknown>) => api.getList(params),
     [],
   );
 
   const onMainGridClick = useCallback(
-    (row: any) =>
-      base.handleRowClick("main", row, [
+    (row: any) => {
+      if (!row) {
+        base.resetGrids(["detail"]);
+        return;
+      }
+
+      return base.handleRowClick("main", row, [
         {
           to: "detail",
           fetch: (r) => api.getDetailList({ IF_ID: r.IF_ID, ORD_NO: r.ORD_NO }),
         },
-      ]),
+      ]);
+    },
     [base],
   );
 
@@ -42,17 +50,47 @@ export function useIfDeliveryDocumentController({ model }: Args) {
     [model.grids.main, onMainGridClick],
   );
 
+  const onReProcess = useCallback(
+    (e?: any) => {
+      const selectedRows = Array.isArray(e?.data)
+        ? e.data
+        : e?.data
+          ? [e.data]
+          : [];
+
+      if (selectedRows.length === 0) {
+        showInfoModal(Lang.get("MSG_SELECT_NO_DATA"));
+        return;
+      }
+
+      for (const row of selectedRows) {
+        const ifId = String(row.IF_ID ?? "");
+
+        if (row.IF_PRCS_STS === "R") {
+          showInfoModal(Lang.get("LBL_ALREADY_RETRY", ifId));
+          return;
+        }
+
+        if (row.IF_PRCS_STS !== "E") {
+          showInfoModal(Lang.get("MSG_ALREADY_SUCCESS", ifId));
+          return;
+        }
+      }
+
+      base
+        .callAjax(api.reprocess({ dsSave: selectedRows }), { successMsg: "MSG_SAVE_CMPLT", mask: "main" })
+        .then(() => base.search());
+    },
+    [base],
+  );
+
   const mainActions: ActionItem[] = useMemo(
     () => [
       {
         type: "button",
         key: "BTN_REPRO",
         label: "BTN_REPRO",
-        onClick: () => {
-          base
-            .callAjax(api.reprocess(model.filtersRef.current))
-            .then(() => base.search());
-        },
+        onClick: onReProcess,
       },
       makeExcelGroupAction({
         excelColumns: () => model.grids.main.getExcelColumns(),
@@ -62,16 +100,13 @@ export function useIfDeliveryDocumentController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [menuName, model.grids.main, model.filtersRef, base],
+    [menuName, model.grids.main, model.filtersRef, onReProcess],
   );
-
-  const detailActions: ActionItem[] = useMemo(() => [], []);
 
   return {
     fetchList,
     onSearchCallback,
     onMainGridClick,
     mainActions,
-    detailActions,
   };
 }

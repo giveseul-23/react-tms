@@ -5,11 +5,11 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import { Lang } from "@/app/services/common/Lang";
 import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import { toDsSave } from "@/app/components/grid/gridUtils/rowStatus";
 import { receiveShipmentManagementApi as api } from "./ReceiveShipmentManagementApi";
 import { MENU_CODE } from "./ReceiveShipmentManagement";
 import type { GridKey, ReceiveShipmentManagementModel } from "./ReceiveShipmentManagementModel";
 import ReceiveShipmentManagementPop from "./popup/ReceiveShipmentManagementPop";
+import ReceiveShipmentDetailAddPop from "./popup/ReceiveShipmentDetailAddPop";
 import ShipmentTransferPop from "./popup/ShipmentTransferPop";
 import { CommonPopup } from "@/app/components/popup/CommonPopup";
 
@@ -18,6 +18,15 @@ interface Args {
 }
 
 const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
+
+const toActionDsSave = (rows: any[]) =>
+  rows.map(({ EDIT_STS, __rid__, ...row }) => ({
+    ...row,
+    rowStatus: row.rowStatus ?? EDIT_STS ?? "U",
+  }));
+
+const hasConsolidationClass = (row: any) =>
+  String(row?.CSLD_CLSS_CD ?? row?.csld_clss_cd ?? "").trim() !== "";
 
 export function useReceiveShipmentManagementController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
@@ -72,13 +81,13 @@ export function useReceiveShipmentManagementController({ model }: Args) {
       base.alert(Lang.get("MSG_NO_SELECT_SHIPMENT"));
       return;
     }
-    await base.callAjax(apiFn({ dsSave: toDsSave(rows) }));
+    await base.callAjax(apiFn({ dsSave: toActionDsSave(rows) }), { mask: "main" });
     base.search();
   }, [base]);
 
   const openShipmentPop = useCallback((mode: "I" | "U", record?: any) => {
     openPopup({
-      title: mode === "I" ? Lang.get("LBL_SHIPMENT_INSERT_POP") : Lang.get("LBL_SHIPMENT_UPDATE_POP"),
+      title: mode === "I" ? "LBL_SHIPMENT_INSERT_POP": "LBL_SHIPMENT_UPDATE_POP",
       width: "4xl",
       content: (
         <ReceiveShipmentManagementPop
@@ -113,7 +122,12 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     if (!rows.length) { base.alert(Lang.get("MSG_NO_SELECT_SHIPMENT")); return; }
     if (rows.some((row) => row.PLN_ID)) { base.alert(Lang.get("MSG_CHK_PLN_NULL")); return; }
     if (rows.some((row) => row.SHPM_OP_STS === "1000")) { base.alert(Lang.get("MSG_CAN_SHIPMENT_OPR_VALID")); return; }
-    base.confirm(Lang.get("MSG_SO_CONSOL_NOTICE_CANCEL_SHIPMENT"), () => void saveMainRows(rows, api.saveShipmentCancel));
+    const saveCancel = () => void saveMainRows(rows, api.saveShipmentCancel);
+    if (rows.some(hasConsolidationClass)) {
+      base.confirm(Lang.get("MSG_ASK_SO_CONSOL_NOTICE_CANCEL_SHIPMENT"), saveCancel);
+      return;
+    }
+    saveCancel();
   }, [base, saveMainRows]);
 
   const onSettingPlanId = useCallback(() => {
@@ -155,7 +169,7 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     if (rows.length > 1) { base.alert(Lang.get("MSG_CHK_SELECT_CNT")); return; }
     const row = rows[0];
     openPopup({
-      title: Lang.get("BTN_SHIPMENT_TRANSFER"),
+      title: "BTN_SHIPMENT_TRANSFER",
       width: "lg",
       content: (
         <ShipmentTransferPop
@@ -177,7 +191,9 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     const lgstGrp = srchObj.SHPM_LGST_GRP_CD ?? srchObj.SRCH_SHPM_LGST_GRP_CD ?? ""; 
     const delivDt = srchObj.SHPM_DLVRY_DT_TO?? srchObj.SRCH_SHPM_DLVRY_DT_TO ?? "";
     if (!division || !lgstGrp) { base.alert(Lang.get("LBL_SHPM_SRCH_COND_CHK")); return; }
-    void base.callAjax(api.saveBatchCreation({ DIV_CD: division, LGST_GRP_CD: lgstGrp, DLVRY_DT: delivDt ?? "" }));
+    void base.callAjax(api.saveBatchCreation({ DIV_CD: division, LGST_GRP_CD: lgstGrp, DLVRY_DT: delivDt ?? "" }), { mask: "main" })
+            .then(() => base.search()
+    );
   }, [base, model.rawFiltersRef]);
 
   const onSaveSub01 = useCallback(() => base.saveGrid("sub01", (payload) => api.saveShipmentDetail(payload), { afterSave: { cascadeFrom: "main", fetch: (main) => fetchSub01(main) } }), [base, fetchSub01]);
@@ -185,23 +201,39 @@ export function useReceiveShipmentManagementController({ model }: Args) {
   const onAddSub01 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
     if (!base.requireParentRow(main, Lang.get("LBL_SHIPMENT_NUMBER"))) return;
-    base.addRow("sub01", { SHPM_ID: main.SHPM_ID, CUST_CD: main.CUST_CD, ORD_LINE_NO: "", CUST_ITEM_CD: "", CUST_ITEM_NM: "", PLN_ORD_QTY: 0, PLN_ORD_QTY_UOM: "", PLN_INV_QTY: 0, PLN_INV_QTY_UOM: "", SHPM_DTL_RSN_DESC: "" });
-  }, [base, model.grids.main]);
+    openPopup({
+      title: "BTN_ADD",
+      width: "4xl",
+      content: (
+        <ReceiveShipmentDetailAddPop
+          onApply={(row) => {
+            closePopup();
+            base.addRow("sub01", {
+              SHPM_ID: main.SHPM_ID,
+              CUST_CD: main.CUST_CD,
+              ...row,
+            });
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  }, [base, closePopup, model.grids.main, openPopup]);
 
   const mainActions: ActionItem[] = useMemo(() => [
-    { type: "button", key: "BTN_CRT_ORD_BTC", label: Lang.get("BTN_CRT_ORD_BTC"), onClick: onBatchInsert },
-    { type: "button", key: "BTN_SHIPMENT_INSERT", label: Lang.get("BTN_SHIPMENT_INSERT"), onClick: onShipmentIns },
-    { type: "button", key: "BTN_SHIPMENT_UPDATE", label: Lang.get("BTN_SHIPMENT_UPDATE"), onClick: onShipmentUpd },
-    { type: "button", key: "BTN_SHIPMENT_CANCEL", label: Lang.get("BTN_SHIPMENT_CANCEL"), onClick: onShipmentCancel },
-    { type: "button", key: "BTN_SHIPMENT_PLAN", label: Lang.get("BTN_SHIPMENT_PLAN"), onClick: onSettingPlanId },
-    { type: "button", key: "BTN_SHIPMENT_PLAN_CANCEL", label: Lang.get("BTN_SHIPMENT_PLAN_CANCEL"), onClick: onPlanIdCancel },
-    { type: "button", key: "BTN_SHIPMENT_TRANSFER", label: Lang.get("BTN_SHIPMENT_TRANSFER"), onClick: onShipmentTransfer },
+    { type: "button", key: "BTN_CRT_ORD_BTC", label: "BTN_CRT_ORD_BTC", onClick: onBatchInsert },
+    { type: "button", key: "BTN_SHIPMENT_INSERT", label: "BTN_SHIPMENT_INSERT", onClick: onShipmentIns },
+    { type: "button", key: "BTN_SHIPMENT_UPDATE", label: "BTN_SHIPMENT_UPDATE", onClick: onShipmentUpd },
+    { type: "button", key: "BTN_SHIPMENT_CANCEL", label: "BTN_SHIPMENT_CANCEL", onClick: onShipmentCancel },
+    { type: "button", key: "BTN_SHIPMENT_PLAN", label: "BTN_SHIPMENT_PLAN", onClick: onSettingPlanId },
+    { type: "button", key: "BTN_SHIPMENT_PLAN_CANCEL", label: "BTN_SHIPMENT_PLAN_CANCEL", onClick: onPlanIdCancel },
+    { type: "button", key: "BTN_SHIPMENT_TRANSFER", label: "BTN_SHIPMENT_TRANSFER", onClick: onShipmentTransfer },
     makeExcelGroupAction({ excelColumns: () => model.grids.main.getExcelColumns(), menuCode: MENU_CODE, menuName, fetchFn: () => api.search(getSearchParams(model.filtersRef.current)), rows: model.grids.main.rows }),
   ], [getSearchParams, menuName, model.filtersRef, model.grids.main, onBatchInsert, onPlanIdCancel, onSettingPlanId, onShipmentCancel, onShipmentIns, onShipmentTransfer, onShipmentUpd]);
 
   const sub01Actions: ActionItem[] = useMemo(() => [
-    { type: "button", key: "BTN_ADD", label: Lang.get("BTN_ADD"), onClick: onAddSub01 },
-    { type: "button", key: "BTN_SAVE", label: Lang.get("BTN_SAVE"), onClick: onSaveSub01 },
+    { type: "button", key: "BTN_ADD", label: "BTN_ADD", onClick: onAddSub01 },
+    { type: "button", key: "BTN_SAVE", label: "BTN_SAVE", onClick: onSaveSub01 },
     makeExcelGroupAction({ excelColumns: () => model.grids.sub01.getExcelColumns(), menuCode: MENU_CODE, menuName, fetchFn: () => { const main = model.grids.main.selectedRef.current; return main ? fetchSub01(main) : EMPTY_RESULT; }, rows: model.grids.sub01.rows }),
   ], [fetchSub01, menuName, model.grids.main, model.grids.sub01, onAddSub01, onSaveSub01]);
 

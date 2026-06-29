@@ -17,6 +17,12 @@ interface SearchMetaBase {
   sqlParam3?: string;
   /** POPUP 등 4번째 동적 파라미터 — COMBO 는 자체 combo 타입으로 사용 */
   keyParam?: string;
+  /** COMBO 옵션 조회 SQL prop (ComboSearchMeta 에서 required). base 에선 공통 접근용 optional */
+  sqlProp?: string;
+  /** 필터 연동(런타임 주입) — 부모 필드 값으로 옵션/조회 필터링.
+   *  filterValueKey: 부모(소스) 필드 key / filterCol: 옵션에서 비교할 컬럼명 */
+  filterValueKey?: string;
+  filterCol?: string;
 }
 
 export interface TextSearchMeta extends SearchMetaBase {
@@ -44,7 +50,6 @@ export interface PopupSearchMeta extends SearchMetaBase {
   filterComponent?: string;
   /** 필터링 참조 컬럼명 (FLTRREFCOLNM) */
   filterRefColumn?: string;
-  filterCol?: string;
 }
 
 export interface DateRangeSearchMeta extends SearchMetaBase {

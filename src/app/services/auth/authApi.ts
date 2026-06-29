@@ -9,8 +9,18 @@ export type LoginRequest = {
 };
 
 export type LoginResponse = {
-  access_token: string;
-  refresh_token: string;
+  success: boolean;
+  msg?: string;
+  data: {
+    ACCESS_TOKEN: string;
+    REFRESH_TOKEN: string;
+    userId: string;
+    userNm: string;
+    userLang: string;
+    userGroupName: string;
+    userGroupCode: string;
+    [key: string]: any;
+  };
 };
 
 export const authApi = {

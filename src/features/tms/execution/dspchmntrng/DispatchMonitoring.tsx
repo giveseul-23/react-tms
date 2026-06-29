@@ -17,12 +17,10 @@ export default function DispatchMonitoring() {
     <GridOnlyPage
       menuCode={MENU_CODE}
       searchProps={{
-        fetchFn: ctrl.fetchList,
-        searchRef: model.searchRef,
-        filtersRef: model.filtersRef,
-        pageSize: model.pageSize,
-        onSearchCallback: ctrl.onSearchCallback,
         moduleDefault: "TMS",
+        fetchFn: ctrl.fetchList,
+        onSearchCallback: ctrl.onSearchCallback,
+        ...model.bindSearch(),
       }}
       grid={
         <DataGrid

@@ -30,7 +30,7 @@ export default function Driver() {
       master={
         <DataGrid
           {...model.bind("main")}
-          columnDefs={MAIN_COLUMN_DEFS()}
+          columnDefs={MAIN_COLUMN_DEFS}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           gridOptions={{
@@ -43,7 +43,7 @@ export default function Driver() {
       detail={
         <DataGrid
           {...model.bind("sub01")}
-          columnDefs={SUB01_COLUMN_DEFS()}
+          columnDefs={SUB01_COLUMN_DEFS}
           actions={ctrl.sub01Actions}
           subTitle="LBL_CUSTOMER"
           headerCheckbox={false}

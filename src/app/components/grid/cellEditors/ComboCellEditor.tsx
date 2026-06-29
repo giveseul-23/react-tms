@@ -35,7 +35,6 @@ export function ComboCellEditor(props: ComboCellEditorProps) {
 
   // AG Grid 가 commit 시점에 호출 — ref 의 최신값을 그대로 반환
   useGridCellEditor({
-    getValue: () => valueRef.current,
     isCancelBeforeStart: () => false,
     isCancelAfterEnd: () => false,
   });

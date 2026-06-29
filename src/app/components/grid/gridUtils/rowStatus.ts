@@ -205,3 +205,28 @@ export function commitRowChanges(
     }),
   }));
 }
+
+/** singleMode 체크 — Y 선택 시 대상 행만 Y, 나머지는 N. N 해제는 대상 행만 변경. */
+export function commitSingleModeCheck(
+  setRowData: ((updater: any) => void) | undefined,
+  targetRow: any,
+  field: string,
+  value: "Y" | "N",
+): void {
+  if (!setRowData || !targetRow || !field) return;
+  setRowData((prev: any) => ({
+    ...prev,
+    rows: (prev?.rows ?? []).map((r: any) => {
+      const isTarget =
+        r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__);
+      const nextVal =
+        value === "Y" ? (isTarget ? "Y" : "N") : isTarget ? "N" : r[field];
+      if (!isTarget && value === "N") return r;
+      if (r[field] === nextVal) return r;
+      const next = { ...r, [field]: nextVal };
+      carryOrig(next, r);
+      next.EDIT_STS = resolveUpdateSts(next);
+      return next;
+    }),
+  }));
+}

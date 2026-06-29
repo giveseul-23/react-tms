@@ -1,7 +1,6 @@
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useIfDeliveryDocumentModel } from "./IfDeliveryDocumentModel";
@@ -13,6 +12,13 @@ import {
 
 export const MENU_CODE = "MENU_IF_RCV_DLVRY_DOC";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_IF_RCV_DLVRY_DOC",
+    detail: "SUB02_GRID_IF_RCV_DLVRY_DOC",
+  },
+};
+
 export default function IfDeliveryDocument() {
   const model = useIfDeliveryDocumentModel(MENU_CODE);
   const ctrl = useIfDeliveryDocumentController({ model });
@@ -20,18 +26,27 @@ export default function IfDeliveryDocument() {
   return (
     <MasterDetailPage
       menuCode={MENU_CODE}
-      defaultSizes={[55, 45]}
+      defaultSizes={[50, 50]}
       searchProps={{
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
+        excludes: [
+          {
+            column: "DLVRY_DT",
+            as: { FROM: "DLVRY_DT_FROM", TO: "DLVRY_DT_TO" },
+          },
+        ],
       }}
-      defaultDirection="horizontal"
-      storageKey={model.storageKeys.outer}
+      defaultDirection="vertical"
+      layoutToggle={false}
+      storageKey={`${model.storageKeys.outer}-sencha`}
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
+          rowSelection="multiple"
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
@@ -48,9 +63,12 @@ export default function IfDeliveryDocument() {
               render: () => (
                 <DataGrid
                   {...model.bind("detail")}
+                  authId={AUTH.grids.detail}
                   columnDefs={DETAIL_COLUMN_DEFS}
-                  actions={ctrl.detailActions}
+                  codeMap={model.codeMap}
+                  actions={[]}
                   audit={false}
+                  pagination={false}
                 />
               ),
             },

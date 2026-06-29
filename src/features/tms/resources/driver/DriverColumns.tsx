@@ -1,4 +1,4 @@
-export const MAIN_COLUMN_DEFS = () => [
+export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "text",
@@ -26,7 +26,7 @@ export const MAIN_COLUMN_DEFS = () => [
   },
 ];
 
-export const SUB01_COLUMN_DEFS = () => [
+export const SUB01_COLUMN_DEFS = [
   { headerName: "No" },
   {
     type: "popup",

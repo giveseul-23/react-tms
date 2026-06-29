@@ -97,7 +97,7 @@ export const overheadTariffManagementApi = {
   createTariffOverhead(payload: { LGST_GRP_CD_LIST: any[]; CHG_LIST: any[] }) {
     return apiClient.post<commonResponse>(
       `/overheadTariffMgmtService/createTariffOverhead`,
-      withSession(payload),
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
 

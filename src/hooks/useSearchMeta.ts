@@ -5,7 +5,7 @@
 //    값:  대문자  (type: "COMBO", "TEXT", "YMD", "YMDT", "POPUP")
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { commonApi, comboOptRequest } from "@/app/services/common/commonApi";
+import { commonApi } from "@/app/services/common/commonApi";
 import { getSessionFields, getUserGroupCodes } from "@/app/services/auth/auth";
 import {
   decodeAuthFlags,
@@ -253,7 +253,10 @@ export function useSearchMeta(menuCode: string) {
     let cancelled = false;
 
     // 1회 시도 — 실패 시 throw (재시도는 load 가 담당)
-    async function loadOnce(): Promise<{ meta: SearchMeta[]; menuAuth: MenuAuth }> {
+    async function loadOnce(): Promise<{
+      meta: SearchMeta[];
+      menuAuth: MenuAuth;
+    }> {
       const { userId, sesUserId, ACCESS_TOKEN, sesLang } = getSessionFields();
 
       const [condRes, operatorMap] = await Promise.all([
@@ -355,9 +358,7 @@ export function useSearchMeta(menuCode: string) {
           if (cancelled) return;
           if (attempt < SEARCH_META_MAX_RETRY) {
             // loading 유지(skeleton 노출)한 채 잠시 후 재시도
-            await new Promise((r) =>
-              setTimeout(r, SEARCH_META_RETRY_DELAY),
-            );
+            await new Promise((r) => setTimeout(r, SEARCH_META_RETRY_DELAY));
             if (cancelled) return;
           } else {
             // 재시도 소진 — 빈 화면 노출 대신 error 게이트 유지
@@ -457,7 +458,6 @@ export function useSearchMetaCode(baseMeta: readonly SearchMeta[]) {
     return () => {
       cancelled = true;
     };
-     
   }, [baseMetaKey]);
 
   return { meta, loading };

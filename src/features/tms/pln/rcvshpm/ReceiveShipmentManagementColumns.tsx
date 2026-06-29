@@ -51,12 +51,10 @@ export const MAIN_COLUMN_DEFS = [
 
 export const SUB01_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "ShipmentId", field: "SHPM_ID", hidden: true },
-  { type: "text", headerName: "CustCd", field: "CUST_CD", hidden: true },
-  { type: "text", headerName: "ShipmentDetailCd", field: "SHPM_DTL_ID", hidden: true },
-  { type: "text", headerName: "LBL_LINE_NO", field: "ORD_LINE_NO", align: "center", width: 100 },
+  { type: "text", headerName: "LBL_ORD_LINE_NO", field: "ORD_LINE_NO", align: "center", width: 100 },
   { type: "text", headerName: "LBL_ITEM_CD", field: "CUST_ITEM_CD", align: "left", width: 120 },
   { type: "text", headerName: "LBL_ITEM_NM", field: "CUST_ITEM_NM", align: "left", width: 120 },
+  { type: "combo", headerName: "LBL_COMMODITY_CODE", field: "CMDT_CD", codeKey: "cmdtTpList", align: "left", width: 120 },
   { type: "numeric", headerName: "LBL_PLN_ORD_QTY", field: "PLN_ORD_QTY", align: "right", width: 100 },
   { type: "combo", headerName: "LBL_PLN_ORD_QTY_UOM", field: "PLN_ORD_QTY_UOM", codeKey: "itmUomList", align: "left", width: 100 },
   { type: "numeric", headerName: "LBL_PLN_INV_QTY", field: "PLN_INV_QTY", align: "right", width: 100 },

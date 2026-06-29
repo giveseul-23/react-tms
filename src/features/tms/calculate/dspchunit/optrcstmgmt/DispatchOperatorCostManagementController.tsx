@@ -87,7 +87,7 @@ export function useDispatchOperatorCostController({ model }: Args) {
 
   const doAction = useCallback(
     (apiCall: () => Promise<any>, msg = "MSG_SAVE_CMPLT.") =>
-      base.callAjax(apiCall(), msg).then(() => base.search()),
+      base.callAjax(apiCall(), { successMsg: msg, mask: "main" }).then(() => base.search()),
     [base],
   );
 

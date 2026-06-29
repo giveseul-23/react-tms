@@ -1,8 +1,7 @@
-import { useMemo } from "react";
 import { useBaseModel } from "@/app/feature/useBaseModel";
 import { useCommonStores } from "@/hooks/useCommonStores";
 
-export type GridKey = "main" | "stopover" | "assignedOrder";
+export type GridKey = "main" | "stopover" | "assignedOrder" | "shipmentDetail";
 
 export function useDepartArrivalManagementModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode, { defaultLayout: "vertical" });

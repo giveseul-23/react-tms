@@ -97,8 +97,8 @@ export default function VltnRgstrPop({ onConfirm, onClose }: Props) {
   }, []);
 
   const searchFields: GridSearchField[] = [
-    { type: "date", label: "LBL_FROM_DATE", value: frm, onChange: setFrm },
-    { type: "date", label: "LBL_TO_DATE", value: to, onChange: setTo },
+    { type: "date", label: "LBL_FROM_DATE", value: frm, onChange: setFrm, max: to },
+    { type: "date", label: "LBL_TO_DATE", value: to, onChange: setTo, min: frm },
   ];
 
   const onSave = () => {

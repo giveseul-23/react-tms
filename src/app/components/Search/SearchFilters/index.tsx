@@ -56,7 +56,7 @@ interface SearchFiltersProps {
    *  지정 시 SearchFilters 가 내부에서 useSearchCondition 호출 + fetchFn 자동 wrap.
    *  Controller 에서 transformParams 직접 호출 불필요. */
   excludes?: readonly ExcludeSpec[];
-  computeTotalCount?: (rows: any[]) => number;
+  computeTotalCount?: (rows: any) => number;
   /** 모듈 기본값 조회 — 모듈명 (예: "TMS"). falsy면 비활성 */
   moduleDefault?: string;
   moduleDefaultParams?: Record<string, unknown>;
@@ -162,20 +162,45 @@ export function SearchFilters({
             </span>
           </div>
 
-          <CollapsibleTrigger asChild>
+          <div className="flex items-center gap-1.5">
             <Button
               variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-slate-200 hover:bg-transparent hover:text-white hover:font-bold"
+              size="xs"
+              onClick={handleReset}
+              className="h-6 px-2 bg-white/15 hover:bg-white border border-white/30 text-white hover:text-[rgb(var(--primary))] text-[11px] font-semibold"
             >
-              {open ? "접기" : "펼치기"}
-              <ChevronDown
-                className={`w-4 h-4 ml-1 transition-transform ${
-                  open ? "rotate-180" : ""
-                }`}
-              />
+              <RefreshCw className="w-3 h-3" />
             </Button>
-          </CollapsibleTrigger>
+            {layoutToggle}
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => handleSearch(1)}
+              disabled={searching}
+              className="h-6 px-2 bg-white/15 hover:bg-white border border-white/30 text-white hover:text-[rgb(var(--primary))] text-[11px] font-semibold"
+            >
+              {searching ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Search className="w-3 h-3" />
+              )}
+              {searching ? Lang.get("LBL_SEARCHING") : Lang.get("LBL_SEARCH")}
+            </Button>
+
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                size="xs"
+                className="h-6 px-2 bg-white/15 hover:bg-white border border-white/30 text-white hover:text-[rgb(var(--primary))] text-[11px] font-semibold"
+              >
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${
+                    open ? "rotate-180" : ""
+                  }`}
+                />
+              </Button>
+            </CollapsibleTrigger>
+          </div>
         </div>
 
         <CollapsibleContent>
@@ -192,6 +217,7 @@ export function SearchFilters({
             }}
             className="
             p-2
+            [&:last-child]:pb-2
             text-[12px]
 
             [&_input]:h-6
@@ -212,31 +238,6 @@ export function SearchFilters({
               />
             </div>
           </CardContent>
-
-          <div className="flex justify-between px-2 py-1 border-t">
-            <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="xs" onClick={handleReset}>
-                <RefreshCw className="w-3 h-3" />
-                {Lang.get("LBL_INITIALIZE")}
-              </Button>
-              {layoutToggle}
-            </div>
-
-            <Button
-              variant="outline"
-              size="xs"
-              onClick={() => handleSearch(1)}
-              disabled={searching}
-              className="btn-primary btn-primary:hover"
-            >
-              {searching ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
-              ) : (
-                <Search className="w-3 h-3" />
-              )}
-              {searching ? Lang.get("LBL_SEARCHING") : Lang.get("LBL_SEARCH")}
-            </Button>
-          </div>
         </CollapsibleContent>
       </Collapsible>
     </Card>

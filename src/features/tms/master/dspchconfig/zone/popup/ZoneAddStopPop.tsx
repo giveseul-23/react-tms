@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { SplitPane } from "@/app/components/layout/SplitPane";
 import type { GridSearchField } from "@/app/components/popup/GridSearchPopupLayout";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
+import { PopupSearchCondition } from "@/app/components/popup/PopupSearchCondition";
 import { newRid } from "@/app/feature/useBaseModel";
 import { ROW_STATUS } from "@/app/components/grid/gridCommon";
 import { Lang } from "@/app/services/common/Lang";
@@ -59,66 +60,6 @@ const SELECTED_LOC_COLUMN_DEFS = [
     flex: 1,
   },
 ];
-
-function AddStopSearchFields({
-  fields,
-  onSearch,
-}: {
-  fields: GridSearchField[];
-  onSearch: () => void;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between px-3 py-2 bg-[var(--grid-header-bg)]">
-        <div className="flex items-center gap-1.5 leading-none">
-          <SlidersHorizontal className="w-3.5 h-3.5 text-color/80 flex-shrink-0" />
-          <span className="text-[12px] font-semibold text-color tracking-widest uppercase leading-none">
-            조회조건
-          </span>
-        </div>
-        <Button
-          variant="ghost"
-          size="xs"
-          onClick={onSearch}
-          className="h-6 px-3 rounded-full bg-white/15 hover:bg-white border border-white/30 text-color hover:text-[rgb(var(--primary))] text-[12px] font-semibold transition-all flex items-center gap-1"
-          style={{ lineHeight: 1 }}
-        >
-          <Search className="w-3 h-3 flex-shrink-0" />
-          <span className="leading-none">조회</span>
-        </Button>
-      </div>
-
-      <div
-        className="grid divide-x divide-y divide-slate-100"
-        style={{
-          gridTemplateColumns: `repeat(${Math.min(fields.length, 3)}, minmax(0, 1fr))`,
-        }}
-      >
-        {fields.map((f) => {
-          if (f.type === "popup" || f.type === "combo") return null;
-          return (
-            <div
-              key={f.label}
-              className="flex flex-col px-3 py-2 bg-white hover:bg-blue-50/40 transition-colors group"
-            >
-              <label className="text-[10px] font-medium text-slate-400 mb-0.5 group-focus-within:text-blue-500 transition-colors">
-                {f.label}
-              </label>
-              <input
-                value={f.value}
-                onChange={(e) => f.onChange(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onSearch()}
-                disabled={f.disable}
-                className="text-[12px] text-slate-700 bg-transparent outline-none border-none placeholder:text-slate-300 w-full disabled:cursor-not-allowed disabled:text-slate-400"
-                placeholder={f.placeholder ?? "입력"}
-              />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 function mapLocPopToSelected(row: any) {
   return {
@@ -242,42 +183,12 @@ export function ZoneAddStopPop({
 
   const searchFields: GridSearchField[] = useMemo(
     () => [
-      {
-        label: Lang.get("LBL_CODE"),
-        value: locCd,
-        onChange: setLocCd,
-        placeholder: Lang.get("LBL_INPUT"),
-      },
-      {
-        label: Lang.get("LBL_CODE_NM"),
-        value: locNm,
-        onChange: setLocNm,
-        placeholder: Lang.get("LBL_INPUT"),
-      },
-      {
-        label: Lang.get("LBL_ADDR"),
-        value: dtlAddr,
-        onChange: setDtlAddr,
-        placeholder: Lang.get("LBL_INPUT"),
-      },
-      {
-        label: Lang.get("LBL_ZIP_CODE"),
-        value: zipCd,
-        onChange: setZipCd,
-        placeholder: Lang.get("LBL_INPUT"),
-      },
-      {
-        label: Lang.get("LBL_CUSTOMER_CODE"),
-        value: custCd,
-        onChange: setCustCd,
-        placeholder: Lang.get("LBL_INPUT"),
-      },
-      {
-        label: Lang.get("LBL_CUSTOMER_NAME"),
-        value: custNm,
-        onChange: setCustNm,
-        placeholder: Lang.get("LBL_INPUT"),
-      },
+      { label: "LBL_CODE", value: locCd, onChange: setLocCd },
+      { label: "LBL_CODE_NM", value: locNm, onChange: setLocNm },
+      { label: "LBL_ADDR", value: dtlAddr, onChange: setDtlAddr },
+      { label: "LBL_ZIP_CODE", value: zipCd, onChange: setZipCd },
+      { label: "LBL_CUSTOMER_CODE", value: custCd, onChange: setCustCd },
+      { label: "LBL_CUSTOMER_NAME", value: custNm, onChange: setCustNm },
     ],
     [custCd, custNm, dtlAddr, locCd, locNm, zipCd],
   );
@@ -368,7 +279,7 @@ export function ZoneAddStopPop({
 
   return (
     <div className="flex flex-col gap-3 w-full h-full">
-      <AddStopSearchFields fields={searchFields} onSearch={fetchLocPopList} />
+      <PopupSearchCondition fields={searchFields} onSearch={fetchLocPopList} />
 
       <div style={{ height: 500 }} className="min-h-0">
         <SplitPane

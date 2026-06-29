@@ -27,7 +27,10 @@ export default function ShipmentTransferPop({ record, onApply, onClose }: Props)
   const [planNm, setPlanNm] = useState("");
 
   const { stores } = useCommonStores({
-    planId: { sqlProp: "CODE", keyParam: toLgstGrpCd || "__EMPTY__" },
+    planId: {
+      sqlProp: "selectUsrPlanCodeNameLgstGrpDesc",
+      keyParam: toLgstGrpCd || "__EMPTY__",
+    },
   });
 
   useEffect(() => {
@@ -39,11 +42,9 @@ export default function ShipmentTransferPop({ record, onApply, onClose }: Props)
 
   useEffect(() => {
     const first = stores.planId?.[0];
-    if (first && !planId) {
-      setPlanId(first.CODE);
-      setPlanNm(first.NAME);
-    }
-  }, [planId, stores.planId]);
+    setPlanId(first?.CODE ?? "");
+    setPlanNm(first?.NAME ?? "");
+  }, [stores.planId]);
 
   const isValid = !!(toLgstGrpCd && planId);
 
@@ -62,13 +63,13 @@ export default function ShipmentTransferPop({ record, onApply, onClose }: Props)
         })
       }
     >
-      <Field layout="vertical" type="text" label="LBL_LOGISTICS_GROUP" value={toLgstGrpNm} disabled />
+      <Field layout="vertical" type="text" label={Lang.get("LBL_LOGISTICS_GROUP")} value={toLgstGrpNm} disabled />
       <div className="flex items-end gap-2">
         <div className="flex-1">
           <Field
             layout="vertical"
             type="text"
-            label="LBL_CHANGE_LOGISTICS_GROUP"
+            label={Lang.get("LBL_CHANGE_LOGISTICS_GROUP")}
             value={toLgstGrpCd}
             onChange={(v) => {
               setToLgstGrpCd(v);
@@ -83,11 +84,17 @@ export default function ShipmentTransferPop({ record, onApply, onClose }: Props)
           className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-sm"
           onClick={() =>
             openPopup({
-              title: Lang.get("LBL_CHANGE_LOGISTICS_GROUP"),
+              title: "LBL_CHANGE_LOGISTICS_GROUP",
               width: "2xl",
               content: (
                 <CommonPopup
                   sqlId="selectLogisticsgroupCodeNameNoAuth"
+                  {...(record?.DIV_CD
+                    ? {
+                        filterCol: "DIV_CD",
+                        filterValue: String(record.DIV_CD),
+                      }
+                    : {})}
                   onApply={(row: any) => {
                     setToLgstGrpCd(row?.CODE ?? "");
                     setToLgstGrpNm(row?.NAME ?? "");
@@ -107,7 +114,7 @@ export default function ShipmentTransferPop({ record, onApply, onClose }: Props)
       <Field
         layout="vertical"
         type="combo"
-        label="LBL_PLAN_ID"
+        label={Lang.get("LBL_PLAN_ID")}
         value={planId}
         onChange={(v) => {
           setPlanId(v);

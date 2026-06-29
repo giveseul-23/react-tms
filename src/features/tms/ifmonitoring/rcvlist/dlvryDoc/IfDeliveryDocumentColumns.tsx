@@ -67,12 +67,17 @@ export const MAIN_COLUMN_DEFS = [
 export const DETAIL_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_INTERFAE_ID", field: "IF_ID" },
   { type: "text", headerName: "LBL_ORDER_NO", field: "ORD_NO" },
-  { type: "text", headerName: "LBL_ORD_LINE_CNT", field: "ORD_LINE_NO" },
+  { type: "numeric", headerName: "LBL_ORD_LINE_CNT", field: "ORD_LINE_NO" },
   { type: "text", headerName: "LBL_ITEM_CD", field: "CUST_ITM_CD" },
-  { type: "text", headerName: "LBL_PLAN_QTY", field: "PLN_ORD_QTY" },
-  { type: "text", headerName: "LBL_QTY_UOM", field: "PLN_ORD_QTY_UOM", codeKey: "itemUom" },
-  { type: "text", headerName: "LBL_TTL_NET_WGT", field: "PLN_NET_WGT" },
-  { type: "text", headerName: "LBL_PLN_VOL", field: "PLN_GROSS_VOL" },
+  { type: "numeric", headerName: "LBL_PLAN_QTY", field: "PLN_ORD_QTY" },
+  {
+    type: "text",
+    headerName: "LBL_QTY_UOM",
+    field: "PLN_ORD_QTY_UOM",
+    codeKey: "itemUom",
+  },
+  { type: "numeric", headerName: "LBL_TTL_NET_WGT", field: "PLN_NET_WGT" },
+  { type: "numeric", headerName: "LBL_PLN_VOL", field: "PLN_GROSS_VOL" },
   ...makeAuditColumns({
     insertPerson: true,
     insertDate: true,

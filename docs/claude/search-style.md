@@ -48,7 +48,11 @@ Card("shadow-sm rounded-lg")
 | `POPUP` | `PopupFilter` | 코드 input `w-[110px]` + 코드명 input(`flex-1 pr-10`, **`readOnly`** — 돋보기 선택/코드 Enter 로만 채워짐, 사용자 직접 입력 불가) + 돋보기 버튼(absolute). payload 엔 `_CD`(meta.key)만 — `_NM` 은 서버 제외(표시 전용) |
 | `CHECKBOX` | `CheckboxFilter` | `label("h-6 px-2 rounded-lg border")` + checkbox `h-3 w-3 accent-emerald-600` |
 
-- **DatePicker 트리거**: `h-7 w-full pl-2 pr-6 text-[11px] border border-input rounded-md bg-input-background` + 캘린더아이콘 `w-3.5 h-3.5`(absolute right-1.5). (본문 override 로 h-6 적용)
+- **DatePicker(`DatePickerPopover`)**: 트리거는 **숫자 직접입력 마스크 입력창** + 우측 달력아이콘(absolute, 팝오버 트리거). 미입력 자리는 회색 placeholder 오버레이로 표시.
+  - **마스크/검증**: 숫자만 입력(비숫자 제거). 자리별 범위 검증 — 월 01–12 / 일 01–31 / 시 00–23 / 분·초 00–59. `13`·`32`·`00` 등 둘째 자리 오버플로는 거부, 십의자리로 불가능한 첫 숫자(월 `6` 등)는 `0` 자동 패딩(`06`).
+  - **커밋**: 달력/연·월 선택 시 **확인 없이 즉시 적용**(확인/취소 버튼 없음, `오늘`만), 시간 변경도 라이브. 직접입력은 blur/Enter 로 커밋(미완성·무효 원복). 비필수면 `allowClear` 로 공백 허용.
+  - **크기 `size`**: `sm`(기본 — 조회조건/그리드, `h-7`·`text-[11px]`·`rounded-md`·`bg-input-background`) / `lg`(폼 팝업 `Field` 와 동일 — `h-10`·`text-sm`·`rounded-lg`·`border-gray-300`·`px-3`). 입력·마스크 오버레이·아이콘이 함께 맞춰진다.
+  - **범위(from-to)**: `DateRangeFilter`(`mode:"Y"`)가 from>to 면 to=from, to<from 이면 from=to 로 자동 보정.
 
 ## 4. 조건 연산자 (`ConditionBox` / `IconCombo`)
 

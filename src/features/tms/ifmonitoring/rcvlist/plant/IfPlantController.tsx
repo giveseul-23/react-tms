@@ -64,7 +64,7 @@ export function useFeatureController({ model }: ControllerArgs) {
           api.reprocess({
             dsSave: selectedRows,
           }),
-          "MSG_SAVE_CMPLT",
+          { successMsg: "MSG_SAVE_CMPLT", mask: "main" },
         )
         .then(() => base.search());
     },

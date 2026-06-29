@@ -96,7 +96,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "SUBCHG_NM",
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_MIN_COST",
     field: "MIN_COST",
     editable: true,
@@ -108,7 +108,7 @@ export const MAIN_COLUMN_DEFS = [
     },
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_MAX_COST",
     field: "MAX_COST",
     editable: true,
@@ -120,7 +120,7 @@ export const MAIN_COLUMN_DEFS = [
     },
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_BASIC_COST",
     field: "BSE_COST",
     editable: true,
@@ -148,7 +148,7 @@ export const MAIN_COLUMN_DEFS = [
     defaultValue: "Y",
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_ORDER",
     field: "SEQ",
     required: true,
@@ -209,7 +209,7 @@ export const MAIN_COLUMN_DEFS = [
     insertable: true,
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_COST_UNIT",
     field: "ADJ_RT",
     required: true,
@@ -218,7 +218,7 @@ export const MAIN_COLUMN_DEFS = [
     valueFormatter: numberValueFormatter,
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_COST",
     field: "COST",
     required: true,
@@ -261,7 +261,7 @@ export const CONDITION_COLUMN_DEFS = [
     hide: true
   },
   {
-    type: "number",
+    type: "numeric",
     headerName: "LBL_ORDER",
     field: "SEQ",
     required: true,

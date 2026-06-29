@@ -1,11 +1,13 @@
 import { useCallback, useMemo } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
+import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { showInfoModal } from "@/app/components/popup/showInfoModal";
+import { Lang } from "@/app/services/common/Lang";
 import { ifDispatchResultApi as api } from "./IfDispatchResultApi";
 import { MENU_CODE } from "./IfDispatchResult";
-import { makeExcelGroupAction } from "@/app/components/grid/actions/commonActions";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
-import type { IfDispatchResultModel, GridKey } from "./IfDispatchResultModel";
-import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import type { GridKey, IfDispatchResultModel } from "./IfDispatchResultModel";
 
 interface Args {
   model: IfDispatchResultModel;
@@ -16,16 +18,55 @@ export function useIfDispatchResultController({ model }: Args) {
   const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
-    (params: Record<string, unknown>) =>
-      api.getList({ userTz: "Asia/Seoul", ...params }),
+    (params: Record<string, unknown>) => api.getList(params),
     [],
   );
+
+  const onMainGridClick = useCallback(() => {}, []);
 
   const onSearchCallback = useCallback(
     (data: any) => {
       model.grids.main.setData(data);
+      model.grids.main.setSelected(null);
     },
     [model.grids.main],
+  );
+
+  const onReprocess = useCallback(
+    (e?: any) => {
+      const selectedRows = Array.isArray(e?.data)
+        ? e.data
+        : e?.data
+          ? [e.data]
+          : [];
+
+      if (selectedRows.length === 0) {
+        showInfoModal(Lang.get("MSG_SELECT_NO_DATA"));
+        return;
+      }
+
+      for (const row of selectedRows) {
+        if (row.IF_PRCS_STS !== "E") {
+          showInfoModal(
+            Lang.get("MSG_ALREADY_SUCCESS", String(row.IF_ID ?? "")),
+          );
+          return;
+        }
+      }
+
+      base
+        .callAjax(
+          api.reprocess({
+            dsSave: selectedRows.map((row: any) => ({
+              ...row,
+              rowStatus: "U",
+            })),
+          }),
+          { successMsg: "MSG_SAVE_CMPLT", mask: "main" },
+        )
+        .then(() => base.search());
+    },
+    [base],
   );
 
   const mainActions: ActionItem[] = useMemo(
@@ -34,10 +75,7 @@ export function useIfDispatchResultController({ model }: Args) {
         type: "button",
         key: "BTN_REPRO",
         label: "BTN_REPRO",
-        onClick: () =>
-          base
-            .callAjax(api.reprocess(model.filtersRef.current))
-            .then(() => base.search()),
+        onClick: onReprocess,
       },
       makeExcelGroupAction({
         excelColumns: () => model.grids.main.getExcelColumns(),
@@ -47,12 +85,13 @@ export function useIfDispatchResultController({ model }: Args) {
         rows: model.grids.main.rows,
       }),
     ],
-    [model, base, menuName],
+    [menuName, model.grids.main, model.filtersRef, onReprocess],
   );
 
   return {
     fetchList,
     onSearchCallback,
+    onMainGridClick,
     mainActions,
   };
 }

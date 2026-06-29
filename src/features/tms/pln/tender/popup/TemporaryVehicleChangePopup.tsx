@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { FormPopupLayout } from "@/app/components/popup/FormPopupLayout";
 import { Field } from "@/app/components/popup/Field";
+import { Lang } from "@/app/services/common/Lang";
 
 type TemporaryVehicleChangeContentProps = {
-  defaultVehicleType?: string;
-  defaultCarrierName?: string;
   onConfirm: (data: {
     VEH_NO: string;
     DRVR_NM: string;
@@ -32,7 +31,8 @@ export default function TemporaryVehicleChangePopup({
   return (
     <FormPopupLayout
       cardClassName="space-y-4"
-      confirmLabel="저장"
+      cancelLabel={Lang.get("BTN_CANCEL")}
+      confirmLabel={Lang.get("BTN_SAVE")}
       isValid={isValid}
       onCancel={onClose}
       onConfirm={() =>
@@ -47,7 +47,7 @@ export default function TemporaryVehicleChangePopup({
         layout="horizontal"
         type="text"
         disabled
-        label="차량유형명"
+        label={Lang.get("LBL_VEHICLE_TYPE_NAME")}
         value={vehicleType}
       />
 
@@ -55,14 +55,14 @@ export default function TemporaryVehicleChangePopup({
         layout="horizontal"
         type="text"
         disabled
-        label="운송협력사명"
+        label={Lang.get("LBL_CARRIER_NAME")}
         value={carrierName}
       />
 
       <Field
         layout="horizontal"
         type="text"
-        label="차량번호"
+        label={Lang.get("LBL_VEH_NO")}
         value={vehicleNo}
         onChange={setVehicleNo}
       />
@@ -70,7 +70,7 @@ export default function TemporaryVehicleChangePopup({
       <Field
         layout="horizontal"
         type="text"
-        label="운전자명"
+        label={Lang.get("LBL_DRIVER_NAME")}
         value={driverName}
         onChange={setDriverName}
       />
@@ -78,7 +78,7 @@ export default function TemporaryVehicleChangePopup({
       <Field
         layout="horizontal"
         type="text"
-        label="운전자전화번호"
+        label={Lang.get("LBL_DRIVER_TEL")}
         value={driverPhone}
         onChange={setDriverPhone}
         placeholder='"-" 를 빼고 작성하세요.'

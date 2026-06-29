@@ -53,7 +53,7 @@
 6. `type:"check"` → 체크박스 렌더러
 7. `type:"popup"|"popuser"` → 돋보기 + CommonPopup
 8. `type:"address"` → "주소찾기" 버튼 + `AddressPop`. `field` 없는 액션 컬럼(`colId` 사용). 선택 시 `addrFields` 매핑대로 **다중 필드 write-back**(기본 `CTRY_CD`/`CTRY_NM`/`STT_CD`/`STT_NM`/`CTY_CD`/`CTY_NM`/`ZIP_CD`/`DTL_ADDR1`/`DTL_ADDR2`). 다른 필드명이면 `addrFields` 로 부분 오버라이드. 결과 필드는 보통 별도 읽기전용 `text` 컬럼으로 표시. 편집 노출은 `insertable`/`editable` 정책.
-9. `type:"date"|"datetime"` (편집 켜진 경우) → DatePickerPopover
+9. `type:"date"|"datetime"` (편집 켜진 경우) → DatePickerPopover — 그리드 셀은 값 텍스트 + 달력아이콘(iconOnly), 폼/팝업은 마스크 입력창. **선택 즉시 적용(확인/취소 없음)**, 숫자 직접입력 시 자리별 범위 검증(월/일/시/분/초). 자세한 동작은 [search-style.md](./search-style.md) §3.
 10. `insertable`/`editable` + EDIT_STS → ag-grid `editable` 변환
 11. `required:true` → 헤더 필수 클래스
 12. 커스텀 키 제거 후 ag-grid 전달

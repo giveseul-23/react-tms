@@ -786,6 +786,22 @@ export const TmapView = forwardRef<TmapViewHandle, TmapViewProps>(
             map.setCenter(new Tmapv2.LatLng(markers[0].lat, markers[0].lon));
             return;
           }
+          const lats = markers.map((m) => m.lat);
+          const lons = markers.map((m) => m.lon);
+          const minLat = Math.min(...lats);
+          const maxLat = Math.max(...lats);
+          const minLon = Math.min(...lons);
+          const maxLon = Math.max(...lons);
+          // 여러 마커가 (거의) 같은 위치면 fitBounds 영역이 0 이라 과도 확대/오작동 →
+          // 중심 이동 + 적정 줌으로 처리.
+          const EPS = 0.0009; // 약 100m
+          if (maxLat - minLat < EPS && maxLon - minLon < EPS) {
+            map.setCenter(
+              new Tmapv2.LatLng((minLat + maxLat) / 2, (minLon + maxLon) / 2),
+            );
+            map.setZoom(16);
+            return;
+          }
           const bounds = new Tmapv2.LatLngBounds();
           markers.forEach((m) =>
             bounds.extend(new Tmapv2.LatLng(m.lat, m.lon)),

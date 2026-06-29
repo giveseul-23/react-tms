@@ -6,11 +6,11 @@ export type GridKey = "main";
 export function useVehicleDailyBaseRtnMgmtModel(menuCode: string) {
   const base = useBaseModel<GridKey>(menuCode);
 
-  const { stores } = useCommonStores({
+  const { codeMap } = useCommonStores({
     vehTp: { sqlProp: "selectVehTpList" },
   });
 
-  return { ...base, stores };
+  return { ...base, codeMap };
 }
 
 export type VehicleDailyBaseRtnMgmtModel = ReturnType<

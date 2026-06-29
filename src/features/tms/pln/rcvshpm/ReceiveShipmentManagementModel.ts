@@ -11,6 +11,11 @@ export function useReceiveShipmentManagementModel(menuCode: string) {
     shpmTpList: { sqlProp: "CODE", keyParam: "SHPM_TP" },
     shpmOpStsList: { sqlProp: "CODE", keyParam: "SHPM_OP_STS" },
     itmUomList: { sqlProp: "CODE", keyParam: "ITEM_UOM" },
+    cmdtTpList: {
+      fields: ["field1"],
+      module: "TMS",
+      sqlProp: "selectCommodityCodeList",
+    },
     ordCreFlag: { sqlProp: "CODE", keyParam: "HARIM_ORD_CRE_TP_CD" },
     docTp: { sqlProp: "CODE", keyParam: "DOC_TYPE" },
     dlvryTp: { sqlProp: "CODE", keyParam: "HARIM_ORD_DLV_TP_CD" },

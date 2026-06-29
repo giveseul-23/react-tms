@@ -131,12 +131,12 @@ export default function ArChargeAddPopup({
         width: 120,
       }, {
         headerName: "LBL_CUSTOMER_CONTRACT_CODE",
-        sendField: "CUST_CNTRCT_CD",
-        field: "CUST_CNTRCT_CD",
+        sendField: "AR_CNTRCT_CD",
+        field: "AR_CNTRCT_CD",
       }, {
         headerName: "LBL_CUSTOMER_CONTRACT_NAME",
-        sendField: "CUST_CNTRCT_NM",
-        field: "CUST_CNTRCT_NM",
+        sendField: "AR_CNTRCT_NM",
+        field: "AR_CNTRCT_NM",
       }, {
         headerName: "LBL_ACCOUNTS_RECEIVABLE_TARIFF_CODE",
         sendField: "AR_TRF_CD",
@@ -155,7 +155,7 @@ export default function ArChargeAddPopup({
       columnDefs={columnDefs}
       rows={rows}
       gridHeight={350}
-      selectedBadgeFields={["CUST_CD", "AR_TRF_LCD", "CUST_CNTRCT_CD", "AR_TRF_CD"]}
+      selectedBadgeFields={["CUST_CD", "AR_TRF_LCD", "AR_CNTRCT_CD", "AR_TRF_CD"]}
       rowSelection="multiple"
       onSearch={onSearch}
       onConfirm={onApply}

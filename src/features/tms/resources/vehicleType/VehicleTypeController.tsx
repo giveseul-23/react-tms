@@ -7,9 +7,10 @@ import {
 } from "@/app/components/grid/actions/commonActions";
 import { vehicleTypeApi as api } from "./VehicleTypeApi";
 import { MAIN_COLUMN_DEFS } from "./VehicleTypeColumns";
-import { MENU_CODE } from "./VehicleType";
+import { AUTH, MENU_CODE } from "./VehicleType";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { VehicleTypeModel, GridKey } from "./VehicleTypeModel";
+import { useMenuMeta } from "@/app/context/MenuMetaContext";
 
 interface Args {
   model: VehicleTypeModel;
@@ -17,6 +18,7 @@ interface Args {
 
 export function useVehicleTypeController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
+  const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
     (params: Record<string, unknown>) => api.getList(params),
@@ -47,12 +49,14 @@ export function useVehicleTypeController({ model }: Args) {
         columns: MAIN_COLUMN_DEFS,
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
-        menuName: "차량유형관리",
+        menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
         rows: model.grids.main.rows,
+        upload: { gridId: AUTH.grids.main, onUploaded: () => base.search() },
+        templateDownload: { gridId: AUTH.grids.main, fileName: menuName },
       }),
     ],
-    [handleAddRow, onSaveMain, model],
+    [base, handleAddRow, menuName, model, onSaveMain],
   );
 
   return {

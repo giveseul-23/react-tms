@@ -26,6 +26,7 @@ type GridSearchPopupLayoutProps = {
   /** 그리드 선택 모드 — 자식 팝업에서 지정. 기본 "single".
    *  "multiple" 이면 배지에 선택 다건을 표시하고 onConfirm 에 payload 배열을 전달. */
   rowSelection?: "single" | "multiple";
+  confirmOnRowDoubleClick?: boolean;
   onSearch: () => void;
   onConfirm: (payload: Record<string, any> | Record<string, any>[]) => void;
   onClose: () => void;
@@ -41,6 +42,7 @@ export function GridSearchPopupLayout({
   selectedLabel = "선택됨",
   selectPrompt = "그리드에서 차량을 선택하세요",
   rowSelection = "single",
+  confirmOnRowDoubleClick = false,
   onSearch,
   onConfirm,
   onClose,
@@ -140,7 +142,15 @@ export function GridSearchPopupLayout({
                 }
               : undefined
           }
-          disableAutoSize
+          onRowDoubleClicked={
+            confirmOnRowDoubleClick
+              ? (row: any) =>
+                  onConfirm(
+                    isMultiple ? [buildPayload(row)] : buildPayload(row),
+                  )
+              : undefined
+          }
+          // disableAutoSize
         />
       </div>
 

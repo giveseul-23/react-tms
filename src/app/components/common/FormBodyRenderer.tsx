@@ -258,6 +258,7 @@ function FormDateField({
           value={toPicker(value)}
           precision={dateUnit}
           onChange={(v) => onChange(v ? toCompact(v) : "")}
+          allowClear={!required}
         />
       )}
     </div>

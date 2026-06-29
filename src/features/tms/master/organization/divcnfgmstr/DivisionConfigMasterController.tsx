@@ -224,7 +224,7 @@ export function useDivisionConfigMasterController({ model }: Args) {
   const syncConfig = useCallback(
     () =>
       base
-        .callAjax(api.syncConfig({}), Lang.get("MSG_CMPLT_SYNC"))
+        .callAjax(api.syncConfig({}), { successMsg: Lang.get("MSG_CMPLT_SYNC"), mask: "divCd" })
         .then(() => base.search()),
     [base],
   );

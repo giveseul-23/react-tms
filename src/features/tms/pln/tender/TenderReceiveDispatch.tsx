@@ -1,4 +1,3 @@
-// src/views/tender/TenderReceiveDispatch.tsx
 "use client";
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
@@ -15,6 +14,16 @@ import {
 
 export const MENU_CD = "MENU_PLAN_TENDER_RECEIVE";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_PLAN_TENDER_RECEIVE",
+    stop: "SUB01_GRID_PLAN_TENDER_RECEIVE",
+    sms: "SUB04_GRID_PLAN_TENDER_RECEIVE",
+    apSetl: "CARR_COST_GRID_PLAN_TENDER_RECEIVE",
+    carrRateExcel: "CARR_RATE_EXCEL_GRID",
+  },
+};
+
 export default function TenderReceiveDispatch() {
   const model = useTenderReceiveDispatchModel(MENU_CD);
   const ctrl = useTenderReceiveDispatchController({ model });
@@ -26,16 +35,22 @@ export default function TenderReceiveDispatch() {
         fetchFn: ctrl.fetchDispatchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
-        excludes: ["BOOKING"],
+        excludes: [
+          { column: "BOOKING", as: "BOOKING" },
+          { column: "DROP_LOC_NM", as: "DROP_LOC_NM" },
+        ],
       }}
-      defaultDirection="horizontal"
+      defaultDirection="vertical"
+      defaultSizes={[60, 40]}
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           actions={ctrl.mainActions}
           onRowClicked={ctrl.onMainGridClick}
+          rowSelection="multiple"
           codeMap={model.codeMap}
           audit={{
             delete: false,
@@ -60,8 +75,10 @@ export default function TenderReceiveDispatch() {
               render: () => (
                 <DataGrid
                   {...model.bind("stop")}
-                  columnDefs={STOP_COLUMN_DEFS()}
+                  authId={AUTH.grids.stop}
+                  columnDefs={STOP_COLUMN_DEFS}
                   codeMap={model.codeMap}
+                  headerCheckbox={false}
                   audit={false}
                 />
               ),
@@ -70,8 +87,10 @@ export default function TenderReceiveDispatch() {
               render: () => (
                 <DataGrid
                   {...model.bind("sms")}
-                  columnDefs={SMS_COLUMN_DEFS()}
+                  authId={AUTH.grids.sms}
+                  columnDefs={SMS_COLUMN_DEFS}
                   codeMap={model.codeMap}
+                  headerCheckbox={false}
                   audit={{
                     delete: false,
                     rowStatus: false,
@@ -87,10 +106,12 @@ export default function TenderReceiveDispatch() {
               render: () => (
                 <DataGrid
                   {...model.bind("apSetl")}
-                  columnDefs={AP_SETL_COLUMN_DEFS()}
+                  authId={AUTH.grids.apSetl}
+                  columnDefs={AP_SETL_COLUMN_DEFS}
                   codeMap={model.codeMap}
-                  onCellValueChanged={ctrl.handleApSetlCellChange}
+                  rowSelection="multiple"
                   actions={ctrl.apSetlActions}
+                  audit={{ delete: false }}
                 />
               ),
             },
@@ -98,9 +119,6 @@ export default function TenderReceiveDispatch() {
           actions={[]}
         />
       }
-      bottomSlot={ctrl.track.panel}
-      bottomOpen={ctrl.track.open}
-      bottomHeight={280}
     />
   );
 }

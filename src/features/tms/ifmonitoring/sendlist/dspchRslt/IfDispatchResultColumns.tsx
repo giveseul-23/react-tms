@@ -1,17 +1,284 @@
-import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
+const ifPrcsStsCellStyle = (p: any): Record<string, string> => {
+  const base = { textAlign: "center" as const };
+  switch (String(p?.data?.IF_PRCS_STS ?? "").trim()) {
+    case "S":
+      return { ...base, backgroundColor: "#D9F0A6", fontWeight: "bold" };
+    case "R":
+      return { ...base, backgroundColor: "#F0CFA6" };
+    case "E":
+      return { ...base, backgroundColor: "red", color: "#FFFF00" };
+    default:
+      return base;
+  }
+};
+
+const rePrcsCellStyle = (p: any): Record<string, string> => {
+  const base = { textAlign: "center" as const };
+  if (String(p?.data?.RE_PRCS_BY_USR_YN ?? "").trim() === "Y") {
+    return { ...base, backgroundColor: "#BBE6F6" };
+  }
+  return base;
+};
 
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
-  { headerName: "LBL_ITM_CD", field: "CUST_ITEM_CD" },
-  { headerName: "LBL_ITM_NM", field: "CUST_ITEM_NM" },
-  { headerName: "LBL_QTY", field: "PLN_QTY" },
-  { headerName: "LBL_PLANT_CD", field: "PLANT_CD" },
-  { headerName: "LBL_TMS_IF_PRCS_ID", field: "TMS_IF_PRCS_ID" },
-  { headerName: "LBL_TMS_IF_PRCS_START_DTTM", field: "TMS_IF_PRCS_START_DTTM" },
-  { headerName: "LBL_TMS_IF_PRCS_END_DTTM", field: "TMS_IF_PRCS_END_DTTM" },
-  ...makeAuditColumns({
-    insertPerson: true,
-    updatePerson: true,
-    updateTime: true,
-  }),
+  {
+    type: "datetime",
+    headerName: "LBL_SEND_DATE",
+    field: "CRE_DTTM",
+    width: 150,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_INTERFAE_ID",
+    field: "IF_ID",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_INTERFACE_TCD",
+    field: "IF_TCD",
+    codeKey: "interfaceType",
+    width: 100,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_USR_RE_PRCS_YN",
+    field: "RE_PRCS_BY_USR_YN",
+    width: 130,
+    headerClass: "ag-header-center",
+    cellStyle: rePrcsCellStyle,
+    editable: false,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_PRCS_STS",
+    field: "IF_PRCS_STS",
+    codeKey: "interfaceStatus",
+    width: 70,
+    headerClass: "ag-header-center",
+    cellStyle: ifPrcsStsCellStyle,
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_PRCS_MSG",
+    field: "IF_PRCS_MSG_DESC",
+    width: 180,
+    editable: false,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_INV_SYS_ID",
+    field: "TO_SYS_CD",
+    codeKey: "invSysList",
+    width: 140,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_ORDER_NO",
+    field: "ORD_NO",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_ORD_LINE_NO",
+    field: "ORD_LINE_NO",
+    width: 110,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_ORDER_TYPE",
+    field: "ORD_TP",
+    codeKey: "ordTpList",
+    width: 100,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "date",
+    headerName: "LBL_DSPCH_DLVRY_DT",
+    field: "DLVRY_DT",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DISPATCH_NO",
+    field: "DSPCH_NO",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_CODE",
+    field: "CARR_CD",
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_NAME",
+    field: "CARR_NM",
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_NUMBER",
+    field: "VEH_NO",
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEH_TP_CD",
+    field: "VEH_TP_CD",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_VEH_GRP",
+    field: "VEH_GRP_CD",
+    codeKey: "vehGrpCd",
+    width: 100,
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DRIVER_NAME",
+    field: "DRVR_NM",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DEPARTURE_CODE",
+    field: "FRM_LOC_CD",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DEPARTURE_NAME",
+    field: "FRM_LOC_NM",
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DESTINATION_CD",
+    field: "TO_LOC_CD",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DESTINATION_NM",
+    field: "TO_LOC_NM",
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_SOLD_TO_CD",
+    field: "SOLD_TO_CD",
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_SEQ",
+    field: "DLVRY_SEQ",
+    align: "right",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_ITM_CD",
+    field: "CUST_ITEM_CD",
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_ITM_NM",
+    field: "CUST_ITEM_NM",
+    align: "left",
+    editable: false,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_QTY",
+    field: "PLN_QTY",
+    align: "right",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_PLANT_CD",
+    field: "PLANT_CD",
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_TMS_IF_PRCS_ID",
+    field: "TMS_IF_PRCS_ID",
+    width: 150,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "datetime",
+    headerName: "LBL_TMS_IF_PRCS_START_DTTM",
+    field: "TMS_IF_PRCS_START_DTTM",
+    width: 200,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "datetime",
+    headerName: "LBL_TMS_IF_PRCS_END_DTTM",
+    field: "TMS_IF_PRCS_END_DTTM",
+    width: 200,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_INSERT_PERSON_ID",
+    field: "CRE_USR_ID",
+    width: 150,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "text",
+    headerName: "LBL_UPDATE_PERSON_ID",
+    field: "UPD_USR_ID",
+    width: 150,
+    align: "center",
+    editable: false,
+  },
+  {
+    type: "datetime",
+    headerName: "LBL_UPDATE_TIME",
+    field: "UPD_DTTM",
+    width: 150,
+    align: "center",
+    editable: false,
+  },
 ];

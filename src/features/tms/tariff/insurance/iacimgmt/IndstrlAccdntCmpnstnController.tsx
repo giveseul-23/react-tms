@@ -91,7 +91,7 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
             onConfirm={(params) => {
               closePopup();
               const saveRows = rows.map((r: any) => ({ ...r, ...params, rowStatus: "I" }));
-              base.callAjax(api.saveBatch(saveRows)).then(() => base.search());
+              base.callAjax(api.saveBatch(saveRows), { mask: "main" }).then(() => base.search());
             }}
             onClose={closePopup}
           />
@@ -196,6 +196,7 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
                 .filter((p: any) => !existing.has(p.CODE))
                 .map((p: any) => ({
                   INSRNC_ID: rate.INSRNC_ID,
+                  AP_PROC_TP: rate.AP_PROC_TP,
                   CHG_CD: p.CODE,
                   CHG_NM: p.NAME,
                 })),

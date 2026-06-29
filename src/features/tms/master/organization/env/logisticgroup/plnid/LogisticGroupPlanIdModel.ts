@@ -8,7 +8,6 @@ export function useLogisticGroupPlanIdModel(menuCode: string) {
 
   // ── 공통 코드 lookup (Cell Renderer 의 codeKey 매핑용) ─────────
   const { codeMap } = useCommonStores({
-    plnOpDiv: { sqlProp: "CODE", keyParam: "PLN_OP_DIV" },
     ynList: { sqlProp: "CODE", keyParam: "YN" },
   });
 

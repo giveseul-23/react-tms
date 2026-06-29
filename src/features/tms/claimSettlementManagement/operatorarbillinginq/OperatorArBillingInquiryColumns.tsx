@@ -50,12 +50,12 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_AR_CUSTOMER_CONTRACT_CD",
-    field: "CUST_CNTRCT_CD",
+    field: "AR_CNTRCT_CD",
   },
   {
     type: "text",
     headerName: "LBL_AR_CUSTOMER_CONTRACT_NM",
-    field: "CUST_CNTRCT_NM",
+    field: "AR_CNTRCT_NM",
   },
   { type: "text", headerName: "LBL_AR_SALES_CONTRACT_CD", field: "AR_TRF_CD" },
   {
@@ -133,12 +133,12 @@ export const ORDER_INFO_COLUMN_DEFS = [
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CONTRACT_CODE",
-    field: "CUST_CNTRCT_CD",
+    field: "AR_CNTRCT_CD",
   },
   {
     type: "text",
     headerName: "LBL_CUSTOMER_CONTRACT_NAME",
-    field: "CUST_CNTRCT_NM",
+    field: "AR_CNTRCT_NM",
   },
   { type: "text", headerName: "LBL_SHIPMENT_ID", field: "SHPM_ID" },
   { type: "text", headerName: "LBL_SHIPMENT_NO", field: "SHPM_NO" },
