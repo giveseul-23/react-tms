@@ -322,6 +322,26 @@ function sanitizeDateDigits(
   return out.slice(0, maxDigits);
 }
 
+// 시간 텍스트 입력 — 타이핑 중 HH:MM:SS 형태로 마스킹(숫자만, 콜론 자동).
+function maskTimeInput(raw: string): string {
+  const d = raw.replace(/\D/g, "").slice(0, 6);
+  const parts: string[] = [];
+  if (d.length >= 1) parts.push(d.slice(0, 2));
+  if (d.length > 2) parts.push(d.slice(2, 4));
+  if (d.length > 4) parts.push(d.slice(4, 6));
+  return parts.join(":");
+}
+
+// 시간 문자열 → 유효 범위로 보정한 HH:MM:SS (시 0~23, 분·초 0~59).
+function clampTime(s: string): string {
+  const d = s.replace(/\D/g, "").padEnd(6, "0").slice(0, 6);
+  const hh = Math.min(23, Number(d.slice(0, 2)));
+  const mm = Math.min(59, Number(d.slice(2, 4)));
+  const ss = Math.min(59, Number(d.slice(4, 6)));
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(hh)}:${p(mm)}:${p(ss)}`;
+}
+
 export function DatePickerPopover({
   id,
   value,
@@ -399,17 +419,32 @@ export function DatePickerPopover({
           : format(d, "yyyy-MM-dd");
 
   const handleToday = () => {
+    // 일시(withTime)는 확인 버튼으로 적용 → 오늘은 draft 만 갱신(닫지 않음)
+    if (withTime) {
+      setDraftDate(new Date());
+      return;
+    }
     commit(formatResult(new Date()));
     setOpen(false);
   };
 
-  // 달력/연/월 선택 — 항상 즉시 적용(확인 불필요). 날짜 단위면 닫고, 일시는 시간 입력 위해 열어둠.
+  // 달력/연/월 선택 — 날짜 단위는 즉시 적용+닫기. 일시(withTime)는 draft 만 갱신(시간 확인 시 함께 적용).
   const handleSelectDate = (d?: Date) => {
     setDraftDate(d);
-    if (d) {
+    if (d && !withTime) {
       commit(formatResult(d));
-      if (!withTime) setOpen(false);
+      setOpen(false);
     }
+  };
+
+  // 일시 확인 — 시간 보정 후 날짜+시간 적용하고 닫기.
+  const handleConfirmDateTime = () => {
+    const t = clampTime(draftTime);
+    setDraftTime(t);
+    if (draftDate) {
+      commit(`${format(draftDate, "yyyy-MM-dd")}T${t}`);
+    }
+    setOpen(false);
   };
 
   // 숫자만 허용 + 자리별 범위 검증(월/일/시/분/초)
@@ -583,26 +618,34 @@ export function DatePickerPopover({
           </div>
         )}
 
-        {/* 시간 입력 (withTime) */}
+        {/* 시간 입력 (withTime) — 텍스트 직접입력(HH:MM:SS) + 확인/취소 */}
         {withTime && (
-          <div className="px-3 py-2 border-t border-border flex items-center">
+          <div className="px-3 py-2 border-t border-border flex items-center gap-1.5">
             <Input
-              type="time"
-              step={1}
+              type="text"
+              inputMode="numeric"
               value={draftTime}
-              onChange={(e) => {
-                const t = e.target.value;
-                setDraftTime(t);
-                // 날짜가 선택돼 있으면 시간 변경도 즉시 적용
-                if (draftDate) {
-                  commit(
-                    `${format(draftDate, "yyyy-MM-dd")}T${t || "00:00:00"}`,
-                  );
-                }
+              placeholder="HH:MM:SS"
+              onChange={(e) => setDraftTime(maskTimeInput(e.target.value))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleConfirmDateTime();
               }}
-              lang="ko-KR-u-hc-h23"
-              className="h-7 flex-1 text-[11px] pl-2 pr-1 dark:[color-scheme:dark]"
+              className="h-7 flex-1 text-[11px] px-2"
             />
+            <button
+              type="button"
+              onClick={handleConfirmDateTime}
+              className="h-7 px-2.5 text-[11px] rounded-md border border-input bg-[rgb(var(--primary))] text-white hover:bg-[rgb(var(--primary-hover))]"
+            >
+              확인
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="h-7 px-2.5 text-[11px] rounded-md border border-input bg-background hover:bg-accent"
+            >
+              취소
+            </button>
           </div>
         )}
 
