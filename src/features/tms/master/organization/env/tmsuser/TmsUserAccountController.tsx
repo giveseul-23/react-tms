@@ -19,6 +19,7 @@ import type {
   TmsUserAccountModel,
 } from "./TmsUserAccountModel";
 import TmsUserAccountPopup from "./popup/TmsUserAccountPopup";
+import TmsUserLocationPopup from "./popup/TmsUserLocationPopup";
 
 interface Args {
   model: TmsUserAccountModel;
@@ -239,13 +240,10 @@ export function useTmsUserAccountController({ model }: Args) {
       title: "LBL_USR_LOC",
       width: "2xl",
       content: (
-        <CommonPopup
-          rowSelection="multiple"
-          sqlId="selectLocationCodeName"
-          extraParams={{ keyParam: String(main.CUST_GRP_CD ?? "") }}
-          onApply={(selected: any) => {
+        <TmsUserLocationPopup
+          keyParam={String(main.CUST_GRP_CD ?? "")}
+          onConfirm={(rows) => {
             closePopup();
-            const rows = Array.isArray(selected) ? selected : [selected];
             const additions = withoutDuplicates(
               model.grids.sub03.rows,
               rows,
@@ -362,7 +360,7 @@ export function useTmsUserAccountController({ model }: Args) {
 
   const sub03Actions: ActionItem[] = useMemo(
     () => [
-      makeAddAction({ onClick: onAddSub03 }),
+      makeAddAction({ onClick: onAddSub03, authCls: "" }),
       makeSaveAction({ onClick: onSaveSub03 }),
     ],
     [onAddSub03, onSaveSub03],

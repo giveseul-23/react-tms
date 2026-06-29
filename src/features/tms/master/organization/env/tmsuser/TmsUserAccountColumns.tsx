@@ -65,12 +65,12 @@ export const MAIN_COLUMN_DEFS: any[] = [
     required: true,
   },
   {
-    type: "popup",
+    type: "popuser",
     headerName: "LBL_USR_CARR_CD",
     field: "USR_CARR_CD",
     nameField: "USR_CARR_NM",
     width: 120,
-    editable: (params: any) => params.data?.USR_TP === "USRCARRIER",
+    editable: true,
     insertable: true,
     renderPopup: ({ row, commit, close }: any) => (
       <CommonPopup

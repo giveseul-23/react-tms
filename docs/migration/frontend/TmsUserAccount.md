@@ -19,6 +19,31 @@
 
 ## 작업 이력
 
+### 2026-06-29 - 운송사 팝업 상시 활성화
+- 수정:
+  - 공통 popup 편집 판정은 변경하지 않고 `USR_CARR_CD` 컬럼을 추가/기존 행 모두 항상 팝업 가능하도록 변경했다.
+  - `USRCARRIER` 행의 운송사 필수 저장 검증은 유지했다.
+
+### 2026-06-29 - 운송사 사용자 팝업 조회 수정
+- 원인:
+  - `USR_CARR_CD`가 `type: "popup"`이면서 `renderPopup`을 사용해 공통 grid가 커스텀 팝업을 실행하지 못했다.
+- 수정:
+  - 컬럼을 `type: "popuser"`로 변경했다.
+  - `USR_TP=USRCARRIER`인 행에서만 `selectCarrList` 운송사 조회 팝업을 생성하고 선택 결과를 `USR_CARR_CD`, `USR_CARR_NM`에 반영한다.
+
+### 2026-06-29 - 사용자 착지 선택 팝업 페이징
+- 수정:
+  - LOCATION 추가 버튼에서 화면 전용 `TmsUserLocationPopup`을 사용하도록 변경했다.
+  - 조회 결과를 클라이언트 페이징하며 기본 페이지 크기를 100건으로 설정했다.
+  - 공통 `CommonPopup`은 변경하지 않았다.
+
+### 2026-06-29 - 사용자 착지 추가 버튼 활성화
+- 원인:
+  - React `makeAddAction`은 기본적으로 grid의 `I` 권한을 검사하지만, Sencha 사용자 착지 추가 버튼은 일반 handler 버튼으로 별도 `I` 권한을 적용하지 않는다.
+- 수정:
+  - `sub03Actions`의 추가 버튼에만 `authCls: ""`를 지정해 Sencha와 동일하게 동작하도록 했다.
+  - 저장 버튼의 `C` 권한과 `SUB03_GRID_TMS_USER_ACCOUNT`의 grid 조회 권한은 유지했다.
+
 ### 2026-06-29 - Sencha 화면 React 전환
 
 #### 작업 범위
