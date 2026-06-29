@@ -23,6 +23,24 @@ export const OIL_PRICE_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
+  },{
+    type: "popup",
+    headerName: "LBL_CARRIER_CODE",
+    field: "CARR_CD",
+    nameField: "CARR_NM",
+    sqlId: "selectCarrListWithLgst",
+    popupTitle: "LBL_CARRIER_CODE",
+    required: true,
+    insertable: true,
+    align: "center",
+    width: 130,
+    extraParams: (row) => ({ keyParam: row?.LGST_GRP_CD ?? "" }),
+  },{
+    type: "text",
+    headerName: "LBL_CARRIER_NAME",
+    field: "CARR_NM",
+    align: "left",
+    width: 120,
   },
   {
     type: "text",
@@ -32,14 +50,14 @@ export const OIL_PRICE_COLUMN_DEFS = [
   {
     type: "date",
     headerName: "LBL_FROM_DTTM",
-    field: "FRM_DTTM",
+    field: "FRM_DT",
     required: true,
     insertable: true,
   },
   {
     type: "date",
     headerName: "LBL_TO_DTTM",
-    field: "TO_DTTM",
+    field: "TO_DT",
     required: true,
     insertable: true,
   },
@@ -63,6 +81,18 @@ export const PERIOD_COLUMN_DEFS = [
     type: "text",
     headerName: "LBL_LOGISTICS_GROUP_NAME",
     field: "LGST_GRP_NM",
+  }, {
+    type: "text",
+    headerName: "LBL_CARRIER_CODE",
+    field: "CARR_CD",
+    align: "left",
+    width: 120,
+  },{
+    type: "text",
+    headerName: "LBL_CARRIER_NAME",
+    field: "CARR_NM",
+    align: "left",
+    width: 120,
   },
   {
     type: "text",
@@ -72,12 +102,12 @@ export const PERIOD_COLUMN_DEFS = [
   {
     type: "date",
     headerName: "LBL_FROM_DATE",
-    field: "FRM_DTTM",
+    field: "FRM_DT",
   },
   {
     type: "date",
     headerName: "LBL_TO_DTTM",
-    field: "TO_DTTM",
+    field: "TO_DT",
   },
   {
     type: "numeric",
