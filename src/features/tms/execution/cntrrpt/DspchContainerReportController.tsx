@@ -19,9 +19,12 @@ interface Args {
   model: DspchContainerReportModel;
 }
 
+type ReportTab = "DAY" | "LOC" | "VEH";
+
 export function useDspchContainerReportController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
+  const [activeTab, setActiveTab] = useState<ReportTab>("DAY");
   const [mainColumnDefs, setMainColumnDefs] = useState<any[]>(MAIN_COLUMN_DEFS);
   const [sub01ColumnDefs, setSub01ColumnDefs] = useState<any[]>(SUB01_COLUMN_DEFS);
   const [sub02ColumnDefs, setSub02ColumnDefs] = useState<any[]>(SUB02_COLUMN_DEFS);
@@ -38,6 +41,14 @@ export function useDspchContainerReportController({ model }: Args) {
       );
     },
     [model.rawFiltersRef],
+  );
+
+  const withLgstGrpCd = useCallback(
+    (params: Record<string, unknown> = {}) => ({
+      ...params,
+      LGST_GRP_CD: getLgstGrpCd(params),
+    }),
+    [getLgstGrpCd],
   );
 
   const refreshContainerColumns = useCallback(
@@ -58,20 +69,26 @@ export function useDspchContainerReportController({ model }: Args) {
   const fetchList = useCallback(
     async (params: Record<string, unknown>) => {
       await refreshContainerColumns(params);
-      return api.getMainList(params);
+      const searchParams = withLgstGrpCd(params);
+      if (activeTab === "LOC") return api.getSub01List(searchParams);
+      if (activeTab === "VEH") return api.getSub02List(searchParams);
+      return api.getMainList(searchParams);
     },
-    [refreshContainerColumns],
+    [activeTab, refreshContainerColumns, withLgstGrpCd],
   );
 
-  // ── 조회 콜백 — 3그리드 동시 조회 (서버 onSaveAfterSearch 대응) ──
+  // ── 조회 콜백 — 현재 선택된 탭 결과만 반영 ──
   const onSearchCallback = useCallback(
     (data: any) => {
-      model.grids.main.setData(data);
-      const filters = model.filtersRef.current;
-      void base.searchSub("sub01", api.getSub01List(filters));
-      void base.searchSub("sub02", api.getSub02List(filters));
+      if (activeTab === "LOC") {
+        model.grids.sub01.setData(data);
+      } else if (activeTab === "VEH") {
+        model.grids.sub02.setData(data);
+      } else {
+        model.grids.main.setData(data);
+      }
     },
-    [base, model.grids.main, model.filtersRef],
+    [activeTab, model.grids.main, model.grids.sub01, model.grids.sub02],
   );
 
   // ── 그리드별 액션 (엑셀만) ─────────────────────────────────────
@@ -126,22 +143,28 @@ export function useDspchContainerReportController({ model }: Args) {
   // ── 탭 변경 — 해당 탭 그리드만 재조회 (서버 onTabChange) ─────────
   const onTabChange = useCallback(
     (key: string) => {
-      const filters = model.filtersRef.current;
-      if (key === "DAY") {
-        void base.searchSub("main", api.getMainList(filters));
-      } else if (key === "LOC") {
-        void base.searchSub("sub01", api.getSub01List(filters));
-      } else if (key === "VEH") {
-        void base.searchSub("sub02", api.getSub02List(filters));
-      }
+      if (key !== "DAY" && key !== "LOC" && key !== "VEH") return;
+      setActiveTab(key);
+
+      const filters = withLgstGrpCd(model.filtersRef.current);
+      void refreshContainerColumns(filters).then(() => {
+        if (key === "DAY") {
+          return base.searchSub("main", api.getMainList(filters));
+        }
+        if (key === "LOC") {
+          return base.searchSub("sub01", api.getSub01List(filters));
+        }
+        return base.searchSub("sub02", api.getSub02List(filters));
+      });
     },
-    [base, model.filtersRef],
+    [base, model.filtersRef, refreshContainerColumns, withLgstGrpCd],
   );
 
   return {
     fetchList,
     onSearchCallback,
     onTabChange,
+    activeTab,
     mainActions,
     sub01Actions,
     sub02Actions,

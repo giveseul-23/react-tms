@@ -25,10 +25,8 @@ const trckTypeValueGetter = (p: any) =>
 // 입/출고 수량 쌍 그룹 생성 헬퍼 (서버 IN_COUNT=출고/OUT_COUNT=입고 매핑 보존)
 const qtyPair = (
   headerName: string,
-  inField: string,
-  inExcel: string,
-  outField: string,
-  outExcel: string,
+  dlvryField: string,
+  rtrnField: string,
   groupOpts: Record<string, any> = {},
 ) => ({
   headerName,
@@ -36,18 +34,18 @@ const qtyPair = (
   children: [
     {
       type: "numeric",
-      headerName: "LBL_OUTBOUND",
-      field: inField,
-      width: 38,
-      excelColName: inExcel,
+      headerName: "LBL_INBOUND_COUNT",
+      field: dlvryField,
+      validators: { min: 0 },
+      width: 50,
       cellStyle: qtyCellStyle,
     },
     {
       type: "numeric",
-      headerName: "LBL_INBOUND",
-      field: outField,
-      width: 38,
-      excelColName: outExcel,
+      headerName: "LBL_OUTBOUND_COUNT",
+      field: rtrnField,
+      validators: { min: 0 },
+      width: 50,
       cellStyle: qtyCellStyle,
     },
   ],
@@ -72,10 +70,8 @@ export const buildContainerQtyColumnDefs = (containers: ContainerColumnMeta[] = 
     const cntrName = String(container.CNTR_NM || container.CNTR_CD || dynamicCode);
     return qtyPair(
       cntrName,
-      `${dynamicCode}_IN_COUNT`,
-      `LBL_${dynamicCode}_INBOUND`,
-      `${dynamicCode}_OUT_COUNT`,
-      `LBL_${dynamicCode}_OUTBOUND`,
+      `CD_${dynamicCode}_DLVRY_QTY`,
+      `CD_${dynamicCode}_RTRN_QTY`,
       { noLang: true },
     );
   });

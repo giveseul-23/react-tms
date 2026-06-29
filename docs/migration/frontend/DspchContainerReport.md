@@ -1,5 +1,16 @@
 # DspchContainerReport 작업 기록
 
+### 2026-06-29 - 활성 탭 단건 조회
+- 수정:
+  - 조회 버튼 클릭 시 `DAY`, `LOC`, `VEH` 중 현재 활성 탭의 API만 호출하고 해당 grid에만 결과를 반영하도록 변경했다.
+  - 탭을 선택할 때마다 선택한 탭의 API를 호출하도록 변경했다.
+  - 모든 탭 조회 payload에 조회조건의 `LGST_GRP_CD`를 명시적으로 포함했다.
+- 비교한 React 참고:
+  - 공통 `DataGrid`의 controlled `activeTab`과 `onTabChange` 패턴을 사용했으며 공통 컴포넌트는 변경하지 않았다.
+- 검증:
+  - `npm run build`: 통과. 기존 Vite dynamic/static import 경고만 발생했다.
+  - 로컬 ESLint 실행 파일이 없어 대상 폴더 lint는 실행하지 못했다.
+
 ## 화면 정보
 - React 경로: `src/features/tms/execution/cntrrpt`
 - React 파일: `DspchContainerReport.tsx`, `DspchContainerReportController.tsx`, `DspchContainerReportModel.ts`, `DspchContainerReportColumns.tsx`, `DspchContainerReportApi.ts`

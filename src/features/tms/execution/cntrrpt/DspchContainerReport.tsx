@@ -40,6 +40,7 @@ export default function DspchContainerReport() {
             { key: "LOC", label: "LBL_BY_LOC" },
             { key: "VEH", label: "LBL_BY_VEH" },
           ]}
+          activeTab={ctrl.activeTab}
           onTabChange={ctrl.onTabChange}
           presets={{
             DAY: {
