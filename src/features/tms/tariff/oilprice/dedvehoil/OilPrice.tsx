@@ -13,7 +13,7 @@ import {
   MONTH_COLUMN_DEFS,
 } from "./OilPriceColumns";
 
-export const MENU_CODE = "MENU_DED_VEH_OIL_PRICE_MGMT";
+export const MENU_CODE = "MENU_OIL_PRICE_DF";
 
 export const AUTH = {
   grids: {
