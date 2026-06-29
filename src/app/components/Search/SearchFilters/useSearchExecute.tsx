@@ -46,7 +46,7 @@ export type DsSearchConditionRow = {
 // 아이콘 키 → SQL 연산자 문자열 (useSearchMeta 의 NAME→ICON 역방향)
 const ICON_TO_SQL_OP: Record<string, string> = {
   equal: "=",
-  notEqual: "<>",
+  notEqual: "!=",
   percent: "LIKE",
   parentheses: "IN",
   chevronRight: ">",
@@ -471,7 +471,8 @@ export function useSearchExecute({
   // 조회조건 구성 중에도 rawFiltersRef 실시간 동기화 — 조회 버튼 전/모듈기본값 로드 후에도
   // 팝업·액션이 현재 조회조건 값을 바로 사용할 수 있도록.
   useEffect(() => {
-    if (rawFiltersRef) rawFiltersRef.current = buildRawFilters(meta, searchState);
+    if (rawFiltersRef)
+      rawFiltersRef.current = buildRawFilters(meta, searchState);
   }, [meta, searchState, rawFiltersRef]);
 
   return { searching, handleSearch };
