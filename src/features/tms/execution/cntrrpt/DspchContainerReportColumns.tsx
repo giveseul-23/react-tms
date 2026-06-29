@@ -96,7 +96,7 @@ const VEHICLE_MANAGER_SUB = {
   headerName: "LBL_VEHICLE_MANAGER",
   children: [
     { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO", align: "center", width: 80 },
-    { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM", width: 80 },
+    { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM", width: 100 },
     { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO", align: "center", width: 90 },
     { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM", align: "center", width: 60 },
     { type: "text", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "VEH_OP_TP", align: "center", width: 60, hide: true },
