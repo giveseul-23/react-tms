@@ -65,7 +65,14 @@ export function useModuleDefault({
         // meta key가 DTL.LGST_GRP_CD 처럼 prefix가 붙어있을 수 있으므로
         // 정확 일치 → '.<key>'로 끝나는 것 순으로 탐색
         const findMeta = (apiKey: string) =>
-          meta.find((m) => m.key === apiKey || m.key.endsWith("." + apiKey));
+          meta.find(
+            (m) => m.key === apiKey || m.key.endsWith("." + apiKey),
+          ) ??
+          meta.find(
+            (m) =>
+              m.key === "PAY_" + apiKey ||
+              m.key.endsWith(".PAY_" + apiKey),
+          );
 
         for (const [key, rawValue] of Object.entries(data)) {
           if (removeSet.has(key)) continue;
