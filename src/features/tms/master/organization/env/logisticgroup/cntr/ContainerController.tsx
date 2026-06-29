@@ -139,7 +139,7 @@ export function useContainerController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.filtersRef, model.grids.main],
@@ -163,7 +163,7 @@ export function useContainerController({ model }: ControllerArgs) {
               })
             : Promise.resolve({ data: { result: [] } });
         },
-        rows: model.grids.detail.rows,
+        rows: () => model.grids.detail.rows,
       }),
     ],
     [menuName, model.grids.detail, model.grids.main.selectedRef, onAddDetail, onSaveDetail],

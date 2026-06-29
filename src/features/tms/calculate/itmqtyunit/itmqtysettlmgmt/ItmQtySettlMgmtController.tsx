@@ -353,7 +353,7 @@ export function useItmQtySettlMgmtController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getMainList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         upload: {
           gridId: AUTH.grids.main,
           onUploaded: () => base.search(),
@@ -387,7 +387,7 @@ export function useItmQtySettlMgmtController({ model }: Args) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [
@@ -409,7 +409,7 @@ export function useItmQtySettlMgmtController({ model }: Args) {
           const sub01 = model.grids.sub01.selectedRef.current;
           return sub01 ? fetchSub02(sub01) : EMPTY_RESULT;
         },
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [menuName, model.grids.sub02, model.grids.sub01.selectedRef, fetchSub02],

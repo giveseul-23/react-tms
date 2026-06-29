@@ -86,7 +86,7 @@ export function useWorkdaysController({ model }: Args) {
         menuName: menuName,
         fetchFn: () =>
           WorkdaysApi.getWorkdaysList(MENU_CD, model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [handleOpenHolidayPopup, base.mainActions, model],

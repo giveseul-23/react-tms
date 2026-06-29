@@ -349,7 +349,7 @@ export function useDriverController({ model }: ControllerArgs) {
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => fetchList(getExcelSearchParams()),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         upload: {
           gridId: GRID_ID,
           url: "/driverService/uploadDrvr",
@@ -382,7 +382,7 @@ export function useDriverController({ model }: ControllerArgs) {
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => api.getCustList(getSub01ExcelSearchParams()),
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [model, getSub01ExcelSearchParams, onAddSub01, onSaveSub01, menuName],

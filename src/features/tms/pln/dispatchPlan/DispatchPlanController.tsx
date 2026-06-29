@@ -1086,7 +1086,7 @@ export function useDispatchPlanController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getDispatchPlanList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [

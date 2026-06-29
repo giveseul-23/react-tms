@@ -110,7 +110,7 @@ export function useAccountReceivableChargeController({
       menuCode: MENU_CD,
       menuName: menuName,
       fetchFn: () => api.getArChargeList({ MENU_CD, ...model.filtersRef.current }),
-      rows: model.grids.main.rows
+      rows: () => model.grids.main.rows
     }),
     ],
     [model.filtersRef, model.grids.main.rows, onAddMain, onSaveMain],

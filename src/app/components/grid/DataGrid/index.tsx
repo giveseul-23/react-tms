@@ -227,6 +227,8 @@ export default function DataGrid<TRow>({
   const { columnOrderRef } = useCellRangeSelection({
     containerRef: gridContainerRef,
     gridApiRef,
+    // 전체 행 드래그(rowDragEntireRow) 그리드는 셀 범위선택과 mousedown 충돌 → 셀선택 비활성.
+    enabled: !gridOptions?.rowDragEntireRow,
   });
 
   const {

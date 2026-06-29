@@ -227,7 +227,7 @@ export function usePodReportController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.grids.main, model.filtersRef, onConfirm],
@@ -243,7 +243,7 @@ export function usePodReportController({ model }: Args) {
           api.getPodDetail({
             ...(model.grids.main.selectedRef.current ?? {}),
           }),
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [menuName, model.grids.sub01, model.grids.main],
@@ -261,7 +261,7 @@ export function usePodReportController({ model }: Args) {
           api.getPodRejected({
             POD_DTL_ID: model.grids.sub01.selectedRef.current?.POD_DTL_ID,
           }),
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [menuName, model.grids.sub02, model.grids.sub01, onAddSub02, onSaveSub02],

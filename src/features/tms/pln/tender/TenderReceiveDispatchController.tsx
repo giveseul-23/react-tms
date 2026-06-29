@@ -392,7 +392,7 @@ export function useTenderReceiveDispatchController({ model }: Args) {
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => fetchDispatchList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [

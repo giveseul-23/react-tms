@@ -92,7 +92,7 @@ export function useUserPlanController({ model }: Args) {
         menuName: menuName,
         fetchFn: () =>
           userPlanApi.getUserPlanList(MENU_CD, model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         upload: { gridId: AUTH.grids.main, onUploaded: () => base.search() },
         templateDownload: { gridId: AUTH.grids.main },
       }),

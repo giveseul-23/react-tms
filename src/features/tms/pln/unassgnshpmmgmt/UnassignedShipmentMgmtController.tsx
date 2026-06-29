@@ -43,7 +43,7 @@ export function useUnassignedShipmentMgmtController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [model, menuName],

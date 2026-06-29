@@ -100,7 +100,7 @@ export function useSearchConditionController({ model }: ControllerProps) {
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => searchConditionApi.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [handleAdd, handleSave, model.filtersRef, model.grids.main.rows],

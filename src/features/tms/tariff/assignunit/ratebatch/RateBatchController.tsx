@@ -157,7 +157,7 @@ export function useRateBatchController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onAddMain, base, menuName, model.filtersRef, model.grids.main],
@@ -183,7 +183,7 @@ export function useRateBatchController({ model }: Args) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchCondition(main) : EMPTY_RESULT;
         },
-        rows: model.grids.conditionInfo.rows,
+        rows: () => model.grids.conditionInfo.rows,
       }),
     ],
     [

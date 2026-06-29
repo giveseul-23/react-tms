@@ -457,7 +457,7 @@ export function useVehicleMgmtController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getVehicleList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         // 그룹 안에 엑셀업로드 / 엑셀양식다운로드 버튼 포함
         upload: { onUploaded: () => base.search() },
         templateDownload: {},

@@ -159,7 +159,7 @@ export function useFeatureController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         // 엑셀 업로드 / 양식 다운로드를 그룹 "안"에 포함 (필요한 화면만).
         // gridId 는 View 가 export 한 AUTH.grids 단일 소스 참조 (센차 grid.authId).
         // 그룹 "밖" 별도 버튼은 makeExcelUploadAction / makeExcelTemplateDownloadAction 따로 호출.
@@ -178,7 +178,7 @@ const tabActions = useMemo(
         excelColumns: () => model.grids.role_type.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
-        rows: model.grids.role_type.rows,
+        rows: () => model.grids.role_type.rows,
         fetchFn: () => Promise.resolve({ data: { result: [] } }),
         hideAll: true,
       }),
@@ -188,7 +188,7 @@ const tabActions = useMemo(
         excelColumns: () => model.grids.sales.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
-        rows: model.grids.sales.rows,
+        rows: () => model.grids.sales.rows,
         fetchFn: () => Promise.resolve({ data: { result: [] } }),
         hideAll: true,
       }),
@@ -198,7 +198,7 @@ const tabActions = useMemo(
         excelColumns: () => model.grids.addr.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
-        rows: model.grids.addr.rows,
+        rows: () => model.grids.addr.rows,
         fetchFn: () => Promise.resolve({ data: { result: [] } }),
         hideAll: true,
       }),
@@ -208,7 +208,7 @@ const tabActions = useMemo(
         excelColumns: () => model.grids.bank_account.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
-        rows: model.grids.bank_account.rows,
+        rows: () => model.grids.bank_account.rows,
         fetchFn: () => Promise.resolve({ data: { result: [] } }),
         hideAll: true,
       }),
@@ -218,7 +218,7 @@ const tabActions = useMemo(
         excelColumns: () => model.grids.company.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
-        rows: model.grids.company.rows,
+        rows: () => model.grids.company.rows,
         fetchFn: () => Promise.resolve({ data: { result: [] } }),
         hideAll: true,
       }),
@@ -242,7 +242,7 @@ const tabActions = useMemo(
             ? api.getDetailList({ XXX_CD: main.XXX_CD })
             : Promise.resolve({ data: { result: [] } });
         },
-        rows: model.grids.detail.rows,
+        rows: () => model.grids.detail.rows,
       }),
     ],
     [

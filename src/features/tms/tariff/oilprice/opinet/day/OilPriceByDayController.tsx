@@ -130,7 +130,7 @@ export function useOilPriceByDayController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.grids.main, model.filtersRef, openTrend],
@@ -148,7 +148,7 @@ export function useOilPriceByDayController({ model }: Args) {
           if (!main) return Promise.resolve({ data: { data: { dsOut: [] } } });
           return loadSido(main);
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [menuName, model.grids.sub01, model.grids.main, model.filtersRef, loadSido, openTrend],
@@ -166,7 +166,7 @@ export function useOilPriceByDayController({ model }: Args) {
           if (!sub01) return Promise.resolve({ data: { data: { dsOut: [] } } });
           return loadSigun(sub01);
         },
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [menuName, model.grids.sub02, model.grids.sub01, model.filtersRef, loadSigun, openTrend],

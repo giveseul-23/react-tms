@@ -217,7 +217,7 @@ export function useContractController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onAddMain, onSaveMain, menuName, model.grids.main, model.filtersRef],
@@ -235,7 +235,7 @@ export function useContractController({ model }: Args) {
           api.getBuplaList({
             CUST_CD: model.grids.main.selectedRef.current?.CUST_CD ?? "",
           }),
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [onAddBupla, onSaveBupla, menuName, model.grids.sub01, model.grids.main],
@@ -253,7 +253,7 @@ export function useContractController({ model }: Args) {
           api.getCustCntrctList({
             CUST_CD: model.grids.main.selectedRef.current?.CUST_CD ?? "",
           }),
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [onAddCustCntrct, onSaveCustCntrct, menuName, model.grids.sub02, model.grids.main],

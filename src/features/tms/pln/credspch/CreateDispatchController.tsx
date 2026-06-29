@@ -498,7 +498,7 @@ export function useCreateDispatchController({ model }: Args) {
       menuCode: MENU_CODE,
       menuName,
       fetchFn: () => createDispatchApi.search(model.filtersRef.current),
-      rows: model.grids.main.rows,
+      rows: () => model.grids.main.rows,
     }),
   ], [
     menuName,
@@ -524,7 +524,7 @@ export function useCreateDispatchController({ model }: Args) {
         const main = model.grids.main.selectedRef.current;
         return main ? fetchSub01(main) : Promise.resolve({ data: { data: { dsOut: [] } } });
       },
-      rows: model.grids.sub01.rows,
+      rows: () => model.grids.sub01.rows,
     }),
   ], [fetchSub01, menuName, model.grids.main, model.grids.sub01, onSplitShipmentLine, onSplitShipmentQty]);
 

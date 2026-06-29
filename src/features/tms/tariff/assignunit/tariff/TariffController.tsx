@@ -237,7 +237,7 @@ export function useTariffController({ model }: Args) {
             menuCode: MENU_CODE,
             menuName,
             fetchFn: () => api.getList(model.filtersRef.current),
-            rows: model.grids.main.rows,
+            rows: () => model.grids.main.rows,
           }).items ?? []),
           makeExcelUploadAction({
             menuCode: MENU_CODE,
@@ -273,7 +273,7 @@ export function useTariffController({ model }: Args) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [fetchSub01, menuName, model.grids.main.selectedRef, model.grids.sub01, onAddCharge, onSaveSub01],
@@ -291,7 +291,7 @@ export function useTariffController({ model }: Args) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub02(main) : EMPTY_RESULT;
         },
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [fetchSub02, menuName, model.grids.main.selectedRef, model.grids.sub02, onAddVehicleType, onSaveSub02],

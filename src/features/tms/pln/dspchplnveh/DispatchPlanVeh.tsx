@@ -248,7 +248,11 @@ export default function DispatchPlanVeh() {
           onRowDoubleClicked={(row: any) =>
             openDetail({ ...row, VEH_OP_TP: "110" }, true)
           }
-          gridOptions={{ defaultColDef: NO_FILTER_COLDEF }}
+          // 배차간조정(분할) 모드: 전체 행 어디서나 드래그 (셀 범위선택은 DataGrid 가 자동 비활성)
+          gridOptions={{
+            defaultColDef: NO_FILTER_COLDEF,
+            rowDragEntireRow: splitView,
+          }}
         />
       </div>
     </div>
@@ -285,7 +289,7 @@ export default function DispatchPlanVeh() {
         {...model.bind("locationShpmVolume")}
         columnDefs={LOCATION_SHPM_VOLUME_COLUMN_DEFS}
         codeMap={model.codeMap}
-        actions={[]}
+        actions={ctrl.volumeActions}
         audit={false}
       />
     ) : (
@@ -293,7 +297,7 @@ export default function DispatchPlanVeh() {
         {...model.bind("locationDspch")}
         columnDefs={LOCATION_DSPCH_COLUMN_DEFS}
         codeMap={model.codeMap}
-        actions={[]}
+        actions={ctrl.dspchActions}
         audit={false}
       />
     );

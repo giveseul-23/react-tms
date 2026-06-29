@@ -1021,12 +1021,11 @@ export function useDispatchPlanVehController({ model }: Args) {
         onClick: onReport,
       },
       makeExcelGroupAction({
-        hideAll: true,
         excelColumns: () => model.grids.dedicatedTruck.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.searchDedicatedTruckDispatchList(baseParams()),
-        rows: model.grids.dedicatedTruck.rows,
+        rows: () => model.grids.dedicatedTruck.rows,
       }),
     ],
     [
@@ -1100,11 +1099,6 @@ export function useDispatchPlanVehController({ model }: Args) {
             label: "BTN_COPY_DSPCH",
             onClick: (e: any) => onCopyDspch(e?.data ?? []),
           },
-          makeExcelUploadAction({ menuCode: MENU_CODE, onUploaded: refresh }),
-          makeExcelTemplateDownloadAction({
-            menuCode: MENU_CODE,
-            fileName: menuName,
-          }),
           makeExcelTemplateDownloadAction({
             menuCode: MENU_CODE,
             gridId: "DED_MULTI_PICK",
@@ -1186,7 +1180,6 @@ export function useDispatchPlanVehController({ model }: Args) {
     ],
     [
       onCreateNewDspch,
-      refresh,
       menuName,
       onSendSmsToCarr,
       onRegSpotVeh,
@@ -1206,6 +1199,35 @@ export function useDispatchPlanVehController({ model }: Args) {
     ],
   );
 
+  // 좌측 그리드 엑셀(보이는 데이터만)
+  const volumeActions: ActionItem[] = useMemo(
+    () => [
+      makeExcelGroupAction({
+        hideAll: true,
+        excelColumns: () => model.grids.locationShpmVolume.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
+        fetchFn: () => api.searchShpmVolumePerLocation(baseParams()),
+        rows: () => model.grids.locationShpmVolume.rows,
+      }),
+    ],
+    [baseParams, menuName, model.grids.locationShpmVolume],
+  );
+
+  const dspchActions: ActionItem[] = useMemo(
+    () => [
+      makeExcelGroupAction({
+        hideAll: true,
+        excelColumns: () => model.grids.locationDspch.getExcelColumns(),
+        menuCode: MENU_CODE,
+        menuName: menuName,
+        fetchFn: () => api.searchDspchPerLocation(baseParams()),
+        rows: () => model.grids.locationDspch.rows,
+      }),
+    ],
+    [baseParams, menuName, model.grids.locationDspch],
+  );
+
   return {
     fetchList,
     onSearchCallback,
@@ -1213,6 +1235,8 @@ export function useDispatchPlanVehController({ model }: Args) {
     loadDspch,
     dedActions,
     conActions,
+    volumeActions,
+    dspchActions,
     onShowVehLocation,
     refreshVehLoc,
     refresh,

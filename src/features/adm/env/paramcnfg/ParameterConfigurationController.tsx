@@ -62,7 +62,7 @@ export function useParameterConfigurationController({ model }: ControllerProps) 
         menuName: menuName,
         fetchFn: () =>
           parameterConfigurationApi.getParameterConfigurationList(MENU_CD, model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [handleAdd, handleSave, menuName, model.filtersRef, model.grids.main.rows],

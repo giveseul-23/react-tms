@@ -69,7 +69,7 @@ export function useTariffChargeServiceController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onAddMain, onSaveMain, model],

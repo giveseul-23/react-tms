@@ -281,7 +281,7 @@ export function useFuelEfficiencyController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     [model.filtersRef, model.grids.main.rows],
   );
@@ -312,7 +312,7 @@ export function useFuelEfficiencyController({ model }: Args) {
             const main = model.grids.main.selectedRef.current;
             return main ? fetchSub01(main) : EMPTY_RESULT;
           },
-          rows: model.grids.sub01.rows,
+          rows: () => model.grids.sub01.rows,
         }),
       ],
       sub02: [
@@ -326,7 +326,7 @@ export function useFuelEfficiencyController({ model }: Args) {
             const sub01 = model.grids.sub01.selectedRef.current;
             return sub01 ? fetchSub02(sub01) : EMPTY_RESULT;
           },
-          rows: model.grids.sub02.rows,
+          rows: () => model.grids.sub02.rows,
         }),
       ],
     }),

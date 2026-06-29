@@ -10,9 +10,12 @@ type Coords = { rowIndex: number; colIndex: number };
 export function useCellRangeSelection({
   containerRef,
   gridApiRef,
+  enabled = true,
 }: {
   containerRef: React.RefObject<HTMLDivElement>;
   gridApiRef: React.MutableRefObject<any>;
+  /** false 면 셀 범위선택/복사 비활성 (예: 전체 행 드래그 그리드와 충돌 방지). */
+  enabled?: boolean;
 }) {
   const selectedCellsRef = useRef<Set<string>>(new Set());
   const isDraggingRef = useRef(false);
@@ -20,6 +23,7 @@ export function useCellRangeSelection({
   const columnOrderRef = useRef<string[]>([]);
 
   useEffect(() => {
+    if (!enabled) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -266,7 +270,7 @@ export function useCellRangeSelection({
       observer.disconnect();
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [enabled]);
 
   return { columnOrderRef };
 }

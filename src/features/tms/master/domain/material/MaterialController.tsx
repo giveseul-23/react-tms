@@ -59,7 +59,7 @@ export function useMaterialController({ model }: Args) {
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => api.getList(MENU_CD, model.filtersRef.current ?? {}),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.filtersRef, model.grids.main],
@@ -77,7 +77,7 @@ export function useMaterialController({ model }: Args) {
             ? api.getUomList(MENU_CD, masterParam(parent))
             : Promise.resolve({ data: { data: { dsOut: [] } } });
         },
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [menuName, model.grids.main.selectedRef, model.grids.sub02],
@@ -95,7 +95,7 @@ export function useMaterialController({ model }: Args) {
             ? api.getDetailList(MENU_CD, masterParam(parent))
             : Promise.resolve({ data: { data: { dsOut: [] } } });
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [menuName, model.grids.main.selectedRef, model.grids.sub01],

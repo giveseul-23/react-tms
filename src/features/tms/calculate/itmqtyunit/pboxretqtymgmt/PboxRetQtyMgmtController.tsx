@@ -169,7 +169,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getMainList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.grids.main, model.filtersRef],
@@ -197,7 +197,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getSub01List(model.filtersRef.current),
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [
@@ -240,7 +240,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getSub02List(model.filtersRef.current),
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [

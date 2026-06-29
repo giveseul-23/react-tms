@@ -167,7 +167,7 @@ export function useCarrierByLogisticController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getLogisticsList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.filtersRef, model.grids.main],

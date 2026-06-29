@@ -194,7 +194,7 @@ export function useAccountReceivableSubChargeManagementController({
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onOpenAdd, base, menuName, model.filtersRef, model.grids.main],
@@ -220,7 +220,7 @@ export function useAccountReceivableSubChargeManagementController({
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;
         },
-        rows: model.grids.detail01.rows,
+        rows: () => model.grids.detail01.rows,
       }),
     ],
     [

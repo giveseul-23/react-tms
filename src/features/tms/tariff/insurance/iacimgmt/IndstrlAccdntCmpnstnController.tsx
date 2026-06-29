@@ -249,7 +249,7 @@ export function useIndstrlAccdntCmpnstnController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getRateList(model.filtersRef.current),
-        rows: model.grids.rate.rows,
+        rows: () => model.grids.rate.rows,
       }),
     ],
     [onAddRate, onSaveRate, menuName, model.filtersRef, model.grids.rate],

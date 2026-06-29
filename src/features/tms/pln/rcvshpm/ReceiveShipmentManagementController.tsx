@@ -228,13 +228,13 @@ export function useReceiveShipmentManagementController({ model }: Args) {
     { type: "button", key: "BTN_SHIPMENT_PLAN", label: "BTN_SHIPMENT_PLAN", onClick: onSettingPlanId },
     { type: "button", key: "BTN_SHIPMENT_PLAN_CANCEL", label: "BTN_SHIPMENT_PLAN_CANCEL", onClick: onPlanIdCancel },
     { type: "button", key: "BTN_SHIPMENT_TRANSFER", label: "BTN_SHIPMENT_TRANSFER", onClick: onShipmentTransfer },
-    makeExcelGroupAction({ excelColumns: () => model.grids.main.getExcelColumns(), menuCode: MENU_CODE, menuName, fetchFn: () => api.search(getSearchParams(model.filtersRef.current)), rows: model.grids.main.rows }),
+    makeExcelGroupAction({ excelColumns: () => model.grids.main.getExcelColumns(), menuCode: MENU_CODE, menuName, fetchFn: () => api.search(getSearchParams(model.filtersRef.current)), rows: () => model.grids.main.rows }),
   ], [getSearchParams, menuName, model.filtersRef, model.grids.main, onBatchInsert, onPlanIdCancel, onSettingPlanId, onShipmentCancel, onShipmentIns, onShipmentTransfer, onShipmentUpd]);
 
   const sub01Actions: ActionItem[] = useMemo(() => [
     { type: "button", key: "BTN_ADD", label: "BTN_ADD", onClick: onAddSub01 },
     { type: "button", key: "BTN_SAVE", label: "BTN_SAVE", onClick: onSaveSub01 },
-    makeExcelGroupAction({ excelColumns: () => model.grids.sub01.getExcelColumns(), menuCode: MENU_CODE, menuName, fetchFn: () => { const main = model.grids.main.selectedRef.current; return main ? fetchSub01(main) : EMPTY_RESULT; }, rows: model.grids.sub01.rows }),
+    makeExcelGroupAction({ excelColumns: () => model.grids.sub01.getExcelColumns(), menuCode: MENU_CODE, menuName, fetchFn: () => { const main = model.grids.main.selectedRef.current; return main ? fetchSub01(main) : EMPTY_RESULT; }, rows: () => model.grids.sub01.rows }),
   ], [fetchSub01, menuName, model.grids.main, model.grids.sub01, onAddSub01, onSaveSub01]);
 
   return { fetchList, onSearchCallback, onMainGridClick, onMainSelectionChanged, mainActions, sub01Actions };

@@ -126,7 +126,7 @@ export function useTransferedShipmentMgmtController({ model }: Args) {
         menuName,
         fetchFn: () =>
           api.search(buildSearchParams(model, model.filtersRef.current)),
-        rows: model.grids.sendMain.rows,
+        rows: () => model.grids.sendMain.rows,
       }),
     ],
     [model, menuName],
@@ -140,7 +140,7 @@ export function useTransferedShipmentMgmtController({ model }: Args) {
         menuName,
         fetchFn: () =>
           api.searchReceive(buildSearchParams(model, model.filtersRef.current)),
-        rows: model.grids.rcvMain.rows,
+        rows: () => model.grids.rcvMain.rows,
       }),
     ],
     [model, menuName],

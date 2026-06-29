@@ -247,7 +247,7 @@ export function useUserGroupController({ model }: Args) {
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => userGroupApi.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [model.filtersRef, model.grids.main.rows, onAddMain, onSaveMain],
@@ -266,7 +266,7 @@ export function useUserGroupController({ model }: Args) {
             const main = model.grids.main.selectedRef.current;
             return main ? fetchSub01(main) : EMPTY_RESULT;
           },
-          rows: model.grids.sub01.rows,
+          rows: () => model.grids.sub01.rows,
         }),
       ],
       sub02: [
@@ -280,7 +280,7 @@ export function useUserGroupController({ model }: Args) {
             const main = model.grids.main.selectedRef.current;
             return main ? fetchSub02(main) : EMPTY_RESULT;
           },
-          rows: model.grids.sub02.rows,
+          rows: () => model.grids.sub02.rows,
         }),
       ],
       sub03: [
@@ -294,7 +294,7 @@ export function useUserGroupController({ model }: Args) {
             const main = model.grids.main.selectedRef.current;
             return main ? fetchSub03(main) : EMPTY_RESULT;
           },
-          rows: model.grids.sub03.rows,
+          rows: () => model.grids.sub03.rows,
         }),
       ],
     }),
