@@ -220,6 +220,52 @@ export function Sidebar({
   // 즐겨찾기 섹션 펼침 (기본 펼침)
   const [favorOpen, setFavorOpen] = useState(true);
 
+  // ── 사이드바 너비(펼침 시) 드래그 조절 — 최소 200px, 최대 화면의 1/3 ──
+  const SIDEBAR_MIN_W = 200;
+  const sidebarMaxW = () =>
+    typeof window !== "undefined" ? Math.floor(window.innerWidth / 3) : 9999;
+  const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
+    const saved = Number(localStorage.getItem("sidebar_width"));
+    const base = saved || 240; // 기본 w-60(=240px)
+    return Math.min(sidebarMaxW(), Math.max(SIDEBAR_MIN_W, base));
+  });
+  const [resizingSidebar, setResizingSidebar] = useState(false);
+
+  // 창 크기 변경 시 1/3 상한 재적용
+  useEffect(() => {
+    const onResize = () =>
+      setSidebarWidth((w) =>
+        Math.min(sidebarMaxW(), Math.max(SIDEBAR_MIN_W, w)),
+      );
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const startSidebarResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setResizingSidebar(true);
+    const startX = e.clientX;
+    const startW = sidebarWidth;
+    const maxW = sidebarMaxW();
+    let last = startW;
+    const onMove = (ev: MouseEvent) => {
+      last = Math.min(maxW, Math.max(SIDEBAR_MIN_W, startW + ev.clientX - startX));
+      setSidebarWidth(last);
+    };
+    const onUp = () => {
+      setResizingSidebar(false);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      try {
+        localStorage.setItem("sidebar_width", String(last));
+      } catch {
+        /* localStorage 불가 무시 */
+      }
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  };
+
   // nav 스크롤용 ref
   const navRef = useRef<HTMLDivElement>(null);
   // 직전 선택이 즐겨찾기에서 왔는지 — true 면 아래 섹션 자동 펼침/스크롤 skip
@@ -365,13 +411,23 @@ export function Sidebar({
   return (
     <>
       <aside
+        style={{ width: isOpen ? sidebarWidth : undefined }}
         className={`
           relative inset-y-0 left-0 z-30
           bg-[rgb(var(--bg))] border-r border-gray-200
           transition-all duration-300 flex flex-col shrink-0
-          ${isOpen ? "w-60" : "w-14 overflow-hidden"}
+          ${isOpen ? "" : "w-14 overflow-hidden"}
+          ${resizingSidebar ? "!transition-none" : ""}
         `}
       >
+        {/* 너비 조절 핸들 — 펼침 상태에서 우측 가장자리 드래그 */}
+        {isOpen && (
+          <div
+            onMouseDown={startSidebarResize}
+            title="너비 조절"
+            className="absolute top-0 right-0 z-40 h-full w-1 cursor-col-resize hover:bg-[rgb(var(--primary))]/40"
+          />
+        )}
         {/* ── Logo ── */}
         <div
           className={`h-16 flex items-center justify-between border-b shrink-0 ${isOpen ? "px-6" : "px-0"}`}
