@@ -11,6 +11,7 @@
 - **리팩터링/구조변경 시 시각 결과물(className·inline style·DOM 구조)은 byte-for-byte 보존.** — 상세: `docs/claude/dev-workflow.md` §2
 - **조회조건(SearchFilters) 스타일이 가장 중요** — 임의 변경 금지, 토큰 준수: `docs/claude/search-style.md`
 - **상태 코드 컬럼은 `statusStyle` 로 공통 배지, 컨트롤러 로직은 상태 enum 상수 사용**(매직스트링 금지) — 상세: `docs/claude/column-rules.md` §7
+- **`BTN_VEHICLE_CHANGE`/`LBL_MEMO`/배차메모 등은 기존 공통 팝업에 연결**(새 팝업 금지) — 상세: `docs/claude/popup.md` §7
 
 ---
 
@@ -22,7 +23,7 @@
 | 화면 구조 (base hook·preset·View/Controller/Model/Api) | `docs/claude/screen-architecture.md` |
 | 컬럼 규칙 (편집 정책·위젯 타입·audit·**상태 배지/enum ★**) | `docs/claude/column-rules.md` |
 | 엑셀 다운로드 표준 | `docs/claude/excel-download.md` |
-| 팝업(모달) 규칙 | `docs/claude/popup.md` |
+| 팝업(모달) 규칙 (+ **키/라벨→공통 팝업 연결 ★**) | `docs/claude/popup.md` |
 | **조회조건 스타일 표준 ★** | `docs/claude/search-style.md` |
 | 복잡도별 참조 화면 | `docs/claude/reference-screens.md` |
 | 프론트 화면별 작업 기록/오디트 | `docs/claude/frontend-audit.md` |

@@ -16,7 +16,7 @@ import { OuterTabs } from "@/app/components/layout/OuterTabs";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import VehicleLocationSidePanel from "@/app/components/map/VehicleLocationSidePanel";
 import FixedVehiclePanel from "./panel/FixedVehiclePanel";
-import DispatchDetailPop from "./popup/DispatchDetailPop";
+import DispatchDetailPop from "@/app/components/popup/DispatchDetailPop";
 import { dispatchPlanVehApi as api } from "./DispatchPlanVehApi";
 import { useDispatchPlanVehModel } from "./DispatchPlanVehModel";
 import { useDispatchPlanVehController } from "./DispatchPlanVehController";

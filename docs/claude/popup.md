@@ -143,3 +143,17 @@ div("rounded-xl border border-slate-200 overflow-hidden shadow-sm")
 - **조회 버튼은 헤더 우측 알약형**(footer 아님). 필드 라벨은 `text-[10px]` 회색 떠있는 라벨, input 은 **테두리 없이** 셀 안에 배치. 보통 3열(`min(필드수,3)`).
 
 > **앞으로 팝업에 조회조건 영역을 추가할 때는 `PopupSearchCondition` 컴포넌트를 쓴다** (hand-roll 금지).
+
+## 7. 키/라벨 → 공통 팝업 연결 규칙 (새 팝업 만들지 말 것) ★
+
+아래 트리거(액션/버튼의 `key` 또는 `label`, 또는 사용자 요청 문구)에 해당하면 **새 팝업을 만들지 말고 지정된 공통 팝업에 연결**한다. (모두 `@/app/components/popup/` 에 있음)
+
+| 트리거 | 의미 | 연결할 공통 팝업 |
+|---|---|---|
+| `BTN_VEHICLE_CHANGE` (key/label) | 차량변경 | **`ChangeVehiclePopup`** |
+| 요청이 "배차메모" / "배차메모팝업" | 배차메모(배차관리자/운송사제공/상차요청/고객사제공 4종 일괄) | **`DispatchMemoPopup`** |
+| `LBL_MEMO` (key) | 단일/일반 메모 | **`MemoInputPopup`** (보통 `makeMemoGroupAction` 경유) |
+
+- **우선순위**: "배차메모"로 **명시 요청**되면 `DispatchMemoPopup`. 그 외 `LBL_MEMO` 키면 `MemoInputPopup`.
+- `BTN_VEHICLE_CHANGE` 는 key 든 label 이든 `ChangeVehiclePopup` 로 연결.
+- 이미 공통 팝업이 있으므로 화면 폴더에 동일 기능 팝업을 **새로 만들지 않는다**.
