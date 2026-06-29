@@ -6,8 +6,18 @@
 //  툴바: 표준 DataGrid actions(GridActionsBar) — 라벨 키는 Sencha DispatchDetailPop 기준
 //  데이터: 배차행 선택 → 배송경로/할당주문(+첫행 품목) 조회. 미할당주문은 배송유형 조건 조회(+첫행 품목).
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import DataGrid from "@/app/components/grid/DataGrid";
+import {
+  commitRowChanges,
+  captureOrig,
+} from "@/app/components/grid/gridUtils/rowStatus";
+import { newRid } from "@/app/feature/useBaseModel";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/app/components/ui/popover";
 import { PopupSearchCondition } from "@/app/components/popup/PopupSearchCondition";
 import { InlineSearchCondition } from "@/app/components/Search/InlineSearchCondition";
 import { SplitPane } from "@/app/components/layout/SplitPane";
@@ -20,12 +30,15 @@ import { usePopup } from "@/app/components/popup/PopupContext";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import DispatchMemoPopup from "@/app/components/popup/DispatchMemoPopup";
 import PredictEstimateTimetoArrivalPop from "../../dispatchPlan/popup/PredictEstimateTimetoArrivalPop";
+import SplitQtyPop from "../../dispatchPlan/popup/SplitQtyPop";
 import { Lang } from "@/app/services/common/Lang";
 import { dispatchPlanVehApi as api } from "../DispatchPlanVehApi";
 import { MENU_CODE } from "../DispatchPlanVeh";
 
 type Props = {
   onClose: () => void;
+  /** 팝업이 닫힐 때(언마운트) 1회 호출 — 메인 화면 전체 재조회용. */
+  onClosed?: () => void;
   /** 더블클릭한 행의 배차번호 — 고정차량은 첫 회전 배차키, 용차는 DSPCH_NO. */
   initValue?: Record<string, string>;
   /** 임시용차(계약차)에서 열렸는지 — true 면 배차생성/저장 버튼 숨김(센차 cntrVeh). */
@@ -37,6 +50,16 @@ const rowsOf = (res: any) => res?.data?.data?.dsOut ?? res?.data?.result ?? [];
 
 // 저장(dsSave)용 행에 EDIT_STS:"U" 부여 (센차 rowStatus='U' 대응)
 const markU = (rows: any[]) => rows.map((r) => ({ ...r, EDIT_STS: "U" }));
+
+// raw 배열 그리드 행에 안정 id(__rid__) + 원본 스냅샷 부여.
+//   commitRowChanges 가 그리드 행(p.node.data)과 원본 state 를 __rid__/참조로 매칭하려면
+//   원본 행에 __rid__ 가 있어야 한다 (useBaseModel ensureRid 와 동일 역할).
+const withRid = (rows: any[]) =>
+  rows.map((r) => {
+    const next = { ...r, __rid__: newRid() };
+    captureOrig(next);
+    return next;
+  });
 
 // ── 배차정보 컬럼 (센차 DispatchDetailPopDspchGrid 기준, headerName=LBL 키) ──
 const DSPCH_INFO_COLS = [
@@ -189,6 +212,7 @@ const DSPCH_INFO_COLS = [
     field: "CONSTRAINT_OVRD_YN",
     align: "center",
     width: 80,
+    editable: true,
   },
   {
     type: "combo",
@@ -349,47 +373,289 @@ const ROUTE_COLS = [
 // ── 주문(할당/미할당) 컬럼 (센차 DispatchDetailPopAssignedShpm 기준) ──
 const ORDER_COLS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_BATCH_NO", field: "BATCH_NO", align: "center", width: 70, hide: true },
-  { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM", align: "left", width: 80 },
-  { type: "text", headerName: "LBL_DESTINATION_NAME", field: "TO_LOC_NM", align: "left", width: 80 },
-  { type: "combo", headerName: "LBL_ORDER_TYPE", field: "ORD_TP", codeKey: "ordTp", align: "center", width: 100 },
-  { type: "combo", headerName: "LBL_TEMP_TCD", field: "CMDT_CD", codeKey: "cmdtTp", align: "center", width: 70 },
-  { type: "numeric", headerName: "LBL_PLN_GRS_VOL", field: "PLN_GRS_VOL", align: "right", summable: true },
-  { type: "numeric", headerName: "LBL_PLN_GRS_WGT", field: "PLN_GRS_WGT", align: "right", summable: true },
-  { type: "text", headerName: "LBL_ORDER_NO", field: "ORD_NO", align: "center" },
-  { type: "text", headerName: "LBL_CUSTOMER_ORDER_NO", field: "CUST_ORD_NO", align: "center" },
-  { type: "text", headerName: "LBL_DESTINATION_CODE", field: "TO_LOC_CD", align: "center", width: 160 },
-  { type: "text", headerName: "LBL_DESTINATION_COUNTRY_NAME", field: "TO_CTRY_NM", align: "left" },
-  { type: "text", headerName: "LBL_DESTINATION_STATE", field: "TO_STT_NM", align: "left" },
-  { type: "text", headerName: "LBL_DESTINATION_CITY", field: "TO_CTY_NM", align: "left" },
-  { type: "text", headerName: "LBL_TO_DETAIL_ADDRESS_1", field: "TO_DTL_ADDR1", align: "left", width: 160 },
-  { type: "text", headerName: "LBL_TO_DETAIL_ADDRESS_2", field: "TO_DTL_ADDR2", align: "left", width: 160 },
-  { type: "text", headerName: "LBL_DESTINATION_ZIP_CODE", field: "TO_ZIP_CD", align: "center" },
-  { type: "numeric", headerName: "LBL_PLN_PLT_QTY", field: "PLN_PLT_QTY", align: "right", width: 100, summable: true },
-  { type: "numeric", headerName: "LBL_PLN_RTNR_QTY", field: "PLN_RTNR_QTY", align: "right", width: 100, summable: true },
-  { type: "numeric", headerName: "LBL_PLN_PBOX_QTY", field: "PLN_PBOX_QTY", align: "right", width: 100, summable: true },
-  { type: "numeric", headerName: "LBL_PLN_BOX_QTY", field: "PLN_BOX_QTY", align: "right", width: 100, summable: true },
-  { type: "numeric", headerName: "LBL_PLANNED_FLEX_QTY1", field: "PLN_FLEX_QTY1", align: "right", width: 80, summable: true },
-  { type: "numeric", headerName: "LBL_PLANNED_FLEX_QTY2", field: "PLN_FLEX_QTY2", align: "right", width: 90, summable: true },
-  { type: "numeric", headerName: "LBL_PLANNED_FLEX_QTY3", field: "PLN_FLEX_QTY3", align: "right", width: 90, summable: true },
-  { type: "numeric", headerName: "LBL_PLANNED_FLEX_QTY4", field: "PLN_FLEX_QTY4", align: "right", width: 90, summable: true },
-  { type: "numeric", headerName: "LBL_PLANNED_FLEX_QTY5", field: "PLN_FLEX_QTY5", align: "right", width: 90, summable: true },
-  { type: "numeric", headerName: "LBL_PLANNED_QTY", field: "PLN_QTY", align: "right", summable: true },
-  { type: "text", headerName: "LBL_SHIPMENT_NUMBER", field: "SHPM_NO", align: "center" },
-  { type: "text", headerName: "LBL_MIT_CODE_NAME", field: "MIT_CLSS_CD", align: "center" },
-  { type: "text", headerName: "LBL_CUSTOMER_CODE", field: "CUST_CD", align: "center" },
-  { type: "text", headerName: "LBL_CUSTOMER_NAME", field: "CUST_NM", align: "left" },
-  { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD", align: "center" },
-  { type: "text", headerName: "LBL_DEPARTURE_COUNTRY_NAME", field: "FRM_CTRY_NM", align: "left" },
-  { type: "text", headerName: "LBL_DEPARTURE_STATE", field: "FRM_STT_NM", align: "left" },
-  { type: "text", headerName: "LBL_FROM_CITY_NM", field: "FRM_CTY_NM", align: "left" },
-  { type: "text", headerName: "LBL_FRM_DETAIL_ADDRESS_1", field: "FRM_DTL_ADDR1", align: "left", width: 160 },
-  { type: "text", headerName: "LBL_FRM_DETAIL_ADDRESS_2", field: "FRM_DTL_ADDR2", align: "left" },
-  { type: "text", headerName: "LBL_DEPARTURE_ZIP_CODE", field: "FRM_ZIP_CD", align: "center" },
-  { type: "text", headerName: "LBL_SHPM_RMRK", field: "SHPM_RSN_DESC", align: "left", width: 160 },
-  { type: "text", headerName: "LBL_SOLD_TO_CD", field: "SOLD_TO_CD", align: "left", width: 160 },
-  { type: "text", headerName: "LBL_SOLD_TO_NM", field: "SOLD_TO_NM", align: "left", width: 160 },
-  { type: "text", headerName: "LBL_CUST_PICKUP_YN", field: "CUST_PICKUP_YN", align: "center", width: 100 },
+  {
+    type: "text",
+    headerName: "LBL_BATCH_NO",
+    field: "BATCH_NO",
+    align: "center",
+    width: 70,
+    hide: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DEPARTURE_NAME",
+    field: "FRM_LOC_NM",
+    align: "left",
+    width: 80,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DESTINATION_NAME",
+    field: "TO_LOC_NM",
+    align: "left",
+    width: 80,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_ORDER_TYPE",
+    field: "ORD_TP",
+    codeKey: "ordTp",
+    align: "center",
+    width: 100,
+  },
+  {
+    type: "combo",
+    headerName: "LBL_TEMP_TCD",
+    field: "CMDT_CD",
+    codeKey: "cmdtTp",
+    align: "center",
+    width: 70,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLN_GRS_VOL",
+    field: "PLN_GRS_VOL",
+    align: "right",
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLN_GRS_WGT",
+    field: "PLN_GRS_WGT",
+    align: "right",
+    summable: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_ORDER_NO",
+    field: "ORD_NO",
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_CUSTOMER_ORDER_NO",
+    field: "CUST_ORD_NO",
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DESTINATION_CODE",
+    field: "TO_LOC_CD",
+    align: "center",
+    width: 160,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DESTINATION_COUNTRY_NAME",
+    field: "TO_CTRY_NM",
+    align: "left",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DESTINATION_STATE",
+    field: "TO_STT_NM",
+    align: "left",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DESTINATION_CITY",
+    field: "TO_CTY_NM",
+    align: "left",
+  },
+  {
+    type: "text",
+    headerName: "LBL_TO_DETAIL_ADDRESS_1",
+    field: "TO_DTL_ADDR1",
+    align: "left",
+    width: 160,
+  },
+  {
+    type: "text",
+    headerName: "LBL_TO_DETAIL_ADDRESS_2",
+    field: "TO_DTL_ADDR2",
+    align: "left",
+    width: 160,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DESTINATION_ZIP_CODE",
+    field: "TO_ZIP_CD",
+    align: "center",
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLN_PLT_QTY",
+    field: "PLN_PLT_QTY",
+    align: "right",
+    width: 100,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLN_RTNR_QTY",
+    field: "PLN_RTNR_QTY",
+    align: "right",
+    width: 100,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLN_PBOX_QTY",
+    field: "PLN_PBOX_QTY",
+    align: "right",
+    width: 100,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLN_BOX_QTY",
+    field: "PLN_BOX_QTY",
+    align: "right",
+    width: 100,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLANNED_FLEX_QTY1",
+    field: "PLN_FLEX_QTY1",
+    align: "right",
+    width: 80,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLANNED_FLEX_QTY2",
+    field: "PLN_FLEX_QTY2",
+    align: "right",
+    width: 90,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLANNED_FLEX_QTY3",
+    field: "PLN_FLEX_QTY3",
+    align: "right",
+    width: 90,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLANNED_FLEX_QTY4",
+    field: "PLN_FLEX_QTY4",
+    align: "right",
+    width: 90,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLANNED_FLEX_QTY5",
+    field: "PLN_FLEX_QTY5",
+    align: "right",
+    width: 90,
+    summable: true,
+  },
+  {
+    type: "numeric",
+    headerName: "LBL_PLANNED_QTY",
+    field: "PLN_QTY",
+    align: "right",
+    summable: true,
+  },
+  {
+    type: "text",
+    headerName: "LBL_SHIPMENT_NUMBER",
+    field: "SHPM_NO",
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_MIT_CODE_NAME",
+    field: "MIT_CLSS_CD",
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_CUSTOMER_CODE",
+    field: "CUST_CD",
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_CUSTOMER_NAME",
+    field: "CUST_NM",
+    align: "left",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DEPARTURE_CODE",
+    field: "FRM_LOC_CD",
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DEPARTURE_COUNTRY_NAME",
+    field: "FRM_CTRY_NM",
+    align: "left",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DEPARTURE_STATE",
+    field: "FRM_STT_NM",
+    align: "left",
+  },
+  {
+    type: "text",
+    headerName: "LBL_FROM_CITY_NM",
+    field: "FRM_CTY_NM",
+    align: "left",
+  },
+  {
+    type: "text",
+    headerName: "LBL_FRM_DETAIL_ADDRESS_1",
+    field: "FRM_DTL_ADDR1",
+    align: "left",
+    width: 160,
+  },
+  {
+    type: "text",
+    headerName: "LBL_FRM_DETAIL_ADDRESS_2",
+    field: "FRM_DTL_ADDR2",
+    align: "left",
+  },
+  {
+    type: "text",
+    headerName: "LBL_DEPARTURE_ZIP_CODE",
+    field: "FRM_ZIP_CD",
+    align: "center",
+  },
+  {
+    type: "text",
+    headerName: "LBL_SHPM_RMRK",
+    field: "SHPM_RSN_DESC",
+    align: "left",
+    width: 160,
+  },
+  {
+    type: "text",
+    headerName: "LBL_SOLD_TO_CD",
+    field: "SOLD_TO_CD",
+    align: "left",
+    width: 160,
+  },
+  {
+    type: "text",
+    headerName: "LBL_SOLD_TO_NM",
+    field: "SOLD_TO_NM",
+    align: "left",
+    width: 160,
+  },
+  {
+    type: "text",
+    headerName: "LBL_CUST_PICKUP_YN",
+    field: "CUST_PICKUP_YN",
+    align: "center",
+    width: 100,
+  },
 ];
 
 // ── 할당주문 품목 컬럼 (센차 DispatchDetailPopAssignedShpmDtl 기준) ──
@@ -803,9 +1069,16 @@ const ORDER_TABS = [
 
 export default function DispatchDetailPop({
   onClose,
+  onClosed,
   initValue,
   cntrVeh = false,
 }: Props) {
+  // 팝업이 닫힐 때(언마운트) onClosed 1회 호출 — 메인 화면 전체 재조회.
+  //   헤더 X / 내부 닫기 등 닫힘 경로와 무관하게 동작. 최신 콜백은 ref 로 참조.
+  const onClosedRef = useRef(onClosed);
+  onClosedRef.current = onClosed;
+  useEffect(() => () => onClosedRef.current?.(), []);
+
   const [vehNo, setVehNo] = useState(initValue.VEH_NO);
   const [drvrNm, setDrvrNm] = useState(initValue.DRVR_NM);
   const [vehTpCd, setVehTpCd] = useState(initValue.VEH_TP_CD);
@@ -837,6 +1110,123 @@ export default function DispatchDetailPop({
   const showError = useErrorAlert();
   const { openPopup, closePopup } = usePopup();
   const [selDspch, setSelDspch] = useState<any>(null); // 선택된 배차행
+
+  // 사유(RSN) 편집 중인 행 __rid__ — 편집 중이면 에러 마커를 숨긴다(콤보 오픈 시 메시지 가림 방지).
+  const editingRidRef = useRef<string | null>(null);
+
+  // 제약해제여부(YN)↔사유(RSN) 실시간 가이드 — 이 화면 로컬 규칙.
+  //   YN 체크 ON → 즉시 경고 + 사유 셀 필수(빨강) 표시. OFF → 사유 자동 클리어.
+  const dspchCols = useMemo(
+    () =>
+      DSPCH_INFO_COLS.map((c: any) => {
+        if (c.field === "CONSTRAINT_OVRD_YN") {
+          return {
+            ...c,
+            editable: false, // 토글은 아래 커스텀 체크박스가 직접 처리
+            cellRenderer: (p: any) => {
+              const row = p.node?.data;
+              if (!row || p.node?.rowPinned) return null;
+              const checked = p.value === "Y";
+              return (
+                <div className="flex items-center justify-center h-full">
+                  <input
+                    type="checkbox"
+                    className="ag-input-field-input ag-checkbox-input"
+                    checked={checked}
+                    onChange={() => {
+                      const rowIndex = p.node.rowIndex;
+                      if (checked) {
+                        // Y → N: 사유 동시 클리어
+                        commitRowChanges(setDspchRowData, row, {
+                          CONSTRAINT_OVRD_YN: "N",
+                          CONSTRAINT_OVRD_RSN_CD: "",
+                        });
+                      } else {
+                        // 편집 시작 전 마커 억제 → commit re-render 시 에러 메시지 안 뜸.
+                        editingRidRef.current = row.__rid__ ?? null;
+                        commitRowChanges(setDspchRowData, row, {
+                          CONSTRAINT_OVRD_YN: "Y",
+                        });
+                      }
+                      // commitRowChanges 의 re-render 후 처리하도록 지연.
+                      setTimeout(() => {
+                        if (checked) {
+                          // YN→N: RSN 값 변화 없어 ag-grid 가 refresh 안 함 → 마커 수동 갱신.
+                          p.api?.refreshCells({
+                            rowNodes: p.node ? [p.node] : undefined,
+                            columns: ["CONSTRAINT_OVRD_RSN_CD"],
+                            force: true,
+                          });
+                        } else {
+                          // 사유 선택 유도 — RSN 셀 편집 시작(콤보 오픈 + 포커스).
+                          p.api?.startEditingCell({
+                            rowIndex,
+                            colKey: "CONSTRAINT_OVRD_RSN_CD",
+                          });
+                        }
+                      }, 0);
+                    }}
+                  />
+                </div>
+              );
+            },
+          };
+        }
+        if (c.field === "CONSTRAINT_OVRD_RSN_CD") {
+          return {
+            ...c,
+            editable: true, // 사유 선택 가능 (제약해제 Y인 행)
+            cellRenderer: (p: any) => {
+              const row = p.node?.data;
+              if (!row || p.node?.rowPinned) return p.value ?? null;
+              const code = p.value;
+              const label =
+                code == null || code === ""
+                  ? ""
+                  : (codeMap.constraintOvrdCd?.[String(code)] ?? code);
+              const need =
+                row.CONSTRAINT_OVRD_YN === "Y" &&
+                !label &&
+                editingRidRef.current !== row.__rid__; // 편집 중이면 마커 숨김
+              if (need) {
+                // regexTp/자릿수 검증과 동일한 인라인 마커 — "!" 배지 + 셀 밖 floating 메시지.
+                return (
+                  <Popover open>
+                    <PopoverAnchor asChild>
+                      <div className="flex items-center gap-1 h-full w-full">
+                        <span className="min-w-0 truncate text-red-600">
+                          {label}
+                        </span>
+                        <span className="shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                          !
+                        </span>
+                      </div>
+                    </PopoverAnchor>
+                    <PopoverContent
+                      side="bottom"
+                      align="start"
+                      sideOffset={2}
+                      hideWhenDetached
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                      className="w-auto max-w-[260px] px-2 py-1 text-[11px] text-red-600 border border-red-200 bg-red-50 shadow rounded"
+                    >
+                      제약해제 사유를 선택해 주세요.
+                    </PopoverContent>
+                  </Popover>
+                );
+              }
+              return (
+                <span className="px-2 py-0.5 rounded-lg text-xs">
+                  {label || "-"}
+                </span>
+              );
+            },
+          };
+        }
+        return c;
+      }),
+    [codeMap],
+  );
 
   // 그리드별 마스킹(작업 차단 오버레이) — 처리 중 ON, settle 시 자동 OFF.
   // base.callAjax({ mask }) 와 동일 효과 (DataGrid loading prop).
@@ -1013,11 +1403,64 @@ export default function DispatchDetailPop({
           LGST_GRP_CD: initValue.LGST_GRP_CD,
           PLN_ID: initValue.PLN_ID,
           DLVRY_DT: initValue.DLVRY_DT,
-          DLVRY_TP:
-            unallocCond.DLVRY_TP === "ALL" ? "" : unallocCond.DLVRY_TP,
+          DLVRY_TP: unallocCond.DLVRY_TP === "ALL" ? "" : unallocCond.DLVRY_TP,
         }),
       rows: unAssignShpmRow,
     }),
+  ];
+
+  // 미할당 품목 라인분할 — 선택 품목 단건 → 라인분할 저장 → 동일 SHPM 품목 재조회
+  const onSplitLineUnalloc = (e: any) => {
+    const rows = (e?.data ?? []) as any[];
+    if (!rows.length) {
+      showError(Lang.get("MSG_SELECT_NO_DATA"));
+      return;
+    }
+    const sub = rows[0];
+    runMask(
+      setUnallocMasking,
+      api.saveSplitShipmentLine([{ ...sub, rowStatus: "U" }]),
+    ).then(() => handleUnallocOrderSearch());
+  };
+  // 미할당 품목 수량분할 — 선택 품목 단건 → SplitQtyPop → 수량분할 저장 → 재조회
+  const onSplitQtyUnalloc = (e: any) => {
+    const rows = (e?.data ?? []) as any[];
+    if (!rows.length) {
+      showError(Lang.get("MSG_SELECT_NO_DATA"));
+      return;
+    }
+    const sub = rows[0];
+    openPopup({
+      title: "BTN_ITEM_QTY_SPLIT",
+      width: "lg",
+      content: (
+        <SplitQtyPop
+          record={{ ...sub, DSPCH_NO: selDspch?.DSPCH_NO }}
+          onConfirm={(payload) => {
+            closePopup();
+            runMask(setUnallocMasking, api.saveSplitShipmentQty(payload)).then(
+              () => handleUnallocOrderSearch(),
+            );
+          }}
+          onClose={closePopup}
+        />
+      ),
+    });
+  };
+  // 미할당주문 품목 그리드 액션 — 라인분할 / 수량분할 (dispatchPlan unallocSubActions 동일)
+  const unallocSubActions: ActionItem[] = [
+    {
+      type: "button",
+      key: "BTN_ITEM_LINE_SPLIT",
+      label: "BTN_ITEM_LINE_SPLIT",
+      onClick: onSplitLineUnalloc,
+    },
+    {
+      type: "button",
+      key: "BTN_ITEM_QTY_SPLIT",
+      label: "BTN_ITEM_QTY_SPLIT",
+      onClick: onSplitQtyUnalloc,
+    },
   ];
 
   // 배차목록 재조회 → 첫 배차행 기준 하위(할당주문/배송경로) 자동 재조회 (저장/처리 후 호출)
@@ -1032,12 +1475,33 @@ export default function DispatchDetailPop({
         PLN_ID: initValue.PLN_ID,
       })
       .then((res) => {
-        const rows = rowsOf(res);
+        const rows = withRid(rowsOf(res));
         setDspchRowData(rows);
         return loadSub(rows[0]);
       });
 
   // ── 배차목록 액션 (dspchplnveh dedActions 동일 기능, 팝업 행=DSPCH_NO 보유) ──
+  // 신규배차 생성 (Sencha onCreateNewDspch) — 선택 차량 행으로 빈 배차 생성
+  const onCreateNewDspch = () => {
+    const params = {
+      VEH_ID: initValue.VEH_ID,
+      DRVR_ID: initValue.DRVR_ID,
+      DRVR_NM: initValue.DRVR_NM,
+      DLVRY_DT: initValue.DLVRY_DT,
+      DIV_CD: initValue.DIV_CD,
+      LGST_GRP_CD: initValue.LGST_GRP_CD,
+      PLN_ID: initValue.PLN_ID,
+      CARR_CD: initValue.CARR_CD,
+      PAY_CARR_CD: initValue.PAY_CARR_CD,
+      VEH_TP_CD: initValue.VEH_TP_CD,
+      AP_PROC_TP: initValue.AP_PROC_TP,
+      VEH_OP_TP: initValue.VEH_OP_TP,
+    };
+    runMask(
+      setDspchMasking,
+      api.saveCreateEmptyDispatch([params]).then(refreshDspch),
+    );
+  };
   // 배차취소(자차)
   const onCancelDspch = (e: any) => {
     const rows = (e?.data ?? []) as any[];
@@ -1127,10 +1591,7 @@ export default function DispatchDetailPop({
       return;
     }
     confirmMsg("메모를 취소하시겠습니까?", () => {
-      runMask(
-        setDspchMasking,
-        api.cancelDspchMemo(rows).then(refreshDspch),
-      );
+      runMask(setDspchMasking, api.cancelDspchMemo(rows).then(refreshDspch));
     });
   };
   // 경유순서 자동조정 (단건) — saveAutoChangeStopSeq
@@ -1153,7 +1614,7 @@ export default function DispatchDetailPop({
   };
 
   // 배차목록 그리드 액션 — dedActions 와 라벨 동일 버튼은 동일 기능 연결.
-  // (LBL_CREATE_NEW_DSPCH / BTN_SAVE 는 dedActions 미해당 → 미연동)
+  // (BTN_SAVE 는 dedActions 미해당 → 미연동)
   // 임시용차(cntrVeh)면 배차생성(BTN_MANAGE_DSPCH)·저장(BTN_SAVE) 숨김
   //  → 메모 / 계획확정 / 경유순서자동조정 3개만 노출 (센차 cntrVeh 동일).
   const dspchActions: ActionItem[] = [
@@ -1169,6 +1630,7 @@ export default function DispatchDetailPop({
                 type: "button",
                 key: "LBL_CREATE_NEW_DSPCH",
                 label: "LBL_CREATE_NEW_DSPCH",
+                onClick: onCreateNewDspch,
               },
               {
                 type: "button",
@@ -1325,8 +1787,92 @@ export default function DispatchDetailPop({
     ).then(() => loadRoute(selDspch));
   };
 
+  // 경유순서 조정(+/-) 공통 검증 — 배차행(selDspch) + 단건 선택 + 차고지/경계/타입 검증.
+  //   dir "plus"=위로(이전 경유처와 swap), "minus"=아래로(다음 경유처와 swap).
+  //   prev/next 는 STOP_SEQ 기준 routeRowData 인접 행(행에 __rid__ 없어 STOP_SEQ 로 매칭).
+  const checkAdjustStopSeq = (
+    routeRows: any[],
+    dir: "plus" | "minus",
+  ): boolean => {
+    if (!selDspch?.DSPCH_NO) {
+      showError(Lang.get("MSG_SELECT_NO_DATA")); // 센차 mainGrid 선택('DFT')
+      return false;
+    }
+    if (!routeRows.length) {
+      showError(Lang.get("MSG_SELECT_STOP_CHK"));
+      return false;
+    }
+    if (routeRows.length > 1) {
+      showError(Lang.get("MSG_STOP_SEQUENCE_ADJUST_ONE_STOP"));
+      return false;
+    }
+    const present = routeRows[0];
+    if (present.STOP_TP === "99") {
+      showError(Lang.get("MSG_ERR_MOVE_GARAGE_STOP"));
+      return false;
+    }
+    const idx = routeRowData.findIndex(
+      (r) => String(r.STOP_SEQ) === String(present.STOP_SEQ),
+    );
+    if (dir === "plus") {
+      if (Number(present.STOP_SEQ) === 1) {
+        showError(Lang.get("MSG_STOP_SEQUENCE_PREVIOUS_STOP_VALID_CHK"));
+        return false;
+      }
+      const prev = routeRowData[idx - 1];
+      if (!prev || present.STOP_TP !== prev.STOP_TP) {
+        showError(Lang.get("MSG_STOP_SEQUENCE_VALID_CHK"));
+        return false;
+      }
+    } else {
+      // 마지막 경유처면 아래로 이동 불가 (센차 gridTotalCnt 의도 — 마지막 행 판정)
+      if (idx === routeRowData.length - 1) {
+        showError(Lang.get("MSG_LAST_STOP_SEQ"));
+        return false;
+      }
+      const next = routeRowData[idx + 1];
+      if (!next || present.STOP_TP !== next.STOP_TP) {
+        showError(Lang.get("MSG_STOP_SEQUENCE_VALID_CHK"));
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // 경유순서 조정 저장 — rowStatus 'U' + DOCK_CMMT_YN 존재 시 확인 후 저장 → 배송경로 재조회.
+  const adjustStopSeq = (rows: any[], apiFn: (r: any[]) => Promise<any>) => {
+    const payload = markU(rows);
+    const hasDockCmmt = rows.some((r) => r.DOCK_CMMT_YN === "Y");
+    const doSave = () =>
+      runMask(setRouteMasking, apiFn(payload)).then(() => loadRoute(selDspch));
+    if (hasDockCmmt) {
+      confirmMsg(
+        Lang.get("MSG_ASK_SAVE_STOP_SEQ_DOCK_CMMT"),
+        doSave,
+        Lang.get("TTL_CONFIRM"),
+      );
+    } else {
+      doSave();
+    }
+  };
+
+  // 경유순서 조정(+) — 선택 경유처를 위로
+  const onAdjustStopSeqPlus = (e: any) => {
+    const rows = (e?.data ?? []) as any[];
+    if (!rows.length) return;
+    if (!checkAdjustStopSeq(rows, "plus")) return;
+    adjustStopSeq(rows, api.saveAdjustPlanStopSeqPlus);
+  };
+  // 경유순서 조정(-) — 선택 경유처를 아래로
+  const onAdjustStopSeqMinus = (e: any) => {
+    const rows = (e?.data ?? []) as any[];
+    if (!rows.length) return;
+    if (!checkAdjustStopSeq(rows, "minus")) return;
+    adjustStopSeq(rows, api.saveAdjustPlanStopSeqMinus);
+  };
+
   // 배송경로 그리드 액션 — stopActions 와 라벨 동일 버튼은 동일 기능 연결.
-  // (BTN_SPLIT_STOP / 조정±(SEQ_PLUS·MINUS) 는 원본도 빈 스텁 → 미연동 유지)
+  // (BTN_SPLIT_STOP 은 원본도 빈 스텁 → 미연동 유지)
   const routeActions: ActionItem[] = [
     {
       type: "button",
@@ -1345,11 +1891,13 @@ export default function DispatchDetailPop({
       type: "button",
       key: "BTN_ADJUST_STOP_SEQ_PLUS",
       label: "BTN_ADJUST_STOP_SEQ_PLUS",
+      onClick: onAdjustStopSeqPlus,
     },
     {
       type: "button",
       key: "BTN_ADJUST_STOP_SEQ_MINUS",
       label: "BTN_ADJUST_STOP_SEQ_MINUS",
+      onClick: onAdjustStopSeqMinus,
     },
     {
       type: "button",
@@ -1415,14 +1963,31 @@ export default function DispatchDetailPop({
                 layoutType="plain"
                 subTitle="LBL_DISPATCH_LIST"
                 actions={dspchActions}
-                columnDefs={DSPCH_INFO_COLS}
+                columnDefs={dspchCols}
                 rowData={dspchRowData}
                 setRowData={setDspchRowData}
                 codeMap={codeMap}
-                rowSelection="single"
+                rowSelection="multiple"
                 onRowClicked={loadSub}
                 loading={dspchMasking}
                 audit={false}
+                gridOptions={{
+                  // 사유(RSN) 편집 시작/종료 추적 — 편집 중 에러 마커 숨김.
+                  onCellEditingStarted: (e: any) => {
+                    if (e.column?.getColId?.() === "CONSTRAINT_OVRD_RSN_CD")
+                      editingRidRef.current = e.data?.__rid__ ?? null;
+                  },
+                  onCellEditingStopped: (e: any) => {
+                    if (e.column?.getColId?.() === "CONSTRAINT_OVRD_RSN_CD") {
+                      editingRidRef.current = null;
+                      e.api.refreshCells({
+                        rowNodes: e.node ? [e.node] : undefined,
+                        columns: ["CONSTRAINT_OVRD_RSN_CD"],
+                        force: true,
+                      });
+                    }
+                  },
+                }}
               />
               <DataGrid
                 layoutType="plain"
@@ -1433,6 +1998,7 @@ export default function DispatchDetailPop({
                 rowData={routeRowData}
                 setRowData={setRouteRowData}
                 loading={routeMasking}
+                rowSelection="single"
                 audit={false}
               />
             </SplitPane>
@@ -1516,11 +2082,12 @@ export default function DispatchDetailPop({
                           <DataGrid
                             layoutType="plain"
                             subTitle="LBL_ITEM_INFO"
-                            actions={[]}
+                            actions={unallocSubActions}
                             columnDefs={ITEM_COLS}
                             codeMap={codeMap}
                             rowData={unAssignItemRow}
                             setRowData={setUnAssignItemRow}
+                            rowSelection="single"
                             audit={false}
                           />
                         </SplitPane>

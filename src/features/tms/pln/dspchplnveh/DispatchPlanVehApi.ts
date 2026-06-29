@@ -263,6 +263,10 @@ export const dispatchPlanVehApi = {
       rows,
     );
   },
+  // 자차 신규배차(빈 배차) 생성 (dsSave) — 선택 배차행 기준. 서버는 /dispatchPlanService 사용
+  saveCreateEmptyDispatch(rows: any[]) {
+    return dsSavePost("/dispatchPlanService/saveCreateEmptyDispatch", rows);
+  },
 
   // ── 배차메모 (공통 DispatchMemoPopup) — 서버 /dispatchPlanService ──
   // 기존 4메모 조회 (배차번호 기준)
@@ -368,6 +372,41 @@ export const dispatchPlanVehApi = {
   saveStopOrder(payload: any) {
     return apiClient.post<CommonResponse>(
       "/dispatchPlanService/saveStopOrder",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  //디테일 배송경로 경유순서 조정(+)
+  saveAdjustPlanStopSeqPlus(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAdjustPlanStopSeqPlus",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  //디테일 배송경로 경유순서 조정(-)
+  saveAdjustPlanStopSeqMinus(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAdjustPlanStopSeqMinus",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  //디테일 품목 라인분할
+  saveSplitShipmentLine(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/createDispatchService/saveSplitShipmentLine",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  //디테일 품목 수량분할
+  saveSplitShipmentQty(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/createDispatchService/saveSplitShipmentQty",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+  // 드래그드랍: 자차 → 용차 변경
+  saveSimpleDedicatedToTempDspch(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanVehService/saveSimpleDedicatedToTempDspch",
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },

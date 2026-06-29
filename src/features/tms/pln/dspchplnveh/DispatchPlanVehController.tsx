@@ -25,6 +25,7 @@ import TonGroupChangePop from "./popup/TonGroupChangePop";
 import ChangeVehiclePopup from "@/app/components/popup/ChangeVehiclePopup";
 import DtoDTrckChangePop from "./popup/DtoDTrckChangePop";
 import TtoDTrckChangePop from "./popup/TtoDTrckChangePop";
+import DtoTTrckChangePop from "./popup/DtoTTrckChangePop";
 import CreateItineraryDispatchPop from "../dispatchPlan/popup/CreateItineraryDispatchPop";
 import CreateItineraryGrpDispatchPop from "../dispatchPlan/popup/CreateItineraryGrpDispatchPop";
 
@@ -91,6 +92,152 @@ export function useDispatchPlanVehController({ model }: Args) {
 
   // 전체 재조회 (센차 searchAll) — 저장/처리 후 호출
   const refresh = useCallback(() => base.search(), [base]);
+
+  // ── 그리드 간 드래그드랍 (자차 ↔ 용차 교차만) ──────────────────
+  //  자차→용차: DtoT 팝업 → saveSimpleDedicatedToTempDspch (IS_TRIP=Y 면 확인)
+  //  용차→자차: TtoD 팝업 → saveTempDspchToDedicatedTrck
+  //  같은 종류(자차↔자차/용차↔용차)는 드롭 대상 아님 (드롭존 미등록).
+  // 자차→용차: 신규배차생성 차량선택 팝업(용차) → 선택차량을 할당차량으로 DtoT 확정.
+  //  드롭한 용차 행은 쓰지 않고, 차량선택 팝업에서 고른 용차를 표시·검증용 target 으로 사용.
+  //  (저장 payload 는 source(자차) 기준 그대로 — 서버가 선호용차 자동 선정)
+  const openDtoTChange = useCallback(
+    (source: any, rtnNo?: number) => {
+      const p = baseParams();
+      openPopup({
+        title: "LBL_CREATE_NEW_DSPCH",
+        width: "4xl",
+        content: (
+          <ChangeVehiclePopup
+            fetchVehicles={(q) =>
+              api.searchVehiclePop({
+                lgstGrpCd: q.LGST_GRP_CD,
+                carrCd: q.CARR_CD,
+                carrNm: q.CARR_NM,
+                vehId: q.VEH_ID,
+                vehTpCd: q.VEH_TP_CD,
+                vehNo: q.VEH_NO,
+                vehOpTp: q.VEH_OP_TP,
+              })
+            }
+            lockVehOpTp="110"
+            initialValues={{
+              LGST_GRP_CD: p.LGST_GRP_CD,
+              VEH_TP_CD: source?.VEH_TP_CD,
+            }}
+            onConfirm={(veh) => {
+              closePopup();
+              openPopup({
+                title: "BTN_CHANGE_TO_TEMP_VEH",
+                width: "3xl",
+                content: (
+                  <DtoTTrckChangePop
+                    source={source}
+                    target={veh}
+                    defaultRtn={rtnNo}
+                    conditions={{
+                      DLVRY_DT: p.DLVRY_DT,
+                      LGST_GRP_CD: p.LGST_GRP_CD,
+                      DIV_CD: p.DIV_CD,
+                      PLN_ID: p.PLN_ID,
+                    }}
+                    onConfirm={(payload) => {
+                      closePopup();
+                      const doSave = () =>
+                        base
+                          .callAjax(
+                            api.saveSimpleDedicatedToTempDspch(payload),
+                            {
+                              mask: "dedicatedTruck",
+                            },
+                          )
+                          .then(refresh);
+                      // trip 이면 모든 트립 차량 변경 확인 (센차 MSG_ALERT_TRIP_VEH_CHANGE)
+                      if (payload.IS_TRIP === "Y") {
+                        base.confirm(
+                          Lang.get("MSG_ALERT_TRIP_VEH_CHANGE"),
+                          doSave,
+                        );
+                      } else {
+                        doSave();
+                      }
+                    }}
+                    onClose={closePopup}
+                  />
+                ),
+              });
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, baseParams, openPopup, closePopup, refresh],
+  );
+
+  const openTtoDChange = useCallback(
+    (source: any, target: any, rtnNo?: number) => {
+      const p = baseParams();
+      openPopup({
+        title: "BTN_CHANGE_TO_DED_VEH",
+        width: "xl",
+        content: (
+          <TtoDTrckChangePop
+            source={source}
+            target={target}
+            defaultRtn={rtnNo}
+            conditions={{
+              DLVRY_DT: p.DLVRY_DT,
+              LGST_GRP_CD: p.LGST_GRP_CD,
+              DIV_CD: p.DIV_CD,
+              PLN_ID: p.PLN_ID,
+            }}
+            onConfirm={(payload) => {
+              closePopup();
+              base
+                .callAjax(api.saveTempDspchToDedicatedTrck(payload), {
+                  mask: "tempTruck",
+                })
+                .then(refresh);
+            }}
+            onClose={closePopup}
+          />
+        ),
+      });
+    },
+    [base, baseParams, openPopup, closePopup, refresh],
+  );
+
+  // 드롭 라우터 — sourceGridId/targetGridId 로 교차 조합 분기.
+  const onGridDrop = useCallback(
+    (e: {
+      sourceGridId: string;
+      targetGridId: string;
+      sourceRows: any[];
+      targetRow: any;
+      /** 회전카드 드롭 시 회전번호 (TtoD 회전수 기본값). */
+      rtnNo?: number;
+    }) => {
+      const src = e.sourceRows?.[0];
+      if (!src) return;
+      if (
+        e.sourceGridId === "dedicatedTruck" &&
+        e.targetGridId === "tempTruck"
+      ) {
+        // 자차→용차: 배차(배송지) 없는 차량은 변경 불가 (센차 noShippingLoc)
+        if (src.RTN_PATH_B1_R1 == null && src.RTN_PATH_B2_R1 == null) return;
+        openDtoTChange(src, e.rtnNo);
+      } else if (
+        e.sourceGridId === "tempTruck" &&
+        e.targetGridId === "dedicatedTruck"
+      ) {
+        // 용차→자차: 드롭한 자차 차량행이 target (분할 모드는 회전카드 → rtnNo 기본값)
+        if (!e.targetRow) return;
+        openTtoDChange(src, e.targetRow, e.rtnNo);
+      }
+      // 같은 종류 드롭은 무시
+    },
+    [openDtoTChange, openTtoDChange],
+  );
 
   // 선택 검증 헬퍼
   const need = useCallback(
@@ -1068,5 +1215,7 @@ export function useDispatchPlanVehController({ model }: Args) {
     conActions,
     onShowVehLocation,
     refreshVehLoc,
+    refresh,
+    onGridDrop,
   };
 }

@@ -149,6 +149,11 @@ type DataGridProps<TRow> = {
   /** 마스킹(작업 차단) 오버레이 — true 면 그리드 위에 반투명 스피너 오버레이로 클릭/편집 차단.
    *  model.bind() 가 자동 주입(base.callAjax 가 토글). */
   loading?: boolean;
+  /** 그리드 간 행 드래그 활성 — 첫 컬럼에 rowDrag 핸들 부여 (opt-in, 미지정 시 기존 동작). */
+  rowDrag?: boolean;
+  /** ag-grid GridApi 노출 — onGridReady 시 호출(내부 autosize 와 병행).
+   *  그리드 간 드롭존(addRowDropZone) 배선 등 화면에서 api 가 필요할 때 사용. */
+  onApiReady?: (api: any) => void;
 };
 
 export default function DataGrid<TRow>({
@@ -194,6 +199,8 @@ export default function DataGrid<TRow>({
   onExcelColumnsReady,
   model,
   loading,
+  rowDrag,
+  onApiReady,
 }: DataGridProps<TRow>) {
   // columnDefs 가 바뀔 때마다 외부(useBaseModel slot)에 알린다.
   // saveGrid 의 required 검증이 columnDefsRef 로 메타 read.
@@ -262,6 +269,27 @@ export default function DataGrid<TRow>({
     gridApiRef,
     columnOrderRef,
   });
+
+  // onGridReady — 내부 autosize + (옵션) 화면에 GridApi 노출(드롭존 배선용).
+  const handleGridReadyAll = useCallback(
+    (e: any) => {
+      handleGridReady(e);
+      gridApiRef.current = e.api;
+      onApiReady?.(e.api);
+    },
+    [handleGridReady, onApiReady],
+  );
+
+  // rowDrag 활성 시 첫 leaf 컬럼에 드래그 핸들 주입(미지정 시 원본 그대로).
+  const dragColumnDefs = useMemo(() => {
+    if (!rowDrag) return finalColumnDefs;
+    let injected = false;
+    return (finalColumnDefs ?? []).map((c: any) => {
+      if (injected || c?.children) return c;
+      injected = true;
+      return { ...c, rowDrag: true };
+    });
+  }, [finalColumnDefs, rowDrag]);
 
   // ── 엑셀 컬럼 getter ─────────────────────────────────────────────────────
   // activeColumnDefs(audit 포함, 커스텀 키 보존된 원본 defs) 를 grid api 의 표시 순서로 거른다.
@@ -364,9 +392,9 @@ export default function DataGrid<TRow>({
   });
 
   const { commonGridProps } = useGridProps<TRow>({
-    finalColumnDefs,
+    finalColumnDefs: dragColumnDefs,
     summaryRow,
-    handleGridReady,
+    handleGridReady: handleGridReadyAll,
     handleFirstDataRendered,
     handleRowSelected: handlers.handleRowSelected,
     handleRowClicked: handlers.handleRowClicked,

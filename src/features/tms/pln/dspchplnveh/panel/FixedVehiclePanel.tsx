@@ -4,7 +4,7 @@
 //  좌: searchDedicatedTruckDispatchList 응답 행(운전자/차량 1건). 우: 선택 행의 RTN_PATH_B1_R1~R8.
 //  회전 카드 / 임시용차 로우 더블클릭 → onOpenDetail(배차상세정보 팝업).
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 type Props = {
@@ -14,6 +14,18 @@ type Props = {
   onShowVehLocation?: (rows: any[]) => void;
   /** 패널이 열려 있을 때 체크/선택 변경 시 선택 차량으로 리프레시 (열려있지 않으면 no-op) */
   onVehLocRefresh?: (rows: any[]) => void;
+  /** 용차 그리드 GridApi — 회전카드를 외부 드롭존으로 등록(용차→자차 드래그드랍). */
+  dragSourceApi?: any;
+  /** 회전카드에 용차 행 드롭 시 — (선택 자차 차량, 회전번호, 용차행들). */
+  onTempDropToRotation?: (
+    targetVeh: any,
+    rtnNo: number,
+    sourceRows: any[],
+  ) => void;
+  /** 회전카드(배차 있는 회전) 드래그 시작 — 자차→용차 native DnD 소스. (선택 자차 차량, 회전번호) */
+  onRotationDragStart?: (veh: any, rtnNo: number) => void;
+  /** 회전카드 드래그 종료. */
+  onRotationDragEnd?: () => void;
 };
 
 // 구조용 툴바 버튼 (no-op). title 로 그룹 하위 항목 안내.
@@ -46,6 +58,10 @@ export default function FixedVehiclePanel({
   onOpenDetail,
   onShowVehLocation,
   onVehLocRefresh,
+  dragSourceApi,
+  onTempDropToRotation,
+  onRotationDragStart,
+  onRotationDragEnd,
 }: Props) {
   const vehicles = rows ?? [];
   const [selVeh, setSelVeh] = useState(0);
@@ -87,6 +103,49 @@ export default function FixedVehiclePanel({
       reseq: !!selRow?.[`DRVR_RESEQ_B1_R${n}`],
     };
   });
+
+  // ── 회전카드 외부 드롭존 (용차→자차 드래그드랍) ─────────────────
+  //  용차 그리드 행을 회전카드에 드롭 → 선택 자차 차량(selRow) + 회전번호로 라우팅.
+  const cardRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const selRowRef = useRef<any>(selRow);
+  selRowRef.current = selRow;
+  const onDropRef = useRef(onTempDropToRotation);
+  onDropRef.current = onTempDropToRotation;
+  const fallbackElRef = useRef<HTMLDivElement | null>(null);
+  if (!fallbackElRef.current && typeof document !== "undefined") {
+    fallbackElRef.current = document.createElement("div");
+  }
+
+  useEffect(() => {
+    if (!dragSourceApi || dragSourceApi.isDestroyed?.()) return;
+    const zones = Array.from({ length: 8 }, (_, i) => i + 1).map((no) => {
+      const zone = {
+        getContainer: () =>
+          cardRefs.current.get(no) ?? (fallbackElRef.current as HTMLElement),
+        onDragStop: (p: any) => {
+          const veh = selRowRef.current;
+          if (!veh) return;
+          onDropRef.current?.(
+            veh,
+            no,
+            (p?.nodes ?? []).map((n: any) => n.data),
+          );
+        },
+      };
+      dragSourceApi.addRowDropZone(zone);
+      return zone;
+    });
+    return () => {
+      zones.forEach((z) => {
+        try {
+          if (!dragSourceApi.isDestroyed?.())
+            dragSourceApi.removeRowDropZone(z);
+        } catch {
+          /* 그리드 파괴 시 무시 */
+        }
+      });
+    };
+  }, [dragSourceApi]);
 
   // 체크박스 선택 상태(전체선택 지원). 운전자는 VEH_ID 로 식별.
   const [vehChecked, setVehChecked] = useState<Set<string>>(new Set());
@@ -279,9 +338,22 @@ export default function FixedVehiclePanel({
           {rotations.map((r) => (
             <div
               key={r.no}
-              onDoubleClick={() =>
-                onOpenDetail?.(selRow?.[`TRIP_KEY_B1_R${r.no}`])
-              }
+              ref={(el) => {
+                if (el) cardRefs.current.set(r.no, el);
+                else cardRefs.current.delete(r.no);
+              }}
+              draggable={!!r.path}
+              onDragStart={(e) => {
+                if (!selRow || !r.path) return;
+                e.dataTransfer.effectAllowed = "move";
+                // 일부 브라우저는 dataTransfer 데이터가 있어야 drag 가 시작됨
+                e.dataTransfer.setData("text/plain", String(r.no));
+                onRotationDragStart?.(selRow, r.no);
+              }}
+              onDragEnd={() => onRotationDragEnd?.()}
+              onDoubleClick={() => {
+                if (selRow) onOpenDetail?.(selRow);
+              }}
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 cursor-pointer hover:bg-slate-50 transition-colors"
             >
               {/* 회전수 타이틀 옆 체크박스 */}

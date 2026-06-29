@@ -38,6 +38,8 @@ type Props = {
   source: any; // 용차 배차행
   target: any; // 자차 차량행
   conditions: Conditions;
+  /** 회전수 select 초기값 (드롭한 회전카드 번호 등). 미지정 시 1. */
+  defaultRtn?: number;
   onConfirm: (data: TtoDPayload) => void;
   onClose: () => void;
 };
@@ -73,10 +75,11 @@ export default function TtoDTrckChangePop({
   source,
   target,
   conditions,
+  defaultRtn,
   onConfirm,
   onClose,
 }: Props) {
-  const [rtn, setRtn] = useState("1");
+  const [rtn, setRtn] = useState(String(defaultRtn ?? 1));
 
   const save = () =>
     onConfirm({
