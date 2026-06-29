@@ -124,7 +124,7 @@ export function useOilPriceController({ model, activeTabRef }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(buildSearchParams(model, model.filtersRef.current)),
-        rows: model.grids.master.rows,
+        rows: () => model.grids.master.rows,
       }),
     ],
     [model, menuName],
@@ -144,7 +144,7 @@ export function useOilPriceController({ model, activeTabRef }: Args) {
             ? fetchDfOil(main)
             : Promise.resolve({ data: { result: [] } });
         },
-        rows: model.grids.dfOil.rows,
+        rows: () => model.grids.dfOil.rows,
       }),
     ],
     [handleDfOilAdd, handleDfOilSave, menuName, model, fetchDfOil],
@@ -159,7 +159,7 @@ export function useOilPriceController({ model, activeTabRef }: Args) {
           menuName: menuName,
           fetchFn: () =>
             api.getMonth(buildSearchParams(model, model.filtersRef.current)),
-          rows: model.grids.month.rows,
+          rows: () => model.grids.month.rows,
         },
       }),
     [model, menuName],

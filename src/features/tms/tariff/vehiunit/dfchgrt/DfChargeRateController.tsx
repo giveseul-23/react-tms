@@ -335,7 +335,7 @@ export function useDfChargeRateController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         // 메인만 엑셀업로드 / 엑셀양식다운로드 포함
         upload: { onUploaded: () => base.search() },
         templateDownload: {},
@@ -382,7 +382,7 @@ export function useDfChargeRateController({ model }: Args) {
           api.getRateItemList({
             TRF_CD: model.grids.main.selectedRef.current?.TRF_CD,
           }),
-        rows: model.grids.rtItem.rows,
+        rows: () => model.grids.rtItem.rows,
       }),
     ],
     [addViaPopup, saveFromMain, menuName, model.grids.rtItem, model.grids.main],
@@ -419,7 +419,7 @@ export function useDfChargeRateController({ model }: Args) {
           api.getRateCarrList({
             TRF_CD: model.grids.main.selectedRef.current?.TRF_CD,
           }),
-        rows: model.grids.rtCarr.rows,
+        rows: () => model.grids.rtCarr.rows,
       }),
     ],
     [addViaPopup, saveFromMain, menuName, model.grids.rtCarr, model.grids.main],
@@ -455,7 +455,7 @@ export function useDfChargeRateController({ model }: Args) {
           api.getRateVehTpList({
             TRF_CD: model.grids.main.selectedRef.current?.TRF_CD,
           }),
-        rows: model.grids.rtVehTp.rows,
+        rows: () => model.grids.rtVehTp.rows,
       }),
     ],
     [
@@ -482,7 +482,7 @@ export function useDfChargeRateController({ model }: Args) {
             TRF_CD: model.grids.rtItem.selectedRef.current?.TRF_CD,
             CHG_CD: model.grids.rtItem.selectedRef.current?.CHG_CD,
           }),
-        rows: model.grids.rtItemVehTp.rows,
+        rows: () => model.grids.rtItemVehTp.rows,
       }),
     ],
     [
@@ -509,7 +509,7 @@ export function useDfChargeRateController({ model }: Args) {
             TRF_CD: model.grids.rtItem.selectedRef.current?.TRF_CD,
             CHG_CD: model.grids.rtItem.selectedRef.current?.CHG_CD,
           }),
-        rows: model.grids.rtItemVeh.rows,
+        rows: () => model.grids.rtItemVeh.rows,
       }),
     ],
     [

@@ -47,7 +47,7 @@ export function useFreightClassController({ model }: Args) {
             MENU_CD,
             model.filtersRef.current,
           ),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.filtersRef, model.grids.main, onAddMain, onSaveMain],

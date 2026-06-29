@@ -394,8 +394,10 @@ const rotationCol = (n: number) => ({
 // (서버 TRIP_KEY = TRIP_ID = 배차 식별자) — 회전 컬럼과 동일 네이밍/개수로 추출한다.
 //  getDispatchTripKeys: 배차가 있는 회전들의 배차키 배열 (빈 값 제외).
 export const getDispatchTripKeys = (row: any): any[] =>
-  Array.from({ length: lastRotation }, (_, i) => row?.[`TRIP_KEY_B1_R${i + 1}`])
-    .filter((v) => v != null && v !== "");
+  Array.from(
+    { length: lastRotation },
+    (_, i) => row?.[`TRIP_KEY_B1_R${i + 1}`],
+  ).filter((v) => v != null && v !== "");
 
 // 첫 번째(가장 앞 회전) 배차키 — 단건 배차메모 등에서 DSPCH_NO 대용.
 export const getFirstDispatchTripKey = (row: any): any =>
@@ -464,6 +466,7 @@ export const DEDICATED_TRUCK_COLUMN_DEFS = [
     field: "APRVL_CNT",
     hide: true,
   },
+  { type: "text", field: "PAY_CARR_CD", hide: true },
   // 1~lastRotation 회전 컬럼 (루프 생성)
   ...Array.from({ length: lastRotation }, (_, i) => rotationCol(i + 1)),
   // 정산경로 거리
@@ -582,6 +585,7 @@ export const TEMP_TRUCK_COLUMN_DEFS = [
     width: 60,
   },
   { type: "text", headerName: "LBL_CARR_CD", field: "CARR_CD", hide: true },
+  { type: "text", field: "PAY_CARR_CD", hide: true },
   {
     type: "text",
     headerName: "LBL_CARR_NM",

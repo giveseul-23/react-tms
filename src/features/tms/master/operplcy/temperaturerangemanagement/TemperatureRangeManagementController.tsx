@@ -136,7 +136,7 @@ export function useTemperatureRangeManagementController({
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onAddMain, onSaveMain, menuName, model.grids.main, model.filtersRef],

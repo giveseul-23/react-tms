@@ -73,7 +73,7 @@ export function useStoShipmentManagementController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => fetchList(model.filtersRef.current ?? {}),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         upload: { gridId: AUTH.grids.main, onUploaded: () => base.search() },
         templateDownload: { gridId: AUTH.grids.main, fileName: menuName },
       }),

@@ -55,7 +55,7 @@ export function useCommodityController({ model }: Args) {
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => api.getCommodityList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onAddMain, onSaveMain, menuName, model.grids.main, model.filtersRef],

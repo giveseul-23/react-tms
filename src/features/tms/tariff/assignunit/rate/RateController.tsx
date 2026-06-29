@@ -181,7 +181,7 @@ export function useRateController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onAddMain, base, menuName, model.filtersRef, model.grids.main],
@@ -207,7 +207,7 @@ export function useRateController({ model }: Args) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchCostInfo(main) : EMPTY_RESULT;
         },
-        rows: model.grids.costInfo.rows,
+        rows: () => model.grids.costInfo.rows,
       }),
     ],
     [
@@ -240,7 +240,7 @@ export function useRateController({ model }: Args) {
           const cost = model.grids.costInfo.selectedRef.current;
           return cost ? fetchConditionInfo(cost) : EMPTY_RESULT;
         },
-        rows: model.grids.conditionInfo.rows,
+        rows: () => model.grids.conditionInfo.rows,
       }),
     ],
     [

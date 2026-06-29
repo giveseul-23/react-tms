@@ -7,7 +7,7 @@
 //  - 차량작업영역 그리드는 서치트리거(floating filter) 제거.
 // Phase 2(예정): 분할 시 고정↔임시 그리드 간 드래그드랍, Phase 3: 더블클릭 상세 슬라이드.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
@@ -101,6 +101,7 @@ export default function DispatchPlanVeh() {
           initValue={{
             VEH_ID: row.VEH_ID,
             VEH_NO: row.VEH_NO,
+            DRVR_ID: row.DRVR_ID,
             DRVR_NM: row.DRVR_NM,
             VEH_TP_CD: row.VEH_TP_CD,
             DIV_CD: srch.SRCH_DSPCH_DIV_CD,
@@ -108,9 +109,14 @@ export default function DispatchPlanVeh() {
             PLN_ID: srch.SRCH_DSPCH_PLN_ID,
             DLVRY_DT: srch.SRCH_DSPCH_DLVRY_DT,
             DSPCH_NO: row.DSPCH_NO,
+            CARR_CD: row.CARR_CD,
+            PAY_CARR_CD: row.PAY_CARR_CD,
+            AP_PROC_TP: row.AP_PROC_TP,
+            VEH_OP_TP: row.VEH_OP_TP,
           }}
           cntrVeh={cntrVeh}
           onClose={closePopup}
+          onClosed={ctrl.refresh}
         />
       ),
     });
@@ -120,6 +126,53 @@ export default function DispatchPlanVeh() {
   const [rightTab, setRightTab] = useState("FIXED");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [splitView, setSplitView] = useState(false);
+
+  // ── 자차 ↔ 용차 그리드 간 드래그드랍 ────────────────────────────
+  // 각 그리드 GridApi 확보 → 교차 그리드끼리 dropzone 상호 등록. 드롭 시 ctrl.onGridDrop 라우팅.
+  const [dedApi, setDedApi] = useState<any>(null);
+  const [tempApi, setTempApi] = useState<any>(null);
+  const onGridDropRef = useRef(ctrl.onGridDrop);
+  onGridDropRef.current = ctrl.onGridDrop;
+
+  // 분할 모드 자차 회전카드 → 용차 그리드 native DnD (카드는 ag-grid 행이 아니라 HTML5 드래그 사용).
+  const dndRef = useRef<{ row: any; rtnNo: number } | null>(null);
+  const [tempDragOver, setTempDragOver] = useState(false);
+
+  useEffect(() => {
+    if (!dedApi || !tempApi) return;
+    if (dedApi.isDestroyed?.() || tempApi.isDestroyed?.()) return;
+    const toRows = (p: any) => (p?.nodes ?? []).map((n: any) => n.data);
+    // 용차 → 자차 드롭(target=자차)
+    const dedZone = dedApi.getRowDropZoneParams({
+      onDragStop: (p: any) =>
+        onGridDropRef.current?.({
+          sourceGridId: "tempTruck",
+          targetGridId: "dedicatedTruck",
+          sourceRows: toRows(p),
+          targetRow: p?.overNode?.data ?? null,
+        }),
+    });
+    // 자차 → 용차 드롭(target=용차)
+    const tempZone = tempApi.getRowDropZoneParams({
+      onDragStop: (p: any) =>
+        onGridDropRef.current?.({
+          sourceGridId: "dedicatedTruck",
+          targetGridId: "tempTruck",
+          sourceRows: toRows(p),
+          targetRow: p?.overNode?.data ?? null,
+        }),
+    });
+    tempApi.addRowDropZone(dedZone);
+    dedApi.addRowDropZone(tempZone);
+    return () => {
+      try {
+        if (!tempApi.isDestroyed?.()) tempApi.removeRowDropZone?.(dedZone);
+        if (!dedApi.isDestroyed?.()) dedApi.removeRowDropZone?.(tempZone);
+      } catch {
+        /* 그리드 파괴 시 무시 */
+      }
+    };
+  }, [dedApi, tempApi]);
 
   const onLeftTabChange = (key: string) => {
     setLeftTab(key);
@@ -141,7 +194,47 @@ export default function DispatchPlanVeh() {
       .then((res: any) => res?.data?.data?.dsOut ?? res?.data?.result ?? []);
 
   const tempGrid = (
-    <div className="h-full flex flex-col min-h-0">
+    <div
+      className={`h-full flex flex-col min-h-0 ${
+        tempDragOver
+          ? "rounded-lg ring-2 ring-[rgb(var(--primary))] ring-inset"
+          : ""
+      }`}
+      onDragOver={(e) => {
+        // 자차 회전카드 드래그 중일 때만 drop 허용
+        if (!dndRef.current) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (!tempDragOver) setTempDragOver(true);
+      }}
+      onDragLeave={(e) => {
+        // 컨테이너 밖으로 나갈 때만 해제
+        if (!e.currentTarget.contains(e.relatedTarget as Node))
+          setTempDragOver(false);
+      }}
+      onDrop={(e) => {
+        const p = dndRef.current;
+        dndRef.current = null;
+        setTempDragOver(false);
+        if (!p) return;
+        e.preventDefault();
+        // 드롭한 용차 행 찾기 (ag-grid .ag-row[row-index]) — 할당차량 표시용
+        let targetRow: any = null;
+        const rowEl = (e.target as HTMLElement)?.closest?.(".ag-row");
+        const idxAttr = rowEl?.getAttribute("row-index");
+        if (idxAttr != null && tempApi && !tempApi.isDestroyed?.()) {
+          targetRow =
+            tempApi.getDisplayedRowAtIndex?.(Number(idxAttr))?.data ?? null;
+        }
+        ctrl.onGridDrop({
+          sourceGridId: "dedicatedTruck",
+          targetGridId: "tempTruck",
+          sourceRows: [p.row],
+          targetRow,
+          rtnNo: p.rtnNo,
+        });
+      }}
+    >
       <div className="flex-1 min-h-0">
         <DataGrid
           {...model.bind("tempTruck")}
@@ -150,8 +243,16 @@ export default function DispatchPlanVeh() {
           rowSelection="multiple"
           actions={ctrl.conActions}
           audit={false}
-          onRowDoubleClicked={(row: any) => openDetail(row, true)}
-          gridOptions={{ defaultColDef: NO_FILTER_COLDEF }}
+          rowDrag={splitView}
+          onApiReady={setTempApi}
+          onRowDoubleClicked={(row: any) =>
+            openDetail({ ...row, VEH_OP_TP: "110" }, true)
+          }
+          // 배차간조정(분할) 모드: 전체 행 어디서나 드래그 (셀 범위선택은 DataGrid 가 자동 비활성)
+          gridOptions={{
+            defaultColDef: NO_FILTER_COLDEF,
+            rowDragEntireRow: splitView,
+          }}
         />
       </div>
     </div>
@@ -168,8 +269,13 @@ export default function DispatchPlanVeh() {
           rowSelection="multiple"
           actions={ctrl.dedActions}
           audit={false}
+          onApiReady={setDedApi}
           onRowDoubleClicked={(row: any) =>
-            openDetail({ ...row, DSPCH_NO: getFirstDispatchTripKey(row) })
+            openDetail({
+              ...row,
+              DSPCH_NO: getFirstDispatchTripKey(row),
+              VEH_OP_TP: "100",
+            })
           }
           gridOptions={{ defaultColDef: NO_FILTER_COLDEF }}
         />
@@ -183,7 +289,7 @@ export default function DispatchPlanVeh() {
         {...model.bind("locationShpmVolume")}
         columnDefs={LOCATION_SHPM_VOLUME_COLUMN_DEFS}
         codeMap={model.codeMap}
-        actions={[]}
+        actions={ctrl.volumeActions}
         audit={false}
       />
     ) : (
@@ -191,7 +297,7 @@ export default function DispatchPlanVeh() {
         {...model.bind("locationDspch")}
         columnDefs={LOCATION_DSPCH_COLUMN_DEFS}
         codeMap={model.codeMap}
-        actions={[]}
+        actions={ctrl.dspchActions}
         audit={false}
       />
     );
@@ -244,11 +350,14 @@ export default function DispatchPlanVeh() {
       {/* 탭 + 분할 토글 버튼 */}
       <div className="flex items-center">
         <div className="flex-1 min-w-0">
-          <OuterTabs
-            tabs={RIGHT_TABS}
-            activeTab={rightTab}
-            onChange={setRightTab}
-          />
+          {/* 배차간조정(분할) 모드에서는 고정/임시 탭 숨김 */}
+          {!splitView && (
+            <OuterTabs
+              tabs={RIGHT_TABS}
+              activeTab={rightTab}
+              onChange={setRightTab}
+            />
+          )}
         </div>
         <button
           type="button"
@@ -260,7 +369,7 @@ export default function DispatchPlanVeh() {
           }`}
         >
           <ArrowLeftRight className="w-3 h-3" />
-          분할
+          배차간조정
         </button>
       </div>
       <div className="flex-1 min-h-0">
@@ -274,9 +383,31 @@ export default function DispatchPlanVeh() {
           >
             <FixedVehiclePanel
               rows={model.grids.dedicatedTruck.rows}
-              onOpenDetail={openDetail}
+              onOpenDetail={(row: any) =>
+                openDetail({
+                  ...row,
+                  DSPCH_NO: getFirstDispatchTripKey(row),
+                  VEH_OP_TP: "100",
+                })
+              }
               onShowVehLocation={ctrl.onShowVehLocation}
               onVehLocRefresh={ctrl.refreshVehLoc}
+              dragSourceApi={tempApi}
+              onTempDropToRotation={(veh, rtn, rows) =>
+                ctrl.onGridDrop({
+                  sourceGridId: "tempTruck",
+                  targetGridId: "dedicatedTruck",
+                  sourceRows: rows,
+                  targetRow: veh,
+                  rtnNo: rtn,
+                })
+              }
+              onRotationDragStart={(veh, rtn) => {
+                dndRef.current = { row: veh, rtnNo: rtn };
+              }}
+              onRotationDragEnd={() => {
+                dndRef.current = null;
+              }}
             />
             {tempGrid}
           </SplitPane>

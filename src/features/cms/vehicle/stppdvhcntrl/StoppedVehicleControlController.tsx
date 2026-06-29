@@ -122,7 +122,7 @@ export function useStoppedVehicleControlController({ model }: Args) {
         menuName: menuName,
         fetchFn: () =>
           api.getMainList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [model.filtersRef, model.grids.main.rows],
@@ -148,7 +148,7 @@ export function useStoppedVehicleControlController({ model }: Args) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub02(main) : EMPTY_RESULT;
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [
@@ -170,7 +170,7 @@ export function useStoppedVehicleControlController({ model }: Args) {
             LOG_TIME_ID: main?.LOG_TIME_ID,
           });
         },
-        rows: model.grids.sub03.rows,
+        rows: () => model.grids.sub03.rows,
       }),
     ],
     [model],

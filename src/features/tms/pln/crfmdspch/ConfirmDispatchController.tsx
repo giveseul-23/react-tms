@@ -292,7 +292,7 @@ export function useConfirmDispatchController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.config.rows,
+        rows: () => model.grids.config.rows,
       }),
     ],
     [act, menuName, model.filtersRef, model.grids.config, onChangeRegVeh, onChangeTempVeh, onStartWork],

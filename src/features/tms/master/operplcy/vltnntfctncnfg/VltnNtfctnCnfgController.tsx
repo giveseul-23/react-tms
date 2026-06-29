@@ -374,7 +374,7 @@ export function useVltnNtfctnCnfgController({ model }: Args) {
             VLTN_NTFCTN_CNFG_ID: detail?.VLTN_NTFCTN_CNFG_ID,
           });
         },
-        rows: model.grids.target.rows,
+        rows: () => model.grids.target.rows,
         upload: { gridId: "SUB03_GRID_VLTN_NTFCTN_CNFG", onUploaded: () => base.search() },
         templateDownload: { gridId: "SUB03_GRID_VLTN_NTFCTN_CNFG" },
       }),

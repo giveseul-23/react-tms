@@ -106,7 +106,7 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [model],
@@ -126,7 +126,7 @@ export function useLogisticGroupPlanIdController({ model }: ControllerArgs) {
             ? api.getDetailList({ LGST_GRP_CD: main.LGST_GRP_CD })
             : Promise.resolve({ data: { result: [] } });
         },
-        rows: model.grids.detail.rows,
+        rows: () => model.grids.detail.rows,
       }),
     ],
     [onAddDetail, onSaveDetail, model],

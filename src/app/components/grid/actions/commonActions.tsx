@@ -60,7 +60,9 @@ export type ExcelGroupActionConfig = {
   /** 다운로드 파일 표시명(시트 제목). 미지정 시 menuCode 로 폴백. */
   menuName?: string;
   fetchFn: () => Promise<any> | any;
-  rows: any[];
+  /** 보이는 데이터 행. 배열 또는 클릭 시점에 평가할 getter.
+   *  getter 권장 — 배열로 넘기면 액션 생성 시점 스냅샷이라 조회 후 데이터가 반영 안 될 수 있다. */
+  rows: any[] | (() => any[]);
   searchUrl?: string;
   /** 지정 시 클릭 시점에 표시 중인 colId 목록을 받아 columns 를 표시된 것만/표시 순서로 거른다.
    *  (런타임 컬럼 숨김/보임 반영) 미지정이면 정적 columns 그대로 사용. */
@@ -301,7 +303,8 @@ export const makeExcelGroupAction = (config: ExcelGroupActionConfig) => {
           columns: resolveExcelColumns(config),
           menuName: config.menuName ?? config.menuCode,
           menuCd: config.menuCode,
-          rows: config.rows,
+          rows:
+            typeof config.rows === "function" ? config.rows() : config.rows,
           searchUrl: config.searchUrl,
         }).catch((e) => showErrorModal(excelErrorMsg(e)));
       },

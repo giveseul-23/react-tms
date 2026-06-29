@@ -133,7 +133,7 @@ export function useOilPriceByGasStationController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.grids.main, model.filtersRef, onOpnRegi, onSaveMain],
@@ -153,7 +153,7 @@ export function useOilPriceByGasStationController({ model }: Args) {
             OPINET_GSSTTN_CD: sel.OPINET_GSSTTN_CD,
           });
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [menuName, model.grids.sub01, model.grids.main, model.filtersRef],

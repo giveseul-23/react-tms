@@ -185,25 +185,28 @@ export function commitRowChange(
 }
 
 /** commitRowChange 의 다필드 버전 — patch 객체의 모든 필드를 한 번의 setRowData 로
- *  갱신하고 EDIT_STS 자동 마킹. (팝업 셀에서 CODE/NAME 동시 기록 등) */
+ *  갱신하고 EDIT_STS 자동 마킹. (팝업 셀에서 CODE/NAME 동시 기록 등)
+ *  state shape 는 배열(raw 팝업) / `{rows,...}` 객체(model.bind) 둘 다 지원. */
 export function commitRowChanges(
   setRowData: ((updater: any) => void) | undefined,
   targetRow: any,
   patch: Record<string, any>,
 ): void {
   if (!setRowData || !targetRow || !patch) return;
-  setRowData((prev: any) => ({
-    ...prev,
-    rows: (prev?.rows ?? []).map((r: any) => {
-      const isTarget =
-        r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__);
-      if (!isTarget) return r;
-      const next = { ...r, ...patch };
-      carryOrig(next, r); // spread 로 사라진 원본 스냅샷 복원
-      next.EDIT_STS = resolveUpdateSts(next); // 원복이면 "" 로 되돌림
-      return next;
-    }),
-  }));
+  const updateRow = (r: any) => {
+    const isTarget =
+      r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__);
+    if (!isTarget) return r;
+    const next = { ...r, ...patch };
+    carryOrig(next, r); // spread 로 사라진 원본 스냅샷 복원
+    next.EDIT_STS = resolveUpdateSts(next); // 원복이면 "" 로 되돌림
+    return next;
+  };
+  setRowData((prev: any) =>
+    Array.isArray(prev)
+      ? prev.map(updateRow)
+      : { ...prev, rows: (prev?.rows ?? []).map(updateRow) },
+  );
 }
 
 /** singleMode 체크 — Y 선택 시 대상 행만 Y, 나머지는 N. N 해제는 대상 행만 변경. */
@@ -214,19 +217,21 @@ export function commitSingleModeCheck(
   value: "Y" | "N",
 ): void {
   if (!setRowData || !targetRow || !field) return;
-  setRowData((prev: any) => ({
-    ...prev,
-    rows: (prev?.rows ?? []).map((r: any) => {
-      const isTarget =
-        r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__);
-      const nextVal =
-        value === "Y" ? (isTarget ? "Y" : "N") : isTarget ? "N" : r[field];
-      if (!isTarget && value === "N") return r;
-      if (r[field] === nextVal) return r;
-      const next = { ...r, [field]: nextVal };
-      carryOrig(next, r);
-      next.EDIT_STS = resolveUpdateSts(next);
-      return next;
-    }),
-  }));
+  const updateRow = (r: any) => {
+    const isTarget =
+      r === targetRow || (!!r?.__rid__ && r.__rid__ === targetRow.__rid__);
+    const nextVal =
+      value === "Y" ? (isTarget ? "Y" : "N") : isTarget ? "N" : r[field];
+    if (!isTarget && value === "N") return r;
+    if (r[field] === nextVal) return r;
+    const next = { ...r, [field]: nextVal };
+    carryOrig(next, r);
+    next.EDIT_STS = resolveUpdateSts(next);
+    return next;
+  };
+  setRowData((prev: any) =>
+    Array.isArray(prev)
+      ? prev.map(updateRow)
+      : { ...prev, rows: (prev?.rows ?? []).map(updateRow) },
+  );
 }

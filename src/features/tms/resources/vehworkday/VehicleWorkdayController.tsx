@@ -173,7 +173,7 @@ export function useVehicleWorkdayController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(getExcelSearchParams()),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         upload: { gridId: GRID_ID, onUploaded: () => base.search() },
         templateDownload: {
           gridId: GRID_ID,

@@ -102,7 +102,7 @@ export function useDspchContainerReportController({ model }: Args) {
           await refreshContainerColumns(model.filtersRef.current);
           return api.getMainList(model.filtersRef.current);
         },
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.grids.main, model.filtersRef, refreshContainerColumns],
@@ -118,7 +118,7 @@ export function useDspchContainerReportController({ model }: Args) {
           await refreshContainerColumns(model.filtersRef.current);
           return api.getSub01List(model.filtersRef.current);
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [menuName, model.grids.sub01, model.filtersRef, refreshContainerColumns],
@@ -134,7 +134,7 @@ export function useDspchContainerReportController({ model }: Args) {
           await refreshContainerColumns(model.filtersRef.current);
           return api.getSub02List(model.filtersRef.current);
         },
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [menuName, model.grids.sub02, model.filtersRef, refreshContainerColumns],

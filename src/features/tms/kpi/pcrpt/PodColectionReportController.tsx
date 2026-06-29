@@ -129,7 +129,7 @@ export function usePodColectionReportController({ model }: Args) {
             ...model.filtersRef.current,
             ...getSearchParams(),
           }),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [getSearchParams, menuName, model.filtersRef, model.grids.main],
@@ -143,7 +143,7 @@ export function usePodColectionReportController({ model }: Args) {
         menuName,
         fetchFn: () =>
           api.getSub01List(sub01Params(model.grids.main.selectedRef.current)),
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [menuName, model.grids.main.selectedRef, model.grids.sub01],
@@ -157,7 +157,7 @@ export function usePodColectionReportController({ model }: Args) {
         menuName,
         fetchFn: () =>
           api.getSub02List(sub02Params(model.grids.sub01.selectedRef.current)),
-        rows: model.grids.sub02.rows,
+        rows: () => model.grids.sub02.rows,
       }),
     ],
     [menuName, model.grids.sub01.selectedRef, model.grids.sub02],

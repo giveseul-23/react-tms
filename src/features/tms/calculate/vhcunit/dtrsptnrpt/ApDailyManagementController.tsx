@@ -386,7 +386,7 @@ export function useApDailyManagementController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getDailyList(buildSearchParams(model.filtersRef.current)),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [
@@ -417,7 +417,7 @@ export function useApDailyManagementController({ model }: Args) {
             dynamicColumns: chgCacheRef.current.list,
           });
         },
-        rows: model.grids.detail.rows,
+        rows: () => model.grids.detail.rows,
       }),
     ],
     [buildSearchParams, menuName, model.filtersRef, model.grids.detail],

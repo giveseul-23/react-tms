@@ -180,7 +180,7 @@ export function useApSettlMgmtController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.config.rows,
+        rows: () => model.grids.config.rows,
       }),
     ],
     [
@@ -204,7 +204,7 @@ export function useApSettlMgmtController({ model }: Args) {
           api.getSummaryList({
             CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
           }),
-        rows: model.grids.summary.rows,
+        rows: () => model.grids.summary.rows,
       }),
     ],
     [menuName, model.grids.config.selectedRef, model.grids.summary],
@@ -223,7 +223,7 @@ export function useApSettlMgmtController({ model }: Args) {
           api.getEachCostOrGlList({
             CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
           }),
-        rows: model.grids.costCenter.rows,
+        rows: () => model.grids.costCenter.rows,
       }),
     ],
     [onAddCostCenter, onSaveCostCenter, model],
@@ -240,7 +240,7 @@ export function useApSettlMgmtController({ model }: Args) {
           api.getEachItmCostList({
             CLOSE_ID: model.grids.config.selectedRef.current?.CLOSE_ID,
           }),
-        rows: model.grids.materialCost.rows,
+        rows: () => model.grids.materialCost.rows,
       }),
     ],
     [model],

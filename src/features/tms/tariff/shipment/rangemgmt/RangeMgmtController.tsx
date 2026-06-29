@@ -88,7 +88,7 @@ export function useRangeMgmtController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onAddMain, onSaveMain, menuName, model.grids.main, model.filtersRef],
@@ -108,7 +108,7 @@ export function useRangeMgmtController({ model }: ControllerArgs) {
             ? api.getDetailList({ RNG_CD: main.RNG_CD })
             : Promise.resolve({ data: { result: [] } });
         },
-        rows: model.grids.detail.rows,
+        rows: () => model.grids.detail.rows,
       }),
     ],
     [onAddDetail, onSaveDetail, menuName, model.grids.detail, model.grids.main.selectedRef],

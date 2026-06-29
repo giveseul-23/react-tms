@@ -87,7 +87,7 @@ export function useLanguagePackController({ menuCd, model }: ControllerProps) {
         menuCode: MENU_CD,
         menuName: menuName,
         fetchFn: () => langPackApi.getLangPackList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [

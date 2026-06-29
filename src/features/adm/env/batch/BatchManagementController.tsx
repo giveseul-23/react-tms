@@ -289,7 +289,7 @@ export function useBatchManagementController({ model }: Args) {
         menuName: menuName,
         fetchFn: () =>
           batchManagementApi.getBatchManagementList(MENU_CD, model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [model.filtersRef, model.grids.main.rows, onExeBatch, onMainGridAdd, onSaveMain],
@@ -313,7 +313,7 @@ export function useBatchManagementController({ model }: Args) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [

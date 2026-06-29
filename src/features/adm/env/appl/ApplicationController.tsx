@@ -60,7 +60,7 @@ export function useApplicationController({ model }: ControllerProps) {
         menuName: menuName,
         fetchFn: () =>
           applicationApi.getApplicationList(MENU_CD, model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [handleAdd, handleSave, model.filtersRef, model.grids.main.rows],

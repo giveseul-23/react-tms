@@ -125,7 +125,7 @@ export function useDfChargeController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [onAddMain, onSaveMain, model],
@@ -145,7 +145,7 @@ export function useDfChargeController({ model }: ControllerArgs) {
             ? api.getDetailList({ CHG_CD: main.CHG_CD })
             : Promise.resolve({ data: { result: [] } });
         },
-        rows: model.grids.detail.rows,
+        rows: () => model.grids.detail.rows,
       }),
     ],
     [onAddDetail, onSaveDetail, model],

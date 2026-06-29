@@ -513,7 +513,7 @@ export function useDepartArrivalManagementController({ model }: Args) {
             ...(model.filtersRef.current ?? {}),
             ...buildSearchParams(model.filtersRef.current ?? {}),
           }),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [act, buildSearchParams, menuName, model.grids.main, model.filtersRef, base, onShowDriveHistory, onShowPod, onStartTransportation, onStartWork],

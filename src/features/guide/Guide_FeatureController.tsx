@@ -131,7 +131,7 @@ export function useFeatureController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
         // 엑셀 업로드 / 양식 다운로드를 그룹 "안"에 포함 (필요한 화면만).
         // gridId 는 View 가 export 한 AUTH.grids 단일 소스 참조 (센차 grid.authId).
         // 그룹 "밖" 별도 버튼은 makeExcelUploadAction / makeExcelTemplateDownloadAction 따로 호출.
@@ -157,7 +157,7 @@ export function useFeatureController({ model }: ControllerArgs) {
             ? api.getDetailList({ XXX_CD: main.XXX_CD })
             : Promise.resolve({ data: { result: [] } });
         },
-        rows: model.grids.detail.rows,
+        rows: () => model.grids.detail.rows,
       }),
     ],
     [

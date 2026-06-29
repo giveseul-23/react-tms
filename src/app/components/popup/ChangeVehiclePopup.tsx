@@ -39,7 +39,7 @@ export default function ChangeVehiclePopup({
   const [carrCd, setCarrCd] = useState("");
   const [carrNm, setCarrNm] = useState("");
   const [vehId, setVehId] = useState("");
-  const [vehTpCd, setVehTpCd] = useState("");
+  const [vehTpCd, setVehTpCd] = useState(initialValues.VEH_TP_CD);
   const [vehNo, setVehNo] = useState("");
   // 차량운영유형 — 지입(100)/용차(110)/가상(999). lockVehOpTp 지정 시 그 값으로 고정.
   const [vehOpTp, setVehOpTp] = useState<string>(

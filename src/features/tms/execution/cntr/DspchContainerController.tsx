@@ -83,7 +83,7 @@ export function useDspchContainerController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getMainList(buildSearchParams()),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [buildSearchParams, menuName, model.grids.main],
@@ -100,7 +100,7 @@ export function useDspchContainerController({ model }: Args) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [fetchSub01, menuName, model.grids.main.selectedRef, model.grids.sub01, onSaveSub01],

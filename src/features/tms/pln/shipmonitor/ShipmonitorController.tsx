@@ -76,7 +76,7 @@ export function useFeatureController({ model }: ControllerArgs) {
         menuCode: MENU_CODE,
         menuName: menuName,
         fetchFn: () => api.getList(model.filtersRef.current),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [menuName, model.filtersRef, model.grids.main, model.grids.main.rows],
@@ -94,7 +94,7 @@ export function useFeatureController({ model }: ControllerArgs) {
             ? api.getDetailList({ SHPM_ID: main.SHPM_ID })
             : Promise.resolve({ data: { result: [] } });
         },
-        rows: model.grids.detail.rows,
+        rows: () => model.grids.detail.rows,
       }),
     ],
     [menuName, model.grids.detail, model.grids.detail.rows, model.grids.main.selectedRef],

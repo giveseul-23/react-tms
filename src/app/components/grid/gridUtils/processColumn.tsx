@@ -271,6 +271,10 @@ function injectCheckRenderer(
   const singleMode = c.singleMode as boolean | undefined;
   const extended = !!checkEditable || !!group;
   const isOn = (v: any) => v === "Y" || (extended && v === true);
+  // 편집 정책(insertable/editable + EDIT_STS) — 다른 컬럼 타입과 동일.
+  //   none(둘 다 미지정/명시적 false) → 읽기전용, insert → 추가행, update → 수정행,
+  //   always → 항상, custom(editable 함수) → EDIT_STS 게이팅 없이 passthrough.
+  const editMode = resolveEditMode(c);
 
   return {
     ...col,
@@ -285,8 +289,17 @@ function injectCheckRenderer(
       : {}),
     cellRenderer: (params: any) => {
       const checked = isOn(params.value);
+      const editStsI = params.node?.data?.EDIT_STS === "I";
+      const modeDisabled =
+        editMode === "none"
+          ? true
+          : editMode === "custom"
+            ? false
+            : !rowEditableByMode(editMode, editStsI);
       const cellDisabled =
-        readOnly || (checkEditable ? !checkEditable(params) : false);
+        readOnly ||
+        modeDisabled ||
+        (checkEditable ? !checkEditable(params) : false);
       return (
         <div className="flex items-center justify-center h-full">
           <input

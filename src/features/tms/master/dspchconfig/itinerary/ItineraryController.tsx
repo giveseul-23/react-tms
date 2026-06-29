@@ -272,7 +272,7 @@ export function useItineraryController({ model }: ControllerArgs) {
             menuCode: MENU_CODE,
             menuName: menuName,
             fetchFn: () => api.getList(model.filtersRef.current),
-            rows: model.grids.main.rows,
+            rows: () => model.grids.main.rows,
           }).items ?? []),
           makeExcelUploadAction({
             menuCode: MENU_CODE,
@@ -316,7 +316,7 @@ export function useItineraryController({ model }: ControllerArgs) {
           const main = model.grids.main.selectedRef.current;
           return main ? fetchSub01(main) : EMPTY_RESULT;
         },
-        rows: model.grids.sub01.rows,
+        rows: () => model.grids.sub01.rows,
       }),
     ],
     [

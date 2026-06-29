@@ -90,7 +90,7 @@ export function useDspchContainer2Controller({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => fetchList(model.filtersRef.current ?? {}),
-        rows: model.grids.main.rows,
+        rows: () => model.grids.main.rows,
       }),
     ],
     [fetchList, menuName, model.filtersRef, model.grids.main, onSaveMain],
