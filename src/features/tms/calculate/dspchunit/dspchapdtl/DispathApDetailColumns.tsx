@@ -10,7 +10,6 @@ import {
 //   editDisabled/insertDisabled 컬럼은 읽기전용(편집형 위젯 아님 → 기본 읽기전용)
 // ─────────────────────────────────────────────────────────────
 export const MAIN_HEAD = [
-  { type: "text", headerName: "No", width: 40, cellStyle: RIGHT },
   // 일자
   { type: "date", headerName: "LBL_DLVRY_DATE", field: "DLVRY_DT", cellStyle: CENTER },
   // 배차번호

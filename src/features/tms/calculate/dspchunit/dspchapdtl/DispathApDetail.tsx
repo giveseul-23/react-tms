@@ -30,6 +30,7 @@ export default function DispathApDetail() {
           columnDefs={model.mainColumnDefs}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          audit={false}
         />
       }
     />
