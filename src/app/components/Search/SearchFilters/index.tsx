@@ -115,6 +115,7 @@ export function SearchFilters({
     buildInitialSearchState,
     setSearchState,
     moduleDefaultCacheRef,
+    searchState,
   });
 
   // 3) 제외 키 / 키 리네임 — excludes 선언 시 자동 처리

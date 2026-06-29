@@ -106,6 +106,16 @@ export const commonApi = {
     return apiClient.post(url, { ...getSessionFields(), ...params });
   },
 
+  // DIV_CD 별 사용자 기본 물류운영그룹 (DFT_YN DESC → 첫 행 = 기본적용 Y).
+  //  DIV 변경 시 LGST_GRP_CD 자동 적용에 사용 (서버 selectTmsUserDefDivLgstGrp).
+  //  응답 dsOut[0] = { LGST_GRP_CD, LGST_GRP_NM }
+  searchDefaultLgstGrpValue(params: Record<string, unknown> = {}) {
+    return apiClient.post("/tmsCommonService/searchDefaultLgstGrpValue", {
+      ...getSessionFields(),
+      ...params,
+    });
+  },
+
   //우편번호조회
   searchTariffVehicleTypeList(payload: any) {
     return apiClient.post<commonResponse>(
