@@ -5,7 +5,7 @@ export const MAIN_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_SHIPMENT_NUMBER", field: "SHPM_NO", align: "center", width: 120 },
   { type: "text", headerName: "LBL_ORDER_NO", field: "ORD_NO", align: "center", width: 140 },
   { type: "combo", headerName: "LBL_SHIPMENT_TYPE", field: "SHPM_TP", codeKey: "shpmTpList", align: "center", width: 100 },
-  { type: "combo", headerName: "LBL_SHIPMENT_OP_STATUS", field: "SHPM_OP_STS", codeKey: "shpmOpStsList", align: "center", width: 120 },
+  { type: "combo", headerName: "LBL_SHIPMENT_OP_STATUS", field: "SHPM_OP_STS", statusStyle: "SHPM_OP_STS", codeKey: "shpmOpStsList", align: "center", width: 120 },
   { type: "combo", headerName: "LBL_ORD_DLV_TP", field: "DLVRY_TP", codeKey: "dlvryTp", align: "center", width: 100 },
   { type: "text", headerName: "LBL_RMRK", field: "SHPM_RSN_DESC", align: "left", width: 200 },
   { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD", align: "center", width: 80 },

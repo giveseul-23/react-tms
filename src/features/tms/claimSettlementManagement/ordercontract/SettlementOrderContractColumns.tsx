@@ -11,8 +11,8 @@ export const MAIN_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_CUSTOMER_CODE", field: "CUST_CD", align: "center" },
   { type: "text", headerName: "LBL_CUSTOMER_NAME", field: "CUST_NM", align: "left" },
   { type: "text", headerName: "LBL_ORDER_NO", field: "ORD_NO", align: "center" },
-  { type: "combo", headerName: "LBL_SHIPMENT_OPERATIONAL_STATUS", field: "SHPM_OP_STS", codeKey: "shpmOperStatus", align: "center" },
-  { type: "combo", headerName: "LBL_AR_FI_STATUS", field: "AR_FI_STS", codeKey: "arFiStatus", align: "center" },
+  { type: "combo", headerName: "LBL_SHIPMENT_OPERATIONAL_STATUS", field: "SHPM_OP_STS", statusStyle: "SHPM_OP_STS", codeKey: "shpmOperStatus", align: "center" },
+  { type: "combo", headerName: "LBL_AR_FI_STATUS", field: "AR_FI_STS", statusStyle: "AR_FI_STS", codeKey: "arFiStatus", align: "center" },
   {
     type: "combo",
     headerName: "MSG_AR_RESULT_MESSGE",

@@ -32,6 +32,7 @@ import DispatchMemoPopup from "@/app/components/popup/DispatchMemoPopup";
 import PredictEstimateTimetoArrivalPop from "../../dispatchPlan/popup/PredictEstimateTimetoArrivalPop";
 import SplitQtyPop from "../../dispatchPlan/popup/SplitQtyPop";
 import { Lang } from "@/app/services/common/Lang";
+import { DSPCH_OP_STS } from "@/app/components/grid/status/statusEnums";
 import { dispatchPlanVehApi as api } from "../DispatchPlanVehApi";
 import { MENU_CODE } from "../DispatchPlanVeh";
 
@@ -84,6 +85,7 @@ const DSPCH_INFO_COLS = [
     headerName: "LBL_OP_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpSts",
+    statusStyle: "DSPCH_OP_STS",
     align: "center",
     width: 80,
   },
@@ -1699,11 +1701,11 @@ export default function DispatchDetailPop({
       showError(Lang.get("MSG_SELECT_NO_DATA"));
       return false;
     }
-    if (row.DSPCH_OP_STS >= "2090") {
+    if (row.DSPCH_OP_STS >= DSPCH_OP_STS.IN_TRANSIT) {
       showError(Lang.get("MSG_PRIDICT_ETA_EXCEPTION_WHEN_IN_TRANSIT"));
       return false;
     }
-    if (row.DSPCH_OP_STS >= "2110") {
+    if (row.DSPCH_OP_STS >= DSPCH_OP_STS.COMPLETED) {
       showError(Lang.get("MSG_PRIDICT_ETA_EXCEPTION_WHEN_DELIVERED"));
       return false;
     }
@@ -1714,17 +1716,20 @@ export default function DispatchDetailPop({
       showError(Lang.get("MSG_SELECT_NO_DATA"));
       return false;
     }
-    if (row.DSPCH_OP_STS < "2090") {
+    if (row.DSPCH_OP_STS < DSPCH_OP_STS.IN_TRANSIT) {
       showError(
         Lang.get("MSG_CAL_ETA_EXCEPTION_BEFORE_TRANSIT_PARTIALLY_DELIVERED"),
       );
       return false;
     }
-    if (row.DSPCH_OP_STS == "2110") {
+    if (row.DSPCH_OP_STS === DSPCH_OP_STS.COMPLETED) {
       showError(Lang.get("MSG_CAL_ETA_EXCEPTION_DELIVERED"));
       return false;
     }
-    if (row.DSPCH_OP_STS == "2090" || row.DSPCH_OP_STS == "2100") {
+    if (
+      row.DSPCH_OP_STS === DSPCH_OP_STS.IN_TRANSIT ||
+      row.DSPCH_OP_STS === DSPCH_OP_STS.DELIVERED_PARTIALLY
+    ) {
       const blocked = routeRowData.find(
         (d) => d.ATA_DTTM != null && d.ATD_DTTM == null,
       );

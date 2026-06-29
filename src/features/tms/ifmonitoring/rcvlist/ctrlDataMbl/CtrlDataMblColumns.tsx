@@ -19,6 +19,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_IF_PRCS_STS",
     field: "IF_PRCS_STS",
     codeKey: "interfaceStatus",
+    statusStyle: "IF_PRCS_STS",
     width: 120,
     align: "center",
   },

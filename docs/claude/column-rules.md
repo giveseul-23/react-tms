@@ -72,6 +72,7 @@
 | `type` | `text`/`numeric`/`date`/`datetime`/`combo`/`check`/`popup`/`popuser`/`address` — 위젯·정렬·포맷·기본 편집모드 결정 |
 | `field` | row 데이터 키. 없으면 액션 전용 컬럼 |
 | `codeKey` | 코드→라벨 + combo 옵션 |
+| `statusStyle` | 상태 enum 명(예: `"DSPCH_OP_STS"`) → 코드값을 배지(톤색)로 렌더. `codeKey`(라벨)와 함께, 자동 중앙정렬 (→ §7) |
 | `isPrimaryKey` | row 식별 컬럼 (`rowKeys`/`autoSelectFirstRow` 자동) |
 | `align` | 자동 정렬 덮어쓰기 |
 | `decimalPlaces` | `numeric` 고정 소수 자릿수 포맷 + 천단위 콤마 (→ §6) |
@@ -135,3 +136,31 @@
 - 이미 값이 있는 필드는 덮어쓰지 않는다(빈 필드만 채움). 사용자가 입력/토글하지 않아도 저장 페이로드에 기본값이 포함된다.
 
 > (구버전) `type:"check"` 전용 `defaultYn` 키는 **폐기**되었다 — 전부 `defaultValue` 로 통합. 신규/기존 화면 모두 `defaultValue` 만 쓴다.
+
+## 7. 상태 배지 / 상태 enum (`statusStyle`) ★
+
+상태 코드 컬럼(`SHPM_OP_STS` / `DSPCH_OP_STS` / `AP_FI_STS` / `AR_FI_STS` / `IF_PRCS_STS`)은 공통 배지 스타일(라벨스탕 — 연한 배경 + 동계열 글자 알약)로 통일한다.
+
+### 그리드 컬럼 — `statusStyle`
+
+- **`field` 가 관리 대상 상태 enum 과 같거나 유사하면**, 그 enum 명을 **`statusStyle`** 로 넣는다(+ 라벨용 `codeKey`). 그게 전부.
+  ```ts
+  { type:"combo", headerName:"LBL_OP_STATUS", field:"DSPCH_OP_STS",
+    codeKey:"dspchOpSts", statusStyle:"DSPCH_OP_STS" }
+  ```
+- `processColumn`(`injectStatusBadge`)이 배지 cellRenderer 를 자동 주입하고 **자동 중앙정렬**한다. **화면에서 상태 색상 `cellStyle`/색상맵을 직접 작성하지 말 것.**
+- 라벨 = `codeMap[codeKey][code]`, 색 = `STATUS_TONE[statusStyle][code]`.
+
+### 두 파일로 분리 관리 (색 따로 / 코드 따로)
+
+- `src/app/components/grid/status/statusColors.ts` — 톤 팔레트(`TONE_CLASS`) + 코드→톤(`STATUS_TONE`). **색만** 여기서 수정.
+- `src/app/components/grid/status/statusEnums.ts` — 상태 **코드 상수**(서버 enum 미러링: `DSPCH_OP_STS`/`SHPM_OP_STS`/`AP_FI_STS`/`AR_FI_STS`/`IF_PRCS_STS`). **컨트롤러 로직 체크용.**
+
+### 컨트롤러 로직 — 값(매직스트링) 금지, enum 상수 사용
+
+상태를 리터럴(`"2010"` 등)로 비교하지 말고 enum 상수를 쓴다. **부등호/`||`/`===` 는 코드에 그대로 두고 "값"만 상수**로 바꾼다(헬퍼 함수 없이).
+  ```ts
+  if (r.DSPCH_OP_STS !== DSPCH_OP_STS.OPEN) ...
+  if (row.DSPCH_OP_STS >= DSPCH_OP_STS.IN_TRANSIT) ...
+  if (String(r.AP_FI_STS ?? "") >= AP_FI_STS.OPEN) ...   // 4010 이상
+  ```

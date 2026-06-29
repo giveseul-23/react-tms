@@ -196,12 +196,13 @@ export const LOCATION_DSPCH_COLUMN_DEFS = [
     align: "right",
     valueFormatter: pctFormatter,
   },
-  // 배차진행상태 — codeKey(dspchOpSts) + 상태 컬러는 Controller setDispatchOperationStatusColor 참고 (TODO: cellStyle 매핑)
+  // 배차진행상태 — codeKey(라벨) + statusEnum(배지 색). 공통 statusEnums 관리.
   {
     type: "combo",
     headerName: "LBL_OP_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpSts",
+    statusStyle: "DSPCH_OP_STS",
     align: "center",
     width: 80,
   },
@@ -593,12 +594,13 @@ export const TEMP_TRUCK_COLUMN_DEFS = [
     align: "left",
     width: 100,
   },
-  // 배차운영상태 — codeKey + 상태 컬러 (TODO: setDispatchOperationStatusColor cellStyle 매핑)
+  // 배차운영상태 — codeKey(라벨) + statusEnum(배지 색). 공통 statusEnums 관리.
   {
     type: "combo",
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpSts",
+    statusStyle: "DSPCH_OP_STS",
     align: "center",
     width: 80,
   },

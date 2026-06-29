@@ -1,21 +1,6 @@
 // 그리드 컬럼 정의 (서버 IfConfirmLoadingMain 기준)
 // 적재확정 IF 모니터링 — 전 컬럼 읽기전용(조회). audit 컬럼은 OMIT.
 
-// 처리상태(IF_PRCS_STS) 셀 색상 (서버 ViewController.setInterfaceProcessStatusColor 대응)
-const ifPrcsStsCellStyle = (p: any): Record<string, string> => {
-  const base = { textAlign: "center" as const };
-  const code = String(p?.data?.IF_PRCS_STS ?? "");
-  switch (code) {
-    case "S":
-      return { ...base, backgroundColor: "#D9F0A6", fontWeight: "bold" };
-    case "R":
-      return { ...base, backgroundColor: "#F0CFA6" };
-    case "E":
-      return { ...base, backgroundColor: "red", color: "#FFFF00" };
-    default:
-      return base;
-  }
-};
 
 // 사용자재처리여부(RE_PRCS_BY_USR_YN) 셀 색상 (서버 setInterfaceRePrcsColor 대응)
 const rePrcsCellStyle = (p: any): Record<string, string> => {
@@ -62,9 +47,9 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_PRCS_STS",
     field: "IF_PRCS_STS",
     codeKey: "interfaceStatus",
+    statusStyle: "IF_PRCS_STS",
     width: 70,
     headerClass: "ag-header-center",
-    cellStyle: ifPrcsStsCellStyle,
   },
   {
     type: "text",

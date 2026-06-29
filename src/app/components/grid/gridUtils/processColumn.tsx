@@ -33,6 +33,7 @@ import {
   PopoverContent,
 } from "@/app/components/ui/popover";
 import { DatePickerPopover } from "@/app/components/Search/filters/DatePickerPopover";
+import { TONE_CLASS, STATUS_TONE } from "@/app/components/grid/status/statusColors";
 import ConfirmModal from "@/app/components/popup/ConfirmPopup";
 import {
   commitRowChange,
@@ -118,6 +119,7 @@ const CUSTOM_KEYS = new Set([
   "type",
   "align",
   "codeKey",
+  "statusStyle",
   "fieldType",
   "decimalPlaces",
   "disableMaxWidth",
@@ -177,7 +179,10 @@ function walkChildren(
   if (!Array.isArray(children)) return children;
   const { codeMap, setRowData } = opts;
   return children.map((child) => {
-    const withRenderer = injectCodeRenderer(child, codeMap) as any;
+    const withRenderer = injectCodeRenderer(
+      injectStatusBadge(child, codeMap),
+      codeMap,
+    ) as any;
     const withEditor = injectComboEditor(
       withRenderer,
       codeMap,
@@ -206,6 +211,47 @@ function walkChildren(
       children: walkChildren(withRequired.children, opts),
     });
   });
+}
+
+/** statusStyle 이 있는 컬럼에 상태 배지 cellRenderer 주입 (라벨스탕 배지 스타일).
+ *  값은 enum 이름(예: "DSPCH_OP_STS"). 라벨은 codeKey(codeMap)에서, 톤(색)은 STATUS_TONE 에서.
+ *  injectCodeRenderer 보다 먼저 실행돼 cellRenderer 를 선점한다(이미 있으면 유지). */
+function injectStatusBadge(
+  col: AnyCol,
+  codeMap?: Record<string, Record<string, string>>,
+): AnyCol {
+  const c = col as any;
+  const statusStyle = c.statusStyle as string | undefined;
+  if (!statusStyle || c.cellRenderer) return col;
+  const codeKey = c.codeKey as string | undefined;
+  const toneMap = STATUS_TONE[statusStyle];
+  return {
+    ...c,
+    // 배지는 항상 셀 중앙정렬 (명시 align 이 있으면 그 값 우선)
+    align: c.align ?? "center",
+    cellRenderer: (params: any) => {
+      const code = params.value;
+      if (code === "" || code == null) {
+        return (
+          <span className="px-2 py-0.5 rounded-full text-xs text-gray-400">
+            -
+          </span>
+        );
+      }
+      const codeStr = String(code);
+      const label =
+        (codeKey ? codeMap?.[codeKey]?.[codeStr] : undefined) ?? code;
+      const toneClass = TONE_CLASS[toneMap?.[codeStr] ?? "gray"];
+      // 행 높이(22px) 안에서 짤리지 않도록 h-4(16px, box-border)로 고정 + leading-none 로 수직중앙.
+      return (
+        <span
+          className={`inline-flex items-center h-4 px-2 rounded-full border text-[11px] font-semibold leading-none ${toneClass}`}
+        >
+          {label}
+        </span>
+      );
+    },
+  } as AnyCol;
 }
 
 /** codeKey 가 있는 컬럼에 자동 cellRenderer 주입 (이미 cellRenderer 있으면 유지). */
@@ -1030,7 +1076,7 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
               injectMaskEditor(
                 injectPasswordEditor(
                   injectComboEditor(
-                    injectCodeRenderer(col, codeMap),
+                    injectCodeRenderer(injectStatusBadge(col, codeMap), codeMap),
                     codeMap,
                     opts.setRowData,
                   ),

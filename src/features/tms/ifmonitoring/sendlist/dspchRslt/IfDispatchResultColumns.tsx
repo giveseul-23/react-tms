@@ -1,16 +1,3 @@
-const ifPrcsStsCellStyle = (p: any): Record<string, string> => {
-  const base = { textAlign: "center" as const };
-  switch (String(p?.data?.IF_PRCS_STS ?? "").trim()) {
-    case "S":
-      return { ...base, backgroundColor: "#D9F0A6", fontWeight: "bold" };
-    case "R":
-      return { ...base, backgroundColor: "#F0CFA6" };
-    case "E":
-      return { ...base, backgroundColor: "red", color: "#FFFF00" };
-    default:
-      return base;
-  }
-};
 
 const rePrcsCellStyle = (p: any): Record<string, string> => {
   const base = { textAlign: "center" as const };
@@ -60,9 +47,9 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_PRCS_STS",
     field: "IF_PRCS_STS",
     codeKey: "interfaceStatus",
+    statusStyle: "IF_PRCS_STS",
     width: 70,
     headerClass: "ag-header-center",
-    cellStyle: ifPrcsStsCellStyle,
     editable: false,
   },
   {

@@ -27,37 +27,6 @@ const evntTcdCellStyle = (p: any): Record<string, string> => {
   return base;
 };
 
-// 배차운영상태(DSPCH_OP_STS) 셀 색상 (서버 setDispatchOperationStatusColor 대응)
-const dspchOpStsCellStyle = (p: any): Record<string, string> => {
-  const base = {
-    textAlign: "center" as const,
-    fontWeight: "bold" as const,
-  };
-  const code = parseInt(String(p?.data?.DSPCH_OP_STS ?? ""), 10);
-  switch (code) {
-    case 2000:
-      return { ...base, backgroundColor: "#595959", color: "#fff" };
-    case 2030:
-    case 2040:
-    case 2060:
-    case 2070:
-    case 2073:
-    case 2075:
-      return { ...base, backgroundColor: "#B4C6E7" };
-    case 2050:
-    case 2080:
-    case 2090:
-    case 2100:
-    case 2103:
-    case 2105:
-      return { ...base, backgroundColor: "#2F75B5", color: "#fff" };
-    case 2110:
-      return { ...base, backgroundColor: "#002060", color: "#fff" };
-    default:
-      return base;
-  }
-};
-
 // ── HEAD (setHeadColumns) ─────────────────────────────────────────
 export const MAIN_HEAD = [
   { headerName: "No" },
@@ -133,10 +102,10 @@ export const MAIN_HEAD = [
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpStsList",
+    statusStyle: "DSPCH_OP_STS",
     align: "center",
     width: 90,
     editable: false,
-    cellStyle: dspchOpStsCellStyle,
   },
   {
     type: "combo",

@@ -1,19 +1,5 @@
 // 적재상태 인터페이스 모니터링 — 단일 그리드. 조회 전용(편집 없음). audit 컬럼 OMIT.
 
-// 처리상태(IF_PRCS_STS) 셀 색상 — 서버 setInterfaceProcessStatusColor 대응
-const STATUS_CELL_STYLE = (params: any) => {
-  const base = { textAlign: "center" as const };
-  switch (String(params?.data?.IF_PRCS_STS ?? "").trim()) {
-    case "S":
-      return { ...base, backgroundColor: "#D9F0A6", fontWeight: "bold" };
-    case "R":
-      return { ...base, backgroundColor: "#F0CFA6" };
-    case "E":
-      return { ...base, backgroundColor: "red", color: "#FFFF00" };
-    default:
-      return base;
-  }
-};
 
 // 사용자재처리여부(RE_PRCS_BY_USR_YN) 셀 색상 — 서버 setInterfaceRePrcsColor 대응
 const REPRCS_YN_CELL_STYLE = (params: any) => {
@@ -60,9 +46,9 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_PRCS_STS",
     field: "IF_PRCS_STS",
     codeKey: "interfaceStatus",
+    statusStyle: "IF_PRCS_STS",
     width: 70,
     headerClass: "ag-header-center",
-    cellStyle: STATUS_CELL_STYLE,
   },
   {
     type: "text",

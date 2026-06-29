@@ -36,6 +36,7 @@ export const MONTHLY_MAIN_HEAD = [
     type: "text",
     headerName: "LBL_FINANCIAL_STATUS",
     field: "AP_FI_STS",
+    statusStyle: "AP_FI_STS",
     width: 100,
     pinned: "left",
     cellStyle: CENTER,

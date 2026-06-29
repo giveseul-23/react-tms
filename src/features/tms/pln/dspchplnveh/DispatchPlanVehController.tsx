@@ -14,6 +14,10 @@ import {
 import { usePopup } from "@/app/components/popup/PopupContext";
 import { commonApi } from "@/app/services/common/commonApi";
 import { Lang } from "@/app/services/common/Lang";
+import {
+  DSPCH_OP_STS,
+  AP_FI_STS,
+} from "@/app/components/grid/status/statusEnums";
 import DispatchMemoPopup from "@/app/components/popup/DispatchMemoPopup";
 import DspchCountPop from "./popup/DspchCountPop";
 import DispatchPrintPop from "./popup/DispatchPrintPop";
@@ -663,7 +667,7 @@ export function useDispatchPlanVehController({ model }: Args) {
   const onCancelDspchTemp = useCallback(
     (rows: any[]) => {
       if (!need(rows, "MSG_SELECT_NO_DATA")) return;
-      if (rows.some((r) => r.DSPCH_OP_STS !== "2010")) {
+      if (rows.some((r) => r.DSPCH_OP_STS !== DSPCH_OP_STS.OPEN)) {
         base.alert(Lang.get("MSG_CANCEL_DSPCH_OPEN_STATUS"));
         return;
       }
@@ -715,7 +719,11 @@ export function useDispatchPlanVehController({ model }: Args) {
     (rows: any[]) => {
       if (!need(rows, "MSG_SELECT_NO_DATA")) return;
       if (
-        rows.some((r) => r.DSPCH_OP_STS !== "2010" && r.DSPCH_OP_STS !== "2060")
+        rows.some(
+          (r) =>
+            r.DSPCH_OP_STS !== DSPCH_OP_STS.OPEN &&
+            r.DSPCH_OP_STS !== DSPCH_OP_STS.TENDER_CANCELED,
+        )
       ) {
         base.alert(Lang.get("MSG_ERR_CHANGE_CARRIER_STATUS"));
         return;
@@ -754,11 +762,11 @@ export function useDispatchPlanVehController({ model }: Args) {
     [base, need, openPopup, closePopup, refresh],
   );
 
-  // 톤급 변경 — 상태(AP_FI_STS < 4010) 검증 → 톤급변경 팝업
+  // 톤급 변경 — 상태(AP_FI_STS < OPEN(4010)) 검증 → 톤급변경 팝업
   const onChangeTonType = useCallback(
     (rows: any[]) => {
       if (!need(rows, "MSG_SELECT_NO_DATA")) return;
-      if (rows.some((r) => String(r.AP_FI_STS ?? "") >= "4010")) {
+      if (rows.some((r) => String(r.AP_FI_STS ?? "") >= AP_FI_STS.OPEN)) {
         base.alert(Lang.get("MSG_ERR_CHANGE_TON_GROUP_STATUS"));
         return;
       }
@@ -862,7 +870,7 @@ export function useDispatchPlanVehController({ model }: Args) {
   const onReturnOpenTemp = useCallback(
     (rows: any[]) => {
       if (!need(rows, "MSG_SELECT_NO_DATA")) return;
-      if (rows.some((r) => r.DSPCH_OP_STS === "2010")) {
+      if (rows.some((r) => r.DSPCH_OP_STS === DSPCH_OP_STS.OPEN)) {
         base.alert("배차 확정 취소할 수 없는 상태입니다.");
         return;
       }

@@ -5,7 +5,7 @@ export const MAIN_COLUMN_DEFS = () => [
   { type: "date", headerName: "LBL_REQUESTED_DELIVERY_DATE", field: "DLVRY_DT", align: "center", width: 100 },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO", align: "center" },
   { type: "text", headerName: "LBL_PLAN_ID", field: "PLN_ID", align: "center", hide: true },
-  { type: "text", headerName: "LBL_DISPATCH_OPERATIONAL_STATUS", field: "DSPCH_OP_STS", codeKey: "dspchOpSts", align: "center", width: 150 },
+  { type: "text", headerName: "LBL_DISPATCH_OPERATIONAL_STATUS", field: "DSPCH_OP_STS", statusStyle: "DSPCH_OP_STS", codeKey: "dspchOpSts", align: "center", width: 150 },
   { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM", width: 200 },
   { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO", align: "center" },
   { type: "text", headerName: "LBL_ORDER_TYPE", field: "SHPM_TP_NM", align: "center" },
@@ -93,7 +93,7 @@ export const ORDER_COLUMN_DEFS = () => [
   { type: "text", headerName: "LBL_CUSTOMER_NAME", field: "CUST_NM", width: 80 },
   { type: "text", headerName: "LBL_SOLD_TO_CD", field: "SOLD_TO_CD", align: "center", width: 70 },
   { type: "text", headerName: "LBL_SOLD_TO_NM", field: "SOLD_TO_NM", width: 100 },
-  { type: "text", headerName: "LBL_SHIPMENT_OP_STATUS", field: "SHPM_OP_STS", codeKey: "shpmOpSts", align: "center", width: 130 },
+  { type: "text", headerName: "LBL_SHIPMENT_OP_STATUS", field: "SHPM_OP_STS", statusStyle: "SHPM_OP_STS", codeKey: "shpmOpSts", align: "center", width: 130 },
   { type: "text", headerName: "LBL_SHIPMENT_NUMBER", field: "SHPM_NO", width: 150 },
   { type: "text", headerName: "LBL_TO_STATE_CD", field: "STT_CD", align: "center", width: 150 },
   { type: "text", headerName: "LBL_TO_STATE_NM", field: "STT_NM", width: 150 },
@@ -138,7 +138,7 @@ export const ORDER_ITEM_COLUMN_DEFS = () => [
   { type: "numeric", headerName: "LBL_CONFIRMED_FLEX_QTY5", field: "CFM_FLEX_QTY5", align: "right", width: 100, decimalPlaces: 4, summable: true },
   { type: "text", headerName: "LBL_SHIPMENT_ID", field: "SHPM_DTL_ID", hide: true },
   { type: "text", headerName: "LBL_LD_INSP_MDT", field: "REQUIRED_LD_RESULT_INTEGRATION_WITH_IMS", hide: true },
-  { type: "text", headerName: "LBL_DISPATCH_OPERATIONAL_STATUS", field: "DSPCH_OP_STS", codeKey: "dspchOpSts", align: "center", hide: true },
+  { type: "text", headerName: "LBL_DISPATCH_OPERATIONAL_STATUS", field: "DSPCH_OP_STS", statusStyle: "DSPCH_OP_STS", codeKey: "dspchOpSts", align: "center", hide: true },
 ];
 
 // 인수증

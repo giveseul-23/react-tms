@@ -22,7 +22,7 @@ export const MAIN_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM", align: "center", width: 100 },
   { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM", align: "left", width: 80 },
   { type: "text", headerName: "LBL_LANE", field: "LOC_LANE", align: "left", width: 200 },
-  { type: "combo", headerName: "LBL_DISPATCH_OPERATIONAL_STATUS", field: "DSPCH_OP_STS", codeKey: "dspchOpStsList", align: "center", width: 90 },
+  { type: "combo", headerName: "LBL_DISPATCH_OPERATIONAL_STATUS", field: "DSPCH_OP_STS", statusStyle: "DSPCH_OP_STS", codeKey: "dspchOpStsList", align: "center", width: 90 },
   { type: "text", headerName: "LBL_PAY_CARRIER_CODE", field: "PAY_CARR_CD", align: "center", width: 150 },
   { type: "text", headerName: "LBL_PAY_CARRIER_NAME", field: "PAY_CARR_NM", align: "left", width: 200 },
   { type: "text", headerName: "LBL_AP_ID", field: "AP_ID", align: "center", width: 140 },

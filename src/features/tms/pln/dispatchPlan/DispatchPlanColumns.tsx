@@ -13,6 +13,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpSts",
+    statusStyle: "DSPCH_OP_STS",
   }, // 배차진행상태
   {
     type: "text",

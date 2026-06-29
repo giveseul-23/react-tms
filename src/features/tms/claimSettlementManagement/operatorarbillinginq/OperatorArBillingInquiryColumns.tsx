@@ -10,6 +10,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_AR_PROGRESS_STATUS",
     field: "AR_FI_STS",
     codeKey: "arFiStatus",
+    statusStyle: "AR_FI_STS",
   },
   {
     headerName: "LBL_AR_SALES_START_BASE_DATE",

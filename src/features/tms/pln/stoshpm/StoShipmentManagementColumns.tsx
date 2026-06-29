@@ -110,6 +110,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_SHIPMENT_OP_STATUS",
     field: "SHPM_OP_STS",
     codeKey: "shpmOpStsList",
+    statusStyle: "SHPM_OP_STS",
     align: "center",
     width: 140,
     editable: false,

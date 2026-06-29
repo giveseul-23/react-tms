@@ -10,6 +10,7 @@
 - **모든 코드 수정/추가/삭제 전에 한국어로 계획을 설명하고 사용자 OK 후에만 변경한다.** (조회·검색은 확인 불필요) — 상세: `docs/claude/dev-workflow.md` §1
 - **리팩터링/구조변경 시 시각 결과물(className·inline style·DOM 구조)은 byte-for-byte 보존.** — 상세: `docs/claude/dev-workflow.md` §2
 - **조회조건(SearchFilters) 스타일이 가장 중요** — 임의 변경 금지, 토큰 준수: `docs/claude/search-style.md`
+- **상태 코드 컬럼은 `statusStyle` 로 공통 배지, 컨트롤러 로직은 상태 enum 상수 사용**(매직스트링 금지) — 상세: `docs/claude/column-rules.md` §7
 
 ---
 
@@ -19,7 +20,7 @@
 |---|---|
 | 개발 방식 (작업 전 확인·스타일 금지·기타·메모리) | `docs/claude/dev-workflow.md` |
 | 화면 구조 (base hook·preset·View/Controller/Model/Api) | `docs/claude/screen-architecture.md` |
-| 컬럼 규칙 (편집 정책·위젯 타입·audit) | `docs/claude/column-rules.md` |
+| 컬럼 규칙 (편집 정책·위젯 타입·audit·**상태 배지/enum ★**) | `docs/claude/column-rules.md` |
 | 엑셀 다운로드 표준 | `docs/claude/excel-download.md` |
 | 팝업(모달) 규칙 | `docs/claude/popup.md` |
 | **조회조건 스타일 표준 ★** | `docs/claude/search-style.md` |

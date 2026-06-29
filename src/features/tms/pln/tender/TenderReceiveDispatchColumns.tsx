@@ -1,31 +1,3 @@
-// 배차진행상태 색상 — 레거시 ViewController.setDispatchOperationStatusColor 대응
-// (DspchContainerColumns 패턴 — cellStyle + hex)
-const DSPCH_OP_STS_STYLE: Record<string, { backgroundColor: string; color?: string }> = {
-  "2000": { backgroundColor: "#4D4D4D" },
-  "2010": { backgroundColor: "#ffffff" },
-  "2020": { backgroundColor: "#edeff4", color: "#000" },
-  "2030": { backgroundColor: "#dbdfe8", color: "#000" },
-  "2040": { backgroundColor: "#FFD85D", color: "#000" },
-  "2050": { backgroundColor: "#b6bfd2", color: "#000" },
-  "2060": { backgroundColor: "#FFD85D", color: "#000" },
-  "2070": { backgroundColor: "#929fbb", color: "#fff" },
-  "2073": { backgroundColor: "#8090b0", color: "#fff" },
-  "2075": { backgroundColor: "#6d80a4", color: "#fff" },
-  "2080": { backgroundColor: "#5b7099", color: "#fff" },
-  "2090": { backgroundColor: "#49608d", color: "#fff" },
-  "2100": { backgroundColor: "#375082", color: "#fff" },
-  "2103": { backgroundColor: "#244077", color: "#fff" },
-  "2105": { backgroundColor: "#12306b", color: "#fff" },
-  "2110": { backgroundColor: "#002060", color: "#fff" },
-  "2001": { backgroundColor: "#000000", color: "#fff" },
-};
-
-const dispatchStatusCellStyle = (p: any) => {
-  const code = String(parseInt(p?.data?.DSPCH_OP_STS ?? p?.value ?? "", 10));
-  const color = DSPCH_OP_STS_STYLE[code];
-  return { textAlign: "center" as const, fontWeight: "bold" as const, ...(color ?? {}) };
-};
-
 const carrierBookingCellStyle = (p: any): Record<string, string> => {
   const base = { textAlign: "center" as const };
   if (p?.data?.CARR_BOOKING_YN === "N") {
@@ -55,7 +27,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpSts",
-    cellStyle: dispatchStatusCellStyle,
+    statusStyle: "DSPCH_OP_STS",
   },
   {
     type: "text",

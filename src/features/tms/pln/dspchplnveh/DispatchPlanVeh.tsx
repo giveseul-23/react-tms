@@ -78,14 +78,6 @@ function Card({
   );
 }
 
-function SubHeader({ title }: { title: string }) {
-  return (
-    <div className="px-2 py-1 text-[11px] font-semibold text-slate-600 bg-slate-50 border-b shrink-0">
-      {title}
-    </div>
-  );
-}
-
 export default function DispatchPlanVeh() {
   const model = useDispatchPlanVehModel(MENU_CODE);
   const ctrl = useDispatchPlanVehController({ model });

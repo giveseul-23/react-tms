@@ -17,7 +17,7 @@ export const MAIN_COLUMN_DEFS = [
   { type: "text", headerName: "VOLUME_AP_AUTO_CONFIRM", field: "VOLUME_AP_AUTO_CONFIRM", hide: true, noLang: true },
   { headerName: "No" },
   { type: "text", headerName: "LBL_AP_DOC_ID", field: "AP_ID", align: "center", width: 100 },
-  { type: "combo", headerName: "LBL_PRCS_STS", field: "AP_FI_STS", codeKey: "apFiSts", align: "center", width: 70 },
+  { type: "combo", headerName: "LBL_PRCS_STS", field: "AP_FI_STS", statusStyle: "AP_FI_STS", codeKey: "apFiSts", align: "center", width: 70 },
   { type: "text", headerName: "LBL_PAY_CARRIER_CODE", field: "PAY_CARR_CD", align: "center", width: 120 },
   { type: "text", headerName: "LBL_PAY_CARRIER_NAME", field: "PAY_CARR_NM", width: 120 },
   { type: "combo", headerName: "LBL_DLY_SETL_STS", field: "DLY_SETL_STS", codeKey: "dlySetlSts", align: "center", width: 100 },

@@ -114,6 +114,7 @@ export const SUB02_COLUMN_DEFS: any[] = [
     headerName: "LBL_OPERATIONAL_STATUS",
     field: "SHPM_OP_STS",
     codeKey: "shpmOpStsList",
+    statusStyle: "SHPM_OP_STS",
     headerClass: "ag-header-center",
     width: 120,
     cellStyle: { textAlign: "center" },

@@ -1,29 +1,4 @@
-const DSPCH_OP_STS_STYLE: Record<string, { backgroundColor: string; color?: string }> = {
-  "2000": { backgroundColor: "#4D4D4D", color: "#fff" },
-  "2010": { backgroundColor: "#ffffff" },
-  "2020": { backgroundColor: "#edeff4", color: "#000" },
-  "2030": { backgroundColor: "#dbdfe8", color: "#000" },
-  "2040": { backgroundColor: "#FFD85D", color: "#000" },
-  "2050": { backgroundColor: "#b6bfd2", color: "#000" },
-  "2060": { backgroundColor: "#FFD85D", color: "#000" },
-  "2070": { backgroundColor: "#929fbb", color: "#fff" },
-  "2073": { backgroundColor: "#8090b0", color: "#fff" },
-  "2075": { backgroundColor: "#6d80a4", color: "#fff" },
-  "2080": { backgroundColor: "#5b7099", color: "#fff" },
-  "2090": { backgroundColor: "#49608d", color: "#fff" },
-  "2100": { backgroundColor: "#375082", color: "#fff" },
-  "2103": { backgroundColor: "#244077", color: "#fff" },
-  "2105": { backgroundColor: "#12306b", color: "#fff" },
-  "2110": { backgroundColor: "#002060", color: "#fff" },
-  "2001": { backgroundColor: "#000000", color: "#fff" },
-};
 
-// Sencha setDispatchOperationStatusColor 대응 — 배차진행상태 셀 배경/글자색.
-const dispatchStatusCellStyle = (p: any) => {
-  const code = String(parseInt(p?.data?.DSPCH_OP_STS ?? p?.value ?? "", 10));
-  const color = DSPCH_OP_STS_STYLE[code];
-  return { textAlign: "center" as const, fontWeight: "bold" as const, ...(color ?? {}) };
-};
 
 // ── 메인 그리드 (센차 TenderDispatchMain) ──
 // audit: 레거시는 CRE/UPD 4컬럼만 있고 삭제·행상태(EDIT_STS) 없음 → View audit 옵션 참고.
@@ -41,8 +16,8 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpSts",
+    statusStyle: "DSPCH_OP_STS",
     width: 80,
-    cellStyle: dispatchStatusCellStyle,
   },
   { field: "CARR_CD", hide: true },
   {

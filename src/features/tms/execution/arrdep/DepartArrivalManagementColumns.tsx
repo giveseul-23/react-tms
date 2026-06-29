@@ -13,6 +13,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_DISPATCH_OPERATIONAL_STATUS",
     field: "DSPCH_OP_STS",
     codeKey: "dspchOpStsList",
+    statusStyle: "DSPCH_OP_STS",
   },
   { type: "text", headerName: "LBL_CARRIER_CODE", field: "CARR_CD" },
   { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM" },
