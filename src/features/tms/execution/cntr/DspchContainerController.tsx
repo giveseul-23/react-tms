@@ -20,21 +20,10 @@ export function useDspchContainerController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
 
-  // 조회조건 raw 값 → 서버 SRCH_DSPCH_* comp 대응 (서버 onSaveAfterSearch 파라미터 구성)
-  const buildSearchParams = useCallback(() => {
-    const s = (model.rawFiltersRef.current ?? {}) as Record<string, any>;
-    return {
-      LGST_GRP_CD: s.SRCH_DSPCH_LGST_GRP_CD ?? "",
-      DIV_CD: s.SRCH_DSPCH_DIV_CD ?? "",
-      DLVRY_DT_FROM: s.SRCH_DSPCH_DLVRY_DT_FRM ?? "",
-      DLVRY_DT_TO: s.SRCH_DSPCH_DLVRY_DT_TO ?? "",
-    };
-  }, [model.rawFiltersRef]);
-
   // 메인 조회 — searchStop
   const fetchList = useCallback(
-    (_params: Record<string, unknown>) => api.getMainList(buildSearchParams()),
-    [buildSearchParams],
+    (params: Record<string, unknown>) => api.getMainList(params),
+    [],
   );
 
   // sub01 조회 — 선택된 메인 행 기준 (서버 searchSubGrid)
@@ -82,11 +71,11 @@ export function useDspchContainerController({ model }: Args) {
         excelColumns: () => model.grids.main.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
-        fetchFn: () => api.getMainList(buildSearchParams()),
+        fetchFn: () => api.getMainList(model.filtersRef.current),
         rows: () => model.grids.main.rows,
       }),
     ],
-    [buildSearchParams, menuName, model.grids.main],
+    [menuName, model.filtersRef, model.grids.main],
   );
 
   const sub01Actions: ActionItem[] = useMemo(
