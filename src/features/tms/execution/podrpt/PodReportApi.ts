@@ -79,10 +79,9 @@ export const podReportApi = {
   },
   // POD 이미지 파일 다운로드 (binary) — 서버 /fileService/downloadFile (FILE_DMN_TCD:"POD")
   downloadFile(payload: { KEY_ID: string; FILE_ID: string }) {
-    return apiClient.post(
-      `/fileService/downloadFile`,
-      withSession({ MENU_CD: MENU_CODE, FILE_DMN_TCD: "POD", ...payload }),
-      { responseType: "blob" },
-    );
+    return apiClient.get(`/fileService/downloadFile`, {
+      params: withSession({ MENU_CD: MENU_CODE, FILE_DMN_TCD: "POD", ...payload }),
+      responseType: "blob",
+    });
   },
 };

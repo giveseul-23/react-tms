@@ -25,7 +25,7 @@ export function PodFileUploadPop({ onSubmit, onClose }: Props) {
       onConfirm={() => file && onSubmit(file)}
     >
       <label className="block text-sm font-medium text-gray-700">
-        {Lang.get("LBL_FILE")} <span className="text-red-500">*</span>
+        {Lang.get("LBL_FILE_ATTACH")} <span className="text-red-500">*</span>
       </label>
       <input
         ref={inputRef}

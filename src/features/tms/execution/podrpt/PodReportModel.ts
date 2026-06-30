@@ -20,6 +20,7 @@ export function usePodReportModel(menuCode: string) {
     podTcd: { sqlProp: "CODE", keyParam: "POD_TCD" },
     podOpSts: { sqlProp: "CODE", keyParam: "POD_OP_STS" },
     podDelvCnfmTp: { sqlProp: "CODE", keyParam: "POD_DELV_CNFM_TP" },
+    itmTkovrScd: { sqlProp: "CODE", keyParam: "ITM_TKOVR_SCD" },
     itmTkovrRjctRsnCd: { sqlProp: "CODE", keyParam: "ITM_TKOVR_RJCT_RSN_CD" },
     imgOpTcd: { sqlProp: "CODE", keyParam: "IMG_OP_TCD" },
   });

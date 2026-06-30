@@ -21,6 +21,15 @@ import { PodImagePanel } from "./popup/PodImagePanel";
 
 export const MENU_CODE = "MENU_POD_RPT";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_POD_RPT",
+    sub01: "SUB01_GRID_POD_RPT",
+    sub02: "SUB02_GRID_POD_RPT",
+    sub03: "SUB03_GRID_POD_RPT",
+  },
+};
+
 export default function PodReport() {
   const model = usePodReportModel(MENU_CODE);
   const ctrl = usePodReportController({ model });
@@ -35,43 +44,51 @@ export default function PodReport() {
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
+        menuCode: MENU_CODE,
         ...model.bindSearch(),
       }}
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
           rowSelection="multiple"
-          audit={false}
+          audit={{ delete: false }}
         />
       }
       detail={
-        <DataGrid
+        < DataGrid
           layoutType="tab"
-          tabs={[
-            { key: "ITEM", label: "LBL_TAKEOVER_ITM_INFO" },
-            { key: "IMAGE", label: "LBL_POD_IMAGE" },
-          ]}
+          tabs={
+            [
+              { key: "ITEM", label: "LBL_TAKEOVER_ITM_INFO" },
+              { key: "IMAGE", label: "LBL_POD_IMAGE" },
+            ]}
+          onTabChange={ctrl.onDetailTabChange}
           presets={{
             ITEM: {
               render: () => (
                 <SplitPane direction="horizontal" defaultSizes={[60, 40]}>
                   <DataGrid
                     {...model.bind("sub01")}
+                    authId={AUTH.grids.sub01}
                     columnDefs={SUB01_COLUMN_DEFS}
                     codeMap={model.codeMap}
                     onRowClicked={ctrl.onSub01GridClick}
                     actions={ctrl.sub01Actions}
+                    headerCheckbox={false}
                     audit={false}
                   />
                   <DataGrid
                     {...model.bind("sub02")}
+                    authId={AUTH.grids.sub02}
                     columnDefs={SUB02_COLUMN_DEFS}
                     codeMap={model.codeMap}
                     actions={ctrl.sub02Actions}
+                    headerCheckbox={false}
                     audit={false}
                   />
                 </SplitPane>
@@ -82,13 +99,15 @@ export default function PodReport() {
                 <SplitPane direction="horizontal" defaultSizes={[60, 40]}>
                   <DataGrid
                     {...model.bind("sub03")}
+                    authId={AUTH.grids.sub03}
                     columnDefs={SUB03_COLUMN_DEFS}
                     codeMap={model.codeMap}
                     onRowClicked={ctrl.onSub03GridClick}
                     onRowDoubleClicked={ctrl.onSub03GridDblClick}
                     actions={ctrl.sub03Actions}
                     rowSelection="multiple"
-                    audit={false}
+                    audit={{ updatePerson: false, updateTime: false, delete: false, rowStatus: false }}
+                    headerCheckbox={false}
                   />
                   <PodImagePanel image={model.image} />
                 </SplitPane>
