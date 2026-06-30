@@ -149,6 +149,7 @@ export function MAIN_COLUMN_DEFS(getLgstGrpCd: () => string): any[] {
       field: "DFT_YN",
       insertable: true,
       editable: true,
+      singleMode: true,
     },
   ];
 }
