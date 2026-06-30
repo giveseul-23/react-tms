@@ -85,7 +85,7 @@ export const COST_DETAIL_COLUMN_DEFS = [
     field: "INS_COST",
     type: "numeric",
     aggFunc: "sum",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
@@ -93,7 +93,7 @@ export const COST_DETAIL_COLUMN_DEFS = [
     field: "ADJ_COST",
     type: "numeric",
     aggFunc: "sum",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   { type: "text", headerName: "LBL_OP_ADJUST_REASON", field: "ADJ_RSN" },
@@ -147,7 +147,7 @@ export const WAYPOINT_COLUMN_DEFS = [
     field: "PRVS_DIST",
     type: "numeric",
     aggFunc: "sum",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "text",

@@ -9,10 +9,10 @@ export const MAIN_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_HIPASS_AP_ID", field: "HIPASS_AP_ID", align: "center", width: 150 },
   { type: "text", headerName: "LBL_PAY_CARR_CD", field: "PAY_CARR_CD", hide: true },
   { type: "combo", headerName: "LBL_OP_STATUS", field: "HIPASS_FI_STS", codeKey: "fiStsList", align: "center" },
-  { type: "numeric", headerName: "LBL_EXCL_LINE_CNT", field: "EXCL_LINE_CNT", align: "right", width: 80, summable: true },
-  { type: "numeric", headerName: "LBL_REGI_LINE_CNT", field: "UPLD_LINE_CNT", align: "right", width: 80, summable: true },
-  { type: "numeric", headerName: "LBL_TRANS_RATE_TOT", field: "TTL_TRNSCTN_RATE", align: "right", width: 100, summable: true },
-  { type: "numeric", headerName: "LBL_APPROV_RATE_TOT", field: "TTL_APRVL_RATE", align: "right", width: 100, summable: true },
+  { type: "numeric", headerName: "LBL_EXCL_LINE_CNT", field: "EXCL_LINE_CNT", align: "right", width: 80, summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_REGI_LINE_CNT", field: "UPLD_LINE_CNT", align: "right", width: 80, summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_TRANS_RATE_TOT", field: "TTL_TRNSCTN_RATE", align: "right", width: 100, summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_APPROV_RATE_TOT", field: "TTL_APRVL_RATE", align: "right", width: 100, summaryType: "sum" },
 ];
 
 // ── sub01: 차량단위 상세 (읽기전용 + 합계행) ─────────────────────────
@@ -24,6 +24,6 @@ export const SUB01_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_NM", align: "center", width: 90 },
   { type: "text", headerName: "LBL_HIPASS_CARDNO", field: "HIPASS_CARD_NO", align: "center", width: 150 },
   { type: "combo", headerName: "LBL_DIV", field: "HIGHWAY_OP_TCD", codeKey: "highWayTcd", align: "center", width: 50 },
-  { type: "numeric", headerName: "LBL_TRANS_RATE", field: "TRNSCTN_RATE", align: "right", width: 100, summable: true },
-  { type: "numeric", headerName: "LBL_APPROV_RATE", field: "APRVL_RATE", align: "right", width: 100, summable: true },
+  { type: "numeric", headerName: "LBL_TRANS_RATE", field: "TRNSCTN_RATE", align: "right", width: 100, summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_APPROV_RATE", field: "APRVL_RATE", align: "right", width: 100, summaryType: "sum" },
 ];

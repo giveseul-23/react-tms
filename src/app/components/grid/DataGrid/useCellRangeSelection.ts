@@ -11,16 +11,23 @@ export function useCellRangeSelection({
   containerRef,
   gridApiRef,
   enabled = true,
+  onRangeRowsChange,
 }: {
   containerRef: React.RefObject<HTMLDivElement>;
   gridApiRef: React.MutableRefObject<any>;
   /** false 면 셀 범위선택/복사 비활성 (예: 전체 행 드래그 그리드와 충돌 방지). */
   enabled?: boolean;
+  /** 셀 범위에 포함된 "행 데이터" 변경 통지 — summaryScope:"selected" 집계 등에 사용. */
+  onRangeRowsChange?: (rows: any[]) => void;
 }) {
   const selectedCellsRef = useRef<Set<string>>(new Set());
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<Coords | null>(null);
   const columnOrderRef = useRef<string[]>([]);
+
+  // 최신 콜백을 ref 로 추적 — effect deps([enabled]) 재실행 없이 사용
+  const onRangeRowsChangeRef = useRef(onRangeRowsChange);
+  onRangeRowsChangeRef.current = onRangeRowsChange;
 
   useEffect(() => {
     if (!enabled) return;
@@ -116,6 +123,31 @@ export function useCellRangeSelection({
         if (c === maxC) borders.push(`inset -1px 0 0 0 ${borderColor}`);
         cell.style.boxShadow = borders.join(", ");
       });
+
+      emitRangeRows();
+    }
+
+    // 셀 범위에 포함된 행(중복 제거) → 행 데이터 배열을 통지. 동일 선택이면 skip.
+    let lastRowSig = "";
+    function emitRangeRows() {
+      const cb = onRangeRowsChangeRef.current;
+      if (!cb) return;
+      const cells = selectedCellsRef.current;
+      const rowIdx = new Set<number>();
+      cells.forEach((k) => rowIdx.add(Number(k.split(":")[0])));
+      const sorted = [...rowIdx].sort((a, b) => a - b);
+      // 셀 1개만(단순 포커스)이면 범위 아님 → 집계 비대상(빈 배열). 2개 이상이 범위.
+      const sig = cells.size > 1 ? sorted.join(",") : "";
+      if (sig === lastRowSig) return;
+      lastRowSig = sig;
+      const api = gridApiRef.current;
+      const rows =
+        sig && api && !api.isDestroyed?.()
+          ? sorted
+              .map((r) => api.getDisplayedRowAtIndex(r)?.data)
+              .filter((d) => d != null)
+          : [];
+      cb(rows);
     }
 
     function tsvFromSelection() {

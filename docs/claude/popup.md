@@ -157,3 +157,14 @@ div("rounded-xl border border-slate-200 overflow-hidden shadow-sm")
 - **우선순위**: "배차메모"로 **명시 요청**되면 `DispatchMemoPopup`. 그 외 `LBL_MEMO` 키면 `MemoInputPopup`.
 - `BTN_VEHICLE_CHANGE` 는 key 든 label 이든 `ChangeVehiclePopup` 로 연결.
 - 이미 공통 팝업이 있으므로 화면 폴더에 동일 기능 팝업을 **새로 만들지 않는다**.
+
+## 8. CommonPopup 페이징 (서버 페이징)
+
+`CommonPopup` 결과 그리드는 **본 화면 그리드와 동일한 서버 페이징** 구조를 옵션으로 지원한다.
+
+- **props**: `pagination?: boolean`(기본 `false`) / `pageSize?: number`(기본 `20`).
+- `pagination` true → 조회 시 `page`/`limit` 를 서버에 함께 전송하고, 응답 행의 **`rows[0].TOTALCOUNT`** 로 전체건수를 잡아 하단 페이징 바를 렌더한다. 페이지 이동·페이지크기 변경 시 **서버 재조회**(화면 그리드와 동일 구조 — 서버 슬라이싱).
+- **전제**: `sqlProp` 의 SQL 이 `page`/`limit`(예: `ROW_COUNT BETWEEN ((page-1)*limit+1) AND (page*limit)`) + `TOTALCOUNT`(`COUNT(*) OVER ()`) 를 지원해야 슬라이싱이 동작한다. 미지원 SQL 에 켜면 바만 뜨고 슬라이싱이 안 되므로 **기본 false(opt-in)** 이다.
+- **그리드 `popup`/`popuser` 셀**: 컬럼 속성 `popupPagination`(boolean) / `popupPageSize`(number) 로 제어 — `processColumn` 이 `CommonPopup` 에 forward 한다.
+- **No 컬럼**: 서버 페이징 시 페이지 오프셋이 자동 반영되어 2페이지가 21부터 연속 번호로 표시된다(`DataGrid` 가 ag-grid `context.noRowOffset` 주입, `processColumn` 의 No valueGetter 가 합산).
+- 직접 사용 예: `<CommonPopup sqlId="selectLocationCodeName" pagination pageSize={20} ... />`

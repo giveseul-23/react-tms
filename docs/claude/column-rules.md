@@ -76,7 +76,8 @@
 | `isPrimaryKey` | row 식별 컬럼 (`rowKeys`/`autoSelectFirstRow` 자동) |
 | `align` | 자동 정렬 덮어쓰기 |
 | `decimalPlaces` | `numeric` 고정 소수 자릿수 포맷 + 천단위 콤마 (→ §6) |
-| `summable` | `true` 면 그 `field` 합계를 하단 고정 합계행으로 자동 생성 (→ §6) |
+| `summaryType` | `"sum"`/`"avg"`/`"count"`/`"min"`/`"max"` — 그 `field` 집계를 하단 고정 집계행으로 자동 생성 (→ §6) |
+| `summaryScope` | 집계 대상 — `"all"`(기본, 전체 행) / `"selected"`(셀 범위(shift 드래그) 선택 행) (→ §6) |
 | `dateUnit` | `date` 단위(`year`/`month`/`day`) |
 | `defaultValue` | 신규 행(`EDIT_STS:"I"`)의 해당 `field` 가 비어있을 때 자동 채움 (모든 type 공통) (→ §6) |
 | `addrFields` | `type:"address"` write-back 필드 매핑 부분 오버라이드 (기본 `ctryCd:"CTRY_CD"`…`dtlAddr2:"DTL_ADDR2"`) |
@@ -114,11 +115,13 @@
 - **`decimalPlaces`** 지정 시 `toLocaleString` 으로 **고정 소수 자릿수 + 천단위 콤마** 포맷. (커스텀 `valueFormatter` 가 있으면 그게 우선)
 - 별도 `numberComma` 같은 키는 없다 — 콤마 포맷은 numeric + `decimalPlaces` 로 제어.
 
-### 6.3 합계행 (`summable`)
+### 6.3 집계행 (`summaryType` / `summaryScope`)
 
-- 컬럼에 **`summable: true`** → DataGrid 가 그 `field` 의 합계를 **하단 고정 합계행(ag-grid `pinnedBottomRowData`)** 으로 자동 생성.
-- 값의 콤마를 제거한 뒤 숫자로 합산하며, 숫자가 아닌 값은 무시. 그룹 컬럼의 `children` 도 재귀로 수집한다.
-- 컬럼 파일에 `summable: true` 만 달면 되고, View 에서 별도 prop 불필요.
+- 컬럼에 **`summaryType`** → DataGrid 가 그 `field` 의 집계를 **하단 고정 집계행(ag-grid `pinnedBottomRowData`)** 으로 자동 생성. 종류: **`"sum"`(합계) / `"avg"`(평균) / `"count"`(개수) / `"min"`(최소) / `"max"`(최대)**.
+- 값의 콤마를 제거한 뒤 숫자로 집계하며, 숫자가 아닌 값은 무시(`count`는 행 개수). 그룹 컬럼의 `children` 도 재귀로 수집한다.
+- **`summaryScope`** 로 집계 대상 지정 — **`"all"`(기본, 전체 행)** / **`"selected"`(셀 범위(shift 드래그)로 선택한 행)**. `"selected"` 는 선택 변경 시 실시간 재계산되며, 범위 미선택 시 행 선택(없으면 0)으로 폴백한다.
+- 컬럼 파일에 `summaryType`(+필요 시 `summaryScope`) 만 달면 되고, View 에서 별도 prop 불필요.
+- (구) `summable: true | "avg"` 키는 **폐기** — 전부 `summaryType` 으로 통합(`true`→`"sum"`).
 
 ### 6.4 체크 토글 조건부 허용 (`editAllowField`)
 

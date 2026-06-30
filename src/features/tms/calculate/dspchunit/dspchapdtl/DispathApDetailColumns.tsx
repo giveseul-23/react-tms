@@ -6,7 +6,7 @@ import {
 
 // ─────────────────────────────────────────────────────────────
 // 메인 그리드 — HEAD (센차 addHeaderColumns 대응)
-//   editType float/number → numeric + numberValueFormatter, summaryType sum → summable
+//   editType float/number → numeric + numberValueFormatter, summaryType: "sum"
 //   editDisabled/insertDisabled 컬럼은 읽기전용(편집형 위젯 아님 → 기본 읽기전용)
 // ─────────────────────────────────────────────────────────────
 export const MAIN_HEAD = [
@@ -45,7 +45,7 @@ export const MAIN_HEAD = [
     width: 90,
     cellStyle: { ...RIGHT, color: "red" },
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
   },
   // 출발지코드
   { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD", width: 100 },
@@ -57,7 +57,7 @@ export const MAIN_HEAD = [
     width: 90,
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
   },
   // 경로
   { type: "text", headerName: "LBL_LANE", field: "ROUTE_PATH", width: 200 },
@@ -69,7 +69,7 @@ export const MAIN_HEAD = [
     width: 110,
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
   },
   // 총이동거리
   {
@@ -79,7 +79,7 @@ export const MAIN_HEAD = [
     width: 110,
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
   },
   // 정산문서번호
   { type: "text", headerName: "LBL_AP_ID", field: "AP_ID", width: 140, cellStyle: CENTER },
@@ -91,7 +91,7 @@ export const MAIN_HEAD = [
     width: 120,
     cellStyle: { ...RIGHT, color: "#CC0000", backgroundColor: "#FAE3D7" },
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
   },
 ];
 
@@ -117,7 +117,7 @@ export const MAIN_COLUMN_DEFS = [...MAIN_HEAD, ...MAIN_TAIL];
 // ─────────────────────────────────────────────────────────────
 // 동적 body 컬럼 빌드 (센차 addDynamicColumns 대응)
 //   dataIndex = CHG_CD.replace('.','_') + '_COST', headerName = CHG_NM (리터럴)
-//   editType number → numeric + summaryType sum → summable
+//   editType number → numeric + summaryType: "sum"
 // ─────────────────────────────────────────────────────────────
 type ChgMeta = { CHG_CD: string; CHG_NM: string };
 
@@ -135,7 +135,7 @@ export function buildDispathApColumns(
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
     aggFunc: "sum",
-    summable: true,
+    summaryType: "sum",
   }));
 
   return [...head, ...body, ...tail];

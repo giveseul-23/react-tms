@@ -137,7 +137,7 @@ export const MAIN_COLUMN_DEFS = [
   { field: "ASST_NM", hide: true },
 ];
 
-// ── sub01: 경유지/착지 (센차 TenderDispatchSub01) — summaryType:sum → summable ──
+// ── sub01: 경유지/착지 (센차 TenderDispatchSub01) — summaryType: "sum" ──
 export const SUB01_COLUMN_DEFS = [
   { headerName: "No" },
   {
@@ -183,79 +183,79 @@ export const SUB01_COLUMN_DEFS = [
   },
   { type: "numeric", headerName: "LBL_LATITUDE", field: "LAT" },
   { type: "numeric", headerName: "LBL_LONGITUDE", field: "LON" },
-  { type: "numeric", headerName: "LBL_LOADING_VOL", field: "LDNG_VOL", summable: true },
-  { type: "numeric", headerName: "LBL_LOADING_WGT", field: "LDNG_WGT", summable: true },
+  { type: "numeric", headerName: "LBL_LOADING_VOL", field: "LDNG_VOL", summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_LOADING_WGT", field: "LDNG_WGT", summaryType: "sum" },
   {
     type: "numeric",
     headerName: "LBL_LOADING_FLEX_QTY1",
     field: "LDNG_FLEX_QTY1",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_LOADING_FLEX_QTY2",
     field: "LDNG_FLEX_QTY2",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_LOADING_FLEX_QTY3",
     field: "LDNG_FLEX_QTY3",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_LOADING_FLEX_QTY4",
     field: "LDNG_FLEX_QTY4",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_LOADING_FLEX_QTY5",
     field: "LDNG_FLEX_QTY5",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_UNLOADING_VOL",
     field: "UNLDNG_VOL",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_UNLOADING_WGT",
     field: "UNLDNG_WGT",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_UNLOADING_FLEX_QTY1",
     field: "UNLDNG_FLEX_QTY1",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_UNLOADING_FLEX_QTY2",
     field: "UNLDNG_FLEX_QTY2",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_UNLOADING_FLEX_QTY3",
     field: "UNLDNG_FLEX_QTY3",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_UNLOADING_FLEX_QTY4",
     field: "UNLDNG_FLEX_QTY4",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_UNLOADING_FLEX_QTY5",
     field: "UNLDNG_FLEX_QTY5",
-    summable: true,
+    summaryType: "sum",
   },
 ];
 
@@ -361,42 +361,42 @@ export const SUB02_COLUMN_DEFS = [
   { type: "numeric", headerName: "LBL_FROM_LON", field: "FRM_LON" },
 ];
 
-// ── sub03: 운송지시 상세/품목 (센차 TenderDispatchSub03) — summaryType:sum → summable ──
+// ── sub03: 운송지시 상세/품목 (센차 TenderDispatchSub03) — summaryType: "sum" ──
 export const SUB03_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_ITEM_CODE", field: "CUST_ITEM_CD" },
   { type: "text", headerName: "LBL_ITEM_NAME", field: "CUST_ITEM_NM" },
-  { type: "numeric", headerName: "LBL_VOL", field: "PLN_VOL", summable: true },
-  { type: "numeric", headerName: "LBL_WGT", field: "PLN_WGT", summable: true },
+  { type: "numeric", headerName: "LBL_VOL", field: "PLN_VOL", summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_WGT", field: "PLN_WGT", summaryType: "sum" },
   {
     type: "numeric",
     headerName: "LBL_PLANNED_FLEX_QTY1",
     field: "PLN_FLEX_QTY1",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_PLANNED_FLEX_QTY2",
     field: "PLN_FLEX_QTY2",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_PLANNED_FLEX_QTY3",
     field: "PLN_FLEX_QTY3",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_PLANNED_FLEX_QTY4",
     field: "PLN_FLEX_QTY4",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_PLANNED_FLEX_QTY5",
     field: "PLN_FLEX_QTY5",
-    summable: true,
+    summaryType: "sum",
   },
-  { type: "numeric", headerName: "LBL_PLAN_QTY", field: "PLN_QTY", summable: true },
+  { type: "numeric", headerName: "LBL_PLAN_QTY", field: "PLN_QTY", summaryType: "sum" },
 ];

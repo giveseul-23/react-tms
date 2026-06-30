@@ -152,7 +152,7 @@ export const SUB01_COLUMN_DEFS = [
     field: "DTL_DIST_COST",
     width: 100,
     align: "right",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "text",

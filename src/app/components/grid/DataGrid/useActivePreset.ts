@@ -1,6 +1,6 @@
 // app/components/grid/DataGrid/useActivePreset.ts
 // 탭/프리셋이 활성화된 경우 해당 탭의 값으로, 없으면 기본 props 로 도출되는
-// active* 메모이즈 모음. audit 자동 추가, summable 합계, processColumnDef 적용까지.
+// active* 메모이즈 모음. audit 자동 추가, summaryType 집계행, processColumnDef 적용까지.
 
 import { useMemo } from "react";
 import type { ColDef, ColGroupDef } from "ag-grid-community";
@@ -27,6 +27,7 @@ export function useActivePreset<TRow>({
   columnDefs,
   rowData,
   overrideRowData,
+  selectedRows,
   actions,
   onCellValueChanged,
   onRowClicked,
@@ -44,6 +45,8 @@ export function useActivePreset<TRow>({
   columnDefs: (ColDef<TRow> | ColGroupDef<TRow>)[];
   rowData?: TRow[] | Record<string, TRow[]>;
   overrideRowData?: TRow[];
+  /** summaryScope:"selected" 집계용 — 현재 선택 행 전체 */
+  selectedRows?: TRow[];
   actions?: ActionItem[];
   onCellValueChanged?: (params: any) => void;
   onRowClicked?: (row: TRow) => void;
@@ -93,23 +96,35 @@ export function useActivePreset<TRow>({
     return Array.isArray(rowData) ? rowData : [];
   }, [layoutType, activeTab, rowData, overrideRowData]);
 
-  // summable: true(합계) / "avg"(평균) 컬럼을 pinnedBottomRowData 로 생성
+  // summaryType: "sum"|"avg"|"count"|"min"|"max" 컬럼을 pinnedBottomRowData 로 생성.
+  //  summaryScope: "all"(기본, 전체 행) | "selected"(선택 행) — 하단 고정 집계행.
   const summaryRow = useMemo(() => {
-    const collectSummable = (cols: any[]): any[] => {
-      const out: any[] = [];
+    type SummaryType = "sum" | "avg" | "count" | "min" | "max";
+    type SummaryScope = "all" | "selected";
+    const resolveType = (c: any): SummaryType | undefined =>
+      (c?.summaryType as SummaryType) ?? undefined;
+    const collect = (
+      cols: any[],
+    ): Array<{ field: string; type: SummaryType; scope: SummaryScope }> => {
+      const out: Array<{
+        field: string;
+        type: SummaryType;
+        scope: SummaryScope;
+      }> = [];
       for (const c of cols) {
-        if (
-          (c?.summable === true || c?.summable === "avg") &&
-          c.field
-        )
-          out.push(c);
-        if (Array.isArray(c?.children))
-          out.push(...collectSummable(c.children));
+        const type = resolveType(c);
+        if (type && c.field)
+          out.push({
+            field: c.field,
+            type,
+            scope: c?.summaryScope === "selected" ? "selected" : "all",
+          });
+        if (Array.isArray(c?.children)) out.push(...collect(c.children));
       }
       return out;
     };
-    const summable = collectSummable(activeColumnDefs as any[]);
-    if (summable.length === 0) return undefined;
+    const targets = collect(activeColumnDefs as any[]);
+    if (targets.length === 0) return undefined;
 
     const toNumber = (v: unknown) => {
       const n =
@@ -119,26 +134,37 @@ export function useActivePreset<TRow>({
       return Number.isNaN(n) ? null : n;
     };
 
+    const allRows = activeRowData as any[];
+    const selRows = (selectedRows ?? []) as any[];
     const row: Record<string, any> = {};
-    for (const col of summable) {
-      const field = col.field as string;
-      if (col.summable === "avg") {
-        const nums = (activeRowData as any[])
-          .map((r) => toNumber(r?.[field]))
-          .filter((n): n is number => n != null);
-        row[field] =
-          nums.length > 0
+    for (const { field, type, scope } of targets) {
+      const srcRows = scope === "selected" ? selRows : allRows;
+      const nums = srcRows
+        .map((r) => toNumber(r?.[field]))
+        .filter((n): n is number => n != null);
+      switch (type) {
+        case "count":
+          row[field] = srcRows.length;
+          break;
+        case "min":
+          row[field] = nums.length ? Math.min(...nums) : 0;
+          break;
+        case "max":
+          row[field] = nums.length ? Math.max(...nums) : 0;
+          break;
+        case "avg":
+          row[field] = nums.length
             ? nums.reduce((acc, n) => acc + n, 0) / nums.length
             : 0;
-      } else {
-        row[field] = (activeRowData as any[]).reduce((acc: number, r: any) => {
-          const n = toNumber(r?.[field]);
-          return n == null ? acc : acc + n;
-        }, 0);
+          break;
+        case "sum":
+        default:
+          row[field] = nums.reduce((acc, n) => acc + n, 0);
+          break;
       }
     }
     return [row];
-  }, [activeColumnDefs, activeRowData]);
+  }, [activeColumnDefs, activeRowData, selectedRows]);
 
   const activeActions = useMemo(() => {
     if (layoutType === "tab" && activeTab && presets) {

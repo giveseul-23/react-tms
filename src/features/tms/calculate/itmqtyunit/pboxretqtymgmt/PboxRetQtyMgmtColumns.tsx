@@ -19,15 +19,26 @@ const pctFormatter = (p: any) => {
 // ── 메인: 협력사단위 (읽기전용 + 합계행) ───────────────────────────
 export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_CARRIER_CODE", field: "CARR_CD", cellStyle: CENTER, width: 150 },
-  { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM", width: 150 },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_CODE",
+    field: "CARR_CD",
+    cellStyle: CENTER,
+    width: 150,
+  },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_NAME",
+    field: "CARR_NM",
+    width: 150,
+  },
   {
     type: "numeric",
     headerName: "LBL_OUT_PBOX_QTY_ORI",
     field: "TTL_OUT_PBOX_QTY_ORI",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -36,7 +47,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "TTL_OUT_PBOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -45,7 +56,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "TTL_IN_PBOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -55,7 +66,7 @@ export const MAIN_COLUMN_DEFS = [
     cellStyle: RIGHT,
     width: 100,
     valueFormatter: pctFormatter,
-    summable: "avg",
+    summaryType: "avg",
   },
   {
     type: "numeric",
@@ -63,7 +74,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "ADD_RCVRY_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
 ];
@@ -71,12 +82,46 @@ export const MAIN_COLUMN_DEFS = [
 // ── sub01: 차량단위요약 (읽기전용 + 합계행) ────────────────────────
 export const SUB01_COLUMN_DEFS = [
   { headerName: "No" },
-  { type: "text", headerName: "LBL_CARRIER_CODE", field: "CARR_CD", cellStyle: CENTER, width: 150 },
-  { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM", width: 150 },
-  { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO", cellStyle: CENTER },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_CD", cellStyle: CENTER, width: 100 },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM", cellStyle: CENTER, width: 100 },
-  { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM", cellStyle: CENTER, width: 60 },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_CODE",
+    field: "CARR_CD",
+    cellStyle: CENTER,
+    width: 150,
+  },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_NAME",
+    field: "CARR_NM",
+    width: 150,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEH_NO",
+    field: "VEH_NO",
+    cellStyle: CENTER,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_TYPE",
+    field: "VEH_TP_CD",
+    cellStyle: CENTER,
+    width: 100,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_TYPE_NAME",
+    field: "VEH_TP_NM",
+    cellStyle: CENTER,
+    width: 100,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DRIVER_NAME",
+    field: "DRVR_NM",
+    cellStyle: CENTER,
+    width: 60,
+  },
   {
     type: "combo",
     headerName: "LBL_ITM_QTY_OP_STS",
@@ -91,7 +136,7 @@ export const SUB01_COLUMN_DEFS = [
     field: "TTL_OUT_PBOX_QTY_ORI",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -100,7 +145,7 @@ export const SUB01_COLUMN_DEFS = [
     field: "TTL_OUT_PBOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -109,7 +154,7 @@ export const SUB01_COLUMN_DEFS = [
     field: "TTL_IN_PBOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -118,7 +163,7 @@ export const SUB01_COLUMN_DEFS = [
     field: "TTL_BASE_PRD_IN_BOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 180,
   },
   {
@@ -127,7 +172,7 @@ export const SUB01_COLUMN_DEFS = [
     field: "TTL_FOCUS_PRD_IN_BOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 180,
   },
   {
@@ -137,7 +182,7 @@ export const SUB01_COLUMN_DEFS = [
     cellStyle: RIGHT,
     width: 100,
     valueFormatter: pctFormatter,
-    summable: "avg",
+    summaryType: "avg",
   },
   {
     type: "numeric",
@@ -145,7 +190,7 @@ export const SUB01_COLUMN_DEFS = [
     field: "ADD_IN_BOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -154,7 +199,7 @@ export const SUB01_COLUMN_DEFS = [
     field: "TTL_IN_PLT_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
 ];
@@ -170,13 +215,53 @@ export const SUB02_COLUMN_DEFS = [
     cellStyle: CENTER,
     editable: editableWhenNew,
   },
-  { type: "text", headerName: "LBL_DLVRY_DATE", field: "DLVRY_DT", cellStyle: CENTER, width: 90 },
-  { type: "text", headerName: "LBL_CARRIER_CODE", field: "CARR_CD", cellStyle: CENTER, width: 150 },
-  { type: "text", headerName: "LBL_CARRIER_NAME", field: "CARR_NM", width: 150 },
-  { type: "text", headerName: "LBL_VEH_NO", field: "VEH_NO", cellStyle: CENTER },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE", field: "VEH_TP_CD", cellStyle: CENTER, width: 100 },
-  { type: "text", headerName: "LBL_VEHICLE_TYPE_NAME", field: "VEH_TP_NM", cellStyle: CENTER, width: 100 },
-  { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM", cellStyle: CENTER, width: 60 },
+  {
+    type: "text",
+    headerName: "LBL_DLVRY_DATE",
+    field: "DLVRY_DT",
+    cellStyle: CENTER,
+    width: 90,
+  },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_CODE",
+    field: "CARR_CD",
+    cellStyle: CENTER,
+    width: 150,
+  },
+  {
+    type: "text",
+    headerName: "LBL_CARRIER_NAME",
+    field: "CARR_NM",
+    width: 150,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEH_NO",
+    field: "VEH_NO",
+    cellStyle: CENTER,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_TYPE",
+    field: "VEH_TP_CD",
+    cellStyle: CENTER,
+    width: 100,
+  },
+  {
+    type: "text",
+    headerName: "LBL_VEHICLE_TYPE_NAME",
+    field: "VEH_TP_NM",
+    cellStyle: CENTER,
+    width: 100,
+  },
+  {
+    type: "text",
+    headerName: "LBL_DRIVER_NAME",
+    field: "DRVR_NM",
+    cellStyle: CENTER,
+    width: 60,
+  },
   {
     type: "combo",
     headerName: "LBL_ITM_QTY_OP_STS",
@@ -191,7 +276,7 @@ export const SUB02_COLUMN_DEFS = [
     field: "OTBND_PBOX_QTY_ORI",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -202,7 +287,7 @@ export const SUB02_COLUMN_DEFS = [
     validators: { min: 1 },
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -211,7 +296,7 @@ export const SUB02_COLUMN_DEFS = [
     field: "INBND_PBOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {
@@ -220,7 +305,7 @@ export const SUB02_COLUMN_DEFS = [
     field: "ADD_IN_BOX_QTY",
     cellStyle: RIGHT,
     valueFormatter: numberValueFormatter,
-    summable: true,
+    summaryType: "sum",
     width: 120,
   },
   {

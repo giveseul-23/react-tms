@@ -224,11 +224,14 @@ export default function DataGrid<TRow>({
   selectedRowRef.current = (selectedRow ?? null) as TRow | null;
 
   const gridApiRef = useRef<any>(null);
+  // 셀 범위(shift 드래그) 선택 행 — summaryScope:"selected" 집계 소스
+  const [rangeRows, setRangeRows] = useState<TRow[]>([]);
   const { columnOrderRef } = useCellRangeSelection({
     containerRef: gridContainerRef,
     gridApiRef,
     // 전체 행 드래그(rowDragEntireRow) 그리드는 셀 범위선택과 mousedown 충돌 → 셀선택 비활성.
     enabled: !gridOptions?.rowDragEntireRow,
+    onRangeRowsChange: setRangeRows as (rows: any[]) => void,
   });
 
   const {
@@ -250,6 +253,8 @@ export default function DataGrid<TRow>({
     columnDefs,
     rowData,
     overrideRowData,
+    // summaryScope:"selected" 소스 — 셀 범위 선택 우선, 없으면 행 선택
+    selectedRows: rangeRows.length ? rangeRows : selectedRows,
     actions,
     onCellValueChanged,
     onRowClicked,

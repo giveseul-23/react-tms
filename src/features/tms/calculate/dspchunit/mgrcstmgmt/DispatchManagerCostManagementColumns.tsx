@@ -51,7 +51,7 @@ export const COST_DETAIL_COLUMN_DEFS = [
     headerName: "LBL_INS_COST",
     field: "INS_COST",
     aggFunc: "sum",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
@@ -59,7 +59,7 @@ export const COST_DETAIL_COLUMN_DEFS = [
     headerName: "LBL_ADJ_COST",
     field: "ADJ_COST",
     aggFunc: "sum",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
@@ -67,7 +67,7 @@ export const COST_DETAIL_COLUMN_DEFS = [
     headerName: "LBL_CFM_COST",
     field: "CFM_COST",
     aggFunc: "sum",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   { type: "text", headerName: "LBL_OP_ADJUST_REASON", field: "ADJ_RSN" },
