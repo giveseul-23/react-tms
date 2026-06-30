@@ -164,6 +164,12 @@ export function useDispatchPlanController({ model }: Args) {
     });
   }, [handleUnallocAndAllocOrderSearch, model]);
 
+  const refreshAfterAssignedShipment = useCallback(() => {
+    base.search();
+    base.resetGrids(["unallocSub"]);
+    handleUnallocOrderSearch();
+  }, [base, handleUnallocOrderSearch]);
+
   // 할당 탭 조회 (조회조건 개별 값 기반) — 미할당과 동일 UI, 상태는 allocCond 로 별도 관리.
   const handleAllocOrderSearch = useCallback(
     (dspchNo?: string) => {
@@ -808,9 +814,14 @@ export function useDispatchPlanController({ model }: Args) {
             rows.map((r) => ({ ...r, DSPCH_NO: main.DSPCH_NO })),
           ),
         )
-        .then(() => base.search());
+        .then(refreshAfterAssignedShipment);
     },
-    [model.grids.main, guardHasData, base],
+    [
+      model.grids.main,
+      guardHasData,
+      base,
+      refreshAfterAssignedShipment,
+    ],
   );
 
   // 선택 배차행 정보 + 조회조건 착지(SRCH_TO_LOC_CD)를 품목 행에 세팅 (센차 setAssignedShipment/assignItem 대응)
@@ -841,7 +852,7 @@ export function useDispatchPlanController({ model }: Args) {
           ),
           { mask: "main" },
         )
-        .then(() => base.search());
+        .then(refreshAfterAssignedShipment);
     },
     [
       model.grids.main,
@@ -849,6 +860,7 @@ export function useDispatchPlanController({ model }: Args) {
       guardHasData,
       setItemAssignInfo,
       base,
+      refreshAfterAssignedShipment,
     ],
   );
 
@@ -885,12 +897,16 @@ export function useDispatchPlanController({ model }: Args) {
           : api.saveAssignedShipment(
               rows.map((r) => ({ ...r, DSPCH_NO: target.DSPCH_NO })),
             );
-      base.callAjax(apiCall, { mask: "main" }).then(() => {
-        base.search(); // 메인 재조회
-        handleUnallocOrderSearch(); // 미할당(품목/주문) 그리드 재조회 — 할당된 행 제거
-      });
+      base
+        .callAjax(apiCall, { mask: "main" })
+        .then(refreshAfterAssignedShipment);
     },
-    [model.unallocCond, setItemAssignInfo, base, handleUnallocOrderSearch],
+    [
+      model.unallocCond,
+      setItemAssignInfo,
+      base,
+      refreshAfterAssignedShipment,
+    ],
   );
 
   // 품목 라인분할 — 상세 그리드 선택 행
