@@ -164,6 +164,12 @@ export function useDispatchPlanController({ model }: Args) {
     });
   }, [handleUnallocAndAllocOrderSearch, model]);
 
+  const refreshAfterAssignedShipment = useCallback(() => {
+    base.search();
+    base.resetGrids(["unallocSub"]);
+    handleUnallocOrderSearch();
+  }, [base, handleUnallocOrderSearch]);
+
   // 할당 탭 조회 (조회조건 개별 값 기반) — 미할당과 동일 UI, 상태는 allocCond 로 별도 관리.
   const handleAllocOrderSearch = useCallback(
     (dspchNo?: string) => {
@@ -787,9 +793,14 @@ export function useDispatchPlanController({ model }: Args) {
             rows.map((r) => ({ ...r, DSPCH_NO: main.DSPCH_NO })),
           ),
         )
-        .then(() => base.search());
+        .then(refreshAfterAssignedShipment);
     },
-    [model.grids.main, guardHasData, base],
+    [
+      model.grids.main,
+      guardHasData,
+      base,
+      refreshAfterAssignedShipment,
+    ],
   );
 
   // 미할당주문(unallocOrder) → 메인 드래그드랍 → 드롭한 타겟 배차행에 할당.
@@ -803,9 +814,9 @@ export function useDispatchPlanController({ model }: Args) {
             rows.map((r) => ({ ...r, DSPCH_NO: target.DSPCH_NO })),
           ),
         )
-        .then(() => base.search());
+        .then(refreshAfterAssignedShipment);
     },
-    [base],
+    [base, refreshAfterAssignedShipment],
   );
 
   // 품목 라인분할 — 상세 그리드 선택 행

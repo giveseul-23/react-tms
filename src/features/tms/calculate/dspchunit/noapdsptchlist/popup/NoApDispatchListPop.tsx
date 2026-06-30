@@ -55,7 +55,7 @@ export function NoApDispatchListPop({ dspchNo, onDone, onClose }: Props) {
   const onSearch = () => {
     apiClient
       .post(
-        `/tariffOperationRefactorService/selectTariffList`,
+        `/tariffOperationService/rateShop`,
         { DSPCH_NO: dspchNo },
         { params: { ...getSessionFields(), module: "TMS", MENU_CD: MENU_CODE } },
       )
