@@ -295,6 +295,20 @@ export const dispatchPlanApi = {
     );
   },
 
+  // ── 품목할당 / 품목할당취소 (데이터필터 ITEM 일 때) ──────────
+  saveAssignedItem(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveAssignedItem",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+  saveUnAssignedItem(rows: any[]) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveUnAssignedItem",
+      withSession({ MENU_CD: MENU_CODE, dsSave: rows }),
+    );
+  },
+
   // ── 물동량 배차생성 (CreateQtyDispatchPop) ──────────────────
   // 메인: 물동배차노선/차량 후보 (sub 미할당주문은 getUnallocOrderList 재사용)
   searchQtyItinerary(payload: any) {

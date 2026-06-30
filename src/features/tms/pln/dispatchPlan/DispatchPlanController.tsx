@@ -1,5 +1,5 @@
 // src/views/dispatchPlan/DispatchPlanController.tsx
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useBaseController } from "@/app/feature/useBaseController";
 import { dispatchPlanApi as api } from "./dispatchPlanApi";
 import { useGuard } from "@/hooks/useGuard";
@@ -182,6 +182,27 @@ export function useDispatchPlanController({ model }: Args) {
     },
     [handleUnallocAndAllocOrderSearch, model],
   );
+
+  // 데이터필터(SRCH_FILTER) 변경 시 해당 탭 자동 재조회 (초기 마운트 제외)
+  const unallocFilterFirst = useRef(true);
+  useEffect(() => {
+    if (unallocFilterFirst.current) {
+      unallocFilterFirst.current = false;
+      return;
+    }
+    handleUnallocOrderSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model.unallocCond.SRCH_FILTER]);
+
+  const allocFilterFirst = useRef(true);
+  useEffect(() => {
+    if (allocFilterFirst.current) {
+      allocFilterFirst.current = false;
+      return;
+    }
+    handleAllocOrderSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model.allocCond.SRCH_FILTER]);
 
   const handleVehMgmtSearch = useCallback(() => {
     const srchObj = model.rawFiltersRef.current;
@@ -792,20 +813,84 @@ export function useDispatchPlanController({ model }: Args) {
     [model.grids.main, guardHasData, base],
   );
 
-  // 미할당주문(unallocOrder) → 메인 드래그드랍 → 드롭한 타겟 배차행에 할당.
-  //  메인 타겟 행(DSPCH_NO)이 있어야만 동작. 다중선택 시 드롭된 모든 주문 일괄 할당.
-  const onUnallocDropToMain = useCallback(
-    (rows: any[], target: any) => {
-      if (!target?.DSPCH_NO || !rows?.length) return; // 메인 타겟 배차행 필수
+  // 선택 배차행 정보 + 조회조건 착지(SRCH_TO_LOC_CD)를 품목 행에 세팅 (센차 setAssignedShipment/assignItem 대응)
+  const setItemAssignInfo = useCallback(
+    (rows: any[], main: any, toLocCd: string) =>
+      rows.map((r) => ({
+        ...r,
+        DSPCH_NO: main.DSPCH_NO,
+        VEH_ID: main.VEH_ID,
+        VEH_TP_CD: main.VEH_TP_CD,
+        DSPCH_OP_STS: main.DSPCH_OP_STS,
+        SRCH_TO_LOC_CD: toLocCd,
+      })),
+    [],
+  );
+
+  // 품목할당 (미할당주문 탭, 데이터필터 ITEM — 선택 배차에 품목 단위 할당)
+  const onAssignedItem = useCallback(
+    (e: any) => {
+      const main = model.grids.main.selectedRef.current;
+      const rows = (e?.data ?? []) as any[];
+      if (!guardHasData(main ? [main] : [])) return;
+      if (!guardHasData(rows)) return;
       base
         .callAjax(
-          api.saveAssignedShipment(
-            rows.map((r) => ({ ...r, DSPCH_NO: target.DSPCH_NO })),
+          api.saveAssignedItem(
+            setItemAssignInfo(rows, main, model.unallocCond.TO_LOC_CD ?? ""),
           ),
+          { mask: "main" },
         )
         .then(() => base.search());
     },
-    [base],
+    [
+      model.grids.main,
+      model.unallocCond,
+      guardHasData,
+      setItemAssignInfo,
+      base,
+    ],
+  );
+
+  // 품목할당취소 (할당주문 탭, 데이터필터 ITEM)
+  const onUnassignedItem = useCallback(
+    (e: any) => {
+      const main = model.grids.main.selectedRef.current;
+      const rows = (e?.data ?? []) as any[];
+      if (!guardHasData(main ? [main] : [])) return;
+      if (!guardHasData(rows)) return;
+      base
+        .callAjax(
+          api.saveUnAssignedItem(
+            setItemAssignInfo(rows, main, model.allocCond.TO_LOC_CD ?? ""),
+          ),
+          { mask: "main" },
+        )
+        .then(() => base.search());
+    },
+    [model.grids.main, model.allocCond, guardHasData, setItemAssignInfo, base],
+  );
+
+  // 미할당주문(unallocOrder) → 메인 드래그드랍 → 드롭한 타겟 배차행에 할당.
+  //  메인 타겟 행(DSPCH_NO)이 있어야만 동작. 다중선택 시 드롭된 모든 주문 일괄 할당.
+  //  데이터필터 ITEM 이면 품목 단위(saveAssignedItem), 그 외 주문 단위(saveAssignedShipment)로 분기 — 버튼과 동일.
+  const onUnallocDropToMain = useCallback(
+    (rows: any[], target: any) => {
+      if (!target?.DSPCH_NO || !rows?.length) return; // 메인 타겟 배차행 필수
+      const apiCall =
+        model.unallocCond.SRCH_FILTER === "ITEM"
+          ? api.saveAssignedItem(
+              setItemAssignInfo(rows, target, model.unallocCond.TO_LOC_CD ?? ""),
+            )
+          : api.saveAssignedShipment(
+              rows.map((r) => ({ ...r, DSPCH_NO: target.DSPCH_NO })),
+            );
+      base.callAjax(apiCall, { mask: "main" }).then(() => {
+        base.search(); // 메인 재조회
+        handleUnallocOrderSearch(); // 미할당(품목/주문) 그리드 재조회 — 할당된 행 제거
+      });
+    },
+    [model.unallocCond, setItemAssignInfo, base, handleUnallocOrderSearch],
   );
 
   // 품목 라인분할 — 상세 그리드 선택 행
@@ -1390,10 +1475,20 @@ export function useDispatchPlanController({ model }: Args) {
         type: "button",
         key: "BTN_UNASSIGNED_SHIPMENT",
         label: "BTN_UNASSIGNED_SHIPMENT",
-        onClick: onUnassignedShipment,
+        // 데이터필터 ITEM 이면 품목할당취소, 그 외 주문할당취소로 분기
+        onClick: (e: any) =>
+          (model.allocCond.SRCH_FILTER === "ITEM"
+            ? onUnassignedItem
+            : onUnassignedShipment)(e),
       },
     ],
-    [handleAllocOrderSearch, model.allocSearching, onUnassignedShipment],
+    [
+      handleAllocOrderSearch,
+      model.allocSearching,
+      model.allocCond,
+      onUnassignedShipment,
+      onUnassignedItem,
+    ],
   );
 
   const unallocOrderActions: ActionItem[] = useMemo(
@@ -1403,10 +1498,16 @@ export function useDispatchPlanController({ model }: Args) {
         type: "button",
         key: "BTN_ASSIGN_SHIPMENT",
         label: "BTN_ASSIGN_SHIPMENT",
-        onClick: onAssignedShipment,
+        // 데이터필터 ITEM 이면 품목할당, 그 외 주문할당으로 분기
+        onClick: (e: any) => {
+          console.log(model.unallocCond.SRCH_FILTER);
+          (model.unallocCond.SRCH_FILTER === "ITEM"
+            ? onAssignedItem
+            : onAssignedShipment)(e);
+        },
       },
     ],
-    [onAssignedShipment],
+    [model.unallocCond, onAssignedShipment, onAssignedItem],
   );
 
   const unallocSubActions: ActionItem[] = useMemo(
