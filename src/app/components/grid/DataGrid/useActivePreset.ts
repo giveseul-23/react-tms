@@ -93,12 +93,16 @@ export function useActivePreset<TRow>({
     return Array.isArray(rowData) ? rowData : [];
   }, [layoutType, activeTab, rowData, overrideRowData]);
 
-  // summable: true 컬럼의 합계를 pinnedBottomRowData 로 생성
+  // summable: true(합계) / "avg"(평균) 컬럼을 pinnedBottomRowData 로 생성
   const summaryRow = useMemo(() => {
     const collectSummable = (cols: any[]): any[] => {
       const out: any[] = [];
       for (const c of cols) {
-        if (c?.summable && c.field) out.push(c);
+        if (
+          (c?.summable === true || c?.summable === "avg") &&
+          c.field
+        )
+          out.push(c);
         if (Array.isArray(c?.children))
           out.push(...collectSummable(c.children));
       }
@@ -107,18 +111,31 @@ export function useActivePreset<TRow>({
     const summable = collectSummable(activeColumnDefs as any[]);
     if (summable.length === 0) return undefined;
 
+    const toNumber = (v: unknown) => {
+      const n =
+        typeof v === "number"
+          ? v
+          : Number(String(v ?? "").replaceAll(",", ""));
+      return Number.isNaN(n) ? null : n;
+    };
+
     const row: Record<string, any> = {};
     for (const col of summable) {
       const field = col.field as string;
-      const total = (activeRowData as any[]).reduce((acc: number, r: any) => {
-        const v = r?.[field];
-        const n =
-          typeof v === "number"
-            ? v
-            : Number(String(v ?? "").replaceAll(",", ""));
-        return Number.isNaN(n) ? acc : acc + n;
-      }, 0);
-      row[field] = total;
+      if (col.summable === "avg") {
+        const nums = (activeRowData as any[])
+          .map((r) => toNumber(r?.[field]))
+          .filter((n): n is number => n != null);
+        row[field] =
+          nums.length > 0
+            ? nums.reduce((acc, n) => acc + n, 0) / nums.length
+            : 0;
+      } else {
+        row[field] = (activeRowData as any[]).reduce((acc: number, r: any) => {
+          const n = toNumber(r?.[field]);
+          return n == null ? acc : acc + n;
+        }, 0);
+      }
     }
     return [row];
   }, [activeColumnDefs, activeRowData]);
