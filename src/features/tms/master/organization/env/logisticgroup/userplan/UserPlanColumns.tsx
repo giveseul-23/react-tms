@@ -147,6 +147,8 @@ export function MAIN_COLUMN_DEFS(getLgstGrpCd: () => string): any[] {
       type: "check",
       headerName: "LBL_DEFAULT",
       field: "DFT_YN",
+      insertable: true,
+      editable: true,
     },
   ];
 }
