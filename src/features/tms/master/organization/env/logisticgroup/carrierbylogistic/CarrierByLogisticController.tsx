@@ -10,6 +10,8 @@ import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type { CarrierByLogisticModel, GridKey } from "./CarrierByLogisticModel";
 import { MENU_CODE } from "./CarrierByLogistic";
 import { useMenuMeta } from "@/app/context/MenuMetaContext";
+import { usePopup } from "@/app/components/popup/PopupContext";
+import { CommonPopup } from "@/app/components/popup/CommonPopup";
 
 interface Args {
   model: CarrierByLogisticModel;
@@ -18,6 +20,7 @@ interface Args {
 export function useCarrierByLogisticController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
+  const { openPopup, closePopup } = usePopup();
 
   const fetchList = useCallback(
     async (params: Record<string, unknown>) => {
@@ -80,16 +83,47 @@ export function useCarrierByLogisticController({ model }: Args) {
   const onAddSub01 = useCallback(() => {
     const main = model.grids.main.selectedRef.current;
     if (!base.requireParentRow(main, "물류운영그룹코드")) return;
-    base.resetGrids(["sub02"]);
-    base.addRow("sub01", {
-      DIV_CD: main.DIV_CD,
-      LGST_GRP_CD: main.LGST_GRP_CD,
-      CARR_CD: "",
-      DSPCH_AP_FRM_DAY_ADJ: 0,
-      DSPCH_AP_TO_DAY_ADJ: 0,
-      USE_YN: "Y",
+
+    openPopup({
+      title: "LBL_CARRIER",
+      width: "2xl",
+      content: (
+        <CommonPopup
+          sqlId="selectCarrList"
+          rowSelection="multiple"
+          onApply={(selected) => {
+            const selectedRows = Array.isArray(selected) ? selected : [selected];
+            const existingCodes = new Set(
+              model.grids.sub01.rows.map((row) => String(row.CARR_CD ?? "")),
+            );
+            const newRows = selectedRows
+              .filter((row) => {
+                const carrCd = String(row.CODE ?? "");
+                if (!carrCd || existingCodes.has(carrCd)) return false;
+                existingCodes.add(carrCd);
+                return true;
+              })
+              .map((row) => ({
+                DIV_CD: main.DIV_CD,
+                LGST_GRP_CD: main.LGST_GRP_CD,
+                CARR_CD: row.CODE,
+                CARR_NM: row.NAME,
+                DSPCH_AP_FRM_DAY_ADJ: 0,
+                DSPCH_AP_TO_DAY_ADJ: 0,
+                USE_YN: "Y",
+              }));
+
+            if (newRows.length > 0) {
+              base.resetGrids(["sub02"]);
+              base.addRow("sub01", newRows);
+            }
+            closePopup();
+          }}
+          onClose={closePopup}
+        />
+      ),
     });
-  }, [model, base]);
+  }, [base, closePopup, model, openPopup]);
 
   const onAddSub02 = useCallback(() => {
     const sub01 = model.grids.sub01.selectedRef.current;

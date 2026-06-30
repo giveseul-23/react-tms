@@ -193,8 +193,8 @@ export const WAYPOINT_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_UNLDNG_CFM_FLEX_QTY4", field: "UNLDNG_CFM_FLEX_QTY4" },
   { type: "text", headerName: "LBL_UNLDNG_PLN_FLEX_QTY5", field: "UNLDNG_PLN_FLEX_QTY5" },
   { type: "text", headerName: "LBL_UNLDNG_CFM_FLEX_QTY5", field: "UNLDNG_CFM_FLEX_QTY5" },
-  { type: "text", headerName: "LBL_RTR_PBOX", field: "OUT_COUNT" },
-  { type: "text", headerName: "LBL_RTR_PLT", field: "PLT_OUT_COUNT" },
+  { type: "text", headerName: "LBL_RTR_PBOX", field: "RTRN_QTY" },
+  { type: "text", headerName: "LBL_RTR_PLT", field: "PLT_RTRN_QTY" },
 ];
 
 // 증빙문서
