@@ -225,6 +225,8 @@ export function SearchFilters({
             [&_input]:px-2
             [&_input]:py-0
             [&_input]:text-[11px]
+            [&_input]:selection:text-gray-700
+            [&_input]:selection:bg-gray-300
 
             [&_select]:h-6
             [&_[role=combobox]]:h-6
