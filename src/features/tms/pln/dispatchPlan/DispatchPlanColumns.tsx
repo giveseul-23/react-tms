@@ -94,7 +94,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "numeric",
   }, //팔레트수량
   {
-    headerName: "LBL_PLT_QTY_LOADING_RATE",
+    headerName: "LBL_PLN_PLT_QTY_RT",
     field: "PLN_PLT_RT",
     type: "numeric",
     decimalPlaces: 1,
@@ -126,7 +126,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "numeric",
   }, //PBOX수량
   {
-    headerName: "LBL_PBOX_QTY_LOADING_RATE",
+    headerName: "LBL_PLN_PBOX_QTY_RT",
     field: "PLN_PBOX_RT",
     type: "numeric",
     decimalPlaces: 1,
@@ -142,7 +142,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "numeric",
   }, //BOX수량
   {
-    headerName: "LBL_BOX_QTY_LOADING_RATE",
+    headerName: "LBL_PLN_BOX_QTY_RT",
     field: "PLN_BOX_RT",
     type: "numeric",
     decimalPlaces: 1,

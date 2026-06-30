@@ -144,7 +144,7 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   const onSaveMain = useCallback(
     () =>
       base.saveGrid("main", api.saveConfig, {
-        confirmOnDelete: "MSG_CHK_DELETE",
+        confirmOnDelete: Lang.get("MSG_CHK_DELETE"),
       }),
     [base],
   );
@@ -194,10 +194,10 @@ export function useLgstgrpOprConfigMstController({ model }: Args) {
   // ── 동기화 (센차: syncConfig) ──────────────────────────────────
   const syncConfig = useCallback(() => {
     base
-      .callAjax(
-        api.syncConfig({ LGST_GRP_CNFG_GRP_CD: model.activeType }),
-        { successMsg: "MSG_CMPLT_SYNC", mask: "main" },
-      )
+      .callAjax(api.syncConfig({ LGST_GRP_CNFG_GRP_CD: model.activeType }), {
+        successMsg: "MSG_CMPLT_SYNC",
+        mask: "main",
+      })
       .then(() => base.search());
   }, [model.activeType, base]);
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { ContentSidePanel } from "@/app/components/layout/ContentSidePanel";
 import VehicleLocationSidePanel from "@/app/components/map/VehicleLocationSidePanel";
@@ -64,6 +65,45 @@ export default function DispatchPlan() {
 
   const model = useDispatchPlanModel(MENU_CODE);
   const ctrl = useDispatchPlanController({ model });
+
+  // ── 차량정보(vehMgmt) → 메인 드래그드랍 → 신규배차생성 ──────────────
+  // 두 그리드 GridApi 확보 후, vehMgmt 행을 메인 드롭존에 떨어뜨리면 ctrl.onVehMgmtDropToMain 호출.
+  // (vehMgmt 그리드는 rowDragMultiRow 로 선택행 전체를 드래그 — 드롭존 onDragStop 의 nodes 가 전체)
+  const [mainApi, setMainApi] = useState<any>(null);
+  const [vehMgmtApi, setVehMgmtApi] = useState<any>(null);
+  const [unallocApi, setUnallocApi] = useState<any>(null);
+  useEffect(() => {
+    if (!mainApi || mainApi.isDestroyed?.()) return;
+    const rowsOf = (p: any) => (p?.nodes ?? []).map((n: any) => n.data);
+    const zones: Array<{ src: any; zone: any }> = [];
+    // 차량정보 → 메인: 타겟 무관, 신규배차생성
+    if (vehMgmtApi && !vehMgmtApi.isDestroyed?.()) {
+      const z = mainApi.getRowDropZoneParams({
+        onDragStop: (p: any) => ctrl.onVehMgmtDropToMain(rowsOf(p)),
+      });
+      vehMgmtApi.addRowDropZone(z);
+      zones.push({ src: vehMgmtApi, zone: z });
+    }
+    // 미할당주문 → 메인: 드롭한 타겟 배차행(overNode)에 할당 (타겟 필수)
+    if (unallocApi && !unallocApi.isDestroyed?.()) {
+      const z = mainApi.getRowDropZoneParams({
+        onDragStop: (p: any) =>
+          ctrl.onUnallocDropToMain(rowsOf(p), p?.overNode?.data ?? null),
+      });
+      unallocApi.addRowDropZone(z);
+      zones.push({ src: unallocApi, zone: z });
+    }
+    return () => {
+      zones.forEach(({ src, zone }) => {
+        try {
+          if (!src.isDestroyed?.()) src.removeRowDropZone?.(zone);
+        } catch {
+          /* 그리드 파괴 시 무시 */
+        }
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainApi, vehMgmtApi, unallocApi]);
 
   // 화면(필드 레이아웃)은 공유, 내부 관리(state/setter/검색핸들러/로딩)는 호출부에서 주입.
   const shipmentsSrchCond = (cfg: {
@@ -281,6 +321,7 @@ export default function DispatchPlan() {
             actions={ctrl.mainActions}
             onRowClicked={ctrl.onMainGridClick}
             onSelectionRowsChanged={ctrl.onMainSelectionForVehLoc}
+            onApiReady={setMainApi}
             rowSelection="multiple"
             audit={{ delete: false }}
           />
@@ -289,6 +330,7 @@ export default function DispatchPlan() {
           <DataGrid
             layoutType="tab"
             tabs={DETAIL_TABS}
+            onTabChange={ctrl.onDetailTabChange}
             presets={{
               STOP: {
                 render: () => (
@@ -309,7 +351,7 @@ export default function DispatchPlan() {
                       key: "ALLOC",
                       cond: model.allocCond,
                       setCond: model.setAllocCond,
-                      onSearch: ctrl.handleAllocOrderSearch,
+                      onSearch: () => ctrl.handleAllocOrderSearch(),
                       searching: model.allocSearching,
                       open: model.allocCondOpen,
                       onOpenChange: model.setAllocCondOpen,
@@ -375,6 +417,10 @@ export default function DispatchPlan() {
                           codeMap={model.codeMap}
                           actions={ctrl.unallocOrderActions}
                           onRowClicked={ctrl.onUnallocOrderRowClicked}
+                          rowSelection="multiple"
+                          rowDrag
+                          onApiReady={setUnallocApi}
+                          gridOptions={{ rowDragMultiRow: true, rowDragEntireRow: true }}
                           audit={false}
                         />
                       ) : (
@@ -387,6 +433,9 @@ export default function DispatchPlan() {
                             actions={ctrl.unallocOrderActions}
                             onRowClicked={ctrl.onUnallocOrderRowClicked}
                             rowSelection="multiple"
+                            rowDrag
+                            onApiReady={setUnallocApi}
+                            gridOptions={{ rowDragMultiRow: true, rowDragEntireRow: true }}
                             audit={false}
                           />
                           <DataGrid
@@ -425,6 +474,9 @@ export default function DispatchPlan() {
                         codeMap={model.codeMap}
                         actions={ctrl.vehMgmtActions}
                         rowSelection="multiple"
+                        rowDrag
+                        onApiReady={setVehMgmtApi}
+                        gridOptions={{ rowDragMultiRow: true, rowDragEntireRow: true }}
                         audit={false}
                       />
                     </div>
