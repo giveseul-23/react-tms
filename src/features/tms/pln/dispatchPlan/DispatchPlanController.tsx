@@ -58,7 +58,7 @@ export function useDispatchPlanController({ model }: Args) {
             fetch: (r) => api.getAllocOrderList({ DSPCH_NO: r.DSPCH_NO }),
           },
         ],
-        { alsoReset: ["unallocOrder", "allocSub", "unallocSub"] },
+        { alsoReset: ["allocSub"] },
       );
       // 차량위치 패널이 열려 있으면 클릭한 차량으로 패널 리프레시
       if (model.vehLocPanelOpen && row) model.setVehLocRows([row]);
