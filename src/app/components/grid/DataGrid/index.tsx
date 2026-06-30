@@ -477,6 +477,14 @@ export default function DataGrid<TRow>({
             <AgGridReact<TRow>
               {...commonGridProps}
               rowData={rowDataWithRid}
+              context={{
+                ...(commonGridProps as any).context,
+                // 서버 페이징 시 "No" 컬럼 연속 번호용 오프셋 (1페이지=0)
+                noRowOffset:
+                  pagination && currentPage && currentPage > 1
+                    ? (currentPage - 1) * (pageSize ?? 0)
+                    : 0,
+              }}
             />
           </div>
         )}

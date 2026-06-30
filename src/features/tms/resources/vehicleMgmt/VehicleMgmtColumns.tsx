@@ -167,6 +167,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     areaNo: 0,
     fieldType: "select",
     codeKey: "apProcTp",
+    required: true,
   },
   {
     type: "popup",
@@ -623,6 +624,7 @@ export const MAIN_COLUMN_DEFS: ColumnDef[] = [
     renderPopup: ({ commit, close }) => (
       <CommonPopup
         sqlId="selectLocationCodeName"
+        pagination
         onApply={(p) => {
           commit({
             LOC_CD: p.CODE,

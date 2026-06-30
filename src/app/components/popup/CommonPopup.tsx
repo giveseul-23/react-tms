@@ -5,7 +5,6 @@ import { Search, SlidersHorizontal, Check, X } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { commonApi } from "@/app/services/common/commonApi";
 import DataGrid from "@/app/components/grid/DataGrid";
-import { Row } from "react-day-picker";
 
 /* =======================
  * Component
@@ -21,6 +20,8 @@ export function CommonPopup({
   initialCode = "",
   initialName = "",
   rowSelection = "single",
+  pagination = false,
+  pageSize = 20,
 }: {
   sqlId?: string;
   fetchFn?: (params?: any) => Promise<any>;
@@ -28,6 +29,12 @@ export function CommonPopup({
   onClose: () => void;
   /** 그리드 선택 모드 — 기본 "single". "multiple" 이면 배지에 다건 표시 + onApply 에 행 배열 전달. */
   rowSelection?: "single" | "multiple";
+  /** 서버 페이징 사용 여부 — 기본 false(전체 조회). true 면 화면 그리드와 동일하게
+   *  page/limit 를 서버에 전송하고 응답 TOTALCOUNT 로 페이징(서버 슬라이싱).
+   *  ※ sqlProp 의 SQL 이 page/limit(ROW_COUNT BETWEEN) + TOTALCOUNT 를 지원해야 동작. */
+  pagination?: boolean;
+  /** 페이지당 행 수 — pagination true 일 때 적용. 기본 20. */
+  pageSize?: number;
   /** 결과 필터 컬럼 — 비우면 필터 미적용 */
   filterCol?: string;
   /** 결과 필터 값 — filterCol 과 함께 사용 */
@@ -44,16 +51,37 @@ export function CommonPopup({
   const [code, setCode] = useState(initialCode);
   const [name, setName] = useState(initialName);
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  // 서버 페이징 상태 (pagination=true 일 때만 사용)
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(pageSize);
 
   useEffect(() => {
-    handleSearch({
-      ...(initialCode ? { code: initialCode } : {}),
-      ...(initialName ? { name: initialName } : {}),
-    });
+    handleSearch(
+      {
+        ...(initialCode ? { code: initialCode } : {}),
+        ...(initialName ? { name: initialName } : {}),
+      },
+      1,
+      pageSize,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSearch = (extra: Record<string, any> = {}) => {
+  // 화면 그리드와 동일하게 rows[0].TOTALCOUNT 로 전체건수 산출
+  const readTotal = (data: any[]) =>
+    data?.[0]?.TOTALCOUNT != null ? Number(data[0].TOTALCOUNT) : (data?.length ?? 0);
+
+  const handleSearch = (
+    extra: Record<string, any> = {},
+    targetPage = 1,
+    targetSize = size,
+  ) => {
+    // pagination 이면 page/limit 를 함께 전송 (서버가 ROW_COUNT BETWEEN 으로 슬라이싱)
+    const pageParams = pagination
+      ? { page: targetPage, limit: targetSize }
+      : {};
+
     // sqlId가 있으면 기존 commonApi 사용 — 세션은 commonApi 내부에서 URL 쿼리로 자동 부착
     if (sqlId) {
       commonApi
@@ -61,6 +89,7 @@ export function CommonPopup({
           key: "dsOut",
           sqlProp: sqlId,
           ...extraParams,
+          ...pageParams,
           ...extra,
         })
         .then((res: any) => {
@@ -73,6 +102,11 @@ export function CommonPopup({
           }
 
           setRows(filterDatas ?? []);
+          if (pagination) {
+            setTotal(readTotal(datas));
+            setPage(targetPage);
+            setSize(targetSize);
+          }
         })
         .catch(console.error);
       return;
@@ -80,7 +114,7 @@ export function CommonPopup({
 
     // fetchFn이 있으면 주입된 API 사용
     if (fetchFn) {
-      fetchFn(extra)
+      fetchFn({ ...pageParams, ...extra })
         .then((res: any) => {
           // 응답 데이터를 { CODE, NAME } 형식으로 변환
           const result =
@@ -90,17 +124,25 @@ export function CommonPopup({
             res.data.data ??
             [];
           setRows(result);
+          if (pagination) {
+            setTotal(readTotal(result));
+            setPage(targetPage);
+            setSize(targetSize);
+          }
         })
         .catch(console.error);
       return;
     }
   };
 
+  // 현재 코드/코드명 검색값 — 페이지 이동/페이지크기 변경 시에도 유지
+  const currentFilters = () => ({
+    ...(code && { code }),
+    ...(name && { name }),
+  });
+
   const onSearch = () => {
-    handleSearch({
-      ...(code && { code }),
-      ...(name && { name }),
-    });
+    handleSearch(currentFilters(), 1, size);
   };
 
   // Enter 키로 조회 버튼과 동일 동작
@@ -227,8 +269,14 @@ export function CommonPopup({
           actions={[]}
           columnDefs={columnDefs}
           rowData={rows}
-          pagination
-          pageSize={20}
+          pagination={pagination}
+          totalCount={pagination ? total : undefined}
+          currentPage={page}
+          pageSize={size}
+          onPageChange={(p: number) => handleSearch(currentFilters(), p, size)}
+          onPageSizeChange={(s: number) =>
+            handleSearch(currentFilters(), 1, s)
+          }
           rowSelection={rowSelection}
           onRowSelected={
             isMultiple

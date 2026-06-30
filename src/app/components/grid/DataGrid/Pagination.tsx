@@ -93,7 +93,7 @@ export function Pagination({
           setPageInput(e.target.value);
           commitPage(e.target.value);
         }}
-        className="w-10 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
+        className="w-14 h-5 px-1 border border-gray-300 rounded text-center text-[11px] bg-[rgb(var(--bg))]"
       />
       <span className="shrink-0 text-gray-500">
         / {isEmpty ? 0 : totalPages} 페이지

@@ -761,6 +761,8 @@ function injectPopupCell(col: AnyCol, opts: ProcessOptions): AnyCol {
                   sqlId={c.sqlId}
                   fetchFn={c.fetchFn}
                   extraParams={resolvedExtra}
+                  pagination={c.popupPagination}
+                  pageSize={c.popupPageSize}
                   onApply={(picked: any) => {
                     const patch: Record<string, any> = { [field]: picked.CODE };
                     if (c.nameField) patch[c.nameField] = picked.NAME;
@@ -1124,7 +1126,7 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
       valueGetter: (params: any) =>
         params.node?.rowPinned === "bottom"
           ? "Total"
-          : (params.node?.rowIndex ?? 0) + 1,
+          : (params.node?.rowIndex ?? 0) + 1 + (params.context?.noRowOffset ?? 0),
     } as AnyCol;
   }
 
