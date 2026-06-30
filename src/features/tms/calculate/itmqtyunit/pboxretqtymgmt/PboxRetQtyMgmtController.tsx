@@ -18,39 +18,65 @@ interface Args {
 
 const EMPTY_RESULT = Promise.resolve({ data: { data: { dsOut: [] } } });
 
+const normYmd = (v: unknown) =>
+  String(v ?? "")
+    .replace(/-/g, "")
+    .slice(0, 8);
+
+const pick = (raw: Record<string, any>, ...keys: string[]) => {
+  for (const k of keys) {
+    const v = raw?.[k];
+    if (v !== undefined && v !== null && String(v).trim() !== "")
+      return normYmd(v);
+  }
+  return "";
+};
+
 export function usePboxRetQtyMgmtController({ model }: Args) {
   const base = useBaseController<GridKey>({ model });
   const { menuName } = useMenuMeta();
   const { openPopup, closePopup } = usePopup();
 
-  // 조회조건 raw 값 (SearchMeta 필드 id = 센차 comp 이름)
   const getSearch = useCallback(
     () => (model.rawFiltersRef.current ?? {}) as Record<string, any>,
     [model.rawFiltersRef],
   );
+
   const getDateRange = useCallback(() => {
     const s = getSearch();
     return {
-      FRM_DTTM: String(s.SRCH_QTY_DLVRY_DT_FROM ?? ""),
-      TO_DTTM: String(s.SRCH_QTY_DLVRY_DT_TO ?? ""),
+      FRM_DTTM: pick(
+        s,
+        "SRCH_QTY_DLVRY_DT_FRM",
+        "SRCH_QTY_DLVRY_DT_FROM",
+        "QTY_DLVRY_DT_FRM",
+        "QTY_DLVRY_DT_FROM",
+      ),
+      TO_DTTM: pick(
+        s,
+        "SRCH_QTY_DLVRY_DT_TO",
+        "QTY_DLVRY_DT_TO",
+      ),
     };
   }, [getSearch]);
 
   // 운송일 시작/종료월 동일 검증
   const isSameMonth = useCallback(() => {
     const { FRM_DTTM, TO_DTTM } = getDateRange();
-    if (!FRM_DTTM || !TO_DTTM) return true;
-    return (
-      FRM_DTTM.replace(/-/g, "").slice(0, 6) ===
-      TO_DTTM.replace(/-/g, "").slice(0, 6)
-    );
+    if (!FRM_DTTM || !TO_DTTM || FRM_DTTM.length < 6 || TO_DTTM.length < 6)
+      return true;
+
+    const year1 = FRM_DTTM.substring(0, 4);
+    const month1 = FRM_DTTM.substring(4, 6);
+    const year2 = TO_DTTM.substring(0, 4);
+    const month2 = TO_DTTM.substring(4, 6);
+    return year1 === year2 && month1 === month2;
   }, [getDateRange]);
 
-  // ── 메인 조회 — 동월 검증 후 협력사단위 조회 ──────────────────────
   const fetchList = useCallback(
     (params: Record<string, unknown>) => {
       if (!isSameMonth()) {
-        base.alert("[조회조건] 운송일 시작월과 종료월은 같을 수 없습니다.");
+        base.alert("[조회조건] 운송일 시작, 종료월은 다를 수 없습니다.");
         return EMPTY_RESULT;
       }
       return api.getMainList(params);
@@ -87,6 +113,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
         return;
       }
       if (validate && !validate(rows)) return;
+
       const { FRM_DTTM, TO_DTTM } = getDateRange();
       const dsSave = toDsSave(
         rows.map((r) => ({
@@ -119,9 +146,17 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
     },
     [base],
   );
-  const checkStatus = useCallback(
-    (rows: any[]) => rows.every((r) => r.ITEMQTY_OP_STS === "1010"),
-    [],
+
+  // 확인취소 — 확정(1020) 상태만 허용 (서버 saveCancelConfirm / checkOpStatusNot CONFIRM)
+  const checkCancelConfirm = useCallback(
+    (rows: any[]) => {
+      const ok = rows.every((r) => String(r.ITEMQTY_OP_STS) === "1020");
+      if (!ok) {
+        base.alert(Lang.get("MSG_ERR_CANCEL_CONFIRM_ITMQTY_OP_STS"));
+      }
+      return ok;
+    },
+    [base],
   );
 
   // ── 기간구분 변경 팝업 ────────────────────────────────────────────
@@ -147,8 +182,8 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
                   LGST_GRP_CD: s.SRCH_QTY_LGST_GRP_CD ?? "",
                   VEH_NO: s.SRCH_V_VEH_NO ?? "",
                   CARR_CD: s.SRCH_QTY_CARR_CD ?? "",
-                  FRM_DTTM: p.FRM_DTTM,
-                  TO_DTTM: p.TO_DTTM,
+                  FRM_DTTM: normYmd(p.FRM_DTTM),
+                  TO_DTTM: normYmd(p.TO_DTTM),
                   TERM_TP: p.TERM_TP,
                 }),
                 { mask: "main" },
@@ -161,7 +196,6 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
     });
   }, [base, closePopup, getDateRange, getSearch, model.codeMap, openPopup]);
 
-  // ── 그리드별 액션 ─────────────────────────────────────────────────
   const mainActions: ActionItem[] = useMemo(
     () => [
       makeExcelGroupAction({
@@ -169,7 +203,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getMainList(model.filtersRef.current),
-        rows: () => model.grids.main.rows,
+        rows: model.grids.main.rows,
       }),
     ],
     [menuName, model.grids.main, model.filtersRef],
@@ -177,7 +211,12 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
 
   const sub01Actions: ActionItem[] = useMemo(
     () => [
-      { type: "button", key: "BTN_CHG_TERM_TP", label: "BTN_CHG_TERM_TP", onClick: onChangeTermTp },
+      {
+        type: "button",
+        key: "BTN_CHG_TERM_TP",
+        label: "BTN_CHG_TERM_TP",
+        onClick: onChangeTermTp,
+      },
       {
         type: "button",
         key: "BTN_CONFIRM",
@@ -190,14 +229,14 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
         key: "CONFIRM_CANCEL",
         label: "CONFIRM_CANCEL",
         onClick: ({ data }: { data: any[] }) =>
-          saveSelected(data, api.saveCancelConfirm, checkStatus),
+          saveSelected(data, api.saveCancelConfirm, checkCancelConfirm),
       },
       makeExcelGroupAction({
         excelColumns: () => model.grids.sub01.getExcelColumns(),
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getSub01List(model.filtersRef.current),
-        rows: () => model.grids.sub01.rows,
+        rows: model.grids.sub01.rows,
       }),
     ],
     [
@@ -207,13 +246,18 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
       onChangeTermTp,
       saveSelected,
       checkSaveSub02,
-      checkStatus,
+      checkCancelConfirm,
     ],
   );
 
   const sub02Actions: ActionItem[] = useMemo(
     () => [
-      { type: "button", key: "BTN_CHG_TERM_TP", label: "BTN_CHG_TERM_TP", onClick: onChangeTermTp },
+      {
+        type: "button",
+        key: "BTN_CHG_TERM_TP",
+        label: "BTN_CHG_TERM_TP",
+        onClick: onChangeTermTp,
+      },
       {
         type: "button",
         key: "BTN_CONFIRM",
@@ -226,7 +270,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
         key: "CONFIRM_CANCEL",
         label: "CONFIRM_CANCEL",
         onClick: ({ data }: { data: any[] }) =>
-          saveSelected(data, api.saveCancelConfirm, checkStatus),
+          saveSelected(data, api.saveCancelConfirm, checkCancelConfirm),
       },
       {
         type: "button",
@@ -240,7 +284,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
         menuCode: MENU_CODE,
         menuName,
         fetchFn: () => api.getSub02List(model.filtersRef.current),
-        rows: () => model.grids.sub02.rows,
+        rows: model.grids.sub02.rows,
       }),
     ],
     [
@@ -250,7 +294,7 @@ export function usePboxRetQtyMgmtController({ model }: Args) {
       onChangeTermTp,
       saveSelected,
       checkSaveSub02,
-      checkStatus,
+      checkCancelConfirm,
     ],
   );
 

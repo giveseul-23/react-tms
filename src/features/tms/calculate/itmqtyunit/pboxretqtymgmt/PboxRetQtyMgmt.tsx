@@ -16,6 +16,14 @@ import {
 
 export const MENU_CODE = "MENU_PBOX_RET_QTY_MGMT";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_PBOX_RET_QTY_MGMT",
+    sub01: "SUB01_GRID_PBOX_RET_QTY_MGMT",
+    sub02: "SUB02_GRID_PBOX_RET_QTY_MGMT",
+  },
+};
+
 export default function PboxRetQtyMgmt() {
   const model = usePboxRetQtyMgmtModel(MENU_CODE);
   const ctrl = usePboxRetQtyMgmtController({ model });
@@ -35,10 +43,13 @@ export default function PboxRetQtyMgmt() {
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          headerCheckbox={false}
+          audit={{ delete: false, rowStatus: false }}
         />
       }
       detail={
@@ -53,10 +64,12 @@ export default function PboxRetQtyMgmt() {
               render: () => (
                 <DataGrid
                   {...model.bind("sub01")}
+                  authId={AUTH.grids.sub01}
                   columnDefs={SUB01_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.sub01Actions}
                   rowSelection="multiple"
+                  audit={{ delete: false, rowStatus: false }}
                 />
               ),
             },
@@ -64,10 +77,12 @@ export default function PboxRetQtyMgmt() {
               render: () => (
                 <DataGrid
                   {...model.bind("sub02")}
+                  authId={AUTH.grids.sub02}
                   columnDefs={SUB02_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.sub02Actions}
                   rowSelection="multiple"
+                  audit={{ delete: false, rowStatus: false }}
                 />
               ),
             },
