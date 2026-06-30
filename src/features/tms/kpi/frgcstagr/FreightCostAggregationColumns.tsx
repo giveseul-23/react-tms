@@ -23,10 +23,10 @@ export const MAIN_HEAD = [
   { type: "text", headerName: "LBL_REP_CUST_CD", field: "LOC_NM", align: "left" },
   { type: "text", headerName: "LBL_MEMO", field: "MEMO_DESC", align: "left" },
   { type: "numeric", headerName: "LBL_STOP_CNT", field: "STOP_SEQ", width: 80, align: "right" },
-  { type: "numeric", headerName: "LBL_DLVRY_BOX", field: "DLVRY_BOX", width: 80, align: "right", summable: true },
-  { type: "numeric", headerName: "LBL_TRANS_WGT", field: "CFM_NET_WGT", width: 80, align: "right", summable: true },
+  { type: "numeric", headerName: "LBL_DLVRY_BOX", field: "DLVRY_BOX", width: 80, align: "right", summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_TRANS_WGT", field: "CFM_NET_WGT", width: 80, align: "right", summaryType: "sum" },
   { type: "numeric", headerName: "LBL_PBOX_WGT", field: "PBOX_WGT", width: 80, align: "right" },
-  { type: "numeric", headerName: "LBL_TRANS_COST", field: "CFM_COST", width: 80, align: "right", summable: true },
+  { type: "numeric", headerName: "LBL_TRANS_COST", field: "CFM_COST", width: 80, align: "right", summaryType: "sum" },
 ];
 
 // ── TAIL: BOX당운임비 / KG당운임비 ─────────────────────────────────
@@ -51,7 +51,7 @@ export function buildFreightColumns(
     field: c.PIVOT_CHG_CD,
     width: 100,
     align: "right",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }));
 

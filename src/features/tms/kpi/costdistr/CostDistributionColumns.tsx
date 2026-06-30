@@ -1,6 +1,6 @@
 // 그리드 컬럼 정의 (서버 CostDistributionMain / CostDistributionSub01 기준)
 // 조회 전용 화면 — 편집 없음(editable 미지정). audit 컬럼은 사용 안 함(View audit={false}).
-// 숫자 컬럼 summaryType:'sum' → summable:true (하단 합계행 자동).
+// 숫자 컬럼 summaryType:'sum' → summaryType: "sum" (하단 합계행 자동).
 
 // ── 주문단위 (MAIN, LBL_ORDER_UOM) ───────────────────────────────
 export const MAIN_COLUMN_DEFS = [
@@ -26,7 +26,7 @@ export const MAIN_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_AP_CD", field: "CHG_CD", align: "center" },
   { type: "text", headerName: "LBL_AP_NM", field: "CHG_NM" },
   { type: "numeric", headerName: "LBL_SHPM_DIST", field: "SHPM_DIST" },
-  { type: "numeric", headerName: "LBL_ORI_CHG_COST", field: "ORI_CHG_COST", summable: true },
+  { type: "numeric", headerName: "LBL_ORI_CHG_COST", field: "ORI_CHG_COST", summaryType: "sum" },
   { type: "numeric", headerName: "LBL_TTL_SHPM_DIST", field: "TTL_SHPM_DIST" },
   { type: "numeric", headerName: "LBL_SHPM_DIST_RATIO", field: "SHPM_DIST_RATIO" },
   { type: "numeric", headerName: "LBL_SHPM_WGT", field: "SHPM_WGT" },
@@ -34,9 +34,9 @@ export const MAIN_COLUMN_DEFS = [
   { type: "numeric", headerName: "LBL_SHPM_WGT_RATIO", field: "SHPM_WGT_RATIO" },
   { type: "numeric", headerName: "LBL_WGT_COE", field: "WGT_COE" },
   { type: "numeric", headerName: "LBL_WGT_COE_RATIO", field: "WGT_COE_RATIO" },
-  { type: "numeric", headerName: "LBL_ADJ_CST_DIST_COST", field: "ADJ_CST_DIST_COST", summable: true },
-  { type: "numeric", headerName: "LBL_DIST_DED_DIST_COST", field: "DIST_DED_DIST_COST", summable: true },
-  { type: "numeric", headerName: "LBL_FINAL_CST_DIST_COST", field: "FINAL_CST_DIST_COST", summable: true },
+  { type: "numeric", headerName: "LBL_ADJ_CST_DIST_COST", field: "ADJ_CST_DIST_COST", summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_DIST_DED_DIST_COST", field: "DIST_DED_DIST_COST", summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_FINAL_CST_DIST_COST", field: "FINAL_CST_DIST_COST", summaryType: "sum" },
   { type: "text", headerName: "LBL_GNRL_LDGR_CD", field: "GNRL_LDGR_CD", colId: "GNRL_LDGR_CD_TXT", align: "center" },
   { type: "combo", headerName: "LBL_GNRL_LDGR_NM", field: "GNRL_LDGR_CD", colId: "GNRL_LDGR_CD_NM", codeKey: "gnrlLdgrCd", align: "left" },
   { type: "text", headerName: "LBL_CST_CNTR_CD", field: "CST_CNTR_CD", colId: "CST_CNTR_CD_TXT", align: "center", width: 150 },
@@ -80,8 +80,8 @@ export const SUB01_COLUMN_DEFS = [
   { type: "text", headerName: "LBL_SHPM_DTL_ID", field: "SHPM_DTL_ID", align: "center" },
   { type: "text", headerName: "LBL_AP_CD", field: "CHG_CD", align: "center" },
   { type: "text", headerName: "LBL_AP_NM", field: "CHG_NM" },
-  { type: "numeric", headerName: "LBL_HDR_DIST_COST", field: "HDR_DIST_COST", summable: true },
-  { type: "numeric", headerName: "LBL_DTL_DIST_COST", field: "DTL_DIST_COST", summable: true },
+  { type: "numeric", headerName: "LBL_HDR_DIST_COST", field: "HDR_DIST_COST", summaryType: "sum" },
+  { type: "numeric", headerName: "LBL_DTL_DIST_COST", field: "DTL_DIST_COST", summaryType: "sum" },
   { type: "text", headerName: "LBL_GNRL_LDGR_CD", field: "GNRL_LDGR_CD", colId: "GNRL_LDGR_CD_TXT", align: "center" },
   { type: "combo", headerName: "LBL_GNRL_LDGR_NM", field: "GNRL_LDGR_CD", colId: "GNRL_LDGR_CD_NM", codeKey: "gnrlLdgrCd", align: "left" },
   { type: "text", headerName: "LBL_CST_CNTR_CD", field: "CST_CNTR_CD", colId: "CST_CNTR_CD_TXT", align: "center", width: 150 },

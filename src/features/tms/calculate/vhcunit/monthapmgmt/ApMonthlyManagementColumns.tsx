@@ -165,7 +165,7 @@ export function buildMonthlyColumns(
             editable,
             valueFormatter: numberValueFormatter,
             cellStyle: negativeRedCenterCellStyle,
-            summable: true,
+            summaryType: "sum",
           },
           {
             type: "text",
@@ -190,7 +190,7 @@ export function buildMonthlyColumns(
       editable,
       valueFormatter: numberValueFormatter,
       cellStyle: negativeRedCenterCellStyle,
-      summable: true,
+      summaryType: "sum",
     };
   });
 

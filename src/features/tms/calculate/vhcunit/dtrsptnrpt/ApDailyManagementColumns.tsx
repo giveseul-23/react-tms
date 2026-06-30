@@ -843,7 +843,7 @@ export function buildDailyColumns(
             editable,
             valueFormatter: numberValueFormatter,
             cellStyle: negativeRedCenterCellStyle,
-            summable: true,
+            summaryType: "sum",
           },
           {
             type: "text",
@@ -869,7 +869,7 @@ export function buildDailyColumns(
       valueFormatter: numberValueFormatter,
       cellStyle: negativeRedCenterCellStyle,
       aggFunc: "sum",
-      summable: true,
+      summaryType: "sum",
     };
   });
 

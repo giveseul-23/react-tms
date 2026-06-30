@@ -111,7 +111,7 @@ const DSPCH_INFO_COLS = [
     align: "right",
     width: 80,
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -120,7 +120,7 @@ const DSPCH_INFO_COLS = [
     align: "right",
     width: 80,
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -159,7 +159,7 @@ const DSPCH_INFO_COLS = [
     align: "right",
     width: 80,
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -168,7 +168,7 @@ const DSPCH_INFO_COLS = [
     align: "right",
     width: 80,
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -177,7 +177,7 @@ const DSPCH_INFO_COLS = [
     align: "right",
     width: 80,
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -186,7 +186,7 @@ const DSPCH_INFO_COLS = [
     align: "right",
     width: 80,
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -195,7 +195,7 @@ const DSPCH_INFO_COLS = [
     align: "right",
     width: 80,
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "text",
@@ -369,7 +369,7 @@ const ROUTE_COLS = [
     headerName: "LBL_TRNST_PREVSTOP_DIST",
     field: "TRNST_PREVSTOP_DIST",
     align: "right",
-    summable: true,
+    summaryType: "sum",
   },
 ];
 
@@ -419,14 +419,14 @@ const ORDER_COLS = [
     headerName: "LBL_PLN_GRS_VOL",
     field: "PLN_GRS_VOL",
     align: "right",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_PLN_GRS_WGT",
     field: "PLN_GRS_WGT",
     align: "right",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "text",
@@ -491,7 +491,7 @@ const ORDER_COLS = [
     field: "PLN_PLT_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -499,7 +499,7 @@ const ORDER_COLS = [
     field: "PLN_RTNR_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -507,7 +507,7 @@ const ORDER_COLS = [
     field: "PLN_PBOX_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -515,7 +515,7 @@ const ORDER_COLS = [
     field: "PLN_BOX_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -523,7 +523,7 @@ const ORDER_COLS = [
     field: "PLN_FLEX_QTY1",
     align: "right",
     width: 80,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -531,7 +531,7 @@ const ORDER_COLS = [
     field: "PLN_FLEX_QTY2",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -539,7 +539,7 @@ const ORDER_COLS = [
     field: "PLN_FLEX_QTY3",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -547,7 +547,7 @@ const ORDER_COLS = [
     field: "PLN_FLEX_QTY4",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -555,14 +555,14 @@ const ORDER_COLS = [
     field: "PLN_FLEX_QTY5",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
     headerName: "LBL_PLANNED_QTY",
     field: "PLN_QTY",
     align: "right",
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "text",
@@ -813,7 +813,7 @@ const ITEM_COLS = [
     field: "PLN_NET_WGT",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -821,7 +821,7 @@ const ITEM_COLS = [
     field: "PLN_GRS_WGT",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -829,7 +829,7 @@ const ITEM_COLS = [
     field: "PLN_PLT_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -837,7 +837,7 @@ const ITEM_COLS = [
     field: "PLN_RTNR_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -845,7 +845,7 @@ const ITEM_COLS = [
     field: "PLN_PBOX_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -853,7 +853,7 @@ const ITEM_COLS = [
     field: "PLN_BOX_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -861,7 +861,7 @@ const ITEM_COLS = [
     field: "PLN_FLEX_QTY1",
     align: "right",
     width: 80,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -869,7 +869,7 @@ const ITEM_COLS = [
     field: "PLN_FLEX_QTY2",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -877,7 +877,7 @@ const ITEM_COLS = [
     field: "PLN_FLEX_QTY3",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -885,7 +885,7 @@ const ITEM_COLS = [
     field: "PLN_FLEX_QTY4",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -893,7 +893,7 @@ const ITEM_COLS = [
     field: "PLN_FLEX_QTY5",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -931,7 +931,7 @@ const ITEM_COLS = [
     field: "CFM_NET_WGT",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -939,7 +939,7 @@ const ITEM_COLS = [
     field: "CFM_GRS_WGT",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -947,7 +947,7 @@ const ITEM_COLS = [
     field: "CFM_PLT_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -955,7 +955,7 @@ const ITEM_COLS = [
     field: "CFM_RTNR_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -963,7 +963,7 @@ const ITEM_COLS = [
     field: "CFM_PBOX_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -971,7 +971,7 @@ const ITEM_COLS = [
     field: "CFM_BOX_QTY",
     align: "right",
     width: 100,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -979,7 +979,7 @@ const ITEM_COLS = [
     field: "CFM_FLEX_QTY1",
     align: "right",
     width: 80,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -987,7 +987,7 @@ const ITEM_COLS = [
     field: "CFM_FLEX_QTY2",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -995,7 +995,7 @@ const ITEM_COLS = [
     field: "CFM_FLEX_QTY3",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -1003,7 +1003,7 @@ const ITEM_COLS = [
     field: "CFM_FLEX_QTY4",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "numeric",
@@ -1011,7 +1011,7 @@ const ITEM_COLS = [
     field: "CFM_FLEX_QTY5",
     align: "right",
     width: 90,
-    summable: true,
+    summaryType: "sum",
   },
   {
     type: "text",

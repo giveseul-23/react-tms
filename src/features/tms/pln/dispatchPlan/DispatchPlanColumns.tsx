@@ -44,7 +44,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "PLN_NET_VOL",
     type: "numeric",
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -60,7 +60,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_VOL",
     field: "PLN_GRS_VOL",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -76,7 +76,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_WGT",
     field: "PLN_NET_WGT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -98,7 +98,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "PLN_PLT_RT",
     type: "numeric",
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -114,7 +114,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "PLN_RTNR_RT",
     type: "numeric",
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -130,7 +130,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "PLN_PBOX_RT",
     type: "numeric",
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -146,7 +146,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "PLN_BOX_RT",
     type: "numeric",
     decimalPlaces: 1,
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -156,7 +156,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_FLEX_QTY1",
     field: "PLN_FLEX_QTY1",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -172,7 +172,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_FLEX_QTY2",
     field: "PLN_FLEX_QTY2",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -188,7 +188,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_FLEX_QTY3",
     field: "PLN_FLEX_QTY3",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -204,7 +204,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_FLEX_QTY4",
     field: "PLN_FLEX_QTY4",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -220,7 +220,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_FLEX_QTY5",
     field: "PLN_FLEX_QTY5",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
     validators: {
       pointLength: 4,
@@ -236,7 +236,7 @@ export const MAIN_COLUMN_DEFS = [
     headerName: "LBL_STOP_CNT",
     field: "PLN_STOP_CNT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, //경유처수
   {
@@ -323,49 +323,49 @@ const buildOrderColumns = () => [
     headerName: "LBL_VOL",
     field: "PLN_VOL",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, //계획CBM
   {
     headerName: "LBL_WGT",
     field: "PLN_WGT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, //계획중량
   {
     headerName: "LBL_FLEX_QTY1",
     field: "PLN_FLEX_QTY1",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, //계획FQ1
   {
     headerName: "LBL_FLEX_QTY2",
     field: "PLN_FLEX_QTY2",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, //계획FQ2
   {
     headerName: "LBL_FLEX_QTY3",
     field: "PLN_FLEX_QTY3",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, //계획FQ3
   {
     headerName: "LBL_FLEX_QTY4",
     field: "PLN_FLEX_QTY4",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, //계획FQ4
   {
     headerName: "LBL_FLEX_QTY5",
     field: "PLN_FLEX_QTY5",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, //계획FQ5
   { type: "text", headerName: "LBL_CUSTOMER_ORDER_NO", field: "CUST_ORD_NO" }, //고객주문번호
@@ -408,77 +408,77 @@ const buildOrderSubColumns = () => [
     headerName: "LBL_PLN_NET_WGT",
     field: "PLN_NET_WGT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLN_GRS_WGT",
     field: "PLN_GRS_WGT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLN_PLT_QTY",
     field: "PLN_PLT_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLN_RTNR_QTY",
     field: "PLN_RTNR_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLN_PBOX_QTY",
     field: "PLN_PBOX_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLN_BOX_QTY",
     field: "PLN_BOX_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLANNED_FLEX_QTY1",
     field: "PLN_FLEX_QTY1",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLANNED_FLEX_QTY2",
     field: "PLN_FLEX_QTY2",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLANNED_FLEX_QTY3",
     field: "PLN_FLEX_QTY4",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLANNED_FLEX_QTY4",
     field: "PLN_FLEX_QTY4",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_PLANNED_FLEX_QTY5",
     field: "PLN_FLEX_QTY5",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
@@ -501,77 +501,77 @@ const buildOrderSubColumns = () => [
     headerName: "LBL_CFM_NET_WGT",
     field: "CFM_NET_WGT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CFM_GRS_WGT",
     field: "CFM_GRS_WGT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CFM_PLT_QTY",
     field: "CFM_PLT_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CFM_RTNR_QTY",
     field: "CFM_RTNR_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CFM_PBOX_QTY",
     field: "CFM_PBOX_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CFM_BOX_QTY",
     field: "CFM_BOX_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CONFIRMED_FLEX_QTY1",
     field: "CFM_FLEX_QTY1",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CONFIRMED_FLEX_QTY2",
     field: "CFM_FLEX_QTY2",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CONFIRMED_FLEX_QTY3",
     field: "CFM_FLEX_QTY3",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CONFIRMED_FLEX_QTY4",
     field: "CFM_FLEX_QTY4",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   {
     headerName: "LBL_CONFIRMED_FLEX_QTY5",
     field: "CFM_FLEX_QTY5",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   { type: "text", headerName: "LBL_ITEM_REMARK", field: "SHPM_DTL_RSN_DESC" },
@@ -624,77 +624,77 @@ export const ALLOC_ORDER_ITEM_COLUMN_DEFS = [
     headerName: "LBL_PLN_NET_WGT",
     field: "PLN_NET_WGT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획순중량
   {
     headerName: "LBL_PLN_GRS_WGT",
     field: "PLN_GRS_WGT",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획총중량
   {
     headerName: "LBL_PLN_PLT_QTY",
     field: "PLN_PLT_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획팔레트수량
   {
     headerName: "LBL_PLN_RTNR_QTY",
     field: "PLN_RTNR_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획롤테이너수량
   {
     headerName: "LBL_PLN_PBOX_QTY",
     field: "PLN_PBOX_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획PBOX수량
   {
     headerName: "LBL_PLN_BOX_QTY",
     field: "PLN_BOX_QTY",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획BOX수량
   {
     headerName: "LBL_PLANNED_FLEX_QTY1",
     field: "PLN_FLEX_QTY1",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획FQ1
   {
     headerName: "LBL_PLANNED_FLEX_QTY2",
     field: "PLN_FLEX_QTY2",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획FQ2
   {
     headerName: "LBL_PLANNED_FLEX_QTY3",
     field: "PLN_FLEX_QTY3",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획FQ3
   {
     headerName: "LBL_PLANNED_FLEX_QTY4",
     field: "PLN_FLEX_QTY4",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획FQ4
   {
     headerName: "LBL_PLANNED_FLEX_QTY5",
     field: "PLN_FLEX_QTY5",
     type: "numeric",
-    summable: true,
+    summaryType: "sum",
     valueFormatter: numberValueFormatter,
   }, // 계획FQ5
   {
