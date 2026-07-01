@@ -36,6 +36,7 @@ export default function DispatchManagerCostManagement() {
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          rowSelection="multiple"
         />
       }
       detail={

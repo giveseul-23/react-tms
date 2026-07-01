@@ -6,10 +6,11 @@ export const MAIN_COLUMN_DEFS = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_AP_ID", field: "AP_ID" },
   {
-    type: "text",
+    type: "combo",
     headerName: "LBL_FINANCIAL_STATUS",
     field: "AP_FI_STS",
     codeKey: "financialStatus",
+    statusStyle: "AP_FI_STS",
   },
   { type: "text", headerName: "LBL_COST_CHECK", field: "COST_CHECK" },
   { type: "text", headerName: "LBL_DISPATCH_NO", field: "DSPCH_NO" },

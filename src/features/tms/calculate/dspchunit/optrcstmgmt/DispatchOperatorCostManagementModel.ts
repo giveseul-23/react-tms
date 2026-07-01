@@ -14,11 +14,10 @@ export function useDispatchOperatorCostModel(menuCode: string) {
 
   const { stores } = useCommonStores({
     apType: { sqlProp: "CODE", keyParam: "TM_LEGARCY_AP_TP" },
-    financialStatus: { sqlProp: "CODE", keyParam: "DSPCH_FI_STS" },
+    financialStatus: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
     serviceType: { sqlProp: "CODE", keyParam: "TRF_SVC_TP" },
     pickDropDiv: { sqlProp: "CODE", keyParam: "STOP_TP" },
     schedTcd: { sqlProp: "CODE", keyParam: "SCHED_TCD" },
-    dsFiStsList: { sqlProp: "CODE", keyParam: "AP_FI_STS" },
     payTo: { sqlProp: "CODE", keyParam: "PAY_TO" },
     locTp: { sqlProp: "CODE", keyParam: "LOC_TP" },
     calTcd: { sqlProp: "CODE", keyParam: "CAL_TCD" },

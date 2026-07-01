@@ -10,7 +10,7 @@ export const MAIN_COLUMN_DEFS = [
     type: "combo",
     headerName: "LBL_FINANCIAL_STATUS",
     field: "AP_FI_STS",
-    codeKey: "dsFiStsList",
+    codeKey: "financialStatus",
     statusStyle: "AP_FI_STS",
   },
   { type: "text", headerName: "LBL_DLVRY_DATE", field: "DLVRY_DT" },

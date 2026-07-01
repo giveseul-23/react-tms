@@ -57,7 +57,7 @@ export function useDispatchManagerCostController({ model }: Args) {
   );
 
   const doAction = useCallback(
-    (apiCall: () => Promise<any>, msg = "MSG_SAVE_CMPLT.") =>
+    (apiCall: () => Promise<any>, msg = "MSG_SAVE_CMPLT") =>
       base.callAjax(apiCall(), { successMsg: msg, mask: "main" }).then(() => base.search()),
     [base],
   );
@@ -73,35 +73,35 @@ export function useDispatchManagerCostController({ model }: Args) {
         type: "button",
         key: "BTN_RATE_OP_CONFIRM_CANCEL",
         label: "BTN_RATE_OP_CONFIRM_CANCEL",
-        onClick: () =>
-          doAction(() => api.cancelOperatorConfirm(model.filtersRef.current)),
+        onClick: (e: any) =>
+          doAction(() => api.cancelOperatorConfirm(e.data)),
       },
       {
         type: "button",
         key: "BTN_RATE_MG_CONFIRM",
         label: "BTN_RATE_MG_CONFIRM",
-        onClick: () =>
-          doAction(() => api.approveByManager(model.filtersRef.current)),
+        onClick: (e: any) =>
+          doAction(() => api.approveByManager(e.data)),
       },
       {
         type: "button",
         key: "BTN_RATE_MG_CONFIRM_CANCEL",
         label: "BTN_RATE_MG_CONFIRM_CANCEL",
-        onClick: () =>
-          doAction(() => api.cancelManagerApprove(model.filtersRef.current)),
+        onClick: (e: any) =>
+          doAction(() => api.cancelManagerApprove(e.data)),
       },
       {
         type: "button",
         key: "BTN_RATE_CLOSE",
         label: "BTN_RATE_CLOSE",
-        onClick: () => doAction(() => api.closeCost(model.filtersRef.current)),
+        onClick: (e: any) => doAction(() => api.closeCost(e.data)),
       },
       {
         type: "button",
         key: "BTN_RATE_CLOSE_CANCEL",
         label: "BTN_RATE_CLOSE_CANCEL",
-        onClick: () =>
-          doAction(() => api.cancelCostClose(model.filtersRef.current)),
+        onClick: (e: any) =>
+          doAction(() => api.cancelCostClose(e.data)),
       },
       makeExcelGroupAction({
         excelColumns: () => model.grids.main.getExcelColumns(),

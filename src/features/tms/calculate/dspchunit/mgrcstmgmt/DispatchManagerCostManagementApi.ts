@@ -14,6 +14,15 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
+const dsSavePost = (url: string, rows: any[]) =>
+  apiClient.post<commonResponse>(
+    url,
+    { dsSave: rows },
+    {
+      params: { ...getSessionFields(), MENU_CD: MENU_CODE },
+    },
+  );
+
 export const dispatchManagerCostApi = {
   getList(payload: any) {
     return apiClient.post<commonResponse>(
@@ -37,45 +46,45 @@ export const dispatchManagerCostApi = {
   },
 
   // 운영자확정취소
-  cancelOperatorConfirm(payload: any) {
-    return apiClient.post<commonResponse>(
+  cancelOperatorConfirm(rows: any[]) {
+    return dsSavePost(
       `/dispatchManagerCostManagementService/saveRateOpConfirmCancel`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
   // 관리자확정(승인)
-  approveByManager(payload: any) {
-    return apiClient.post<commonResponse>(
+  approveByManager(rows: any[]) {
+    return dsSavePost(
       `/dispatchManagerCostManagementService/saveRateMgConfirm`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
   // 관리자확정취소
-  cancelManagerApprove(payload: any) {
-    return apiClient.post<commonResponse>(
+  cancelManagerApprove(rows: any[]) {
+    return dsSavePost(
       `/dispatchManagerCostManagementService/saveRateMgConfirmCancel`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
   // 비용마감
-  closeCost(payload: any) {
-    return apiClient.post<commonResponse>(
+  closeCost(rows: any[]) {
+    return dsSavePost(
       `/dispatchManagerCostManagementService/saveRateClose`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
   // 비용마감취소
-  cancelCostClose(payload: any) {
-    return apiClient.post<commonResponse>(
+  cancelCostClose(rows: any[]) {
+    return dsSavePost(
       `/dispatchManagerCostManagementService/saveRateCloseCancel`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
   // 비용상세 저장
   saveCostDetail(rows: any[]) {
-    return apiClient.post<commonResponse>(
+    return dsSavePost(
       `/dispatchManagerCostManagementService/saveDetail`,
-      withSession(rows),
+      rows,
     );
   },
 };
