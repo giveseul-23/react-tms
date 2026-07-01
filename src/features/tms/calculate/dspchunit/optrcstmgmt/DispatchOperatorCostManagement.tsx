@@ -2,7 +2,6 @@
 
 import { MasterDetailPage } from "@/app/components/layout/presets/MasterDetailPage";
 import { SplitPane } from "@/app/components/layout/SplitPane";
-import { LayoutType } from "@/app/components/layout/LayoutToggleButton";
 import DataGrid from "@/app/components/grid/DataGrid";
 
 import { useDispatchOperatorCostModel } from "./DispatchOperatorCostManagementModel";
@@ -17,6 +16,16 @@ import {
 
 export const MENU_CODE = "MENU_DSPCH_AP_CRATN_N_REVW";
 
+export const AUTH = {
+  grids: {
+    main: "MAIN_GRID_DSPCH_AP_CRATN_N_REVW",
+    costDetail: "SUB01_GRID_DSPCH_AP_CRATN_N_REVW",
+    waypoint: "SUB02_GRID_DSPCH_AP_CRATN_N_REVW",
+    costFunction: "SUB03_GRID_DSPCH_AP_CRATN_N_REVW",
+    evidence: "SUB04_GRID_DSPCH_AP_CRATN_N_REVW",
+  },
+};
+
 export default function DispatchOperatorCostManagement() {
   const model = useDispatchOperatorCostModel(MENU_CODE);
   const ctrl = useDispatchOperatorCostController({ model });
@@ -24,22 +33,24 @@ export default function DispatchOperatorCostManagement() {
   return (
     <MasterDetailPage
       menuCode={MENU_CODE}
-      defaultSizes={[55, 45]}
+      defaultSizes={[68, 32]}
       searchProps={{
         moduleDefault: "TMS",
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
       }}
-      defaultDirection="horizontal"
+      defaultDirection="vertical"
       storageKey={model.storageKeys.outer}
       master={
         <DataGrid
           {...model.bind("main")}
+          authId={AUTH.grids.main}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
           actions={ctrl.mainActions}
+          rowSelection="multiple"
         />
       }
       detail={
@@ -53,21 +64,26 @@ export default function DispatchOperatorCostManagement() {
           presets={{
             COST: {
               render: () => (
-                <SplitPane direction="horizontal" defaultSizes={[70, 30]}>
+                <SplitPane direction="horizontal" defaultSizes={[60, 40]}>
                   <DataGrid
                     {...model.bind("costDetail")}
+                    authId={AUTH.grids.costDetail}
                     columnDefs={COST_DETAIL_COLUMN_DEFS}
                     codeMap={model.codeMap}
                     actions={ctrl.costDetailActions}
                     onRowClicked={ctrl.onCostDetailRowClicked}
-                    audit={false}
+                    onCellValueChanged={ctrl.onCostDetailChanged}
                   />
-                  <DataGrid
-                    {...model.bind("costFunction")}
-                    columnDefs={COST_FUNCTION_COLUMN_DEFS}
-                    actions={[]}
-                    audit={false}
-                  />
+                  <div className="h-full min-h-0 pt-8">
+                    <DataGrid
+                      {...model.bind("costFunction")}
+                      authId={AUTH.grids.costFunction}
+                      columnDefs={COST_FUNCTION_COLUMN_DEFS}
+                      onCellValueChanged={ctrl.onCostFunctionChanged}
+                      actions={[]}
+                      audit={false}
+                    />
+                  </div>
                 </SplitPane>
               ),
             },
@@ -75,6 +91,7 @@ export default function DispatchOperatorCostManagement() {
               render: () => (
                 <DataGrid
                   {...model.bind("waypoint")}
+                  authId={AUTH.grids.waypoint}
                   columnDefs={WAYPOINT_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.waypointActions}
@@ -86,9 +103,11 @@ export default function DispatchOperatorCostManagement() {
               render: () => (
                 <DataGrid
                   {...model.bind("evidence")}
+                  authId={AUTH.grids.evidence}
                   columnDefs={EVIDENCE_COLUMN_DEFS}
                   codeMap={model.codeMap}
                   actions={ctrl.evidenceActions}
+                  rowSelection="multiple"
                   audit={false}
                 />
               ),

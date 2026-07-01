@@ -179,7 +179,7 @@ export function useNoApDispatchListController({ model }: Args) {
         base.alert(Lang.get("MSG_SEL_LGST_GRP"));
         return;
       }
-      if (!s.SRCH_PD_DLVRY_DT_FROM || !s.SRCH_PD_DLVRY_DT_TO) {
+      if (!s.SRCH_PD_DLVRY_DT_FRM || !s.SRCH_PD_DLVRY_DT_TO) {
         base.alert(Lang.get("MSG_CHECK_SEARCH_CONDITION"));
         return;
       }
@@ -188,7 +188,7 @@ export function useNoApDispatchListController({ model }: Args) {
           api.makeRateRefactor(data, {
             DIV_CD: s.SRCH_PD_DIV_CD,
             LGST_GRP_CD: s.SRCH_PD_PAY_LGST_GRP_CD,
-            DLVRY_DT_FROM: s.SRCH_PD_DLVRY_DT_FROM,
+            DLVRY_DT_FROM: s.SRCH_PD_DLVRY_DT_FRM,
             DLVRY_DT_TO: s.SRCH_PD_DLVRY_DT_TO,
           }),
           { mask: "main" },

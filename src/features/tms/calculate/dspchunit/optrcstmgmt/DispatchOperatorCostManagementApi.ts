@@ -14,6 +14,23 @@ const withSession = (payload: any = {}) => {
   return { ...sessionFields, ...payload };
 };
 
+const dsSavePost = (
+  url: string,
+  rows: any[],
+  params: Record<string, any> = {},
+) =>
+  apiClient.post<commonResponse>(
+    url,
+    { dsSave: rows },
+    {
+      params: {
+        ...getSessionFields(),
+        MENU_CD: MENU_CODE,
+        ...params,
+      },
+    },
+  );
+
 export const dispatchOperatorCostApi = {
   getList(payload: any) {
     return apiClient.post<commonResponse>(
@@ -54,133 +71,135 @@ export const dispatchOperatorCostApi = {
     );
   },
 
-  // 상단 액션
-  changeContract(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/changeContract`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
   // 요율 계산 (요율생성)
-  calculateCost(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/tariffOperationService/makeRate`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+  calculateCost(rows: any[], params: Record<string, any>) {
+    return dsSavePost(
+      `/tariffOperationRefactorService/makeRateRefactor`,
+      rows,
+      params,
     );
   },
-  // 이동거리 재계산 (일괄/단건 공통)
-  adjustBulkDistance(payload: any) {
-    return apiClient.post<commonResponse>(
+  recalculateMoveDistance(rows: any[]) {
+    return dsSavePost(
       `/dispatchOperatorCostManagementService/recalcDistance`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  recalculateMoveDistance(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/recalcDistance`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
   // 일정산 처리 / 취소
-  closeDaily(payload: any) {
-    return apiClient.post<commonResponse>(
+  closeDaily(payload: { dsSave: any[] }) {
+    return dsSavePost(
       `/apDailyManagementService/saveDlySetl`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      payload.dsSave,
     );
   },
-  cancelCloseDaily(payload: any) {
-    return apiClient.post<commonResponse>(
+  cancelCloseDaily(payload: { dsSave: any[] }) {
+    return dsSavePost(
       `/apDailyManagementService/saveDlySetlCancel`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      payload.dsSave,
     );
   },
   // 운영자 비용 확정 / 확정취소
-  confirmCost(payload: any) {
-    return apiClient.post<commonResponse>(
+  confirmCost(rows: any[]) {
+    return dsSavePost(
       `/dispatchOperatorCostManagementService/saveRateOpConfirm`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
-  cancelConfirmCost(payload: any) {
-    return apiClient.post<commonResponse>(
+  cancelConfirmCost(rows: any[]) {
+    return dsSavePost(
       `/dispatchOperatorCostManagementService/saveRateOpConfirmCancel`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
   // 비용(정산) 삭제
-  deleteSettlement(payload: any) {
-    return apiClient.post<commonResponse>(
+  deleteSettlement(rows: any[]) {
+    return dsSavePost(
       `/dispatchOperatorCostManagementService/deleteAp`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      rows,
     );
   },
-  save(rows: any[]) {
-    return apiClient.post<commonResponse>(
+  save(payload: { dsSave: any[] }) {
+    return dsSavePost(
       `/dispatchOperatorCostManagementService/save`,
-      withSession(rows),
+      payload.dsSave,
     );
   },
-  createClose(payload: any) {
+  saveDetail(payload: {
+    FI_APPLN_DTL: string;
+    FI_DSPCH_APPLN_RT: string;
+  }) {
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/createClose`,
+      `/dispatchOperatorCostManagementService/saveDetail`,
       withSession({ MENU_CD: MENU_CODE, ...payload }),
     );
   },
-
-  // 경유처 - 정산경로 추가/복구/조정
-  addSettlementRoute(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/addSettlementRoute`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+  // 경유처 - 정산경로 복구/조정
+  restoreRoute(rows: any[]) {
+    return dsSavePost(
+      `/dispatchPlanVehService/deleteFiRoute`,
+      rows,
     );
   },
-  restoreRoute(payload: any) {
-    return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/restoreRoute`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
-    );
-  },
-  saveWaypoint(rows: any[]) {
-    return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/saveWaypoint`,
-      withSession(rows),
+  saveFiRoute(rows: any[]) {
+    return dsSavePost(
+      `/dispatchPlanVehService/saveFiRoute`,
+      rows,
     );
   },
 
   // 증빙문서 - 저장 / 첨부
   saveEvidence(rows: any[]) {
-    return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/saveEvidence`,
-      withSession(rows),
+    return dsSavePost(
+      `/dispatchOperatorCostManagementService/saveDoc`,
+      rows,
     );
   },
-  downloadEvidence(payload: any) {
+  uploadEvidence(file: File, params: Record<string, any>) {
+    const form = new FormData();
+    form.append("UPLOAD_FILE", file);
+    form.append("MENU_CD", MENU_CODE);
+    form.append("JSON_READ_PASS", "Y");
+    Object.entries({ ...getSessionFields(), ...params }).forEach(([key, value]) =>
+      form.append(key, String(value ?? "")),
+    );
     return apiClient.post<commonResponse>(
-      `/dispatchOperatorCostManagementService/downloadEvidence`,
-      withSession({ MENU_CD: MENU_CODE, ...payload }),
+      `/dispatchOperatorCostManagementService/uploadImgFile`,
+      form,
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
   },
-
+  downloadEvidence(fileIds: string, zipFlag: "Y" | "N") {
+    return apiClient.post(
+      `/dispatchOperatorCostManagementService/fileDownload`,
+      undefined,
+      {
+        params: {
+          ...getSessionFields(),
+          MENU_CD: MENU_CODE,
+          FILE_ID: fileIds,
+          ZIP_FLAG: zipFlag,
+        },
+        responseType: "blob",
+      },
+    );
+  },
   // 메모 등록 — 선택행에 MEMO_DESC 세팅 후 저장. (센차 onSaveApplnMemo, rowStatus 'I')
   saveMemo(rows: any[], text: string) {
-    return apiClient.post<commonResponse>(
+    return dsSavePost(
       `/dispatchOperatorCostManagementService/saveApplnMemo`,
-      withSession(
-        rows.map((r) => ({
-          ...r,
-          MEMO_DESC: text,
-          EDIT_STS: "I",
-          MENU_CD: MENU_CODE,
-        })),
-      ),
+      rows.map((r) => ({
+        ...r,
+        MEMO_DESC: text,
+        rowStatus: "I",
+      })),
     );
   },
 
   // 메모 등록취소. (센차 onCancelApplnMemo)
   cancelMemo(rows: any[]) {
-    return apiClient.post<commonResponse>(
+    return dsSavePost(
       `/dispatchOperatorCostManagementService/cancelApplnMemo`,
-      withSession(rows.map((r) => ({ ...r, EDIT_STS: "I", MENU_CD: MENU_CODE }))),
+      rows.map((r) => ({ ...r, rowStatus: "I" })),
     );
   },
 };
