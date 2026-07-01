@@ -101,6 +101,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "MIN_COST",
     editable: true,
     insertable: true,
+    defaultValue: 0,
     valueFormatter: numberValueFormatter,
     validators: {
       min: 0,
@@ -113,6 +114,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "MAX_COST",
     editable: true,
     insertable: true,
+    defaultValue: 999999999,
     valueFormatter: numberValueFormatter,
     validators: {
       min: 0,
@@ -125,6 +127,7 @@ export const MAIN_COLUMN_DEFS = [
     field: "BSE_COST",
     editable: true,
     insertable: true,
+    defaultValue: 0,
     valueFormatter: numberValueFormatter,
     validators: {
       min: 0,

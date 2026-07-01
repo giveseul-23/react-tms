@@ -92,7 +92,6 @@ export function usePodReportController({ model }: Args) {
         model.setImage({ url: null, ext: null, loading: false });
         return;
       }
-      // 서버는 FILE_NM_EXTENSION 으로 확장자 판단 — 없으면 원본 파일명으로 폴백.
       const ext =
         (row.FILE_NM_EXTENSION as string | undefined)?.toLowerCase() ??
         extOf(row.ORG_FILE_NM);
@@ -140,6 +139,48 @@ export function usePodReportController({ model }: Args) {
       content: <PdfPop url={url} fileExtension={ext} />,
     });
   }, [model.image, openPopup]);
+
+  // ── 하단 탭 변경  ───────────────────────
+  const onDetailTabChange = useCallback(
+    (key: string) => {
+      const main =
+        model.grids.main.selectedRef.current ?? model.grids.main.rows?.[0];
+      if (!main?.POD_ID) return;
+
+      if (key === "ITEM") {
+        base.resetGrids(["sub01", "sub02"]);
+        void base
+          .searchSub(
+            "sub01",
+            api.getPodDetail({
+              SHPM_DTL_ID: main.SHPM_DTL_ID,
+              POD_ID: main.POD_ID,
+            }),
+          )
+          .then((rows) => {
+            const first = rows?.[0];
+            if (first?.POD_DTL_ID) {
+              void base.searchSub(
+                "sub02",
+                api.getPodRejected({ POD_DTL_ID: first.POD_DTL_ID }),
+              );
+            }
+          });
+        return;
+      }
+
+      if (key === "IMAGE") {
+        model.setImage({ url: null, ext: null, loading: false });
+        void base
+          .searchSub("sub03", api.getPodFile({ POD_ID: main.POD_ID }))
+          .then((rows) => {
+            const first = rows?.[0];
+            if (first) void showImage(first);
+          });
+      }
+    },
+    [base, model, showImage],
+  );
 
   // ── 인수증 확인 (메인) ────────────────────────────────────────────
   const onConfirm = useCallback(
@@ -282,6 +323,7 @@ export function usePodReportController({ model }: Args) {
     onSub01GridClick,
     onSub03GridClick,
     onSub03GridDblClick,
+    onDetailTabChange,
     mainActions,
     sub01Actions,
     sub02Actions,
