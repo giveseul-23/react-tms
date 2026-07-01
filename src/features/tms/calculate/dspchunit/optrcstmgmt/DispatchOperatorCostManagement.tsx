@@ -39,6 +39,7 @@ export default function DispatchOperatorCostManagement() {
         fetchFn: ctrl.fetchList,
         onSearchCallback: ctrl.onSearchCallback,
         ...model.bindSearch(),
+        excludes: ["LOC_DE_NM", "LOC_NM"],
       }}
       defaultDirection="vertical"
       storageKey={model.storageKeys.outer}

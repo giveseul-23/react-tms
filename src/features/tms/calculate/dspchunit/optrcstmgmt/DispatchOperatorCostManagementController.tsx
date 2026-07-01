@@ -37,8 +37,15 @@ export function useDispatchOperatorCostController({ model }: Args) {
   const { menuName } = useMenuMeta();
 
   const fetchList = useCallback(
-    (params: Record<string, unknown>) => api.getList(params),
-    [],
+    (params: Record<string, unknown>) => {
+      const raw = model.rawFiltersRef.current ?? {};
+      return api.getList({
+        ...params,
+        LOC_DE_NM: raw.SRCH_LOC_DE_NM,
+        LOC_NM: raw.SRCH_LOC_NM,
+      });
+    },
+    [model.rawFiltersRef],
   );
 
   // master 클릭 → costDetail/waypoint/evidence cascade + costFunction reset
@@ -213,6 +220,7 @@ export function useDispatchOperatorCostController({ model }: Args) {
       const rows = toDsSave(
         toUpdateRows(selected).map((row) => ({
           ...row,
+          EDIT_STS: "U",
           MENU_CD: MENU_CODE,
         })),
       );
