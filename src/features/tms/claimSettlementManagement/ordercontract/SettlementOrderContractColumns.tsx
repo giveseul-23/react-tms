@@ -2,11 +2,11 @@
 // audit 컬럼(등록자/등록일시/수정자/수정일시)은 DataGrid 가 자동 추가(model.bind).
 // 조회 결과 그리드 — 전 컬럼 읽기전용(서버 editType 은 위젯 타입 결정용).
 
-// 매출계산결과메시지: 값이 있으면 빨간색 (서버 onRenderer color:red 대응)
-const resultMsgCellStyle = (p: any) =>
-  p?.value ? { color: "rgb(220, 38, 38)" } : undefined;
+import type { ReactNode } from "react";
 
-export const MAIN_COLUMN_DEFS = [
+const AR_RESULT_MSG_RED = "rgb(220, 38, 38)";
+
+const MAIN_COLUMN_DEFS_BASE = [
   { headerName: "No" },
   { type: "text", headerName: "LBL_CUSTOMER_CODE", field: "CUST_CD", align: "center" },
   { type: "text", headerName: "LBL_CUSTOMER_NAME", field: "CUST_NM", align: "left" },
@@ -20,7 +20,6 @@ export const MAIN_COLUMN_DEFS = [
     codeKey: "arResultMessage",
     align: "left",
     width: 250,
-    cellStyle: resultMsgCellStyle,
   },
   { type: "text", headerName: "LBL_DEPARTURE_CODE", field: "FRM_LOC_CD", align: "center" },
   { type: "text", headerName: "LBL_DEPARTURE_NAME", field: "FRM_LOC_NM", align: "left" },
@@ -50,4 +49,40 @@ export const MAIN_COLUMN_DEFS = [
   { type: "date", headerName: "LBL_DEP_DATE", field: "DEP_DATE", align: "center" },
   { type: "date", headerName: "LBL_ARRIVAL_DATE", field: "ARR_DATE", align: "center" },
   { type: "date", headerName: "LBL_POD_EVNT_DATE", field: "POD_DATE", align: "center" },
-];
+] as const;
+
+/** 매출계산결과메시지: 값이 있으면 빨간색 (센차 onRenderer color:red 대응) */
+function arResultMessageCellRenderer(
+  codeMap?: Record<string, Record<string, string>>,
+) {
+  return (params: { value?: string | null }): ReactNode => {
+    const code = params.value;
+    if (code === "" || code == null) {
+      return <span className="px-2 py-0.5 rounded-lg text-xs text-gray-400">-</span>;
+    }
+    const label = codeMap?.arResultMessage?.[String(code)] ?? code;
+    return (
+      <span
+        className="px-2 py-0.5 rounded-lg text-xs"
+        style={{ color: AR_RESULT_MSG_RED }}
+      >
+        {label}
+      </span>
+    );
+  };
+}
+
+/** codeMap 연동 — align+cellStyle 병합은 공통 processColumn 미사용, 화면 전용 cellRenderer */
+export function buildMainColumnDefs(
+  codeMap?: Record<string, Record<string, string>>,
+) {
+  return MAIN_COLUMN_DEFS_BASE.map((col) => {
+    if ((col as { field?: string }).field !== "AR_CALC_RSLT_MSG_CD") return col;
+    return {
+      ...col,
+      cellRenderer: arResultMessageCellRenderer(codeMap),
+    };
+  });
+}
+
+export const MAIN_COLUMN_DEFS = MAIN_COLUMN_DEFS_BASE;
