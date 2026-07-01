@@ -11,7 +11,7 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "date",
     headerName: "LBL_FROM_DATE",
-    field: "FRM_DTTM",
+    field: "FRM_DT",
     insertable: true,
     editable: true,
     required: true,
@@ -19,7 +19,7 @@ export const MAIN_COLUMN_DEFS = [
   {
     type: "date",
     headerName: "LBL_TO_DATE",
-    field: "TO_DTTM",
+    field: "TO_DT",
     insertable: true,
     editable: true,
     required: true,
