@@ -87,7 +87,7 @@ const VEHICLE_MANAGER_MAIN = {
     { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM", align: "center", width: 60 },
     { type: "text", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "VEH_OP_TP", align: "center", width: 60, hide: true },
     { type: "text", headerName: "LBL_VEH_TP_NM", field: "VEH_TP_NM", align: "center", width: 60 },
-    { type: "text", headerName: "LBL_DIV", field: "TRCK_TYPE", width: 40, cellStyle: trckTypeCellStyle },
+    { type: "text", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "TRCK_TYPE", width: 40, cellStyle: trckTypeCellStyle },
   ],
 };
 
@@ -101,7 +101,7 @@ const VEHICLE_MANAGER_SUB = {
     { type: "text", headerName: "LBL_DRIVER_NAME", field: "DRVR_NM", align: "center", width: 60 },
     { type: "text", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "VEH_OP_TP", align: "center", width: 60, hide: true },
     { type: "text", headerName: "LBL_VEH_TP_NM", field: "VEH_TP_NM", align: "center", width: 60 },
-    { type: "text", headerName: "LBL_DIV", field: "TRCK_TYPE", width: 40, cellStyle: trckTypeCellStyle, valueGetter: trckTypeValueGetter },
+    { type: "text", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "TRCK_TYPE", width: 40, cellStyle: trckTypeCellStyle, valueGetter: trckTypeValueGetter },
   ],
 };
 

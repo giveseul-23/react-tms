@@ -110,7 +110,7 @@ export const BASE_MAIN_COLUMN_DEFS = [
         ),
       },
       { type: "text", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "VEH_OP_TP", align: "center", width: 40, hide: true },
-      { type: "text", headerName: "LBL_DIV", field: "TRCK_TYPE", align: "center", width: 40 },
+      { type: "text", headerName: "LBL_VEHICLE_OPERATION_TYPE", field: "TRCK_TYPE", align: "center", width: 40 },
     ],
   },
   {
