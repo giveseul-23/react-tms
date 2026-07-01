@@ -169,6 +169,8 @@ type Props = {
   /** from-to 범위 하한/상한 — value 와 같은 형식(YYYY-MM-DD 등). 벗어난 값은 경계로 클램프. */
   min?: string;
   max?: string;
+  /** true(기본) 면 마운트 시 값이 비어 있을 때 오늘로 자동 채움. 그리드 셀은 EDIT_STS 로 제어. */
+  autoToday?: boolean;
 };
 
 // value → { date, time } 분해
@@ -355,6 +357,7 @@ export function DatePickerPopover({
   size = "sm",
   min,
   max,
+  autoToday = true,
 }: Props) {
   const isLg = size === "lg";
   // from-to 범위 클램프 — 같은 형식이라 문자열 비교로 충분(YYYY-MM-DD…). 빈값은 통과.
@@ -398,13 +401,14 @@ export function DatePickerPopover({
     });
   };
 
-  // 팝오버가 열릴 때마다 현재 value 로 초기화
+  // 팝오버가 열릴 때마다 현재 value 로 초기화. 값이 비어 있으면 오늘로 시작(선택/확인 편의).
   useEffect(() => {
     if (!open) return;
     const { date, time } = parseValue(value, withTime, precision);
-    setDraftDate(date);
+    const start = date ?? new Date();
+    setDraftDate(start);
     setDraftTime(time);
-    setViewMonth(date ?? new Date());
+    setViewMonth(start);
     setViewMode("day");
   }, [open, value, withTime, precision]);
 
@@ -418,6 +422,14 @@ export function DatePickerPopover({
           ? `${format(d, "yyyy-MM-dd")}T${draftTime || "00:00:00"}`
           : format(d, "yyyy-MM-dd");
 
+  // 값이 비어 있으면 오늘 날짜로 자동 채움(공통 정책). autoToday=false 면 비활성(그리드에서 EDIT_STS 로 제어).
+  const autoTodayDoneRef = useRef(false);
+  useEffect(() => {
+    if (autoTodayDoneRef.current || !autoToday) return;
+    autoTodayDoneRef.current = true;
+    if (!value) commit(formatResult(new Date()));
+  }, [autoToday, value]);
+
   const handleToday = () => {
     // 일시(withTime)는 확인 버튼으로 적용 → 오늘은 draft 만 갱신(닫지 않음)
     if (withTime) {
@@ -430,9 +442,10 @@ export function DatePickerPopover({
 
   // 달력/연/월 선택 — 날짜 단위는 즉시 적용+닫기. 일시(withTime)는 draft 만 갱신(시간 확인 시 함께 적용).
   const handleSelectDate = (d?: Date) => {
-    setDraftDate(d);
-    if (d && !withTime) {
-      commit(formatResult(d));
+    const picked = d ?? draftDate; // 이미 선택된 날 재클릭(deselect)이면 현재 draft 유지
+    setDraftDate(picked);
+    if (picked && !withTime) {
+      commit(formatResult(picked));
       setOpen(false);
     }
   };
@@ -441,9 +454,8 @@ export function DatePickerPopover({
   const handleConfirmDateTime = () => {
     const t = clampTime(draftTime);
     setDraftTime(t);
-    if (draftDate) {
-      commit(`${format(draftDate, "yyyy-MM-dd")}T${t}`);
-    }
+    const d = draftDate ?? new Date(); // 날짜 미선택이면 오늘로 커밋
+    commit(`${format(d, "yyyy-MM-dd")}T${t}`);
     setOpen(false);
   };
 

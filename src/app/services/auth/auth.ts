@@ -88,6 +88,6 @@ export function getSessionFields() {
     sesUserId: userId,
     ACCESS_TOKEN: sessionStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
     REFRESH_TOKEN: sessionStorage.getItem(REFRESH_TOKEN_KEY) ?? "",
-    sesLang: sessionStorage.getItem(SESLANG) ?? "",
+    sesLang: sessionStorage.getItem(SESLANG) ?? "KO",
   };
 }

@@ -998,6 +998,7 @@ function injectDateCell(col: AnyCol, opts: ProcessOptions): AnyCol {
             withTime={withTime}
             precision={unit}
             iconOnly
+            autoToday={row?.EDIT_STS === "I" || row?.EDIT_STS === "U"}
           />
         </div>
       );
