@@ -6,7 +6,7 @@ import {
   makeExcelGroupAction,
   makeSaveAction,
 } from "@/app/components/grid/actions/commonActions";
-import { dirtyRows } from "@/app/components/grid/gridCommon";
+import { toDsSave } from "@/app/components/grid/gridCommon";
 import type { ActionItem } from "@/app/components/ui/GridActionsBar";
 import type {
   DispatchManagerCostModel,
@@ -117,14 +117,19 @@ export function useDispatchManagerCostController({ model }: Args) {
   const costDetailActions: ActionItem[] = useMemo(
     () => [
       makeSaveAction({
-        onClick: (e: any) => {
-          const saveRows = dirtyRows(e.data);
+        onClick: () => {
+          const saveRows = toDsSave(model.grids.costDetail.rows);
           if (saveRows.length === 0) return;
-          api.saveCostDetail(saveRows).then(() => refetchSubTabs());
+          base
+            .callAjax(api.saveCostDetail(saveRows), { mask: "costDetail" })
+            .then(() => {
+              refetchSubTabs();
+              base.search();
+            });
         },
       }),
     ],
-    [refetchSubTabs],
+    [base, model.grids.costDetail, refetchSubTabs],
   );
 
   const waypointActions: ActionItem[] = useMemo(() => [], []);

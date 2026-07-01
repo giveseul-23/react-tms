@@ -1,5 +1,9 @@
 import { makeAuditColumns } from "@/app/components/grid/columns/commonColumns";
 import { numberValueFormatter } from "@/app/components/grid/columns/commonFormatters";
+import { AP_FI_STS } from "@/app/components/grid/status/statusEnums";
+
+const isPlanned = (params: any) =>
+  String(params.data?.AP_FI_STS ?? "") === AP_FI_STS.PLANNED;
 
 // 메인 그리드
 export const MAIN_COLUMN_DEFS = [
@@ -64,22 +68,27 @@ export const COST_DETAIL_COLUMN_DEFS = [
     valueFormatter: numberValueFormatter,
   },
   {
-    type: "text",
+    type: "numeric",
     headerName: "LBL_CFM_COST",
     field: "CFM_COST",
+    editable: isPlanned,
     aggFunc: "sum",
     summaryType: "sum",
     valueFormatter: numberValueFormatter,
   },
   { type: "text", headerName: "LBL_OP_ADJUST_REASON", field: "ADJ_RSN" },
-  { type: "text", headerName: "LBL_MG_ADJUST_REASON", field: "CFM_RSN" },
+  {
+    type: "text",
+    headerName: "LBL_MG_ADJUST_REASON",
+    field: "CFM_RSN",
+    editable: isPlanned,
+  },
   { type: "text", headerName: "LBL_ADJ_PERSON_ID", field: "ADJ_USR_ID" },
   { type: "text", headerName: "LBL_ADJ_DATETIME", field: "ADJ_DTTM" },
   { type: "text", headerName: "LBL_CFM_PERSON_ID", field: "CFM_USR_ID" },
   { type: "text", headerName: "LBL_CFM_DATETIME", field: "CFM_DTTM" },
   { type: "text", headerName: "LBL_AP_ID", field: "AP_ID" },
   ...makeAuditColumns({
-    delete: true,
     rowStatus: true,
     insertPerson: true,
     insertDate: true,
