@@ -58,13 +58,13 @@ export function useFreightCostAggregationController({ model }: Args) {
       }
 
       // 차량 표시값이 '모두' 면 VEH_NO 미전송 (서버 onSaveAfterSearch)
-      const vehNo =
-        s.SRCH_DSP_VEH_ID_NM === "모두" ? null : (s.SRCH_DSP_VEH_ID_NM ?? null);
+      const vehId =
+        s.SRCH_DV_VEH_ID === "모두" ? "" : (s.SRCH_DV_VEH_ID ?? "");
 
       return api.getList({
         AP_PROC_TP: s.SRCH_AP_PROC_TP ?? "",
         ZERO_INCLD: s.SRCH_ZERO_INCLD ?? "",
-        VEH_NO: vehNo,
+        VEH_ID: vehId,
         ...params,
       });
     },
