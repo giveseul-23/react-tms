@@ -126,6 +126,9 @@ export function useRateController({ model }: Args) {
                 LGST_GRP_NM: item.LGST_GRP_NM,
                 TRF_CD: item.TRF_CD,
                 TRF_NM: item.TRF_NM,
+                MIN_COST: 0,
+                MAX_COST: 999999999,
+                BSE_COST: 0,
                 USE_YN: "Y",
               });
             });
