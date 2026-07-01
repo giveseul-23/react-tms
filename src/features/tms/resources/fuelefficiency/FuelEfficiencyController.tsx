@@ -154,8 +154,8 @@ export function useFuelEfficiencyController({ model }: Args) {
       ) {
         continue;
       }
-      const from = normYmd(row.FRM_DTTM);
-      const to = normYmd(row.TO_DTTM);
+      const from = normYmd(row.FRM_DT);
+      const to = normYmd(row.TO_DT);
       if (from && to && from > to) {
         base.alert(
           Lang.get("MSG_VALID_RANGE_CHK", Lang.get("LBL_FROM_DATE"), Lang.get("LBL_TO_DATE")),
@@ -170,8 +170,8 @@ export function useFuelEfficiencyController({ model }: Args) {
     const today = ymdToday();
     base.addRow("main", {
       FE_ID: `FE_${today}`,
-      FRM_DTTM: today,
-      TO_DTTM: ymdAddDays(today, 1),
+      FRM_DT: today,
+      TO_DT: ymdAddDays(today, 1),
     });
     const added = model.grids.main.selectedRef.current;
     if (added) void cascadeFromMain(added);
@@ -199,8 +199,8 @@ export function useFuelEfficiencyController({ model }: Args) {
       content: (
         <FuelEfficiencyPop
           defaultFeId={`FE_${today}`}
-          defaultFrmDttm={today}
-          defaultToDttm=""
+          defaultFrmDt={today}
+          defaultToDt=""
           onClose={closePopup}
           onApply={(values) => {
             closePopup();
@@ -208,8 +208,8 @@ export function useFuelEfficiencyController({ model }: Args) {
               api.addCopy({
                 COPY_FE_ID: selected.FE_ID,
                 FE_ID: values.FE_ID,
-                FRM_DTTM: values.FRM_DTTM,
-                TO_DTTM: values.TO_DTTM,
+                FRM_DT: values.FRM_DT,
+                TO_DT: values.TO_DT,
               }),
               { mask: "main" },
             ).then(() => base.search());

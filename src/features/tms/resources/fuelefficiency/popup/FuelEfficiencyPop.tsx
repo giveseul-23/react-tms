@@ -7,34 +7,34 @@ import { Lang } from "@/app/services/common/Lang";
 
 type Props = {
   defaultFeId: string;
-  defaultFrmDttm: string;
-  defaultToDttm: string;
+  defaultFrmDt: string;
+  defaultToDt: string;
   onApply: (values: {
     FE_ID: string;
-    FRM_DTTM: string;
-    TO_DTTM: string;
+    FRM_DT: string;
+    TO_DT: string;
   }) => void;
   onClose: () => void;
 };
 
 export function FuelEfficiencyPop({
   defaultFeId,
-  defaultFrmDttm,
-  defaultToDttm,
+  defaultFrmDt,
+  defaultToDt,
   onApply,
   onClose,
 }: Props) {
   const [feId, setFeId] = useState(defaultFeId);
-  const [frmDttm, setFrmDttm] = useState(defaultFrmDttm);
-  const [toDttm, setToDttm] = useState(defaultToDttm);
+  const [frmDt, setFrmDt] = useState(defaultFrmDt);
+  const [toDt, setToDt] = useState(defaultToDt);
 
   const isValid = useMemo(
     () =>
       String(feId).trim() !== "" &&
-      String(frmDttm).trim() !== "" &&
-      String(toDttm).trim() !== "" &&
-      frmDttm <= toDttm,
-    [feId, frmDttm, toDttm],
+      String(frmDt).trim() !== "" &&
+      String(toDt).trim() !== "" &&
+      frmDt <= toDt,
+    [feId, frmDt, toDt],
   );
 
   return (
@@ -45,7 +45,7 @@ export function FuelEfficiencyPop({
       isValid={isValid}
       onCancel={onClose}
       onConfirm={() =>
-        onApply({ FE_ID: feId, FRM_DTTM: frmDttm, TO_DTTM: toDttm })
+        onApply({ FE_ID: feId, FRM_DT: frmDt, TO_DT: toDt })
       }
     >
       <Field
@@ -61,16 +61,16 @@ export function FuelEfficiencyPop({
         type="text"
         label={Lang.get("LBL_FROM_DATE")}
         required
-        value={frmDttm}
-        onChange={setFrmDttm}
+        value={frmDt}
+        onChange={setFrmDt}
       />
       <Field
         layout="vertical"
         type="text"
         label={Lang.get("LBL_TO_DATE")}
         required
-        value={toDttm}
-        onChange={setToDttm}
+        value={toDt}
+        onChange={setToDt}
       />
     </FormPopupLayout>
   );
