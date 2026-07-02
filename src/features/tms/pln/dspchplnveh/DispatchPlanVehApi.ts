@@ -82,7 +82,10 @@ export const dispatchPlanVehApi = {
   // ── 배차취소 ──────────────────────────────────────────────────
   // 자차 배차 취소
   saveCancelPlanDedDispatch(rows: any[]) {
-    return dsSavePost("/dispatchPlanVehService/saveCancelPlanDispatch", rows);
+    return dsSavePost(
+      "/dispatchPlanVehService/saveCancelPlanDedDispatch",
+      rows,
+    );
   },
   // 용차 배차 취소 — 서버는 /dispatchPlanService 사용
   saveCancelPlanDispatchTemp(rows: any[]) {
