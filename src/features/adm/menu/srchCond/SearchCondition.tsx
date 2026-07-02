@@ -28,7 +28,6 @@ export default function SearchCondition() {
           codeMap={model.codeMap}
           headerCheckbox={false}
           actions={ctrl.mainActions}
-          audit={true}
         />
       }
     />

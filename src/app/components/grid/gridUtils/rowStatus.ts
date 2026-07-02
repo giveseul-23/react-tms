@@ -145,9 +145,13 @@ export function carryOrig(next: any, src: any): void {
 // 달라도 같은 날짜면 동일하게 본다 — 구분자 제거 후 비교.
 const stripDateSep = (v: any) => String(v ?? "").replace(/[\s\-:/T]/g, "");
 
-/** 원본과 모든 필드가 동일한가 (number/string 차이는 문자열 비교로 흡수). */
+/** 원본과 모든 필드가 동일한가 (number/string 차이는 문자열 비교로 흡수).
+ *  원본 스냅샷에 없던 필드(서버 미반환 → null/blank)도 값이 생기면 변경으로 잡도록
+ *  원본 키 ∪ 현재 행 키 합집합을 비교한다 (내부 관리 키는 제외). */
 function matchesOrig(row: any, orig: Record<string, any>): boolean {
-  for (const k of Object.keys(orig)) {
+  const keys = new Set([...Object.keys(orig), ...Object.keys(row)]);
+  for (const k of keys) {
+    if (ORIG_INTERNAL_KEYS.has(k)) continue;
     if (k.includes("DTTM")) {
       if (stripDateSep(row[k]) !== stripDateSep(orig[k])) return false;
     } else if (String(row[k] ?? "") !== String(orig[k] ?? "")) {
