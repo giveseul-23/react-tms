@@ -87,6 +87,7 @@ export const CONFIG_DETAIL_COLUMN_DEFS = [
     field: "CNFG_DTL_NM",
     editable: true,
     insertable: true,
+    required: true,
   },
   {
     type: "check",
