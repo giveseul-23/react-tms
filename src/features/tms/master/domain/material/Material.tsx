@@ -34,6 +34,7 @@ export default function Material() {
       master={
         <DataGrid
           {...model.bind("main")}
+          audit={{ delete: false, rowStatus: false }}
           columnDefs={MAIN_COLUMN_DEFS}
           codeMap={model.codeMap}
           onRowClicked={ctrl.onMainGridClick}
@@ -53,6 +54,7 @@ export default function Material() {
                 <DataGrid
                   {...model.bind("sub02")}
                   layoutType="plain"
+                  audit={{ delete: false, rowStatus: false }}
                   columnDefs={SUB02_COLUMN_DEFS}
                   actions={ctrl.sub02Actions}
                 />
@@ -63,6 +65,7 @@ export default function Material() {
                 <DataGrid
                   {...model.bind("sub01")}
                   layoutType="plain"
+                  audit={{ delete: false, rowStatus: false }}
                   columnDefs={SUB01_COLUMN_DEFS}
                   actions={ctrl.sub01Actions}
                 />
