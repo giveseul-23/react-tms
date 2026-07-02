@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { Lang } from "@/app/services/common/Lang";
 import { Check, CircleAlert } from "lucide-react";
 
@@ -17,6 +18,12 @@ export default function ConfirmModal({
   onClose,
   type,
 }: ConfirmModalProps) {
+  const btnRef = useRef<HTMLButtonElement>(null);
+  // 팝업 열릴 때 확인 버튼에 포커스 — Enter 로 바로 확인, 뒤 화면으로 포커스가 새지 않도록.
+  useEffect(() => {
+    btnRef.current?.focus();
+  }, []);
+
   return (
     // py-6 → pt-4 pb-2 로 완화, px-4 제거 (PopupShell p-6 로 이미 적용)
     // 스크롤이 필요할 때 내부에서 자연스럽게 늘어나도록 고정 높이/패딩 최소화
@@ -63,9 +70,10 @@ export default function ConfirmModal({
       {/* Buttons */}
       <div className="flex gap-3 w-full mt-2">
         <button
+          ref={btnRef}
           type="button"
           onClick={onClose}
-          className={`flex-1 h-11 rounded-md text-white font-medium transition
+          className={`flex-1 h-11 rounded-md text-white font-medium transition outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-300
             ${type === "error" ? "bg-red-500 hover:bg-red-600" : ""}
             ${type === "confirm" ? "bg-blue-500 hover:bg-blue-600" : ""}
             ${type === "check" ? "bg-gray-500 hover:bg-gray-600" : ""}

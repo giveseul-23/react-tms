@@ -48,6 +48,7 @@ export function PopupShell({
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const dialogRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // 팝업 열기 직전(= render 시점, 내용 autofocus 전) 포커스 요소 캡처 → 닫힐 때 복원.
   // 조회조건 팝업 선택 후 그 필드로 포커스가 돌아가 Enter 조회가 이어지도록.
@@ -63,6 +64,20 @@ export function PopupShell({
       }
     };
   }, [opener]);
+
+  // 팝업 활성 시 포커스를 팝업 안으로 이동 — 뒤 화면(조회조건 등)이 포커스를 유지하면
+  // Enter 가 뒤 화면 조회로 새므로 방지. 내용이 이미 오토포커스했으면(활성요소가 팝업
+  // 내부) 존중하고, 아니면 첫 입력요소, 그것도 없으면 다이얼로그 자체에 포커스.
+  useEffect(() => {
+    if (!open || !active) return;
+    const dialog = dialogRef.current;
+    if (!dialog || dialog.contains(document.activeElement)) return;
+    const scope = contentRef.current ?? dialog;
+    const focusable = scope.querySelector<HTMLElement>(
+      'input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    (focusable ?? dialog).focus();
+  }, [open, active]);
 
   useEffect(() => {
     if (open) setPos(null);
@@ -156,8 +171,9 @@ export function PopupShell({
       {/* Dialog — 구조는 active 와 무관하게 항상 동일하게 렌더 (visibility 만 토글) */}
       <div
         ref={dialogRef}
+        tabIndex={-1}
         style={finalDialogStyle}
-        className="rounded-lg shadow-xl bg-white dark:bg-slate-800 overflow-hidden"
+        className="rounded-lg shadow-xl bg-white dark:bg-slate-800 overflow-hidden outline-none"
         aria-hidden={!active}
       >
         {/* Header — 항상 고정 표시, shrink 되지 않음 */}
@@ -184,6 +200,7 @@ export function PopupShell({
           - minHeight: 0 → flex 자식이 부모 높이를 초과하지 않도록
         */}
         <div
+          ref={contentRef}
           style={{
             flex: 1,
             minHeight: 0,

@@ -2,7 +2,7 @@
 // PopupProvider 없이도 독립적으로 사용 가능한 오류 팝업
 // 로그인 페이지처럼 PopupProvider 외부에서 사용하는 용도
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { AlertCircle, X } from "lucide-react";
 
@@ -19,6 +19,14 @@ export function ErrorPopup({
   message,
   onClose,
 }: ErrorPopupProps) {
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
+  // 팝업 열릴 때 포커스를 팝업(확인 버튼)으로 이동 — 안 하면 뒤 화면 Sign In 버튼이
+  // 포커스를 유지해 Enter 시 재로그인/재조회로 샌다.
+  useEffect(() => {
+    if (open) confirmRef.current?.focus();
+  }, [open]);
+
   if (!open) return null;
 
   return createPortal(
@@ -52,9 +60,10 @@ export function ErrorPopup({
         {/* Footer */}
         <div className="px-5 pb-4 flex justify-end">
           <button
+            ref={confirmRef}
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium bg-slate-100 hover:bg-slate-200
-                       text-slate-700 rounded-md transition-colors"
+                       text-slate-700 rounded-md transition-colors outline-none focus:ring-2 focus:ring-blue-300"
           >
             확인
           </button>
