@@ -65,6 +65,8 @@ type DataGridProps<TRow> = {
   rowSelection?: string;
   /** false 명시 시 selection column(체크박스/헤더체크박스) 숨김. 미지정 시 기존 동작 유지. */
   headerCheckbox?: boolean;
+  /** multiRow 에서 행 클릭으로도 선택되게 (기본 false — 체크박스로만 선택). 클릭 조회+체크 동시 필요할 때. */
+  enableClickSelection?: boolean;
   /** 변할 때만 autoSize 재실행. model.bind() 가 자동 spread — 객체 set(조회 결과 도착)에만 +1,
    *  함수형 updater(셀 편집/행 추가)는 변경 없음 → 셀 편집 시 가로 스크롤 유지. */
   autoSizeKey?: number;
@@ -174,6 +176,7 @@ export default function DataGrid<TRow>({
   onRowDoubleClicked,
   rowSelection: rowSelectionProp,
   headerCheckbox,
+  enableClickSelection,
   autoSizeKey,
   onCellValueChanged,
   onSelectionChanged,
@@ -410,6 +413,7 @@ export default function DataGrid<TRow>({
     handleSelectionChanged: handlers.handleSelectionChanged,
     rowSelectionProp,
     headerCheckbox,
+    enableClickSelection,
     treeData,
     getDataPath,
     autoGroupColumnDef,

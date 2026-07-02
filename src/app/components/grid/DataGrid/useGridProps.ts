@@ -24,6 +24,7 @@ export function useGridProps<TRow>({
   handleSelectionChanged,
   rowSelectionProp,
   headerCheckbox,
+  enableClickSelection,
   treeData,
   getDataPath,
   autoGroupColumnDef,
@@ -41,6 +42,8 @@ export function useGridProps<TRow>({
   handleSelectionChanged: (e: any) => void;
   rowSelectionProp?: string;
   headerCheckbox?: boolean;
+  /** multiRow 에서도 행 클릭으로 선택되게 (기본 false — 체크박스로만 선택). */
+  enableClickSelection?: boolean;
   treeData?: boolean;
   getDataPath?: (data: TRow) => string[];
   autoGroupColumnDef?: ColDef<TRow>;
@@ -69,10 +72,10 @@ export function useGridProps<TRow>({
         }
       : {
           mode: "multiRow" as const,
-          enableClickSelection: false,
+          enableClickSelection: !!enableClickSelection,
           ...(hide && { checkboxes: false, headerCheckbox: false }),
         };
-  }, [rowSelectionProp, headerCheckbox]);
+  }, [rowSelectionProp, headerCheckbox, enableClickSelection]);
 
   const selectionColumnDef = useMemo(() => ({ ...SELECTION_COLUMN_DEF }), []);
 

@@ -25,7 +25,6 @@ import {
   LOCATION_DSPCH_COLUMN_DEFS,
   DEDICATED_TRUCK_COLUMN_DEFS,
   TEMP_TRUCK_COLUMN_DEFS,
-  getFirstDispatchTripKey,
 } from "./DispatchPlanVehColumns";
 import { Lang } from "@/app/services/common/Lang";
 
@@ -265,7 +264,8 @@ export default function DispatchPlanVeh() {
           onRowDoubleClicked={(row: any) =>
             openDetail({
               ...row,
-              DSPCH_NO: getFirstDispatchTripKey(row),
+              // 고정차량(자차)은 배차번호를 보내지 않고 차량 기준으로 조회
+              DSPCH_NO: "",
               VEH_OP_TP: "100",
             })
           }
@@ -378,7 +378,8 @@ export default function DispatchPlanVeh() {
               onOpenDetail={(row: any) =>
                 openDetail({
                   ...row,
-                  DSPCH_NO: getFirstDispatchTripKey(row),
+                  // 고정차량(자차)은 배차번호를 보내지 않고 차량 기준으로 조회
+                  DSPCH_NO: "",
                   VEH_OP_TP: "100",
                 })
               }

@@ -54,6 +54,8 @@ export function useGridHandlers<TRow>({
 
   const handleRowClicked = useCallback(
     (e: any) => {
+      // 하단 합계(total)/pinned 행은 데이터 행이 아님 — 클릭 무시(선택/cascade 재조회 방지)
+      if (e.node?.rowPinned) return;
       const target = e.event?.target as HTMLElement;
       if (
         target?.closest(".ag-selection-checkbox") ||
@@ -72,6 +74,8 @@ export function useGridHandlers<TRow>({
 
   const handleRowDoubleClicked = useCallback(
     (e: any) => {
+      // 하단 합계(total)/pinned 행은 데이터 행이 아님 — 더블클릭 무시
+      if (e.node?.rowPinned) return;
       if (!e.data) return;
       onRowDoubleClicked?.(e.data);
     },

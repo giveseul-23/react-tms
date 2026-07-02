@@ -2,7 +2,7 @@
 //  데이터 로더/핸들러/검증/액션배열 + 인터랙티브 컬럼(dspchCols) 보유.
 //  상태는 useDispatchDetailPopModel 이 소유, 여기서는 그 setter/값을 사용해 로직만 담당.
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   commitRowChanges,
   captureOrig,
@@ -79,6 +79,7 @@ export function useDispatchDetailPopController({
     unallocCond,
     selDspch,
     setSelDspch,
+    dspchCheckedRef,
     codeMap,
     editingRidRef,
     setDspchMasking,
@@ -225,15 +226,26 @@ export function useDispatchDetailPopController({
     });
   };
 
+  // 요청 시퀀스 가드 — 같은 종류의 조회가 겹칠 때(연속 선택/탭전환/할당 후 재조회) 최신 응답만 반영.
+  //   응답이 도착순과 무관하게 out-of-order 로 와도, 마지막 요청 seq 와 다르면 폐기 → 잘못/빈 화면 방지.
+  const seqRef = useRef<Record<string, number>>({});
+  const nextSeq = (key: string) =>
+    (seqRef.current[key] = (seqRef.current[key] ?? 0) + 1);
+  const isLatest = (key: string, seq: number) => seq === seqRef.current[key];
+
   // 할당주문 행의 품목 조회 (SHPM_ID 기준)
   const loadAssignItems = (row: any) => {
     if (!row?.SHPM_ID) {
       setAssignItemRow([]);
       return;
     }
+    const seq = nextSeq("assignItem");
     api
       .searchAssignedShipmentDetail({ SHPM_ID: row.SHPM_ID })
-      .then((res) => setAssignItemRow(rowsOf(res)));
+      .then((res) => {
+        if (!isLatest("assignItem", seq)) return;
+        setAssignItemRow(rowsOf(res));
+      });
   };
 
   // 미할당주문 행의 품목 조회 (SHPM_ID 기준)
@@ -242,9 +254,13 @@ export function useDispatchDetailPopController({
       setUnAssignItemRow([]);
       return;
     }
+    const seq = nextSeq("unassignItem");
     api
       .searchUnAssignedShipmentDetail({ SHPM_ID: row.SHPM_ID })
-      .then((res) => setUnAssignItemRow(rowsOf(res)));
+      .then((res) => {
+        if (!isLatest("unassignItem", seq)) return;
+        setUnAssignItemRow(rowsOf(res));
+      });
   };
 
   const subParams = (record: any) => ({
@@ -260,8 +276,12 @@ export function useDispatchDetailPopController({
       setRouteRowData([]);
       return Promise.resolve();
     }
+    const seq = nextSeq("route");
     return runMask(setRouteMasking, api.searchPlanStop(subParams(record))).then(
-      (res) => setRouteRowData(rowsOf(res)),
+      (res) => {
+        if (!isLatest("route", seq)) return;
+        setRouteRowData(rowsOf(res));
+      },
     );
   };
 
@@ -272,10 +292,12 @@ export function useDispatchDetailPopController({
       setAssignItemRow([]);
       return Promise.resolve();
     }
+    const seq = nextSeq("assigned");
     return runMask(
       setAllocMasking,
       api.searchAssignedShipment(subParams(record)),
     ).then((res) => {
+      if (!isLatest("assigned", seq)) return;
       const rows = rowsOf(res);
       setAssignShpmRow(rows);
       loadAssignItems(rows[0]);
@@ -288,8 +310,15 @@ export function useDispatchDetailPopController({
     return Promise.all([loadRoute(record), loadAssigned(record)]);
   };
 
+  // 배차그리드 체크박스 선택 변경 — 주문할당 대상(체크 1건) 추적.
+  //   행 클릭(cascade 표시)과 무관하게, "사용자가 체크한 배차"만 할당 대상으로 본다.
+  const onDspchSelectionRows = (rows: any[]) => {
+    dspchCheckedRef.current = rows ?? [];
+  };
+
   // 미할당주문 조회 (배송유형 조건) → 첫 행 품목까지
   const handleUnallocOrderSearch = () => {
+    const seq = nextSeq("unalloc");
     setUnAssignSearching(true);
     api
       .getUnallocOrderList({
@@ -300,17 +329,32 @@ export function useDispatchDetailPopController({
         DLVRY_TP: unallocCond.DLVRY_TP === "ALL" ? "" : unallocCond.DLVRY_TP,
       })
       .then((res) => {
+        if (!isLatest("unalloc", seq)) return;
         const rows = rowsOf(res);
         setUnAssignShpmRow(rows);
         loadUnAssignItems(rows[0]);
       })
-      .finally(() => setUnAssignSearching(false));
+      .finally(() => {
+        // 더 최신 요청이 진행 중이면 그 요청이 스피너를 관리하도록 둔다.
+        if (isLatest("unalloc", seq)) setUnAssignSearching(false);
+      });
   };
 
-  // 주문할당 — 선택 미할당주문 행을 선택 배차행(DSPCH_NO)에 할당 → 미할당/할당 재조회
-  const onAssignShipment = (e: any) => {
-    const rows = (e?.data ?? []) as any[];
-    if (!selDspch?.DSPCH_NO) {
+  // 주문할당 — 선택 미할당주문 행을 "체크한 배차"(정확히 1건)에 할당 → 미할당/할당 재조회.
+  //   대상 배차는 auto-first(selDspch)가 아니라 배차그리드 체크박스 선택 기준.
+  // 공용 할당 코어 — 체크한 대상 배차(정확히 1건)에 넘어온 미할당 행들을 할당
+  const assignShipments = (rows: any[]) => {
+    const checked = dspchCheckedRef.current ?? [];
+    if (checked.length === 0) {
+      showError(Lang.get("MSG_SELECT_NO_DATA"));
+      return;
+    }
+    if (checked.length > 1) {
+      showError(Lang.get("MSG_CHECK_SINGLE_RECORD"));
+      return;
+    }
+    const targetDspch = checked[0];
+    if (!targetDspch?.DSPCH_NO) {
       showError(Lang.get("MSG_SELECT_NO_DATA"));
       return;
     }
@@ -321,13 +365,22 @@ export function useDispatchDetailPopController({
     runMask(
       setUnallocMasking,
       api.saveAssignedShipment(
-        rows.map((r) => ({ ...r, DSPCH_NO: selDspch.DSPCH_NO })),
+        rows.map((r) => ({ ...r, DSPCH_NO: targetDspch.DSPCH_NO })),
       ),
     ).then(() => {
       handleUnallocOrderSearch();
-      loadSub(selDspch);
+      // 메인 배차목록도 재조회 (수량/적재율 갱신) + 방금 할당한 배차 선택 유지
+      fetchDspchAndSelect(targetDspch.DSPCH_NO);
     });
   };
+
+  // 주문할당 버튼 — 체크된 미할당 행들 할당
+  const onAssignShipment = (e: any) =>
+    assignShipments((e?.data ?? []) as any[]);
+
+  // 미할당주문 행 더블클릭 — 주문할당과 동일 처리(더블클릭한 행 1건)
+  const onUnallocRowDblClick = (row: any) =>
+    assignShipments(row ? [row] : []);
 
   // 주문할당취소 — 선택 할당주문 행을 미할당으로 → 할당/배송경로/미할당 재조회
   const onUnassignedShipment = (e: any) => {
@@ -337,7 +390,8 @@ export function useDispatchDetailPopController({
       return;
     }
     runMask(setAllocMasking, api.saveUnAssignedShipment(rows)).then(() => {
-      loadSub(selDspch);
+      // 메인 배차목록도 재조회 (수량/적재율 갱신) + 보던 배차 선택 유지
+      fetchDspchAndSelect(selDspch?.DSPCH_NO);
       handleUnallocOrderSearch();
     });
   };
@@ -430,8 +484,8 @@ export function useDispatchDetailPopController({
     },
   ];
 
-  // 배차목록 재조회 → 첫 배차행 기준 하위(할당주문/배송경로) 자동 재조회 (저장/처리 후 호출)
-  const refreshDspch = () =>
+  // 배차목록 재조회 코어 — 조회 후 대상 배차 선택(pickDspchNo 있으면 그 배차, 없으면 첫 행)해 하위 재조회.
+  const fetchDspchAndSelect = (pickDspchNo?: string) =>
     api
       .searchDispatchPop({
         DSPCH_NO: initValue.DSPCH_NO,
@@ -444,8 +498,16 @@ export function useDispatchDetailPopController({
       .then((res) => {
         const rows = withRid(rowsOf(res));
         setDspchRowData(rows);
-        return loadSub(rows[0]);
+        // 재조회 시 이전 체크 선택 초기화 (auto-first 는 cascade 표시용일 뿐, 할당 대상 아님).
+        dspchCheckedRef.current = [];
+        const target = pickDspchNo
+          ? rows.find((r) => String(r.DSPCH_NO) === String(pickDspchNo))
+          : undefined;
+        return loadSub(target ?? rows[0]);
       });
+
+  // 배차목록 재조회 → 첫 배차행 기준 하위(할당주문/배송경로) 자동 재조회 (저장/처리 후 호출)
+  const refreshDspch = () => fetchDspchAndSelect();
 
   // 저장 (센차 onSave) — 수정행(EDIT_STS:"U")만 saveDispatchRtnNo 저장.
   //  제약무시(CONSTRAINT_OVRD_YN:"Y") 인데 사유(CONSTRAINT_OVRD_RSN_CD) 미입력이면 저장 불가.
@@ -495,12 +557,10 @@ export function useDispatchDetailPopController({
       showError(Lang.get("MSG_SELECT_NO_DATA"));
       return;
     }
-    confirmMsg(Lang.get("MSG_CANCEL_DSPCH_OPEN_STATUS"), () => {
-      runMask(
-        setDspchMasking,
-        api.saveCancelPlanDedDispatch(markU(rows)).then(refreshDspch),
-      );
-    });
+    runMask(
+      setDspchMasking,
+      api.saveCancelPlanDedDispatch(markU(rows)).then(refreshDspch),
+    );
   };
   // 계획확정
   const onSetPlanned = (e: any) => {
@@ -915,8 +975,10 @@ export function useDispatchDetailPopController({
     unallocActions,
     unallocSubActions,
     loadSub,
+    onDspchSelectionRows,
     loadAssignItems,
     loadUnAssignItems,
+    onUnallocRowDblClick,
     handleUnallocOrderSearch,
   };
 }

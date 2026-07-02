@@ -44,6 +44,10 @@ export function useDispatchDetailPopModel(
 
   const [selDspch, setSelDspch] = useState<any>(null); // 선택된 배차행
 
+  // 배차그리드에서 체크박스로 선택된 행들 — 주문할당 대상(정확히 1건)에 사용.
+  //   auto-first(cascade 표시용 selDspch)와 무관하게 "사용자가 체크한 배차"만 할당 대상.
+  const dspchCheckedRef = useRef<any[]>([]);
+
   // 사유(RSN) 편집 중인 행 __rid__ — 편집 중이면 에러 마커를 숨긴다(콤보 오픈 시 메시지 가림 방지).
   const editingRidRef = useRef<string | null>(null);
 
@@ -83,6 +87,7 @@ export function useDispatchDetailPopModel(
     codeMap,
     selDspch,
     setSelDspch,
+    dspchCheckedRef,
     editingRidRef,
     dspchMasking,
     setDspchMasking,

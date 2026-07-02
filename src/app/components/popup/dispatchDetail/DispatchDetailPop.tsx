@@ -31,7 +31,6 @@ type Props = {
 };
 
 export default function DispatchDetailPop({
-  onClose,
   onClosed,
   initValue,
   cntrVeh = false,
@@ -126,7 +125,9 @@ export default function DispatchDetailPop({
                 setRowData={setDspchRowData}
                 codeMap={codeMap}
                 rowSelection="multiple"
+                enableClickSelection
                 onRowClicked={ctrl.loadSub}
+                onSelectionRowsChanged={ctrl.onDspchSelectionRows}
                 loading={dspchMasking}
                 audit={false}
                 gridOptions={{
@@ -167,6 +168,10 @@ export default function DispatchDetailPop({
             <DataGrid
               layoutType="tab"
               tabs={ORDER_TABS}
+              // 미할당주문 탭 활성화 시 자동 조회
+              onTabChange={(k) => {
+                if (k === "UNALLOC") ctrl.handleUnallocOrderSearch();
+              }}
               presets={{
                 // 할당주문 — 조회조건 없음
                 ALLOC: {
@@ -234,6 +239,7 @@ export default function DispatchDetailPop({
                             setRowData={setUnAssignShpmRow}
                             rowSelection="multiple"
                             onRowClicked={ctrl.loadUnAssignItems}
+                            onRowDoubleClicked={ctrl.onUnallocRowDblClick}
                             loading={unallocMasking}
                             audit={false}
                           />
