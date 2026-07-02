@@ -1463,7 +1463,17 @@ export function useDispatchPlanController({ model }: Args) {
         label: "BTN_ADJ_STOP_SEQ_GRID_RVDSPCH",
         authId: "BTN_ADJ_STOP_SEQ_GRID_RVDSPCH",
         noLang: true,
-        onClick: () => {},
+        onClick: () => {
+          const row = model.grids.main.selectedRef.current;
+          if (!row) return;
+          base.callAjax(
+            api.saveOpt({
+              DSPCH_NO: row.DSPCH_NO,
+              dsSave: model.grids.stop.rows,
+            }),
+            { mask: "stop" },
+          ).then(() => base.search());;
+        },
       },
     ],
     [

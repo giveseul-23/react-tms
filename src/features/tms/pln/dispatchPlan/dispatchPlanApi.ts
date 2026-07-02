@@ -170,6 +170,14 @@ export const dispatchPlanApi = {
     );
   },
 
+  // ── 최적화 ────────────────────────────────────────
+  saveOpt(payload: any) {
+    return apiClient.post<CommonResponse>(
+      "/dispatchPlanService/saveOptimization",
+      withSession({ MENU_CD: MENU_CODE, ...payload }),
+    );
+  },
+
   // ── 메모 (TruckDispatchConfirmMemoPop) ──────────────────────
   // 기존 메모 조회 (배차번호 기준 4개 메모 1건)
   searchDispatchMemo(payload: any) {
