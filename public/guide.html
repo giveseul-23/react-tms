@@ -976,6 +976,95 @@ SearchFilters 재렌더
            └─ <span class="fn">setSearchState</span>(initial)</pre>
         </div>
 
+        <!-- H-2. 조회조건 필드 활성 규칙 -->
+        <h3 style="margin-top: 24px">H-2. 조회조건 필드 활성 규칙 — <code>fieldRules</code> / <code>enableWhen</code></h3>
+        <p>다른 필드 값에 따라 특정 조회조건 필드를 <strong>활성/비활성(+필수/자동클리어)</strong> 하는 선언 규칙. 화면별 커스텀 검색 컴포넌트를 <strong>포크하지 말고</strong>, 공통 <code>SearchFilters</code> 에 <code>fieldRules</code> prop 만 넘긴다. (센차 <code>contractConditionDisable</code> 대응)</p>
+
+        <h4 style="margin-top: 12px">규칙 형태</h4>
+        <div class="code-block">
+          <div class="code-header"><span>타입</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+          <pre>
+<span class="c">// fieldRules: Record&lt;대상필드 key, FieldRule&gt;</span>
+<span class="t">EnableCondition</span> = { field: <span class="s">string</span>; equals?: <span class="s">string</span> | <span class="s">string[]</span>; filled?: <span class="s">boolean</span> }
+<span class="t">FieldRule</span> = {
+  enableWhen: <span class="t">EnableCondition</span> | <span class="t">EnableCondition[]</span>,  <span class="c">// 배열 = 여러 조건 AND</span>
+  requiredWhenEnabled?: <span class="s">boolean</span>,                 <span class="c">// 활성일 때 필수(*)로</span>
+  clearOnDisable?: <span class="s">boolean</span>,                       <span class="c">// 필드가 비활성될 때 그 필드 값을 자동으로 지울지 여부 (기본 true=지움 / false=값 보존)</span>
+}</pre>
+        </div>
+
+        <h4 style="margin-top: 16px">필드 요약</h4>
+        <table class="change-table">
+          <thead><tr><th style="width: 220px">항목</th><th>의미</th></tr></thead>
+          <tbody>
+            <tr><td>Record 의 key</td><td>대상 필드 <code>DBCOLUMN</code>(점 포함) — 활성/필수/클리어 <strong>대상</strong></td></tr>
+            <tr><td><code>enableWhen.field</code></td><td>제어 필드 state 키(=<code>DBCOLUMN</code>, 점 포함)</td></tr>
+            <tr><td><code>enableWhen.equals</code></td><td>그 값(들)일 때 만족. <strong>배열 = OR</strong></td></tr>
+            <tr><td><code>enableWhen.filled</code></td><td><code>true</code> → 값이 채워져 있어야 만족</td></tr>
+            <tr><td><code>enableWhen</code> 자체</td><td>객체 or <strong>배열 = 여러 조건 AND</strong></td></tr>
+            <tr><td><code>requiredWhenEnabled</code></td><td>활성일 때 required(헤더 <code>*</code> + 조회 필수검증)</td></tr>
+            <tr><td><code>clearOnDisable</code></td><td>필드가 <strong>비활성될 때 그 필드 값을 자동으로 지울지 여부</strong>. 기본 <code>true</code>(지움) / <code>false</code> 면 값 보존(다시 활성되면 이전 값 유지)</td></tr>
+          </tbody>
+        </table>
+
+        <h4 style="margin-top: 16px">예시</h4>
+        <div class="code-block">
+          <div class="code-header"><span>fieldRules 작성 예</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+          <pre>
+<span class="c">// 1) 기본 — 레벨이 CONTRACT 일 때만 매출계약코드 활성 + 필수</span>
+fieldRules={{
+  <span class="s">"AR_CNTRCT_CD"</span>: {
+    enableWhen: { field: <span class="s">"AR_TRF_LCD"</span>, equals: <span class="s">"CONTRACT"</span> },
+    requiredWhenEnabled: <span class="s">true</span>,
+  },
+}}
+
+<span class="c">// 2) DB 컬럼에 테이블 접두(점)가 있으면 그대로 (따옴표 필수)</span>
+fieldRules={{
+  <span class="s">"A.AR_CNTRCT_CD"</span>: {
+    enableWhen: { field: <span class="s">"A.AR_TRF_LCD"</span>, equals: <span class="s">"CONTRACT"</span> },
+    requiredWhenEnabled: <span class="s">true</span>,
+  },
+}}
+
+<span class="c">// 3) 여러 "필드" → Record 항목만 늘림</span>
+fieldRules={{
+  <span class="s">"A.AR_CNTRCT_CD"</span>: { enableWhen: { field: <span class="s">"A.AR_TRF_LCD"</span>, equals: <span class="s">"CONTRACT"</span> }, requiredWhenEnabled: <span class="s">true</span> },
+  <span class="s">"B.SUB_CD"</span>:      { enableWhen: { field: <span class="s">"B.USE_YN"</span>, equals: <span class="s">"Y"</span> } },
+  <span class="s">"C.DTL_CD"</span>:      { enableWhen: { field: <span class="s">"C.MAIN_CD"</span>, filled: <span class="s">true</span> }, clearOnDisable: <span class="s">true</span> },
+}}
+
+<span class="c">// 4) 한 "필드"에 조건 여러 개 (모두 만족 = AND) → enableWhen 배열</span>
+fieldRules={{
+  <span class="s">"A.AR_CNTRCT_CD"</span>: {
+    enableWhen: [
+      { field: <span class="s">"A.AR_TRF_LCD"</span>, equals: <span class="s">"CONTRACT"</span> },
+      { field: <span class="s">"SHPM.CUST_CD"</span>, filled: <span class="s">true</span> },
+    ],
+    requiredWhenEnabled: <span class="s">true</span>,
+  },
+}}
+
+<span class="c">// 5) 값이 여러 개 중 하나면 활성 (OR) → equals 배열</span>
+fieldRules={{
+  <span class="s">"A.SOME_CD"</span>: { enableWhen: { field: <span class="s">"A.TYPE_CD"</span>, equals: [<span class="s">"10"</span>, <span class="s">"20"</span>] } },
+}}</pre>
+        </div>
+
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <div>
+            <strong>키는 서버 <code>DBCOLUMN</code> 그대로:</strong> 정규화(점→언더스코어) 안 한다. DB 컬럼이 <code>A.AR_TRF_LCD</code> 면 <code>field: "A.AR_TRF_LCD"</code>, 대상 key 도 <code>"A.AR_CNTRCT_CD"</code> 처럼 점 포함. 정확한 값은 조회조건 API 응답의 <code>dsSearchCondition[].DBCOLUMN</code> 에서 확인. (점 들어간 키는 객체 리터럴에서 <strong>따옴표 필수</strong>)
+          </div>
+        </div>
+
+        <div class="warn">
+          <span class="warn-icon">⚠️</span>
+          <div>
+            <strong>제어 필드가 POPUP 이면</strong> <code>enableWhen.field</code> 는 코드 state 키(<code>&lt;base&gt;_CD</code>)를 쓴다 — 코드명이 아니라 <strong>코드값</strong>으로 판정. COMBO/TEXT/CHECKBOX/날짜는 state 키 = <code>DBCOLUMN</code> 그대로.
+          </div>
+        </div>
+
         <!-- I. Hook 전체 의존 관계도 -->
         <h3 style="margin-top: 24px">I. Hook 전체 의존 관계도</h3>
         <p>화면이 마운트되면 hook 이 아래 트리 구조로 호출됩니다. 들여쓰기 깊이 = 호출 깊이.</p>

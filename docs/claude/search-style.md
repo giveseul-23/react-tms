@@ -83,3 +83,77 @@ Card("shadow-sm rounded-lg")
 4. **아이콘 크기 불일치**: DatePicker `w-3.5 h-3.5` vs Combo `[&>svg]:h-3 w-3`.
 5. **CheckboxFilter** 만 입력 높이 규약 밖(`h-3 w-3` 하드코딩) — 의도/통일 결정.
 6. **버튼 색**: 조회/초기화가 Radix 기본 의존 — 명시 토큰화 검토.
+
+## 7. 조회조건 필드 활성 규칙 (`fieldRules` / `enableWhen`) ★
+
+> 다른 필드 값에 따라 특정 조회조건 필드를 **활성/비활성(+필수/자동클리어)** 하는 선언 규칙. 화면별 커스텀 검색 컴포넌트를 **포크하지 말고**, 공통 `SearchFilters` 에 `fieldRules` prop 만 넘긴다. (센차 `contractConditionDisable` 대응)
+> 위치: `src/app/components/Search/SearchFilters/fieldRules.ts`(규칙 타입·평가) + `index.tsx`(비활성 계산/입력차단/자동클리어/required 오버라이드) + `SearchFieldRenderer.tsx`(비활성 시각/조건아이콘 잠금).
+
+### 규칙 형태
+
+```ts
+// fieldRules: Record<대상필드 key, FieldRule>
+type EnableCondition = { field: string; equals?: string | string[]; filled?: boolean };
+type FieldRule = {
+  enableWhen: EnableCondition | EnableCondition[];  // 배열 = 여러 조건 AND
+  requiredWhenEnabled?: boolean;                    // 활성일 때 필수(*)로
+  clearOnDisable?: boolean;                         // 필드가 비활성될 때 그 필드 값을 자동으로 지울지 여부 (기본 true=지움 / false=값 보존)
+};
+```
+
+| 항목 | 의미 |
+|---|---|
+| Record 의 key | 대상 필드 `DBCOLUMN`(점 포함) — 활성/필수/클리어 **대상** |
+| `enableWhen.field` | 제어 필드 state 키(=`DBCOLUMN`, 점 포함) |
+| `enableWhen.equals` | 그 값(들)일 때 만족. **배열 = OR** |
+| `enableWhen.filled` | `true` → 값이 채워져 있어야 만족 |
+| `enableWhen` 자체 | 객체 or **배열 = 여러 조건 AND** |
+| `requiredWhenEnabled` | 활성일 때 required(헤더 `*` + 조회 필수검증) |
+| `clearOnDisable` | 필드가 **비활성될 때 그 필드 값을 자동으로 지울지 여부**. 기본 `true`(지움) / `false` 면 값 보존(다시 활성되면 이전 값 유지) |
+
+### 동작 (공통단 자동 처리)
+
+- **비활성 필드**: 시각 disable(`opacity-50 pointer-events-none`) + 조건아이콘 잠금 + **입력 차단**(비어있지 않은 write 무시, 클리어는 허용) + **자동 클리어** + **쿼리에서 값 제외**.
+- **required 오버라이드**: 활성+`requiredWhenEnabled` → 필수 / 비활성 → 필수 해제. (표시 + `useSearchExecute` 필수검증 공용)
+- `fieldRules` 미지정 화면은 기존 경로 그대로 → 회귀 없음.
+
+### 예시
+
+```tsx
+// 1) 기본 — 레벨이 CONTRACT 일 때만 매출계약코드 활성 + 필수
+fieldRules={{
+  "AR_CNTRCT_CD": { enableWhen: { field: "AR_TRF_LCD", equals: "CONTRACT" }, requiredWhenEnabled: true },
+}}
+
+// 2) DB 컬럼에 테이블 접두(점)가 있으면 그대로 (따옴표 필수)
+fieldRules={{
+  "A.AR_CNTRCT_CD": { enableWhen: { field: "A.AR_TRF_LCD", equals: "CONTRACT" }, requiredWhenEnabled: true },
+}}
+
+// 3) 여러 "필드" → Record 항목만 늘림
+fieldRules={{
+  "A.AR_CNTRCT_CD": { enableWhen: { field: "A.AR_TRF_LCD", equals: "CONTRACT" }, requiredWhenEnabled: true },
+  "B.SUB_CD":       { enableWhen: { field: "B.USE_YN", equals: "Y" } },
+  "C.DTL_CD":       { enableWhen: { field: "C.MAIN_CD", filled: true }, clearOnDisable: true },
+}}
+
+// 4) 한 "필드"에 조건 여러 개 (모두 만족 = AND) → enableWhen 배열
+fieldRules={{
+  "A.AR_CNTRCT_CD": {
+    enableWhen: [
+      { field: "A.AR_TRF_LCD", equals: "CONTRACT" },
+      { field: "SHPM.CUST_CD", filled: true },
+    ],
+    requiredWhenEnabled: true,
+  },
+}}
+
+// 5) 값이 여러 개 중 하나면 활성 (OR) → equals 배열
+fieldRules={{
+  "A.SOME_CD": { enableWhen: { field: "A.TYPE_CD", equals: ["10", "20"] } },
+}}
+```
+
+- **키는 서버 `DBCOLUMN` 그대로**: 정규화(점→언더스코어) 안 한다. DB 컬럼이 `A.AR_TRF_LCD` 면 `field: "A.AR_TRF_LCD"`, 대상 key 도 `"A.AR_CNTRCT_CD"` 처럼 점 포함. 정확한 값은 조회조건 API 응답의 `dsSearchCondition[].DBCOLUMN` 에서 확인. (점 들어간 키는 객체 리터럴에서 **따옴표 필수**)
+- **제어 필드가 POPUP 이면** `enableWhen.field` 는 코드 state 키(`<base>_CD`)를 쓴다(코드명 아님, **코드값**으로 판정). COMBO/TEXT/CHECKBOX/날짜는 state 키 = `DBCOLUMN` 그대로.
+- 적용 예: `SettlementOrderContract` (매출계약레벨=CONTRACT → 매출계약코드 활성/필수). 과거 전용 컴포넌트 `SettlementOrderContractSearch`(약 740줄)를 이 규칙으로 대체·제거함.

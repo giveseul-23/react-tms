@@ -5,7 +5,13 @@
 
 "use client";
 
-import React, { useState, useRef, useMemo, ReactNode } from "react";
+import React, {
+  useState,
+  useRef,
+  useMemo,
+  useEffect,
+  ReactNode,
+} from "react";
 import {
   Search,
   RefreshCw,
@@ -37,8 +43,10 @@ import {
   type ExcludeSpec,
 } from "@/hooks/useSearchCondition";
 import { Lang } from "@/app/services/common/Lang";
+import { computeDisabled, type FieldRules } from "./fieldRules";
 
 export type { SearchResult, ParamMode };
+export type { FieldRule, FieldRules, EnableCondition } from "./fieldRules";
 
 interface SearchFiltersProps {
   meta: readonly SearchMeta[];
@@ -70,6 +78,9 @@ interface SearchFiltersProps {
   menuCode?: string;
   /** [TEMP-userTz] DATE 필터 tz 보정 — 서버 완료 시 제거 */
   userTz?: string;
+  /** 다른 필드 값에 따라 특정 필드를 활성/비활성(+필수/자동클리어)하는 선언 규칙.
+   *  Record<대상필드 key, FieldRule>. 화면 포크 없이 prop 으로만 선언한다. */
+  fieldRules?: FieldRules;
 }
 
 export function SearchFilters({
@@ -89,6 +100,7 @@ export function SearchFilters({
   moduleDefaultSearchParams,
   paramMode,
   menuCode,
+  fieldRules,
 }: SearchFiltersProps) {
   const [open, setOpen] = useState(true);
 
@@ -104,6 +116,83 @@ export function SearchFilters({
     handleReset,
     buildInitialSearchState,
   } = useSearchState(meta, moduleDefaultCacheRef);
+
+  // 1-b) enableWhen 규칙 — 비활성 대상/state 키 계산 (현재 조건값 기준)
+  //   disabledStateKeys: 입력 차단(비활성이면 무조건) / clearStateKeys: 자동 클리어·쿼리 제외(clearOnDisable !== false)
+  const { disabledTargets, disabledStateKeys, clearStateKeys } = useMemo(
+    () => computeDisabled(meta, fieldRules, getCondition),
+    // getCondition 은 searchState 를 클로저로 읽으므로 searchState 를 dep 에 포함
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [meta, fieldRules, searchState],
+  );
+
+  // 비활성 필드로의 값 입력 차단 (클리어는 허용). 활성 필드는 그대로 통과.
+  const guardedUpdateCondition = useMemo(
+    () =>
+      (
+        key: string,
+        value: string,
+        operator: Parameters<typeof updateCondition>[2],
+        dataType: Parameters<typeof updateCondition>[3],
+        sourceType: "POPUP" | "NORMAL" = "NORMAL",
+      ) => {
+        if (disabledStateKeys.has(key) && String(value ?? "").trim() !== "")
+          return;
+        updateCondition(key, value, operator, dataType, sourceType);
+      },
+    [disabledStateKeys, updateCondition],
+  );
+
+  // 비활성 전환 시 대상 필드 값 자동 클리어 (clearOnDisable !== false 인 대상만).
+  //   clearOnDisable:false 필드는 비활성돼도 값 보존.
+  const clearKeysSig = useMemo(
+    () => [...clearStateKeys].sort().join(","),
+    [clearStateKeys],
+  );
+  useEffect(() => {
+    if (!clearStateKeys.size) return;
+    for (const key of clearStateKeys) {
+      const cur = searchState[key];
+      if (!cur?.value) continue;
+      updateCondition(
+        key,
+        "",
+        (cur.operator ?? "equal") as Parameters<typeof updateCondition>[2],
+        cur.dataType ?? "STRING",
+        cur.sourceType ?? (key.endsWith("_NM") ? "POPUP" : "NORMAL"),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearKeysSig, searchState]);
+
+  // required 오버라이드: 활성+requiredWhenEnabled → 필수 / 비활성 → 필수 해제.
+  // (SearchFieldRenderer 표시 + useSearchExecute 필수검증 공용)
+  const effectiveMeta = useMemo(() => {
+    if (!fieldRules) return meta;
+    return meta.map((m) => {
+      const rule = fieldRules[m.key];
+      if (!rule) return m;
+      const enabled = !disabledTargets.has(m.key);
+      const required = enabled
+        ? rule.requiredWhenEnabled
+          ? true
+          : m.required
+        : false;
+      return required === m.required ? m : { ...m, required };
+    });
+  }, [meta, fieldRules, disabledTargets]);
+
+  // 클리어 대상 값은 쿼리에서 제외 (클리어 effect 와 이중 안전장치).
+  //   clearOnDisable:false 로 값 보존한 필드는 그대로 쿼리에 포함.
+  const searchStateForQuery = useMemo(() => {
+    if (!clearStateKeys.size) return searchState;
+    const stripped = { ...searchState };
+    for (const key of clearStateKeys) {
+      const cur = stripped[key];
+      if (cur?.value) stripped[key] = { ...cur, value: "" };
+    }
+    return stripped;
+  }, [searchState, clearKeysSig]);
 
   // 2) 모듈 기본값 자동 로드
   useModuleDefault({
@@ -136,8 +225,8 @@ export function SearchFilters({
 
   // 4) 조회 실행
   const { searching, handleSearch } = useSearchExecute({
-    meta,
-    searchState,
+    meta: effectiveMeta,
+    searchState: searchStateForQuery,
     fetchFn: wrappedFetchFn,
     onSearchCallback,
     pageSize,
@@ -235,9 +324,12 @@ export function SearchFilters({
           >
             <div className="grid grid-cols-20 gap-x-2 gap-y-1">
               <SearchFieldRenderer
-                meta={meta}
+                meta={effectiveMeta}
                 getCondition={getCondition}
-                updateCondition={updateCondition}
+                updateCondition={
+                  fieldRules ? guardedUpdateCondition : updateCondition
+                }
+                disabledKeys={fieldRules ? disabledTargets : undefined}
               />
             </div>
           </CardContent>

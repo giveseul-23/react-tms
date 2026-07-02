@@ -23,12 +23,16 @@ interface SearchFieldRendererProps {
     dataType: SearchDataType,
     sourceType?: "POPUP" | "NORMAL",
   ) => void;
+  /** enableWhen 규칙으로 비활성화된 대상 필드 meta.key 집합 — 시각 disable + 조건아이콘 잠금.
+   *  실제 입력 차단은 상위(SearchFilters)가 넘긴 guardedUpdateCondition 이 담당. */
+  disabledKeys?: Set<string>;
 }
 
 export function SearchFieldRenderer({
   meta,
   getCondition,
   updateCondition,
+  disabledKeys,
 }: SearchFieldRendererProps) {
   const { openPopup, closePopup } = usePopup();
 
@@ -84,6 +88,7 @@ export function SearchFieldRenderer({
     <>
       {meta.map((m) => {
         const condition = getCondition(m.key);
+        const disabled = disabledKeys?.has(m.key) ?? false;
 
         const common = {
           key: m.key,
@@ -93,13 +98,15 @@ export function SearchFieldRenderer({
           requaluired: m.required,
           condition: getCondition(m.key)?.operator ?? m.condition ?? "equal",
           dataType: m.dataType,
-          conditionLocked: m.conditionLocked,
-          onConditionChange: m.conditionLocked
-            ? undefined
-            : (op: string) => {
-                const currentValue = getCondition(m.key)?.value ?? "";
-                updateCondition(m.key, currentValue, op as any, m.dataType);
-              },
+          conditionLocked: m.conditionLocked || disabled,
+          className: disabled ? "opacity-50 pointer-events-none" : undefined,
+          onConditionChange:
+            m.conditionLocked || disabled
+              ? undefined
+              : (op: string) => {
+                  const currentValue = getCondition(m.key)?.value ?? "";
+                  updateCondition(m.key, currentValue, op as any, m.dataType);
+                },
           required: m.required ? m.required : false,
         };
 

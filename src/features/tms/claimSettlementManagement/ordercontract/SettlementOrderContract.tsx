@@ -4,11 +4,7 @@
 // 단일 그리드(주문계약 목록) + 다중선택. 주문별/기간합산 정산문서 생성 + 엑셀.
 
 import { useMemo } from "react";
-import { Skeleton } from "@/app/components/ui/skeleton";
-import { PageShell } from "@/app/components/layout/PageShell";
-import { Pane } from "@/app/components/layout/Pane";
-import { LayoutToggleButton } from "@/app/components/layout/LayoutToggleButton";
-import { SettlementOrderContractSearch } from "./SettlementOrderContractSearch";
+import { GridOnlyPage } from "@/app/components/layout/presets/GridOnlyPage";
 import DataGrid from "@/app/components/grid/DataGrid";
 import { useSettlementOrderContractModel } from "./SettlementOrderContractModel";
 import { useSettlementOrderContractController } from "./SettlementOrderContractController";
@@ -27,37 +23,40 @@ export default function SettlementOrderContract() {
     [model.codeMap],
   );
 
-  if (model.searchMetaLoading) return <Skeleton className="h-24" />;
-
   return (
-    <PageShell
-      searchSlot={
-        <SettlementOrderContractSearch
-          meta={model.searchMeta}
-          menuCode={MENU_CODE}
-          moduleDefault="TMS"
-          moduleDefaultRemove={["AR_CNTRCT_CD", "AR_CNTRCT_NM", "AR_CNTRCT"]}
-          fetchFn={ctrl.fetchList}
-          onSearchCallback={ctrl.onSearchCallback}
-          // 센차 setCompToParamExclude
-          excludes={[
-            { column: "AR_TRF_LCD", as: "AR_TRF_LCD" },
-            { column: "AR_STL_BASE_DT_TP", as: "AR_STL_BASE_DT_TP" },
-            { column: "AR_CNTRCT_CD", as: "AR_CNTRCT_CD" },
-            {
-              column: "AR_DATE",
-              as: { FROM: "AR_DATE_FROM", TO: "AR_DATE_TO" },
-              transform: (v) => String(v ?? "").replace(/-/g, ""),
-            },
-          ]}
-          layoutToggle={
-            <LayoutToggleButton layout="side" onToggle={() => { }} visible={false} />
-          }
-          {...model.bindSearch()}
-        />
-      }
-    >
-      <Pane>
+    <GridOnlyPage
+      searchProps={{
+        // Model 이 이미 meta 를 로드(Controller 가 사용)하므로 그대로 전달 → 중복 조회 방지.
+        // menuCode 는 payload MENU_CD 용으로 searchProps 안에 둔다.
+        menuCode: MENU_CODE,
+        meta: model.searchMeta,
+        loading: model.searchMetaLoading,
+        moduleDefault: "TMS",
+        moduleDefaultRemove: ["AR_CNTRCT_CD", "AR_CNTRCT_NM", "AR_CNTRCT"],
+        fetchFn: ctrl.fetchList,
+        onSearchCallback: ctrl.onSearchCallback,
+        // 센차 contractConditionDisable — 매출계약레벨=CONTRACT 일 때만 매출계약코드 활성/필수,
+        // 그 외에는 비활성 + 자동 클리어 (공통 enableWhen 규칙으로 처리).
+        fieldRules: {
+          AR_CNTRCT_CD: {
+            enableWhen: { field: "AR_TRF_LCD", equals: "CONTRACT" },
+            requiredWhenEnabled: true,
+          },
+        },
+        // 센차 setCompToParamExclude
+        excludes: [
+          { column: "AR_TRF_LCD", as: "AR_TRF_LCD" },
+          { column: "AR_STL_BASE_DT_TP", as: "AR_STL_BASE_DT_TP" },
+          { column: "AR_CNTRCT_CD", as: "AR_CNTRCT_CD" },
+          {
+            column: "AR_DATE",
+            as: { FROM: "AR_DATE_FROM", TO: "AR_DATE_TO" },
+            transform: (v) => String(v ?? "").replace(/-/g, ""),
+          },
+        ],
+        ...model.bindSearch(),
+      }}
+      grid={
         <DataGrid
           {...model.bind("main")}
           authId={AUTH.grids.main}
@@ -67,7 +66,7 @@ export default function SettlementOrderContract() {
           rowSelection="multiple"
           audit={false}
         />
-      </Pane>
-    </PageShell>
+      }
+    />
   );
 }
