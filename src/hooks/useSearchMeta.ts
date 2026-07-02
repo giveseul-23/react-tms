@@ -122,7 +122,12 @@ function toSearchMeta(
   return sorted.map((row): SearchMeta => {
     // 값이 대문자로 오므로 toUpperCase() 후 매핑
     const type: SearchMeta["type"] = TYPE_MAP[row.TYPE] ?? "TEXT";
-    const condition = operatorMap[String(row.OPERATOR)] ?? "equal";
+    // OPERATOR 가 숫자 코드("2")면 operatorMap, SQL 문자열("LIKE","=")로 내려오는
+    // 화면이면 OPERATOR_NAME_TO_ICON 으로 폴백
+    const condition =
+      operatorMap[String(row.OPERATOR)] ??
+      OPERATOR_NAME_TO_ICON[String(row.OPERATOR)] ??
+      "equal";
 
     const base = {
       key: row.DBCOLUMN,
