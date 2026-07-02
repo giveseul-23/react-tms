@@ -297,7 +297,8 @@ export function Sidebar({
         (sec.nodes ?? []).forEach((node) => {
           if (node.type === "group" && nodeContains(node, activeMenuCode)) {
             const walk = (n: MenuNode) => {
-              if (n.type === "group") {
+              // 활성 메뉴로 가는 경로의 그룹만 펼친다 (자손 그룹 전체 펼침 방지).
+              if (n.type === "group" && nodeContains(n, activeMenuCode)) {
                 toOpen.push(n.code);
                 n.children.forEach(walk);
               }
