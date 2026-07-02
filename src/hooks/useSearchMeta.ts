@@ -28,6 +28,7 @@ const TYPE_MAP: Record<string, SearchMeta["type"]> = {
   YMD: "YMD",
   YMDT: "YMDT",
   CHECK: "CHECKBOX",
+  CHECKBOX: "CHECKBOX",
 };
 
 // 서버 OPRT_TP 공통코드 NAME(SQL 연산자 문자열) → 아이콘 키
