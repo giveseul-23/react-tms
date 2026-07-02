@@ -189,7 +189,7 @@ function walkChildren(
       codeMap,
       setRowData,
     ) as any;
-    const withPassword = injectPasswordEditor(withEditor, setRowData) as any;
+    const withPassword = injectPasswordEditor(withEditor) as any;
     const withMask = injectMaskEditor(withPassword, setRowData) as any;
     const withText = injectValidation(withMask) as any;
     const withCheck = injectCheckRenderer(
@@ -426,20 +426,28 @@ function injectComboEditor(
   } as AnyCol;
 }
 
-function injectPasswordEditor(
-  col: AnyCol,
-  setRowData?: (updater: any) => void,
-): AnyCol {
+function injectPasswordEditor(col: AnyCol): AnyCol {
   const c = col as any;
   if (c.inputType !== "password") return col;
+  const field = c.field as string | undefined;
 
   return {
     ...col,
     ...(c.cellEditor ? {} : { cellEditor: PasswordCellEditor }),
-    cellEditorParams: {
-      ...(c.cellEditorParams ?? {}),
-      setRowData,
-    },
+    // 편집 중에는 ag-grid 의 네이티브 키보드 처리를 억제 — 커스텀 에디터가 키를
+    // 온전히 처리하도록.
+    suppressKeyboardEvent: c.suppressKeyboardEvent ?? ((p: any) => !!p.editing),
+    // 빈칸으로 커밋(미입력)하면 원래 비번 유지 — valueSetter 가 변경 없음(false) 반환.
+    ...(field && !c.valueSetter
+      ? {
+          valueSetter: (p: any) => {
+            const nv = p.newValue;
+            if (nv == null || nv === "") return false;
+            p.data[field] = nv;
+            return true;
+          },
+        }
+      : {}),
     ...(c.cellRenderer
       ? {}
       : {
@@ -1084,7 +1092,6 @@ function processColumnDefRaw(col: AnyCol, opts: ProcessOptions = {}): AnyCol {
                     codeMap,
                     opts.setRowData,
                   ),
-                  opts.setRowData,
                 ),
                 opts.setRowData,
               ),
