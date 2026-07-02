@@ -241,7 +241,7 @@ export const SUB01_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: "LBL_SALES_ORG",
+    headerName: "LBL_SALES_ORG_CD",
     field: "SALES_ORG_CD",
     isPrimaryKey: true,
     editable: false,
@@ -254,7 +254,7 @@ export const SUB01_COLUMN_DEFS = [
   },
   {
     type: "text",
-    headerName: "LBL_SALES_STRG_CODE",
+    headerName: "LBL_ITEM_STRG_CODE",
     field: "SALES_UNIT_CD",
     editable: false,
   },
